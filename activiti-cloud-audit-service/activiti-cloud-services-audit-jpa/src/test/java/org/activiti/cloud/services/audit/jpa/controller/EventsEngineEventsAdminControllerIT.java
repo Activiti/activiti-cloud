@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.controller;
 
+import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -26,6 +28,7 @@ import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,8 +73,8 @@ public class EventsEngineEventsAdminControllerIT {
     private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
 
     private static String CSV_CONTENT = "\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
-        "\"\",\"\",\"\",\"ProcessInstance{id='10', name='null', processDefinitionId='1', processDefinitionKey='null', parentId='null', initiator='null', startDate=null, completedDate=null, businessKey='null', status=null, processDefinitionVersion='null', processDefinitionName='null'}\",\"\",\"PROCESS_STARTED\",\"eventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
-        "\"\",\"\",\"\",\"ProcessInstance{id='10', name='null', processDefinitionId='1', processDefinitionKey='null', parentId='null', initiator='null', startDate=null, completedDate=null, businessKey='null', status=null, processDefinitionVersion='null', processDefinitionName='null'}\",\"\",\"PROCESS_STARTED\",\"eventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
+        "\"testApp\",\"\",\"\",\"{\"\"appVersion\"\":null,\"\"id\"\":\"\"10\"\",\"\"name\"\":null,\"\"processDefinitionId\"\":\"\"1\"\",\"\"processDefinitionKey\"\":null,\"\"initiator\"\":null,\"\"startDate\"\":null,\"\"completedDate\"\":null,\"\"businessKey\"\":null,\"\"status\"\":null,\"\"parentId\"\":null,\"\"processDefinitionVersion\"\":null,\"\"processDefinitionName\"\":null}\",\"\",\"PROCESS_STARTED\",\"processEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
+        "\"testApp\",\"\",\"\",\"{\"\"name\"\":\"\"var\"\",\"\"type\"\":null,\"\"processInstanceId\"\":\"\"processId\"\",\"\"value\"\":null,\"\"taskId\"\":\"\"taskId\"\",\"\"taskVariable\"\":true}\",\"var\",\"VARIABLE_CREATED\",\"variableEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -109,9 +112,12 @@ public class EventsEngineEventsAdminControllerIT {
 
     @Test
     public void exportEvents() throws Exception {
+        List<AuditEventEntity> events = buildEventsData(1);
+        events.add(buildVariableAuditEventEntity(2));
+
         PageRequest pageable = PageRequest.of(1,
             10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(2),
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(events,
             pageable,
             11);
 
@@ -140,7 +146,8 @@ public class EventsEngineEventsAdminControllerIT {
 
     private AuditEventEntity buildAuditEventEntity(long id) {
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
-        eventEntity.setEventId("eventId");
+        eventEntity.setAppName("testApp");
+        eventEntity.setEventId("processEventId");
         eventEntity.setTimestamp(System.currentTimeMillis());
         eventEntity.setId(id);
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
@@ -149,6 +156,21 @@ public class EventsEngineEventsAdminControllerIT {
         eventEntity.setProcessInstance(processInstance);
         eventEntity.setServiceName("rb-my-app");
         eventEntity.setEventType(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name());
+        eventEntity.setProcessDefinitionId("1");
+        eventEntity.setProcessInstanceId("10");
+        eventEntity.setTimestamp(1657205977551L);
+        return eventEntity;
+    }
+
+    private AuditEventEntity buildVariableAuditEventEntity(long id) {
+        VariableCreatedEventEntity eventEntity = new VariableCreatedEventEntity();
+        eventEntity.setAppName("testApp");
+        eventEntity.setEventId("variableEventId");
+        eventEntity.setTimestamp(System.currentTimeMillis());
+        eventEntity.setId(id);
+        eventEntity.setVariableInstance(new VariableInstanceImpl<Object>("var", null, null, "processId", "taskId"));
+        eventEntity.setServiceName("rb-my-app");
+        eventEntity.setEventType(VariableEvent.VariableEvents.VARIABLE_CREATED.name());
         eventEntity.setProcessDefinitionId("1");
         eventEntity.setProcessInstanceId("10");
         eventEntity.setTimestamp(1657205977551L);

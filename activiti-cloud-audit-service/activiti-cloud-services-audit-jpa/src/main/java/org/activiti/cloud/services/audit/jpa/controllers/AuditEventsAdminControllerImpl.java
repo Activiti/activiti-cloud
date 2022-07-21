@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
@@ -28,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
@@ -56,17 +59,17 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
     private final AuditEventsExporter auditEventsExporter;
 
-
     @Autowired
     public AuditEventsAdminControllerImpl(EventsRepository eventsRepository,
                                           EventRepresentationModelAssembler eventRepresentationModelAssembler,
                                           APIEventToEntityConverters eventConverters,
-                                          AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler) {
+                                          AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler,
+                                          ObjectMapper objectMapper) {
         this.eventsRepository = eventsRepository;
         this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
-        this.auditEventsExporter = new AuditEventsExporter();
+        this.auditEventsExporter = new AuditEventsExporter(objectMapper);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -83,7 +86,9 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     }
 
     @GetMapping(path = "/export/{fileName}")
-    public void export(Pageable pageable, @PathVariable(value = "fileName") String fileName, HttpServletResponse response) throws Exception {
+    public void export(@PageableDefault(size = Integer.MAX_VALUE, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable,
+                       @PathVariable(value = "fileName") String fileName,
+                       HttpServletResponse response) throws Exception {
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage);
