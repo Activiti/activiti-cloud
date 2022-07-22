@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.5.0-alpha.25</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-api</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.5.0-alpha.25</version>
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
