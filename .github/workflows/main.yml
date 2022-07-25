@@ -382,17 +382,28 @@ jobs:
                 make delete
             fi
 
+  delete-test-images:
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - name: Delete Docker images
         if: ${{ always() }}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+          PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}
+          BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
             if [ $IS_PREVIEW = true ]
             then
                 echo "Skipping delete Docker images for preview"
             else
+                echo $VERSION > VERSION
                 echo "Delete Docker images"
                 make docker-delete-all
             fi
