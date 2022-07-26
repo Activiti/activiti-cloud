@@ -29,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
@@ -43,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -76,7 +75,7 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     public PagedModel<EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> findAll(Pageable pageable) {
         Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
 
-        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage);
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage.getContent());
 
         return pagedCollectionModelAssembler.toModel(pageable,
                                                   new PageImpl<>(events,
@@ -86,20 +85,18 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     }
 
     @GetMapping(path = "/export/{fileName}")
-    public void export(@PageableDefault(size = Integer.MAX_VALUE, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable,
-                       @PathVariable(value = "fileName") String fileName,
-                       HttpServletResponse response) throws Exception {
-        Page<AuditEventEntity> allAuditInPage = eventsRepository.findAll(pageable);
+    public void export(@PathVariable(value = "fileName") String fileName, HttpServletResponse response) throws Exception {
+        Collection<AuditEventEntity> allAuditInPage = eventsRepository.findAllByOrderByTimestampDesc();
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage);
 
         auditEventsExporter.exportCsv(events, fileName, response);
     }
 
-    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(Page<AuditEventEntity> allAuditInPage) {
+    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(Iterable<AuditEventEntity> allAuditInPage) {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
-        for (AuditEventEntity aee : allAuditInPage.getContent()) {
+        for (AuditEventEntity aee : allAuditInPage) {
             events.add(eventConverters.getConverterByEventTypeName(aee.getEventType()).convertToAPI(aee));
         }
         return events;
