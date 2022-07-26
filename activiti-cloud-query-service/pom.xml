@@ -20,7 +20,7 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
   <properties>
-    <activiti.version>7.5.0-alpha.25</activiti.version>
+    <activiti.version>7.5.0-alpha.27</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
