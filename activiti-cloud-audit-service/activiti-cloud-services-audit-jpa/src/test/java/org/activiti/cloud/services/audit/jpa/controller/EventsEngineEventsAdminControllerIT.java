@@ -115,13 +115,7 @@ public class EventsEngineEventsAdminControllerIT {
         List<AuditEventEntity> events = buildEventsData(1);
         events.add(buildVariableAuditEventEntity(2));
 
-        PageRequest pageable = PageRequest.of(1,
-            10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(events,
-            pageable,
-            11);
-
-        given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
+        given(eventsRepository.findAllByOrderByTimestampDesc()).willReturn(events);
 
         MvcResult response = mockMvc.perform(get("/admin/{version}/events/export/" + CSV_FILENAME, "v1"))
             .andExpect(status().isOk())

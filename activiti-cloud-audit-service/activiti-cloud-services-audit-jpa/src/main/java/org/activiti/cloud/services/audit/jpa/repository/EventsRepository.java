@@ -20,6 +20,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @RepositoryRestResource(exported = false)
@@ -27,4 +28,7 @@ public interface EventsRepository<T extends AuditEventEntity> extends PagingAndS
                                                             JpaSpecificationExecutor<T> {
 
     Optional<T> findByEventId(String eventId);
+
+    Collection<T> findAllByOrderByTimestampDesc();
+
 }
