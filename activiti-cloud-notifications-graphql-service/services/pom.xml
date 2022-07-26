@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.5.0-alpha.29</version>
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
