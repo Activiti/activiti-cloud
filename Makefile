@@ -91,12 +91,28 @@ docker/%:
 	docker build -f $(MODULE)/Dockerfile -q -t docker.io/activiti/$(MODULE):$(RELEASE_VERSION) $(MODULE)
 	docker push docker.io/activiti/$(MODULE):$(RELEASE_VERSION)
 
+# follow instructions at https://github.com/docker/hub-feedback/issues/496#issuecomment-277562292
 docker-delete/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
 
 	@echo "Delete image from Docker Hub for $(MODULE):$(RELEASE_VERSION)..."
-	curl --silent --show-error --fail -X DELETE -u "${DOCKERHUB_USERNAME}:${DOCKERHUB_PASSWORD}" \
-		https://hub.docker.com/v2/repositories/activiti/$(MODULE)/tags/$(RELEASE_VERSION)
+	$(eval TOKEN=$(shell curl --silent --show-error --fail \
+		-X POST \
+		-H "Content-Type: application/json" \
+		-H "Accept: application/json" \
+		-d '{"username":"${DOCKERHUB_USERNAME}","password":"${DOCKERHUB_PASSWORD}"}' \
+		https://hub.docker.com/v2/users/login/ | jq ".token"))
+	@curl --silent --show-error --fail \
+		-X DELETE \
+		-H "Authorization: JWT $(TOKEN)" \
+		https://hub.docker.com/v2/repositories/activiti/$(MODULE)/tags/$(RELEASE_VERSION); \
+	e=$$?; \
+	curl --silent --show-error --fail \
+	  -X POST \
+		-H "Accept: application/json" \
+		-H "Authorization: JWT $(TOKEN)" \
+		https://hub.docker.com/v2/logout/; \
+	exit $$e
 
 docker-delete-all: docker-delete/example-runtime-bundle docker-delete/activiti-cloud-query \
 	docker-delete/example-cloud-connector docker-delete/activiti-cloud-modeling
