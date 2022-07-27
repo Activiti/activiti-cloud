@@ -106,4 +106,10 @@ public class ProcessExtensionsValidatorTest {
                           "string [folder] does not match pattern ^integer$|^string$|^boolean$|^date$",
                           "string [json] does not match pattern ^integer$|^string$|^boolean$|^date$");
     }
+
+    @Test
+    public void shouldBeValidTaskAssignments() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-valid-assignments.json");
+        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+    }
 }
