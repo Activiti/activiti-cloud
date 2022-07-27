@@ -1,0 +1,30 @@
+{
+  "id": "process-baa8aa57-7cbb-40bc-bd70-a1da5f7b0311",
+  "extensions": {
+    "Process_jEKhhV0rp": {
+      "constants": {},
+      "mappings": {},
+      "properties": {},
+      "assignments": {
+        "task-1": {
+          "id": "1",
+          "assignment": "assignee",
+          "type": "static",
+          "mode": "manual"
+        },
+        "task-2": {
+          "id": "2",
+          "assignment": "candidates",
+          "type": "identity",
+          "mode": "manual"
+        },
+        "task-3": {
+          "id": "3",
+          "assignment": "candidates",
+          "type": "expression",
+          "mode": "sequential"
+        }
+      }
+    }
+  }
+}
