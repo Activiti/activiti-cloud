@@ -291,3 +291,5 @@ alter table task_process_variable
   add constraint fk_task_id foreign key (task_id) references task;
 alter table task_process_variable
   add constraint fk_process_variable_id foreign key (process_variable_id) references process_variable;
+alter table task_process_variable
+  add constraint uk_task_process_var unique (task_id, process_variable_id);

@@ -64,6 +64,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -125,6 +126,9 @@ public class QueryTasksIT {
 
     @Autowired
     private MyProducer producer;
+
+    @Autowired
+    private ProcessVariablesMigrationHelper processVariablesMigrationHelper;
 
     private EventsAggregator eventsAggregator;
 
@@ -2394,6 +2398,65 @@ public class QueryTasksIT {
             assertThat(retrievedTasks)
                 .extracting(Task::getName, QueryCloudTask -> CollectionUtils.isEmpty((QueryCloudTask.getProcessVariables())))
                 .containsExactly(tuple("Created task", true), tuple("Completed task", true));
+        });
+    }
+
+    @Test
+    public void should_migrateTaskProcessVariables() throws Exception {
+        //given
+        Task task = taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariableWithProcessDefinitionKey("varBName", "varBValue", "string", "varBProcessDefinitionKey")
+            .onProcessInstance(runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactly(tuple("Task", "varAName", "varAValue"));
+        });
+
+        BigInteger taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
+        assertThat(taskProcessVariableCount).isEqualTo(2);
+
+        processVariablesMigrationHelper.deleteFromTaskProcessVariable(task.getId());
+        taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
+        assertThat(taskProcessVariableCount).isEqualTo(0);
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName, tasks -> tasks.getProcessVariables().size())
+                .containsExactly(tuple("Task", 0));
+        });
+
+        processVariablesMigrationHelper.migrateTaskProcessVariableData();
+        taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
+        assertThat(taskProcessVariableCount).isEqualTo(2);
+
+        await().untilAsserted(() -> {
+            //when
+            Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables("varAProcessDefinitionKey/varAName").getBody().getContent();
+
+            //then
+            assertThat(retrievedTasks)
+                .extracting(Task::getName,
+                    getProcessVariableField(VariableInstance::getName),
+                    getProcessVariableField(VariableInstance::getValue))
+                .containsExactly(tuple("Task", "varAName", "varAValue"));
         });
     }
 
