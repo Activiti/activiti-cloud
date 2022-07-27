@@ -112,4 +112,21 @@ public class ProcessExtensionsValidatorTest {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-valid-assignments.json");
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
+
+    @Test
+    public void shouldBeInvalidTaskAssignments() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-assignments.json");
+
+        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
+            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
+            SemanticModelValidationException.class);
+
+        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
+        assertThat(validationErrors).hasSize(3);
+        assertThat(validationErrors).
+            extracting("problem")
+            .containsOnly("foobar is not a valid enum value",
+                          "subject must not be valid against schema {\"required\":[\"assignment\"],\"properties\":{\"assignment\":{\"const\":\"candidates\"}}}",
+                          "required key [mode] not found");
+    }
 }
