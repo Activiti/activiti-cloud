@@ -25,6 +25,8 @@ import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.api.process.model.events.MessageDefinitionEvent;
 import org.activiti.api.process.model.events.MessageSubscriptionEvent;
+import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
+import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -76,6 +78,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.context.annotation.Bean;
@@ -161,6 +167,18 @@ public class CloudProcessModelAutoConfiguration {
                                               MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
         module.registerSubtypes(new NamedType(CloudApplicationDeployedEventImpl.class,
                                               ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()));
+
+        module.registerSubtypes(new NamedType(CloudProcessCandidateStarterUserAddedEventImpl.class,
+                                              ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessCandidateStarterUserRemovedEventImpl.class,
+                                              ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name()));
+
+        module.registerSubtypes(new NamedType(CloudProcessCandidateStarterGroupAddedEventImpl.class,
+                                              ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessCandidateStarterGroupRemovedEventImpl.class,
+                                              ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name()));
+
+
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
