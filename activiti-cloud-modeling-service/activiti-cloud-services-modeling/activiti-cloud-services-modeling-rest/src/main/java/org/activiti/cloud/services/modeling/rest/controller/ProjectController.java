@@ -65,15 +65,17 @@ public class ProjectController implements ProjectRestApi {
     @Override
     public PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
             @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
-            @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters) {
-        return pagedCollectionModelAssembler.toModel(pageable, projectService.getProjects(pageable, name, filters),
+            @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters,
+            @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include) {
+        return pagedCollectionModelAssembler.toModel(pageable, projectService.getProjects(pageable, name, filters, include),
             representationModelAssembler);
     }
 
     @Override
-    public EntityModel<Project> getProject(
-            @PathVariable String projectId) {
-        return representationModelAssembler.toModel(findProjectRepresentationById(projectId));
+    public EntityModel<Project> getProject(@PathVariable String projectId,
+                                           @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false)
+                                               List<String> include) {
+        return representationModelAssembler.toModel(findProjectRepresentationById(projectId, include));
     }
 
     @Override
@@ -140,8 +142,8 @@ public class ProjectController implements ProjectRestApi {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 
-    public Project findProjectRepresentationById(String projectId) {
-        return projectService.findProjectRepresentationById(projectId)
+    public Project findProjectRepresentationById(String projectId, List<String> include) {
+        return projectService.findProjectRepresentationById(projectId, include)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 }

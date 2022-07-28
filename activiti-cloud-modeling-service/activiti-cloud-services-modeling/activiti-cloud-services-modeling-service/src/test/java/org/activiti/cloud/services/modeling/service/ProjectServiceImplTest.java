@@ -15,24 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import static java.util.Arrays.asList;
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsStream;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -52,6 +34,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsStream;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
@@ -280,7 +282,7 @@ public class ProjectServiceImplTest {
     void should_findProjectRepresentationById() {
         ProjectImpl givenProject = new ProjectImpl("projectId", "name");
         when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
-        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById("projectId");
+        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById("projectId", null);
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
     }
 }

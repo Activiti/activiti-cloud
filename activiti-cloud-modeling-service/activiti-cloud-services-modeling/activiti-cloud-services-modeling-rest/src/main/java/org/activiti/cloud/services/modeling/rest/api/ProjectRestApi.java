@@ -77,6 +77,8 @@ public interface ProjectRestApi {
 
     String PROJECT_FILTERS_PARAM_DESCR = "The filter name to filter the returned projects";
 
+    String PROJECT_INCLUDE_PARAM_DESCR = "The name of values to include with the returned projects";
+
     String UPLOAD_FILE_PARAM_NAME = "file";
 
     String EXPORT_AS_ATTACHMENT_PARAM_NAME = "attachment";
@@ -84,6 +86,8 @@ public interface ProjectRestApi {
     String PROJECT_NAME_PARAM_NAME = "name";
 
     String PROJECT_FILTERS_PARAM_NAME = "filters";
+
+    String PROJECT_INCLUDE_PARAM_NAME = "include";
 
     @Operation(
             tags = PROJECTS,
@@ -95,7 +99,9 @@ public interface ProjectRestApi {
                                                  @Parameter(description = PROJECT_NAME_PARAM_DESCR)
                                                  @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
                                                  @Parameter(description = PROJECT_FILTERS_PARAM_DESCR)
-                                                 @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters);
+                                                 @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters,
+                                                 @Parameter(description = PROJECT_INCLUDE_PARAM_DESCR)
+                                                 @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include);
 
     @Operation(
             tags = PROJECTS,
@@ -112,7 +118,9 @@ public interface ProjectRestApi {
     @GetMapping(path = "/projects/{projectId}")
     EntityModel<Project> getProject(
             @Parameter(description = GET_PROJECT_ID_PARAM_DESCR, required = true)
-            @PathVariable String projectId);
+            @PathVariable String projectId,
+            @Parameter(description = PROJECT_INCLUDE_PARAM_DESCR)
+            @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include);
 
     @Operation(
             tags = PROJECTS,

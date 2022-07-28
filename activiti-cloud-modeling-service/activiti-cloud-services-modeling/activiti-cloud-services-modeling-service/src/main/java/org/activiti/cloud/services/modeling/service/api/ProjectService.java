@@ -59,11 +59,11 @@ public interface ProjectService {
 
     Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
 
-    default Page<Project> getProjects(Pageable pageable, String name, List<String> filters) {
+    default Page<Project> getProjects(Pageable pageable, String name, List<String> filters, List<String> include) {
         return getProjects(pageable, name);
     }
 
-    default Optional<Project> findProjectRepresentationById(String projectId){
+    default Optional<Project> findProjectRepresentationById(String projectId, List<String> include){
         return findProjectById(projectId);
     }
 }
