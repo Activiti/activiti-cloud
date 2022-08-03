@@ -87,7 +87,7 @@ public class ProjectControllerExistingNameIT {
         projectRepository.createProject(project("creating-project"));
         projectRepository.createProject(project("updating-project"));
         projectRepository.createProject(project("copying-project"));
-        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null))
+        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .hasSize(4)
             .extracting(ProjectEntity::getCreatedBy).containsOnly("otherUser");
     }
@@ -107,7 +107,7 @@ public class ProjectControllerExistingNameIT {
                 .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
 
-        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null))
+        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
             .contains(tuple("otherUser", "application-xy"),
                 tuple("testuser", "application-xy"));
@@ -123,7 +123,7 @@ public class ProjectControllerExistingNameIT {
             .content(mapper.writeValueAsString(project("creating-project"))))
             .andExpect(status().isCreated());
 
-        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null))
+        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
             .contains(tuple("otherUser", "creating-project"),
                 tuple("testuser", "creating-project"));
@@ -142,7 +142,7 @@ public class ProjectControllerExistingNameIT {
                 .content(mapper.writeValueAsString(project("updating-project"))))
             .andExpect(status().isOk());
 
-        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null))
+        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
             .contains(tuple("otherUser", "updating-project"),
                 tuple("testuser", "updating-project"));
@@ -158,7 +158,7 @@ public class ProjectControllerExistingNameIT {
         mockMvc.perform(post("/v1/projects/{projectId}/copy?name=copying-project", project.getId()))
             .andExpect(status().isOk());
 
-        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null))
+        assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
             .contains(tuple("otherUser", "copying-project"),
                 tuple("testuser", "copying-project"));

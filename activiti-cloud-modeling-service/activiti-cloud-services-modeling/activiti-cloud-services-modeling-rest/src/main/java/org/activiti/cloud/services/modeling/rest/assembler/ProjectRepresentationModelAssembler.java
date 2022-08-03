@@ -26,6 +26,7 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -40,7 +41,7 @@ public class ProjectRepresentationModelAssembler implements RepresentationModelA
     public EntityModel<Project> toModel(Project project) {
         return EntityModel.of(
                 project,
-                linkTo(methodOn(ProjectController.class).getProject(project.getId())).withSelfRel(),
+                linkTo(methodOn(ProjectController.class).getProject(project.getId(), List.of())).withSelfRel(),
                 getExportProjectLink(project.getId()),
                 getImportProjectModelLink(project.getId()),
                 linkTo(methodOn(ModelController.class).getModels(project.getId(),

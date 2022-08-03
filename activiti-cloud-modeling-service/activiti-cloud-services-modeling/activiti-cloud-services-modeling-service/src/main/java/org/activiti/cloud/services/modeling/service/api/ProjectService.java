@@ -32,8 +32,7 @@ import java.util.Optional;
  * Business logic related to {@link Project} entities
  */
 public interface ProjectService {
-    Page<Project> getProjects(Pageable pageable,
-                              String name);
+    Page<Project> getProjects(Pageable pageable, String name, List<String> filters, List<String> include);
 
     Project createProject(Project project);
 
@@ -42,7 +41,11 @@ public interface ProjectService {
 
     void deleteProject(Project project);
 
-    Optional<Project> findProjectById(String projectId);
+    Optional<Project> findProjectById(String projectId, List<String> include);
+
+    default Optional<Project> findProjectById(String projectId) {
+        return findProjectById(projectId, null);
+    }
 
     FileContent exportProject(Project project) throws IOException;
 
@@ -59,11 +62,4 @@ public interface ProjectService {
 
     Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
 
-    default Page<Project> getProjects(Pageable pageable, String name, List<String> filters) {
-        return getProjects(pageable, name);
-    }
-
-    default Optional<Project> findProjectRepresentationById(String projectId){
-        return findProjectById(projectId);
-    }
 }

@@ -15,14 +15,16 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
-import java.util.Optional;
-
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * JPA Repository for {@link ProjectEntity} entity
@@ -34,16 +36,27 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>,
                                               ProjectRepository<ProjectEntity> {
 
-    Page<ProjectEntity> findAllByNameContaining(String name,
-                                                Pageable pageable);
+    Page<ProjectEntity> findAllByNameContaining(String name, Pageable pageable);
+
+    Page<ProjectEntity> findAllByIdIn(Collection<String> filteredProjectIds, Pageable pageable);
+
+    Page<ProjectEntity> findAllByNameContainingAndIdIn(String name,
+                                                       Collection<String> filteredProjectIds,
+                                                       Pageable pageable);
 
     @Override
     default Page<ProjectEntity> getProjects(Pageable pageable,
-                                            String nameToFilter) {
-        return Optional.ofNullable(nameToFilter)
-                .map(name -> findAllByNameContaining(name,
-                                                     pageable))
-                .orElseGet(() -> findAll(pageable));
+                                            String nameToFilter,
+                                            List<String> filteredProjectIds) {
+        if (nameToFilter != null && filteredProjectIds != null) {
+            return findAllByNameContainingAndIdIn(nameToFilter, filteredProjectIds, pageable);
+        } else if (nameToFilter != null) {
+            return findAllByNameContaining(nameToFilter, pageable);
+        } else if (filteredProjectIds != null) {
+            return findAllByIdIn(filteredProjectIds, pageable);
+        } else {
+            return findAll(pageable);
+        }
     }
 
     @Override
