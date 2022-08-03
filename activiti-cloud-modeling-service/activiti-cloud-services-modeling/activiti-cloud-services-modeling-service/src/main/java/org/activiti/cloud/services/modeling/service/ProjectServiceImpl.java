@@ -15,27 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.transaction.Transactional;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -54,6 +33,8 @@ import org.activiti.cloud.services.common.zip.ZipStream;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
+import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
+import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -64,6 +45,28 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 
 /**
  * Business logic related to {@link Project} entities
@@ -88,6 +91,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final Set<ProjectValidator> projectValidators;
 
+    private final ProjectFilterService projectFilterService;
+
+    private final ProjectDecoratorService projectDecoratorService;
+
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
                               ModelService modelService,
@@ -95,7 +102,9 @@ public class ProjectServiceImpl implements ProjectService {
                               JsonConverter<ProjectDescriptor> descriptorJsonConverter,
                               JsonConverter<Project> jsonConverter,
                               JsonConverter<Map> jsonMetadataConverter,
-                              Set<ProjectValidator> projectValidators) {
+                              Set<ProjectValidator> projectValidators,
+                              ProjectFilterService projectFilterService,
+                              ProjectDecoratorService projectDecoratorService) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
         this.modelTypeService = modelTypeService;
@@ -103,6 +112,8 @@ public class ProjectServiceImpl implements ProjectService {
         this.jsonConverter = jsonConverter;
         this.projectValidators = projectValidators;
         this.jsonMetadataConverter = jsonMetadataConverter;
+        this.projectFilterService = projectFilterService;
+        this.projectDecoratorService = projectDecoratorService;
     }
 
     /**
@@ -112,11 +123,11 @@ public class ProjectServiceImpl implements ProjectService {
      * @return the page
      */
     @Override
-    public Page<Project> getProjects(Pageable pageable,
-                                     String name) {
+    public Page<Project> getProjects(Pageable pageable, String name, List<String> filters, List<String> include) {
         String projectName = name != null ? name.toLowerCase() : null;
-        return projectRepository.getProjects(pageable,
-                projectName);
+        List<String> filteredProjects = getFilteredProjectIds(filters);
+        Page<Project> projects = projectRepository.getProjects(pageable, projectName, filteredProjects);
+        return decorateAll(projects, include);
     }
 
     /**
@@ -173,8 +184,9 @@ public class ProjectServiceImpl implements ProjectService {
      * @return the found project, or {@literal Optional#empty()}
      */
     @Override
-    public Optional<Project> findProjectById(String projectId) {
-        return projectRepository.findProjectById(projectId);
+    public Optional<Project> findProjectById(String projectId, List<String> include) {
+        Optional<Project> project = projectRepository.findProjectById(projectId);
+        return decorate(project, include);
     }
 
     /**
@@ -507,4 +519,31 @@ public class ProjectServiceImpl implements ProjectService {
 
         return project;
     }
+
+    public List<String> getFilteredProjectIds(List<String> filters) {
+        List<String> filteredProjects = null;
+        if (anyNotBlank(filters)) {
+            filteredProjects = projectFilterService.getFilterIds(filters);
+        }
+        return filteredProjects;
+    }
+
+    public Optional<Project> decorate(Optional<Project> project, List<String> include) {
+        if (anyNotBlank(include)) {
+            project.ifPresent(p -> projectDecoratorService.decorate(p, include));
+        }
+        return project;
+    }
+
+    public Page<Project> decorateAll(Page<Project> projects, List<String> include) {
+        if (anyNotBlank(include)) {
+            projectDecoratorService.decorateAll(projects.getContent(), include);
+        }
+        return projects;
+    }
+
+    private boolean anyNotBlank(List<String> filters) {
+        return filters != null && filters.stream().anyMatch(StringUtils::isNotBlank);
+    }
+
 }

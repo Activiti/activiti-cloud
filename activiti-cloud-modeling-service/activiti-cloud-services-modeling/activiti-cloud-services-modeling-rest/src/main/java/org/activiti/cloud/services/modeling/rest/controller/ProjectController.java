@@ -75,7 +75,7 @@ public class ProjectController implements ProjectRestApi {
     public EntityModel<Project> getProject(@PathVariable String projectId,
                                            @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false)
                                                List<String> include) {
-        return representationModelAssembler.toModel(findProjectRepresentationById(projectId, include));
+        return representationModelAssembler.toModel(findProjectById(projectId, include));
     }
 
     @Override
@@ -142,8 +142,8 @@ public class ProjectController implements ProjectRestApi {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 
-    public Project findProjectRepresentationById(String projectId, List<String> include) {
-        return projectService.findProjectRepresentationById(projectId, include)
+    public Project findProjectById(String projectId, List<String> include) {
+        return projectService.findProjectById(projectId, include)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 }

@@ -13,31 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.modeling.repository;
+
+package org.activiti.cloud.services.modeling.service.decorators;
 
 import org.activiti.cloud.modeling.api.Project;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Optional;
 
-/**
- * Interface for {@link Project} entities repository
- */
-public interface ProjectRepository<P extends Project> {
+public interface ProjectDecorator {
 
-    Page<P> getProjects(Pageable pageable,
-                        String nameToFilter,
-                        List<String> filteredProjectIds);
+    String decoratorName();
 
-    Optional<P> findProjectById(String projectId);
+    void decorate(Project project);
 
-    P createProject(P project);
-
-    P updateProject(P projectToUpdate);
-
-    P copyProject(P projectToCopy, String newProjectName);
-
-    void deleteProject(P project);
+    void decorateAll(List<Project> projects);
 }

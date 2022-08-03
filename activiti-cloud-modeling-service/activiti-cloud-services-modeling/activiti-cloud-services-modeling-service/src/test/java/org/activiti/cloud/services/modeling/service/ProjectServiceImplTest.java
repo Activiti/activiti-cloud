@@ -282,7 +282,7 @@ public class ProjectServiceImplTest {
     void should_findProjectRepresentationById() {
         ProjectImpl givenProject = new ProjectImpl("projectId", "name");
         when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
-        Optional<Project> foundProjectOptional = projectService.findProjectRepresentationById("projectId", null);
+        Optional<Project> foundProjectOptional = projectService.findProjectById("projectId", null);
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
     }
 }

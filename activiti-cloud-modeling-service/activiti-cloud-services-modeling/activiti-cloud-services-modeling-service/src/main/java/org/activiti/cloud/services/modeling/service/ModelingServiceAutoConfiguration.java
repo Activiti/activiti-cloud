@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
@@ -34,6 +31,10 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
+import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
+import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
+import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
+import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -41,6 +42,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Configuration
 public class ModelingServiceAutoConfiguration {
@@ -59,7 +64,6 @@ public class ModelingServiceAutoConfiguration {
     public ExtensionsModelValidator extensionsModelValidator(SchemaLoader modelExtensionsSchemaLoader) {
         return new ExtensionsModelValidator(modelExtensionsSchemaLoader);
     }
-
 
     @Bean
     public ModelExtensionsService modelExtensionsService(Set<ModelExtensionsValidator> metadataValidators,
@@ -100,7 +104,9 @@ public class ModelingServiceAutoConfiguration {
                                          JsonConverter<Project> jsonConverter,
                                          JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
                                          JsonConverter<Map> jsonMetadataConverter,
-                                         Set<ProjectValidator> projectValidators) {
+                                         Set<ProjectValidator> projectValidators,
+                                         ProjectFilterService projectFilterService,
+                                         ProjectDecoratorService projectDecoratorService) {
 
         return new ProjectServiceImpl(projectRepository,
                                       modelService,
@@ -108,7 +114,9 @@ public class ModelingServiceAutoConfiguration {
                                       projectDescriptorJsonConverter,
                                       jsonConverter,
                                       jsonMetadataConverter,
-                                      projectValidators);
+                                      projectValidators,
+                                      projectFilterService,
+                                      projectDecoratorService);
 
     }
 
@@ -128,5 +136,17 @@ public class ModelingServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public SchemaService schemaService(List<SchemaProvider> schemaProviders) {
         return new SchemaService(schemaProviders);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProjectFilterService projectFilterService(List<ProjectFilter> projectFilters) {
+        return new ProjectFilterService(projectFilters);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProjectDecoratorService projectDecoratorService(List<ProjectDecorator> projectDecorators) {
+        return new ProjectDecoratorService(projectDecorators);
     }
 }

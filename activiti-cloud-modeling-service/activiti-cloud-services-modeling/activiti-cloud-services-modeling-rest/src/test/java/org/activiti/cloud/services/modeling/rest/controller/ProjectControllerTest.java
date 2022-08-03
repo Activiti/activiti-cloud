@@ -50,17 +50,17 @@ class ProjectControllerTest {
     @Test
     void should_getProject() {
         Project projectMock = mock(Project.class);
-        when(projectService.findProjectRepresentationById("projectId", null)).thenReturn(Optional.of(projectMock));
+        when(projectService.findProjectById("projectId", null)).thenReturn(Optional.of(projectMock));
         EntityModel<Project> foundProject = projectController.getProject("projectId", null);
-        verify(projectService, times(1)).findProjectRepresentationById("projectId", null);
+        verify(projectService, times(1)).findProjectById("projectId", null);
         assertThat(foundProject.getContent()).isEqualTo(projectMock);
         assertThat(representationModelAssembler).isNotNull();
     }
 
     @Test
     void should_throwException_when_projectNotFound() {
-        when(projectService.findProjectRepresentationById("projectId", null)).thenReturn(Optional.empty());
+        when(projectService.findProjectById("projectId", null)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> projectController.getProject("projectId", null)).isInstanceOf(ResourceNotFoundException.class);
-        verify(projectService, times(1)).findProjectRepresentationById("projectId", null);
+        verify(projectService, times(1)).findProjectById("projectId", null);
     }
 }
