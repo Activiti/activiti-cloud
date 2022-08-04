@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 @SpringBootTest(
     classes = {KeycloakClientApplication.class},
@@ -136,9 +137,9 @@ public class KeycloakClientIT {
         assertThat(roles).extracting("name").contains("ACTIVITI_USER");
 
         assertThat(cache.get(key)).isNotNull();
-        Thread.sleep(5000);
         //check if the cache expires
-        assertThat(cache.get(key)).isNull();
+        Awaitility.await().untilAsserted(() -> assertThat(cache.get(key)).isNull());
+
     }
 
     @Test
@@ -156,9 +157,8 @@ public class KeycloakClientIT {
         assertThat(groups).extracting("name").contains("hr");
 
         assertThat(cache.get(key)).isNotNull();
-        Thread.sleep(5000);
         //check if the cache expires
-        assertThat(cache.get(key)).isNull();
+        Awaitility.await().untilAsserted(() -> assertThat(cache.get(key)).isNull());
     }
 
     @Test
@@ -177,9 +177,8 @@ public class KeycloakClientIT {
         assertThat(roles).extracting("name").contains("offline_access");
 
         assertThat(cache.get(key)).isNotNull();
-        Thread.sleep(5000);
         //check if the cache expires
-        assertThat(cache.get(key)).isNull();
+        Awaitility.await().untilAsserted(() -> assertThat(cache.get(key)).isNull());
     }
 
     @Test
