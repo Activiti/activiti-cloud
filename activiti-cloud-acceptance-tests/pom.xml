@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.5.0-alpha.34</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <groupId>org.activiti.cloud</groupId>
   <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>7.5.0-alpha.34</version>
   <name>Activiti Cloud :: Acceptance Tests</name>
   <packaging>pom</packaging>
   <modules>
