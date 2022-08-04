@@ -21,6 +21,7 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientReprese
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,10 +39,12 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
+    @Cacheable("userRoleMapping")
     List<KeycloakRoleMapping> getUserRoleMapping(@PathVariable("id") String id);
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/groups")
     @Headers("Content-Type: application/json")
+    @Cacheable("userGroups")
     List<KeycloakGroup> getUserGroups(@PathVariable("id") String userId);
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
@@ -51,6 +54,7 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
+    @Cacheable("groupRoleMapping")
     List<KeycloakRoleMapping> getGroupRoleMapping(@PathVariable("id") String id);
 
     @RequestMapping(method = RequestMethod.GET, value = "/clients")
