@@ -44,8 +44,8 @@ install: release
 			--timeout 8m
 
 delete:
-	helm uninstall ${PREVIEW_NAME} --namespace ${PREVIEW_NAME} || echo "try to remove helm chart"
-	kubectl delete ns ${PREVIEW_NAME} || echo "try to remove namespace ${PREVIEW_NAME}"
+	echo "Not try to remove helm chart"
+	echo "Not try to remove namespace ${PREVIEW_NAME}"
 
 clone-chart:
 	rm -rf $(ACTIVITI_CLOUD_FULL_CHART_CHECKOUT_DIR) && \
