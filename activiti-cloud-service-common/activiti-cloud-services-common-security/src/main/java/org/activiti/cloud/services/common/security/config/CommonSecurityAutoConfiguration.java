@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.common.security.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.RequestInterceptor;
+import java.util.Collection;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
@@ -41,6 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -186,6 +192,18 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .oauth2ResourceServer()
             .jwt()
             .jwtAuthenticationConverter(jwtAuthenticationConverter);
+    }
+
+    @Bean
+    public CacheManager cacheManager(Collection<Cache> caches) {
+        SimpleCacheManager cacheManager = new SimpleCacheManager() {
+            @Override
+            protected Cache getMissingCache(String name) {
+                return new CaffeineCache(name, Caffeine.newBuilder().build());
+            }
+        };
+        cacheManager.setCaches(caches);
+        return cacheManager;
     }
 
 }
