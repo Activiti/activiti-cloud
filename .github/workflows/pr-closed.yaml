@@ -47,3 +47,28 @@ jobs:
         run: |
           echo PR #${{ github.event.pull_request.number }} has been closed
           kubectl delete ns $PREVIEW_NAME || true
+
+  cleanup-test-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set PREVIEW_NAME env variable
+        id: set-preview-name
+        run: |
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          echo set PREVIEW_NAME=$PREVIEW_NAME
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+
+      - name: Set preview version
+        run: |
+          echo 0.0.1-$PREVIEW_NAME-$GITHUB_RUN_NUMBER-SNAPSHOT > VERSION
+
+      - name: Delete Docker images
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          echo "Delete Docker images"
+          make docker-delete-all

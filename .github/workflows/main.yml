@@ -388,18 +388,14 @@ jobs:
       - test
       # dependency needed for build.outputs env variables resolution
       - build
-    if: always()
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Delete Docker images
-        if: ${{ always() }}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
-          PREVIEW_NAME: ${{ needs.build.outputs.preview-name }}
-          BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
             if [ $IS_PREVIEW = true ]
