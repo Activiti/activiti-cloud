@@ -147,11 +147,11 @@ class QueryEventHandlerContextOptimizerTest {
             cloudIntegrationRequestedEvent,
             cloudSequenceFlowTakenEvent,
             cloudBPMNActivityStartedEvent,
+            cloudIntegrationResultReceivedEvent,
+            cloudIntegrationErrorReceivedEvent,
             cloudBPMNActivityCompletedEvent,
             cloudBPMNActivityCancelledEvent,
-            cloudBPMNSignalReceivedEvent,
-            cloudIntegrationResultReceivedEvent,
-            cloudIntegrationErrorReceivedEvent
+            cloudBPMNSignalReceivedEvent
         );
 
         //when
@@ -162,10 +162,10 @@ class QueryEventHandlerContextOptimizerTest {
                                            cloudBPMNActivityStartedEvent,
                                            cloudIntegrationRequestedEvent,
                                            cloudBPMNSignalReceivedEvent,
-                                           cloudIntegrationResultReceivedEvent,
-                                           cloudIntegrationErrorReceivedEvent,
                                            cloudBPMNActivityCompletedEvent,
-                                           cloudBPMNActivityCancelledEvent);
+                                           cloudBPMNActivityCancelledEvent,
+                                           cloudIntegrationResultReceivedEvent,
+                                           cloudIntegrationErrorReceivedEvent);
     }
 
 
