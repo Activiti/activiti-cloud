@@ -195,6 +195,7 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public CacheManager cacheManager(Collection<Cache> caches) {
         SimpleCacheManager cacheManager = new SimpleCacheManager() {
             @Override
