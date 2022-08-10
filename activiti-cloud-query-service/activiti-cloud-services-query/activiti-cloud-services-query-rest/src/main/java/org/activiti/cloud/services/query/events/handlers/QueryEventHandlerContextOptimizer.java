@@ -25,6 +25,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
@@ -74,29 +75,30 @@ public class QueryEventHandlerContextOptimizer {
                        Map.entry(CloudProcessCreatedEventImpl.class, 0),
                        Map.entry(CloudProcessStartedEventImpl.class, 1),
                        Map.entry(CloudProcessUpdatedEventImpl.class, 1),
-                       Map.entry(CloudSequenceFlowTakenEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityStartedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCompletedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCancelledEventImpl.class, 1),
-                       Map.entry(CloudIntegrationRequestedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationResultReceivedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 1),
-                       Map.entry(CloudTaskCreatedEventImpl.class, 2),
-                       Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 3),
-                       Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 3),
-                       Map.entry(CloudVariableCreatedEventImpl.class, 3),
-                       Map.entry(CloudVariableUpdatedEventImpl.class, 4),
-                       Map.entry(CloudVariableDeletedEventImpl.class, 5),
-                       Map.entry(CloudTaskActivatedEventImpl.class, 6),
-                       Map.entry(CloudTaskSuspendedEventImpl.class, 6),
-                       Map.entry(CloudTaskAssignedEventImpl.class, 6),
-                       Map.entry(CloudTaskUpdatedEventImpl.class, 6),
-                       Map.entry(CloudTaskCompletedEventImpl.class, 6),
-                       Map.entry(CloudTaskCancelledEventImpl.class, 6),
-                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 7),
-                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 7),
-                       Map.entry(CloudProcessCompletedEventImpl.class, 8),
-                       Map.entry(CloudProcessCancelledEventImpl.class, 8));
+                       Map.entry(CloudSequenceFlowTakenEventImpl.class, 2),
+                       Map.entry(CloudBPMNActivityStartedEventImpl.class, 3),
+                       Map.entry(CloudIntegrationRequestedEventImpl.class, 4),
+                       Map.entry(CloudBPMNSignalReceivedEventImpl.class, 5),
+                       Map.entry(CloudIntegrationResultReceivedEventImpl.class, 6),
+                       Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 6),
+                       Map.entry(CloudBPMNActivityCompletedEventImpl.class, 7),
+                       Map.entry(CloudBPMNActivityCancelledEventImpl.class, 7),
+                       Map.entry(CloudTaskCreatedEventImpl.class, 8),
+                       Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 9),
+                       Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 9),
+                       Map.entry(CloudVariableCreatedEventImpl.class, 9),
+                       Map.entry(CloudVariableUpdatedEventImpl.class, 10),
+                       Map.entry(CloudVariableDeletedEventImpl.class, 11),
+                       Map.entry(CloudTaskActivatedEventImpl.class, 12),
+                       Map.entry(CloudTaskSuspendedEventImpl.class, 12),
+                       Map.entry(CloudTaskAssignedEventImpl.class, 12),
+                       Map.entry(CloudTaskUpdatedEventImpl.class, 12),
+                       Map.entry(CloudTaskCompletedEventImpl.class, 13),
+                       Map.entry(CloudTaskCancelledEventImpl.class, 13),
+                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 14),
+                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 14),
+                       Map.entry(CloudProcessCompletedEventImpl.class, 15),
+                       Map.entry(CloudProcessCancelledEventImpl.class, 15));
 
     private final EntityManager entityManager;
 
