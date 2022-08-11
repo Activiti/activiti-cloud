@@ -156,48 +156,6 @@
     "eventType": "ACTIVITY_COMPLETED"
   },
   {
-    "id": "0f73f699-3b38-4a27-850d-1223883a477e",
-    "timestamp": 1656691355999,
-    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-    "processDefinitionKey": "Process_h3P-40rj",
-    "processDefinitionVersion": 1,
-    "entity": {
-      "id": "e762beb8-f954-11ec-b060-f27c39b4c340",
-      "inBoundVariables": {
-        "input1": {
-          "type": "integer",
-          "value": "0"
-        },
-        "_activiti_dmn_table_": {
-          "type": "string",
-          "value": "decision-loopcounter"
-        }
-      },
-      "outBoundVariables": {},
-      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "rootProcessInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-      "executionId": "e761ad43-f954-11ec-b060-f27c39b4c340",
-      "processDefinitionKey": "Process_h3P-40rj",
-      "processDefinitionVersion": 1,
-      "clientId": "ServiceTask_1t8vsc0",
-      "clientName": "decisiontask-sequence",
-      "clientType": "ServiceTask",
-      "appVersion": "1",
-      "connectorType": "dmn-connector.EXECUTE_TABLE"
-    },
-    "appName": "test-replay-sa",
-    "serviceFullName": "rb",
-    "serviceName": "rb",
-    "serviceVersion": "",
-    "serviceType": "runtime-bundle",
-    "entityId": "e762beb8-f954-11ec-b060-f27c39b4c340",
-    "sequenceNumber": 8,
-    "messageId": "f467268b-bc13-ffd1-f72a-35e2e467835f",
-    "eventType": "INTEGRATION_REQUESTED"
-  },
-  {
     "id": "0bb07e8e-3b9a-40b2-9610-eca3c3e5a051",
     "timestamp": 1656690359607,
     "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
@@ -247,6 +205,49 @@
     "eventType": "VARIABLE_UPDATED"
   },
   {
+    "id": "0f73f699-3b38-4a27-850d-1223883a477e",
+    "timestamp": 1656691355999,
+    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+    "processDefinitionKey": "Process_h3P-40rj",
+    "processDefinitionVersion": 1,
+    "entity": {
+      "id": "e762beb8-f954-11ec-b060-f27c39b4c340",
+      "inBoundVariables": {
+        "input1": {
+          "type": "integer",
+          "value": "0"
+        },
+        "_activiti_dmn_table_": {
+          "type": "string",
+          "value": "decision-loopcounter"
+        }
+      },
+      "outBoundVariables": {},
+      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "rootProcessInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+      "executionId": "e761ad43-f954-11ec-b060-f27c39b4c340",
+      "processDefinitionKey": "Process_h3P-40rj",
+      "processDefinitionVersion": 1,
+      "clientId": "ServiceTask_1t8vsc0",
+      "clientName": "decisiontask-sequence",
+      "clientType": "ServiceTask",
+      "appVersion": "1",
+      "connectorType": "dmn-connector.EXECUTE_TABLE"
+    },
+    "appName": "test-replay-sa",
+    "serviceFullName": "rb",
+    "serviceName": "rb",
+    "serviceVersion": "",
+    "serviceType": "runtime-bundle",
+    "entityId": "e762beb8-f954-11ec-b060-f27c39b4c340",
+    "sequenceNumber": 8,
+    "messageId": "f467268b-bc13-ffd1-f72a-35e2e467835f",
+    "eventType": "INTEGRATION_REQUESTED"
+  },
+
+  {
     "id": "f87b0a8b-c586-47dd-800e-10410a7a5d1a",
     "timestamp": 1656690359617,
     "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
@@ -269,6 +270,32 @@
     "sequenceNumber": 7,
     "messageId": "f467268b-bc13-ffd1-f72a-35e2e467835f",
     "eventType": "ACTIVITY_STARTED"
+  },
+  {
+    "id": "512a6a22-43cd-415f-b0b7-8914c2fe4167",
+    "timestamp": 1656690359965,
+    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+    "processDefinitionKey": "Process_h3P-40rj",
+    "entity": {
+      "elementId": "ServiceTask_1t8vsc0",
+      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+      "signalPayload": {
+        "payloadType": "SignalPayload",
+        "id": "a10b531e-cedc-416b-80d0-fa176011e100",
+        "variables": {}
+      }
+    },
+    "appName": "test-replay-sa",
+    "serviceFullName": "rb",
+    "serviceName": "rb",
+    "serviceVersion": "",
+    "serviceType": "runtime-bundle",
+    "entityId": "ServiceTask_1t8vsc0",
+    "sequenceNumber": 0,
+    "messageId": "65ba0307-ff3b-8a8b-1304-a61b9c07f199",
+    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "45a794cf-c274-4fe3-9f02-22fbc0cb5874",
@@ -318,32 +345,6 @@
     "eventType": "INTEGRATION_RESULT_RECEIVED"
   },
   {
-    "id": "512a6a22-43cd-415f-b0b7-8914c2fe4167",
-    "timestamp": 1656690359965,
-    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-    "processDefinitionKey": "Process_h3P-40rj",
-    "entity": {
-      "elementId": "ServiceTask_1t8vsc0",
-      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-      "signalPayload": {
-        "payloadType": "SignalPayload",
-        "id": "a10b531e-cedc-416b-80d0-fa176011e100",
-        "variables": {}
-      }
-    },
-    "appName": "test-replay-sa",
-    "serviceFullName": "rb",
-    "serviceName": "rb",
-    "serviceVersion": "",
-    "serviceType": "runtime-bundle",
-    "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 0,
-    "messageId": "65ba0307-ff3b-8a8b-1304-a61b9c07f199",
-    "eventType": "SIGNAL_RECEIVED"
-  },
-  {
     "id": "9f55ec33-2230-4fc4-b182-1ec05c49f05e",
     "timestamp": 1656690359977,
     "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
@@ -366,6 +367,32 @@
     "sequenceNumber": 3,
     "messageId": "65ba0307-ff3b-8a8b-1304-a61b9c07f199",
     "eventType": "ACTIVITY_STARTED"
+  },
+  {
+    "id": "13bab65e-9945-4ba2-bb58-ecc572781f56",
+    "timestamp": 1656690360055,
+    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+    "processDefinitionKey": "Process_h3P-40rj",
+    "entity": {
+      "elementId": "ServiceTask_1t8vsc0",
+      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+      "signalPayload": {
+        "payloadType": "SignalPayload",
+        "id": "d2114d1e-e5d5-4349-aefa-cf6447dd06f2",
+        "variables": {}
+      }
+    },
+    "appName": "test-replay-sa",
+    "serviceFullName": "rb",
+    "serviceName": "rb",
+    "serviceVersion": "",
+    "serviceType": "runtime-bundle",
+    "entityId": "ServiceTask_1t8vsc0",
+    "sequenceNumber": 0,
+    "messageId": "3b2c571d-fd36-41c3-47eb-4c1223b90ec0",
+    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "55cee0e5-7d5a-45d2-8596-b2ba2679b1fe",
@@ -413,32 +440,6 @@
     "sequenceNumber": 1,
     "messageId": "3b2c571d-fd36-41c3-47eb-4c1223b90ec0",
     "eventType": "INTEGRATION_RESULT_RECEIVED"
-  },
-  {
-    "id": "13bab65e-9945-4ba2-bb58-ecc572781f56",
-    "timestamp": 1656690360055,
-    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-    "processDefinitionKey": "Process_h3P-40rj",
-    "entity": {
-      "elementId": "ServiceTask_1t8vsc0",
-      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-      "signalPayload": {
-        "payloadType": "SignalPayload",
-        "id": "d2114d1e-e5d5-4349-aefa-cf6447dd06f2",
-        "variables": {}
-      }
-    },
-    "appName": "test-replay-sa",
-    "serviceFullName": "rb",
-    "serviceName": "rb",
-    "serviceVersion": "",
-    "serviceType": "runtime-bundle",
-    "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 0,
-    "messageId": "3b2c571d-fd36-41c3-47eb-4c1223b90ec0",
-    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "33805bb2-e3a6-4752-98ac-43520a422ba3",
@@ -502,7 +503,7 @@
     "serviceVersion": "",
     "serviceType": "runtime-bundle",
     "entityId": "e7a6305c-f954-11ec-b060-f27c39b4c340",
-    "sequenceNumber": 4,
+    "sequenceNumber": 3,
     "messageId": "3b2c571d-fd36-41c3-47eb-4c1223b90ec0",
     "eventType": "INTEGRATION_REQUESTED"
   },
@@ -526,9 +527,35 @@
     "serviceVersion": "",
     "serviceType": "runtime-bundle",
     "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 3,
+    "sequenceNumber": 4,
     "messageId": "3b2c571d-fd36-41c3-47eb-4c1223b90ec0",
     "eventType": "ACTIVITY_STARTED"
+  },
+  {
+    "id": "e25dff1d-ecb9-4b82-8918-116b3d237f76",
+    "timestamp": 1656690360118,
+    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+    "processDefinitionKey": "Process_h3P-40rj",
+    "entity": {
+      "elementId": "ServiceTask_1t8vsc0",
+      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+      "signalPayload": {
+        "payloadType": "SignalPayload",
+        "id": "af0249a6-81aa-4843-88b1-9f58d100171c",
+        "variables": {}
+      }
+    },
+    "appName": "test-replay-sa",
+    "serviceFullName": "rb",
+    "serviceName": "rb",
+    "serviceVersion": "",
+    "serviceType": "runtime-bundle",
+    "entityId": "ServiceTask_1t8vsc0",
+    "sequenceNumber": 0,
+    "messageId": "2e62598f-6559-1c58-0236-fd3215accde6",
+    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "93976930-a3e2-42f8-9773-f235c007b700",
@@ -576,32 +603,6 @@
     "sequenceNumber": 1,
     "messageId": "2e62598f-6559-1c58-0236-fd3215accde6",
     "eventType": "INTEGRATION_RESULT_RECEIVED"
-  },
-  {
-    "id": "e25dff1d-ecb9-4b82-8918-116b3d237f76",
-    "timestamp": 1656690360118,
-    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-    "processDefinitionKey": "Process_h3P-40rj",
-    "entity": {
-      "elementId": "ServiceTask_1t8vsc0",
-      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-      "signalPayload": {
-        "payloadType": "SignalPayload",
-        "id": "af0249a6-81aa-4843-88b1-9f58d100171c",
-        "variables": {}
-      }
-    },
-    "appName": "test-replay-sa",
-    "serviceFullName": "rb",
-    "serviceName": "rb",
-    "serviceVersion": "",
-    "serviceType": "runtime-bundle",
-    "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 0,
-    "messageId": "2e62598f-6559-1c58-0236-fd3215accde6",
-    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "1295da62-278f-4e81-81af-6f8be3536298",
@@ -665,7 +666,7 @@
     "serviceVersion": "",
     "serviceType": "runtime-bundle",
     "entityId": "e7afa63d-f954-11ec-b060-f27c39b4c340",
-    "sequenceNumber": 4,
+    "sequenceNumber": 3,
     "messageId": "2e62598f-6559-1c58-0236-fd3215accde6",
     "eventType": "INTEGRATION_REQUESTED"
   },
@@ -689,9 +690,35 @@
     "serviceVersion": "",
     "serviceType": "runtime-bundle",
     "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 3,
+    "sequenceNumber": 4,
     "messageId": "2e62598f-6559-1c58-0236-fd3215accde6",
     "eventType": "ACTIVITY_STARTED"
+  },
+  {
+    "id": "c6f89f65-257c-44ae-b2ab-6cd993f466ff",
+    "timestamp": 1656690360185,
+    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+    "processDefinitionKey": "Process_h3P-40rj",
+    "entity": {
+      "elementId": "ServiceTask_1t8vsc0",
+      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
+      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
+      "signalPayload": {
+        "payloadType": "SignalPayload",
+        "id": "2d5ab4f7-36bb-4ed4-bd30-220fd7a03eb2",
+        "variables": {}
+      }
+    },
+    "appName": "test-replay-sa",
+    "serviceFullName": "rb",
+    "serviceName": "rb",
+    "serviceVersion": "",
+    "serviceType": "runtime-bundle",
+    "entityId": "ServiceTask_1t8vsc0",
+    "sequenceNumber": 0,
+    "messageId": "c177e26d-ccfb-8e26-522a-7a206d53abbc",
+    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "1b21b781-ee60-40f8-8187-384fca02f292",
@@ -739,32 +766,6 @@
     "sequenceNumber": 1,
     "messageId": "c177e26d-ccfb-8e26-522a-7a206d53abbc",
     "eventType": "INTEGRATION_RESULT_RECEIVED"
-  },
-  {
-    "id": "c6f89f65-257c-44ae-b2ab-6cd993f466ff",
-    "timestamp": 1656690360185,
-    "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-    "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-    "processDefinitionKey": "Process_h3P-40rj",
-    "entity": {
-      "elementId": "ServiceTask_1t8vsc0",
-      "processInstanceId": "e6a1b89f-f954-11ec-b060-f27c39b4c341",
-      "processDefinitionId": "Process_h3P-40rj:1:c9edf64d-f953-11ec-b060-f27c39b4c340",
-      "signalPayload": {
-        "payloadType": "SignalPayload",
-        "id": "2d5ab4f7-36bb-4ed4-bd30-220fd7a03eb2",
-        "variables": {}
-      }
-    },
-    "appName": "test-replay-sa",
-    "serviceFullName": "rb",
-    "serviceName": "rb",
-    "serviceVersion": "",
-    "serviceType": "runtime-bundle",
-    "entityId": "ServiceTask_1t8vsc0",
-    "sequenceNumber": 0,
-    "messageId": "c177e26d-ccfb-8e26-522a-7a206d53abbc",
-    "eventType": "SIGNAL_RECEIVED"
   },
   {
     "id": "5db03164-c1d7-40dc-99ef-e90ff307cab8",
