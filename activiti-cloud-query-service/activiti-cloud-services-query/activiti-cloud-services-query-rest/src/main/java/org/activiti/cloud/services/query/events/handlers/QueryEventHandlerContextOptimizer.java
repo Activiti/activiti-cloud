@@ -86,19 +86,19 @@ public class QueryEventHandlerContextOptimizer {
                        Map.entry(CloudTaskCreatedEventImpl.class, 8),
                        Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 9),
                        Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 9),
-                       Map.entry(CloudVariableCreatedEventImpl.class, 9),
-                       Map.entry(CloudVariableUpdatedEventImpl.class, 10),
-                       Map.entry(CloudVariableDeletedEventImpl.class, 11),
-                       Map.entry(CloudTaskActivatedEventImpl.class, 12),
-                       Map.entry(CloudTaskSuspendedEventImpl.class, 12),
-                       Map.entry(CloudTaskAssignedEventImpl.class, 12),
-                       Map.entry(CloudTaskUpdatedEventImpl.class, 12),
-                       Map.entry(CloudTaskCompletedEventImpl.class, 13),
-                       Map.entry(CloudTaskCancelledEventImpl.class, 13),
-                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 14),
-                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 14),
-                       Map.entry(CloudProcessCompletedEventImpl.class, 15),
-                       Map.entry(CloudProcessCancelledEventImpl.class, 15));
+                       Map.entry(CloudVariableCreatedEventImpl.class, 10),
+                       Map.entry(CloudVariableUpdatedEventImpl.class, 11),
+                       Map.entry(CloudVariableDeletedEventImpl.class, 12),
+                       Map.entry(CloudTaskActivatedEventImpl.class, 13),
+                       Map.entry(CloudTaskSuspendedEventImpl.class, 13),
+                       Map.entry(CloudTaskAssignedEventImpl.class, 13),
+                       Map.entry(CloudTaskUpdatedEventImpl.class, 13),
+                       Map.entry(CloudTaskCompletedEventImpl.class, 14),
+                       Map.entry(CloudTaskCancelledEventImpl.class, 14),
+                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 15),
+                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 15),
+                       Map.entry(CloudProcessCompletedEventImpl.class, 16),
+                       Map.entry(CloudProcessCancelledEventImpl.class, 16));
 
     private final EntityManager entityManager;
 
