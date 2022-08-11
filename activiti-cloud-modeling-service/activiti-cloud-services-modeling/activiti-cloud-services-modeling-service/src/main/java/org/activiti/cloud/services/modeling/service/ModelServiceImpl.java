@@ -36,7 +36,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.activiti.cloud.services.modeling.validation.FileContentValidator;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +94,7 @@ public class ModelServiceImpl implements ModelService{
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    private final FileContentValidator fileContentValidator;
+    private final FileMagicNumberValidator fileContentValidator;
 
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
@@ -110,7 +110,7 @@ public class ModelServiceImpl implements ModelService{
                             JsonConverter<Model> jsonConverter,
                             ProcessModelContentConverter processModelContentConverter,
                             Set<ModelUpdateListener> modelUpdateListeners,
-                            FileContentValidator fileContentValidator) {
+                            FileMagicNumberValidator fileContentValidator) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
