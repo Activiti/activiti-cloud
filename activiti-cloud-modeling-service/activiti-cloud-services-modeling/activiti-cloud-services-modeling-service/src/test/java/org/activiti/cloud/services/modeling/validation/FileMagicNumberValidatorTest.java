@@ -15,7 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
 @ContextConfiguration(classes = {FileContentValidatorConfiguration.class, ModelingApiAutoConfiguration.class})
-class FileContentValidatorTest {
+class FileMagicNumberValidatorTest {
 
     @Autowired
     private FileMagicNumberValidator fileContentValidator;
@@ -27,54 +27,53 @@ class FileContentValidatorTest {
     }
 
     @Test
+    void checkFileIsExecutableJavaClass() throws IOException {
+        //use a fake extension to verify if the test works regardless of extension
+        File file = new File("src/test/resources/executables/javaClass");
+        byte[] firstBytes = readBytes(file);
+        assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
+    }
+
+    @Test
     void checkFileIsExecutableExe() throws IOException {
         //use a fake extension to verify if the test works regardless of extension
         File file = new File("src/test/resources/executables/windows-file.windows");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
     }
 
     @Test
     void checkFileIsExecutableMsi() throws IOException {
         File file = new File("src/test/resources/executables/Chrome.msi");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
     }
 
     @Test
     void checkFileIsExecutableBash() throws IOException {
         File file = new File("src/test/resources/executables/test.sh");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
     }
 
     @Test
     void checkFileIsExecutableLinux() throws IOException {
         File file = new File("src/test/resources/executables/linuxExFile");
-        byte[] firstBytes = readBytes(file, 100);
-        assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
-    }
-
-    @Test
-    void checkFileIsExecutableMacOs() throws IOException {
-        File file = new File("src/test/resources/executables/test");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isTrue();
     }
 
     @Test
     void checkFileIsNotExecutablePlainText() throws IOException {
-        //use a fake extension to verify if the test works regardless of extension
         File file = new File("src/test/resources/executables/text.txt");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isFalse();
     }
 
     @Test
     void checkFileIsNotExecutablePngImage() throws IOException {
-        //use a fake extension to verify if the test works regardless of extension
         File file = new File("src/test/resources/executables/image.png");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isFalse();
     }
 
@@ -82,14 +81,11 @@ class FileContentValidatorTest {
     void checkFileIsNotExecutableZipFile() throws IOException {
         //use a fake extension to verify if the test works regardless of extension
         File file = new File("src/test/resources/executables/testzip.isAZip");
-        byte[] firstBytes = readBytes(file, 100);
+        byte[] firstBytes = readBytes(file);
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isFalse();
     }
 
-    private byte[] readBytes(File file, int length) throws IOException {
-        byte[] firstBytes = new byte[length];
-        FileInputStream input = new FileInputStream(file);
-        input.read(firstBytes);
-        return firstBytes;
+    private byte[] readBytes(File file) throws IOException {
+        return new FileInputStream(file).readAllBytes();
     }
 }

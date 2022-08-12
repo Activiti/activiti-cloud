@@ -1,5 +1,8 @@
 package org.activiti.cloud.services.modeling.validation.magicnumber;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,7 +21,18 @@ public class FileMagicNumber {
 
     public void setString(String string) {
         this.string = string;
-        this.setBytes(string.getBytes());
+        if (string != null) {
+            byte[] stringBytes;
+            if (string.startsWith("0x")) {
+                String hexString = string.substring(2);
+                int i = Integer.parseUnsignedInt(hexString, 16);
+                stringBytes = BigInteger.valueOf(i).toByteArray();
+            } else {
+                stringBytes = string.getBytes();
+            }
+            this.setBytes(stringBytes);
+        }
+
     }
 
     public String getName() {
@@ -51,20 +65,6 @@ public class FileMagicNumber {
             result = Arrays.compare(fileContent, offset, bytes.length, bytes, 0, bytes.length) == 0;
         }
         return result;
-    }
-
-    @Configuration
-    @ConfigurationProperties(prefix = "executable-filter")
-    public static class FileMagicNumberList {
-        private List<FileMagicNumber> magicNumber;
-
-        public List<FileMagicNumber> getMagicNumber() {
-            return magicNumber;
-        }
-
-        public void setMagicNumber(List<FileMagicNumber> magicNumber) {
-            this.magicNumber = magicNumber;
-        }
     }
 
 }
