@@ -390,7 +390,7 @@ public class ModelServiceImpl implements ModelService{
                                         FileContent fileContent) {
         if (fileContentValidator.checkFileIsExecutable(fileContent.getFileContent())) {
             throw new ImportModelException(MessageFormat
-                .format("Import executable file is forbidden {0}: {1}",
+                .format("Import the executable file {1} for type {0} is forbidden.",
                     modelType.getName(),
                     fileContent.getFilename()));
         }
