@@ -100,6 +100,9 @@ public class QueryEventHandlerContextOptimizer {
                        Map.entry(CloudProcessCompletedEventImpl.class, 16),
                        Map.entry(CloudProcessCancelledEventImpl.class, 16));
 
+    private Comparator<CloudRuntimeEvent<?,?>> byTimestamp = Comparator.comparingLong(CloudRuntimeEvent::getTimestamp);
+    private Comparator<CloudRuntimeEvent<?,?>> byEventClass = Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
+                                                                                                    .orElseGet(() -> order.get(CloudRuntimeEvent.class)));
     private final EntityManager entityManager;
 
     public QueryEventHandlerContextOptimizer(EntityManager entityManager) {
@@ -137,8 +140,7 @@ public class QueryEventHandlerContextOptimizer {
             });
 
         return events.stream()
-                     .sorted(Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
-                                                                   .orElseGet(() -> order.get(CloudRuntimeEvent.class))))
+                     .sorted(byEventClass.thenComparing(byTimestamp))
                      .collect(Collectors.toList());
     }
 
