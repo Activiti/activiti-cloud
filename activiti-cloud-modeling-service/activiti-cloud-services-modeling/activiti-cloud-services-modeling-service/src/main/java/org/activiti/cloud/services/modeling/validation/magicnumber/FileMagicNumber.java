@@ -47,17 +47,8 @@ public class FileMagicNumber {
 
     public boolean accept(byte[] fileContent) {
         boolean result = false;
-        if(fileContent.length >= bytes.length) {
-            result = new String(fileContent).startsWith(new String(bytes));
-        }
-        return result;
-    }
-
-    public boolean acceptN(byte[] fileContent) {
-        boolean result = false;
         if (fileContent.length >= bytes.length + offset) {
-            byte[] fileContentBytes = Arrays.copyOfRange(fileContent, this.offset, bytes.length + offset);
-            result = Arrays.equals(fileContentBytes, this.bytes);
+            result = Arrays.compare(fileContent, offset, bytes.length, bytes, 0, bytes.length) == 0;
         }
         return result;
     }

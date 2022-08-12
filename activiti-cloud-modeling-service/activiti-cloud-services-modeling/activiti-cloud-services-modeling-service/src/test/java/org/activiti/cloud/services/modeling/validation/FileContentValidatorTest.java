@@ -6,8 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
-import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileContentValidatorConfiguration;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +19,12 @@ class FileContentValidatorTest {
 
     @Autowired
     private FileMagicNumberValidator fileContentValidator;
+
+    @Test
+    void checkFileIsNotExecutableIfSizeIsLessMinMagicNumberSize() {
+        byte[] firstBytes = new byte[]{22};
+        assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isFalse();
+    }
 
     @Test
     void checkFileIsExecutableExe() throws IOException {
