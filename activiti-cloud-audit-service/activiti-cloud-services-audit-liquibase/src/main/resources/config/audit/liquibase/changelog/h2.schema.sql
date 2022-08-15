@@ -47,6 +47,8 @@ create table audit_event
     integration_context		   text,
     stack_trace_elements	   text,
     deployment                 text,
+    candidate_starter_user     text,
+    candidate_starter_group    text,
     primary key (id)
 );
 
