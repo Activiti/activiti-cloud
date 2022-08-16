@@ -31,18 +31,6 @@ public class FileMagicNumber {
 
     public void setString(String string) {
         this.string = string;
-        if (string != null) {
-            byte[] stringBytes;
-            if (string.startsWith("0x")) {
-                String hexString = string.substring(2);
-                int i = Integer.parseUnsignedInt(hexString, 16);
-                stringBytes = BigInteger.valueOf(i).toByteArray();
-            } else {
-                stringBytes = string.getBytes();
-            }
-            this.setBytes(stringBytes);
-        }
-
     }
 
     public String getName() {
@@ -70,11 +58,31 @@ public class FileMagicNumber {
     }
 
     public boolean accept(byte[] fileContent) {
+        if (bytes == null && string != null) {
+            this.calculateBytesFromString(string);
+        }
         boolean result = false;
         if (fileContent.length >= bytes.length + offset) {
             result = Arrays.compare(fileContent, offset, bytes.length, bytes, 0, bytes.length) == 0;
         }
         return result;
+    }
+
+    /**
+     * Please make attention, in order to avoid to re-calculate
+     * the byte array every time it is "cached" in the bytes variable
+     * @param string
+     */
+    private void calculateBytesFromString(String string) {
+        byte[] stringBytes;
+        if (string.startsWith("0x")) {
+            String hexString = string.substring(2);
+            int i = Integer.parseUnsignedInt(hexString, 16);
+            stringBytes = BigInteger.valueOf(i).toByteArray();
+        } else {
+            stringBytes = string.getBytes();
+        }
+        this.setBytes(stringBytes);
     }
 
 }
