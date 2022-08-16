@@ -168,5 +168,68 @@ class QueryEventHandlerContextOptimizerTest {
                                            cloudIntegrationErrorReceivedEvent);
     }
 
+    @Test
+    void optimizeEventsByTimestamp() throws InterruptedException {
+        //given
+        CloudIntegrationRequestedEventImpl cloudIntegrationRequestedEvent1 = new CloudIntegrationRequestedEventImpl();
+        CloudIntegrationResultReceivedEventImpl cloudIntegrationResultReceivedEvent1 = new CloudIntegrationResultReceivedEventImpl();
+        CloudIntegrationErrorReceivedEvent cloudIntegrationErrorReceivedEvent1 = new CloudIntegrationErrorReceivedEventImpl();
+        CloudSequenceFlowTakenEventImpl cloudSequenceFlowTakenEvent1 = new CloudSequenceFlowTakenEventImpl();
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent1 = new CloudBPMNActivityStartedEventImpl();
+        CloudBPMNActivityCompletedEventImpl cloudBPMNActivityCompletedEvent1 = new CloudBPMNActivityCompletedEventImpl();
+        CloudBPMNActivityCancelledEvent cloudBPMNActivityCancelledEvent1 = new CloudBPMNActivityCancelledEventImpl();
+        CloudBPMNSignalReceivedEvent cloudBPMNSignalReceivedEvent1 = new CloudBPMNSignalReceivedEventImpl();
+
+        Thread.sleep(10);
+
+        CloudIntegrationRequestedEventImpl cloudIntegrationRequestedEvent2 = new CloudIntegrationRequestedEventImpl();
+        CloudIntegrationResultReceivedEventImpl cloudIntegrationResultReceivedEvent2 = new CloudIntegrationResultReceivedEventImpl();
+        CloudIntegrationErrorReceivedEvent cloudIntegrationErrorReceivedEvent2 = new CloudIntegrationErrorReceivedEventImpl();
+        CloudSequenceFlowTakenEventImpl cloudSequenceFlowTakenEvent2 = new CloudSequenceFlowTakenEventImpl();
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent2 = new CloudBPMNActivityStartedEventImpl();
+        CloudBPMNActivityCompletedEventImpl cloudBPMNActivityCompletedEvent2 = new CloudBPMNActivityCompletedEventImpl();
+        CloudBPMNActivityCancelledEvent cloudBPMNActivityCancelledEvent2 = new CloudBPMNActivityCancelledEventImpl();
+        CloudBPMNSignalReceivedEvent cloudBPMNSignalReceivedEvent2 = new CloudBPMNSignalReceivedEventImpl();
+
+        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
+            cloudIntegrationRequestedEvent2,
+            cloudIntegrationRequestedEvent1,
+            cloudSequenceFlowTakenEvent2,
+            cloudSequenceFlowTakenEvent1,
+            cloudBPMNActivityStartedEvent2,
+            cloudBPMNActivityStartedEvent1,
+            cloudIntegrationResultReceivedEvent2,
+            cloudIntegrationResultReceivedEvent1,
+            cloudIntegrationErrorReceivedEvent2,
+            cloudIntegrationErrorReceivedEvent1,
+            cloudBPMNActivityCompletedEvent2,
+            cloudBPMNActivityCompletedEvent1,
+            cloudBPMNActivityCancelledEvent2,
+            cloudBPMNActivityCancelledEvent1,
+            cloudBPMNSignalReceivedEvent2,
+            cloudBPMNSignalReceivedEvent1
+        );
+
+        //when
+        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+
+        //then
+        assertThat(result).containsExactly(cloudSequenceFlowTakenEvent1,
+                                           cloudSequenceFlowTakenEvent2,
+                                           cloudBPMNActivityStartedEvent1,
+                                           cloudBPMNActivityStartedEvent2,
+                                           cloudIntegrationRequestedEvent1,
+                                           cloudIntegrationRequestedEvent2,
+                                           cloudBPMNSignalReceivedEvent1,
+                                           cloudBPMNSignalReceivedEvent2,
+                                           cloudBPMNActivityCompletedEvent1,
+                                           cloudBPMNActivityCancelledEvent1,
+                                           cloudBPMNActivityCompletedEvent2,
+                                           cloudBPMNActivityCancelledEvent2,
+                                           cloudIntegrationResultReceivedEvent1,
+                                           cloudIntegrationErrorReceivedEvent1,
+                                           cloudIntegrationResultReceivedEvent2,
+                                           cloudIntegrationErrorReceivedEvent2);
+    }
 
 }
