@@ -398,9 +398,9 @@ jobs:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
-            if [ $IS_PREVIEW = true ]
+            if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
             then
-                echo "Skipping delete Docker images for preview"
+                echo "Skipping delete Docker images"
             else
                 echo $VERSION > VERSION
                 echo "Delete Docker images"
