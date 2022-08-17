@@ -63,7 +63,7 @@ public class FileMagicNumber {
         }
         boolean result = false;
         if (fileContent.length >= bytes.length + offset) {
-            result = Arrays.compare(fileContent, offset, bytes.length, bytes, 0, bytes.length) == 0;
+            result = Arrays.compare(fileContent, offset, offset + bytes.length, bytes, 0, bytes.length) == 0;
         }
         return result;
     }
