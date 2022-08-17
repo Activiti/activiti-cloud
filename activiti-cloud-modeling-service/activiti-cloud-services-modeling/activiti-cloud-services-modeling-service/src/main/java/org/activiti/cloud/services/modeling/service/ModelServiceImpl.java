@@ -36,6 +36,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,8 @@ public class ModelServiceImpl implements ModelService{
 
     private final ProcessModelContentConverter processModelContentConverter;
 
+    private final FileMagicNumberValidator fileContentValidator;
+
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
@@ -106,13 +109,15 @@ public class ModelServiceImpl implements ModelService{
                             ModelExtensionsService modelExtensionsService,
                             JsonConverter<Model> jsonConverter,
                             ProcessModelContentConverter processModelContentConverter,
-                            Set<ModelUpdateListener> modelUpdateListeners) {
+                            Set<ModelUpdateListener> modelUpdateListeners,
+                            FileMagicNumberValidator fileContentValidator) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
         this.jsonConverter = jsonConverter;
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
+        this.fileContentValidator = fileContentValidator;
         modelUpdateListenersMapByModelType = modelUpdateListeners
             .stream()
             .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
@@ -383,6 +388,12 @@ public class ModelServiceImpl implements ModelService{
     public Model importModelFromContent(Project project,
                                         ModelType modelType,
                                         FileContent fileContent) {
+        if (fileContentValidator.checkFileIsExecutable(fileContent.getFileContent())) {
+            throw new ImportModelException(MessageFormat
+                .format("Import the executable file {1} for type {0} is forbidden.",
+                    modelType.getName(),
+                    fileContent.getFilename()));
+        }
         Model model = null;
         if (modelTypeService.isJson(modelType) || ContentTypeUtils.isJsonContentType(fileContent.getContentType())) {
             model = convertContentToModel(modelType,

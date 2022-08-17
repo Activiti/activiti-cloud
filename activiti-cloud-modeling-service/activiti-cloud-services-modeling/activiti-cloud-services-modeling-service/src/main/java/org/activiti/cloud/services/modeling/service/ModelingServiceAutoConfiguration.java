@@ -35,6 +35,7 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -81,14 +82,16 @@ public class ModelingServiceAutoConfiguration {
                                      ModelExtensionsService modelExtensionsService,
                                      JsonConverter<Model> jsonConverter,
                                      ProcessModelContentConverter processModelContentConverter,
-                                     Set<ModelUpdateListener> modelUpdateListeners) {
+                                     Set<ModelUpdateListener> modelUpdateListeners,
+                                     FileMagicNumberValidator fileContentValidator) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
                                     modelContentService,
                                     modelExtensionsService,
                                     jsonConverter,
                                     processModelContentConverter,
-                                    modelUpdateListeners);
+                                    modelUpdateListeners,
+                                    fileContentValidator);
 
     }
 
