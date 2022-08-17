@@ -249,4 +249,28 @@ public class EventHandlersAutoConfiguration {
         return new ApplicationDeployedEventHandler(entityManager,
                                                    applicationRepository);
     }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterUserAddedEventHandler processCandidateStarterUserAddedEventHandler(EntityManager entityManager) {
+        return new ProcessCandidateStarterUserAddedEventHandler(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterUserRemovedEventHandler processCandidateStarterUserRemovedEventHandler(EntityManager entityManager) {
+        return new ProcessCandidateStarterUserRemovedEventHandler(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterGroupAddedEventHandler processCandidateStarterGroupAddedEventHandler(EntityManager entityManager) {
+        return new ProcessCandidateStarterGroupAddedEventHandler(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterGroupRemovedEventHandler processCandidateStarterGroupRemovedEventHandler(EntityManager entityManager) {
+        return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
+    }
 }

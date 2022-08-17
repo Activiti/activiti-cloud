@@ -25,6 +25,7 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
@@ -32,6 +33,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
@@ -74,30 +76,35 @@ public class QueryEventHandlerContextOptimizer {
                        Map.entry(CloudProcessCreatedEventImpl.class, 0),
                        Map.entry(CloudProcessStartedEventImpl.class, 1),
                        Map.entry(CloudProcessUpdatedEventImpl.class, 1),
-                       Map.entry(CloudSequenceFlowTakenEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityStartedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCompletedEventImpl.class, 1),
-                       Map.entry(CloudBPMNActivityCancelledEventImpl.class, 1),
-                       Map.entry(CloudIntegrationRequestedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationResultReceivedEventImpl.class, 1),
-                       Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 1),
-                       Map.entry(CloudTaskCreatedEventImpl.class, 2),
-                       Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 3),
-                       Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 3),
-                       Map.entry(CloudVariableCreatedEventImpl.class, 3),
-                       Map.entry(CloudVariableUpdatedEventImpl.class, 4),
-                       Map.entry(CloudVariableDeletedEventImpl.class, 5),
-                       Map.entry(CloudTaskActivatedEventImpl.class, 6),
-                       Map.entry(CloudTaskSuspendedEventImpl.class, 6),
-                       Map.entry(CloudTaskAssignedEventImpl.class, 6),
-                       Map.entry(CloudTaskUpdatedEventImpl.class, 6),
-                       Map.entry(CloudTaskCompletedEventImpl.class, 6),
-                       Map.entry(CloudTaskCancelledEventImpl.class, 6),
-                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 7),
-                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 7),
-                       Map.entry(CloudProcessCompletedEventImpl.class, 8),
-                       Map.entry(CloudProcessCancelledEventImpl.class, 8));
+                       Map.entry(CloudProcessSuspendedEventImpl.class, 1),
+                       Map.entry(CloudSequenceFlowTakenEventImpl.class, 2),
+                       Map.entry(CloudBPMNActivityStartedEventImpl.class, 3),
+                       Map.entry(CloudIntegrationRequestedEventImpl.class, 4),
+                       Map.entry(CloudBPMNSignalReceivedEventImpl.class, 5),
+                       Map.entry(CloudBPMNActivityCompletedEventImpl.class, 6),
+                       Map.entry(CloudBPMNActivityCancelledEventImpl.class, 6),
+                       Map.entry(CloudIntegrationResultReceivedEventImpl.class, 7),
+                       Map.entry(CloudIntegrationErrorReceivedEventImpl.class, 7),
+                       Map.entry(CloudTaskCreatedEventImpl.class, 8),
+                       Map.entry(CloudTaskCandidateUserAddedEventImpl.class, 9),
+                       Map.entry(CloudTaskCandidateGroupAddedEventImpl.class, 9),
+                       Map.entry(CloudVariableCreatedEventImpl.class, 10),
+                       Map.entry(CloudVariableUpdatedEventImpl.class, 11),
+                       Map.entry(CloudVariableDeletedEventImpl.class, 12),
+                       Map.entry(CloudTaskActivatedEventImpl.class, 13),
+                       Map.entry(CloudTaskSuspendedEventImpl.class, 13),
+                       Map.entry(CloudTaskAssignedEventImpl.class, 13),
+                       Map.entry(CloudTaskUpdatedEventImpl.class, 13),
+                       Map.entry(CloudTaskCompletedEventImpl.class, 14),
+                       Map.entry(CloudTaskCancelledEventImpl.class, 14),
+                       Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 15),
+                       Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 15),
+                       Map.entry(CloudProcessCompletedEventImpl.class, 16),
+                       Map.entry(CloudProcessCancelledEventImpl.class, 16));
 
+    private Comparator<CloudRuntimeEvent<?,?>> byTimestamp = Comparator.comparingLong(CloudRuntimeEvent::getTimestamp);
+    private Comparator<CloudRuntimeEvent<?,?>> byEventClass = Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
+                                                                                                    .orElseGet(() -> order.get(CloudRuntimeEvent.class)));
     private final EntityManager entityManager;
 
     public QueryEventHandlerContextOptimizer(EntityManager entityManager) {
@@ -135,8 +142,7 @@ public class QueryEventHandlerContextOptimizer {
             });
 
         return events.stream()
-                     .sorted(Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
-                                                                   .orElseGet(() -> order.get(CloudRuntimeEvent.class))))
+                     .sorted(byEventClass.thenComparing(byTimestamp))
                      .collect(Collectors.toList());
     }
 

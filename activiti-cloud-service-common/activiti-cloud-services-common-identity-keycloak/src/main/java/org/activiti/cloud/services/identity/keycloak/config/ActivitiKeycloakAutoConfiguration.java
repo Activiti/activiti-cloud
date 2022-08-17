@@ -20,6 +20,7 @@ import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
+import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
@@ -99,6 +100,12 @@ public class ActivitiKeycloakAutoConfiguration {
                                      .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
                                      .maximumSize(cacheMaxSize)
                                      .build());
+    }
+
+    @Bean(name = "identityHealthService")
+    @ConditionalOnMissingBean(KeycloakHealthService.class)
+    public KeycloakHealthService keycloakHealthService(KeycloakUserGroupManager keycloakUserGroupManager) {
+        return new KeycloakHealthService(keycloakUserGroupManager);
     }
 
 }

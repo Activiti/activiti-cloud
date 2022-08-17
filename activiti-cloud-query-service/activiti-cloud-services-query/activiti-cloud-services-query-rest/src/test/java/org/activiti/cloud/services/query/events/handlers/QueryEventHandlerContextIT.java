@@ -24,6 +24,8 @@ import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
+import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
+import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
@@ -75,8 +77,13 @@ public class QueryEventHandlerContextIT {
                 IntegrationEvents.INTEGRATION_REQUESTED.name(),
                 IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name(),
                 IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name(),
-                ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()
+                ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name(),
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name(),
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name(),
+                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name(),
+                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name()
         );
+
         assertThat(handlers.get(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name())).isInstanceOf(ProcessDeployedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).isInstanceOf(ProcessCreatedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name())).isInstanceOf(ProcessStartedEventHandler.class);
@@ -107,5 +114,9 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name())).isInstanceOf(IntegrationResultReceivedEventHandler.class);
         assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name())).isInstanceOf(IntegrationErrorReceivedEventHandler.class);
         assertThat(handlers.get(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name())).isInstanceOf(ApplicationDeployedEventHandler.class);
+        assertThat(handlers.get(ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name())).isInstanceOf(ProcessCandidateStarterUserAddedEventHandler.class);
+        assertThat(handlers.get(ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name())).isInstanceOf(ProcessCandidateStarterUserRemovedEventHandler.class);
+        assertThat(handlers.get(ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name())).isInstanceOf(ProcessCandidateStarterGroupAddedEventHandler.class);
+        assertThat(handlers.get(ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name())).isInstanceOf(ProcessCandidateStarterGroupRemovedEventHandler.class);
     }
 }

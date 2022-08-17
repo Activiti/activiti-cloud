@@ -104,6 +104,9 @@ public class QueryBPMNActivityIT {
     @Value("classpath:events/multi-instance-sequence.json")
     private Resource multiInstanceSequenceJson;
 
+    @Value("classpath:events/multi-instance-sequence-legacy.json")
+    private Resource multiInstanceSequenceJsonLegacy;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -222,8 +225,22 @@ public class QueryBPMNActivityIT {
     public void shouldReplayMultiInstanceSequenceBPMNActivityEvents() throws IOException {
         //given
         List<CloudRuntimeEvent> events = objectMapper.readValue(multiInstanceSequenceJson.getFile(),
+                                                                new TypeReference<List<CloudRuntimeEvent>>() {
+                                                                });
+
+        replayAuditEvents(events);
+    }
+
+    @Test
+    public void shouldReplayMultiInstanceSequenceBPMNActivityEventsLegacy() throws IOException {
+        //given
+        List<CloudRuntimeEvent> events = objectMapper.readValue(multiInstanceSequenceJsonLegacy.getFile(),
                                                                 new TypeReference<List<CloudRuntimeEvent>>() {});
 
+        replayAuditEvents(events);
+    }
+
+    private void replayAuditEvents(List<CloudRuntimeEvent> events) {
         eventsAggregator.addEvents(events.toArray(new CloudRuntimeEvent[] {}));
 
         //when
@@ -243,17 +260,19 @@ public class QueryBPMNActivityIT {
             List<ServiceTaskEntity> serviceTasks = serviceTaskRepository.findByProcessInstanceId(processInstanceId);
 
             assertThat(serviceTasks).hasSize(1)
-                                    .extracting(ServiceTaskEntity::getStatus)
-                                    .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+                                    .extracting(ServiceTaskEntity::getActivityName, ServiceTaskEntity::getStatus)
+                                    .containsOnly(tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
 
             List<BPMNActivityEntity> activities = bpmnActivityRepository.findByProcessInstanceId(processInstanceId);
 
             assertThat(activities).hasSize(4)
-                                  .extracting(BPMNActivityEntity::getStatus)
-                                  .containsOnly(CloudBPMNActivity.BPMNActivityStatus.COMPLETED);
+                                  .extracting(BPMNActivityEntity::getActivityName, BPMNActivityEntity::getStatus)
+                                  .containsOnly(tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                                                tuple("usertaskdmnoutputform", CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                                                tuple(null, CloudBPMNActivity.BPMNActivityStatus.COMPLETED),
+                                                tuple("decisiontask-sequence", CloudBPMNActivity.BPMNActivityStatus.COMPLETED));
 
         });
-
     }
 
 }
