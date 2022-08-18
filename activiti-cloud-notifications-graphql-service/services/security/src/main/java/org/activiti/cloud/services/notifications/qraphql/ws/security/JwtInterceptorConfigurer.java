@@ -30,7 +30,6 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
@@ -58,13 +57,12 @@ public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigure
                 if (accessor != null) {
                     if(headerValues.contains(accessor.getHeader(headerName))) {
                         Optional.ofNullable(accessor.getUser())
-                                .filter(Jwt.class::isInstance)
-                                .map(Jwt.class::cast)
-                                .ifPresent(jwt -> {
+                                .filter(JWSAuthentication.class::isInstance)
+                                .map(JWSAuthentication.class::cast)
+                                .ifPresent(jWSAuthentication -> {
                                     try {
                                         logger.info("Verifying Access Token for {}", accessor.getHeader(GRAPHQL_MESSAGE_TYPE));
-                                        tokenVerifier.verifyToken(jwt.getTokenValue());
-
+                                        tokenVerifier.verifyToken((String) jWSAuthentication.getCredentials());
                                     } catch (Exception e) {
                                         throw new BadCredentialsException("Invalid token", e);
                                     }
