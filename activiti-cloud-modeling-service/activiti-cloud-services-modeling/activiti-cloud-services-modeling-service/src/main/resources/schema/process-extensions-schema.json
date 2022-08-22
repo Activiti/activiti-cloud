@@ -529,26 +529,8 @@
         "mode": {
           "type": "string",
           "enum": ["manual", "sequential"],
-          "additionalProperties": false
-        }
-      },
-      "dependencies": {
-        "assignment":{
-          "anyOf": [
-            {
-              "not": {
-                "properties": { "assignment": { "const": "candidates" } },
-                "required": ["assignment"]
-              }
-            },
-            {
-              "required": ["mode"],
-              "message": {
-                "type": "string",
-                "required": "If assignment is 'candidates', then mode property must be specified."
-              }
-            }
-          ]
+          "additionalProperties": false,
+          "default": "manual"
         }
       }
     }

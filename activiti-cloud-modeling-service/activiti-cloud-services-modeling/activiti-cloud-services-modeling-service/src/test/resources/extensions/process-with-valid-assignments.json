@@ -9,19 +9,36 @@
         "task-1": {
           "id": "1",
           "assignment": "assignee",
-          "type": "static"
+          "type": "identity"
         },
         "task-2": {
           "id": "2",
-          "assignment": "candidates",
+          "assignment": "assignee",
           "type": "identity",
           "mode": "manual"
         },
         "task-3": {
           "id": "3",
+          "assignment": "assignee",
+          "type": "identity",
+          "mode": "manual"
+        },
+        "task-4": {
+          "id": "4",
+          "assignment": "candidates",
+          "type": "expression",
+          "mode": "manual"
+        },
+        "task-5": {
+          "id": "5",
           "assignment": "candidates",
           "type": "expression",
           "mode": "sequential"
+        },
+        "task-6": {
+          "id": "6",
+          "assignment": "candidates",
+          "type": "identity"
         }
       }
     }

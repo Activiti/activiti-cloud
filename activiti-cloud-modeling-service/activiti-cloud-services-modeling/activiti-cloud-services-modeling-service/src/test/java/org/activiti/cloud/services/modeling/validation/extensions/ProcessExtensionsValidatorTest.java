@@ -122,11 +122,10 @@ public class ProcessExtensionsValidatorTest {
             SemanticModelValidationException.class);
 
         List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
-        assertThat(validationErrors).hasSize(3);
+        assertThat(validationErrors).hasSize(2);
         assertThat(validationErrors).
             extracting("problem")
             .containsOnly("foobar is not a valid enum value",
-                          "subject must not be valid against schema {\"required\":[\"assignment\"],\"properties\":{\"assignment\":{\"const\":\"candidates\"}}}",
-                          "required key [mode] not found");
+                          "bazbar is not a valid enum value");
     }
 }

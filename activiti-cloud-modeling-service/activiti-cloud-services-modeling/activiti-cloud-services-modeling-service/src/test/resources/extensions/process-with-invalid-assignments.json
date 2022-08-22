@@ -8,14 +8,15 @@
       "assignments": {
         "task-1": {
           "id": "1",
-          "assignment": "candidates",
-          "type": "identity"
+          "assignment": "assignee",
+          "type": "identity",
+          "mode": "foobar"
         },
         "task-2": {
           "id": "2",
           "assignment": "candidates",
           "type": "expression",
-          "mode": "foobar"
+          "mode": "bazbar"
         }
       }
     }
