@@ -9,17 +9,16 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-application</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>7.5.0-SNAPSHOT</version>
   </parent>
   <artifactId>example-cloud-connector</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
   <name>Activiti Cloud :: Example Cloud Connector</name>
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.5.0-alpha.45</activiti-cloud.version>
+    <activiti-cloud.version>7.5.0-alpha.47</activiti-cloud.version>
     <start-class>org.activiti.cloud.examples.CloudConnectorApp</start-class>
   </properties>
   <dependencyManagement>
