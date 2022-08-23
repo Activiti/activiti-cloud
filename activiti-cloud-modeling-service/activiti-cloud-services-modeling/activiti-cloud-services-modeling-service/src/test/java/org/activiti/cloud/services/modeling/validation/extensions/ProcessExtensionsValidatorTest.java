@@ -106,4 +106,26 @@ public class ProcessExtensionsValidatorTest {
                           "string [folder] does not match pattern ^integer$|^string$|^boolean$|^date$",
                           "string [json] does not match pattern ^integer$|^string$|^boolean$|^date$");
     }
+
+    @Test
+    public void shouldBeValidTaskAssignments() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-valid-assignments.json");
+        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+    }
+
+    @Test
+    public void shouldBeInvalidTaskAssignments() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-assignments.json");
+
+        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
+            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
+            SemanticModelValidationException.class);
+
+        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
+        assertThat(validationErrors).hasSize(2);
+        assertThat(validationErrors).
+            extracting("problem")
+            .containsOnly("foobar is not a valid enum value",
+                          "bazbar is not a valid enum value");
+    }
 }

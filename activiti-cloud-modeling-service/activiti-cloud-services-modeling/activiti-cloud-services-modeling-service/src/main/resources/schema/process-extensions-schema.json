@@ -525,6 +525,12 @@
           "type": "string",
           "enum": ["static", "identity", "expression"],
           "additionalProperties": false
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["manual", "sequential"],
+          "additionalProperties": false,
+          "default": "manual"
         }
       }
     }
