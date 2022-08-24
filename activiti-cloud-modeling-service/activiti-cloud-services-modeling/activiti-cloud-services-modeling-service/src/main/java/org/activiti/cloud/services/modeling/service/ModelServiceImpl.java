@@ -308,6 +308,7 @@ public class ModelServiceImpl implements ModelService{
     public Model updateModelContent(Model modelToBeUpdated,
         FileContent fileContent) {
 
+        throwExceptionIfFileIsExecutable(modelToBeUpdated.getType(), fileContent);
         FileContent fixedFileContent = modelIdentifiers.isEmpty()
             ? fileContent
             : overrideModelContentId(modelToBeUpdated,
@@ -388,12 +389,7 @@ public class ModelServiceImpl implements ModelService{
     public Model importModelFromContent(Project project,
                                         ModelType modelType,
                                         FileContent fileContent) {
-        if (fileContentValidator.checkFileIsExecutable(fileContent.getFileContent())) {
-            throw new ImportModelException(MessageFormat
-                .format("Import the executable file {1} for type {0} is forbidden.",
-                    modelType.getName(),
-                    fileContent.getFilename()));
-        }
+        throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = null;
         if (modelTypeService.isJson(modelType) || ContentTypeUtils.isJsonContentType(fileContent.getContentType())) {
             model = convertContentToModel(modelType,
@@ -419,6 +415,15 @@ public class ModelServiceImpl implements ModelService{
                             model.getId()));
         }
         return model;
+    }
+
+    private void throwExceptionIfFileIsExecutable(String modelTypeName, FileContent fileContent) {
+        if (fileContentValidator.checkFileIsExecutable(fileContent.getFileContent())) {
+            throw new ImportModelException(MessageFormat
+                .format("Import the executable file {0} for type {1} is forbidden.",
+                        fileContent.getFilename(),
+                        modelTypeName));
+        }
     }
 
     @Override
