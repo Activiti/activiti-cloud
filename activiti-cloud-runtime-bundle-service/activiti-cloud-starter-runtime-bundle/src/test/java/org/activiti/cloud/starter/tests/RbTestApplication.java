@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
-@EnableIdentityManagementRestAPI
 public class RbTestApplication {
 
     public static void main(String[] args) {

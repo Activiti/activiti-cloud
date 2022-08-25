@@ -29,7 +29,6 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableIdentityManagementRestAPI
 @PropertySource("classpath:modeling-rest.properties")
 @Import({
     ModelController.class,

@@ -25,7 +25,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@EnableIdentityManagementRestAPI
 public class KeycloakClientApplication {
 
     @Bean
