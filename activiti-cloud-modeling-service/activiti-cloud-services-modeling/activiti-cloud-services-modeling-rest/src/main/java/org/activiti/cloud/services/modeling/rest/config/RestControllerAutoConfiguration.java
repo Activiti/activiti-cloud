@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.config;
 
-import org.activiti.cloud.identity.web.EnableIdentityManagementRestAPI;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.activiti.cloud.services.modeling.rest.controller.ModelingRestExceptionHandler;
 import org.activiti.cloud.services.modeling.rest.controller.ModelsSchemaController;
@@ -29,7 +28,6 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
-@EnableIdentityManagementRestAPI
 @PropertySource("classpath:modeling-rest.properties")
 @Import({
     ModelController.class,
