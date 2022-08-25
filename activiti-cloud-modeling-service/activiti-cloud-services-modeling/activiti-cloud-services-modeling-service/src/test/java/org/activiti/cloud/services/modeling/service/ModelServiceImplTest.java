@@ -38,6 +38,7 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,6 +118,9 @@ public class ModelServiceImplTest {
 
     @Mock
     public Set<ModelUpdateListener> modelUpdateListeners;
+
+    @Mock
+    private FileMagicNumberValidator fileMagicNumberValidator;
 
     private Model modelTwo;
 
@@ -378,6 +382,14 @@ public class ModelServiceImplTest {
     }
 
     @Test
+    void should_thrownExecption_whenUpdatingModelContentWithExecutableFile() throws Exception {
+        FileContent fileContent = new FileContent("a.exe", null, "mockContent".getBytes(StandardCharsets.UTF_8));
+        when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(true);
+
+        assertThatThrownBy(() -> modelService.updateModelContent(modelTwo, fileContent)).hasMessage("Import the executable file a.exe for type PROCESS is forbidden.");
+    }
+
+    @Test
     void should_updateCategory_whenUpdatingModelContent() throws Exception {
         FileContent fileContent = new FileContent(null, null,"mockContent".getBytes(StandardCharsets.UTF_8));
         when(modelRepository.updateModelContent(modelTwo, fileContent)).thenReturn(modelTwo);
@@ -385,6 +397,8 @@ public class ModelServiceImplTest {
         BpmnModel bpmnModel = new BpmnModel();
         bpmnModel.setTargetNamespace(PROCESS_MODEL_TEST_CATEGORY);
         when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
+
+        when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(false);
 
         assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
 
