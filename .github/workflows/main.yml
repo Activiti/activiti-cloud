@@ -491,7 +491,7 @@ jobs:
     needs:
       - build
       - publish
-    if: ${{ github.event_name == 'push' }}
+    if: github.event_name == 'push' && github.ref_name == 'develop'
     env:
       VERSION: ${{ needs.build.outputs.version }}
       FULL_CHART_DIR: full-chart
