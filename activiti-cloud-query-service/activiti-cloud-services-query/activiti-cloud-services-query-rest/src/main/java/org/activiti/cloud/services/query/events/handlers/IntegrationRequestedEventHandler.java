@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.events.handlers;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
@@ -68,7 +69,11 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         entity.setStatus(IntegrationContextStatus.INTEGRATION_REQUESTED);
         entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
 
-        ServiceTaskEntity serviceTaskEntity = entityManager.getReference(ServiceTaskEntity.class, entityId);
+        ServiceTaskEntity serviceTaskEntity = entityManager.find(ServiceTaskEntity.class, entityId);
+        serviceTaskEntity.setStatus(CloudBPMNActivity.BPMNActivityStatus.STARTED);
+        serviceTaskEntity.setStartedDate(new Date(event.getTimestamp()));
+        serviceTaskEntity.setCompletedDate(null);
+
         entity.setServiceTask(serviceTaskEntity);
 
         entityManager.persist(entity);
