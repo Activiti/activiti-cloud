@@ -20,6 +20,8 @@ import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -27,12 +29,18 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 @Component
 @EnableBinding(TestErrorConnector.Channels.class)
 public class TestErrorConnector {
+    private final static Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
+
+    private CountDownLatch countDownLatch;
 
     public interface Channels {
 
@@ -49,15 +57,24 @@ public class TestErrorConnector {
     }
 
     @StreamListener(value = Channels.CHANNEL)
-    public void handle(IntegrationRequest integrationRequest) {
+    public void handle(IntegrationRequest integrationRequest) throws InterruptedException {
         String var = integrationRequest.getIntegrationContext()
                                        .getInBoundVariable("var");
         if (!"replay".equals(var)) {
             throw new RuntimeException("TestErrorConnector");
+        } else {
+            countDownLatch = new CountDownLatch(1);
         }
+
+        logger.info("Processing integration request: {}", integrationRequest);
 
         Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
                                                                      .buildMessage();
+
+        countDownLatch.await(10, TimeUnit.SECONDS);
+
+        logger.info("Sending integration result: {}", message.getPayload());
+
         integrationResultSender.send(message);
     }
 }

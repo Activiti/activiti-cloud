@@ -60,5 +60,7 @@ And integration error event is emitted for the process
 And the user can get list of service tasks with status of ERROR
 Then the user set the instance variable var with value replay
 And the user can replay service task execution
+And the user can get list of service tasks with status of STARTED
+And all integration context events are emitted for the process
 And the user can get list of service tasks with status of COMPLETED
 And the process with service tasks is completed
