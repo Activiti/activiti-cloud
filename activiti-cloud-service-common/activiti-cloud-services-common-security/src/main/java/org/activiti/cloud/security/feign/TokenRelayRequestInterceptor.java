@@ -15,43 +15,22 @@
  */
 package org.activiti.cloud.security.feign;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 
 /**
  * Feign request interceptor for forwarding the bearer token
  */
-public class TokenRelayRequestInterceptor implements RequestInterceptor {
-
-    public static final String BEARER = "Bearer";
-
-    public static final String AUTHORIZATION = "Authorization";
-
-    private final String tokenType;
+public class TokenRelayRequestInterceptor implements AuthTokenRequestInterceptor {
 
     private final SecurityContextTokenProvider securityContextTokenProvider;
 
     public TokenRelayRequestInterceptor(SecurityContextTokenProvider securityContextTokenProvider) {
-        this(securityContextTokenProvider,
-             BEARER);
-    }
-
-    public TokenRelayRequestInterceptor(SecurityContextTokenProvider securityContextTokenProvider,
-                                        String tokenType) {
         this.securityContextTokenProvider = securityContextTokenProvider;
-        this.tokenType = tokenType;
     }
 
     @Override
-    public void apply(RequestTemplate template) {
-        securityContextTokenProvider.getCurrentToken()
-                .ifPresent(token -> {
-                    template.removeHeader(AUTHORIZATION);
-                    template.header(AUTHORIZATION,
-                                    String.format("%s %s",
-                                                  tokenType,
-                                                  token));
-                });
+    public Optional<String> getToken() {
+        return securityContextTokenProvider.getCurrentToken();
     }
 }

@@ -15,8 +15,7 @@
  */
 package org.activiti.cloud.security.feign;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
+import java.util.Optional;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -27,11 +26,8 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 /**
  * Feign request interceptor for forwarding the bearer token
  */
-public class ClientCredentialsAuthRequestInterceptor implements RequestInterceptor {
+public class ClientCredentialsAuthRequestInterceptor implements AuthTokenRequestInterceptor {
 
-    public static final String BEARER = "Bearer";
-
-    public static final String AUTHORIZATION = "Authorization";
     private final OAuth2AuthorizedClientManager authorizedClientManager;
     private final ClientRegistration clientRegistration;
 
@@ -43,8 +39,9 @@ public class ClientCredentialsAuthRequestInterceptor implements RequestIntercept
     }
 
     @Override
-    public void apply(RequestTemplate template) {
-        if(AuthorizationGrantType.CLIENT_CREDENTIALS.equals(clientRegistration.getAuthorizationGrantType())) {
+    public Optional<String> getToken() {
+        Optional<String> result;
+        if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(clientRegistration.getAuthorizationGrantType())) {
             OAuth2AuthorizeRequest oAuth2AuthorizeRequest = OAuth2AuthorizeRequest
                 .withClientRegistrationId(clientRegistration.getRegistrationId())
                 .principal("activiti")
@@ -52,12 +49,11 @@ public class ClientCredentialsAuthRequestInterceptor implements RequestIntercept
 
             OAuth2AuthorizedClient client = authorizedClientManager.authorize(oAuth2AuthorizeRequest);
             OAuth2AccessToken accessToken = client.getAccessToken();
-
-            template.removeHeader(AUTHORIZATION);
-            template.header(AUTHORIZATION,
-                            String.format("%s %s",
-                                          accessToken.getTokenType().getValue(),
-                                          accessToken.getTokenValue()));
+            result = Optional.of(accessToken.getTokenValue());
+        } else {
+            result = Optional.empty();
         }
+
+        return result;
     }
 }
