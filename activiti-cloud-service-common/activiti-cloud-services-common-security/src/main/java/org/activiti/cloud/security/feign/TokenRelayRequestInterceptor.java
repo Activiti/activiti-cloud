@@ -47,6 +47,7 @@ public class TokenRelayRequestInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate template) {
         securityContextTokenProvider.getCurrentToken()
                 .ifPresent(token -> {
+                    template.removeHeader(AUTHORIZATION);
                     template.header(AUTHORIZATION,
                                     String.format("%s %s",
                                                   tokenType,
