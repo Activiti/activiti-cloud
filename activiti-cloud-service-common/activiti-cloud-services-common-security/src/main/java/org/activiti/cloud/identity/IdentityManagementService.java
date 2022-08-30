@@ -35,4 +35,6 @@ public interface IdentityManagementService {
   void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations);
 
   List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
+
+  List<User> findUsersByGroup(String groupId);
 }

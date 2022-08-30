@@ -232,6 +232,11 @@ public class KeycloakManagementService implements IdentityManagementService {
         return applicationPermissions;
     }
 
+    @Override
+    public List<User> findUsersByGroup(String groupId) {
+        return null;
+    }
+
     private List<User> getUsersClientRoleMapping(String clientId, String role) {
         return keycloakClient.getUsersClientRoleMapping(clientId, role)
             .stream()
