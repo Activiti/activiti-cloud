@@ -19,7 +19,10 @@ package org.activiti.cloud.identity;
 import java.util.List;
 import org.activiti.cloud.identity.model.User;
 
-public interface IdentityRuntimeService {
+/**
+ * Interface used to handle general purpose interaction with external Identity and Access Management
+ */
+public interface IdentityService {
 
     List<User> findUsersByGroupId(String groupId);
 }
