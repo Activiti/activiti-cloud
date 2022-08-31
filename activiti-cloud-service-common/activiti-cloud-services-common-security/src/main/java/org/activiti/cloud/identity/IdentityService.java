@@ -24,5 +24,5 @@ import org.activiti.cloud.identity.model.User;
  */
 public interface IdentityService {
 
-    List<User> findUsersByGroupId(String groupId);
+    List<User> findUsersByGroupName(String groupName);
 }
