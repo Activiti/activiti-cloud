@@ -37,8 +37,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
     properties = {
         "keycloak.realm=activiti",
         "keycloak.use-resource-role-mappings=false",
-        "identity.client.cache.cacheExpireAfterWrite=PT5s",
-        "spring.security.oauth2.client.registration.keycloak.client-id=activiti-keycloak"}
+        "identity.client.cache.cacheExpireAfterWrite=PT5s"}
 )
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
