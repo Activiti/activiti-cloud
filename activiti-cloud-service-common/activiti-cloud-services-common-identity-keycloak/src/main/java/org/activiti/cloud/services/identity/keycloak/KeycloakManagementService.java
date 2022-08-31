@@ -20,10 +20,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
@@ -49,7 +51,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class KeycloakManagementService implements IdentityManagementService {
+public class KeycloakManagementService implements IdentityManagementService,
+    IdentityService {
 
     public static final int PAGE_START = 0;
     public static final int PAGE_SIZE = 50;
@@ -230,6 +233,31 @@ public class KeycloakManagementService implements IdentityManagementService {
         });
 
         return applicationPermissions;
+    }
+
+    @Override
+    public List<User> findUsersByGroupName(String groupName) {
+        List<User> users = new ArrayList<>();
+        if (!StringUtils.isEmpty(groupName)) {
+            Optional<Group> groupOptional = findGroupStrictlyEqualToGroupName(groupName);
+            groupOptional.ifPresent(group ->
+                    users.addAll(getUsersByGroupId(group.getId())));
+        }
+        return users;
+    }
+
+    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
+        return findGroups(groupName).stream()
+            .filter(group -> groupName.equals(group.getName()))
+            .findFirst();
+    }
+
+    private List<User> getUsersByGroupId(String groupID) {
+        return
+            keycloakClient.getUsersByGroupId(groupID)
+                .stream()
+                .map(KeycloakUserToUser::toUser)
+                .collect(Collectors.toList());
     }
 
     private List<User> getUsersClientRoleMapping(String clientId, String role) {

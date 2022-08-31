@@ -24,6 +24,12 @@ import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+/**
+ *
+ * Interface used to handle Identity business logic
+ * <p>For general purpose you should use {@link org.activiti.cloud.identity.IdentityService}
+ *
+ */
 public interface IdentityManagementService {
 
   List<User> findUsers(UserSearchParams userSearchParams);
@@ -35,4 +41,5 @@ public interface IdentityManagementService {
   void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations);
 
   List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
+
 }
