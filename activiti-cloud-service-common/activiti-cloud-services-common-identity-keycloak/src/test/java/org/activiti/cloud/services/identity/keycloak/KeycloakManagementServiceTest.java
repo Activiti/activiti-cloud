@@ -548,6 +548,17 @@ class KeycloakManagementServiceTest {
             .contains(tuple(keycloakRoleA.getName(), List.of(userOne), List.of(groupOne)));
     }
 
+    @Test
+    void should_returnUsers_when_searchingByGroupId() {
+        when(keycloakClient.getUsersByGroupId(eq(groupOne.getId())))
+            .thenReturn(List.of(kUserOne));
+
+        List<User> users = keycloakManagementService.findUsersByGroupId(groupOne.getId());
+
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userOne);
+    }
+
 
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(

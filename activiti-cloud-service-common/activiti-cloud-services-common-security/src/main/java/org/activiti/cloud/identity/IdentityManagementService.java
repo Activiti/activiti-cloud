@@ -36,5 +36,4 @@ public interface IdentityManagementService {
 
   List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
 
-  List<User> findUsersByGroup(String groupId);
 }
