@@ -36,8 +36,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
     classes = {KeycloakClientApplication.class},
     properties = {
         "keycloak.realm=activiti",
-        "keycloak.use-resource-role-mappings=false"
-    ,   "identity.client.cache.cacheExpireAfterWrite=PT5s"}
+        "keycloak.use-resource-role-mappings=false",
+        "identity.client.cache.cacheExpireAfterWrite=PT5s"}
 )
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
@@ -183,7 +183,7 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getClients() {
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(null,0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(null, 0, 50);
 
         assertThat(clients).extracting("clientId").contains("activiti");
         assertThat(clients).extracting("clientId").contains("activiti-keycloak");
@@ -191,7 +191,7 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getClients_when_paginated() {
-        List<KeycloakClientRepresentation> clientPage1 = keycloakClient.searchClients(null,0, 1);
+        List<KeycloakClientRepresentation> clientPage1 = keycloakClient.searchClients(null, 0, 1);
         assertThat(clientPage1).hasSize(1);
         assertThat(clientPage1).extracting("clientId").contains("account");
 
@@ -252,12 +252,12 @@ public class KeycloakClientIT {
             .findFirst()
             .get();
 
-        assertThat(userHasClientRole(testAdminUserId,clientId,ACTIVITI_ADMIN_ROLE)).isFalse();
+        assertThat(userHasClientRole(testAdminUserId, clientId, ACTIVITI_ADMIN_ROLE)).isFalse();
 
         keycloakClient.addUserClientRoleMapping(testAdminUserId, clientId,
-            List.of(kRoleToAdd));
+                                                List.of(kRoleToAdd));
 
-        assertThat(userHasClientRole(testAdminUserId,clientId,ACTIVITI_ADMIN_ROLE)).isTrue();
+        assertThat(userHasClientRole(testAdminUserId, clientId, ACTIVITI_ADMIN_ROLE)).isTrue();
     }
 
     @Test
@@ -271,12 +271,12 @@ public class KeycloakClientIT {
             .findFirst()
             .get();
 
-        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isFalse();
+        assertThat(groupHasClientRole(hrGroupId, clientId, ACTIVITI_USER_ROLE)).isFalse();
 
         keycloakClient.addGroupClientRoleMapping(hrGroupId, clientId,
-            List.of(kRoleToAdd));
+                                                 List.of(kRoleToAdd));
 
-        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isTrue();
+        assertThat(groupHasClientRole(hrGroupId, clientId, ACTIVITI_USER_ROLE)).isTrue();
     }
 
     private boolean userHasClientRole(String userId, String clientId, String roleName) {
