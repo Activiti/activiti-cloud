@@ -42,6 +42,8 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientIT {
 
+    public static final String HR_GROUP_ID = "60c6753b-4f1c-498a-96d2-be6790fae09c";
+    public static final String TEST_GROUP_NAME = "testgroup";
     @Autowired
     private KeycloakClient keycloakClient;
 
@@ -84,7 +86,7 @@ public class KeycloakClientIT {
 
     @Test
     public void should_searchGroups() {
-        List<KeycloakGroup> groups = keycloakClient.searchGroups("testgroup", 0, 50);
+        List<KeycloakGroup> groups = keycloakClient.searchGroups(TEST_GROUP_NAME, 0, 50);
 
         assertThat(groups).hasSize(1);
         assertThat(groups).extracting("name").contains("testgroup");
@@ -262,7 +264,6 @@ public class KeycloakClientIT {
 
     @Test
     public void should_addGroupClientRoleMapping() {
-        String hrGroupId = "60c6753b-4f1c-498a-96d2-be6790fae09c";
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
         String clientId = clients.get(0).getId();
         List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
@@ -271,12 +272,12 @@ public class KeycloakClientIT {
             .findFirst()
             .get();
 
-        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isFalse();
+        assertThat(groupHasClientRole(HR_GROUP_ID,clientId,ACTIVITI_USER_ROLE)).isFalse();
 
-        keycloakClient.addGroupClientRoleMapping(hrGroupId, clientId,
+        keycloakClient.addGroupClientRoleMapping(HR_GROUP_ID, clientId,
             List.of(kRoleToAdd));
 
-        assertThat(groupHasClientRole(hrGroupId,clientId,ACTIVITI_USER_ROLE)).isTrue();
+        assertThat(groupHasClientRole(HR_GROUP_ID,clientId,ACTIVITI_USER_ROLE)).isTrue();
     }
 
     private boolean userHasClientRole(String userId, String clientId, String roleName) {
@@ -311,6 +312,14 @@ public class KeycloakClientIT {
 
         assertThat(groups).hasSize(1);
         assertThat(groups).extracting("name").contains("salesgroup");
+    }
+
+
+    @Test
+    public void should_getUsers_by_groupId() {
+        List<KeycloakUser> users = keycloakClient.getUsersByGroupId(HR_GROUP_ID);
+
+        assertThat(users).hasSizeGreaterThanOrEqualTo(1);
     }
 
 }
