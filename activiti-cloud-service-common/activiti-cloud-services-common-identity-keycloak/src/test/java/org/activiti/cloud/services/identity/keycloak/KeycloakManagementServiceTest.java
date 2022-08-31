@@ -109,6 +109,7 @@ class KeycloakManagementServiceTest {
         userFour.setId("four");
 
         groupOne.setId("one");
+        groupOne.setName("groupOne");
         groupTwo.setId("two");
         groupThree.setId("three");
         groupFour.setId("four");
@@ -549,14 +550,23 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void should_returnUsers_when_searchingByGroupId() {
+    void should_returnUsers_when_searchingByGroupName() {
         when(keycloakClient.getUsersByGroupId(eq(groupOne.getId())))
             .thenReturn(List.of(kUserOne));
+        when(keycloakClient.searchGroups(eq(groupOne.getName()), eq(0), eq(50)))
+            .thenReturn(List.of(kGroupOne));
 
-        List<User> users = keycloakManagementService.findUsersByGroupId(groupOne.getId());
+        List<User> users = keycloakManagementService.findUsersByGroupName(groupOne.getName());
 
         assertThat(users.size()).isEqualTo(1);
         assertThat(users).containsExactly(userOne);
+    }
+
+    @Test
+    void should_returnEmptyUserList_when_groupNameNotFound() {
+        List<User> users = keycloakManagementService.findUsersByGroupName("fakeGroup");
+
+        assertThat(users).isEmpty();
     }
 
 

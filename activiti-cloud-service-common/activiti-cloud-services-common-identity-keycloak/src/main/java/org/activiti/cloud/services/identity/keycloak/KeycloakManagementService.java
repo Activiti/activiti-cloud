@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.identity.GroupSearchParams;
@@ -235,11 +236,28 @@ public class KeycloakManagementService implements IdentityManagementService,
     }
 
     @Override
-    public List<User> findUsersByGroupId(String groupId) {
-        return keycloakClient.getUsersByGroupId(groupId)
-            .stream()
-            .map(KeycloakUserToUser::toUser)
-            .collect(Collectors.toList());
+    public List<User> findUsersByGroupName(String groupName) {
+        List<User> users = new ArrayList<>();
+        if (!StringUtils.isEmpty(groupName)) {
+            Optional<Group> groupOptional = findGroupStrictlyEqualToGroupName(groupName);
+            groupOptional.ifPresent(group ->
+                    users.addAll(getUsersByGroupId(group.getId())));
+        }
+        return users;
+    }
+
+    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
+        return findGroups(groupName).stream()
+            .filter(group -> groupName.equals(group.getName()))
+            .findFirst();
+    }
+
+    private List<User> getUsersByGroupId(String groupID) {
+        return
+            keycloakClient.getUsersByGroupId(groupID)
+                .stream()
+                .map(KeycloakUserToUser::toUser)
+                .collect(Collectors.toList());
     }
 
     private List<User> getUsersClientRoleMapping(String clientId, String role) {
