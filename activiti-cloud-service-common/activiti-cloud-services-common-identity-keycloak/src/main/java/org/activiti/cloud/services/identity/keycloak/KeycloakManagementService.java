@@ -17,7 +17,6 @@ package org.activiti.cloud.services.identity.keycloak;
 
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
@@ -51,10 +50,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class KeycloakManagementService implements IdentityManagementService,
-    IdentityService {
+public class KeycloakManagementService implements IdentityManagementService {
 
     public static final int PAGE_START = 0;
     public static final int PAGE_SIZE = 50;

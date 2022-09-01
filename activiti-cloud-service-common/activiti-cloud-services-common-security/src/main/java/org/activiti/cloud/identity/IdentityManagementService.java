@@ -15,14 +15,15 @@
  */
 package org.activiti.cloud.identity;
 
-import java.util.List;
-import java.util.Set;
 import org.activiti.cloud.identity.model.Group;
-import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -30,7 +31,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
  * <p>For general purpose you should use {@link org.activiti.cloud.identity.IdentityService}
  *
  */
-public interface IdentityManagementService {
+public interface IdentityManagementService extends IdentityService {
 
   List<User> findUsers(UserSearchParams userSearchParams);
 
