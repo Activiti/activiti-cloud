@@ -15,14 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.IdentityService;
@@ -35,8 +27,8 @@ import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
-import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
@@ -45,11 +37,21 @@ import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingT
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
-import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class KeycloakManagementService implements IdentityManagementService,
     IdentityService {
@@ -65,7 +67,9 @@ public class KeycloakManagementService implements IdentityManagementService,
 
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
-        List<User> users= searchUsers(userSearchParams.getSearchKey());
+        List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
+            ? searchUsers(userSearchParams.getSearchKey())
+            : searchUsers(userSearchParams.getGroups());
 
         if(!StringUtils.isEmpty(userSearchParams.getApplication())) {
             return filterUsersInApplicationsScope(users, userSearchParams);
@@ -82,6 +86,13 @@ public class KeycloakManagementService implements IdentityManagementService,
             .collect(Collectors.toList());
     }
 
+    private List<User> searchUsers(Set<String> groups) {
+        return groups.stream()
+                     .map(this::findUsersByGroupName)
+                     .flatMap(Collection::stream)
+                     .collect(Collectors.toList());
+    }
+
     private List<User> filterUsersInRealmScope(List<User> users,
         UserSearchParams userSearchParams) {
 
@@ -92,7 +103,6 @@ public class KeycloakManagementService implements IdentityManagementService,
         return users
             .stream()
             .filter(user -> filterByRoles(usersRolesMapping.get(user.getId()), userSearchParams.getRoles()))
-            .filter(user -> filterByGroups(user, userSearchParams.getGroups()))
             .collect(Collectors.toList());
     }
 
@@ -119,7 +129,6 @@ public class KeycloakManagementService implements IdentityManagementService,
             .stream()
             .filter(user -> filterByApplication(userAppRoles.get(user.getId())))
             .filter(user -> filterByRoles(userAppRoles.get(user.getId()), userSearchParams.getRoles()))
-            .filter(user -> filterByGroups(user, userSearchParams.getGroups()))
             .collect(Collectors.toList());
     }
 
@@ -128,15 +137,6 @@ public class KeycloakManagementService implements IdentityManagementService,
             .collect(Collectors.toMap(
                 User::getId,
                 user -> getUserApplicationRoles(user.getId(), kClientId)));
-    }
-
-    private boolean filterByGroups(User user, Set<String> groups) {
-        return CollectionUtils.isEmpty(groups) || keycloakClient
-            .getUserGroups(user.getId())
-            .stream()
-            .map(KeycloakGroup::getName)
-            .collect(Collectors.toSet())
-            .containsAll(groups);
     }
 
     @Override
