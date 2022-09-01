@@ -90,6 +90,7 @@ public class KeycloakManagementService implements IdentityManagementService,
         return groups.stream()
                      .map(this::findUsersByGroupName)
                      .flatMap(Collection::stream)
+                     .distinct()
                      .collect(Collectors.toList());
     }
 
