@@ -15,21 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
@@ -40,8 +25,8 @@ import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.Role;
-import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
+import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
@@ -55,10 +40,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
 
-    @Mock
+    @Mock(lenient = true)
     private KeycloakClient keycloakClient;
 
     @InjectMocks
@@ -163,12 +164,14 @@ class KeycloakManagementServiceTest {
     @Test
     void should_returnUsers_when_searchingUsingGroupAndRoles() {
         defineSearchUsersFromKeycloak();
+        defineSearchUsersByGroupsFromKeycloak();
+
         setUpUsersRealmRoles();
         when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getUserGroups(userThree.getId())).thenReturn(List.of(kGroupTwo));
 
         UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
+        userSearchParams.setSearch("userTwo");
         userSearchParams.setGroups(Set.of("groupOne"));
         userSearchParams.setRoles(Set.of("a"));
 
@@ -181,6 +184,7 @@ class KeycloakManagementServiceTest {
     @Test
     void shouldReturnUsersWhenSearchingUsingMultipleGroups() {
         defineSearchUsersFromKeycloak();
+        defineSearchUsersByGroupsFromKeycloak();
         when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupOne, kGroupTwo));
 
@@ -221,11 +225,12 @@ class KeycloakManagementServiceTest {
     @Test
     void shouldReturnOnlyApplicationUsersWhenSearchingUsingApplicationAndGroups() {
         defineSearchUsersFromKeycloak();
+        defineSearchUsersByGroupsFromKeycloak();
         setUpUsersApplicationRoles();
         when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
 
         UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
+        userSearchParams.setSearch("userOne");
         userSearchParams.setApplication("client-one");
         userSearchParams.setGroups(Set.of("groupOne"));
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
@@ -251,11 +256,12 @@ class KeycloakManagementServiceTest {
     void should_returnOnlyApplicationUsers_when_searchingUsingApplicationAndRolesAndGroups() {
         defineSearchUsersFromKeycloak();
         setUpUsersApplicationRoles();
+        defineSearchUsersByGroupsFromKeycloak();
         when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupTwo));
 
         UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
+        userSearchParams.setSearch("userOne");
         userSearchParams.setRoles(Set.of("a"));
         userSearchParams.setApplication("client-one");
         userSearchParams.setGroups(Set.of("groupOne"));
@@ -588,6 +594,14 @@ class KeycloakManagementServiceTest {
     private void defineSearchUsersFromKeycloak() {
         when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50)))
             .thenReturn(List.of(kUserOne, kUserTwo, kUserThree, kUserFour));
+    }
+
+    private void defineSearchUsersByGroupsFromKeycloak() {
+        when(keycloakClient.searchGroups(eq(groupOne.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.getUsersByGroupId(kGroupOne.getId())).thenReturn(List.of(kUserOne, kUserTwo));
+
+        when(keycloakClient.searchGroups(eq(kGroupTwo.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupTwo));
+        when(keycloakClient.getUsersByGroupId(kGroupTwo.getId())).thenReturn(List.of(kUserThree));
     }
 
     private void setUpUsersApplicationRoles() {

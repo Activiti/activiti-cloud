@@ -69,7 +69,7 @@ public class KeycloakManagementService implements IdentityManagementService,
     public List<User> findUsers(UserSearchParams userSearchParams) {
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
             ? searchUsers(userSearchParams.getSearchKey())
-            : searchUsers(userSearchParams.getGroups());
+            : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
         if(!StringUtils.isEmpty(userSearchParams.getApplication())) {
             return filterUsersInApplicationsScope(users, userSearchParams);
@@ -86,11 +86,16 @@ public class KeycloakManagementService implements IdentityManagementService,
             .collect(Collectors.toList());
     }
 
-    private List<User> searchUsers(Set<String> groups) {
+    private List<User> searchUsers(Set<String> groups, String searchKey) {
+        Predicate<User> maybeMatchSearchKey = user -> !StringUtils.isEmpty(searchKey)
+            ? StringUtils.contains(user.getUsername(), searchKey) || StringUtils.contains(user.getEmail(), searchKey)
+            : true;
+
         return groups.stream()
                      .map(this::findUsersByGroupName)
                      .flatMap(Collection::stream)
                      .distinct()
+                     .filter(maybeMatchSearchKey)
                      .collect(Collectors.toList());
     }
 
