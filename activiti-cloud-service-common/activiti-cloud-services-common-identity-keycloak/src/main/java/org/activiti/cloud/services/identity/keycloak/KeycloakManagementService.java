@@ -249,6 +249,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     private Group findGroupStrictlyEqualToGroupName(String groupName) {
         return
             Optional.ofNullable(groupName)
+                .filter(Predicate.not(String::isEmpty))
                 .map(g -> findGroups(g).stream())
                 .orElse(Stream.empty())
                 .filter(group -> group.getName().equals(groupName))
