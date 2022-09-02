@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
 
+    public static final String FAKE_GROUP = "fakeGroup";
     @Mock(lenient = true)
     private KeycloakClient keycloakClient;
 
@@ -569,10 +571,11 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void should_returnEmptyUserList_when_groupNameNotFound() {
-        List<User> users = keycloakManagementService.findUsersByGroupName("fakeGroup");
-
-        assertThat(users).isEmpty();
+    void should_throwException_when_groupNameNotFound() {
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(FAKE_GROUP));
+        assertThat(thrown)
+            .isInstanceOf(IdentityInvalidGroupException.class)
+            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist", FAKE_GROUP));
     }
 
 

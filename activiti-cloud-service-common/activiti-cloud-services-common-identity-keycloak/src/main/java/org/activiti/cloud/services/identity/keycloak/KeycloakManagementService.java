@@ -242,19 +242,16 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     @Override
     public List<User> findUsersByGroupName(String groupName) {
-        List<User> users = new ArrayList<>();
-        if (!StringUtils.isEmpty(groupName)) {
-            Optional<Group> groupOptional = findGroupStrictlyEqualToGroupName(groupName);
-            groupOptional.ifPresent(group ->
-                    users.addAll(getUsersByGroupId(group.getId())));
-        }
-        return users;
+        if (StringUtils.isEmpty(groupName)) throw new IdentityInvalidGroupException(groupName);
+        Group groupFound = findGroupStrictlyEqualToGroupName(groupName);
+        return getUsersByGroupId(groupFound.getId());
     }
 
-    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
+    private Group findGroupStrictlyEqualToGroupName(String groupName) {
         return findGroups(groupName).stream()
             .filter(group -> groupName.equals(group.getName()))
-            .findFirst();
+            .findFirst()
+            .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
     }
 
     private List<User> getUsersByGroupId(String groupID) {
