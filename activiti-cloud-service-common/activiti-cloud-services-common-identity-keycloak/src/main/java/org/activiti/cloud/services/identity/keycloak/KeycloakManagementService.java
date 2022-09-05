@@ -146,7 +146,7 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     @Override
     public List<Group> findGroups(GroupSearchParams groupSearchParams) {
-        List<Group> groups = findGroups(groupSearchParams.getSearch());
+        List<Group> groups = searchGroups(groupSearchParams.getSearch());
 
         if(!StringUtils.isEmpty(groupSearchParams.getApplication())) {
             return filterGroupsInApplicationsScope(groups, groupSearchParams);
@@ -155,7 +155,7 @@ public class KeycloakManagementService implements IdentityManagementService {
         }
     }
 
-    private List<Group> findGroups(String searchKey) {
+    private List<Group> searchGroups(String searchKey) {
         return keycloakClient
             .searchGroups(searchKey, PAGE_START, PAGE_SIZE)
             .stream()
@@ -250,11 +250,13 @@ public class KeycloakManagementService implements IdentityManagementService {
         return
             Optional.ofNullable(groupName)
                 .filter(Predicate.not(String::isEmpty))
-                .map(g -> findGroups(g).stream())
+                .map(g -> searchGroups(g).stream())
                 .orElse(Stream.empty())
                 .filter(group -> group.getName().equals(groupName))
                 .findFirst()
                 .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
+    }
+
     @Override
     public User findUserByName(String userName) {
         Predicate<User> username = user -> user.getUsername().equalsIgnoreCase(userName);
@@ -274,12 +276,6 @@ public class KeycloakManagementService implements IdentityManagementService {
             .filter(group -> group.getName().equalsIgnoreCase(groupName))
             .findFirst()
             .orElseThrow();
-    }
-
-    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
-        return searchGroups(groupName).stream()
-            .filter(group -> groupName.equals(group.getName()))
-            .findFirst();
     }
 
     private List<User> getUsersByGroupId(String groupID) {
@@ -393,7 +389,7 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private Group getGroupFromGroupName(String groupName) {
-        return findGroups(groupName)
+        return searchGroups(groupName)
             .stream()
             .filter(g -> g.getName().equals(groupName))
             .findFirst()
