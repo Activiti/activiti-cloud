@@ -15,6 +15,22 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
@@ -40,25 +56,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
 
+    public static final String NON_EXISTENT_GROUP = "non-existent-group";
     @Mock(lenient = true)
     private KeycloakClient keycloakClient;
 
@@ -569,10 +570,22 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void should_returnEmptyUserList_when_groupNameNotFound() {
-        List<User> users = keycloakManagementService.findUsersByGroupName("fakeGroup");
+    void should_throwException_when_groupNameNotFound() {
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(
+            NON_EXISTENT_GROUP));
+        assertThat(thrown)
+            .isInstanceOf(IdentityInvalidGroupException.class)
+            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist",
+                NON_EXISTENT_GROUP));
+    }
 
-        assertThat(users).isEmpty();
+    @Test
+    void should_throwException_when_groupNameIsNull() {
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(null));
+        assertThat(thrown)
+            .isInstanceOf(IdentityInvalidGroupException.class)
+            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist",
+                null));
     }
 
 

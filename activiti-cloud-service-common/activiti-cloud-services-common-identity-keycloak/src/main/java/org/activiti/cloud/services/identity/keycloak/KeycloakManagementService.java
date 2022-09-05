@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.UserSearchParams;
@@ -41,17 +52,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class KeycloakManagementService implements IdentityManagementService {
 
@@ -242,19 +242,19 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     @Override
     public List<User> findUsersByGroupName(String groupName) {
-        List<User> users = new ArrayList<>();
-        if (!StringUtils.isEmpty(groupName)) {
-            Optional<Group> groupOptional = findGroupStrictlyEqualToGroupName(groupName);
-            groupOptional.ifPresent(group ->
-                    users.addAll(getUsersByGroupId(group.getId())));
-        }
-        return users;
+        Group groupFound = findGroupStrictlyEqualToGroupName(groupName);
+        return getUsersByGroupId(groupFound.getId());
     }
 
-    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
-        return findGroups(groupName).stream()
-            .filter(group -> groupName.equals(group.getName()))
-            .findFirst();
+    private Group findGroupStrictlyEqualToGroupName(String groupName) {
+        return
+            Optional.ofNullable(groupName)
+                .filter(Predicate.not(String::isEmpty))
+                .map(g -> findGroups(g).stream())
+                .orElse(Stream.empty())
+                .filter(group -> group.getName().equals(groupName))
+                .findFirst()
+                .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
     }
 
     private List<User> getUsersByGroupId(String groupID) {
