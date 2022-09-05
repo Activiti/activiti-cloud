@@ -17,6 +17,7 @@
 package org.activiti.cloud.identity;
 
 import java.util.List;
+import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
 
 /**
@@ -25,4 +26,8 @@ import org.activiti.cloud.identity.model.User;
 public interface IdentityService {
 
     List<User> findUsersByGroupName(String groupName);
+
+    User findUserByName(String userName);
+
+    Group findGroupByName(String groupName);
 }

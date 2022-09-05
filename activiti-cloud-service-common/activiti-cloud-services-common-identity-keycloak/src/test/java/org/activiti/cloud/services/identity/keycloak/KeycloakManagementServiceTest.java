@@ -56,6 +56,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
 
@@ -588,6 +606,53 @@ class KeycloakManagementServiceTest {
                 null));
     }
 
+    @Test
+    void should_findUserByName() {
+        String userName = "userOne";
+        when(keycloakClient.searchUsers(userName,PAGE_START, PAGE_SIZE))
+            .thenReturn(List.of(kUserOne));
+
+        User user = keycloakManagementService.findUserByName(userName);
+
+        assertThat(user.getUsername()).isEqualTo(userName);
+    }
+
+    @Test
+    void should_findUserStrictlyByName() {
+        String userName = "userOne";
+        KeycloakUser keycloakUserRetrievedWithSameSearchKey = new KeycloakUser();
+        keycloakUserRetrievedWithSameSearchKey.setUsername("userOneTest");
+        when(keycloakClient.searchUsers(userName,PAGE_START, PAGE_SIZE))
+            .thenReturn(List.of(kUserOne, keycloakUserRetrievedWithSameSearchKey));
+
+        User user = keycloakManagementService.findUserByName(userName);
+
+        assertThat(user.getUsername()).isEqualTo(userName);
+    }
+
+    @Test
+    void should_findGroupByName() {
+        String groupName = "groupOne";
+        when(keycloakClient.searchGroups(groupName,PAGE_START, PAGE_SIZE))
+            .thenReturn(List.of(kGroupOne));
+
+        Group group = keycloakManagementService.findGroupByName(groupName);
+
+        assertThat(group.getName()).isEqualTo(groupName);
+    }
+
+    @Test
+    void should_findGroupStrictlyByName() {
+        String groupName = "groupOne";
+        KeycloakGroup keycloakGroupRetrievedWithSameSearchKey = new KeycloakGroup();
+        keycloakGroupRetrievedWithSameSearchKey.setName("groupOneTest");
+        when(keycloakClient.searchGroups(groupName,PAGE_START, PAGE_SIZE))
+            .thenReturn(List.of(kGroupOne, keycloakGroupRetrievedWithSameSearchKey));
+
+        Group group = keycloakManagementService.findGroupByName(groupName);
+
+        assertThat(group.getName()).isEqualTo(groupName);
+    }
 
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(
