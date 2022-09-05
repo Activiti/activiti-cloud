@@ -255,6 +255,31 @@ public class KeycloakManagementService implements IdentityManagementService {
                 .filter(group -> group.getName().equals(groupName))
                 .findFirst()
                 .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
+    @Override
+    public User findUserByName(String userName) {
+        Predicate<User> username = user -> user.getUsername().equalsIgnoreCase(userName);
+        Predicate<User> email = user -> user.getEmail().equalsIgnoreCase(userName);
+
+        return searchUsers(userName)
+            .stream()
+            .filter(username.or(email))
+            .findFirst()
+            .orElseThrow();
+    }
+
+    @Override
+    public Group findGroupByName(String groupName) {
+        return searchGroups(groupName)
+            .stream()
+            .filter(group -> group.getName().equalsIgnoreCase(groupName))
+            .findFirst()
+            .orElseThrow();
+    }
+
+    private Optional<Group> findGroupStrictlyEqualToGroupName(String groupName) {
+        return searchGroups(groupName).stream()
+            .filter(group -> groupName.equals(group.getName()))
+            .findFirst();
     }
 
     private List<User> getUsersByGroupId(String groupID) {
