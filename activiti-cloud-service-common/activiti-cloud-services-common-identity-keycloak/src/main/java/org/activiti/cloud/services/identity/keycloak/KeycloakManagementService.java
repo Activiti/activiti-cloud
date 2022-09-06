@@ -89,13 +89,17 @@ public class KeycloakManagementService implements IdentityManagementService {
         Predicate<User> maybeMatchSearchKey = user -> !StringUtils.isEmpty(searchKey)
             ? StringUtils.contains(user.getUsername(), searchKey) || StringUtils.contains(user.getEmail(), searchKey)
             : true;
+        try {
+            return groups.stream()
+                .map(this::findUsersByGroupName)
+                .flatMap(Collection::stream)
+                .distinct()
+                .filter(maybeMatchSearchKey)
+                .collect(Collectors.toList());
 
-        return groups.stream()
-                     .map(this::findUsersByGroupName)
-                     .flatMap(Collection::stream)
-                     .distinct()
-                     .filter(maybeMatchSearchKey)
-                     .collect(Collectors.toList());
+        } catch (IdentityInvalidGroupException exception) {
+            return Collections.emptyList();
+        }
     }
 
     private List<User> filterUsersInRealmScope(List<User> users,
@@ -266,7 +270,7 @@ public class KeycloakManagementService implements IdentityManagementService {
             .stream()
             .filter(username.or(email))
             .findFirst()
-            .orElseThrow();
+            .orElseThrow(() -> new IdentityInvalidUserException(userName));
     }
 
     @Override
@@ -275,7 +279,7 @@ public class KeycloakManagementService implements IdentityManagementService {
             .stream()
             .filter(group -> group.getName().equalsIgnoreCase(groupName))
             .findFirst()
-            .orElseThrow();
+            .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
     }
 
     private List<User> getUsersByGroupId(String groupID) {

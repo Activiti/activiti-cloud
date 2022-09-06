@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
@@ -55,24 +57,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class KeycloakManagementServiceTest {
@@ -289,6 +273,17 @@ class KeycloakManagementServiceTest {
 
         assertThat(users.size()).isEqualTo(1);
         assertThat(users).containsExactly(userOne);
+    }
+
+    @Test
+    void should_returnEmptyListOfUsers_when_groupProvidedDoesNotExist() {
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("userOne");
+        userSearchParams.setGroups(Set.of(NON_EXISTENT_GROUP));
+
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+
+        assertThat(users.size()).isEqualTo(0);
     }
 
     @Test
@@ -589,12 +584,10 @@ class KeycloakManagementServiceTest {
 
     @Test
     void should_throwException_when_groupNameNotFound() {
-        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(
-            NON_EXISTENT_GROUP));
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(NON_EXISTENT_GROUP));
         assertThat(thrown)
             .isInstanceOf(IdentityInvalidGroupException.class)
-            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist",
-                NON_EXISTENT_GROUP));
+            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist", NON_EXISTENT_GROUP));
     }
 
     @Test
@@ -602,8 +595,7 @@ class KeycloakManagementServiceTest {
         Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(null));
         assertThat(thrown)
             .isInstanceOf(IdentityInvalidGroupException.class)
-            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist",
-                null));
+            .hasMessage(String.format("Invalid Security data: group {%s} is invalid or doesn't exist", null));
     }
 
     @Test
@@ -631,6 +623,19 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
+    void should_throwExceptionIfUserIsNotFound() {
+        String userName = "userOne";
+        when(keycloakClient.searchUsers(userName,PAGE_START, PAGE_SIZE))
+            .thenReturn(Collections.emptyList());
+
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findUserByName(userName));
+
+        assertThat(thrown)
+            .isInstanceOf(IdentityInvalidUserException.class)
+            .hasMessage("Invalid Security data: user {userOne} is invalid or doesn't exist");
+    }
+
+    @Test
     void should_findGroupByName() {
         String groupName = "groupOne";
         when(keycloakClient.searchGroups(groupName,PAGE_START, PAGE_SIZE))
@@ -652,6 +657,19 @@ class KeycloakManagementServiceTest {
         Group group = keycloakManagementService.findGroupByName(groupName);
 
         assertThat(group.getName()).isEqualTo(groupName);
+    }
+
+    @Test
+    void should_throwExceptionIfGroupIsNotFound() {
+        String groupName = "groupOne";
+        when(keycloakClient.searchGroups(groupName,PAGE_START, PAGE_SIZE))
+            .thenReturn(Collections.emptyList());
+
+        Throwable thrown = catchThrowable(() -> keycloakManagementService.findGroupByName(groupName));
+
+        assertThat(thrown)
+            .isInstanceOf(IdentityInvalidGroupException.class)
+            .hasMessage("Invalid Security data: group {groupOne} is invalid or doesn't exist");
     }
 
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
