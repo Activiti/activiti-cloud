@@ -17,6 +17,7 @@
     <liquibase.version>4.8.0</liquibase.version>
     <h2.version>1.4.200</h2.version>
     <graphql-java.version>13.0</graphql-java.version>
+    <postgresql.version>42.5.0</postgresql.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -55,6 +56,11 @@
         <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
