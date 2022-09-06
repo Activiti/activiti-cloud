@@ -74,6 +74,7 @@
     <project.scm.repository>activiti-cloud-application</project.scm.repository>
     <project.year>2020</project.year>
     <h2.version>1.4.200</h2.version>
+    <postgresql.version>42.5.0</postgresql.version>
   </properties>
   <repositories>
     <repository>
