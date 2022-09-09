@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-dependencies</artifactId>
-    <version>7.5.1-SNAPSHOT</version>
+    <version>7.5.1-alpha.2</version>
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-audit</artifactId>
