@@ -14,7 +14,7 @@
   <properties>
     <spring-cloud.version>2021.0.3</spring-cloud.version>
     <testcontainers.version>1.16.3</testcontainers.version>
-    <liquibase.version>4.8.0</liquibase.version>
+    <liquibase.version>4.16.0</liquibase.version>
     <h2.version>1.4.200</h2.version>
     <graphql-java.version>13.0</graphql-java.version>
     <postgresql.version>42.5.0</postgresql.version>
