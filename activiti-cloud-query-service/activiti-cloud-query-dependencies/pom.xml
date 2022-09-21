@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-service-parent</artifactId>
-    <version>7.5.1-SNAPSHOT</version>
+    <version>7.5.2-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-query-dependencies</artifactId>
   <packaging>pom</packaging>

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-    <version>7.5.1-SNAPSHOT</version>
+    <version>7.5.2-SNAPSHOT</version>
     <relativePath>../activiti-cloud-modeling-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-modeling</artifactId>
