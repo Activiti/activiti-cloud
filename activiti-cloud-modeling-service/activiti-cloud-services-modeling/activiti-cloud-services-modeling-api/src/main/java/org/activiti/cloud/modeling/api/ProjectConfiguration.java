@@ -15,31 +15,17 @@
  */
 package org.activiti.cloud.modeling.api;
 
-import org.activiti.cloud.services.auditable.Auditable;
-
-/**
- * Interface for projects
- */
-public interface Project<U> extends Auditable<U> {
+public interface ProjectConfiguration {
 
     String getId();
 
     void setId(String id);
 
-    String getName();
+    void setEnableCandidateStarters(Boolean enableCandidateStarters);
 
-    void setName(String name);
+    Boolean getEnableCandidateStarters();
 
-    String getVersion();
+    void setProject(Project project);
 
-    void setVersion(String version);
-
-    String getDescription();
-
-    void setDescription(String description);
-
-    void setConfiguration(ProjectConfiguration configuration);
-
-    ProjectConfiguration getConfiguration();
-
+    Project getProject();
 }

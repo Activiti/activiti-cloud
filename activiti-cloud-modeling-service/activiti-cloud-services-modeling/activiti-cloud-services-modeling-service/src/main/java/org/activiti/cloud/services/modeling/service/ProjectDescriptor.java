@@ -18,12 +18,14 @@ package org.activiti.cloud.services.modeling.service;
 import java.util.Date;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.ProjectConfiguration;
 
 public class ProjectDescriptor {
 
     private final Project project;
     private Set<String> users;
     private Set<String> groups;
+    private ProjectConfiguration configuration;
 
     public ProjectDescriptor(Project project) {
         this.project = project;
@@ -81,4 +83,11 @@ public class ProjectDescriptor {
         return this.project;
     }
 
+    public ProjectConfiguration getConfiguration() {
+        return project.getConfiguration();
+    }
+
+    public void setConfiguration(ProjectConfiguration configuration) {
+        this.configuration = configuration;
+    }
 }
