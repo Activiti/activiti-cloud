@@ -929,7 +929,7 @@ public class ProjectControllerIT {
             .andExpect(jsonPath("$.entry.name",
                 is("project-with-configuration")))
             .andExpect(jsonPath("$.entry.configuration.enableCandidateStarters",
-                is(true)));;
+                is(true)));
     }
 
     @Test

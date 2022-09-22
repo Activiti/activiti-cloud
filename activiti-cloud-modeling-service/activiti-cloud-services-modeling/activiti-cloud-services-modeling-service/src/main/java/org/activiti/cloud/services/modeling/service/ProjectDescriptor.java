@@ -25,7 +25,6 @@ public class ProjectDescriptor {
     private final Project project;
     private Set<String> users;
     private Set<String> groups;
-    private ProjectConfiguration configuration;
 
     public ProjectDescriptor(Project project) {
         this.project = project;
@@ -87,7 +86,4 @@ public class ProjectDescriptor {
         return project.getConfiguration();
     }
 
-    public void setConfiguration(ProjectConfiguration configuration) {
-        this.configuration = configuration;
-    }
 }
