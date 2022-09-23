@@ -55,12 +55,10 @@ public class ProjectConfigurationEntity implements ProjectConfiguration {
         this.enableCandidateStarters = enableCandidateStarters;
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public void setId(String id) {
         this.id = id;
     }

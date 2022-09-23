@@ -29,23 +29,10 @@ import org.activiti.cloud.modeling.api.ProjectConfiguration;
 @JsonInclude(NON_NULL)
 public class ProjectConfigurationImpl implements ProjectConfiguration {
 
-    @JsonIgnore
-    private String id;
-
     private Boolean enableCandidateStarters;
 
     @JsonIgnore
     private Project project;
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
 
     @Override
     public void setEnableCandidateStarters(Boolean enableCandidateStarters) {

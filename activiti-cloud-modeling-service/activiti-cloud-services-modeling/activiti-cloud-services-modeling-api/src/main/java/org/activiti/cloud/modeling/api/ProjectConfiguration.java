@@ -17,10 +17,6 @@ package org.activiti.cloud.modeling.api;
 
 public interface ProjectConfiguration {
 
-    String getId();
-
-    void setId(String id);
-
     void setEnableCandidateStarters(Boolean enableCandidateStarters);
 
     Boolean getEnableCandidateStarters();
