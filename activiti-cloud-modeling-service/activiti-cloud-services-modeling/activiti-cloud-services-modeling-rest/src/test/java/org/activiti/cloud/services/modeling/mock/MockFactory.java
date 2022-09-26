@@ -40,6 +40,7 @@ import org.activiti.cloud.modeling.api.process.ProcessVariableMapping;
 import org.activiti.cloud.modeling.api.process.TaskVariableMapping;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
+import org.activiti.cloud.services.modeling.entity.ProjectConfigurationEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StringUtils;
@@ -57,6 +58,13 @@ public class MockFactory {
                                                        String description) {
         ProjectEntity project = new ProjectEntity(name);
         project.setDescription(description);
+        return project;
+    }
+
+    public static ProjectEntity projectWithConfiguration(String name) {
+        ProjectEntity project = project(name);
+        ProjectConfigurationEntity configuration = new ProjectConfigurationEntity(true);
+        project.setConfiguration(configuration);
         return project;
     }
 

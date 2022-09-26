@@ -18,8 +18,12 @@ package org.activiti.cloud.services.modeling.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -58,6 +62,10 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     private String description;
 
     private String version;
+
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL,
+        fetch = FetchType.LAZY)
+    private ProjectConfigurationEntity configuration;
 
     public ProjectEntity() {  // for JPA
     }
@@ -112,6 +120,24 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Override
     public void setDescription(String description) {
         this.description = description;
+    }
+
+     @Override
+    public void setConfiguration(ProjectConfiguration configuration) {
+         if (configuration == null) {
+             if (this.configuration != null) {
+                 this.configuration.setProject(null);
+             }
+         }
+         else {
+             configuration.setProject(this);
+         }
+         this.configuration = (ProjectConfigurationEntity) configuration;
+    }
+
+   @Override
+    public ProjectConfiguration getConfiguration() {
+        return configuration;
     }
 
     public void addModel(ModelEntity model){
