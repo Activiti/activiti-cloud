@@ -339,6 +339,7 @@ public class AuditProducerIT {
                     TASK_CANDIDATE_GROUP_REMOVED.name(),
                     TASK_CANDIDATE_USER_REMOVED.name(),
                     VARIABLE_UPDATED.name(),/*task local var copied back to proc var*/
+                    VARIABLE_CREATED.name(),/*taskAssignee proc var auto created holding user task assignee*/
                     BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()/*user task*/,
                     SEQUENCE_FLOW_TAKEN.name(),
                     ACTIVITY_STARTED.name()/*end event*/,
