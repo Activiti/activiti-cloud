@@ -16,9 +16,11 @@ And the user completes the task available in the current process instance passin
 |meal|pasta|
 |size|medium|
 Then the process instance reaches a task named Wait
-And the process instance has a resultCollection named miResult with entries of size 2 as following:
+And the process instance has a resultCollection named miResult with entries of size 3 as following:
 |name|value|
 |meal|pizza|
 |size|large|
+|taskAssignee|testuser|
 |meal|pasta|
 |size|medium|
+|taskAssignee|testuser|
