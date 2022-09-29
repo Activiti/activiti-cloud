@@ -34,6 +34,7 @@ import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -44,8 +45,8 @@ import org.activiti.cloud.services.rest.api.TaskAdminController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -129,4 +130,14 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
         return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
     }
+
+    @Override
+    public PagedModel<EntityModel<CloudTask>> assign(@RequestBody AssignTasksPayload assignTasksPayload) {
+        Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
+        Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
+        return pagedCollectionModelAssembler.toModel(
+                pageConverter.toSpringPage(pageable, tasks),
+                taskRepresentationModelAssembler);
+    }
+
 }
