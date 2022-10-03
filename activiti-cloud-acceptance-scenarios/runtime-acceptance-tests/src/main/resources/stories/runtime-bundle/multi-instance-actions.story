@@ -20,7 +20,7 @@ And the process instance has a resultCollection named miResult with entries of s
 |name|value|
 |meal|pizza|
 |size|large|
-|taskAssignee|testuser|
+|sys_task_assignee|testuser|
 |meal|pasta|
 |size|medium|
-|taskAssignee|testuser|
+|sys_task_assignee|testuser|
