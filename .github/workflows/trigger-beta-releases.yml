@@ -20,7 +20,7 @@ jobs:
           ref: ${{ env.ACTIVITI_SCRIPTS_BRANCH }}
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v.16.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.16.0
         with:
           release-descriptor: ${{ env.ACT_SCRIPT_PATH }}/release.yaml
           project: activitiCloudApplication
