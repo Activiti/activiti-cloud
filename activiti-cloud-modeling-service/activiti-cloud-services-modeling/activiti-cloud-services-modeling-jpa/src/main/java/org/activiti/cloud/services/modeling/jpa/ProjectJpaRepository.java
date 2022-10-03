@@ -68,6 +68,9 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
 
     @Override
     default ProjectEntity createProject(ProjectEntity project) {
+        if(project.getConfiguration() == null || project.getConfiguration().getEnableCandidateStarters() == null) {
+            project.setConfiguration(new ProjectConfigurationEntity(project, false));
+        }
         return save(project);
     }
 

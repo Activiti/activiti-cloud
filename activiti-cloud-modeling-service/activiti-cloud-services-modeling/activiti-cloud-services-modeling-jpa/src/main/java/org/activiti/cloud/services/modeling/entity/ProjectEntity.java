@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ProjectConfiguration;
@@ -63,8 +63,8 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     private String version;
 
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL,
-        fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "project", optional = false, cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     private ProjectConfigurationEntity configuration;
 
     public ProjectEntity() {  // for JPA
