@@ -1,0 +1,35 @@
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+']
+
+jobs:
+  trigger-beta-release:
+    runs-on: ubuntu-latest
+    env:
+      ACT_SCRIPT_PATH: repos/scripts
+      ALPHA_VERSION: ${{ github.ref_name }}
+      ACTIVITI_SCRIPTS_BRANCH: master
+    steps:
+      - name: Checkout activiti-scripts
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.ACT_SCRIPT_PATH }}
+          repository: Activiti/activiti-scripts
+          ref: ${{ env.ACTIVITI_SCRIPTS_BRANCH }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v.16.0
+        with:
+          release-descriptor: ${{ env.ACT_SCRIPT_PATH }}/release.yaml
+          project: activitiCloudApplication
+          tag: ${{ env.ALPHA_VERSION }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.16.0
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          add-options: -u
+          repository-directory: ${{ env.ACT_SCRIPT_PATH }}
+          commit-message: "[Release:beta] from Activiti Cloud Application ${{ env.ALPHA_VERSION }}"
+
+      - name: Push changes
+        working-directory: ${{ env.ACT_SCRIPT_PATH }}
+        run: git push origin ${{ env.ACTIVITI_SCRIPTS_BRANCH }}
