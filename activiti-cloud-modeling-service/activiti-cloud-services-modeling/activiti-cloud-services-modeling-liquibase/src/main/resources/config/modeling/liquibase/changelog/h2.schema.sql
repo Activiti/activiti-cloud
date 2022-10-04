@@ -51,6 +51,13 @@ create table project_models
     models_id  varchar(255) not null,
     primary key (project_id, models_id)
 );
+create table project_configuration
+(
+    project_id varchar(255) not null,
+    enable_candidate_starters boolean not null default false,
+    primary key (project_id),
+    foreign key (project_id) references project (id)
+);
 alter table model_versions
     add constraint UK_ei9juhk09r20q4bmvgpjrcrs3 unique (versions_version, versions_versioned_entity_id);
 alter table project
