@@ -20,6 +20,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Optional;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -38,11 +40,12 @@ public class ProjectConfigurationEntity implements ProjectConfiguration {
 
     @Id
     @JsonIgnore
+    @Column(name = "project_id")
     private String id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "project_id")
     @JsonIgnore
     private ProjectEntity project;
 
@@ -52,7 +55,12 @@ public class ProjectConfigurationEntity implements ProjectConfiguration {
     }
 
     public ProjectConfigurationEntity(Boolean enableCandidateStarters) {
-        this.enableCandidateStarters = enableCandidateStarters;
+        this.enableCandidateStarters = Optional.of(enableCandidateStarters).orElse(false);
+    }
+
+    public ProjectConfigurationEntity(Project project, Boolean enableCandidateStarters) {
+        this.project = (ProjectEntity) project;
+        this.enableCandidateStarters = Optional.ofNullable(enableCandidateStarters).orElse(false);
     }
 
     public String getId() {
@@ -65,7 +73,7 @@ public class ProjectConfigurationEntity implements ProjectConfiguration {
 
     @Override
     public void setEnableCandidateStarters(Boolean enableCandidateStarters) {
-        this.enableCandidateStarters = enableCandidateStarters;
+        this.enableCandidateStarters = Optional.ofNullable(enableCandidateStarters).orElse(false);
     }
 
     @Override

@@ -1018,6 +1018,20 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_createProjectWithEmptyConfiguration() throws Exception {
+        ProjectEntity project = project("project1");
+        project.setConfiguration( new ProjectConfigurationEntity());
+        projectRepository.createProject(project);
+
+        mockMvc.perform(get("/v1/projects?name=project1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects",
+                hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].configuration.enableCandidateStarters",
+                is(false)));
+    }
+
+    @Test
     public void should_returnStatusOk_when_updatingProjectWithExistingConfiguration() throws Exception {
         Project project = projectRepository.createProject(projectWithConfiguration("project-to-update"));
 
