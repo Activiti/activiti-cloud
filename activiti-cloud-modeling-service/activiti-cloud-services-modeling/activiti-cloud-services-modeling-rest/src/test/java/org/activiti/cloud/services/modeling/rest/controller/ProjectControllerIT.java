@@ -27,6 +27,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processModelWithExtensions;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithConfiguration;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,6 +64,7 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.entity.ProjectConfigurationEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
@@ -914,6 +916,23 @@ public class ProjectControllerIT {
     }
 
     @Test
+    public void should_returnStatusCreated_when_importingProjectWithConfiguration() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile("file",
+            "project-with-configuration.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-with-configuration.zip"));
+
+        mockMvc.perform(multipart("/v1/projects/import")
+            .file(zipFile)
+            .accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name",
+                is("project-with-configuration")))
+            .andExpect(jsonPath("$.entry.configuration.enableCandidateStarters",
+                is(true)));
+    }
+
+    @Test
     public void should_returnNewProjectWithNewProjectName_when_copyingProject() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(projectWithDescription("project-with-models",
             "Project with models to be copied"));
@@ -928,6 +947,23 @@ public class ProjectControllerIT {
                 is("new-project-name")))
             .andExpect(jsonPath("$.description",
                 is("Project with models to be copied")));
+    }
+
+    @Test
+    public void should_returnNewProjectWithNewConfiguration_when_copyingProject() throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(
+            projectWithConfiguration("project-with-configuration"));
+
+        String projectName = "new-project-name";
+
+        mockMvc.perform(
+            post("/v1/projects/{projectId}/copy?name=" + projectName,
+                project.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name",
+                is("new-project-name")))
+            .andExpect(jsonPath("$.configuration.enableCandidateStarters",
+                is(true)));
     }
 
     @Test
@@ -969,4 +1005,102 @@ public class ProjectControllerIT {
                 .andReturn();
     }
 
+    @Test
+    public void should_createProjectWithConfiguration() throws Exception {
+        projectRepository.createProject(projectWithConfiguration("project1"));
+
+        mockMvc.perform(get("/v1/projects?name=project1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects",
+                hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].configuration.enableCandidateStarters",
+                is(true)));
+    }
+
+    @Test
+    public void should_createProjectWithEmptyConfiguration() throws Exception {
+        ProjectEntity project = project("project1");
+        project.setConfiguration( new ProjectConfigurationEntity());
+        projectRepository.createProject(project);
+
+        mockMvc.perform(get("/v1/projects?name=project1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects",
+                hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].configuration.enableCandidateStarters",
+                is(false)));
+    }
+
+    @Test
+    public void should_returnStatusOk_when_updatingProjectWithExistingConfiguration() throws Exception {
+        Project project = projectRepository.createProject(projectWithConfiguration("project-to-update"));
+
+        Project updatedProject = project("updated-project-name");
+        ProjectConfigurationEntity newConfiguration = new ProjectConfigurationEntity(false);
+        updatedProject.setConfiguration(newConfiguration);
+
+        mockMvc.perform(put("/v1/projects/{projectId}",
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(updatedProject)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name",
+                is("updated-project-name")))
+            .andExpect(jsonPath("$.configuration.enableCandidateStarters",
+                is(false)));
+
+      assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
+            .hasValueSatisfying(p -> {
+                assertThat(p.getName()).isEqualTo("updated-project-name");
+                assertThat(p.getConfiguration().getEnableCandidateStarters()).isFalse();
+            });
+    }
+
+    @Test
+    public void should_returnStatusOk_when_updatingProjectWithNewConfiguration() throws Exception {
+        Project project = projectRepository.createProject(project("project-to-update"));
+
+        Project updatedProject = projectWithConfiguration("updated-project-name");
+
+        mockMvc.perform(put("/v1/projects/{projectId}",
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(updatedProject)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name",
+                is("updated-project-name")))
+            .andExpect(jsonPath("$.configuration.enableCandidateStarters",
+                is(true)));
+
+        assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
+            .hasValueSatisfying(p -> {
+                assertThat(p.getName()).isEqualTo("updated-project-name");
+                assertThat(p.getConfiguration().getEnableCandidateStarters()).isTrue();
+            });
+    }
+
+    @Test
+    public void should_returnStatusOk_when_updatingProjectWithEmptyConfiguration() throws Exception {
+        Project project = projectRepository.createProject(projectWithConfiguration("project-to-update"));
+
+        Project updatedProject = project("updated-project-name");
+        ProjectConfigurationEntity newEmptyConfiguration = new ProjectConfigurationEntity();
+        updatedProject.setConfiguration(newEmptyConfiguration);
+
+        mockMvc.perform(put("/v1/projects/{projectId}",
+            project.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(updatedProject)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name",
+                is("updated-project-name")))
+            .andExpect(jsonPath("$.configuration.enableCandidateStarters",
+                is(true)));
+
+        assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
+            .hasValueSatisfying(p -> {
+                assertThat(p.getName()).isEqualTo("updated-project-name");
+                assertThat(p.getConfiguration().getEnableCandidateStarters()).isTrue();
+            });
+    }
 }

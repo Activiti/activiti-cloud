@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -49,11 +47,14 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -167,6 +168,21 @@ public class TaskAdminControllerImplIT {
         this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/assign",
                 1).contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(assignTaskCmd)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void assignMultipleTasks() throws Exception {
+        given(taskAdminRuntime.assignMultiple(any()))
+                .willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
+        AssignTasksPayload assignTasksCmd = TaskPayloadBuilder.assignMultiple()
+                .withTaskId("1")
+                .withAssignee("assignee")
+                .build();
+
+        this.mockMvc.perform(post("/admin/v1/tasks/assign")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(assignTasksCmd)))
                 .andExpect(status().isOk());
     }
 
