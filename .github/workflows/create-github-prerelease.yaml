@@ -1,0 +1,35 @@
+on:
+  push:
+    tags: [ '[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+' ]
+
+jobs:
+  create-prerelease:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Resolve activiti version
+        id: resolve-activiti-version
+        run: |
+          ACTIVITI_VERSION=$(yq -p=xml e '.project.properties."activiti.version"' activiti-cloud-api/pom.xml)
+          echo "::set-output name=activiti-tag::$ACTIVITI_VERSION"
+
+      - run: touch release.yaml
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.16.0
+        with:
+          release-descriptor: release.yaml
+          project: activiti
+          tag: ${{ steps.resolve-activiti-version.outputs.activiti-tag }}
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.16.0
+        with:
+          release-descriptor: release.yaml
+          project: activitiCloud
+          tag: ${{ github.ref_name }}
+
+      - name: Create prerelease
+        env:
+          TAG: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          gh release create $TAG 'release.yaml#Release Descriptor' --prerelease
