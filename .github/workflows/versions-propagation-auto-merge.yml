@@ -6,6 +6,10 @@ on:
       - develop
 
 jobs:
-  enable-auto-merge:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@v1.9.2
-    secrets: inherit
+  versions-propagation-auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v1.15.0
+      with:
+        auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+        approval-token: ${{ secrets.GITHUB_TOKEN }}
