@@ -1,0 +1,46 @@
+name: Create Pre-release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+
+jobs:
+  create-prerelease:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Resolve Activiti Cloud version
+        id: resolve-versions
+        run: |
+          ACTIVITI_CLOUD_VERSION=$(yq -p=xml e '.project.properties."activiti-cloud.version"' example-runtime-bundle/pom.xml)
+          ACTIVITI_CLOUD_APPLICATION_VERSION=$(yq -p=xml e '.project.version' pom.xml)
+          echo "activiti-cloud-tag=$ACTIVITI_CLOUD_VERSION"  >> $GITHUB_OUTPUT
+          echo "activiti-cloud-application-tag=$ACTIVITI_CLOUD_APPLICATION_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download Activiti Cloud Release Descriptor
+        env:
+          ACTIVITI_CLOUD_TAG: ${{ steps.resolve-versions.outputs.activiti-cloud-tag }}
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: gh release download $ACTIVITI_CLOUD_TAG --repo Activiti/activiti-cloud --pattern release.yaml
+
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.18.0
+        with:
+          release-descriptor: release.yaml
+          project: activitiCloud
+          tag: ${{ steps.resolve-versions.outputs.activiti-cloud-tag }}
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.18.0
+        with:
+          release-descriptor: release.yaml
+          project: activitiCloudApplication
+          tag: ${{ steps.resolve-versions.outputs.activiti-cloud-application-tag }}
+
+      - name: Create prerelease
+        env:
+          TAG: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          gh release create $TAG 'release.yaml#Release Descriptor' --prerelease
