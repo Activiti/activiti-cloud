@@ -101,6 +101,9 @@ public class TaskEntityControllerIT {
     private SecurityPoliciesProperties securityPoliciesProperties;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private ProcessInstanceService processInstanceService;
 
     @MockBean
@@ -108,6 +111,7 @@ public class TaskEntityControllerIT {
 
     @BeforeEach
     void setUp() {
+        assertThat(processInstanceAdminService).isNotNull();
         assertThat(processInstanceService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }

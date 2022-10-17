@@ -56,7 +56,6 @@ public class ProcessInstanceAdminController {
 
     private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
-
     @Autowired
     public ProcessInstanceAdminController(ProcessInstanceAdminService processInstanceAdminService,
                                           ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
@@ -70,10 +69,9 @@ public class ProcessInstanceAdminController {
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
                                                                   Pageable pageable) {
-
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  processInstanceAdminService.findAll(predicate, pageable),
-                                                  processInstanceRepresentationModelAssembler);
+            processInstanceAdminService.findAll(predicate, pageable),
+            processInstanceRepresentationModelAssembler);
     }
 
     @JsonView(JsonViews.ProcessVariables.class)
@@ -90,8 +88,7 @@ public class ProcessInstanceAdminController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
 
-        ProcessInstanceEntity processInstanceEntity = processInstanceAdminService.findById(processInstanceId);
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceEntity);
+        return processInstanceRepresentationModelAssembler.toModel(processInstanceAdminService.findById(processInstanceId));
     }
 
 }

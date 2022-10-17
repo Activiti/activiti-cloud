@@ -94,14 +94,10 @@ public class ProcessInstanceEntityAdminControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
-    private ProcessInstanceAdminService processInstanceAdminService;
-
-    @MockBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void setUp() {
-        assertThat(processInstanceAdminService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }
 
@@ -113,7 +109,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                 PageRequest.of(1,
                         10),
                 11));
-
 
         //when
         mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10")
