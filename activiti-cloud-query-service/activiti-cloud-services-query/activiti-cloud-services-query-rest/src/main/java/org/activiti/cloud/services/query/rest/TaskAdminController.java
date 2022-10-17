@@ -73,7 +73,7 @@ public class TaskAdminController {
     }
 
     @JsonView(JsonViews.General.class)
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
