@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.ArrayList;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -102,6 +103,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private ProcessRuntime processRuntime;
 
+
     @BeforeEach
     public void setUp() {
         assertThat(processEngineChannels).isNotNull();
@@ -121,7 +123,8 @@ public class ProcessDefinitionAdminControllerImplIT {
         String my_process = "my process";
         String this_is_my_process = "this is my process";
         int version = 1;
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(buildProcessDefinition(procId,
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(buildProcessDefinition(procId,
                 my_process,
                 this_is_my_process,
                 version));
@@ -156,7 +159,8 @@ public class ProcessDefinitionAdminControllerImplIT {
         processDefinition.setDescription("This is my process");
         processDefinition.setVersion(1);
 
-        List<ProcessDefinition> processDefinitionList = Collections.singletonList(processDefinition);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
         Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
                 11);
         given(processAdminRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
