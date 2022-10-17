@@ -76,6 +76,9 @@ public class TaskEntityAdminControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private TaskRepository taskRepository;
 
     @MockBean
@@ -158,54 +161,6 @@ public class TaskEntityAdminControllerIT {
                 //then
                 .andExpect(status().isOk());
 
-    }
-
-    @Test
-    public void findAllWithProcessVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-            10,
-            PageRequest.of(0,
-                20));
-
-        given(taskRepository.findAll(any(),
-            eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                pageRequest,
-                12));
-
-        //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/tasks?skipCount=11&maxItems=10&variableKeys=test1&variableKeys=test2")
-                .accept(MediaType.APPLICATION_JSON))
-            //then
-            .andExpect(status().isOk())
-            .andReturn();
-
-        assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount").isEqualTo(11)
-            .node("list.pagination.maxItems").isEqualTo(10)
-            .node("list.pagination.count").isEqualTo(1)
-            .node("list.pagination.hasMoreItems").isEqualTo(false)
-            .node("list.pagination.totalItems").isEqualTo(12);
-    }
-
-    @Test
-    public void findAllWithProcessVariablesShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
-        //given
-        PageRequest pageRequest = PageRequest.of(1,
-            10);
-
-        given(taskRepository.findAll(any(),
-            eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                pageRequest,
-                11));
-
-        //when
-        mockMvc.perform(get("/admin/v1/tasks?page=1&size=10&variableKeys=test1&variableKeys=test2")
-                .accept(MediaTypes.HAL_JSON_VALUE))
-            //then
-            .andExpect(status().isOk());
     }
 
     @Test

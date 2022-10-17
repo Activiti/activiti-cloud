@@ -70,6 +70,9 @@ public class ProcessInstanceEntityAdminControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
@@ -133,40 +136,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                 //then
                 .andExpect(status().isOk());
     }
-
-    @Test
-    public void findAllWithVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
-        //given
-        given(processInstanceRepository.findAll(any(),
-            any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-            PageRequest.of(1,
-                10),
-            11));
-
-
-        //when
-        mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10&variableKeys=test1&variableKeys=test2")
-                .accept(MediaType.APPLICATION_JSON))
-            //then
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    public void findAllWithVariablesShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
-        //given
-        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                PageRequest.of(1, 10),
-                11));
-
-
-        //when
-        mockMvc.perform(get("/admin/v1/process-instances?page=1&size=10&variableKeys=test1&variableKeys=test2")
-                .accept(MediaTypes.HAL_JSON_VALUE))
-            //then
-            .andExpect(status().isOk());
-    }
-
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
         return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
