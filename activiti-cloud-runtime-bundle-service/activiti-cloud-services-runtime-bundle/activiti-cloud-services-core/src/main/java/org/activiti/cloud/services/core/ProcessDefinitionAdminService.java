@@ -20,8 +20,6 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
-import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
-import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 
 public class ProcessDefinitionAdminService extends BaseProcessDefinitionService {
