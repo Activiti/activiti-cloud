@@ -92,6 +92,9 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private ProcessInstanceService processInstanceService;
 
     @MockBean
@@ -99,6 +102,7 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
 
     @BeforeEach
     void setUp() {
+        assertThat(processInstanceAdminService).isNotNull();
         assertThat(processInstanceService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }

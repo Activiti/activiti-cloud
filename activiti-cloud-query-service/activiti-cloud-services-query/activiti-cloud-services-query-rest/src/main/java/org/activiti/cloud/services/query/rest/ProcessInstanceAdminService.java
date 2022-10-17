@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class ProcessInstanceAdminService {
 
     private final ProcessInstanceRepository processInstanceRepository;
+
     private final EntityFinder entityFinder;
 
     @PersistenceContext

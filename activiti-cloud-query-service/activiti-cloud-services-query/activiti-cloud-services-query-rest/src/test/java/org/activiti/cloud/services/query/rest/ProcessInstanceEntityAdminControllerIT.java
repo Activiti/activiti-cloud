@@ -70,9 +70,6 @@ public class ProcessInstanceEntityAdminControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProcessInstanceAdminService processInstanceAdminService;
-
-    @MockBean
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
@@ -97,10 +94,14 @@ public class ProcessInstanceEntityAdminControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private EntityManagerFactory entityManagerFactory;
 
     @BeforeEach
     void setUp() {
+        assertThat(processInstanceAdminService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }
 
