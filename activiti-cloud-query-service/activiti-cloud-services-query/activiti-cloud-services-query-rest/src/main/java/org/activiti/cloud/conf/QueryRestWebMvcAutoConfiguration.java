@@ -21,6 +21,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
@@ -213,5 +214,13 @@ public class QueryRestWebMvcAutoConfiguration  {
     ) {
         return new ProcessInstanceService(processInstanceRepository, taskRepository, processInstanceRestrictionService,
             securityPoliciesApplicationService, securityManager, entityFinder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceAdminService processInstanceAdminService(ProcessInstanceRepository processInstanceRepository,
+        EntityFinder entityFinder
+    ) {
+        return new ProcessInstanceAdminService(processInstanceRepository, entityFinder);
     }
 }

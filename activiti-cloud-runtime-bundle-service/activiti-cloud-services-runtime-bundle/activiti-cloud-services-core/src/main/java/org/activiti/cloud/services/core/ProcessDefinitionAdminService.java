@@ -15,27 +15,23 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.runtime.ProcessRuntime;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
-import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
-import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 
-import java.util.List;
+public class ProcessDefinitionAdminService extends BaseProcessDefinitionService {
+    private final ProcessAdminRuntime processAdminRuntime;
 
-public class ProcessDefinitionService extends BaseProcessDefinitionService {
-
-    private final ProcessRuntime processRuntime;
-
-    public ProcessDefinitionService(ProcessRuntime processRuntime, List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    public ProcessDefinitionAdminService(ProcessAdminRuntime processAdminRuntime, List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         super(processDefinitionDecorators);
-        this.processRuntime = processRuntime;
+        this.processAdminRuntime = processAdminRuntime;
     }
 
     public Page<ProcessDefinition> getProcessDefinitions(Pageable pageable, List<String> include) {
-        Page<ProcessDefinition> processDefinitions = processRuntime.processDefinitions(pageable);
+        Page<ProcessDefinition> processDefinitions = processAdminRuntime.processDefinitions(pageable);
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
     }

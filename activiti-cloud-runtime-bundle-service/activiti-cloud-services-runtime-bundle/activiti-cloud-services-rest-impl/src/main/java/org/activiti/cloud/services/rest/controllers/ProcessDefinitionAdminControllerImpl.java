@@ -27,21 +27,23 @@
  * limitations under the License.
  *
  */
-
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
-import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudProcessDefinition;
+import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
+import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessDefinitionAdminController;
+import org.activiti.cloud.services.rest.assemblers.ExtendedCloudProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -50,29 +52,38 @@ public class ProcessDefinitionAdminControllerImpl implements ProcessDefinitionAd
 
     private final ProcessDefinitionRepresentationModelAssembler representationModelAssembler;
 
-    private final ProcessAdminRuntime processAdminRuntime;
+    private final ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler;
+
+    private final ProcessDefinitionAdminService processDefinitionAdminService;
 
     private final AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler;
 
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public ProcessDefinitionAdminControllerImpl(ProcessAdminRuntime processAdminRuntime,
-                                                ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
-                                                AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
-                                                SpringPageConverter pageConverter) {
-        this.processAdminRuntime = processAdminRuntime;
+    public ProcessDefinitionAdminControllerImpl(
+        ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
+        ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
+        SpringPageConverter pageConverter,
+        ProcessDefinitionAdminService processDefinitionAdminService) {
+
         this.representationModelAssembler = representationModelAssembler;
+        this.extendedCloudProcessDefinitionRepresentationModelAssembler = extendedCloudProcessDefinitionRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
+        this.processDefinitionAdminService = processDefinitionAdminService;
     }
 
     @Override
-    public PagedModel<EntityModel<CloudProcessDefinition>> getAllProcessDefinitions(Pageable pageable) {
-        Page<ProcessDefinition> page = processAdminRuntime.processDefinitions(pageConverter.toAPIPageable(pageable));
+    public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
+        @RequestParam(required = false, defaultValue = "") List<String> include,
+        Pageable pageable) {
+
+        Page<ProcessDefinition> page = processDefinitionAdminService.getProcessDefinitions(pageConverter.toAPIPageable(pageable), include);
         return pagedCollectionModelAssembler.toModel(pageable,
                 pageConverter.toSpringPage(pageable, page),
-                representationModelAssembler);
+                extendedCloudProcessDefinitionRepresentationModelAssembler);
     }
 
 }

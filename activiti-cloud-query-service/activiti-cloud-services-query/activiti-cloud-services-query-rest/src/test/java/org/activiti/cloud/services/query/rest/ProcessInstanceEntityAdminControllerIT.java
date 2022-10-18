@@ -110,7 +110,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                         10),
                 11));
 
-
         //when
         mockMvc.perform(get("/admin/v1/process-instances?skipCount=10&maxItems=10")
                 .accept(MediaType.APPLICATION_JSON))
@@ -133,7 +132,6 @@ public class ProcessInstanceEntityAdminControllerIT {
                 //then
                 .andExpect(status().isOk());
     }
-
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
         return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,

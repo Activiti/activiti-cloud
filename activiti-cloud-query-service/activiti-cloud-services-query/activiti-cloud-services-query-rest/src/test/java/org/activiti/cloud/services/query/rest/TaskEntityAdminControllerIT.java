@@ -75,6 +75,9 @@ public class TaskEntityAdminControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private TaskRepository taskRepository;
 
     @MockBean
@@ -106,6 +109,7 @@ public class TaskEntityAdminControllerIT {
 
     @BeforeEach
     void setUp() {
+        assertThat(processInstanceAdminService).isNotNull();
         assertThat(processInstanceService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }

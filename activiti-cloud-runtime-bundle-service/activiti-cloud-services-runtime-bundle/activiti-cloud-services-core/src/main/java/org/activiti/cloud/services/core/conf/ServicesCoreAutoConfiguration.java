@@ -21,6 +21,7 @@ import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
@@ -242,4 +243,10 @@ public class ServicesCoreAutoConfiguration {
         return new ProcessDefinitionService(processRuntime, processDefinitionDecorators);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessDefinitionAdminService processDefinitionAdminService(ProcessAdminRuntime processAdminRuntime,
+        List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+        return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
+    }
 }

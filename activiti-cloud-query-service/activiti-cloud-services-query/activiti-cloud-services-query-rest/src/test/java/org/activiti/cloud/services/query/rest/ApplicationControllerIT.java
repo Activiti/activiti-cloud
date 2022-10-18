@@ -81,6 +81,9 @@ public class ApplicationControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
+    private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
     private ProcessInstanceService processInstanceService;
 
     @MockBean
@@ -88,6 +91,7 @@ public class ApplicationControllerIT {
 
     @BeforeEach
     void setUp() {
+        assertThat(processInstanceAdminService).isNotNull();
         assertThat(processInstanceService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
     }
