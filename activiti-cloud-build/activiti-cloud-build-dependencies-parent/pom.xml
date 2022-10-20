@@ -61,6 +61,11 @@
         <artifactId>snakeyaml</artifactId>
         <version>1.31</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.10.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
