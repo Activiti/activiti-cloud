@@ -15,15 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
-import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Optional;
-
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.DataFetcher;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
@@ -31,6 +25,14 @@ import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
 import org.springframework.core.io.DefaultResourceLoader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Optional;
+
+import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 public class GraphQLSubscriptionSchemaBuilder {
 
@@ -52,8 +54,17 @@ public class GraphQLSubscriptionSchemaBuilder {
         this.typeRegistry = new SchemaParser().parse(streamReader);
 
         this.wiring = RuntimeWiring.newRuntimeWiring()
-                                   .scalar(new ObjectScalar());
-   }
+                                   .scalar(GraphQLScalarType.newScalar()
+                                                            .name("ObjectScalar")
+                                                            .description("An object scalar")
+                                                            .coercing(new ObjectScalar())
+                                                            .build())
+                                   .scalar(GraphQLScalarType.newScalar(ExtendedScalars.GraphQLLong)
+                                                            .name("Timestamp")
+                                                            .description("An timestamp long scalar")
+                                                            .build())
+        ;
+    }
 
     private GraphQLSchema buildSchema() {
         return new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build());

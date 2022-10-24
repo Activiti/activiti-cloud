@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
-import javax.persistence.EntityManager;
-
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.VariableValue;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Configuration;
-
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
@@ -31,6 +22,14 @@ import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaSchemaBuilde
 import graphql.GraphQL;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.VariableValue;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Configuration;
+
+import javax.persistence.EntityManager;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -50,7 +49,11 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
             this.entityManager = entityManager;
 
             JavaScalars.register(VariableValue.class,
-                                 new GraphQLScalarType("VariableValue", "VariableValue type", new JavaScalars.GraphQLObjectCoercing()));
+                                 GraphQLScalarType.newScalar()
+                                                  .name("VariableValue")
+                                                  .description("VariableValue type")
+                                                  .coercing(new JavaScalars.GraphQLObjectCoercing())
+                                                  .build());
         }
 
         @Override
