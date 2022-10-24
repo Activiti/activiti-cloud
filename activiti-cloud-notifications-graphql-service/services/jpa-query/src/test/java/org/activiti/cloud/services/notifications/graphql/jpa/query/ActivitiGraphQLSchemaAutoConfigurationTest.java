@@ -15,16 +15,16 @@
  */
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import graphql.Scalars;
+import graphql.scalars.ExtendedScalars;
+import graphql.schema.GraphQLSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import graphql.Scalars;
-import graphql.schema.GraphQLSchema;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
 @TestPropertySource("classpath:application-test.properties")
@@ -77,7 +77,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
         //then
         assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable")
             .getArgument("id").getType())
-            .isEqualTo(Scalars.GraphQLLong);
+            .isEqualTo(ExtendedScalars.GraphQLLong);
 
         //then
         assertThat(schema.getQueryType().getFieldDefinition("ProcessVariable")

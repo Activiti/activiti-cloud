@@ -15,16 +15,6 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import graphql.language.ArrayValue;
 import graphql.language.BooleanValue;
 import graphql.language.EnumValue;
@@ -39,11 +29,21 @@ import graphql.language.VariableReference;
 import graphql.schema.Coercing;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class ObjectScalarTest {
 
     private Map<String, Object> variables = Collections.singletonMap( "varRef1", "value1");
 
-    private Coercing<?,?> coercing = new ObjectScalar().getCoercing();
+    private Coercing<?,?> coercing = new ObjectScalar();
 
     @SuppressWarnings("serial")
     @Test
