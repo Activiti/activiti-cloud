@@ -15,7 +15,7 @@
     <spring-cloud.version>2021.0.4</spring-cloud.version>
     <testcontainers.version>1.16.3</testcontainers.version>
     <h2.version>1.4.200</h2.version>
-    <graphql-java.version>13.0</graphql-java.version>
+    <graphql-java.version>19.2</graphql-java.version>
     <postgresql.version>42.5.0</postgresql.version>
   </properties>
   <dependencyManagement>
