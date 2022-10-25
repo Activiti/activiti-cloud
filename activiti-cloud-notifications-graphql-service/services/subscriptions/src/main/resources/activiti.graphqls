@@ -2,7 +2,7 @@
 # Schemas must have at least a query root type
 #
 scalar ObjectScalar
-scalar Timestamp
+scalar Long
 
 schema {
   query: Query
@@ -69,7 +69,7 @@ enum EngineEventType {
 
 type EngineEvent {
   id : String
-  timestamp : Timestamp
+  timestamp : Long
   serviceName : String
   serviceFullName : String
   serviceVersion : String
@@ -81,7 +81,7 @@ type EngineEvent {
   parentProcessInstanceId : String
   processDefinitionId : String
   processDefinitionKey : String
-  processDefinitionVersion : Int
+  processDefinitionVersion : Long
   businessKey : String
 
   entityId : String
