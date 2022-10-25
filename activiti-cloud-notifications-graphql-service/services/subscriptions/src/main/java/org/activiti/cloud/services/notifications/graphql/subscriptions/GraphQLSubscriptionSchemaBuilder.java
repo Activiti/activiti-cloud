@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
+import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.JavaScalarsWiringPostProcessor;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.DataFetcher;
@@ -58,7 +59,7 @@ public class GraphQLSubscriptionSchemaBuilder {
                                    .scalar(GraphQLScalarType.newScalar()
                                                             .name("ObjectScalar")
                                                             .description("An object scalar")
-                                                            .coercing(new ObjectScalar())
+                                                            .coercing(new JavaScalars.GraphQLObjectCoercing())
                                                             .build())
                                    .scalar(ExtendedScalars.GraphQLLong)
                                    .transformer(new JavaScalarsWiringPostProcessor());
