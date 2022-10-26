@@ -19,7 +19,6 @@ import static java.util.Collections.singletonMap;
 import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -118,7 +117,6 @@ public final class ContentTypeUtils {
 
         return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
-            .filter(Objects::nonNull)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> removeExtension(filename) + fullExtension)
             .orElse(filename);
