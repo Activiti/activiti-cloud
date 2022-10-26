@@ -67,8 +67,6 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
