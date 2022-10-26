@@ -65,7 +65,7 @@ import java.util.stream.Stream;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 
@@ -216,7 +216,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectDescriptor projectDescriptor = buildDescriptor(project);
 
         ZipBuilder zipBuilder = new ZipBuilder(project.getName())
-                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), toJsonFilename(project.getName()));
+                .appendFile(descriptorJsonConverter.convertToJsonBytes(projectDescriptor), changeToJsonFilename(project.getName()));
 
         modelService.getAllModels(project).forEach(model -> modelTypeService.findModelTypeByName(model.getType()).map(ModelType::getFolderName).ifPresent(folderName -> {
             zipBuilder.appendFolder(folderName)

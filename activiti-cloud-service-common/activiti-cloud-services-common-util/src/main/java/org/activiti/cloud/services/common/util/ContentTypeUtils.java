@@ -19,6 +19,7 @@ import static java.util.Collections.singletonMap;
 import static org.springframework.boot.web.server.MimeMappings.DEFAULT;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -89,10 +90,35 @@ public final class ContentTypeUtils {
             JSON);
     }
 
+    public static String changeToJsonFilename(String filename) {
+        return changeExtension(filename,
+            JSON);
+    }
+
     public static String setExtension(String filename,
         String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
         return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
+            .filter(ext -> !filename.endsWith(ext))
+            .map(fullExtension -> filename + fullExtension)
+            .orElse(filename);
+    }
+
+    public static String changeExtension(String filename,
+        String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
+        return Optional.ofNullable(extension)
+            .map(ContentTypeUtils::fullExtension)
+            .filter(Objects::nonNull)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> removeExtension(filename) + fullExtension)
             .orElse(filename);
@@ -100,6 +126,11 @@ public final class ContentTypeUtils {
 
     public static String removeExtension(String filename,
         String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
         return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(filename::endsWith)

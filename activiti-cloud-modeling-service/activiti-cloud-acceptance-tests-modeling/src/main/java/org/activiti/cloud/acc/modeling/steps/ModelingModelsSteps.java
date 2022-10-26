@@ -23,8 +23,8 @@ import static org.activiti.cloud.modeling.api.process.ServiceTaskActionType.OUTP
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -178,8 +178,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
                                  boolean isExtensionType) throws IOException {
         final String fileExtension = isExtensionType ? CONTENT_TYPE_JSON : getModelType(model.getType()).getContentFileExtension();
         final String fileName = isExtensionType ?
-                toJsonFilename(model.getName() + getModelType(model.getType()).getExtensionsFileSuffix()) :
-                setExtension(model.getName(),
+                changeToJsonFilename(model.getName() + getModelType(model.getType()).getExtensionsFileSuffix()) :
+                changeExtension(model.getName(),
                              fileExtension);
         final String resourcePath = model.getType().toLowerCase() + "/" + fileName;
         return new FormData(fileExtension,

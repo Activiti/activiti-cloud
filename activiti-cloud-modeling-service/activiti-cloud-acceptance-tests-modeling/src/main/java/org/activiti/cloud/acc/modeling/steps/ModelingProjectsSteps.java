@@ -40,8 +40,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.util.StreamUtils;
 
 import static org.activiti.cloud.acc.modeling.modeling.ProcessExtensions.EXTENSIONS_TASK_NAME;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.setExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.test.asserts.AssertFileContent.assertThatFileContent;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -180,17 +180,17 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
                         .isZip()
                         .hasEntries(
-                                toJsonFilename(currentProject.getName()),
+                                changeToJsonFilename(currentProject.getName()),
                                 modelType.getFolderName() + "/",
-                                modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getExtensionsFileSuffix()),
-                                modelType.getFolderName() + "/" + setExtension(modelName,
+                                modelType.getFolderName() + "/" + changeToJsonFilename(modelName + modelType.getExtensionsFileSuffix()),
+                                modelType.getFolderName() + "/" + changeExtension(modelName,
                                                                                modelType.getContentFileExtension())
                         )
-                        .hasJsonContentSatisfying(toJsonFilename(currentProject.getName()),
+                        .hasJsonContentSatisfying(changeToJsonFilename(currentProject.getName()),
                                                   jsonContent -> jsonContent
                                                           .node("name").isEqualTo(currentProject.getName()))
                         .hasJsonContentSatisfying(
-                                modelType.getFolderName() + "/" + toJsonFilename(modelName + modelType.getExtensionsFileSuffix()),
+                                modelType.getFolderName() + "/" + changeToJsonFilename(modelName + modelType.getExtensionsFileSuffix()),
                                 jsonContent -> {
                                     jsonContent.node("id").matches(startsWith("process-"));
                                     jsonContent.node("name").isEqualTo(modelName);
