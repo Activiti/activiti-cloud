@@ -252,6 +252,19 @@ create table task_process_variable
   primary key (task_id, process_variable_id)
 );
 
+create table process_candidate_starter_group
+(
+  process_definition_id  varchar(255) not null,
+  group_id varchar(255) not null,
+  primary key (process_definition_id, group_id)
+);
+create table process_candidate_starter_user
+(
+  process_definition_id varchar(255) not null,
+  user_id varchar(255) not null,
+  primary key (process_definition_id, user_id)
+);
+
 create index bpmn_activity_status_idx on bpmn_activity (status);
 create index bpmn_activity_processInstance_idx on bpmn_activity (process_instance_id);
 alter table bpmn_activity
@@ -283,6 +296,10 @@ create index task_var_name_idx on task_variable (name);
 create index task_var_executionId_idx on task_variable (execution_id);
 create index pi_processDefinitionName_idx on process_instance (process_definition_name);
 create index task_processDefinitionName_idx on task (process_definition_name);
+create index pcsg_groupId_idx on process_candidate_starter_group (group_id);
+create index pcsg_processDefinition_idx on process_candidate_starter_group (process_definition_id);
+create index pcsu_userId_idx on process_candidate_starter_user (user_id);
+create index pcsu_processDefinition_idx on process_candidate_starter_user (process_definition_id);
 alter table integration_context
     add constraint integration_context_bpmn_activity_idx unique (process_instance_id, client_id, execution_id);
 alter table process_model

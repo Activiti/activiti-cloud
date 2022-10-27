@@ -54,6 +54,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
@@ -65,6 +69,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+
 
 public class CloudRuntimeEventRegistry {
 
@@ -113,6 +118,10 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableUpdatedEventImpl());
         eventImplementations.add(new CloudVariableDeletedEventImpl());
         eventImplementations.add(new CloudApplicationDeployedEventImpl());
+        eventImplementations.add(new CloudProcessCandidateStarterUserAddedEventImpl());
+        eventImplementations.add(new CloudProcessCandidateStarterUserRemovedEventImpl());
+        eventImplementations.add(new CloudProcessCandidateStarterGroupAddedEventImpl());
+        eventImplementations.add(new CloudProcessCandidateStarterGroupRemovedEventImpl());
         return eventImplementations
                 .stream()
                 .collect(Collectors.toMap(

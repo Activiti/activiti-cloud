@@ -15,15 +15,20 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
+import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
@@ -48,6 +53,9 @@ import com.querydsl.core.types.Predicate;
         })
 public class ProcessDefinitionController {
 
+    @Value("${activiti.candidateStarter.enabled:false}")
+    private boolean candidateStartersEnabled;
+
     private ProcessDefinitionRepository repository;
 
     private AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler;
@@ -55,27 +63,53 @@ public class ProcessDefinitionController {
     private ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler;
 
     private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
+    private SecurityManager securityManager;
 
     public ProcessDefinitionController(ProcessDefinitionRepository repository,
                                        AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
                                        ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
-                                       ProcessDefinitionRestrictionService processDefinitionRestrictionService) {
+                                       ProcessDefinitionRestrictionService processDefinitionRestrictionService,
+                                       SecurityManager securityManager) {
         this.repository = repository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processDefinitionRepresentationModelAssembler = processDefinitionRepresentationModelAssembler;
         this.processDefinitionRestrictionService = processDefinitionRestrictionService;
+        this.securityManager = securityManager;
     }
 
     @GetMapping
     public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
                                                                     Pageable pageable) {
+        Predicate predicateRestricted = applyRestrictions(predicate);
+        return pagedCollectionModelAssembler.toModel(pageable,
+                                                  repository.findAll(predicateRestricted,
+                                                                     pageable),
+                                                  processDefinitionRepresentationModelAssembler);
+    }
 
+    private Predicate applyRestrictions(Predicate predicate) {
         Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(Optional.ofNullable(predicate)
                                                                                                                  .orElseGet(BooleanBuilder::new),
                                                                                                          SecurityPolicyAccess.READ);
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  repository.findAll(extendedPredicate,
-                                                                     pageable),
-                                                  processDefinitionRepresentationModelAssembler);
+
+        if (!candidateStartersEnabled) {
+            return extendedPredicate;
+        }
+
+        String userId = securityManager.getAuthenticatedUserId();
+        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity
+                                                        .processDefinitionEntity
+                                                        .candidateStarterUsers.any()
+                                                        .userId.eq(userId);
+
+        List<String> groupIds = securityManager.getAuthenticatedUserGroups();
+        if (!groupIds.isEmpty()) {
+            candidateStarterExpression = candidateStarterExpression.or(QProcessDefinitionEntity
+                                                                       .processDefinitionEntity
+                                                                       .candidateStarterGroups.any()
+                                                                       .groupId.in(groupIds));
+        }
+
+        return candidateStarterExpression.and(extendedPredicate);
     }
 }

@@ -1,0 +1,73 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudProcessCandidateStarterGroupRemovedEvent",
+  "properties" : {
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
+    "messageId" : {
+      "type" : "string"
+    },
+    "entityId" : {
+      "type" : "string"
+    },
+    "serviceName" : {
+      "type" : "string"
+    },
+    "serviceFullName" : {
+      "type" : "string"
+    },
+    "serviceType" : {
+      "type" : "string"
+    },
+    "serviceVersion" : {
+      "type" : "string"
+    },
+    "appName" : {
+      "type" : "string"
+    },
+    "appVersion" : {
+      "type" : "string"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "businessKey" : {
+      "type" : "string"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "PROCESS_CANDIDATE_STARTER_GROUP_ADDED", "PROCESS_CANDIDATE_STARTER_GROUP_REMOVED" ]
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "id" : {
+      "type" : "string"
+    },
+    "entity" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:org:activiti:api:process:model:ProcessCandidateStarterGroup",
+      "properties" : {
+        "groupId" : {
+          "type" : "string"
+        },
+        "processDefinitionId" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}

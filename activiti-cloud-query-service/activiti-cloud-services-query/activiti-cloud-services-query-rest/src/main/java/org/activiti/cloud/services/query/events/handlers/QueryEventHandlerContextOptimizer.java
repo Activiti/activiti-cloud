@@ -30,6 +30,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorRec
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -100,7 +104,11 @@ public class QueryEventHandlerContextOptimizer {
                        Map.entry(CloudTaskCandidateUserRemovedEventImpl.class, 15),
                        Map.entry(CloudTaskCandidateGroupRemovedEventImpl.class, 15),
                        Map.entry(CloudProcessCompletedEventImpl.class, 16),
-                       Map.entry(CloudProcessCancelledEventImpl.class, 16));
+                       Map.entry(CloudProcessCancelledEventImpl.class, 16),
+                       Map.entry(CloudProcessCandidateStarterUserAddedEventImpl.class, 17),
+                       Map.entry(CloudProcessCandidateStarterGroupAddedEventImpl.class, 17),
+                       Map.entry(CloudProcessCandidateStarterUserRemovedEventImpl.class, 18),
+                       Map.entry(CloudProcessCandidateStarterGroupRemovedEventImpl.class, 18));
 
     private Comparator<CloudRuntimeEvent<?,?>> byTimestamp = Comparator.comparingLong(CloudRuntimeEvent::getTimestamp);
     private Comparator<CloudRuntimeEvent<?,?>> byEventClass = Comparator.comparing(event -> Optional.ofNullable(order.get(event.getClass()))
