@@ -154,6 +154,8 @@ public class QueryEventHandlerContextOptimizer {
                      .collect(Collectors.toList());
     }
 
+
+
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
         if (events.stream()
                   .anyMatch(CloudProcessCreatedEvent.class::isInstance)) {
@@ -183,4 +185,5 @@ public class QueryEventHandlerContextOptimizer {
                      .filter(predicate)
                      .findFirst();
     }
+
 }

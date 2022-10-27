@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.app;
 
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
@@ -23,9 +24,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import reactor.core.publisher.Flux;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
-public class QueryConsumerChannelHandler {
+public class QueryConsumerChannelHandler implements Consumer<Flux<List<CloudRuntimeEvent<?,?>>>> {
 
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
@@ -36,10 +38,8 @@ public class QueryConsumerChannelHandler {
         this.eventHandlerContext = eventHandlerContext;
     }
 
-    @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
-    public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        eventHandlerContext.handle(optimizer.optimize(events)
-                                            .toArray(new CloudRuntimeEvent[]{}));
+    @Override
+    public synchronized void accept(Flux<List<CloudRuntimeEvent<?, ?>>> listFlux) {
+        listFlux.map(optimizer::optimize).subscribe(eventHandlerContext);
     }
-
 }

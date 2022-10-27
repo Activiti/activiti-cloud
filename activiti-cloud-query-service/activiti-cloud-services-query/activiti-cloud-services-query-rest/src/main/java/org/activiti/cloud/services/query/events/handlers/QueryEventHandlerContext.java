@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +27,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
-public class QueryEventHandlerContext {
+public class QueryEventHandlerContext implements Consumer<List<CloudRuntimeEvent<?,?>>> {
 
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContext.class);
 
@@ -55,5 +59,10 @@ public class QueryEventHandlerContext {
 
     protected Map<String, QueryEventHandler> getHandlers() {
         return handlers;
+    }
+
+    @Override
+    public void accept(List<CloudRuntimeEvent<?, ?>> events) {
+      this.handle(events.toArray(new CloudRuntimeEvent[0]));
     }
 }

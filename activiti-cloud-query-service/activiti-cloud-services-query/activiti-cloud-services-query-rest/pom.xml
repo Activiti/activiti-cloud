@@ -174,6 +174,10 @@
       <artifactId>spring-cloud-stream</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-function-context</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
@@ -206,6 +210,13 @@
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+      <classifier>test-binder</classifier>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

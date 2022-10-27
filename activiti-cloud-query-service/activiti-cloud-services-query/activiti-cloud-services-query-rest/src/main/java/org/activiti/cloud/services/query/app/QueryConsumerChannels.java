@@ -22,6 +22,4 @@ public interface QueryConsumerChannels {
 
     String QUERY_CONSUMER = "queryConsumer";
 
-    @Input(QUERY_CONSUMER)
-    SubscribableChannel queryConsumer();
 }
