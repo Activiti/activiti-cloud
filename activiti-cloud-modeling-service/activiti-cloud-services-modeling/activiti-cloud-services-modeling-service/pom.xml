@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-modeling</artifactId>
-    <version>7.6.0</version>
+    <version>7.6.1-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-modeling-service</artifactId>
   <name>Activiti Cloud Services :: Modeling Services</name>
