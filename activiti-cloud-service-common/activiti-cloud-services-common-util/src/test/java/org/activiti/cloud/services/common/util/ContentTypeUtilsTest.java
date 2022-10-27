@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.services.common.util;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.getExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test ;
@@ -55,6 +57,23 @@ public class ContentTypeUtilsTest {
         assertThat(removeExtension("a\\b\\c")).isEqualTo("a\\b\\c");
         assertThat(removeExtension("C:\\temp\\foo.bar\\README")).isEqualTo("C:\\temp\\foo.bar\\README");
         assertThat(removeExtension("../filename.ext")).isEqualTo("../filename");
+    }
+
+
+    @Test
+    public void testToJsonFilename() {
+        assertThat(toJsonFilename(null)).isEqualTo(null);
+        assertThat(toJsonFilename("file")).isEqualTo("file.json");
+        assertThat(toJsonFilename("file.json")).isEqualTo("file.json");
+        assertThat(toJsonFilename("file.v1")).isEqualTo("file.v1.json");
+    }
+
+    @Test
+    public void testChangeToJsonFilename() {
+        assertThat(changeToJsonFilename(null)).isEqualTo(null);
+        assertThat(changeToJsonFilename("file")).isEqualTo("file.json");
+        assertThat(changeToJsonFilename("file.json")).isEqualTo("file.json");
+        assertThat(changeToJsonFilename("file.v1")).isEqualTo("file.json");
     }
 
 }

@@ -89,8 +89,32 @@ public final class ContentTypeUtils {
             JSON);
     }
 
+    public static String changeToJsonFilename(String filename) {
+        return changeExtension(filename,
+            JSON);
+    }
+
     public static String setExtension(String filename,
         String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
+        return Optional.ofNullable(extension)
+            .map(ContentTypeUtils::fullExtension)
+            .filter(ext -> !filename.endsWith(ext))
+            .map(fullExtension -> filename + fullExtension)
+            .orElse(filename);
+    }
+
+    public static String changeExtension(String filename,
+        String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
         return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(ext -> !filename.endsWith(ext))
@@ -100,6 +124,11 @@ public final class ContentTypeUtils {
 
     public static String removeExtension(String filename,
         String extension) {
+
+        if (filename == null) {
+            return null;
+        }
+
         return Optional.ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(filename::endsWith)
