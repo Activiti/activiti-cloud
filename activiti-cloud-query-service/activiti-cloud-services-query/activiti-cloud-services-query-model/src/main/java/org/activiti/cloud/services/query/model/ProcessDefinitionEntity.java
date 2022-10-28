@@ -15,12 +15,17 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "ProcessDefinition")
 @Table(name = "PROCESS_DEFINITION",
@@ -41,6 +46,20 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
     private int version;
     private String formKey;
     private String category;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<ProcessCandidateStarterUserEntity> candidateStarterUsers = new LinkedHashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<ProcessCandidateStarterGroupEntity> candidateStarterGroups = new LinkedHashSet<>();
 
     public ProcessDefinitionEntity() {
     }
@@ -118,6 +137,22 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public Set<ProcessCandidateStarterUserEntity> getCandidateStarterUsers() {
+        return candidateStarterUsers;
+    }
+
+    public Set<ProcessCandidateStarterGroupEntity> getCandidateStarterGroups() {
+        return candidateStarterGroups;
+    }
+
+    public void setCandidateStarterUsers(Set<ProcessCandidateStarterUserEntity> candidateStarterUsers) {
+        this.candidateStarterUsers = candidateStarterUsers;
+    }
+
+    public void setCandidateStarterGroups(Set<ProcessCandidateStarterGroupEntity> candidateStarterGroups) {
+        this.candidateStarterGroups = candidateStarterGroups;
     }
 
     @Override

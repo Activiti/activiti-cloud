@@ -45,6 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
+import java.util.List;
 
 import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +53,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,6 +106,8 @@ public class ProcessDefinitionControllerIT {
         assertThat(processInstanceAdminService).isNotNull();
         assertThat(processInstanceService).isNotNull();
         assertThat(entityManagerFactory).isNotNull();
+        when(securityManager.getAuthenticatedUserId()).thenReturn("user");
+        when(securityManager.getAuthenticatedUserGroups()).thenReturn(List.of());
     }
 
     @Test
