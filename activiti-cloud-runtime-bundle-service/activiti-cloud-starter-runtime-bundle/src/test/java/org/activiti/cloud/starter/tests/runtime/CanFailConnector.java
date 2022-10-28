@@ -27,8 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @EnableBinding(CanFailConnectorChannels.class)
 public class CanFailConnector {
 
-    private boolean shouldSendError = true;
+    private boolean shouldSendError = false;
+    private boolean shouldSendResult = true;
     private AtomicBoolean integrationErrorSent = new AtomicBoolean(false);
+    private AtomicBoolean resultSent = new AtomicBoolean(false);
+    private AtomicBoolean resultNotSent = new AtomicBoolean(false);
     private IntegrationRequest latestReceivedIntegrationRequest;
 
     private final IntegrationResultSender integrationResultSender;
@@ -42,6 +45,7 @@ public class CanFailConnector {
 
     public void setShouldSendError(boolean shouldSendError) {
         this.shouldSendError = shouldSendError;
+        this.integrationErrorSent.set(false);
     }
 
     @StreamListener(value = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
@@ -49,13 +53,25 @@ public class CanFailConnector {
         latestReceivedIntegrationRequest = integrationRequest;
         integrationErrorSent.set(false);
         if (shouldSendError) {
-            integrationErrorSent.set(true);
             integrationErrorSender.send(integrationRequest,
                                         new RuntimeException("task failed"));
-        } else {
+            integrationErrorSent.set(true);
+        } else if (shouldSendResult){
             integrationResultSender.send(integrationRequest,
                 integrationRequest.getIntegrationContext());
+            resultSent.set(true);
+        } else {
+            resultNotSent.set(true);
         }
+
+    }
+
+    public AtomicBoolean resultSent() {
+        return resultSent;
+    }
+
+    public AtomicBoolean resultNotSent() {
+        return resultNotSent;
     }
 
     public AtomicBoolean errorSent() {
@@ -64,5 +80,16 @@ public class CanFailConnector {
 
     public IntegrationRequest getLatestReceivedIntegrationRequest() {
         return latestReceivedIntegrationRequest;
+    }
+
+    public void setShouldSendResult(boolean shouldSendResult) {
+        this.shouldSendResult = shouldSendResult;
+        this.resultSent.set(false);
+        this.resultNotSent.set(false);
+    }
+
+    public void reset() {
+        setShouldSendResult(true);
+        setShouldSendError(false);
     }
 }
