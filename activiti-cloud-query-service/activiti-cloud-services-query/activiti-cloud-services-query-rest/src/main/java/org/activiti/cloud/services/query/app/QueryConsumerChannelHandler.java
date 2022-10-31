@@ -40,6 +40,6 @@ public class QueryConsumerChannelHandler implements Consumer<Flux<List<CloudRunt
 
     @Override
     public synchronized void accept(Flux<List<CloudRuntimeEvent<?, ?>>> listFlux) {
-        listFlux.map(optimizer::optimize).subscribe(eventHandlerContext);
+        listFlux.log().map(optimizer::optimize).subscribe(eventHandlerContext);
     }
 }

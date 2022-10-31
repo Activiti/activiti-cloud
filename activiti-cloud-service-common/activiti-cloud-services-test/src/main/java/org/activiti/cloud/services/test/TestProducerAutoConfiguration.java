@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceConfiguration;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
@@ -32,13 +33,12 @@ import org.springframework.messaging.MessageChannel;
 public class TestProducerAutoConfiguration {
 
     @ConditionalOnBean(BindingService.class)
-    @EnableBinding(StreamProducer.class)
     static class MyProducerConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public MyProducer myProducer(MessageChannel producer) {
-            return new MyProducer(producer);
+        public MyProducer myProducer(StreamBridge streamBridge) {
+            return new MyProducer(streamBridge);
         }
     }
 
