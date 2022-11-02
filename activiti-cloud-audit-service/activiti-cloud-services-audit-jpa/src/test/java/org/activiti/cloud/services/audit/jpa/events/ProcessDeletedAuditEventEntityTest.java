@@ -19,7 +19,6 @@ import static org.activiti.test.Assertions.assertThat;
 
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.junit.jupiter.api.Test;
 
 public class ProcessDeletedAuditEventEntityTest {

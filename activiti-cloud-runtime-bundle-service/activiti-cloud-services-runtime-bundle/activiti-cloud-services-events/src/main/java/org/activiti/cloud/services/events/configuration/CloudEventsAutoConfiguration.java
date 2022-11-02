@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
-import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;

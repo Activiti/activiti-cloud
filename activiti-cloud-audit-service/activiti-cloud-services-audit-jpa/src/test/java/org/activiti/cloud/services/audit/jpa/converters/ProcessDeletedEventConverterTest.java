@@ -148,10 +148,6 @@ public class ProcessDeletedEventConverterTest {
     assertThat(apiEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
   }
 
-  private ProcessDeletedAuditEventEntity buildAuditEvent() {
-    return new ProcessDeletedAuditEventEntity();
-  }
-
   private CloudRuntimeEvent<?,?> buildEvent(String processInstanceId){
     ProcessInstanceImpl instance = new ProcessInstanceImpl();
     instance.setId(processInstanceId);

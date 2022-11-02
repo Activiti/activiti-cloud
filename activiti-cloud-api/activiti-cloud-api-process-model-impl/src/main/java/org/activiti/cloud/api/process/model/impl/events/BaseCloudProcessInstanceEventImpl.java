@@ -32,8 +32,8 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public abstract class BaseCloudProcessInstanceEventImpl<EVENT_TYPE extends Enum<?>> extends CloudRuntimeEventImpl<ProcessInstance,
-    EVENT_TYPE> {
+public abstract class BaseCloudProcessInstanceEventImpl<T extends Enum<?>> extends CloudRuntimeEventImpl<ProcessInstance,
+    T> {
 
   public BaseCloudProcessInstanceEventImpl() { }
 

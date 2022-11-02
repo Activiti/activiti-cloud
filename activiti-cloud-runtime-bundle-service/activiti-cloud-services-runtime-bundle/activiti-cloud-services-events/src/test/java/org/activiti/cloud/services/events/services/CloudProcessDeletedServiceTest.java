@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.events.services;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,20 +22,16 @@ import static org.mockito.Mockito.when;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
-import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.messaging.MessageChannel;
 
 
@@ -61,7 +56,7 @@ public class CloudProcessDeletedServiceTest {
     cloudProcessDeletedService = new CloudProcessDeletedService(producer, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
   }
 
-  private void setProperties(){
+  private void setProperties() {
     when(producer.auditProducer()).thenReturn(auditProducer);
     when(properties.getAppName()).thenReturn("an");
     when(properties.getServiceName()).thenReturn("sn");
@@ -82,11 +77,4 @@ public class CloudProcessDeletedServiceTest {
     verify(auditProducer, times(1)).send(any());
   }
 
-
-  private ProcessInstance buildProcessInstance(String processInstanceId, ProcessInstanceStatus status) {
-    CloudProcessInstanceImpl processInstance = new CloudProcessInstanceImpl();
-    processInstance.setId(processInstanceId);
-    processInstance.setStatus(status);
-    return processInstance;
-  }
 }
