@@ -20,9 +20,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
-import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
