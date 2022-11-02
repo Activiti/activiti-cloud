@@ -31,6 +31,7 @@ import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,10 +51,10 @@ public class CloudRuntimeEventTypeTest {
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNErrorReceivedEvent.ErrorEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNSignalEvent.SignalEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessDefinitionEvent.ProcessDefinitionEvents.class));
+        assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(IntegrationEvent.IntegrationEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNTimerEvent.TimerEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(BPMNMessageEvent.MessageEvents.class));
-        assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessDefinitionEvent.ProcessDefinitionEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(SequenceFlowEvent.SequenceFlowEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(ProcessRuntimeEvent.ProcessEvents.class));
         assertThat(enumValues).containsAll(this.getEnumValuesAsStringList(MessageDefinitionEvent.MessageDefinitionEvents.class));

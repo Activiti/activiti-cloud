@@ -41,6 +41,7 @@ import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinitio
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.CloudApplicationImpl;
 import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
@@ -73,6 +74,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscription
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -122,6 +124,8 @@ public class CloudProcessModelAutoConfiguration {
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()));
         module.registerSubtypes(new NamedType(CloudProcessUpdatedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessDeletedEventImpl.class,
+                                              ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCompletedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessSuspendedEventImpl.class,

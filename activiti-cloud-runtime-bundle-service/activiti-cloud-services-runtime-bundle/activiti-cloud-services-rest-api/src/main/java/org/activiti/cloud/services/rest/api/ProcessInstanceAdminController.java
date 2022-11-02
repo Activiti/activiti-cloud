@@ -46,12 +46,14 @@ public interface ProcessInstanceAdminController {
     @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/suspend")
     EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
 
-
     @RequestMapping(method = RequestMethod.POST,value = "{processInstanceId}/resume")
     EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
     EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
+
+    @RequestMapping(value = "/{processInstanceId}/destroy", method = RequestMethod.DELETE)
+    ResponseEntity<Void> destroyProcessInstance(@PathVariable String processInstanceId);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
     EntityModel<CloudProcessInstance> updateProcess(@PathVariable("processInstanceId") String processInstanceId,

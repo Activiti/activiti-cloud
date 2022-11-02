@@ -47,6 +47,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscription
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -100,6 +101,7 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudProcessSuspendedEventImpl());
         eventImplementations.add(new CloudProcessResumedEventImpl());
         eventImplementations.add(new CloudProcessUpdatedEventImpl());
+        eventImplementations.add(new CloudProcessDeletedEventImpl());
         eventImplementations.add(new CloudSequenceFlowTakenEventImpl());
         eventImplementations.add(new CloudStartMessageDeployedEventImpl());
         eventImplementations.add(new CloudMessageSubscriptionCancelledEventImpl());

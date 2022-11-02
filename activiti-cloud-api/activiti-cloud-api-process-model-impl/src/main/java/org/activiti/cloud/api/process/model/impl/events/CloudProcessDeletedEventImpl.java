@@ -16,22 +16,27 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
 
-public abstract class CloudProcessInstanceEventImpl extends BaseCloudProcessInstanceEventImpl<ProcessRuntimeEvent.ProcessEvents> {
+public class CloudProcessDeletedEventImpl extends ExtendedCloudProcessInstanceEventImpl implements CloudProcessDeletedEvent {
 
-    public CloudProcessInstanceEventImpl() {
+    public CloudProcessDeletedEventImpl() {
     }
 
-    public CloudProcessInstanceEventImpl(ProcessInstance processInstance) {
+    public CloudProcessDeletedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessInstanceEventImpl(String id,
-                                         Long timestamp,
-                                         ProcessInstance processInstance) {
+    public CloudProcessDeletedEventImpl(String id,
+                                          Long timestamp,
+                                          ProcessInstance processInstance) {
         super(id,
               timestamp,
               processInstance);
+    }
+
+    @Override
+    public ExtendedCloudProcessRuntimeEvents getEventType() {
+        return ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED;
     }
 }

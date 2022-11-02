@@ -16,18 +16,18 @@
 package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent;
 
-public abstract class CloudProcessInstanceEventImpl extends BaseCloudProcessInstanceEventImpl<ProcessRuntimeEvent.ProcessEvents> {
+public abstract class ExtendedCloudProcessInstanceEventImpl extends BaseCloudProcessInstanceEventImpl<ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents> {
 
-    public CloudProcessInstanceEventImpl() {
+    public ExtendedCloudProcessInstanceEventImpl() {
     }
 
-    public CloudProcessInstanceEventImpl(ProcessInstance processInstance) {
+    public ExtendedCloudProcessInstanceEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessInstanceEventImpl(String id,
+    public ExtendedCloudProcessInstanceEventImpl(String id,
                                          Long timestamp,
                                          ProcessInstance processInstance) {
         super(id,
