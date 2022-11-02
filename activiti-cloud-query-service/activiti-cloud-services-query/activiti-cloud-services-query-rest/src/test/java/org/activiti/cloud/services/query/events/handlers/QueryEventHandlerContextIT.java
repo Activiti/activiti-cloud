@@ -94,6 +94,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name())).isInstanceOf(ProcessResumedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name())).isInstanceOf(ProcessCancelledEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name())).isInstanceOf(ProcessUpdatedEventHandler.class);
+        assertThat(handlers.get(ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name())).isInstanceOf(ProcessDeletedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name())).isInstanceOf(TaskCreatedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())).isInstanceOf(TaskAssignedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name())).isInstanceOf(TaskSuspendedEventHandler.class);
