@@ -48,10 +48,6 @@ public class CloudProcessDeletedServiceTest {
   @Mock
   private RuntimeBundleProperties properties;
 
-
-  @Mock
-  private ProcessAdminRuntime processAdminRuntime;
-
   @Mock
   private ProcessEngineChannels producer;
 
@@ -62,7 +58,7 @@ public class CloudProcessDeletedServiceTest {
   public void setUp() {
     RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
     RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory = new RuntimeBundleMessageBuilderFactory(properties);
-    cloudProcessDeletedService = new CloudProcessDeletedService(producer, processAdminRuntime, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
+    cloudProcessDeletedService = new CloudProcessDeletedService(producer, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
   }
 
   private void setProperties(){
@@ -75,47 +71,17 @@ public class CloudProcessDeletedServiceTest {
   }
 
   @Test
-  public void should_sendDeleteEventWhenProcessCompleted() {
+  public void should_sendDeleteEvent() {
+    //given
     setProperties();
 
-    ProcessInstance processInstance = buildProcessInstance("1", ProcessInstanceStatus.COMPLETED);
-    when(processAdminRuntime.processInstance(any())).thenReturn(processInstance);
-
+    //when
     cloudProcessDeletedService.sendDeleteEvent("1");
 
+    //then
     verify(auditProducer, times(1)).send(any());
   }
 
-  @Test
-  public void should_sendDeleteEventWhenProcessCancelled() {
-    setProperties();
-
-    ProcessInstance processInstance = buildProcessInstance("1", ProcessInstanceStatus.COMPLETED);
-    when(processAdminRuntime.processInstance(any())).thenReturn(processInstance);
-
-    cloudProcessDeletedService.sendDeleteEvent("1");
-
-    verify(auditProducer, times(1)).send(any());
-  }
-
-  @Test
-  public void should_sendDeleteEventWhenProcessNotFound() {
-    setProperties();
-
-    when(processAdminRuntime.processInstance(any())).thenThrow(new NotFoundException("Process Instance not found"));
-
-    cloudProcessDeletedService.sendDeleteEvent("1");
-
-    verify(auditProducer, times(1)).send(any());
-  }
-
-  @Test
-  public void should_notSendDeleteEventWhenProcessRunning() {
-    ProcessInstance processInstance = buildProcessInstance("1", ProcessInstanceStatus.RUNNING);
-    when(processAdminRuntime.processInstance(any())).thenReturn(processInstance);
-
-    assertThrows(IllegalStateException.class, () -> cloudProcessDeletedService.sendDeleteEvent("1"));
-  }
 
   private ProcessInstance buildProcessInstance(String processInstanceId, ProcessInstanceStatus status) {
     CloudProcessInstanceImpl processInstance = new CloudProcessInstanceImpl();

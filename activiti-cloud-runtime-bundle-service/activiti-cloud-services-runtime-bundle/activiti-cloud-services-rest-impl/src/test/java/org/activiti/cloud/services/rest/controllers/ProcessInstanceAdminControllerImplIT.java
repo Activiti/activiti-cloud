@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -180,6 +181,18 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy",
                 1))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    public void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
+        //given
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy",
+                1))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

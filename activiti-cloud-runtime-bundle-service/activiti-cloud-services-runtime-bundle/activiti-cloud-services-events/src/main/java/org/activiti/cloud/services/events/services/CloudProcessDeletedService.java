@@ -17,57 +17,31 @@ package org.activiti.cloud.services.events.services;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
-import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CloudProcessDeletedService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CloudProcessDeletedService.class);
-
-  private final Set<ProcessInstanceStatus> deleteStatuses = Set.of(ProcessInstanceStatus.COMPLETED, ProcessInstanceStatus.CANCELLED);
-
-  private final String DELETE_PROCESS_NOT_ALLOWED = "Process Instance %s is not in status: " +
-      String.join(", ", deleteStatuses.stream().map(Enum::name).collect(Collectors.toList()));
-
   private final ProcessEngineChannels producer;
-
-  private final ProcessAdminRuntime processAdminRuntime;
   private final RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
   private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
 
   public CloudProcessDeletedService(ProcessEngineChannels producer,
-      ProcessAdminRuntime processAdminRuntime,
       RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
       RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
 
     this.producer = producer;
-    this.processAdminRuntime = processAdminRuntime;
     this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
     this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
   }
 
   public void sendDeleteEvent(String processInstanceId) {
-    try {
-      ProcessInstance processInstance = processAdminRuntime.processInstance(processInstanceId);
-      if(processInstance != null && !deleteStatuses.contains(processInstance.getStatus())){
-        throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
-      }
-    } catch(NotFoundException e){
-      LOGGER.debug("Process Instance " + processInstanceId + " not found. Sending PROCESS_DELETE event.");
-    }
 
     sendEvent(buildProcessInstance(processInstanceId));
   }

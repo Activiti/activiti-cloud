@@ -460,10 +460,9 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CloudProcessDeletedService cloudProcessDeletedProducer(  ProcessEngineChannels processEngineChannels,
-                                                                    ProcessAdminRuntime processAdminRuntime,
                                                                     RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
                                                                     RuntimeBundleInfoAppender runtimeBundleInfoAppender){
-        return new CloudProcessDeletedService(processEngineChannels, processAdminRuntime, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
+        return new CloudProcessDeletedService(processEngineChannels, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
     }
 
 }
