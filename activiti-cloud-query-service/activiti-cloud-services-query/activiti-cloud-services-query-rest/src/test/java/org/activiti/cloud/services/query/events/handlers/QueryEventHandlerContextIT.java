@@ -31,6 +31,7 @@ import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
+import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,6 +57,7 @@ public class QueryEventHandlerContextIT {
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name(),
+                ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_CREATED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name(),
