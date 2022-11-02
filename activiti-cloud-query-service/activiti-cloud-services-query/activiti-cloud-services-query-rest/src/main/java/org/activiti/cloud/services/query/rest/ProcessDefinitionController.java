@@ -53,7 +53,7 @@ import com.querydsl.core.types.Predicate;
         })
 public class ProcessDefinitionController {
 
-    @Value("${activiti.candidateStarter.enabled:false}")
+    @Value("${activiti.candidateStarters.enabled:false}")
     private boolean candidateStartersEnabled;
 
     private ProcessDefinitionRepository repository;
