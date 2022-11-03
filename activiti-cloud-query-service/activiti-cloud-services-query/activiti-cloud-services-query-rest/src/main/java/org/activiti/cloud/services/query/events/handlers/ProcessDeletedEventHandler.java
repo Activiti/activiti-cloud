@@ -16,8 +16,10 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Optional;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
 import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
@@ -26,27 +28,36 @@ import org.activiti.cloud.services.query.model.QueryException;
 
 public class ProcessDeletedEventHandler implements QueryEventHandler {
 
-    private final EntityManager entityManager;
+  protected final String INVALID_PROCESS_INSTANCE_STATE = "Process Instance %s is not in a valid state: %s";
 
-    public ProcessDeletedEventHandler(EntityManager entityManager) {
-        this.entityManager = entityManager;
+  private Set<ProcessInstanceStatus> ALLOWED_STATUS = Set.of(ProcessInstanceStatus.CANCELLED, ProcessInstanceStatus.COMPLETED);
+
+  private final EntityManager entityManager;
+
+  public ProcessDeletedEventHandler(EntityManager entityManager) {
+    this.entityManager = entityManager;
+  }
+
+  @Override
+  public void handle(CloudRuntimeEvent<?, ?> event) {
+    CloudProcessDeletedEvent deletedEvent = (CloudProcessDeletedEvent) event;
+
+    ProcessInstance eventProcessInstance = deletedEvent.getEntity();
+
+    ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
+            eventProcessInstance.getId()))
+        .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId()));
+
+    if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
+      entityManager.remove(processInstanceEntity);
+    } else {
+      throw new IllegalStateException(String.format(INVALID_PROCESS_INSTANCE_STATE, processInstanceEntity.getId(),
+          processInstanceEntity.getStatus().name()));
     }
+  }
 
-    @Override
-    public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudProcessDeletedEvent deletedEvent = (CloudProcessDeletedEvent) event;
-
-        ProcessInstance eventProcessInstance = deletedEvent.getEntity();
-
-        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                             eventProcessInstance.getId()))
-                                                              .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId()));
-
-        entityManager.remove(processInstanceEntity);
-    }
-
-    @Override
-    public String getHandledEvent() {
-        return ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name();
-    }
+  @Override
+  public String getHandledEvent() {
+    return ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name();
+  }
 }
