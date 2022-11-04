@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -36,7 +35,6 @@ import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +44,7 @@ import java.util.List;
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
 @Configuration
-@EnableBinding(EngineEventsConsumerChannels.class)
+//@EnableBinding(EngineEventsConsumerChannels.class)
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
 @PropertySources({

@@ -15,11 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -42,6 +37,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationErrorEventHandlerTest {
@@ -93,7 +94,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             new CloudBpmnError("Test Error"));
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.accept(integrationErrorEvent);
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
@@ -123,7 +124,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             new CloudBpmnError("Test Error"));
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.accept(integrationErrorEvent);
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);

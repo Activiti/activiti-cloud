@@ -55,9 +55,9 @@ public class ActivitiAuditProducerEnvironmentPostProcessor implements Environmen
                      .ifPresent(value -> {
                          Map<String, Object> properties = new LinkedHashMap<>();
 
-                         properties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionKeyExtractorName",
+                         properties.put("spring.cloud.stream.bindings.auditProducer-out-0.producer.partitionKeyExtractorName",
                                         ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME);
-                         properties.put("spring.cloud.stream.bindings.auditProducer.producer.partitionCount",
+                         properties.put("spring.cloud.stream.bindings.auditProducer-out-0.producer.partitionCount",
                                         partitionCount);
 
                          environment.getPropertySources()

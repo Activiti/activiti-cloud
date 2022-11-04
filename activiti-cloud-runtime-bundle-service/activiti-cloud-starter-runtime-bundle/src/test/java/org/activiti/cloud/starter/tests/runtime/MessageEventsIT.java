@@ -32,7 +32,11 @@ import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
-import org.activiti.cloud.services.messages.events.producer.*;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -47,6 +51,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -64,10 +69,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -86,7 +96,7 @@ public class MessageEventsIT {
     private RuntimeService runtimeService;
 
     @Autowired
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @SpyBean
     private BpmnMessageReceivedEventMessageProducer bpmnMessageReceivedEventMessageProducer;
@@ -122,7 +132,7 @@ public class MessageEventsIT {
     static class TestConfigurationContext {
 
         @Bean
-        @BridgeFrom("messageEventsOutput")
+        @BridgeFrom("messageEventsOutput-out-0")
         QueueChannel messageEventsQueue() {
             return MessageChannels.queue()
                                   .get();
@@ -208,10 +218,9 @@ public class MessageEventsIT {
             .withVariable("key", "value")
             .build();
 
-        Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
-            .build();
+        Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload).build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -237,11 +246,10 @@ public class MessageEventsIT {
             .withVariable("key", "value")
             .build();
 
-        Message<StartMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
-            .build();
+        Message<StartMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload).build();
 
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -312,7 +320,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -358,7 +366,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -404,7 +412,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -450,7 +458,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -498,7 +506,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -546,7 +554,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -592,7 +600,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -695,7 +703,7 @@ public class MessageEventsIT {
         Message<ReceiveMessagePayload> receiveMessage = MessageBuilder.withPayload(receivePayload)
             .build();
         // when
-        processEngineChannels.commandConsumer().send(receiveMessage);
+        streamBridge.send(ProcessEngineChannels.COMMAND_PROCESSOR_INPUT_BINDING, receiveMessage);
 
         // then
         await().untilAsserted(() -> {
@@ -716,12 +724,12 @@ public class MessageEventsIT {
     }
 
     private void assertOutputDestination() {
-        Message<?> message = messageEventsQueue.receive();
+        Message<?> message = messageEventsQueue.receive(5000);
 
         assertThat(message)
             .extracting(Message::getHeaders)
             .extracting(MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION)
-            .isEqualTo(bindingServiceProperties.getBindingDestination("commandConsumer"));
+            .isEqualTo(bindingServiceProperties.getBindingDestination("commandProcessor-in-0"));
     }
 
 }

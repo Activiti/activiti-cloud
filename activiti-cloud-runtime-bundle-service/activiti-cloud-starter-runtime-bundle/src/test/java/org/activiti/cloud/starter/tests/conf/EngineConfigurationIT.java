@@ -92,7 +92,7 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveRequiredGroupsSetForAuditProducer() {
         //when
-        BindingProperties auditProducer = bindingServiceProperties.getBindingProperties("auditProducer");
+        BindingProperties auditProducer = bindingServiceProperties.getBindingProperties("auditProducer-out-0");
 
         //then
         assertThat(auditProducer.getDestination())
@@ -107,7 +107,8 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForMessageEvents() {
         //when
-        BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties("messageEventsOutput");
+        BindingProperties messageEventsOutput = bindingServiceProperties.getBindingProperties(
+                "messageEventsOutput-out-0");
 
         //then
         assertThat(messageEventsOutput.getDestination()).isEqualTo("namespace.message-events.activiti-app");
@@ -117,8 +118,8 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCommandEndpoint() {
         //when
-        BindingProperties commandConsumer = bindingServiceProperties.getBindingProperties("commandConsumer");
-        BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandResults");
+        BindingProperties commandConsumer = bindingServiceProperties.getBindingProperties("commandProcessor-in-0");
+        BindingProperties commandResults = bindingServiceProperties.getBindingProperties("commandProcessor-out-0");
 
         //then
         assertThat(commandConsumer.getDestination()).isEqualTo("namespace.command-consumer.activiti-app");
@@ -129,8 +130,8 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForSignalEvents() {
         //when
-        BindingProperties signalProducer = bindingServiceProperties.getBindingProperties("signalProducer");
-        BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer");
+        BindingProperties signalProducer = bindingServiceProperties.getBindingProperties("signalProducer-out-0");
+        BindingProperties signalConsumer = bindingServiceProperties.getBindingProperties("signalConsumer-in-0");
 
         //then
         assertThat(signalProducer.getDestination()).isEqualTo("namespace.signal-event");
@@ -142,8 +143,10 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties("integrationResultsConsumer");
-        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
+        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties(
+                "integrationResultsConsumer-in-0");
+        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties(
+                "integrationErrorsConsumer-in-0");
 
         //then
         assertThat(integrationResultsConsumer.getDestination()).isEqualTo("namespace.integration-result.my-activiti-rb-app");

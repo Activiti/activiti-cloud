@@ -15,17 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -44,6 +33,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationResultEventHandlerTest {
@@ -80,7 +81,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
 
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.accept(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
@@ -115,7 +116,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(null);
 
         //when
-        handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
+        handler.accept(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService, never()).deleteIntegrationContext(any());

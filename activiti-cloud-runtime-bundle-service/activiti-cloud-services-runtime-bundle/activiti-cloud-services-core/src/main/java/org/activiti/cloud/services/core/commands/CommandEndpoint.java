@@ -15,21 +15,18 @@
  */
 package org.activiti.cloud.services.core.commands;
 
+import org.activiti.api.model.shared.EmptyResult;
+import org.activiti.api.model.shared.Payload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.activiti.api.model.shared.EmptyResult;
-import org.activiti.api.model.shared.Payload;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.context.SecurityContextHolder;
-
-public class CommandEndpoint<T extends Payload> {
+public class CommandEndpoint<T extends Payload, R> implements Function<T, R> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandEndpoint.class);
     private Map<String, CommandExecutor<T>> commandExecutors;
@@ -40,9 +37,7 @@ public class CommandEndpoint<T extends Payload> {
                                                                       Function.identity()));
     }
 
-    @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
-    @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
-    public <R> R execute(T payload) {
+    public R execute(T payload) {
 
         SecurityContextHolder.getContext()
                              .setAuthentication(new CommandEndpointAdminAuthentication());
@@ -66,5 +61,10 @@ public class CommandEndpoint<T extends Payload> {
         }
 
         return new EmptyResult();
+    }
+
+    @Override
+    public R apply(T payload) {
+        return execute(payload);
     }
 }

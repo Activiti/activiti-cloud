@@ -15,12 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
-import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
@@ -39,9 +33,9 @@ import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,10 +43,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +62,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.activiti.api.task.model.Task.TaskStatus.ASSIGNED;
+import static org.activiti.api.task.model.Task.TaskStatus.CREATED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -78,16 +79,13 @@ import java.util.Map;
 public class CommandEndpointIT {
 
     @Autowired
-    private MessageClientStream clientStream;
-
+    private StreamBridge streamBridge;
+    
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Autowired
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
-
-    @Autowired
-    private TaskRestTemplate taskRestTemplate;
 
     @Autowired
     private CommandEndPointITStreamHandler streamHandler;
@@ -194,14 +192,14 @@ public class CommandEndpointIT {
 
         CompleteTaskPayload completeTaskCmd = TaskPayloadBuilder.complete().withTaskId(task.getId()).withVariables(
             variables).build();
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId",
             completeTaskCmd.getId()).build());
         await("task to be completed").untilTrue(streamHandler.getCompletedTaskAck());
     }
 
     private void releaseTask(Task task) {
         ReleaseTaskPayload releaseTaskCmd = TaskPayloadBuilder.release().withTaskId(task.getId()).build();
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId",
             releaseTaskCmd.getId()).build());
         await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
 
@@ -214,7 +212,7 @@ public class CommandEndpointIT {
             "v2");
         SetProcessVariablesPayload setProcessVariables = ProcessPayloadBuilder.setVariables().withProcessInstanceId(proInstanceId).withVariables(variables).build();
 
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId",
             setProcessVariables.getId()).build());
 
         await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
@@ -230,7 +228,7 @@ public class CommandEndpointIT {
     private void claimTask(Task task) {
         streamHandler.resetClaimedTaskAck();
         ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder.claim().withTaskId(task.getId()).withAssignee("hruser").build();
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(claimTaskPayload).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(claimTaskPayload).setHeader("cmdId",
             claimTaskPayload.getId()).build());
 
         await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
@@ -251,7 +249,7 @@ public class CommandEndpointIT {
         String processInstanceId) {
         //given
         ResumeProcessPayload resumeProcess = ProcessPayloadBuilder.resume(processInstanceId);
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(resumeProcess).setHeader("cmdId",
             resumeProcess.getId()).build());
 
         await("process to be resumed").untilTrue(streamHandler.getResumedProcessInstanceAck());
@@ -273,7 +271,7 @@ public class CommandEndpointIT {
     private void suspendProcessInstance(SuspendProcessPayload suspendProcessInstanceCmd) {
         //given
 
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
 
         await("process to be suspended").untilTrue(streamHandler.getSuspendedProcessInstanceAck());
         //when
@@ -287,7 +285,7 @@ public class CommandEndpointIT {
 
     private String startProcessInstance(StartProcessPayload startProcessPayload) {
         //given
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessPayload).build());
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(startProcessPayload).build());
 
         await("process to be started")
             .untilTrue(streamHandler.getStartedProcessInstanceAck());
@@ -351,7 +349,7 @@ public class CommandEndpointIT {
         SignalPayload sendSignal = ProcessPayloadBuilder.signal().withName("go").build();
 
         //when
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(sendSignal).setHeader("cmdId",
+        streamBridge.send("myCmdProducer-out-0", MessageBuilder.withPayload(sendSignal).setHeader("cmdId",
             sendSignal.getId()).build());
         //then
         await("signal to be sent")

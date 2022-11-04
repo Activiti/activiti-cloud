@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 @TestComponent
+//TODO remove
 public class IntegrationResultSender {
 
     private final BinderAwareChannelResolver resolver;

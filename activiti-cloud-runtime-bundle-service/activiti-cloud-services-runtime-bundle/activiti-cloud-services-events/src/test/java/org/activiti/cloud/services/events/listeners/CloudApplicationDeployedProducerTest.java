@@ -22,7 +22,6 @@ import org.activiti.api.runtime.event.impl.ApplicationDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderAppenderChain;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
@@ -34,7 +33,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.Arrays;
@@ -59,10 +58,7 @@ public class CloudApplicationDeployedProducerTest {
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
     @Mock
-    private ProcessEngineChannels producer;
-
-    @Mock
-    private MessageChannel auditProducer;
+    private StreamBridge streamBridge;
 
     @Mock
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
@@ -75,7 +71,6 @@ public class CloudApplicationDeployedProducerTest {
 
     @BeforeEach
     public void setUp() {
-        when(producer.auditProducer()).thenReturn(auditProducer);
         when(runtimeBundleMessageBuilderFactory.create()).thenReturn(messageBuilderAppenderChain);
     }
 
@@ -95,7 +90,7 @@ public class CloudApplicationDeployedProducerTest {
         //then
         verify(runtimeBundleInfoAppender,
                 times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
-        verify(auditProducer).send(any());
+        verify(streamBridge).send(any(), any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
         List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())

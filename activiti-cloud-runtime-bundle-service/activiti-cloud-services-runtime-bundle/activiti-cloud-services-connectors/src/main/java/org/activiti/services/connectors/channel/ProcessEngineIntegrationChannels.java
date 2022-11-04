@@ -15,19 +15,14 @@
  */
 package org.activiti.services.connectors.channel;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.messaging.SubscribableChannel;
+public class ProcessEngineIntegrationChannels {
 
-public interface ProcessEngineIntegrationChannels {
+    public static final String INTEGRATION_RESULTS_CONSUMER = "integrationResultsConsumer";
 
-    String INTEGRATION_RESULTS_CONSUMER = "integrationResultsConsumer";
+    public static final String INTEGRATION_RESULTS_CONSUMER_BINDING = INTEGRATION_RESULTS_CONSUMER + "-in-0";
 
-    String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
+    public static final String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
-    @Input(INTEGRATION_RESULTS_CONSUMER)
-    SubscribableChannel integrationResultsConsumer();
-
-    @Input(INTEGRATION_ERRORS_CONSUMER)
-    SubscribableChannel integrationErrorsConsumer();
+    public static final String INTEGRATION_ERRORS_CONSUMER_BINDING = INTEGRATION_ERRORS_CONSUMER + "-in-0";
 
 }

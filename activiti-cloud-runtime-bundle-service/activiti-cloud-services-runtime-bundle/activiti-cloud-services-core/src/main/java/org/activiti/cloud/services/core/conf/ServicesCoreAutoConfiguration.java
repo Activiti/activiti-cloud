@@ -68,6 +68,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static org.activiti.cloud.services.events.ProcessEngineChannels.COMMAND_PROCESSOR;
+
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
 public class ServicesCoreAutoConfiguration {
@@ -161,10 +163,10 @@ public class ServicesCoreAutoConfiguration {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
-    @Bean
+    @Bean(name = COMMAND_PROCESSOR)
     @ConditionalOnMissingBean
-    public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        return new CommandEndpoint<T>(cmdExecutors);
+    public <T extends Payload, R> CommandEndpoint<T, R> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
+        return new CommandEndpoint<>(cmdExecutors);
     }
 
     @Bean

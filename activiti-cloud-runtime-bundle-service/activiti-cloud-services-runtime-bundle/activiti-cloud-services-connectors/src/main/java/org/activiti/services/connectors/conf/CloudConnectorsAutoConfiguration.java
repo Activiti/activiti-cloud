@@ -38,7 +38,6 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEven
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationContext;
@@ -50,12 +49,11 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
-@EnableBinding(ProcessEngineIntegrationChannels.class)
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
 
-    @Bean
+    @Bean(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler(
         RuntimeService runtimeService,
@@ -68,7 +66,7 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties, managementService, processEngineEventsAggregator, variablesPropagator);
     }
 
-    @Bean
+    @Bean(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
                                                                                            IntegrationContextService integrationContextService,

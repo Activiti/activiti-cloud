@@ -25,7 +25,6 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -42,6 +41,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
@@ -104,7 +104,7 @@ public class ProcessInstanceVariableControllerImplIT {
     private CollectionModelAssembler resourcesAssembler;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
@@ -119,7 +119,7 @@ public class ProcessInstanceVariableControllerImplIT {
         //using it in the test we need to to declare it as @SpyBean so it get inject
         //in the controller
         assertThat(resourcesAssembler).isNotNull();
-        assertThat(processEngineChannels).isNotNull();
+        assertThat(streamBridge).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(cachingProcessExtensionService).isNotNull();
     }

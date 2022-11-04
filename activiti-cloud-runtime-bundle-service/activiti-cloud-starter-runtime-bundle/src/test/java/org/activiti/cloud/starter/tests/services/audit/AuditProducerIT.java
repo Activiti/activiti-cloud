@@ -97,6 +97,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -388,6 +389,7 @@ public class AuditProducerIT {
     }
 
     @Test
+    @Disabled // TODO enable after connector implementation is modified
     public void shouldSendIntegrationResultReceiveEvent() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(

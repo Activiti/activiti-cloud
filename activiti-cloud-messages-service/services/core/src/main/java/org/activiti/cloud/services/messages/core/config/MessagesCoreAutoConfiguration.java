@@ -21,9 +21,7 @@ import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAd
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregatorFactoryBean;
-import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
-import org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow;
 import org.activiti.cloud.services.messages.core.integration.MessageEventHeaders;
 import org.activiti.cloud.services.messages.core.processor.MessageGroupProcessorChain;
 import org.activiti.cloud.services.messages.core.processor.MessageGroupProcessorHandlerChain;
@@ -41,12 +39,10 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.aggregator.CorrelationStrategy;
@@ -72,7 +68,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
@@ -83,7 +78,7 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
  */
 @Configuration
 @EnableIntegration
-@EnableBinding(MessageConnectorProcessor.class)
+//@EnableBinding(MessageConnectorProcessor.class)
 @EnableIntegrationManagement
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
 @EnableTransactionManagement
@@ -106,21 +101,20 @@ public class MessagesCoreAutoConfiguration {
                                .get();
     }
 
-    @Bean
-    @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
-    @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
-    public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorProcessor processor,
-                                                           MessageConnectorAggregator aggregator,
-                                                           IdempotentReceiverInterceptor interceptor,
-                                                           List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           CommandConsumerMessageRouter router) {
-        return new MessageConnectorIntegrationFlow(processor,
-                                                   aggregator,
-                                                   interceptor,
-                                                   adviceChain,
-                                                   properties,
-                                                   router);
-    }
+//    @Bean
+//    @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
+//    @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
+//    public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorAggregator aggregator,
+//                                                           IdempotentReceiverInterceptor interceptor,
+//                                                           List<MessageConnectorHandlerAdvice> adviceChain,
+//                                                           CommandConsumerMessageRouter router) {
+//        return new MessageConnectorIntegrationFlow(null,
+//                                                   aggregator,
+//                                                   interceptor,
+//                                                   adviceChain,
+//                                                   properties,
+//                                                   router);
+//    }
 
     @Bean
     @ConditionalOnMissingBean

@@ -15,25 +15,14 @@
  */
 package org.activiti.cloud.services.events;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
+public class ProcessEngineChannels {
 
-public interface ProcessEngineChannels {
+    public static final String COMMAND_PROCESSOR = "commandProcessor";
 
-    String COMMAND_CONSUMER = "commandConsumer";
+    public static final String COMMAND_PROCESSOR_INPUT_BINDING = COMMAND_PROCESSOR + "-in-0";
 
-    String COMMAND_RESULTS = "commandResults";
+    public static final String COMMAND_PROCESSOR_OUTPUT_BINDING = COMMAND_PROCESSOR + "-out-0";
 
-    String AUDIT_PRODUCER = "auditProducer";
+    public static final String AUDIT_PRODUCER_OUTPUT_BINDING = "auditProducer-out-0";
 
-    @Input(COMMAND_CONSUMER)
-    SubscribableChannel commandConsumer();
-
-    @Output(COMMAND_RESULTS)
-    MessageChannel commandResults();
-
-    @Output(AUDIT_PRODUCER)
-    MessageChannel auditProducer();
 }

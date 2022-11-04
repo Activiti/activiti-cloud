@@ -16,7 +16,6 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -30,9 +29,11 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
 
-public class ServiceTaskIntegrationResultEventHandler {
+import java.util.List;
+import java.util.function.Consumer;
+
+public class ServiceTaskIntegrationResultEventHandler implements Consumer<IntegrationResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskIntegrationResultEventHandler.class);
 
@@ -57,8 +58,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.variablesPropagator = variablesPropagator;
     }
 
-    @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
-    public void receive(IntegrationResult integrationResult) {
+    public void accept(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
 

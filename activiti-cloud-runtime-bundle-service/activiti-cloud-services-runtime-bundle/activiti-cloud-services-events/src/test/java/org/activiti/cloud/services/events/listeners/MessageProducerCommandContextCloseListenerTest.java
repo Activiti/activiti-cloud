@@ -15,23 +15,11 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
@@ -51,8 +39,20 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -81,7 +81,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     private MessageProducerCommandContextCloseListener closeListener;
 
     @Mock
-    private ProcessEngineChannels producer;
+    private StreamBridge streamBridge;
 
     @Spy
     private RuntimeBundleProperties properties = new RuntimeBundleProperties() {
@@ -120,8 +120,6 @@ public class MessageProducerCommandContextCloseListenerTest {
         ProcessInstance processInstance = new ProcessInstanceImpl();
         event = new CloudProcessCreatedEventImpl(processInstance);
 
-        when(producer.auditProducer()).thenReturn(auditChannel);
-
         processEngineEventsAggregator = spy(new ProcessEngineEventsAggregator(closeListener));
 
         when(processEngineEventsAggregator.getCurrentCommandContext()).thenReturn(commandContext);
@@ -143,7 +141,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel).send(messageArgumentCaptor.capture());
+        verify(streamBridge).send(any(), messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue()
                                         .getPayload()).containsExactly(event);
 
@@ -174,8 +172,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel,
-               never()).send(any());
+        verify(streamBridge, never()).send(any(), any());
     }
 
     @Test
@@ -188,8 +185,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel,
-               never()).send(any());
+        verify(streamBridge, never()).send(any(), any());
     }
 
     @Test
@@ -202,7 +198,7 @@ public class MessageProducerCommandContextCloseListenerTest {
         closeListener.closed(commandContext);
 
         // then
-        verify(auditChannel).send(messageArgumentCaptor.capture());
+        verify(streamBridge).send(any(), messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue()
                                         .getHeaders()).containsEntry("routingKey", MOCK_ROUTING_KEY)
                                                       .containsEntry("messagePayloadType",LORG_ACTIVITI_CLOUD_API_MODEL_SHARED_EVENTS_CLOUD_RUNTIME_EVENT)

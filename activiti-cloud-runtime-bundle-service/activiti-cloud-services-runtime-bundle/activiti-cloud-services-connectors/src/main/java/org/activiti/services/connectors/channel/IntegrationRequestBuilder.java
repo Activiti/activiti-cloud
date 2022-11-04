@@ -16,11 +16,12 @@
 
 package org.activiti.services.connectors.channel;
 
-import java.io.Serializable;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+
+import java.io.Serializable;
 
 public class IntegrationRequestBuilder implements Serializable {
 
@@ -36,9 +37,9 @@ public class IntegrationRequestBuilder implements Serializable {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
         String resultDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER);
+            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER_BINDING);
         String errorDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER);
+            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER_BINDING);
 
         integrationRequest.setErrorDestination(errorDestination);
         integrationRequest.setResultDestination(resultDestination);

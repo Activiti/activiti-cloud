@@ -15,16 +15,6 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Collections;
-import java.util.List;
-
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
@@ -32,7 +22,6 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -48,12 +37,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.activiti.cloud.services.rest.controllers.TaskSamples.buildDefaultAssignedTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -79,7 +79,7 @@ public class ProcessInstanceTasksControllerImplIT {
     private SpringPageConverter pageConverter;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
@@ -96,7 +96,7 @@ public class ProcessInstanceTasksControllerImplIT {
     @BeforeEach
     public void setUp() {
         assertThat(pageConverter).isNotNull();
-        assertThat(processEngineChannels).isNotNull();
+        assertThat(streamBridge).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 

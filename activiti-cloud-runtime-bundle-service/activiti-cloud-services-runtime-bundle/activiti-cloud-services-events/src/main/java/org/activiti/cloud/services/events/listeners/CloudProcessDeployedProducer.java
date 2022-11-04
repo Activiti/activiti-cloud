@@ -20,10 +20,10 @@ import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 
@@ -31,19 +31,24 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.activiti.cloud.services.events.ProcessEngineChannels.AUDIT_PRODUCER_OUTPUT_BINDING;
+
 public class CloudProcessDeployedProducer {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
-    private ProcessEngineChannels producer;
+
+    private StreamBridge streamBridge;
+
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
+
     private int chunkSize;
 
     public CloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                        ProcessEngineChannels producer,
+                                        StreamBridge streamBridge,
                                         RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
                                         RuntimeBundleProperties properties) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-        this.producer = producer;
+        this.streamBridge = streamBridge;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
         this.chunkSize = properties.getEventsProperties()
                                    .getChunkSize();
@@ -68,8 +73,7 @@ public class CloudProcessDeployedProducer {
         Message<?> message = runtimeBundleMessageBuilderFactory.create()
                                                                .withPayload(payload)
                                                                .build();
-        producer.auditProducer()
-                .send(message);
+        streamBridge.send(AUDIT_PRODUCER_OUTPUT_BINDING, message);
     }
 
     protected List<CloudProcessDeployedEvent> toCloudProcessDeployedEvents(List<ProcessDeployedEvent> processDeployedEvents) {

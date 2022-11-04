@@ -111,7 +111,7 @@ class MessageEventsIT {
     private StartMessageDeployedEventMessageProducer startMessageDeployedEventMessageProducer;
 
     @Autowired
-    private CommandEndpoint<Payload> commandEndpoint;
+    private CommandEndpoint<Payload, ProcessInstanceResult> commandEndpoint;
 
     @Autowired
     private MessageGroupStore messageGroupStore;
@@ -448,7 +448,7 @@ class MessageEventsIT {
                         .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
                         .withBusinessKey(BUSINESS_KEY + i)
                         .build())
-                .<ProcessInstanceResult>map(commandEndpoint::execute)
+                .map(commandEndpoint::execute)
                 .map(ProcessInstanceResult::getEntity)
                 .forEach(processInstances::add);
 

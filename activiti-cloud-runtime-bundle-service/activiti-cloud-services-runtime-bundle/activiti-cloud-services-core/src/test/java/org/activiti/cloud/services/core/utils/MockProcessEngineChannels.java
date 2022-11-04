@@ -16,24 +16,22 @@
 package org.activiti.cloud.services.core.utils;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
-public class MockProcessEngineChannels implements ProcessEngineChannels {
+public class MockProcessEngineChannels extends ProcessEngineChannels {
 
-    @Override
-    public SubscribableChannel commandConsumer() {
-        return null;
-    }
-
-    @Override
-    public MessageChannel commandResults() {
-        return null;
-    }
-
-    @Override
-    public MessageChannel auditProducer() {
-        return new MockMessageChannel();
-    }
+//    @Override
+//    public SubscribableChannel commandConsumer() {
+//        return null;
+//    }
+//
+//    @Override
+//    public MessageChannel commandResults() {
+//        return null;
+//    }
+//
+//    @Override
+//    public MessageChannel auditProducer() {
+//        return new MockMessageChannel();
+//    }
 
 }

@@ -15,57 +15,17 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudVariableEventConverter;
-import org.activiti.cloud.services.events.listeners.CloudActivityCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudActivityCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudActivityStartedProducer;
-import org.activiti.cloud.services.events.listeners.CloudApplicationDeployedProducer;
-import org.activiti.cloud.services.events.listeners.CloudErrorReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageSentProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageSubscriptionCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudMessageWaitingProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessResumedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessStartedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessSuspendedProducer;
-import org.activiti.cloud.services.events.listeners.CloudProcessUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudSequenceFlowTakenProducer;
-import org.activiti.cloud.services.events.listeners.CloudSignalReceivedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskActivatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskAssignedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupAddedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateGroupRemovedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserAddedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCandidateUserRemovedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCompletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskSuspendedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTaskUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerCancelledProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerExecutedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerFailedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerFiredProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerRetriesDecrementedProducer;
-import org.activiti.cloud.services.events.listeners.CloudTimerScheduledProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableCreatedProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer;
-import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
-import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
-import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.cloud.services.events.listeners.*;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -110,12 +70,12 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(ProcessEngineChannels processEngineChannels,
-                                                                                                    ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
-                                                                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-        return new MessageProducerCommandContextCloseListener(processEngineChannels,
-                                                              executionContextMessageBuilderFactory,
-                                                              runtimeBundleInfoAppender);
+    public MessageProducerCommandContextCloseListener apiMessageProducerCommandContextCloseListener(ExecutionContextMessageBuilderFactory executionContextMessageBuilderFactory,
+                                                                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                                                    StreamBridge streamBridge) {
+        return new MessageProducerCommandContextCloseListener(executionContextMessageBuilderFactory,
+                                                              runtimeBundleInfoAppender,
+                                                              streamBridge);
     }
 
     @Bean
@@ -390,13 +350,11 @@ public class CloudEventsAutoConfiguration {
     @ConditionalOnMissingBean
     @Bean
     public CloudProcessDeployedProducer cloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                     ProcessEngineChannels processEngineChannels,
+                                                                     StreamBridge streamBridge,
                                                                      RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
                                                                      RuntimeBundleProperties properties) {
         return new CloudProcessDeployedProducer(runtimeBundleInfoAppender,
-                                                processEngineChannels,
-                                                runtimeBundleMessageBuilderFactory,
-                                                properties);
+                streamBridge, runtimeBundleMessageBuilderFactory, properties);
     }
 
     @Bean
@@ -448,11 +406,10 @@ public class CloudEventsAutoConfiguration {
     @ConditionalOnMissingBean
     @Bean
     public CloudApplicationDeployedProducer cloudApplicationDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                                                             ProcessEngineChannels processEngineChannels,
+                                                                             StreamBridge streamBridge,
                                                                              RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
         return new CloudApplicationDeployedProducer(runtimeBundleInfoAppender,
-                processEngineChannels,
-                runtimeBundleMessageBuilderFactory);
+                streamBridge, runtimeBundleMessageBuilderFactory);
     }
 
 }

@@ -15,21 +15,10 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
@@ -43,10 +32,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
 @Import({ConnectorsAutoConfiguration.class,
@@ -67,7 +67,7 @@ public class ConnectorDefinitionControllerImplIT {
     private ProcessExtensionService processExtensionService;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @MockBean
     private RepositoryService repositoryService;

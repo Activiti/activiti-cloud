@@ -17,9 +17,9 @@ package org.activiti.cloud.services.messages.events.support;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronization;
 
 public class MessageSenderTransactionSynchronization implements TransactionSynchronization {
@@ -27,20 +27,23 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
     private static final Logger logger = LoggerFactory.getLogger(MessageSenderTransactionSynchronization.class);
 
     private final Message<?> message;
-    private final MessageChannel messageChannel;
+    private final StreamBridge streamBridge;
+    private final String binding;
 
     public MessageSenderTransactionSynchronization(Message<?> message,
-                                                  MessageChannel messageChannel) {
+                                                   StreamBridge streamBridge,
+                                                   String binding) {
         this.message = message;
-        this.messageChannel = messageChannel;
+        this.streamBridge = streamBridge;
+        this.binding = binding;
     }
 
     @Override
     public void afterCommit() {
-        logger.debug("Sending bpmn message '{}' via message channel: {}", message, messageChannel);
+        logger.debug("Sending bpmn message '{}' via message channel: {}", message, streamBridge);
 
         try {
-            boolean sent = messageChannel.send(message);
+            boolean sent = streamBridge.send(binding, message);
 
             if(!sent) {
                 throw new MessageDispatchingException(message);

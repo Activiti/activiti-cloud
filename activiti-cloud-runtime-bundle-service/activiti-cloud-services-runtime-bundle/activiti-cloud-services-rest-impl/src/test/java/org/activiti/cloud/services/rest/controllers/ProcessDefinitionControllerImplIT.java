@@ -15,25 +15,6 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
@@ -47,7 +28,6 @@ import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -72,6 +52,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
@@ -79,6 +60,27 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessDefinitionControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -103,7 +105,7 @@ public class ProcessDefinitionControllerImplIT {
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @MockBean
     private ProcessRuntime processRuntime;

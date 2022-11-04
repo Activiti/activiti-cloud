@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.messages.core.integration;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
-import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -34,9 +32,13 @@ import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 
 import java.util.List;
 import java.util.Objects;
+
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
+import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
@@ -71,7 +73,12 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(processor.input())
+        return this.from(new MessageChannel() {
+                    @Override
+                    public boolean send(Message<?> message, long timeout) {
+                        return true;
+                    }
+                })
                    .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
                                         .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))

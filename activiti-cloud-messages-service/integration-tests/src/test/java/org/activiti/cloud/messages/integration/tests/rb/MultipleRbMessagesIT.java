@@ -184,7 +184,7 @@ class MultipleRbMessagesIT {
 
     void executeCommand(ConfigurableApplicationContext context,
                         Payload payload) {
-        CommandEndpoint<Payload> commandEndpoint = context.getBean(CommandEndpoint.class);
+        CommandEndpoint<Payload, ?> commandEndpoint = context.getBean(CommandEndpoint.class);
         commandEndpoint.execute(payload);
     }
 

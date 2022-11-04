@@ -15,30 +15,28 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.assertj.core.api.Assertions;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
-import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.context.annotation.Bean;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 @TestComponent
-@EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 
     private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
@@ -66,173 +64,198 @@ public class ServiceTaskConsumerHandler {
     private List<String> sizes = Arrays.asList("small", "medium");
 
     public ServiceTaskConsumerHandler(ObjectMapper objectMapper,
-        IntegrationResultSender integrationResultSender) {
+                                      IntegrationResultSender integrationResultSender) {
         this.integrationResultSender = integrationResultSender;
         this.objectMapper = objectMapper;
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
-    public void receive(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);
+    @Bean(ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> receive() {
+        return message ->
+        {
+            IntegrationRequest integrationRequest = message.getPayload();
+            assertIntegrationContextHeaders(integrationRequest, message.getHeaders());
 
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
-        Map<String, Object> requestVariables = integrationContext.getInBoundVariables();
+            Map<String, Object> requestVariables = integrationContext.getInBoundVariables();
 
-        Object customPojo = requestVariables.get("customPojo");
+            Object customPojo = requestVariables.get("customPojo");
 
-        String variableToUpdate = "age";
+            String variableToUpdate = "age";
 
-        HashMap<String, Object> resultVariables = new HashMap<>();
-        resultVariables.put(variableToUpdate,
-            ((Integer) requestVariables.get(variableToUpdate)) + 1);
-        //invert value of boolean
-        resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
+            HashMap<String, Object> resultVariables = new HashMap<>();
+            resultVariables.put(variableToUpdate,
+                    ((Integer) requestVariables.get(variableToUpdate)) + 1);
+            //invert value of boolean
+            resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
 
-        resultVariables.put("customPojoTypeInConnector", "Type of customPojo var in connector is " + customPojo.getClass());
-        resultVariables.put("customPojoField1InConnector", "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1());
-        //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
-        resultVariables.put("customPojoAnnotatedTypeInConnector", "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass());
+            resultVariables.put("customPojoTypeInConnector", "Type of customPojo var in connector is " + customPojo.getClass());
+            resultVariables.put("customPojoField1InConnector", "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1());
+            //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
+            resultVariables.put("customPojoAnnotatedTypeInConnector", "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass());
 
-        integrationContext.addOutBoundVariables(resultVariables);
+            integrationContext.addOutBoundVariables(resultVariables);
 
-        integrationResultSender.send(integrationRequest, integrationContext);
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) throws Exception {
-        assertIntegrationContextHeaders(integrationRequest, headers);
+    @Bean(ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> receiveVariablesConnector() {
+        return message -> {
+            IntegrationRequest integrationRequest = message.getPayload();
+            assertIntegrationContextHeaders(integrationRequest, message.getHeaders());
 
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
-        Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
-        String variableOne = "input_variable_name_1";
-        String variableTwo = "input_variable_name_2";
-        String variableThree = "input_variable_name_3";
-        String constant = "_constant_value_";
+            Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
+            String variableOne = "input_variable_name_1";
+            String variableTwo = "input_variable_name_2";
+            String variableThree = "input_variable_name_3";
+            String constant = "_constant_value_";
 
-        Integer currentAge = (Integer) inBoundVariables.get(variableTwo);
-        Integer offSet = (Integer) inBoundVariables.get(variableThree);
+            Integer currentAge = (Integer) inBoundVariables.get(variableTwo);
+            Integer offSet = (Integer) inBoundVariables.get(variableThree);
 
-        assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
-            .containsOnly(
-                tuple(variableOne,
-                    "inName"),
-                tuple(variableTwo,
-                    20),
-                tuple(variableThree,
-                    5),
-                tuple(constant,
-                    "myConstantValue"));
+            assertThat(inBoundVariables.entrySet())
+                    .extracting(Map.Entry::getKey,
+                            Map.Entry::getValue)
+                    .containsOnly(
+                            tuple(variableOne,
+                                    "inName"),
+                            tuple(variableTwo,
+                                    20),
+                            tuple(variableThree,
+                                    5),
+                            tuple(constant,
+                                    "myConstantValue"));
 
-        integrationContext.addOutBoundVariable("out_variable_name_1",
-            "outName");
-        integrationContext.addOutBoundVariable("out_variable_name_2",
-            currentAge + offSet);
-        integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
-            "outTest");
-        integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
-            "outTest");
+            integrationContext.addOutBoundVariable("out_variable_name_1",
+                    "outName");
+            integrationContext.addOutBoundVariable("out_variable_name_2",
+                    currentAge + offSet);
+            integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
+                    "outTest");
+            integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
+                    "outTest");
 
-        JsonNode value = new ObjectMapper().readTree("{\n"
-            + "  \"city\": {\n"
-            + "    \"name\": \"London\",\n"
-            + "    \"place\": \"Tower of London\"\n"
-            + "  }\n"
-            + "}");
-        integrationContext.addOutBoundVariable("sightSeeing", value);
-        integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
+            JsonNode value;
+            try {
+                value = new ObjectMapper().readTree("{\n"
+                        + "  \"city\": {\n"
+                        + "    \"name\": \"London\",\n"
+                        + "    \"place\": \"Tower of London\"\n"
+                        + "  }\n"
+                        + "}");
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            integrationContext.addOutBoundVariable("sightSeeing", value);
+            integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
 
-        integrationResultSender.send(integrationRequest, integrationContext);
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveConstantsConnector(IntegrationRequest integrationRequest,
-        @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
+    @Bean(ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> receiveConstantsConnector() {
+        return message -> {
+            IntegrationRequest integrationRequest = message.getPayload();
+            assertIntegrationContextHeaders(integrationRequest, message.getHeaders());
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
 
-        Object constantValue = inBoundVariables.get("_constant_value_");
+            Object constantValue = inBoundVariables.get("_constant_value_");
 
-        assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
-            .containsOnly(tuple("name",
-                "inName"),
-                tuple("age",
-                    20),
-                tuple("_constant_value_",
-                    "myConstantValue"));
+            assertThat(inBoundVariables.entrySet())
+                    .extracting(Map.Entry::getKey,
+                            Map.Entry::getValue)
+                    .containsOnly(tuple("name",
+                                    "inName"),
+                            tuple("age",
+                                    20),
+                            tuple("_constant_value_",
+                                    "myConstantValue"));
 
-        integrationContext.addOutBoundVariable("name", "outName");
-        integrationContext.addOutBoundVariable("age", 25);
-        integrationContext.addOutBoundVariable("_constant_value_", constantValue);
+            integrationContext.addOutBoundVariable("name", "outName");
+            integrationContext.addOutBoundVariable("age", 25);
+            integrationContext.addOutBoundVariable("_constant_value_", constantValue);
 
-        integrationResultSender.send(integrationRequest, integrationContext);
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
-        condition = "headers['processDefinitionVersion']!=null")
-    public void receiveRestConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-        assertIntegrationContextHeaders(integrationRequest, headers);
+    @Bean(ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> receiveRestConnector() {
+        return message -> {
+            MessageHeaders headers = message.getHeaders();
+            if (!headers.containsKey("processDefinitionVersion")) {
+                return;
+            }
+            IntegrationRequest integrationRequest = message.getPayload();
+            assertIntegrationContextHeaders(integrationRequest, headers);
 
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        integrationContext.addOutBoundVariable("restResult", "fromConnector");
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            integrationContext.addOutBoundVariable("restResult", "fromConnector");
 
-        integrationResultSender.send(integrationRequest, integrationContext);
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
-
 
     private void assertIntegrationContextHeaders(IntegrationRequest integrationRequest, Map<String, Object> headers) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
         // Mandatory headers assertions
         Assertions.assertThat(headers)
-            .containsKey(ROUTING_KEY)
-            .containsKey(MESSAGE_PAYLOAD_TYPE)
-            .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
-            .containsEntry(PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
-            .containsEntry(CONNECTOR_TYPE, integrationContext.getConnectorType())
-            .containsEntry(INTEGRATION_CONTEXT_ID, integrationContext.getId())
-            .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
-            .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
-            .containsEntry(APP_NAME, integrationRequest.getAppName())
-            .containsEntry(APP_VERSION, integrationRequest.getIntegrationContext().getAppVersion())
-            .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
-            .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
-            .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
-            .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());
+                .containsKey(ROUTING_KEY)
+                .containsKey(MESSAGE_PAYLOAD_TYPE)
+                .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
+                .containsEntry(PROCESS_DEFINITION_KEY, integrationContext.getProcessDefinitionKey())
+                .containsEntry(CONNECTOR_TYPE, integrationContext.getConnectorType())
+                .containsEntry(INTEGRATION_CONTEXT_ID, integrationContext.getId())
+                .containsEntry(PROCESS_INSTANCE_ID, integrationContext.getProcessInstanceId())
+                .containsEntry(PROCESS_DEFINITION_ID, integrationContext.getProcessDefinitionId())
+                .containsEntry(APP_NAME, integrationRequest.getAppName())
+                .containsEntry(APP_VERSION, integrationRequest.getIntegrationContext().getAppVersion())
+                .containsEntry(SERVICE_NAME, integrationRequest.getServiceName())
+                .containsEntry(SERVICE_TYPE, integrationRequest.getServiceType())
+                .containsEntry(SERVICE_VERSION, integrationRequest.getServiceVersion())
+                .containsEntry(SERVICE_FULL_NAME, integrationRequest.getServiceFullName());
 
         // conditional on existing businessKey in integration context
         if (integrationContext.getBusinessKey() != null) {
             Assertions.assertThat(headers)
-                .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
+                    .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
         }
 
         // conditional on existing parentProcessInstanceId in integration context
         if (integrationContext.getParentProcessInstanceId() != null) {
             Assertions.assertThat(headers)
-                .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
+                    .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
         }
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER)
-    public void receiveMealsConnector(IntegrationRequest integrationRequest) {
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        int remainder = currentMealIndex.getAndIncrement() % meals.size();
-        integrationContext.addOutBoundVariable("meal", meals.get(remainder));
-        integrationContext.addOutBoundVariable("size", sizes.get(remainder));
+    @Bean(ConnectorIntegrationChannels.MEALS_CONNECTOR_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> receiveMealsConnector() {
+        return message -> {
+            IntegrationRequest integrationRequest = message.getPayload();
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            int remainder = currentMealIndex.getAndIncrement() % meals.size();
+            integrationContext.addOutBoundVariable("meal", meals.get(remainder));
+            integrationContext.addOutBoundVariable("size", sizes.get(remainder));
 
-        integrationResultSender.send(integrationRequest, integrationContext);
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER)
-    public void valueProcessorConnector(IntegrationRequest integrationRequest) {
-        IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
-        integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
-        integrationResultSender.send(integrationRequest, integrationContext);
+    @Bean(ConnectorIntegrationChannels.VALUE_PROCESSOR_CONSUMER)
+    public Consumer<Message<IntegrationRequest>> valueProcessorConnector() {
+        return message -> {
+            IntegrationRequest integrationRequest = message.getPayload();
+            IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
+            integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
+            integrationResultSender.send(integrationRequest, integrationContext);
+        };
     }
 }

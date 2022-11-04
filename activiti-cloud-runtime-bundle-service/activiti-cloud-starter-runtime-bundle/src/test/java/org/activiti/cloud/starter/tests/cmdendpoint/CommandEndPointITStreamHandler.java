@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
@@ -31,16 +29,16 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
-@TestComponent
-@EnableBinding(MessageClientStream.class)
-public class CommandEndPointITStreamHandler {
+@TestComponent("myCmdResults")
+public class CommandEndPointITStreamHandler implements Consumer<Result> {
 
     public static final String COMMAND_ENDPOINT_IT = "CommandEndpointIT";
 
@@ -58,8 +56,7 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean createTaskVariableAck = new AtomicBoolean(false);
     private AtomicBoolean updateTaskVariableAck = new AtomicBoolean(false);
 
-    @StreamListener(MessageClientStream.MY_CMD_RESULTS)
-    public <T extends Result> void consumeStartProcessInstanceResults(Result result) {
+    public void accept(Result result) {
         if (result.getPayload() instanceof StartProcessPayload) {
             assertThat(result.getEntity()).isNotNull();
             assertThat(result.getEntity()).isInstanceOf(ProcessInstance.class);

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import java.util.ArrayList;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -25,7 +24,6 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -41,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
@@ -49,7 +48,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -86,7 +85,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     private TaskAdminRuntime taskAdminRuntime;
 
     @MockBean
-    private ProcessEngineChannels processEngineChannels;
+    private StreamBridge streamBridge;
 
     @MockBean
     private TaskService taskService;
@@ -106,7 +105,7 @@ public class ProcessDefinitionAdminControllerImplIT {
 
     @BeforeEach
     public void setUp() {
-        assertThat(processEngineChannels).isNotNull();
+        assertThat(streamBridge).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
     }
