@@ -23,12 +23,11 @@ import org.activiti.runtime.api.conf.ProcessRuntimeAutoConfiguration;
 import org.activiti.runtime.api.signal.SignalPayloadEventListener;
 import org.activiti.services.subscription.SignalSender;
 import org.activiti.services.subscription.channel.BroadcastSignalEventHandler;
-import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,11 +38,10 @@ import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventA
 
 @Configuration
 @PropertySource("classpath:config/signal-events-channels.properties")
-@EnableBinding(ProcessEngineSignalChannels.class)
 @AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 
-    @Bean
+    @Bean("signalConsumer")
     @ConditionalOnMissingBean
     public BroadcastSignalEventHandler broadcastSignalEventHandler(RuntimeService runtimeService) {
         return new BroadcastSignalEventHandler(runtimeService);
@@ -51,8 +49,8 @@ public class ActivitiCloudSubscriptionsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SignalPayloadEventListener signalSender(ProcessEngineSignalChannels processEngineSignalChannels) {
-        return new SignalSender(processEngineSignalChannels.signalProducer());
+    public SignalPayloadEventListener signalSender(StreamBridge streamBridge) {
+        return new SignalSender(streamBridge);
     }
 
     @Bean(DEFAULT_THROW_SIGNAL_EVENT_BEAN_NAME)

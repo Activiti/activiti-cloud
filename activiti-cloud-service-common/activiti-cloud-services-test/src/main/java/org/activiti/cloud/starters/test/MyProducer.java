@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.starters.test;
 
-import java.util.stream.Stream;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 
 public class MyProducer {
+
+    public static final String PRODUCER_OUTPUT = "producer-out-0";
 
     private final StreamBridge streamBridge;
 
@@ -31,7 +30,7 @@ public class MyProducer {
         this.streamBridge = streamBridge;
     }
 
-    public boolean send(CloudRuntimeEvent<?, ?>... newEvents) {
-        return streamBridge.send(StreamProducer.PRODUCER, newEvents);
+    public void send(CloudRuntimeEvent<?, ?>... newEvents) {
+        streamBridge.send(PRODUCER_OUTPUT, newEvents);
     }
 }

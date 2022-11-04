@@ -16,13 +16,11 @@
 package org.activiti.cloud.services.audit.api.streams;
 
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.Message;
 
-import java.util.Map;
+import java.util.List;
+import java.util.function.Consumer;
 
-public interface AuditConsumerChannelHandler {
+public interface AuditConsumerChannelHandler extends Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> {
 
-    @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
-    void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events);
 }

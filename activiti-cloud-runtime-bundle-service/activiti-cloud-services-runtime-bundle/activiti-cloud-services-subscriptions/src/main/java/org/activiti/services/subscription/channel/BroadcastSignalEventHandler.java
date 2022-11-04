@@ -17,9 +17,10 @@ package org.activiti.services.subscription.channel;
 
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.engine.RuntimeService;
-import org.springframework.cloud.stream.annotation.StreamListener;
 
-public class BroadcastSignalEventHandler {
+import java.util.function.Consumer;
+
+public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
 
     private final RuntimeService runtimeService;
 
@@ -27,8 +28,7 @@ public class BroadcastSignalEventHandler {
         this.runtimeService = runtimeService;
     }
 
-    @StreamListener(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
-    public void receive(SignalPayload signalPayload) {
+    public void accept(SignalPayload signalPayload) {
         if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
             runtimeService.signalEventReceived(signalPayload.getName());
         } else {

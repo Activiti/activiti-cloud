@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.services.query;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.concurrent.Flow.Publisher;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.conf.EventHandlersAutoConfiguration;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
@@ -32,19 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.stream.binder.test.InputDestination;
-import org.springframework.cloud.stream.binder.test.OutputDestination;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.messaging.support.GenericMessage;
-import reactor.core.publisher.Flux;
 
 import static java.util.Arrays.asList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,27 +47,20 @@ public class QueryConsumerChannelHandlerTest {
 
     @Test
     public void acceptShouldHandleReceivedEvent() {
+        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
+        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
         //given
-        List<CloudRuntimeEvent<?,?>> events = buildEvents();
-
-        Flux<List<CloudRuntimeEvent<?,?>>> flux = Flux.fromIterable(asList(events));
+        List<CloudRuntimeEvent<?,?>> events = asList(processCreatedEvent, processStartedEvent);
 
         when(optimizer.optimize(events)).thenReturn(events);
 
         //when
-        consumer.accept(flux);
+        consumer.accept(events);
 
         //then
         verify(optimizer).optimize(events);
-        verify(eventHandlerContext).accept(events);
-    }
-
-    private List<CloudRuntimeEvent<?,?>> buildEvents(){
-        CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
-        CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
-
-        return asList(processCreatedEvent, processStartedEvent);
+        verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
     }
 
 }

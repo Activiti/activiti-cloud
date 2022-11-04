@@ -16,17 +16,14 @@
 package org.activiti.cloud.services.test;
 
 import org.activiti.cloud.starters.test.MyProducer;
-import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @AutoConfigureAfter(value = BindingServiceConfiguration.class)
