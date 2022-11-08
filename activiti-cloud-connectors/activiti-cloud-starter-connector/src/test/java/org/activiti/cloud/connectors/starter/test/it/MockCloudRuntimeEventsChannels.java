@@ -23,12 +23,4 @@ public interface MockCloudRuntimeEventsChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
-//    @Input(COMMAND_CONSUMER)
-//    SubscribableChannel commandConsumer();
-
-//    @Output(COMMAND_RESULTS)
-//    MessageChannel commandResults();
-
-//    @Output(AUDIT_PRODUCER)
-//    MessageChannel auditProducer();
 }

@@ -29,7 +29,6 @@ public class IntegrationErrorBuilder {
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
-    private String destination;
 
     private IntegrationErrorBuilder(IntegrationRequest integrationRequest,
                                     ConnectorProperties connectorProperties,
@@ -46,11 +45,6 @@ public class IntegrationErrorBuilder {
         return new IntegrationErrorBuilder(integrationRequest,
                                            connectorProperties,
                                            error);
-    }
-
-    public IntegrationErrorBuilder withDestination(String destination) {
-        this.destination = destination;
-        return this;
     }
 
     public IntegrationError build() {
@@ -81,10 +75,6 @@ public class IntegrationErrorBuilder {
                              .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
                              .setHeader("targetAppName", integrationRequest.getAppName())
                              .setHeader("targetService", integrationRequest.getServiceFullName());
-
-        if(StringUtils.hasText(destination)){
-            builder.setHeader("spring.cloud.stream.sendto.destination", destination);
-        }
 
         return builder;
     }

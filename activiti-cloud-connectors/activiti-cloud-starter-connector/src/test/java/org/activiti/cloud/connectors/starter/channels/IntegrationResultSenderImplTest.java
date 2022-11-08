@@ -17,62 +17,65 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestChannelBinderConfiguration.class)
 public class IntegrationResultSenderImplTest {
+
+    @MockBean
+    private IntegrationResultChannelResolver resolver;
+
+    @Autowired
+    private StreamBridge streamBridge;
+
+    @Autowired
+    private OutputDestination target;
+
+    private IntegrationResultSender sender;
+
+    @BeforeEach
+    public void setUp(){
+        sender = new IntegrationResultSenderImpl(streamBridge, resolver);
+    }
 
     @Test
     public void sendShouldSendMessageBasedOnTheTargetApplication() {
-        try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
-            TestChannelBinderConfiguration.getCompleteConfiguration(
-                ActivitiCloudConnectorApp.class))
-            .run()) {
+        //given
+        IntegrationContextImpl integrationContext = new IntegrationContextImpl();
+        IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
+        integrationRequest.setServiceFullName("myApp");
+        integrationRequest.setAppName("myAppName");
+        integrationRequest.setAppVersion("1.0");
+        integrationRequest.setServiceType("RUNTIME_BUNDLE");
+        integrationRequest.setServiceVersion("1.0");
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
+            integrationRequest.getIntegrationContext());
 
-            //given
-            IntegrationContextImpl integrationContext = new IntegrationContextImpl();
-            IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
-            integrationRequest.setServiceFullName("myApp");
-            integrationRequest.setAppName("myAppName");
-            integrationRequest.setAppVersion("1.0");
-            integrationRequest.setServiceType("RUNTIME_BUNDLE");
-            integrationRequest.setServiceVersion("1.0");
-            IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-                integrationRequest.getIntegrationContext());
+        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+        given(resolver.resolveDestination(integrationRequest)).willReturn("test-destination");
 
-            Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+        //when
+        sender.send(message);
 
-            IntegrationResultChannelResolver resolver = mock(IntegrationResultChannelResolver.class);
-            given(resolver.resolveDestination(integrationRequest)).willReturn("test-destination");
-
-            StreamBridge streamBridge = context.getBean(StreamBridge.class);
-
-            IntegrationResultSender sender = new IntegrationResultSenderImpl(streamBridge, resolver);
-            OutputDestination target = context.getBean(OutputDestination.class);
-
-            //when
-            sender.send(message);
-
-            //then
-            Message<?> outputMessage = target.receive(0, "test-destination");
-            assertThat(outputMessage).isNotNull();
-        }
+        //then
+        Message<?> outputMessage = target.receive(0, "test-destination");
+        assertThat(outputMessage).isNotNull();
     }
 
 }

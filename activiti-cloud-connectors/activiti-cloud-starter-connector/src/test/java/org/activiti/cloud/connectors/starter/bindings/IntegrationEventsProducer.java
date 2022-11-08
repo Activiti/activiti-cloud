@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class IntegrationEventsProducer {
 
-//  @Value("${spring.cloud.stream.function.bindings.functionRouter-in-0.destination}")
   private String messageChannel = "messages";
 
   @Autowired

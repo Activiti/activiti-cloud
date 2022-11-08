@@ -18,7 +18,4 @@ package org.activiti.cloud.connectors.starter.channels;
 public interface CloudConnectorConsumerChannels {
     String INTEGRATION_EVENT_CONSUMER = "integrationEventsConsumer";
 
-//    @Input(INTEGRATION_EVENT_CONSUMER)
-//    SubscribableChannel integrationEventConsumer();
-
 }
