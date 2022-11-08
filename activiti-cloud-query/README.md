@@ -29,7 +29,7 @@ You can build this service from source using Git & Maven or you can just run our
 ### Docker:
 > docker run -p 8182:8182 -d --name activiti-cloud-query activiti/activiti-cloud-query:latest
 
-## Environemnt Variables
+## Environment Variables
 ```
 server.port=${ACT_QUERY_PORT:8182}
 spring.application.name=${ACT_QUERY_APP_NAME:query}
