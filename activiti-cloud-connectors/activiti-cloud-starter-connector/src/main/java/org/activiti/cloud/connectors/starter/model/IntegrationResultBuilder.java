@@ -30,8 +30,6 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultImpl integrationResult;
 
-    private String destination;
-
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
         this.integrationResult = new IntegrationResultImpl(integrationRequest, integrationRequest.getIntegrationContext());
@@ -55,11 +53,6 @@ public class IntegrationResultBuilder {
         return this;
     }
 
-    public IntegrationResultBuilder withDestination(String destination) {
-        this.destination = destination;
-        return this;
-    }
-
     public IntegrationResult build() {
         return integrationResult;
     }
@@ -72,10 +65,6 @@ public class IntegrationResultBuilder {
         MessageBuilder builder = MessageBuilder.withPayload((IntegrationResult)integrationResult)
                              .setHeader("targetAppName", requestEvent.getAppName())
                              .setHeader("targetService", requestEvent.getServiceFullName());
-
-        if(StringUtils.hasText(destination)){
-            builder.setHeader("spring.cloud.stream.sendto.destination", destination);
-        }
 
         return builder;
     }

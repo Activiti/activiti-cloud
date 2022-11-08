@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @Component
-//@EnableBinding({RuntimeMockStreams.class, MockCloudRuntimeEventsChannels.class})
 public class ConnectorsITStreamHandlers {
 
     public static final String CONNECTOR_IT = "ConnectorIT";
