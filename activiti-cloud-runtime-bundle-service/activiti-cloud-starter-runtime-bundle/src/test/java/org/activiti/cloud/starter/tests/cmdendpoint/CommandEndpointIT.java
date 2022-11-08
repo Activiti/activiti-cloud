@@ -80,7 +80,7 @@ public class CommandEndpointIT {
 
     @Autowired
     private StreamBridge streamBridge;
-    
+
     @Autowired
     private TestRestTemplate restTemplate;
 
