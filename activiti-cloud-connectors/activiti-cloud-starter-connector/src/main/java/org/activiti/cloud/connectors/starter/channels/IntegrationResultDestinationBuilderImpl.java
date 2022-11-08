@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import java.util.Optional;
+import java.util.function.Predicate;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
-
-import java.util.Optional;
-import java.util.function.Predicate;
 
 public class IntegrationResultDestinationBuilderImpl implements IntegrationResultDestinationBuilder {
 

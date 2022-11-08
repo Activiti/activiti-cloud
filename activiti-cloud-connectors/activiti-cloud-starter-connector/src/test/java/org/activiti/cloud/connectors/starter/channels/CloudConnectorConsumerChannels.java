@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.messaging.SubscribableChannel;
-
 public interface CloudConnectorConsumerChannels {
     String INTEGRATION_EVENT_CONSUMER = "integrationEventsConsumer";
 
-    @Input(INTEGRATION_EVENT_CONSUMER)
-    SubscribableChannel integrationEventConsumer();
+//    @Input(INTEGRATION_EVENT_CONSUMER)
+//    SubscribableChannel integrationEventConsumer();
 
 }

@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.channels;
+package org.activiti.cloud.connectors.starter.bindings;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
 
-public class IntegrationResultSenderImpl implements IntegrationResultSender {
+@Component
+public class IntegrationEventsProducer {
 
-    private final StreamBridge streamBridge;
+//  @Value("${spring.cloud.stream.function.bindings.functionRouter-in-0.destination}")
+  private String messageChannel = "messages";
 
-    private final IntegrationResultChannelResolver resolver;
+  @Autowired
+  private StreamBridge streamBridge;
 
-    public IntegrationResultSenderImpl(StreamBridge streamBridge, IntegrationResultChannelResolver resolver) {
-        this.streamBridge = streamBridge;
-        this.resolver = resolver;
-    }
+  public void send(Message<IntegrationRequest> message) {
+    streamBridge.send(messageChannel, message);
+  }
 
-    @Override
-    public void send(Message<IntegrationResult> message) {
-        IntegrationRequest request = message.getPayload().getIntegrationRequest();
-
-        String destination = resolver.resolveDestination(request);
-
-        streamBridge.send(destination, message);
-    }
 }

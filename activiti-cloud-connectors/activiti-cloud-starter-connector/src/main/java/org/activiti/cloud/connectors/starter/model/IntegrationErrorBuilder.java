@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import java.util.Objects;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -22,14 +23,13 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.Objects;
+import org.springframework.util.StringUtils;
 
 public class IntegrationErrorBuilder {
-
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
+    private String destination;
 
     private IntegrationErrorBuilder(IntegrationRequest integrationRequest,
                                     ConnectorProperties connectorProperties,
@@ -46,6 +46,11 @@ public class IntegrationErrorBuilder {
         return new IntegrationErrorBuilder(integrationRequest,
                                            connectorProperties,
                                            error);
+    }
+
+    public IntegrationErrorBuilder withDestination(String destination) {
+        this.destination = destination;
+        return this;
     }
 
     public IntegrationError build() {
@@ -72,9 +77,15 @@ public class IntegrationErrorBuilder {
     public MessageBuilder<IntegrationError> getMessageBuilder() {
         IntegrationError integrationError = build();
 
-        return MessageBuilder.withPayload(integrationError)
+        MessageBuilder builder = MessageBuilder.withPayload(integrationError)
                              .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
                              .setHeader("targetAppName", integrationRequest.getAppName())
                              .setHeader("targetService", integrationRequest.getServiceFullName());
+
+        if(StringUtils.hasText(destination)){
+            builder.setHeader("spring.cloud.stream.sendto.destination", destination);
+        }
+
+        return builder;
     }
 }
