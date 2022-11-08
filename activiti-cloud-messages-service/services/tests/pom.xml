@@ -37,6 +37,7 @@
         <version>3.3.0</version>
         <executions>
           <execution>
+            <phase>generate-test-sources</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
