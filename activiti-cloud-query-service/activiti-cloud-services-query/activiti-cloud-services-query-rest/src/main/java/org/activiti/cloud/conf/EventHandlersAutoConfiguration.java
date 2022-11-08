@@ -15,26 +15,18 @@
  */
 package org.activiti.cloud.conf;
 
-import java.util.List;
-import java.util.function.Function;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.persistence.EntityManager;
 import java.util.Set;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Configuration
-//@EnableBinding(QueryConsumerChannels.class)
 public class EventHandlersAutoConfiguration {
 
     @Bean(name = QueryConsumerChannels.QUERY_CONSUMER)

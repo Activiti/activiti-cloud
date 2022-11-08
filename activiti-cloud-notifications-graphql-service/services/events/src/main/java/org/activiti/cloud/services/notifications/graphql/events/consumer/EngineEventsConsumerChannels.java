@@ -20,7 +20,4 @@ public interface EngineEventsConsumerChannels {
 
     String SOURCE = "graphQLEngineEventsConsumerSource";
 
-//    @Input(SOURCE)
-//    SubscribableChannel input();
-
 }

@@ -128,7 +128,7 @@ public class ActivitiGraphQLStarterIT {
     private HttpHeaders authHeaders;
 
     @SpringBootApplication
-    @EnableBinding(EngineEventsMessageProducer.EngineEvents.class)
+    @EnableBinding(EngineEventsMessageProducer.EngineEvents.class) //TODO remove after move to functional programming model
     static class Application {
         // Nothing
     }

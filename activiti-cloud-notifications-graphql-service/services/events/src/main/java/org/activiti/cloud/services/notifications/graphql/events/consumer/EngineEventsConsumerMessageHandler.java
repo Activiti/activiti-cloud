@@ -15,21 +15,15 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
-import java.util.List;
-import java.util.Map;
-
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Sinks;
+
+import java.util.List;
+import java.util.Map;
 
 public class EngineEventsConsumerMessageHandler {
 

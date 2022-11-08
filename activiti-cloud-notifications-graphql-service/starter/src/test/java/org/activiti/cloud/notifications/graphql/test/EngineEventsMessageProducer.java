@@ -15,12 +15,8 @@
  */
 package org.activiti.cloud.notifications.graphql.test;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -29,9 +25,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,8 +32,14 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 import reactor.util.retry.RetrySpec;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Component
-@EnableBinding(EngineEventsMessageProducer.EngineEvents.class)
+@EnableBinding(EngineEventsMessageProducer.EngineEvents.class) //TODO remove after move to functional programming model
 public class EngineEventsMessageProducer implements SmartLifecycle {
 
     public static final String ENGINE_EVENTS_PRODUCER = "engineEventsOutput";
@@ -98,7 +97,8 @@ public class EngineEventsMessageProducer implements SmartLifecycle {
         return (control != null && !control.isDisposed());
     }
 
-//    // Does not recover on RabbitMq restart
+    //TODO needs reworking after move to functional programming model
+// Does not recover on RabbitMq restart
 //    @StreamEmitter
 //    @Output("producer")
 //    public void emit(FluxSender output) throws JsonParseException, JsonMappingException, IOException {

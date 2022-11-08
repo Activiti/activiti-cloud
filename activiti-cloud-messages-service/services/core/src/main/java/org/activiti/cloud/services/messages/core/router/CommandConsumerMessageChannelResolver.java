@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
-import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -44,7 +43,7 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
 
     @Override
     public MessageChannel resolveDestination(String destination) throws DestinationResolutionException {
-        String channelName = getChannelName(destination).orElse(MessageConnectorSource.OUTPUT);
+        String channelName = getChannelName(destination).orElse("messageConnectorOutput-out-0");
 
         return binderAwareChannelResolver.resolveDestination(channelName);
     }

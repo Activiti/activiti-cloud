@@ -53,8 +53,8 @@ import static org.assertj.core.api.Assertions.assertThat;
     "spring.cloud.stream.bindings.asyncExecutorJobsInput.destination=asyncExecutorJobs",
     "spring.cloud.stream.bindings.asyncExecutorJobsOutput.destination=asyncExecutorJobs",
 
-    "spring.cloud.stream.bindings.messageEventsOutput.destination=messageEvents",
-    "spring.cloud.stream.bindings.messageConnectorInput.destination=messageEvents",
+    "spring.cloud.stream.bindings.messageEventsOutput-out-0.destination=messageEvents",
+    "spring.cloud.stream.bindings.messageConnectorInput-in-0.destination=messageEvents",
     "activiti.cloud.messaging.destinations.messageEvents.name=message-events",
 
     "spring.cloud.stream.bindings.commandResults.destination=commandResults",
@@ -125,11 +125,11 @@ public class ActivitiMessagingDestinationsEnvironmentPostProcessorIT {
 
     @Test
     public void testBindingServicePropertiesWithMessageEventsOverrides() {
-        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput")
+        assertThat(bindingServiceProperties.getBindingProperties("messageEventsOutput-out-0")
                                            .getDestination())
             .isEqualTo("quix.baz.message-events.foo");
 
-        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput")
+        assertThat(bindingServiceProperties.getBindingProperties("messageConnectorInput-in-0")
                                            .getDestination())
             .isEqualTo("quix.baz.message-events.foo");
     }

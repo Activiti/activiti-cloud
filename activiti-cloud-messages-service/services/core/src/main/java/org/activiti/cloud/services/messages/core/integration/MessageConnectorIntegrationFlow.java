@@ -17,7 +17,6 @@ package org.activiti.cloud.services.messages.core.integration;
 
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
-import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.springframework.integration.annotation.Filter;
@@ -32,7 +31,6 @@ import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.List;
 import java.util.Objects;
@@ -50,20 +48,17 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     public static final String REPLY_CHANNEL = "replyChannel";
     public static final String ERROR_CHANNEL = "errorChannel";
 
-    private final MessageConnectorProcessor processor;
     private final MessageConnectorAggregator aggregator;
     private final IdempotentReceiverInterceptor interceptor;
     private final HandleMessageAdvice[] advices;
     private final MessageAggregatorProperties properties;
     private final AbstractMessageRouter router;
 
-    public MessageConnectorIntegrationFlow(MessageConnectorProcessor processor,
-                                           MessageConnectorAggregator aggregator,
+    public MessageConnectorIntegrationFlow(MessageConnectorAggregator aggregator,
                                            IdempotentReceiverInterceptor interceptor,
                                            List<? extends HandleMessageAdvice> advices,
                                            MessageAggregatorProperties properties,
                                            AbstractMessageRouter router) {
-        this.processor = processor;
         this.aggregator = aggregator;
         this.interceptor = interceptor;
         this.advices = advices.toArray(new HandleMessageAdvice[]{});
@@ -73,12 +68,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(new MessageChannel() {
-                    @Override
-                    public boolean send(Message<?> message, long timeout) {
-                        return true;
-                    }
-                })
+        return this.from("messageConnectorInput-in-0")
                    .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
                                         .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
