@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.Map;
+import org.springframework.util.StringUtils;
 
 public class IntegrationResultBuilder {
 
@@ -30,6 +30,7 @@ public class IntegrationResultBuilder {
 
     private IntegrationResultImpl integrationResult;
 
+    private String destination;
 
     private IntegrationResultBuilder(IntegrationRequest integrationRequest, ConnectorProperties connectorProperties) {
         this.requestEvent = integrationRequest;
@@ -54,6 +55,11 @@ public class IntegrationResultBuilder {
         return this;
     }
 
+    public IntegrationResultBuilder withDestination(String destination) {
+        this.destination = destination;
+        return this;
+    }
+
     public IntegrationResult build() {
         return integrationResult;
     }
@@ -63,8 +69,14 @@ public class IntegrationResultBuilder {
     }
 
     public MessageBuilder<IntegrationResult> getMessageBuilder() {
-        return MessageBuilder.withPayload((IntegrationResult)integrationResult)
+        MessageBuilder builder = MessageBuilder.withPayload((IntegrationResult)integrationResult)
                              .setHeader("targetAppName", requestEvent.getAppName())
                              .setHeader("targetService", requestEvent.getServiceFullName());
+
+        if(StringUtils.hasText(destination)){
+            builder.setHeader("spring.cloud.stream.sendto.destination", destination);
+        }
+
+        return builder;
     }
 }

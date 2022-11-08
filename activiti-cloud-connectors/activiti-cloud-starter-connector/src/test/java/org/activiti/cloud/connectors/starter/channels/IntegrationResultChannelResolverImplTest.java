@@ -16,7 +16,6 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.MessageChannel;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,10 +35,8 @@ public class IntegrationResultChannelResolverImplTest {
 
     private IntegrationResultChannelResolver subject;
 
-    @Mock
-    private BinderAwareChannelResolver resolver;
-
     private IntegrationResultDestinationBuilder builder;
+
 
     @Mock
     private ConnectorProperties connectorProperties;
@@ -51,12 +47,10 @@ public class IntegrationResultChannelResolverImplTest {
     @BeforeEach
     public void setUp() {
         when(connectorProperties.getMqDestinationSeparator()).thenReturn(".");
-        when(resolver.resolveDestination(anyString())).thenReturn(messageChannel);
 
         builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
 
-        subject = new IntegrationResultChannelResolverImpl(resolver,
-                                                     builder);
+        subject = new IntegrationResultChannelResolverImpl(builder);
     }
 
     @Test
@@ -71,10 +65,10 @@ public class IntegrationResultChannelResolverImplTest {
         integrationRequest.setServiceVersion("1.0");
 
         // when
-        MessageChannel resut = subject.resolveDestination(integrationRequest);
+        String result = subject.resolveDestination(integrationRequest);
 
         // then
-        assertThat(resut).isEqualTo(messageChannel);
+        assertThat(result).isEqualTo("integrationResult.myApp");
 
         verify(builder).buildDestination(integrationRequest);
     }

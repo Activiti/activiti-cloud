@@ -23,6 +23,7 @@ import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.ErrorMessage;
@@ -45,14 +46,15 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     }
 
     @Override
-    public void handleErrorMessage(ErrorMessage errorMessage) {
+    @ServiceActivator(inputChannel = IntegrationErrorHandler.ERROR_CHANNEL)
+    public void accept(ErrorMessage errorMessage) {
         logger.debug("Error Message exception occurred: {}", errorMessage);
 
         MessagingException throwablePayload = MessagingException.class.cast(errorMessage.getPayload());
         Optional<Message<?>> originalMessage = Optional.ofNullable(errorMessage.getOriginalMessage());
 
         Optional<Message<?>> failedMessage = originalMessage.isPresent() ? originalMessage
-                                                                         : Optional.ofNullable(throwablePayload.getFailedMessage());
+            : Optional.ofNullable(throwablePayload.getFailedMessage());
         if (failedMessage.isPresent()) {
             failedMessage.filter(this::isIntegrationRequest)
                          .map(it -> new ErrorMessage(throwablePayload, it))
@@ -72,6 +74,7 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
     private void sendIntegrationError(ErrorMessage errorMessage) {
         byte[] data = (byte[]) errorMessage.getOriginalMessage()
                                            .getPayload();
+
         try {
             IntegrationRequest integrationRequest = objectMapper.readValue(data,
                                                                            IntegrationRequest.class);
@@ -79,11 +82,11 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
                                           .getCause();
 
             Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
-                                                                                 connectorProperties,
-                                                                                 cause)
-                                                                       .buildMessage();
-            integrationErrorSender.send(message);
+                                                                                connectorProperties,
+                                                                                cause)
+                                                                            .buildMessage();
 
+            integrationErrorSender.send(message);
         } catch (Throwable cause) {
             logger.error("Error sending IntegrationError for IntegrationRequest", cause);
         }

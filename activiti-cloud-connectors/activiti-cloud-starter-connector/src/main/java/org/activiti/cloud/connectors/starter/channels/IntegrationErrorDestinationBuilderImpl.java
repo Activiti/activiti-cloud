@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import java.util.Optional;
+import java.util.function.Predicate;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.util.ObjectUtils;
-
-import java.util.Optional;
-import java.util.function.Predicate;
 
 public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorDestinationBuilder {
 
@@ -45,7 +44,7 @@ public class IntegrationErrorDestinationBuilderImpl implements IntegrationErrorD
     }
 
     private String getServiceDestination(IntegrationRequest event) {
-        return  new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
+        return new StringBuilder("integrationError").append(connectorProperties.getMqDestinationSeparator())
                                                      .append(event.getServiceFullName())
                                                      .toString();
     }

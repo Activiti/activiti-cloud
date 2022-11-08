@@ -15,55 +15,52 @@
  */
 package org.activiti.cloud.connectors.starter;
 
+import static org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder.resultFor;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
+import org.activiti.cloud.connectors.starter.bindings.TestMessageRoutingCallback;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
-import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.configuration.EnableActivitiCloudConnector;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
+import org.activiti.cloud.connectors.starter.test.it.ConnectorsITStreamHandlers;
+import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.cloud.function.context.MessageRoutingCallback;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder.resultFor;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootApplication
 @EnableActivitiCloudConnector
-@EnableBinding({CloudConnectorConsumerChannels.class, ProcessRuntimeChannels.class})
 public class ActivitiCloudConnectorApp implements CommandLineRunner {
-
-    private static final String CHANNEL_NAME = "notifications";
-
-    private final MessageChannel runtimeCmdProducer;
 
     private final IntegrationResultSender integrationResultSender;
 
     private final IntegrationErrorSender integrationErrorSender;
 
-    private static final String OTHER_PROCESS_DEF = "MyOtherProcessDef";
+    @Autowired
+    private FunctionRegistry functionRegistry;
 
     @Autowired
     private ConnectorProperties connectorProperties;
 
-    public ActivitiCloudConnectorApp(MessageChannel runtimeCmdProducer,
-                                     IntegrationResultSender integrationResultSender,
+    public ActivitiCloudConnectorApp(IntegrationResultSender integrationResultSender,
                                      IntegrationErrorSender integrationErrorSender) {
-        this.runtimeCmdProducer = runtimeCmdProducer;
         this.integrationResultSender = integrationResultSender;
         this.integrationErrorSender = integrationErrorSender;
     }
@@ -75,84 +72,120 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        assertThat(runtimeCmdProducer).isNotNull();
+        assertThat(integrationResultSender).isNotNull();
+        assertThat(integrationErrorSender).isNotNull();
+        Function<?,?> integrationErrorHandler = functionRegistry.lookup("integrationErrorHandler");
+        assertThat(integrationErrorHandler).isNotNull();
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
-    public void mockTypeIntegrationRequestEvents(IntegrationRequest event) {
-        verifyEventAndCreateResults(event);
-        Map<String, Object> resultVariables = createResultVariables(event);
-        IntegrationResult integrationResultEvent = resultFor(event, connectorProperties)
+    @Bean
+    public MessageRoutingCallback messageRoutingCallback() {
+        return new TestMessageRoutingCallback();
+    }
+
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_REQUEST_EVENT_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationRequestEventsConsumer() {
+        return  (IntegrationRequest event) -> {
+            verifyEventAndCreateResults(event);
+            Map<String, Object> resultVariables = createResultVariables(event);
+            IntegrationResult integrationResultEvent = resultFor(event, connectorProperties)
                 .withOutboundVariables(resultVariables)
                 .build();
-        Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
+            Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
 
-        integrationResultSender.send(message);
+            integrationResultSender.send(message);
+        };
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
-    public void mockTypeIntegrationRuntimeError(IntegrationRequest event) {
-        throw new RuntimeException("Mock RuntimeException");
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_RUNTIME_ERROR_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationRuntimeErrorConsumer() {
+        return (IntegrationRequest event) -> {
+            throw new RuntimeException("Mock RuntimeException");
+        };
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
-    public void mockTypeIntegrationErrorSender(IntegrationRequest integrationRequest) {
-        try {
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_ERROR_SENDER_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationErrorSenderConsumer() {
+        return (IntegrationRequest event) -> {
+            try {
 
-            throw new Error("Mock Error");
+                throw new Error("Mock Error");
 
-        } catch (Error error) {
-            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
-                                                                                 connectorProperties,
-                                                                                 error)
-                                                                       .buildMessage();
-            integrationErrorSender.send(message);
-        }
+            } catch (Error error) {
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(event,
+                        connectorProperties,
+                        error)
+                    .buildMessage();
+                integrationErrorSender.send(message);
+            }
+        };
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
-    public void mockTypeIntegrationCloudBpmnErrorSender(IntegrationRequest integrationRequest) {
-        try {
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_CLOUD_BPMN_ERROR_SENDER_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationCloudBpmnErrorSenderConsumer() {
+        return (IntegrationRequest event) -> {
+            try {
 
-            raiseErrorCause("Error code message");
+                raiseErrorCause("Error code message");
 
-        } catch (Error cause) {
-            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
-                                                                                 connectorProperties,
-                                                                                 new CloudBpmnError("ERROR_CODE"))
-                                                                       .buildMessage();
-            integrationErrorSender.send(message);
-        }
+            } catch (Error cause) {
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(event,
+                        connectorProperties,
+                        new CloudBpmnError("ERROR_CODE"))
+                    .buildMessage();
+                integrationErrorSender.send(message);
+            }
+        };
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
-    public void mockTypeIntegrationCloudBpmnErrorRootCauseSender(IntegrationRequest integrationRequest) {
-        try {
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_CLOUD_BPMN_ERROR_ROOT_CAUSE_SENDER_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationCloudBpmnErrorRootCauseSenderConsumer() {
+        return (IntegrationRequest event) -> {
+            try {
 
-            raiseErrorCause("Error cause message");
+                raiseErrorCause("Error cause message");
 
-        } catch (Error cause) {
-            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
-                                                                                 connectorProperties,
-                                                                                 new CloudBpmnError("ERROR_CODE", cause))
-                                                                       .buildMessage();
-            integrationErrorSender.send(message);
-        }
+            } catch (Error cause) {
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(event,
+                        connectorProperties,
+                        new CloudBpmnError("ERROR_CODE", cause))
+                    .buildMessage();
+                integrationErrorSender.send(message);
+            }
+        };
     }
 
-    @StreamListener(value = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
-    public void mockTypeIntegrationCloudBpmnErrorMessageSender(IntegrationRequest integrationRequest) {
-        try {
+    @Bean(TestMessageRoutingCallback.MOCK_INTEGRATION_CLOUD_BPMN_ERROR_MESSAGE_SENDER_BINDING)
+    public Consumer<IntegrationRequest> mockTypeIntegrationCloudBpmnErrorMessageSenderConsumer() {
+        return (IntegrationRequest event) -> {
+            try {
 
-            raiseErrorCause("Error code message");
+                raiseErrorCause("Error code message");
 
-        } catch (Error cause) {
-            Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequest,
-                                                                                 connectorProperties,
-                                                                                 new CloudBpmnError("ERROR_CODE", cause.getMessage()))
-                                                                       .buildMessage();
-            integrationErrorSender.send(message);
-        }
+            } catch (Error cause) {
+                Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(event,
+                        connectorProperties,
+                        new CloudBpmnError("ERROR_CODE", cause.getMessage()))
+                    .buildMessage();
+                integrationErrorSender.send(message);
+            }
+        };
+    }
+
+    @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
+    @Bean(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
+    public Consumer<IntegrationResult> consumeIntegrationResultsMock(ConnectorsITStreamHandlers connectorsITStreamHandlers) {
+        return (IntegrationResult event) -> {
+            connectorsITStreamHandlers.consumeIntegrationResultsMock(event);
+        };
+    }
+
+    @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
+    @Bean(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
+    public Consumer<IntegrationError> consumeIntegrationErrorMock(ConnectorsITStreamHandlers connectorsITStreamHandlers) {
+        return (IntegrationError event) -> {
+            connectorsITStreamHandlers.consumeIntegrationErrorMock(event);
+        };
     }
 
     private void verifyEventAndCreateResults(IntegrationRequest event) {

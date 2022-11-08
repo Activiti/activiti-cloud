@@ -15,10 +15,11 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import java.util.function.Consumer;
 import org.springframework.messaging.support.ErrorMessage;
 
-public interface IntegrationErrorHandler {
+public interface IntegrationErrorHandler extends Consumer<ErrorMessage> {
 
-    void handleErrorMessage(ErrorMessage errorMessage);
+  String ERROR_CHANNEL = "errorChannel";
 
 }

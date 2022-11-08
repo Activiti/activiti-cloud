@@ -47,7 +47,6 @@ public class IntegrationErrorHandlerImplTest {
             connectorProperties, new ObjectMapper());
     }
 
-
     @Test
     public void handleErrorMessage_should_notThrowExceptionWhenOriginalMessageIsNotIntegrationRequest() {
         //given
@@ -58,7 +57,7 @@ public class IntegrationErrorHandlerImplTest {
                 .build()));
 
         //when
-        integrationErrorHandler.handleErrorMessage(errorMessage);
+        integrationErrorHandler.accept(errorMessage);
 
         //then
         Mockito.verifyNoInteractions(integrationErrorSender);

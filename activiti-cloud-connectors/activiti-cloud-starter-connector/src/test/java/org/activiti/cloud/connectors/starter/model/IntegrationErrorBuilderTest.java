@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import static org.activiti.test.Assertions.assertThat;
+
+import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -23,10 +26,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-
-import java.util.Collections;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationErrorBuilderTest {
 
