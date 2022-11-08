@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource({"classpath:activiti-cloud-connector.properties", "classpath:activiti-cloud-connector-bindings.properties"})
+@PropertySource({"classpath:activiti-cloud-connector.properties"})
 @EnableConfigurationProperties(ConnectorProperties.class)
 public class ActivitiCloudConnectorAutoConfiguration {
 
