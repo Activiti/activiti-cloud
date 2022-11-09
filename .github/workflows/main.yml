@@ -502,7 +502,9 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: propagate-helm
+    needs:
+      - propagate-helm
+      - propagate-maven
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Slack Notification
