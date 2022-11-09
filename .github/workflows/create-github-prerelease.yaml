@@ -26,13 +26,13 @@ jobs:
         run: gh release download $ACTIVITI_CLOUD_TAG --repo Activiti/activiti-cloud --pattern release.yaml
 
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.20.0
         with:
           release-descriptor: release.yaml
           project: activitiCloud
           tag: ${{ steps.resolve-versions.outputs.activiti-cloud-tag }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.18.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.20.0
         with:
           release-descriptor: release.yaml
           project: activitiCloudApplication

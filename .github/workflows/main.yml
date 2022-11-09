@@ -1,15 +1,19 @@
 name: CI
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the develop branch
   push:
-    branches: [ develop ]
+    branches:
+      - develop
   pull_request:
-    branches: [ develop ]
+    branches:
+      - develop
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name || github.run_id }}
+  cancel-in-progress: true
 
 env:
   CLUSTER_NAME: activiti-test
@@ -21,12 +25,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Set up python
-        uses: actions/setup-python@v2
-      - name: Run pre-commit
-        uses: pre-commit/action@v2.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v1.20.0
 
   build:
     runs-on: ubuntu-latest
@@ -37,36 +36,22 @@ jobs:
       branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
       preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
-        with:
-          access_token: ${{ github.token }}
 
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Setup Java JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
         with:
           java-version: 11
-
-      # step required for https://github.com/nektos/act/issues/161 to run locally with https://github.com/nektos/act
-      - name: Set up Maven
-        if: ${{ env.ACT }}
-        run: |
-          apt-get update && apt-get install -y libfontconfig1
-          curl -fsSL https://www-eu.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-            | tar xz -C /usr/share
-          ln -s /usr/share/apache-maven-$MAVEN_VERSION/bin/mvn /usr/bin/mvn
-        env:
-          MAVEN_VERSION: 3.6.3
-
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          distribution: 'temurin'
 
       - name: Configure Maven
         run: |
@@ -83,15 +68,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.20.0
         id: update-pom-to-next-version
-        if: ${{ github.event_name == 'push' }}
+        if: github.event_name == 'push'
 
       - name: Update VERSION file
-        if: ${{ github.event_name == 'push' }}
+        if: github.event_name == 'push'
         run: |
           echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
-
 
       - name: Set BRANCH_NAME env variable
         id: set-branch-name
@@ -156,28 +140,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Setup Java JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
         with:
           java-version: 11
-
-      # step required for https://github.com/nektos/act/issues/161 to run locally with https://github.com/nektos/act
-      - name: Set up Maven
-        if: ${{ env.ACT }}
-        run: |
-          apt-get update && apt-get install -y libfontconfig1
-          curl -fsSL https://www-eu.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-            | tar xz -C /usr/share
-          ln -s /usr/share/apache-maven-$MAVEN_VERSION/bin/mvn /usr/bin/mvn
-        env:
-          MAVEN_VERSION: 3.6.3
-
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          distribution: 'temurin'
 
       - name: Configure Maven
         run: |
@@ -199,7 +173,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.5.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.20.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -416,28 +390,18 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Setup Java JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
         with:
           java-version: 11
-
-      # step required for https://github.com/nektos/act/issues/161 to run locally with https://github.com/nektos/act
-      - name: Set up Maven
-        if: ${{ env.ACT }}
-        run: |
-          apt-get update && apt-get install -y libfontconfig1
-          curl -fsSL https://www-eu.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-            | tar xz -C /usr/share
-          ln -s /usr/share/apache-maven-$MAVEN_VERSION/bin/mvn /usr/bin/mvn
-        env:
-          MAVEN_VERSION: 3.6.3
-
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          distribution: 'temurin'
 
       - name: Configure Maven
         run: |
@@ -451,15 +415,15 @@ jobs:
       - name: Update POM files to the next version
         run: mvn ${MAVEN_CLI_OPTS} versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$VERSION
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.5.0
-        if: ${{ github.event_name == 'push' }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.20.0
+        if: github.event_name == 'push'
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
           commit-message: "Release $VERSION"
 
       - name: Create tag
-        if: ${{ github.event_name == 'push' }}
+        if: github.event_name == 'push'
         run: |
           git tag -a $VERSION -m "Release version $VERSION"
           git push origin $VERSION
@@ -472,13 +436,13 @@ jobs:
     needs:
       - build
       - publish
-    if: ${{ github.event_name == 'push' }}
+    if: github.event_name == 'push'
     env:
       VERSION: ${{ needs.build.outputs.version }}
       UPDATEBOT_FULL_CHART_REPO_PATH: .updatebot-repos/github/activiti/activiti-cloud-full-chart
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.20.0
       - name: Run updatebot for Maven
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
@@ -516,12 +480,12 @@ jobs:
           yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.20.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.5.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.20.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -535,3 +499,14 @@ jobs:
         run: |
           git push origin $FULL_CHART_PR_BRANCH
           gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: propagate-helm
+    if: always() && failure() && github.event_name == 'push'
+    steps:
+      - name: Slack Notification
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.20.0
+        with:
+          channel-id: 'eng-hxp-studio-activiti-gh-notifs'
+          token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
