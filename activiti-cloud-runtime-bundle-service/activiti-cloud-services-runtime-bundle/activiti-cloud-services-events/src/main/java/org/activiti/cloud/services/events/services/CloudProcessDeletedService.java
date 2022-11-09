@@ -27,43 +27,43 @@ import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFac
 
 public class CloudProcessDeletedService {
 
-  private final ProcessEngineChannels producer;
-  private final RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
-  private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final ProcessEngineChannels producer;
+    private final RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
+    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
 
-  public CloudProcessDeletedService(ProcessEngineChannels producer,
-      RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-      RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public CloudProcessDeletedService(ProcessEngineChannels producer,
+        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
 
-    this.producer = producer;
-    this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
-    this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
-  }
+        this.producer = producer;
+        this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
+        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+    }
 
-  public void sendDeleteEvent(String processInstanceId) {
+    public void sendDeleteEvent(String processInstanceId) {
 
-    sendEvent(buildProcessInstance(processInstanceId));
-  }
+        sendEvent(buildProcessInstance(processInstanceId));
+    }
 
-  protected void sendEvent(ProcessInstance processInstance) {
+    protected void sendEvent(ProcessInstance processInstance) {
 
-    producer.auditProducer().send(
-        runtimeBundleMessageBuilderFactory.create()
-            .withPayload(buildEvents(processInstance))
-            .build()
-    );
-  }
+        producer.auditProducer().send(
+            runtimeBundleMessageBuilderFactory.create()
+                .withPayload(buildEvents(processInstance))
+                .build()
+        );
+    }
 
-  protected List<CloudRuntimeEvent<?, ?>> buildEvents(ProcessInstance processInstance) {
-    CloudProcessDeletedEventImpl event = new CloudProcessDeletedEventImpl(processInstance);
-    return Arrays.asList(runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event));
-  }
+    protected List<CloudRuntimeEvent<?, ?>> buildEvents(ProcessInstance processInstance) {
+        CloudProcessDeletedEventImpl event = new CloudProcessDeletedEventImpl(processInstance);
+        return Arrays.asList(runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event));
+    }
 
-  protected ProcessInstance buildProcessInstance(String processInstanceId){
-    CloudProcessInstanceImpl processInstance = new CloudProcessInstanceImpl();
-    processInstance.setId(processInstanceId);
-    return processInstance;
-  }
+    protected ProcessInstance buildProcessInstance(String processInstanceId) {
+        CloudProcessInstanceImpl processInstance = new CloudProcessInstanceImpl();
+        processInstance.setId(processInstanceId);
+        return processInstance;
+    }
 
 }

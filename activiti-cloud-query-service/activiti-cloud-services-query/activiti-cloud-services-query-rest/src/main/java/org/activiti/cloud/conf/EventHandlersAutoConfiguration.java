@@ -103,7 +103,6 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
     public ProcessDeletedEventHandler processDeletedEventHandler(EntityManager entityManager) {
         return new ProcessDeletedEventHandler(entityManager);
     }

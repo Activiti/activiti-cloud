@@ -73,15 +73,17 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
         ProcessDeletedAuditEventEntity processDeletedAuditEventEntity = (ProcessDeletedAuditEventEntity) auditEventEntity;
 
         return new CloudProcessDeletedEventImpl(processDeletedAuditEventEntity.getEventId(),
-                                                processDeletedAuditEventEntity.getTimestamp(),
-                                                processDeletedAuditEventEntity.getProcessInstance());
+            processDeletedAuditEventEntity.getTimestamp(),
+            processDeletedAuditEventEntity.getProcessInstance());
     }
 
     protected ProcessAuditEventEntity findEvent(String processInstanceId) {
-        Specification<AuditEventEntity> specification = new EventSpecificationsBuilder().with(new SpecSearchCriteria(PROCESS_INSTANCE_ID, SearchOperation.EQUALITY, processInstanceId)).build();
+        Specification<AuditEventEntity> specification = new EventSpecificationsBuilder().with(
+            new SpecSearchCriteria(PROCESS_INSTANCE_ID, SearchOperation.EQUALITY, processInstanceId)).build();
         List<AuditEventEntity> events = eventsRepository.findAll(specification, Sort.by(Order.desc(TIMESTAMP)));
-        AuditEventEntity lastEvent = events.stream().findFirst().orElseThrow(() -> new IllegalStateException(String.format(MISSING_PROCESS_INSTANCE, processInstanceId)));
-        if(VALID_EVENT_TYPES.contains(lastEvent.getEventType())) {
+        AuditEventEntity lastEvent = events.stream().findFirst()
+            .orElseThrow(() -> new IllegalStateException(String.format(MISSING_PROCESS_INSTANCE, processInstanceId)));
+        if (VALID_EVENT_TYPES.contains(lastEvent.getEventType())) {
             return ProcessAuditEventEntity.class.cast(lastEvent);
         } else {
             throw new IllegalStateException(String.format(INVALID_PROCESS_INSTANCE_STATE, processInstanceId, lastEvent.getEventType()));

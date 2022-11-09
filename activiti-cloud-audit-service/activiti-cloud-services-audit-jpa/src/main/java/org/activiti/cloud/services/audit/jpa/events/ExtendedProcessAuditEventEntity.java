@@ -21,11 +21,12 @@ import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEv
 @MappedSuperclass
 public abstract class ExtendedProcessAuditEventEntity extends ProcessAuditEventEntity {
 
-  public ExtendedProcessAuditEventEntity(){}
+    public ExtendedProcessAuditEventEntity() {
+    }
 
-  public ExtendedProcessAuditEventEntity(ExtendedCloudProcessRuntimeEvent cloudEvent){
-    super(cloudEvent);
-    setProcessInstance(cloudEvent.getEntity());
-  }
+    public ExtendedProcessAuditEventEntity(ExtendedCloudProcessRuntimeEvent cloudEvent) {
+        super(cloudEvent);
+        setProcessInstance(cloudEvent.getEntity());
+    }
 
 }

@@ -18,9 +18,10 @@ package org.activiti.cloud.api.process.model.events;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface ExtendedCloudProcessRuntimeEvent extends CloudRuntimeEvent<ProcessInstance, ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents> {
+public interface ExtendedCloudProcessRuntimeEvent extends
+    CloudRuntimeEvent<ProcessInstance, ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents> {
 
-  public static enum ExtendedCloudProcessRuntimeEvents {
-    PROCESS_DELETED
-  }
+    enum ExtendedCloudProcessRuntimeEvents {
+        PROCESS_DELETED
+    }
 }
