@@ -44,12 +44,6 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
     private final String MISSING_PROCESS_INSTANCE = "Process Instance %s not found";
 
-    private final String INVALID_PROCESS_INSTANCE_STATE = "Process Instance %s is not in a valid state: %s";
-
-    private final Set<String> VALID_EVENT_TYPES =
-        Arrays.asList(CloudRuntimeEventType.PROCESS_CANCELLED, CloudRuntimeEventType.PROCESS_COMPLETED).stream().map(Enum::name)
-            .collect(Collectors.toSet());
-
     private final EventsRepository eventsRepository;
 
     public ProcessDeletedEventConverter(EventsRepository eventsRepository, EventContextInfoAppender eventContextInfoAppender) {
@@ -83,10 +77,6 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
         List<AuditEventEntity> events = eventsRepository.findAll(specification, Sort.by(Order.desc(TIMESTAMP)));
         AuditEventEntity lastEvent = events.stream().findFirst()
             .orElseThrow(() -> new IllegalStateException(String.format(MISSING_PROCESS_INSTANCE, processInstanceId)));
-        if (VALID_EVENT_TYPES.contains(lastEvent.getEventType())) {
-            return ProcessAuditEventEntity.class.cast(lastEvent);
-        } else {
-            throw new IllegalStateException(String.format(INVALID_PROCESS_INSTANCE_STATE, processInstanceId, lastEvent.getEventType()));
-        }
+        return ProcessAuditEventEntity.class.cast(lastEvent);
     }
 }
