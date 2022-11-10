@@ -27,7 +27,11 @@ import org.activiti.api.process.model.results.ProcessInstanceResult;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
-import org.activiti.cloud.services.messages.events.producer.*;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
@@ -35,7 +39,6 @@ import org.activiti.engine.RuntimeService;
 import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +46,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.store.MessageGroupStore;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -58,9 +63,11 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-@Disabled // TODO fix & enable
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.datasource.platform=postgresql",
@@ -118,6 +125,12 @@ class MessageEventsIT {
     @Autowired
     private MessageGroupStore messageGroupStore;
 
+    @Autowired
+    List<MessageChannel> messageChannels;
+
+    @Autowired
+    List<IntegrationFlow> integrationFlows;
+
     @SuppressWarnings("unused")
     @SpringBootApplication
     @ActivitiRuntimeBundle
@@ -160,19 +173,28 @@ class MessageEventsIT {
                 .forClass(StartMessageDeployedEvent.class);
 
         // then
-        verify(startMessageDeployedEventMessageProducer, atLeast(expectedStartEventNames.length))
-                .onEvent(argumentCaptor.capture());
+        await().untilAsserted(() -> {
+                    verify(startMessageDeployedEventMessageProducer,
+                            atLeast(expectedStartEventNames.length))
+                            .onEvent(argumentCaptor.capture());
 
-        assertThat(argumentCaptor.getAllValues()).extracting(StartMessageDeployedEvent::getEntity)
-                .extracting(StartMessageDeploymentDefinition::getMessageSubscription)
-                .extracting(StartMessageSubscription::getEventName)
-                .contains(expectedStartEventNames);
+                    assertThat(argumentCaptor.getAllValues()).extracting(StartMessageDeployedEvent::getEntity)
+                            .extracting(StartMessageDeploymentDefinition::getMessageSubscription)
+                            .extracting(StartMessageSubscription::getEventName)
+                            .contains(expectedStartEventNames);
 
-        Stream.of(expectedStartEventNames)
-                .forEach(messageName -> {
-                    String groupId = "messages-app:" + messageName;
-                    assertThat(messageGroupStore.getMessagesForGroup(groupId)).hasSize(1);
-                });
+                    Stream.of(expectedStartEventNames)
+                            .forEach(messageName -> {
+                                String groupId = "messages-app:" + messageName;
+                                System.out.println(groupId + " " + messageGroupStore.getMessagesForGroup(groupId));
+                            });
+                    Stream.of(expectedStartEventNames)
+                            .forEach(messageName -> {
+                                String groupId = "messages-app:" + messageName;
+                                assertThat(messageGroupStore.getMessagesForGroup(groupId)).hasSize(1);
+                            });
+                }
+        );
     }
 
     @Test
