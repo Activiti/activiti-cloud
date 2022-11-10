@@ -41,7 +41,6 @@ import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinitio
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.CloudApplicationImpl;
 import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
@@ -125,7 +124,7 @@ public class CloudProcessModelAutoConfiguration {
         module.registerSubtypes(new NamedType(CloudProcessUpdatedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()));
         module.registerSubtypes(new NamedType(CloudProcessDeletedEventImpl.class,
-                                              ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name()));
+                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCompletedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessSuspendedEventImpl.class,

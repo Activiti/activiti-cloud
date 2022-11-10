@@ -15,16 +15,12 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
-import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
-import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessDeletedAuditEventEntity;
@@ -53,7 +49,7 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     public String getSupportedEvent() {
-        return ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name();
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name();
     }
 
     @Override

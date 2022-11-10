@@ -19,16 +19,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntityAssert;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessDeletedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 
@@ -62,7 +61,7 @@ public class ProcessDeletedEventConverterTest {
 
   @Test
   public void getSupportedEventShouldReturnProcessDeleted() {
-    assert(converter.getSupportedEvent()).equals(ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name());
+    assert(converter.getSupportedEvent()).equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
   }
 
   @Test

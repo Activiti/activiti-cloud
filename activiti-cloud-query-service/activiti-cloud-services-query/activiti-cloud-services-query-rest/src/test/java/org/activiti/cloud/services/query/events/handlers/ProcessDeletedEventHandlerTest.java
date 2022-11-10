@@ -22,8 +22,8 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -187,7 +187,7 @@ public class ProcessDeletedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name());
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
     }
 
     private void insertProcess(String id, ProcessInstanceStatus status) {

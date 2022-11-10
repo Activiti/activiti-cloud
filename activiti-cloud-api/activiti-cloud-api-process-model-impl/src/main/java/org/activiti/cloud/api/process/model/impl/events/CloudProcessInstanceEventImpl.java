@@ -17,14 +17,17 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public abstract class CloudProcessInstanceEventImpl extends BaseCloudProcessInstanceEventImpl<ProcessRuntimeEvent.ProcessEvents> {
+public abstract class CloudProcessInstanceEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> {
 
     public CloudProcessInstanceEventImpl() {
     }
 
     public CloudProcessInstanceEventImpl(ProcessInstance processInstance) {
         super(processInstance);
+        setFlattenInfo(processInstance);
     }
 
     public CloudProcessInstanceEventImpl(String id,
@@ -33,5 +36,17 @@ public abstract class CloudProcessInstanceEventImpl extends BaseCloudProcessInst
         super(id,
               timestamp,
               processInstance);
+        setFlattenInfo(processInstance);
+    }
+
+    private void setFlattenInfo(ProcessInstance processInstance) {
+        setProcessDefinitionId(processInstance.getProcessDefinitionId());
+        setProcessInstanceId(processInstance.getId());
+        setEntityId(processInstance.getId());
+        setBusinessKey(processInstance.getBusinessKey());
+        setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        setProcessDefinitionVersion(processInstance.getProcessDefinitionVersion());
+        setParentProcessInstanceId(processInstance.getParentId());
+        setAppVersion(processInstance.getAppVersion());
     }
 }

@@ -19,9 +19,9 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
-import org.activiti.cloud.api.process.model.events.ExtendedCloudProcessRuntimeEvent.ExtendedCloudProcessRuntimeEvents;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 
@@ -65,10 +65,7 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
     @Override
     public String getHandledEvent() {
-        return ExtendedCloudProcessRuntimeEvents.PROCESS_DELETED.name();
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name();
     }
 
-//    private CriteriaDelete<TaskEntity> buildTaskDelete(ProcessInstanceEntity processInstance) {
-//        CriteriaBuilder criteriaBuilder = entityManager.
-//    }
 }
