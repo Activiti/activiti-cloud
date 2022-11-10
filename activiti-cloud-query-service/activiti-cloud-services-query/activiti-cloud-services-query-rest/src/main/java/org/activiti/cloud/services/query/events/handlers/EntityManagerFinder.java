@@ -15,23 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import javax.persistence.ConstraintMode;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import org.activiti.cloud.services.query.model.BPMNActivityEntity;
-import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
-import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.hibernate.annotations.Filter;
 import org.hibernate.jpa.QueryHints;
 
 import javax.persistence.EntityGraph;
