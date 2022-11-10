@@ -34,10 +34,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
         <executions>
           <execution>
-            <phase>generate-test-sources</phase>
+            <phase>test</phase>
             <goals>
               <goal>test-jar</goal>
             </goals>
