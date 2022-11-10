@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
-import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.StringUtils;
+
+import java.util.Map;
 
 public class IntegrationResultBuilder {
 

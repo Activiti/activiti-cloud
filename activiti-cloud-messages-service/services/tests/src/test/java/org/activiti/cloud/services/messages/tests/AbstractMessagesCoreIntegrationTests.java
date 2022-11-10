@@ -168,10 +168,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                 @Override
                 public Message<?> preSend(Message<?> message, MessageChannel channel) {
                     Object payload = message.getPayload();
-                    if (payload instanceof MessageEventPayload) {
-                        if (Objects.equals(((MessageEventPayload) payload).getBusinessKey(), "errorInterceptor")) {
-                            throw new RuntimeException("transaction failed");
-                        }
+                    if (payload instanceof MessageEventPayload
+                            && Objects.equals(((MessageEventPayload) payload).getBusinessKey(), "errorInterceptor")) {
+                        throw new IllegalArgumentException("transaction failed");
                     }
                     return message;
                 }

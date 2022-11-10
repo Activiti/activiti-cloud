@@ -140,7 +140,7 @@ public class ServiceTaskConsumerHandler {
             integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
                     "outTest");
 
-            JsonNode value;
+            JsonNode value = null;
             try {
                 value = new ObjectMapper().readTree("{\n"
                         + "  \"city\": {\n"
@@ -149,7 +149,7 @@ public class ServiceTaskConsumerHandler {
                         + "  }\n"
                         + "}");
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                // ignore the exception, the test will fail
             }
             integrationContext.addOutBoundVariable("sightSeeing", value);
             integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
