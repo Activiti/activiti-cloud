@@ -20,7 +20,6 @@ import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfigur
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-//import org.springframework.boot.data.geode.autoconfigure.ClientCacheAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.hazelcast.lock.HazelcastLockRegistry;

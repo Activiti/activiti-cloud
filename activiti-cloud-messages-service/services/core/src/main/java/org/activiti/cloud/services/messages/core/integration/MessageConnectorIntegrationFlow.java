@@ -71,7 +71,7 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
         return this.from(MessageConnectorInputGateway.class,
-                        gateway -> gateway.beanName("messageConnectorInput").requestTimeout(0))
+                        gateway -> gateway.beanName("messageConnectorInput"))
                    .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
                                         .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
