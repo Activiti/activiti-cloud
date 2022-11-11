@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.messages.core.integration;
 
+import java.util.function.Function;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
+import org.springframework.cloud.function.context.catalog.MessageConsumer;
 import org.springframework.integration.annotation.Filter;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.annotation.Transformer;
@@ -68,8 +70,8 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(MessageConnectorInput.class,
-                        gateway -> gateway.beanName("messageConnectorInput"))
+        return this.from(MessageConnectorInputGateway.class,
+                        gateway -> gateway.beanName("messageConnectorInput").requestTimeout(0))
                    .headerFilter(properties.getInputHeadersToRemove())
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
                                         .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))

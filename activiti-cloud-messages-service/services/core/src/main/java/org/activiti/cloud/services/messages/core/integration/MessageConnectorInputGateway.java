@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.cloud.services.messages.core.integration;
 
-import org.springframework.integration.annotation.MessagingGateway;
+import java.util.function.Consumer;
 import org.springframework.messaging.Message;
 
-import java.util.function.Function;
+public interface MessageConnectorInputGateway extends Consumer<Message<?>> {
 
-@MessagingGateway
-public interface MessageConnectorInput extends Function<Message<?>, Message<?>> {
 }
