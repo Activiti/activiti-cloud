@@ -54,13 +54,13 @@ import org.springframework.integration.transformer.MessageTransformationExceptio
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -93,7 +93,7 @@ import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
                 "spring.application.name=rb",
                 "activiti.cloud.application.name=default-app",
                 "spring.cloud.stream.bindings.messageConnectorInput-in-0.content-type=application/json",
-                "spring.cloud.stream.bindings.messageConnectorOutput-out-0.content-type=application/json"
+                "spring.cloud.stream.bindings.messageConnectorInput-out-0.content-type=application/json"
         }
 )
 @DirtiesContext
@@ -167,9 +167,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             return new ChannelInterceptor() {
                 @Override
                 public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                    Object payload = message.getPayload();
-                    if (payload instanceof MessageEventPayload
-                            && Objects.equals(((MessageEventPayload) payload).getBusinessKey(), "errorInterceptor")) {
+                    MessageHeaders headers = message.getHeaders();
+                    if (headers.containsKey(MESSAGE_EVENT_NAME) && "errorInterceptor".equals(headers.get(MESSAGE_EVENT_NAME))){
                         throw new IllegalArgumentException("transaction failed");
                     }
                     return message;
@@ -706,9 +705,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             send(messageSentEvent(messageName, null, "error"));
         });
 
-        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
-
         this.controlBus.send("@aggregator.start()");
+
+        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
     }
 
 
@@ -726,7 +725,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // when
         Throwable thrown = catchThrowable(() -> {
-            send(messageSentEvent(messageName, null, "errorInterceptor"));
+            send(messageSentEvent("errorInterceptor", null, "errorInterceptor"));
         });
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
@@ -759,7 +758,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                              .setHeader(MESSAGE_EVENT_CORRELATION_KEY, correlationKey)
                              .setHeader(MESSAGE_EVENT_ID, UUID.randomUUID())
                              .setHeader(APP_NAME, activitiCloudApplicationName)
-                             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, bindingServiceProperties.getBindingDestination("messageConnectorOutput-out-0"))
+                             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION,
+                                     bindingServiceProperties.getBindingDestination("messageConnectorInput-out-0"))
                              .setHeader(SERVICE_FULL_NAME, springApplicationName);
     }
 

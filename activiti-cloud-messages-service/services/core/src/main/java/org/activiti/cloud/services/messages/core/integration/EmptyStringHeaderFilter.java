@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.messages.core.integration;
 
-import org.springframework.integration.annotation.MessagingGateway;
+import org.springframework.integration.transformer.HeaderFilter;
 import org.springframework.messaging.Message;
 
-import java.util.function.Consumer;
+public class EmptyStringHeaderFilter extends HeaderFilter {
 
-@MessagingGateway(name = "messageConnectorInput")
-public interface MessageConnectorInputGateway extends Consumer<Message<?>> {
+    public EmptyStringHeaderFilter(String... headersToRemove) {
+        super(headersToRemove);
+    }
+
+    @Override
+    public Message<?> transform(Message<?> message) {
+        //TODO remove errorChannel
+        if ("".equals(message.getHeaders().get("errorChannel"))) {
+            return super.transform(message);
+        }
+        return message;
+    }
 
 }

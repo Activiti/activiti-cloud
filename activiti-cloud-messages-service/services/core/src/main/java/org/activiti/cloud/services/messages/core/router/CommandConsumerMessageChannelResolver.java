@@ -43,7 +43,7 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
 
     @Override
     public MessageChannel resolveDestination(String destination) throws DestinationResolutionException {
-        String channelName = getChannelName(destination).orElse("messageConnectorOutput-out-0");
+        String channelName = getChannelName(destination).orElse("messageConnectorInput-out-0");
 
         return binderAwareChannelResolver.resolveDestination(channelName);
     }
