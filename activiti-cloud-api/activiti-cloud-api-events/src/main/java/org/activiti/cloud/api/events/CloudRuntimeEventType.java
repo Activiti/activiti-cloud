@@ -50,6 +50,7 @@ public enum CloudRuntimeEventType {
     PROCESS_STARTED,
     PROCESS_SUSPENDED,
     PROCESS_UPDATED,
+    PROCESS_DELETED,
     SEQUENCE_FLOW_TAKEN,
     SIGNAL_RECEIVED,
     /**

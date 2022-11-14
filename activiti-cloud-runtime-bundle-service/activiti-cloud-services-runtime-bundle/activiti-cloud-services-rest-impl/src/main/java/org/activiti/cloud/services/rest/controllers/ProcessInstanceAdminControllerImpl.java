@@ -30,20 +30,27 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
+import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
@@ -56,6 +63,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceAdminControllerImpl.class);
+
+    private final Set<ProcessInstanceStatus> deleteStatuses = Set.of(ProcessInstanceStatus.COMPLETED, ProcessInstanceStatus.CANCELLED);
+
+    private final String DELETE_PROCESS_NOT_ALLOWED = "Process Instance %s is not in status: " +
+        String.join(", ", deleteStatuses.stream().map(Enum::name).collect(Collectors.toList()));
+
     private final ProcessInstanceRepresentationModelAssembler representationModelAssembler;
 
     private final AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler;
@@ -66,24 +80,29 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
+    private final CloudProcessDeletedService cloudProcessDeletedService;
+
     public ProcessInstanceAdminControllerImpl(ProcessInstanceRepresentationModelAssembler representationModelAssembler,
-                                              AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
-                                              ProcessAdminRuntime processAdminRuntime,
-                                              SpringPageConverter pageConverter,
-                                              ProcessVariablesPayloadConverter variablesPayloadConverter) {
+        AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
+        ProcessAdminRuntime processAdminRuntime,
+        SpringPageConverter pageConverter,
+        ProcessVariablesPayloadConverter variablesPayloadConverter,
+        CloudProcessDeletedService cloudProcessDeletedService) {
+
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.pageConverter = pageConverter;
         this.variablesPayloadConverter = variablesPayloadConverter;
+        this.cloudProcessDeletedService = cloudProcessDeletedService;
     }
 
     @Override
     public PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(pageConverter.toAPIPageable(pageable));
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  representationModelAssembler);
+            pageConverter.toSpringPage(pageable, processInstancePage),
+            representationModelAssembler);
     }
 
     @Override
@@ -103,10 +122,10 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         return representationModelAssembler.toModel(processAdminRuntime.resume(ProcessPayloadBuilder.resume(processInstanceId)));
     }
 
-	@Override
-	public EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {
-		return representationModelAssembler.toModel(processAdminRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
-	}
+    @Override
+    public EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId) {
+        return representationModelAssembler.toModel(processAdminRuntime.suspend(ProcessPayloadBuilder.suspend(processInstanceId)));
+    }
 
     @Override
     public EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId) {
@@ -114,24 +133,38 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     }
 
     @Override
-    public EntityModel<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
-                                                        @RequestBody UpdateProcessPayload payload) {
-        if (payload!=null) {
-            payload.setProcessInstanceId(processInstanceId);
+    public ResponseEntity<Void> destroyProcessInstance(@PathVariable String processInstanceId) {
+        try {
+            ProcessInstance processInstance = processAdminRuntime.processInstance(processInstanceId);
+            if (processInstance != null && !deleteStatuses.contains(processInstance.getStatus())) {
+                throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
+            }
+        } catch (NotFoundException e) {
+            LOGGER.debug("Process Instance " + processInstanceId + " not found. Sending PROCESS_DELETE event.");
+        }
 
+        cloudProcessDeletedService.sendDeleteEvent(processInstanceId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> updateProcess(@PathVariable String processInstanceId,
+        @RequestBody UpdateProcessPayload payload) {
+        if (payload != null) {
+            payload.setProcessInstanceId(processInstanceId);
         }
         return representationModelAssembler.toModel(processAdminRuntime.update(payload));
     }
 
     @Override
     public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                       Pageable pageable) {
+        Pageable pageable) {
         Page<ProcessInstance> processInstancePage = processAdminRuntime.processInstances(pageConverter.toAPIPageable(pageable),
-                                                                                         ProcessPayloadBuilder.subprocesses(processInstanceId));
+            ProcessPayloadBuilder.subprocesses(processInstanceId));
 
         return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable, processInstancePage),
-                                                  representationModelAssembler);
+            pageConverter.toSpringPage(pageable, processInstancePage),
+            representationModelAssembler);
     }
 
     @Override

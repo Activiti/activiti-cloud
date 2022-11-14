@@ -73,6 +73,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscription
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -122,6 +123,8 @@ public class CloudProcessModelAutoConfiguration {
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()));
         module.registerSubtypes(new NamedType(CloudProcessUpdatedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()));
+        module.registerSubtypes(new NamedType(CloudProcessDeletedEventImpl.class,
+                                              ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessCompletedEventImpl.class,
                                               ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()));
         module.registerSubtypes(new NamedType(CloudProcessSuspendedEventImpl.class,

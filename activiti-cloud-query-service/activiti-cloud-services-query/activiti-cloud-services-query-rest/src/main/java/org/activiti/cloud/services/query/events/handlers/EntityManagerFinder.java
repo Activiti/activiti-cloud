@@ -31,6 +31,10 @@ import java.util.Optional;
 public class EntityManagerFinder {
 
     private static final String VARIABLES = "variables";
+    private static final String TASKS = "tasks";
+    private static final String ACTIVITIES = "activities";
+    private static final String SERVICE_TASKS = "serviceTasks";
+    private static final String SEQUENCE_FLOWS = "sequenceFlows";
     private static final String PROCESS_VARIABLES = "processVariables";
     private static final String TASK_CANDIDATE_USERS = "taskCandidateUsers";
     private static final String TASK_CANDIDATE_GROUPS = "taskCandidateGroups";
@@ -90,5 +94,15 @@ public class EntityManagerFinder {
         return Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
                                                       processInstanceId,
                                                       Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
+    }
+
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithRelatedEntities(String processInstanceId) {
+        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+
+        entityGraph.addAttributeNodes(VARIABLES, TASKS, ACTIVITIES, SERVICE_TASKS, SEQUENCE_FLOWS);
+
+        return Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
+            processInstanceId,
+            Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)));
     }
 }

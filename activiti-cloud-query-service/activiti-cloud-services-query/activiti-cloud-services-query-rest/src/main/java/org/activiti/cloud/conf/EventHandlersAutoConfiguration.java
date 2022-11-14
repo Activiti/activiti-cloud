@@ -102,6 +102,12 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessDeletedEventHandler processDeletedEventHandler(EntityManager entityManager) {
+        return new ProcessDeletedEventHandler(entityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public TaskActivatedEventHandler taskActivatedEventHandler(EntityManager entityManager) {
         return new TaskActivatedEventHandler(entityManager);
     }

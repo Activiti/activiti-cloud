@@ -64,6 +64,7 @@ import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregato
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -453,6 +454,14 @@ public class CloudEventsAutoConfiguration {
         return new CloudApplicationDeployedProducer(runtimeBundleInfoAppender,
                 processEngineChannels,
                 runtimeBundleMessageBuilderFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudProcessDeletedService cloudProcessDeletedProducer(  ProcessEngineChannels processEngineChannels,
+                                                                    RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+                                                                    RuntimeBundleInfoAppender runtimeBundleInfoAppender){
+        return new CloudProcessDeletedService(processEngineChannels, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
     }
 
 }

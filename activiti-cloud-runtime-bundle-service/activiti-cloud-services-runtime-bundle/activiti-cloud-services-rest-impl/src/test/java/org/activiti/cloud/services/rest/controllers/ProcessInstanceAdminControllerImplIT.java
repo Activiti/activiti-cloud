@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
@@ -32,6 +33,7 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
+import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
@@ -107,6 +109,9 @@ public class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private ProcessRuntime processRuntime;
 
+    @MockBean
+    private CloudProcessDeletedService cloudProcessDeletedService;
+
     @BeforeEach
     public void setUp() {
         assertThat(processEngineChannels).isNotNull();
@@ -169,6 +174,25 @@ public class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}",
                                     1))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void destroyProcessInstance() throws Exception {
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy",
+                1))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
+        //given
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy",
+                1))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

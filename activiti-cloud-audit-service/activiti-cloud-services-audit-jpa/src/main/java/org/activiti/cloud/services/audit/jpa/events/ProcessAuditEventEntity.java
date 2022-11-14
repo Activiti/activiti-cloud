@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
 
@@ -36,6 +37,10 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     public ProcessAuditEventEntity(CloudProcessRuntimeEvent cloudEvent) {
         super(cloudEvent);
         setProcessInstance(cloudEvent.getEntity());
+    }
+
+    public ProcessAuditEventEntity(CloudRuntimeEvent<?,?> cloudEvent) {
+        super(cloudEvent);
     }
 
     public ProcessInstance getProcessInstance() {

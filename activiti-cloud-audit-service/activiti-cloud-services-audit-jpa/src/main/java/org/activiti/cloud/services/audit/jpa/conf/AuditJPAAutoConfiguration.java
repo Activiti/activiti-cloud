@@ -34,6 +34,7 @@ import org.activiti.cloud.services.audit.jpa.converters.MessageWaitingEventConve
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessDeployedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessResumedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessStartedEventConverter;
@@ -60,6 +61,7 @@ import org.activiti.cloud.services.audit.jpa.converters.TimerScheduledEventConve
 import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
+import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -145,6 +147,12 @@ public class AuditJPAAutoConfiguration {
     @Bean
     public ProcessUpdatedEventConverter processUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         return new ProcessUpdatedEventConverter(eventContextInfoAppender);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public ProcessDeletedEventConverter processDeletedEventConverter(EventsRepository eventsRepository, EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessDeletedEventConverter(eventsRepository, eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean

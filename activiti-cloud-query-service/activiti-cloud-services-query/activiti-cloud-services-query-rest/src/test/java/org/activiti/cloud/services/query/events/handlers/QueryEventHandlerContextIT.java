@@ -56,6 +56,7 @@ public class QueryEventHandlerContextIT {
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name(),
+                ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_CREATED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name(),
                 TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name(),
@@ -92,6 +93,7 @@ public class QueryEventHandlerContextIT {
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name())).isInstanceOf(ProcessResumedEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name())).isInstanceOf(ProcessCancelledEventHandler.class);
         assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name())).isInstanceOf(ProcessUpdatedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name())).isInstanceOf(ProcessDeletedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name())).isInstanceOf(TaskCreatedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())).isInstanceOf(TaskAssignedEventHandler.class);
         assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name())).isInstanceOf(TaskSuspendedEventHandler.class);
