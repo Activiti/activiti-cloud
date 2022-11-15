@@ -47,8 +47,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledE
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer;
-import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer.EngineEvents;
+import org.activiti.cloud.notifications.graphql.starter.ActivitiGraphQLStarterIT.Application;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
@@ -59,20 +58,20 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Mono;
@@ -95,9 +94,11 @@ import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = Application.class)
 @ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ActivitiGraphQLStarterIT {
+
+    private static final String ENGINE_EVENTS_OUTPUT = "engineEventsOutput-out-0";
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-ws";
@@ -121,7 +122,7 @@ public class ActivitiGraphQLStarterIT {
     private TestRestTemplate rest;
 
     @Autowired
-    private EngineEvents producerChannel;
+    private StreamBridge streamBridge;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -129,7 +130,6 @@ public class ActivitiGraphQLStarterIT {
     private HttpHeaders authHeaders;
 
     @SpringBootApplication
-    @EnableBinding(EngineEventsMessageProducer.EngineEvents.class) //TODO remove after move to functional programming model
     static class Application {
         // Nothing
     }
@@ -202,7 +202,6 @@ public class ActivitiGraphQLStarterIT {
     }
 
 
-    @Disabled // TODO fix & enable
     @Test
     public void testGraphqlWsSubprotocolServerStartStopSubscription() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
@@ -282,8 +281,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .take(1)
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2))
+                    .doOnSubscribe(s -> send(MessageBuilder.withPayload(Arrays.array(event1, event2))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
@@ -324,7 +322,6 @@ public class ActivitiGraphQLStarterIT {
             .subscribe();
     }
 
-    @Disabled // TODO fix & enable
     @Test
     public void testGraphqlSubscriptionPROCESS_DEPLOYED() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
@@ -386,8 +383,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .take(1)
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                    .doOnSubscribe(s -> send(MessageBuilder.withPayload(Arrays.array(event1))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
@@ -418,7 +414,6 @@ public class ActivitiGraphQLStarterIT {
     }
 
 
-    @Disabled // TODO fix & enable
     @Test
     public void testGraphqlSubscriptionSIGNAL_RECEIVED() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
@@ -485,8 +480,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .take(1)
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                    .doOnSubscribe(s -> send(MessageBuilder.withPayload(Arrays.array(event1))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
@@ -587,8 +581,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .timeout(Duration.ofSeconds(2))
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder.withPayload(Arrays.array(event1))
+                    .doOnSubscribe(s -> send(MessageBuilder.withPayload(Arrays.array(event1))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
@@ -607,7 +600,6 @@ public class ActivitiGraphQLStarterIT {
     }
 
 
-    @Disabled // TODO fix & enable
     @Test
     public void testGraphqlSubscriptionCloudBPMNTimerEvents() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
@@ -777,8 +769,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .take(1)
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder
+                    .doOnSubscribe(s -> send(MessageBuilder
                                                              .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
@@ -839,7 +830,6 @@ public class ActivitiGraphQLStarterIT {
                 .verify(TIMEOUT);
     }
 
-    @Disabled // TODO fix & enable
     @Test
     public void testGraphqlSubscriptionCloudBPMNMessageEvents() throws JsonProcessingException {
         ReplayProcessor<String> data = ReplayProcessor.create();
@@ -948,8 +938,7 @@ public class ActivitiGraphQLStarterIT {
                     .asString()
                     .log("data")
                     .take(1)
-                    .doOnSubscribe(s -> producerChannel.output()
-                                               .send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
+                    .doOnSubscribe(s -> send(MessageBuilder.withPayload(Arrays.array(event1, event2, event3))
                                                              .setHeader("routingKey", "eventProducer")
                                                              .build()))
                     .delaySubscription(Duration.ofSeconds(1))
@@ -1384,6 +1373,9 @@ public class ActivitiGraphQLStarterIT {
         return new StringObjectMapBuilder();
     }
 
+    private void send(Message<?> message){
+        streamBridge.send(ENGINE_EVENTS_OUTPUT, message);
+    }
 }
 
 

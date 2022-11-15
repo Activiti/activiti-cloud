@@ -86,7 +86,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
-            return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
+            return IntegrationFlows.from(EngineEventsConsumerGateway.class, gateway -> gateway.beanName(EngineEventsConsumerChannels.SOURCE))
                                    .log(LoggingHandler.Level.DEBUG)
                                    .transform(engineEventsMessageHandler)
                                    .toReactivePublisher();

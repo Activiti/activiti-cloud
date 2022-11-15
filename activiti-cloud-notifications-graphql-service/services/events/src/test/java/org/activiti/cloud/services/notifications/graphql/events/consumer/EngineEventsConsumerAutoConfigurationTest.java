@@ -15,13 +15,20 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.cloud.function.context.FunctionRegistry;
 
 @SpringBootTest(webEnvironment=WebEnvironment.NONE)
 public class EngineEventsConsumerAutoConfigurationTest {
+
+    @Autowired
+    private FunctionRegistry functionRegistry;
 
     @SpringBootApplication
     static class Application {
@@ -30,7 +37,7 @@ public class EngineEventsConsumerAutoConfigurationTest {
 
     @Test
     public void contextLoads() {
-        // success
+        assertThat(functionRegistry.<Object>lookup("graphQLEngineEventsConsumerSource")).isNotNull();
     }
 
 }

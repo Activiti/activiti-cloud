@@ -128,6 +128,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-function-context</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
       <scope>test</scope>
