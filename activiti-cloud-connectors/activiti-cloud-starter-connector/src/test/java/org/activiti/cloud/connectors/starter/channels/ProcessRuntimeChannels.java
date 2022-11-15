@@ -24,11 +24,8 @@ public interface ProcessRuntimeChannels {
     String RUNTIME_CMD_PRODUCER = "runtimeCmdProducer";
     String RUNTIME_CMD_RESULTS = "runtimeCmdResults";
 
-    @Output(RUNTIME_CMD_PRODUCER)
     MessageChannel runtimeCmdProducer();
 
-
-    @Input(RUNTIME_CMD_RESULTS)
     SubscribableChannel runtimeCmdResults();
 
 }

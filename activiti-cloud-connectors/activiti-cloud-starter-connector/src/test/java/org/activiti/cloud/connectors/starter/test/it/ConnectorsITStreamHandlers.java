@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @Component
-@EnableBinding({RuntimeMockStreams.class, MockCloudRuntimeEventsChannels.class})
 public class ConnectorsITStreamHandlers {
 
     public static final String CONNECTOR_IT = "ConnectorIT";
@@ -41,15 +40,13 @@ public class ConnectorsITStreamHandlers {
 
     private String integrationId;
 
-    @StreamListener(value = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
-    public void consumeIntegrationResultsMock(IntegrationResult integrationResult) throws InterruptedException {
+    public void consumeIntegrationResultsMock(IntegrationResult integrationResult) {
         assertThat(integrationResult.getIntegrationContext().getOutBoundVariables().get("var2")).isEqualTo(2L);
         assertThat(integrationResult.getIntegrationContext().getId()).isEqualTo(getIntegrationId());
         integrationResultEventsCounter.incrementAndGet();
     }
 
-    @StreamListener(value = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
-    public void consumeIntegrationErrorMock(IntegrationError integrationError) throws InterruptedException {
+    public void consumeIntegrationErrorMock(IntegrationError integrationError) {
         integrationErrorReference.set(integrationError);
 
         integrationErrorEventProduced.set(true);

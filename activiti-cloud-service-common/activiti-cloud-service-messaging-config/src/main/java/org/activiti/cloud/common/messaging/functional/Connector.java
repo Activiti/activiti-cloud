@@ -13,24 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.test.it;
+package org.activiti.cloud.common.messaging.functional;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
-
-public interface MockCloudRuntimeEventsChannels {
-
-    String COMMAND_CONSUMER = "commandConsumer";
-
-    String COMMAND_RESULTS = "commandResults";
-
-    String AUDIT_PRODUCER = "auditProducer";
-
-    SubscribableChannel commandConsumer();
-
-    MessageChannel commandResults();
-
-    MessageChannel auditProducer();
+@FunctionalInterface
+public interface Connector {
+    String apply(String in);
 }
