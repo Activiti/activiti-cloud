@@ -13,24 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.test.it;
+package org.activiti.cloud.common.messaging.functional;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-public interface MockCloudRuntimeEventsChannels {
-
-    String COMMAND_CONSUMER = "commandConsumer";
-
-    String COMMAND_RESULTS = "commandResults";
-
-    String AUDIT_PRODUCER = "auditProducer";
-
-    SubscribableChannel commandConsumer();
-
-    MessageChannel commandResults();
-
-    MessageChannel auditProducer();
+@Retention( RetentionPolicy.RUNTIME )
+@Target( ElementType.METHOD )
+@Qualifier
+public @interface ConditionFunctionDefinition {
+    String condition() default "";
 }
