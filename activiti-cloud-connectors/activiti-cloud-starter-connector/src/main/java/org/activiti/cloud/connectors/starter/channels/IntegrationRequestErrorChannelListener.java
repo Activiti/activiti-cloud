@@ -15,12 +15,15 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
+import java.util.function.Consumer;
+import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.support.ErrorMessage;
 
-public class IntegrationRequestErrorChannelListener {
+public class IntegrationRequestErrorChannelListener implements Consumer<ErrorMessage> {
 
-    private static final String ERROR_CHANNEL = "errorChannel";
+    public static final String ERROR_CHANNEL = "errorChannel";
 
     private final IntegrationErrorHandler integrationErrorHandler;
 
@@ -28,8 +31,8 @@ public class IntegrationRequestErrorChannelListener {
         this.integrationErrorHandler = integrationErrorSender;
     }
 
-    @StreamListener(ERROR_CHANNEL)
-    public void handleError(ErrorMessage errorMessage) {
+    @Override
+    public void accept(ErrorMessage errorMessage) {
         integrationErrorHandler.handleErrorMessage(errorMessage);
     }
 }
