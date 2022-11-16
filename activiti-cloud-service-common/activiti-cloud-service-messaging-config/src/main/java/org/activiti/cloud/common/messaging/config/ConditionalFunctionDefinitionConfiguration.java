@@ -19,62 +19,72 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.config.ConnectorConfiguration.ConnectorMessageFunction;
+import org.activiti.cloud.common.messaging.functional.ConditionalFunctionDefinition;
 import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
-public class FunctionDefinitionConfiguration {
+public class ConditionalFunctionDefinitionConfiguration {
 
     @Bean
-    public FunctionDefinitionPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
-        return new FunctionDefinitionPropertySource(applicationContext.getEnvironment());
-    }
-
-    @Bean
-    public BeanPostProcessor functionDefinitionBeanPostProcessor(DefaultListableBeanFactory beanFactory,
+    public BeanPostProcessor conditionalFunctionDefinitionBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         FunctionDefinitionPropertySource functionDefinitionPropertySource,
-        StreamFunctionProperties streamFunctionProperties) {
+        StreamFunctionProperties streamFunctionProperties,
+        IntegrationFlowContext integrationFlowContext) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (Supplier.class.isInstance(bean) ||
-                    Function.class.isInstance(bean) ||
-                    Consumer.class.isInstance(bean)) {
+                if (Consumer.class.isInstance(bean) ||
+                    Function.class.isInstance(bean)) {
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, FunctionDefinition.class))
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionDefinition.class))
                         .ifPresent(functionDefinition -> {
-                            functionDefinitionPropertySource.register(beanName);
+                            String listenerName = beanName + "Listener";
+
+                            functionDefinitionPropertySource.register(listenerName);
 
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(output -> {
                                     streamFunctionProperties.getBindings()
-                                        .put(beanName + "-out-0", output);
+                                        .put(listenerName + "-out-0", output);
                                 });
 
                             Optional.of(functionDefinition.input())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(input -> {
                                     streamFunctionProperties.getBindings()
-                                        .put(beanName + "-in-0", input);
+                                        .put(listenerName + "-in-0", input);
+                                });
+
+                            Optional.of(functionDefinition.condition())
+                                .filter(StringUtils::hasText)
+                                .ifPresent(condition -> {
+                                    IntegrationFlow flow = IntegrationFlows.from(MessageFunctionGateway.class,
+                                            (gateway) -> gateway.beanName(listenerName)
+                                                .replyTimeout(0L))
+                                        .filter(condition)
+                                        .handle(bean)
+                                        .log(LoggingHandler.Level.INFO, listenerName + "- Result")
+                                        .bridge()
+                                        .get();
+
+                                    integrationFlowContext.registration(flow)
+                                        .register();
                                 });
                         });
                 }
@@ -82,6 +92,26 @@ public class FunctionDefinitionConfiguration {
                 return bean;
             }
         };
+    }
+
+    private class ConsumerMessageHandler implements MessageHandler {
+
+        private Consumer consumer;
+
+        public ConsumerMessageHandler(Object bean) {
+            this.consumer = (Consumer) bean;
+        }
+
+        @Override
+        public void handleMessage(Message<?> message) throws MessagingException {
+            consumer.accept(message);
+        }
+    }
+
+    public interface MessageFunctionGateway extends Consumer<Message<?>> {
+
+        @Override
+        void accept(Message<?> message) throws MessagingException;
     }
 
 }
