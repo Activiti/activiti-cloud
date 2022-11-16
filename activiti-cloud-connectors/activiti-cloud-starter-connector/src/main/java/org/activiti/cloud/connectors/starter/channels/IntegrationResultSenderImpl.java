@@ -17,14 +17,18 @@ package org.activiti.cloud.connectors.starter.channels;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
 public class IntegrationResultSenderImpl implements IntegrationResultSender {
 
+    private final StreamBridge streamBridge;
     private final IntegrationResultChannelResolver resolver;
 
-    public IntegrationResultSenderImpl(IntegrationResultChannelResolver resolver) {
+    public IntegrationResultSenderImpl(StreamBridge streamBridge, IntegrationResultChannelResolver resolver) {
+
+        this.streamBridge = streamBridge;
         this.resolver = resolver;
     }
 
@@ -32,8 +36,8 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
     public void send(Message<IntegrationResult> message) {
         IntegrationRequest request = message.getPayload().getIntegrationRequest();
 
-        MessageChannel destination = resolver.resolveDestination(request);
+        String destination = resolver.resolveDestination(request);
 
-        destination.send(message);
+        streamBridge.send(destination, message);
     }
 }

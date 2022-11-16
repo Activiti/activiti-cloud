@@ -28,4 +28,5 @@ public @interface FunctionDefinition {
     String output() default "";
 
     String input() default "";
+
 }

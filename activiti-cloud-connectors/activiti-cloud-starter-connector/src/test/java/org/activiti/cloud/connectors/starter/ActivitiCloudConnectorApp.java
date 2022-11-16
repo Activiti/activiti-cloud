@@ -25,7 +25,9 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.functional.ConditionalFunctionDefinition;
 import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
 import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -78,33 +80,20 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 //        String[] functions = environment.getProperty("spring.cloud.function.definition", "")
 //            .split(";");
 //
-//        assertThat(functions).containsExactlyInAnyOrder("mockTypeIntegrationRequestEvents",
-//            "mockTypeIntegrationRuntimeError",
-//            "mockTypeIntegrationErrorSender",
-//            "mockTypeIntegrationCloudBpmnErrorSender",
-//            "mockTypeIntegrationCloudBpmnErrorRootCauseSender",
-//            "mockTypeIntegrationCloudBpmnErrorMessageSender",
+//        assertThat(functions).containsExactlyInAnyOrder(
+//            "mockTypeIntegrationRequestEventsListener",
+//            "mockTypeIntegrationRuntimeErrorListener",
+//            "mockTypeIntegrationErrorSenderListener",
+//            "mockTypeIntegrationCloudBpmnErrorSenderListener",
+//            "mockTypeIntegrationCloudBpmnErrorRootCauseSenderListener",
+//            "mockTypeIntegrationCloudBpmnErrorMessageSenderListener",
 //            "integrationRequestErrorChannelListener");
 
         assertThat(processRuntimeChannels.runtimeCmdProducer()).isNotNull();
     }
 
-    @Test
-    public void contextLoads() {
-        String[] functions = environment.getProperty("spring.cloud.function.definition", "")
-            .split(";");
-
-        assertThat(functions).containsExactlyInAnyOrder("mockTypeIntegrationRequestEvents",
-            "mockTypeIntegrationRuntimeError",
-            "mockTypeIntegrationErrorSender",
-            "mockTypeIntegrationCloudBpmnErrorSender",
-            "mockTypeIntegrationCloudBpmnErrorRootCauseSender",
-            "mockTypeIntegrationCloudBpmnErrorMessageSender",
-            "integrationRequestErrorChannelListener");
-    }
-
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
     public Consumer<IntegrationRequest> mockTypeIntegrationRequestEvents() {
         return event -> {
             verifyEventAndCreateResults(event);
@@ -119,7 +108,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationRuntimeError() {
         return event -> {
             throw new RuntimeException("Mock RuntimeException");
@@ -127,7 +116,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationErrorSender() {
         return integrationRequest -> {
             try {
@@ -145,7 +134,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorSender() {
         return integrationRequest -> {
             try {
@@ -163,7 +152,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorRootCauseSender() {
         return integrationRequest -> {
             try {
@@ -181,7 +170,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
+    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorMessageSender() {
         return integrationRequest -> {
             try {
