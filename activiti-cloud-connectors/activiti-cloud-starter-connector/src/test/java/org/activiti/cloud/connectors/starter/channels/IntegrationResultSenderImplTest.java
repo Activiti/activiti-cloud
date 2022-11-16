@@ -56,7 +56,7 @@ public class IntegrationResultSenderImplTest {
         IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
                 integrationRequest.getIntegrationContext());
 
-        given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
+//        given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
 
         Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
 
