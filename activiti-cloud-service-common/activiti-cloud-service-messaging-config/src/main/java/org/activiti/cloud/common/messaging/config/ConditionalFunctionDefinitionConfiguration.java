@@ -15,30 +15,30 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionDefinition;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.ConditionalMessageRoutingCallback;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.cloud.function.context.FunctionCatalog;
+import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
 public class ConditionalFunctionDefinitionConfiguration {
+
+    @Autowired
+    private FunctionCatalog functionCatalog;
 
     @Bean
     public BeanPostProcessor conditionalFunctionDefinitionBeanPostProcessor(DefaultListableBeanFactory beanFactory,
@@ -53,7 +53,7 @@ public class ConditionalFunctionDefinitionConfiguration {
 
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionDefinition.class))
                         .ifPresent(functionDefinition -> {
-                            String listenerName = beanName + "Listener";
+                            String listenerName = beanName;
 
                             functionDefinitionPropertySource.register(listenerName);
 
@@ -67,24 +67,34 @@ public class ConditionalFunctionDefinitionConfiguration {
                             Optional.of(functionDefinition.input())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(input -> {
-                                    streamFunctionProperties.getBindings()
-                                        .put(listenerName + "-in-0", input);
-                                });
+                                    String routerName = input + "Router";
+                                    String routerCallbackName = routerName + "Callback";
 
-                            Optional.of(functionDefinition.condition())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(condition -> {
-                                    IntegrationFlow flow = IntegrationFlows.from(MessageFunctionGateway.class,
-                                            (gateway) -> gateway.beanName(listenerName)
-                                                .replyTimeout(0L))
-                                        .filter(condition)
-                                        .handle(bean)
-                                        .log(LoggingHandler.Level.INFO, listenerName + "- Result")
-                                        .bridge()
-                                        .get();
+                                    Optional.of(functionDefinition.condition())
+                                        .filter(StringUtils::hasText)
+                                        .ifPresentOrElse(condition -> {
+                                                try {
+                                                    RoutingFunction router = beanFactory.getBean(routerName, RoutingFunction.class);
+                                                    try {
+                                                        ConditionalMessageRoutingCallback callback = beanFactory.getBean(routerCallbackName,
+                                                            ConditionalMessageRoutingCallback.class);
+                                                        callback.addRoutingExpression(beanName, condition);
+                                                    } catch (BeansException e) {
+                                                        throw new IllegalStateException(
+                                                            String.format("Router %s is defined, but it has no proper callback", routerName));
+                                                    }
+                                                } catch (BeansException e) {
+                                                    ConditionalMessageRoutingCallback callback = createCallback(beanFactory, routerCallbackName);
+                                                    callback.addRoutingExpression(beanName, condition);
 
-                                    integrationFlowContext.registration(flow)
-                                        .register();
+                                                    RoutingFunction router = createRouter(beanFactory, routerName, callback);
+                                                    functionDefinitionPropertySource.register(routerName);
+                                                    streamFunctionProperties.getBindings().put(routerName + "-in-0", input);
+                                                }
+                                            },
+                                            () -> streamFunctionProperties.getBindings()
+                                                .put(listenerName + "-in-0", input)
+                                        );
                                 });
                         });
                 }
@@ -94,24 +104,17 @@ public class ConditionalFunctionDefinitionConfiguration {
         };
     }
 
-    private class ConsumerMessageHandler implements MessageHandler {
-
-        private Consumer consumer;
-
-        public ConsumerMessageHandler(Object bean) {
-            this.consumer = (Consumer) bean;
-        }
-
-        @Override
-        public void handleMessage(Message<?> message) throws MessagingException {
-            consumer.accept(message);
-        }
+    protected ConditionalMessageRoutingCallback createCallback(DefaultListableBeanFactory beanFactory, String routerCallbackName) {
+        ConditionalMessageRoutingCallback callback = new ConditionalMessageRoutingCallback();
+        beanFactory.registerSingleton(routerCallbackName, callback);
+        return callback;
     }
 
-    public interface MessageFunctionGateway extends Consumer<Message<?>> {
-
-        @Override
-        void accept(Message<?> message) throws MessagingException;
+    protected RoutingFunction createRouter(DefaultListableBeanFactory beanFactory, String routerName, ConditionalMessageRoutingCallback callback) {
+        RoutingFunction routingFunction = new RoutingFunction(functionCatalog, Collections.emptyMap(), new BeanFactoryResolver(beanFactory), callback);
+        beanFactory.registerSingleton(routerName, routingFunction);
+        return routingFunction;
     }
+
 
 }
