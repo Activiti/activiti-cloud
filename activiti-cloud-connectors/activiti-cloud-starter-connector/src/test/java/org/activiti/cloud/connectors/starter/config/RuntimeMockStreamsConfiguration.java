@@ -15,9 +15,12 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -26,10 +29,23 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import reactor.core.publisher.Flux;
 
 @Configuration
 public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
+
+    @Autowired
+    private ObjectMapper mapper;
+
+
+    private MappingJackson2MessageConverter messageConverter() {
+        MappingJackson2MessageConverter messageConverter = new MappingJackson2MessageConverter();
+        messageConverter.setObjectMapper(mapper);
+        return messageConverter;
+    }
 
     @Bean
     @Override
@@ -41,7 +57,17 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
     @Bean
     @Override
     public MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).get();
+        return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).interceptor(new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                return ChannelInterceptor.super.preSend(message, channel);
+            }
+
+            @Override
+            public Message<?> postReceive(Message<?> message, MessageChannel channel) {
+                return message;
+            }
+        }).get();
     }
 
     @FunctionDefinition(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
