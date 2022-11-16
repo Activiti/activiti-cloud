@@ -1,4 +1,6 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     org.activiti.cloud.common.messaging.config.ActivitiCloudMessagingAutoConfiguration,\
     org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration,\
+    org.activiti.cloud.common.messaging.config.FunctionDefinitionConfiguration,\
+    org.activiti.cloud.common.messaging.config.ConditionalFunctionDefinitionConfiguration,\
     org.activiti.cloud.common.messaging.config.ConnectorConfiguration
