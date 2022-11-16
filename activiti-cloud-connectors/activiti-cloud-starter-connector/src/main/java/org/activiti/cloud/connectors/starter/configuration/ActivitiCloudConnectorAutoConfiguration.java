@@ -17,6 +17,7 @@ package org.activiti.cloud.connectors.starter.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
 import org.activiti.cloud.connectors.starter.channels.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -48,7 +49,7 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConnectorDefinition(input = IntegrationRequestErrorChannelListener.ERROR_CHANNEL)
+    @FunctionDefinition(input = IntegrationRequestErrorChannelListener.ERROR_CHANNEL)
     public IntegrationRequestErrorChannelListener integrationRequestErrorChannelListener(IntegrationErrorHandler integrationErrorHandler) {
         return new IntegrationRequestErrorChannelListener(integrationErrorHandler);
     }
