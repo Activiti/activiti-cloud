@@ -24,6 +24,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.METHOD )
 @Qualifier
-public @interface ConditionFunctionDefinition {
+public @interface ConditionalFunctionDefinition {
+    String output() default "";
+
+    String input() default "";
+    
     String condition() default "";
 }

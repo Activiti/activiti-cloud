@@ -22,13 +22,12 @@ import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.handler.LoggingHandler;
@@ -38,12 +37,6 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 public class ConnectorConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public FunctionDefinitionPropertySource functionDefinitionPropertySource(ConfigurableEnvironment configurableEnvironment){
-        return new FunctionDefinitionPropertySource(configurableEnvironment);
-    }
 
     @Bean
     public BeanPostProcessor connectorBeanPostProcessor(DefaultListableBeanFactory beanFactory,
@@ -62,6 +55,10 @@ public class ConnectorConfiguration {
 
                     functionDefinitionPropertySource.register(functionName);
 
+                    final IntegrationFlowBuilder flowBuilder = IntegrationFlows.from(ConnectorMessageFunction.class,
+                            (gateway) -> gateway.beanName(functionName)
+                                .replyTimeout(0L));
+
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorDefinition.class))
                             .ifPresent(functionDefinition -> {
                                 Optional.of(functionDefinition.output())
@@ -77,11 +74,13 @@ public class ConnectorConfiguration {
                                             streamFunctionProperties.getBindings()
                                                                     .put(functionName + "-in-0", input);
                                         });
+
+                                Optional.of(functionDefinition.condition())
+                                    .filter(StringUtils::hasText)
+                                    .ifPresent(condition -> flowBuilder.filter(condition));
                             });
 
-                    IntegrationFlow flow = IntegrationFlows.from(ConnectorMessageFunction.class,
-                                                 (gateway) -> gateway.beanName(functionName)
-                                                                     .replyTimeout(0L))
+                    IntegrationFlow flow = flowBuilder
                                            .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
                                            .handle(String.class,
                                                    (request, headers) -> {
