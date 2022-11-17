@@ -25,9 +25,7 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.ConditionalFunctionDefinition;
-import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -35,7 +33,6 @@ import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.configuration.EnableActivitiCloudConnector;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -93,7 +90,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Mock'")
     public Consumer<IntegrationRequest> mockTypeIntegrationRequestEvents() {
         return event -> {
             verifyEventAndCreateResults(event);
@@ -108,7 +105,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationRuntimeError() {
         return event -> {
             throw new RuntimeException("Mock RuntimeException");
@@ -116,7 +113,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationErrorSender() {
         return integrationRequest -> {
             try {
@@ -134,7 +131,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnError'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorSender() {
         return integrationRequest -> {
             try {
@@ -152,7 +149,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorCause'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorRootCauseSender() {
         return integrationRequest -> {
             try {
@@ -170,7 +167,7 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConditionalFunctionDefinition(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='CloudBpmnErrorMessage'")
     public Consumer<IntegrationRequest>  mockTypeIntegrationCloudBpmnErrorMessageSender() {
         return integrationRequest -> {
             try {
