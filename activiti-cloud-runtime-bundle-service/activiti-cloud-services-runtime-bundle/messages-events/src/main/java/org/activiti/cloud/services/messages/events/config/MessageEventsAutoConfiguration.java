@@ -35,9 +35,9 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
-@EnableBinding({
-    MessageEventsSource.class
-})
+//@EnableBinding({
+//    MessageEventsSource.class
+//})
 public class MessageEventsAutoConfiguration {
 
 

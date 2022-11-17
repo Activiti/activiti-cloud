@@ -28,7 +28,7 @@ import java.util.*;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
-@EnableBinding(AuditConsumer.class)
+//@EnableBinding(AuditConsumer.class)
 public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();

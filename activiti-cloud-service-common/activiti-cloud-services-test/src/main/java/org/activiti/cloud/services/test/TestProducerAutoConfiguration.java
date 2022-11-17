@@ -15,31 +15,41 @@
  */
 package org.activiti.cloud.services.test;
 
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import reactor.core.publisher.Flux;
+
+import java.util.function.Supplier;
 
 @Configuration
-@AutoConfigureAfter(value = BindingServiceConfiguration.class)
-public class TestProducerAutoConfiguration {
+public class TestProducerAutoConfiguration implements StreamProducer {
 
-    @ConditionalOnBean(BindingService.class)
-    @EnableBinding(StreamProducer.class)
-    static class MyProducerConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public MyProducer myProducer(MessageChannel producer) {
-            return new MyProducer(producer);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public MyProducer myProducer(MessageChannel producer) {
+        return new MyProducer(producer);
     }
 
+    @Bean
+    @Override
+    public MessageChannel producer() {
+        return MessageChannels.direct(StreamProducer.PRODUCER).get();
+    }
+
+    @FunctionBinding(output = StreamProducer.PRODUCER)
+    @Bean
+    public Supplier<Flux<Message<?>>> myProducerSupplier(MessageChannel producer) {
+        return () -> Flux.from(IntegrationFlows.from(producer)
+                .log(LoggingHandler.Level.INFO,"myProducer")
+                .toReactivePublisher());
+    }
 }
