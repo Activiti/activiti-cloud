@@ -13,43 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.config;
+package org.activiti.cloud.notifications.graphql.config;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 
 @Configuration
-public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
+public class EngineEventsConfiguration implements EngineEvents {
 
-    @Bean
+
+    @Scope("singleton")
+    @Bean(EngineEvents.ENGINE_EVENTS_PRODUCER)
     @Override
-    public MessageChannel runtimeCmdProducer() {
-        return MessageChannels.direct(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    public MessageChannel output() {
+        return MessageChannels.publishSubscribe(EngineEvents.ENGINE_EVENTS_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    @Scope("singleton")
+    @FunctionBinding(output = EngineEvents.ENGINE_EVENTS_PRODUCER)
     @Bean
-    public Supplier<Flux<Message<?>>> runtimeCmdSupplier(MessageChannel runtimeCmdProducer) {
-        return () -> Flux.from(IntegrationFlows.from(runtimeCmdProducer)
-            .log(LoggingHandler.Level.INFO,"runtimeCmdSupplier")
+    public Supplier<Flux<Message<?>>> engineEventsOutputSupplier(@Qualifier(EngineEvents.ENGINE_EVENTS_PRODUCER) MessageChannel output) {
+        return () -> Flux.from(IntegrationFlows.from(output)
+            .log(LoggingHandler.Level.INFO,"engineEventsOutput")
             .toReactivePublisher());
-    }
-
-    @Bean
-    @Override
-    public SubscribableChannel runtimeCmdResults() {
-        return MessageChannels.publishSubscribe(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
-            .get();
     }
 }
