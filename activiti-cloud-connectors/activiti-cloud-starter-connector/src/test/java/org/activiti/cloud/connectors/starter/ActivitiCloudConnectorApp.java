@@ -26,8 +26,6 @@ import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
-import org.activiti.cloud.common.messaging.functional.Connector;
-import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -107,16 +105,16 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     }
 
     @Bean
-    @ConnectorBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
-    public Connector<IntegrationRequest, Void>  mockTypeIntegrationRuntimeError() {
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='RuntimeException'")
+    public Consumer<IntegrationRequest>  mockTypeIntegrationRuntimeError() {
         return event -> {
             throw new RuntimeException("Mock RuntimeException");
         };
     }
 
     @Bean
-    @ConnectorBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
-    public Connector<IntegrationRequest, Void> mockTypeIntegrationErrorSender() {
+    @ConditionalFunctionBinding(input = CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER, condition = "headers['type']=='Error'")
+    public Consumer<IntegrationRequest>  mockTypeIntegrationErrorSender() {
         return integrationRequest -> {
             try {
 
@@ -129,7 +127,6 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
                     .buildMessage();
                 integrationErrorSender.send(message);
             }
-            return null;
         };
     }
 
