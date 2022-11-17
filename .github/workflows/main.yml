@@ -85,7 +85,7 @@ jobs:
           BRANCH_NAME=$(echo ${BRANCH_NAME/\//-} | tr '[:upper:]' '[:lower:]')
           echo set BRANCH_NAME=$BRANCH_NAME
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "::set-output name=branch-name::$BRANCH_NAME"
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Set PREVIEW_NAME env variable
         id: set-preview-name
@@ -93,7 +93,7 @@ jobs:
           test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
           echo set PREVIEW_NAME=$PREVIEW_NAME
           echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
-          echo "::set-output name=preview-name::$PREVIEW_NAME"
+          echo "preview-name=$PREVIEW_NAME" >> $GITHUB_OUTPUT
 
       - name: Set preview version
         if: ${{ github.event_name == 'pull_request' }}
@@ -106,7 +106,7 @@ jobs:
           VERSION=$(cat VERSION)
           echo set VERSION=$VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=version::$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
