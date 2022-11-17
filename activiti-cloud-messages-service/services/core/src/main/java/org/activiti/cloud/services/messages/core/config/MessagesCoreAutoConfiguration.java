@@ -15,8 +15,11 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
+import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
+
+import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -42,7 +45,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
@@ -70,14 +72,8 @@ import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 /**
  * A Processor app that performs aggregation.
@@ -90,7 +86,7 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
 @EnableTransactionManagement
 @PropertySource("classpath:config/activiti-cloud-services-messages-core.properties")
-public class MessagesCoreAutoConfiguration implements MessageConnectorProcessor {
+public class MessagesCoreAutoConfiguration {
 
     private static final String MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN = "messageConnectorAggregatorFactoryBean";
     private static final String CONTROL_BUS = "controlBus";
@@ -100,18 +96,6 @@ public class MessagesCoreAutoConfiguration implements MessageConnectorProcessor 
     @Autowired
     private MessageAggregatorProperties properties;
 
-    @Bean(MessageConnectorProcessor.INPUT)
-    public SubscribableChannel input() {
-        return MessageChannels.publishSubscribe(MessageConnectorProcessor.INPUT)
-                .get();
-    }
-
-    @Bean(MessageConnectorProcessor.OUTPUT)
-    public MessageChannel output() {
-        return MessageChannels.direct(MessageConnectorProcessor.OUTPUT)
-                .get();
-    }
-
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
@@ -120,7 +104,6 @@ public class MessagesCoreAutoConfiguration implements MessageConnectorProcessor 
                                .get();
     }
 
-    @FunctionBinding(input = MessageConnectorProcessor.INPUT, output = MessageConnectorProcessor.OUTPUT)
     @Bean
     @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
     @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
