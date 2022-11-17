@@ -57,17 +57,7 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
     @Bean
     @Override
     public MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).interceptor(new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                return ChannelInterceptor.super.preSend(message, channel);
-            }
-
-            @Override
-            public Message<?> postReceive(Message<?> message, MessageChannel channel) {
-                return message;
-            }
-        }).get();
+        return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).get();
     }
 
     @Scope("singleton")
