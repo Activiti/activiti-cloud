@@ -18,7 +18,9 @@ package org.activiti.cloud.services.test;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -31,25 +33,33 @@ import reactor.core.publisher.Flux;
 import java.util.function.Supplier;
 
 @Configuration
-public class TestProducerAutoConfiguration implements StreamProducer {
+public class TestProducerAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public MyProducer myProducer(MessageChannel producer) {
-        return new MyProducer(producer);
-    }
+    @ConditionalOnBean(BindingService.class)
+    @Configuration
+    static class MyProducerConfiguration implements StreamProducer {
 
-    @Bean
-    @Override
-    public MessageChannel producer() {
-        return MessageChannels.direct(StreamProducer.PRODUCER).get();
-    }
+        @Bean
+        @Override
+        @ConditionalOnMissingBean
+        public MessageChannel producer() {
+            return MessageChannels.direct(StreamProducer.PRODUCER).get();
+        }
 
-    @FunctionBinding(output = StreamProducer.PRODUCER)
-    @Bean
-    public Supplier<Flux<Message<?>>> myProducerSupplier(MessageChannel producer) {
-        return () -> Flux.from(IntegrationFlows.from(producer)
+        @Bean
+        @ConditionalOnMissingBean
+        public MyProducer myProducer(MessageChannel producer) {
+            return new MyProducer(producer);
+        }
+
+        @FunctionBinding(output = StreamProducer.PRODUCER)
+        @Bean
+        public Supplier<Flux<Message<?>>> myProducerSupplier(MessageChannel producer) {
+            return () -> Flux.from(IntegrationFlows.from(producer)
                 .log(LoggingHandler.Level.INFO,"myProducer")
                 .toReactivePublisher());
+        }
+
     }
+
 }
