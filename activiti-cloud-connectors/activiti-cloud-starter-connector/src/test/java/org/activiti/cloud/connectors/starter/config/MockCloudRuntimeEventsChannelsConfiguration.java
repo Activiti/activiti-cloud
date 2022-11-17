@@ -54,8 +54,8 @@ public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRun
 
     @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
     @Bean
-    public Supplier<Flux<Message<?>>> auditSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(auditProducer())
+    public Supplier<Flux<Message<?>>> auditSupplier(MessageChannel auditProducer) {
+        return () -> Flux.from(IntegrationFlows.from(auditProducer)
             .log(LoggingHandler.Level.INFO,"auditSupplier")
             .toReactivePublisher());
     }

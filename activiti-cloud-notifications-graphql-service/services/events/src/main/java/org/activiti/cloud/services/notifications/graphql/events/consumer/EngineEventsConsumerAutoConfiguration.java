@@ -22,6 +22,7 @@ import org.activiti.cloud.services.notifications.graphql.events.transformer.Engi
 import org.activiti.cloud.services.notifications.graphql.events.transformer.Transformer;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,8 +32,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -46,7 +49,6 @@ import java.util.List;
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
 @Configuration
-@EnableBinding(EngineEventsConsumerChannels.class)
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
 @PropertySources({
@@ -56,7 +58,7 @@ import java.util.List;
 public class EngineEventsConsumerAutoConfiguration {
 
     @Configuration
-    public static class DefaultEngineEventsConsumerConfiguration {
+    public static class DefaultEngineEventsConsumerConfiguration  implements EngineEventsConsumerChannels {
 
         public static final String ENGINE_EVENTS_FLUX_SCHEDULER = "engineEventsScheduler";
         private final EngineEventsConsumerProperties properties;
@@ -70,6 +72,13 @@ public class EngineEventsConsumerAutoConfiguration {
         @ConditionalOnMissingBean
         public RoutingKeyResolver routingKeyResolver() {
             return new SpELTemplateRoutingKeyResolver();
+        }
+
+        @Bean(EngineEventsConsumerChannels.SOURCE)
+        @Override
+        public SubscribableChannel input() {
+            return MessageChannels.publishSubscribe(EngineEventsConsumerChannels.SOURCE)
+                .get();
         }
 
         @Bean
@@ -88,8 +97,10 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler) {
-            return IntegrationFlows.from(EngineEventsConsumerChannels.SOURCE)
+        public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler,
+                @Qualifier(EngineEventsConsumerChannels.SOURCE) SubscribableChannel source) {
+
+            return IntegrationFlows.from(source)
                                    .log(LoggingHandler.Level.DEBUG)
                                    .transform(engineEventsMessageHandler)
                                    .toReactivePublisher();

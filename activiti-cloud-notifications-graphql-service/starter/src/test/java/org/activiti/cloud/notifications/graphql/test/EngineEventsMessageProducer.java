@@ -15,23 +15,20 @@
  */
 package org.activiti.cloud.notifications.graphql.test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,27 +37,14 @@ import reactor.util.context.Context;
 import reactor.util.retry.RetrySpec;
 
 @Component
-@EnableBinding(EngineEventsMessageProducer.EngineEvents.class)
 public class EngineEventsMessageProducer implements SmartLifecycle {
-
-    public static final String ENGINE_EVENTS_PRODUCER = "engineEventsOutput";
-
 
     private static final Logger logger = LoggerFactory.getLogger(EngineEventsMessageProducer.class);
 
-    public interface EngineEvents {
-
-        @Output(ENGINE_EVENTS_PRODUCER)
-        MessageChannel output();
-    }
-
-    private final EngineEvents producerChannels;
+    @Autowired
+    private EngineEvents producerChannels;
 
     private Disposable control;
-
-    public EngineEventsMessageProducer(EngineEvents producerChannels) {
-        this.producerChannels = producerChannels;
-    }
 
     @Override
     public void start() {
