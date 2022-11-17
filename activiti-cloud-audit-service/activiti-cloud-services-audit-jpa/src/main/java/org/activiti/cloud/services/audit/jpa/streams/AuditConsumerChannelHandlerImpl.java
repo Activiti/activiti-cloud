@@ -25,7 +25,6 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.transaction.annotation.Propagation;
@@ -54,7 +53,6 @@ public class AuditConsumerChannelHandlerImpl implements AuditConsumerChannelHand
 
     @SuppressWarnings("unchecked")
     @Override
-    @StreamListener(AuditConsumerChannels.AUDIT_CONSUMER)
     public void receiveCloudRuntimeEvent(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         if (events != null) {
             AtomicInteger counter = new AtomicInteger(0);
