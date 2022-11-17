@@ -98,7 +98,7 @@ jobs:
       - name: Set preview version
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo 0.0.1-$PREVIEW_NAME-$GITHUB_RUN_NUMBER-SNAPSHOT > VERSION
+          echo 0.0.1-$PREVIEW_NAME-SNAPSHOT > VERSION
 
       - name: Set VERSION env variable
         id: set-version
