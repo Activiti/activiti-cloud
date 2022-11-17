@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.notifications.graphql.events.consumer;
+package org.activiti.cloud.notifications.graphql;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.test.annotation.DirtiesContext;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.messaging.SubscribableChannel;
+@SpringBootApplication
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+public class GrapqhQLApplication {
 
-public interface EngineEventsConsumerChannels {
-
-    String SOURCE = "graphQLEngineEventsConsumerSource";
-
-    SubscribableChannel input();
+    public static void main(String[] args) {
+        SpringApplication.run(GrapqhQLApplication.class, args);
+    }
 
 }
