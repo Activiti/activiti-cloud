@@ -44,8 +44,8 @@ public class ConditionalMessageRoutingCallback implements MessageRoutingCallback
         String destination = routingTable.entrySet().stream()
             .filter(e -> e.getValue().getValue(message, Boolean.class))
             .map(Entry::getKey)
-            .findFirst().orElse(null);
-
+            .findFirst().orElseThrow(
+                () -> new IllegalStateException(String.format("No destination available for routing message %s.", message.getHeaders().getId().toString())));
 
         return new FunctionRoutingResult(destination);
     }
