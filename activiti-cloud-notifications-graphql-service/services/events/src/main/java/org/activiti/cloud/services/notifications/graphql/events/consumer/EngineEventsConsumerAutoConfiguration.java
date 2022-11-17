@@ -48,7 +48,6 @@ import java.util.List;
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
-@Configuration
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
 @PropertySources({

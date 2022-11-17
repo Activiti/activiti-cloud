@@ -39,7 +39,7 @@ import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventA
 
 @Configuration
 @PropertySource("classpath:config/signal-events-channels.properties")
-@EnableBinding(ProcessEngineSignalChannels.class)
+//@EnableBinding(ProcessEngineSignalChannels.class)
 @AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @TestComponent
-@EnableBinding(MessageClientStream.class)
+//@EnableBinding(MessageClientStream.class)
 public class CommandEndPointITStreamHandler {
 
     public static final String COMMAND_ENDPOINT_IT = "CommandEndpointIT";
