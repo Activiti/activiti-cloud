@@ -16,9 +16,6 @@
 package org.activiti.cloud.connectors.starter.channels;
 
 import java.util.function.Consumer;
-import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.support.ErrorMessage;
 
 public class IntegrationRequestErrorChannelListener implements Consumer<ErrorMessage> {

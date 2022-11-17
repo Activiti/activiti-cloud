@@ -19,39 +19,30 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.config.ConnectorConfiguration.ConnectorMessageFunction;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlowBuilder;
-import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.dsl.context.IntegrationFlowContext;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
-public class FunctionDefinitionConfiguration {
+public class FunctionBindingConfiguration {
 
     @Bean
-    public FunctionDefinitionPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
-        return new FunctionDefinitionPropertySource(applicationContext.getEnvironment());
+    public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
+        return new FunctionBindingPropertySource(applicationContext.getEnvironment());
     }
 
     @Bean
-    public BeanPostProcessor functionDefinitionBeanPostProcessor(DefaultListableBeanFactory beanFactory,
-        FunctionDefinitionPropertySource functionDefinitionPropertySource,
-        StreamFunctionProperties streamFunctionProperties) {
+    public BeanPostProcessor functionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
+        FunctionBindingPropertySource functionDefinitionPropertySource,
+        StreamFunctionProperties streamFunctionProperties,
+        BindingServiceProperties bindingServiceProperties) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -59,15 +50,20 @@ public class FunctionDefinitionConfiguration {
                     Function.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)) {
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, FunctionDefinition.class))
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, FunctionBinding.class))
                         .ifPresent(functionDefinition -> {
                             functionDefinitionPropertySource.register(beanName);
 
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(output -> {
-                                    streamFunctionProperties.getBindings()
-                                        .put(beanName + "-out-0", output);
+                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
+                                        .ifPresentOrElse(
+                                            binding -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", binding),
+                                            () -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", output)
+                                        );
                                 });
 
                             Optional.of(functionDefinition.input())

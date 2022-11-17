@@ -17,12 +17,12 @@ package org.activiti.cloud.connectors.starter.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
@@ -30,7 +30,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.support.ChannelInterceptor;
 import reactor.core.publisher.Flux;
 
@@ -54,6 +53,7 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
             .get();
     }
 
+    @Scope("singleton")
     @Bean
     @Override
     public MessageChannel integrationEventsProducer() {
@@ -70,10 +70,11 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
         }).get();
     }
 
-    @FunctionDefinition(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
+    @Scope("singleton")
+    @FunctionBinding(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
     @Bean
-    public Supplier<Flux<Message<?>>> integrationEventsSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(integrationEventsProducer())
+    public Supplier<Flux<Message<?>>> integrationEventsSupplier(MessageChannel integrationEventsProducer) {
+        return () -> Flux.from(IntegrationFlows.from(integrationEventsProducer)
             .log(LoggingHandler.Level.INFO,"integrationEventsSupplier")
             .toReactivePublisher());
     }
