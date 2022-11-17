@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.functional;
 
+import java.util.function.Function;
+
 @FunctionalInterface
-public interface Connector {
-    String apply(String in);
+public interface Connector<T, R> extends Function<T, R> {
+
 }
