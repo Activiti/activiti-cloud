@@ -16,7 +16,7 @@
 package org.activiti.cloud.connectors.starter.config;
 
 import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +52,7 @@ public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRun
             .get();
     }
 
-    @FunctionDefinition(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
     @Bean
     public Supplier<Flux<Message<?>>> auditSupplier() {
         return () -> Flux.from(IntegrationFlows.from(auditProducer())
