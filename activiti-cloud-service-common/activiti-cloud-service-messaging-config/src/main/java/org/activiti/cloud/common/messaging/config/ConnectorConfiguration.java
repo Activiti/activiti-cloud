@@ -30,14 +30,17 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.GenericHandler;
-import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.integration.handler.LoggingHandler.Level;
+import org.springframework.integration.handler.support.MessagingMethodInvokerHelper;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
@@ -59,7 +62,7 @@ public class ConnectorConfiguration {
                 if (Connector.class.isInstance(bean)) {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
-                    Connector connector = Connector.class.cast(bean);
+                    Connector<?, ?> connector = Connector.class.cast(bean);
 
                     functionBindingPropertySource.register(functionName);
 
@@ -85,16 +88,19 @@ public class ConnectorConfiguration {
                                 });
                         });
 
-                    GenericHandler<String> handler = (request, headers) -> {
-                        String result = connector.apply(request);
+                    final MessagingMethodInvokerHelper connectorInvoker = new MessagingMethodInvokerHelper(connector, ServiceActivator.class, false);
+                    connectorInvoker.setBeanFactory(beanFactory);
 
-                        Message<String> response = MessageBuilder.withPayload(result)
+                    GenericHandler<?> handler = (payload, headers) -> {
+                        Message<?> message = MessageBuilder.createMessage(payload, headers);
+                        Object result = connectorInvoker.process(message);
+
+                        Message<?> response = MessageBuilder.withPayload(result)
                             .build();
                         String destination = headers.get("resultDestination", String.class);
 
                         if (StringUtils.hasText(destination)) {
-                            streamBridge.send(destination,
-                                response);
+                            streamBridge.send(destination, response);
                             return null;
                         }
 
@@ -111,10 +117,10 @@ public class ConnectorConfiguration {
                     IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorMessageFunction.class,
                             (gateway) -> gateway.beanName(functionName)
                                 .replyTimeout(0L))
-                        .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
+                        .log(Level.INFO,functionName + ".integrationRequest")
                         .filter(selector)
-                        .handle(String.class, handler)
-                        .log(LoggingHandler.Level.INFO,functionName + ".integrationResult")
+                        .handle(handler)
+                        .log(Level.INFO,functionName + ".integrationResult")
                         .bridge()
                         .get();
 
@@ -153,5 +159,10 @@ public class ConnectorConfiguration {
         };
     }
 
-    public interface ConnectorMessageFunction extends Function<Message<String>,Message<String>> {}
+    public interface ConnectorMessageFunction extends Function<Message<?>,Message<?>> {
+
+        @Override
+        Message<?> apply(Message<?> message) throws MessagingException;
+
+    }
 }
