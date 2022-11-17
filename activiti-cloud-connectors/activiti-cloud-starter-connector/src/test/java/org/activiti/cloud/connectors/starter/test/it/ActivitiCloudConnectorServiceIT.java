@@ -185,7 +185,9 @@ public class ActivitiCloudConnectorServiceIT {
         assertThat(integrationError.getStackTraceElements()).asList()
                                                             .isNotEmpty()
                                                             .extracting("methodName")
-                                                            .contains("raiseErrorCause", "mockTypeIntegrationCloudBpmnErrorRootCauseSender");
+                                                            .contains("raiseErrorCause")
+                                                            .anyMatch(element -> String.valueOf(element)
+                                                                .matches(".*(mockTypeIntegrationCloudBpmnErrorRootCauseSender).*"));
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
     }
@@ -215,7 +217,8 @@ public class ActivitiCloudConnectorServiceIT {
         assertThat(integrationError.getStackTraceElements()).asList()
                                                             .isNotEmpty()
                                                             .extracting("methodName")
-                                                            .contains("mockTypeIntegrationCloudBpmnErrorMessageSender")
+                                                            .anyMatch(element -> String.valueOf(element)
+                                                                .matches(".*(mockTypeIntegrationCloudBpmnErrorMessageSender).*"))
                                                             .doesNotContain("raiseErrorCause");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
@@ -246,7 +249,8 @@ public class ActivitiCloudConnectorServiceIT {
         assertThat(integrationError.getStackTraceElements()).asList()
                                                             .isNotEmpty()
                                                             .extracting("methodName")
-                                                            .contains("mockTypeIntegrationCloudBpmnErrorSender")
+                                                            .anyMatch(element -> String.valueOf(element)
+                                                                .matches(".*(mockTypeIntegrationCloudBpmnErrorSender).*"))
                                                             .doesNotContain("raiseErrorCause");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
