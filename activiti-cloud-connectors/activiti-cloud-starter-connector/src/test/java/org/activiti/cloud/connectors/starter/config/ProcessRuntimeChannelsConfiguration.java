@@ -16,7 +16,7 @@
 package org.activiti.cloud.connectors.starter.config;
 
 import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +38,7 @@ public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChanne
             .get();
     }
 
-    @FunctionDefinition(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    @FunctionBinding(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
     @Bean
     public Supplier<Flux<Message<?>>> runtimeCmdSupplier() {
         return () -> Flux.from(IntegrationFlows.from(runtimeCmdProducer())

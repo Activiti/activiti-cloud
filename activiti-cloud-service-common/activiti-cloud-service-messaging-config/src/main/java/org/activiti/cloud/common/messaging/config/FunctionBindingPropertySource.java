@@ -23,15 +23,15 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
-public class FunctionDefinitionPropertySource extends PropertySource {
+public class FunctionBindingPropertySource extends PropertySource {
 
     public static final String SPRING_CLOUD_FUNCTION_DEFINITION = "spring.cloud.function.definition";
 
     private Set<String> functions = new LinkedHashSet<>();
     private final String definition;
 
-    public FunctionDefinitionPropertySource(ConfigurableEnvironment environment) {
-        super(FunctionDefinitionPropertySource.class.getSimpleName());
+    public FunctionBindingPropertySource(ConfigurableEnvironment environment) {
+        super(FunctionBindingPropertySource.class.getSimpleName());
 
         this.definition = environment.getProperty(SPRING_CLOUD_FUNCTION_DEFINITION, "");
 
