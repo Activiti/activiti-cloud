@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
-import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSink {
 
     String INPUT = "messageConnectorInput";
 
-    @Input(MessageConnectorSink.INPUT)
     MessageChannel input();
 
 }

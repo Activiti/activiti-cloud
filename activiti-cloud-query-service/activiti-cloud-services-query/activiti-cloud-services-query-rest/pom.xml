@@ -93,6 +93,10 @@
       <artifactId>activiti-cloud-api-process-model-impl</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
     </dependency>

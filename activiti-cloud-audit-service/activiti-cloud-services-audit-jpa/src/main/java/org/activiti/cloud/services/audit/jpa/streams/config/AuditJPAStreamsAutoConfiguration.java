@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableBinding(AuditConsumerChannels.class)
+//@EnableBinding(AuditConsumerChannels.class)
 public class AuditJPAStreamsAutoConfiguration {
 
     @Bean
