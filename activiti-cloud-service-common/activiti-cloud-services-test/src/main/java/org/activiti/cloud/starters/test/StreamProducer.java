@@ -22,6 +22,5 @@ public interface StreamProducer {
 
     String PRODUCER = "producer";
 
-    @Output(PRODUCER)
     MessageChannel producer();
 }
