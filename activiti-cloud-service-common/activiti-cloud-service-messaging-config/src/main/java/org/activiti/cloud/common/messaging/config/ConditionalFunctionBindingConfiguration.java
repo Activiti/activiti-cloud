@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.activiti.cloud.common.messaging.functional.ConditionalFunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.ConditionalMessageRoutingCallback;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.config.RoutingFunction;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,23 +36,23 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.util.StringUtils;
 
 @Configuration
-public class ConditionalFunctionDefinitionConfiguration {
+public class ConditionalFunctionBindingConfiguration {
 
     @Autowired
     private FunctionCatalog functionCatalog;
 
     @Bean
-    public BeanPostProcessor conditionalFunctionDefinitionBeanPostProcessor(DefaultListableBeanFactory beanFactory,
-        FunctionDefinitionPropertySource functionDefinitionPropertySource,
+    public BeanPostProcessor conditionalFunctionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
+        FunctionBindingPropertySource functionDefinitionPropertySource,
         StreamFunctionProperties streamFunctionProperties,
-        IntegrationFlowContext integrationFlowContext) {
+        BindingServiceProperties bindingServiceProperties) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (Consumer.class.isInstance(bean) ||
                     Function.class.isInstance(bean)) {
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionDefinition.class))
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionBinding.class))
                         .ifPresent(functionDefinition -> {
                             String listenerName = beanName;
 
@@ -60,8 +61,13 @@ public class ConditionalFunctionDefinitionConfiguration {
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(output -> {
-                                    streamFunctionProperties.getBindings()
-                                        .put(listenerName + "-out-0", output);
+                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
+                                        .ifPresentOrElse(
+                                            binding -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", binding),
+                                            () -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", output)
+                                        );
                                 });
 
                             Optional.of(functionDefinition.input())

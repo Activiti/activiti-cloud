@@ -18,18 +18,24 @@ package org.activiti.cloud.common.messaging.config;
 import java.util.Optional;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
-import org.activiti.cloud.common.messaging.functional.ConnectorDefinition;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
+import org.springframework.integration.filter.ExpressionEvaluatingSelector;
+import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -40,10 +46,12 @@ public class ConnectorConfiguration {
 
     @Bean
     public BeanPostProcessor connectorBeanPostProcessor(DefaultListableBeanFactory beanFactory,
-                                                        IntegrationFlowContext integrationFlowContext,
-                                                        StreamFunctionProperties streamFunctionProperties,
-                                                        StreamBridge streamBridge,
-                                                        FunctionDefinitionPropertySource functionDefinitionPropertySource) {
+        IntegrationFlowContext integrationFlowContext,
+        StreamFunctionProperties streamFunctionProperties,
+        StreamBridge streamBridge,
+        FunctionBindingPropertySource functionBindingPropertySource,
+        Function<String, String> resolveExpression,
+        BindingServiceProperties bindingServiceProperties) {
 
         return new BeanPostProcessor() {
             @Override
@@ -53,60 +61,95 @@ public class ConnectorConfiguration {
                     String functionName = connectorName + "Connector";
                     Connector connector = Connector.class.cast(bean);
 
-                    functionDefinitionPropertySource.register(functionName);
+                    functionBindingPropertySource.register(functionName);
 
-                    final IntegrationFlowBuilder flowBuilder = IntegrationFlows.from(ConnectorMessageFunction.class,
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                        .ifPresent(functionDefinition -> {
+                            Optional.of(functionDefinition.output())
+                                .filter(StringUtils::hasText)
+                                .ifPresent(output -> {
+                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
+                                        .ifPresentOrElse(
+                                            binding -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", binding),
+                                            () -> streamFunctionProperties.getBindings()
+                                                .put(beanName + "-out-0", output)
+                                        );
+                                });
+
+                            Optional.of(functionDefinition.input())
+                                .filter(StringUtils::hasText)
+                                .ifPresent(input -> {
+                                    streamFunctionProperties.getBindings()
+                                        .put(functionName + "-in-0", input);
+                                });
+                        });
+
+                    GenericHandler<String> handler = (request, headers) -> {
+                        String result = connector.apply(request);
+
+                        Message<String> response = MessageBuilder.withPayload(result)
+                            .build();
+                        String destination = headers.get("resultDestination", String.class);
+
+                        if (StringUtils.hasText(destination)) {
+                            streamBridge.send(destination,
+                                response);
+                            return null;
+                        }
+
+                        return response;
+                    };
+
+                    GenericSelector<Message<?>> selector = Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                        .map(ConnectorBinding::condition)
+                        .filter(StringUtils::hasText)
+                        .map(resolveExpression)
+                        .map(ExpressionEvaluatingSelector::new)
+                        .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+
+                    IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorMessageFunction.class,
                             (gateway) -> gateway.beanName(functionName)
-                                .replyTimeout(0L));
+                                .replyTimeout(0L))
+                        .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
+                        .filter(selector)
+                        .handle(String.class, handler)
+                        .log(LoggingHandler.Level.INFO,functionName + ".integrationResult")
+                        .bridge()
+                        .get();
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorDefinition.class))
-                            .ifPresent(functionDefinition -> {
-                                Optional.of(functionDefinition.output())
-                                        .filter(StringUtils::hasText)
-                                        .ifPresent(output -> {
-                                            streamFunctionProperties.getBindings()
-                                                                    .put(functionName + "-out-0", output);
-                                        });
+                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
+                        .stream()
+                        .findFirst()
+                        .orElse(functionName);
 
-                                Optional.of(functionDefinition.input())
-                                        .filter(StringUtils::hasText)
-                                        .ifPresent(input -> {
-                                            streamFunctionProperties.getBindings()
-                                                                    .put(functionName + "-in-0", input);
-                                        });
+                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
+                        .get();
 
-                                Optional.of(functionDefinition.condition())
-                                    .filter(StringUtils::hasText)
-                                    .ifPresent(condition -> flowBuilder.filter(condition));
-                            });
-
-                    IntegrationFlow flow = flowBuilder
-                                           .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
-                                           .handle(String.class,
-                                                   (request, headers) -> {
-                                                       String result = connector.apply(request);
-
-                                                       Message<String> response = MessageBuilder.withPayload(result)
-                                                                                                .build();
-                                                       String destination = headers.get("resultDestination", String.class);
-
-                                                       if (StringUtils.hasText(destination)) {
-                                                           streamBridge.send(destination,
-                                                                             response);
-                                                           return null;
-                                                       }
-
-                                                       return response;
-                                                   })
-                                           .log(LoggingHandler.Level.INFO,functionName + ".integrationResult")
-                                           .bridge()
-                                           .get();
-
-                    integrationFlowContext.registration(flow)
-                                          .register();
+                    integrationFlowContext.registration(inputChannelFlow)
+                        .register();
                 }
                 return bean;
             }
+        };
+    }
+
+    @Bean
+    Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
+        return value -> {
+            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
+                .getBeanExpressionResolver();
+            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
+                null);
+
+            String resolvedValue = applicationContext.getBeanFactory()
+                .resolveEmbeddedValue(value);
+            if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
+                resolvedValue = (String) resolver.evaluate(resolvedValue,
+                    expressionContext);
+            }
+            return resolvedValue;
         };
     }
 

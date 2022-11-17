@@ -24,11 +24,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.METHOD )
 @Qualifier
-public @interface ConnectorDefinition {
+public @interface FunctionBinding {
     String output() default "";
 
     String input() default "";
-
-    String condition() default "";
 
 }

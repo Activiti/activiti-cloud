@@ -19,27 +19,28 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.FunctionDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.ConnectorsITStreamHandlers;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.messaging.Message;
 import reactor.core.publisher.Flux;
 
 @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @Configuration
 public class ConnectorsITStreamHandlersConfiguration {
 
-    @FunctionDefinition(input = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
+    @FunctionBinding(input = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     @Bean
     public Consumer<Flux<IntegrationResult>> integrationMockResultConsumer(ConnectorsITStreamHandlers streamHandlers) {
         return flux -> flux.log("integrationMockResultConsumer", Level.INFO).subscribe(result -> streamHandlers.consumeIntegrationResultsMock(result));
     }
 
-    @FunctionDefinition(input = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
+    @FunctionBinding(input = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
     @Bean
-    public Consumer<Flux<IntegrationError>> integrationMockErrorConsumer(ConnectorsITStreamHandlers streamHandlers) {
-        return flux -> flux.log("integrationMockErrorConsumer", Level.INFO).subscribe(result -> streamHandlers.consumeIntegrationErrorMock(result));
+    public Consumer<Message<IntegrationError>> integrationMockErrorConsumer(ConnectorsITStreamHandlers streamHandlers) {
+        return result -> streamHandlers.consumeIntegrationErrorMock(result.getPayload());
     }
 }
