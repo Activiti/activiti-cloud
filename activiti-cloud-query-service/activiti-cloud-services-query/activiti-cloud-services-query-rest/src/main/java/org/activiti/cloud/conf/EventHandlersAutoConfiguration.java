@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.conf;
 
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
@@ -24,20 +26,24 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.SubscribableChannel;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @Configuration
-@EnableBinding(QueryConsumerChannels.class)
-public class EventHandlersAutoConfiguration {
+//@EnableBinding(QueryConsumerChannels.class)
+public class EventHandlersAutoConfiguration implements QueryConsumerChannels {
 
     @Bean
     @ConditionalOnMissingBean
     public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
                                                                    QueryEventHandlerContextOptimizer fetchingOptimizer) {
         return new QueryConsumerChannelHandler(eventHandlerContext,
-                                               fetchingOptimizer);
+                fetchingOptimizer);
     }
 
     @Bean
@@ -135,7 +141,7 @@ public class EventHandlersAutoConfiguration {
     public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(EntityManager entityManager,
                                                                                        EntityManagerFinder entityManagerFinder) {
         return new TaskCandidateGroupRemovedEventHandler(entityManager,
-                                                         entityManagerFinder);
+                entityManagerFinder);
     }
 
     @Bean
@@ -149,7 +155,7 @@ public class EventHandlersAutoConfiguration {
     public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(EntityManager entityManager,
                                                                                      EntityManagerFinder entityManagerFinder) {
         return new TaskCandidateUserRemovedEventHandler(entityManager,
-                                                        entityManagerFinder);
+                entityManagerFinder);
     }
 
     @Bean
@@ -181,7 +187,7 @@ public class EventHandlersAutoConfiguration {
     public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager,
                                                                    EntityManagerFinder entityManagerFinder) {
         return new VariableCreatedEventHandler(new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
-                                               new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder));
+                new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder));
     }
 
     @Bean
@@ -189,7 +195,7 @@ public class EventHandlersAutoConfiguration {
     public VariableDeletedEventHandler variableDeletedEventHandler(EntityManager entityManager,
                                                                    EntityManagerFinder entityManagerFinder) {
         return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
-                                               new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder));
+                new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder));
     }
 
     @Bean
@@ -197,7 +203,7 @@ public class EventHandlersAutoConfiguration {
     public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityManager entityManager,
                                                                    EntityManagerFinder entityManagerFinder) {
         return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
-                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder)));
+                new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder)));
     }
 
     @Bean
@@ -253,7 +259,7 @@ public class EventHandlersAutoConfiguration {
     public ApplicationDeployedEventHandler applicationDeployedEventHandler(EntityManager entityManager,
                                                                            ApplicationRepository applicationRepository) {
         return new ApplicationDeployedEventHandler(entityManager,
-                                                   applicationRepository);
+                applicationRepository);
     }
 
     @Bean
@@ -279,4 +285,17 @@ public class EventHandlersAutoConfiguration {
     public ProcessCandidateStarterGroupRemovedEventHandler processCandidateStarterGroupRemovedEventHandler(EntityManager entityManager) {
         return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
     }
+
+    @Bean
+    @Override
+    public SubscribableChannel queryConsumer() {
+        return MessageChannels.publishSubscribe(QueryConsumerChannels.QUERY_CONSUMER).get();
+    }
+
+    @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
+    @Bean
+    public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(QueryConsumerChannelHandler queryConsumerChannelHandler) {
+        return queryConsumerChannelHandler::receive;
+    }
+
 }

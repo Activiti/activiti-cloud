@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.messages.core.config;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -69,6 +70,7 @@ import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -83,12 +85,12 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
  */
 @Configuration
 @EnableIntegration
-@EnableBinding(MessageConnectorProcessor.class)
+//@EnableBinding(MessageConnectorProcessor.class)
 @EnableIntegrationManagement
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
 @EnableTransactionManagement
 @PropertySource("classpath:config/activiti-cloud-services-messages-core.properties")
-public class MessagesCoreAutoConfiguration {
+public class MessagesCoreAutoConfiguration implements MessageConnectorProcessor {
 
     private static final String MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN = "messageConnectorAggregatorFactoryBean";
     private static final String CONTROL_BUS = "controlBus";
@@ -98,6 +100,18 @@ public class MessagesCoreAutoConfiguration {
     @Autowired
     private MessageAggregatorProperties properties;
 
+    @Bean(MessageConnectorProcessor.INPUT)
+    public SubscribableChannel input() {
+        return MessageChannels.publishSubscribe(MessageConnectorProcessor.INPUT)
+                .get();
+    }
+
+    @Bean(MessageConnectorProcessor.OUTPUT)
+    public MessageChannel output() {
+        return MessageChannels.direct(MessageConnectorProcessor.OUTPUT)
+                .get();
+    }
+
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
@@ -106,6 +120,7 @@ public class MessagesCoreAutoConfiguration {
                                .get();
     }
 
+    @FunctionBinding(input = MessageConnectorProcessor.INPUT, output = MessageConnectorProcessor.OUTPUT)
     @Bean
     @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
     @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)

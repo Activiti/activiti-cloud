@@ -24,7 +24,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @TestComponent
-@EnableBinding(CanFailConnectorChannels.class)
+//@EnableBinding(CanFailConnectorChannels.class)
 public class CanFailConnector {
 
     private boolean shouldSendError = true;
