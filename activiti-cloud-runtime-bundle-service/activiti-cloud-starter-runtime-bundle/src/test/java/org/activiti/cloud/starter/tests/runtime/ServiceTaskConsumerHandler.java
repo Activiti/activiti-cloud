@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 @TestComponent
-@EnableBinding(ConnectorIntegrationChannels.class)
+//@EnableBinding(ConnectorIntegrationChannels.class)
 public class ServiceTaskConsumerHandler {
 
     private static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@EnableBinding(ProcessEngineChannels.class)
+//@EnableBinding(ProcessEngineChannels.class)
 @Inherited
 @EnableDiscoveryClient
 @EnableWebSecurity
