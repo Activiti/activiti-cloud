@@ -28,6 +28,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -92,7 +92,7 @@ public class ConnectorAuditProducerIT {
     private AuditConsumerStreamHandler streamHandler;
 
     @Autowired
-    private BinderAwareChannelResolver channelResolver;
+    private ChannelResolver channelResolver;
 
     @Value("integrationResult_${spring.application.name}")
     private String integrationResultDestination;

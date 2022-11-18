@@ -41,8 +41,8 @@ public class CommandEndpoint<T extends Payload> {
     }
 
     // TODO: pay attenction to migrate since generic
-    @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
-    @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
+//    @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
+//    @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
     public <R> R execute(T payload) {
 
         SecurityContextHolder.getContext()
