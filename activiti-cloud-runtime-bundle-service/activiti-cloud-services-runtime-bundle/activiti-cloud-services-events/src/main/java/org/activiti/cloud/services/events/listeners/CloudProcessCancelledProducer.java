@@ -24,8 +24,10 @@ public class CloudProcessCancelledProducer implements ProcessEventListener<Proce
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessCancelledProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessCancelledProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

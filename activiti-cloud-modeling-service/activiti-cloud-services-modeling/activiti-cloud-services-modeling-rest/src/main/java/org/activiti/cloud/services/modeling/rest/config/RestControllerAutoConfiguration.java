@@ -29,13 +29,13 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @PropertySource("classpath:modeling-rest.properties")
-@Import({
-    ModelController.class,
-    ProjectController.class,
-    ModelsSchemaController.class,
-    ModelingRestExceptionHandler.class,
-    ValidationControllerAdvice.class
-})
-public class RestControllerAutoConfiguration {
-
-}
+@Import(
+    {
+        ModelController.class,
+        ProjectController.class,
+        ModelsSchemaController.class,
+        ModelingRestExceptionHandler.class,
+        ValidationControllerAdvice.class
+    }
+)
+public class RestControllerAutoConfiguration {}

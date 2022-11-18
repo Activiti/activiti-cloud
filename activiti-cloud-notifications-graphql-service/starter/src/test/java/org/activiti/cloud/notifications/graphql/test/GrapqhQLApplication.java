@@ -24,5 +24,4 @@ public class GrapqhQLApplication {
     public static void main(String[] args) {
         SpringApplication.run(GrapqhQLApplication.class, args);
     }
-
 }

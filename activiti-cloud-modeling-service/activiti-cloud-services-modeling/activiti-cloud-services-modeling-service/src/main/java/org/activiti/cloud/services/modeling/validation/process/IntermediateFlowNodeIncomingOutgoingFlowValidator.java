@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import static java.lang.String.format;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.EndEvent;
 import org.activiti.bpmn.model.EventSubProcess;
@@ -23,17 +27,14 @@ import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.apache.commons.collections.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.lang.String.format;
-
 public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNodeFlowsValidator {
 
     public static final String NO_INCOMING_FLOW_PROBLEM = "Flow node has no incoming flow";
-    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION = "Flow node [name: '%s', id: '%s'] has to have an incoming flow";
+    public static final String NO_INCOMING_FLOW_PROBLEM_DESCRIPTION =
+        "Flow node [name: '%s', id: '%s'] has to have an incoming flow";
     public static final String NO_OUTGOING_FLOW_PROBLEM = "Flow node has no outgoing flow";
-    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION = "Flow node [name: '%s', id: '%s'] has to have an outgoing flow";
+    public static final String NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION =
+        "Flow node [name: '%s', id: '%s'] has to have an outgoing flow";
     public static final String INTERMEDIATE_FLOWS_VALIDATOR_NAME = "BPMN Intermediate Flow node validator";
 
     @Override
@@ -41,28 +42,38 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidator implements FlowNo
         List<ModelValidationError> errors = new ArrayList<>();
 
         if (CollectionUtils.isEmpty(flowNode.getIncomingFlows())) {
-            errors.add(createModelValidationError(NO_INCOMING_FLOW_PROBLEM,
-                format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                null,
-                flowNode.getId()));
+            errors.add(
+                createModelValidationError(
+                    NO_INCOMING_FLOW_PROBLEM,
+                    format(NO_INCOMING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                    INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                    null,
+                    flowNode.getId()
+                )
+            );
         }
 
         if (CollectionUtils.isEmpty(flowNode.getOutgoingFlows())) {
-            errors.add(createModelValidationError(NO_OUTGOING_FLOW_PROBLEM,
-                format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
-                INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                null,
-                flowNode.getId()));
+            errors.add(
+                createModelValidationError(
+                    NO_OUTGOING_FLOW_PROBLEM,
+                    format(NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION, flowNode.getName(), flowNode.getId()),
+                    INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                    null,
+                    flowNode.getId()
+                )
+            );
         }
         return errors;
     }
 
     @Override
     public boolean canValidate(FlowNode flowNode) {
-        return !(flowNode instanceof StartEvent) &&
+        return (
+            !(flowNode instanceof StartEvent) &&
             !(flowNode instanceof EndEvent) &&
             !(flowNode instanceof EventSubProcess) &&
-            !(flowNode instanceof BoundaryEvent);
+            !(flowNode instanceof BoundaryEvent)
+        );
     }
 }

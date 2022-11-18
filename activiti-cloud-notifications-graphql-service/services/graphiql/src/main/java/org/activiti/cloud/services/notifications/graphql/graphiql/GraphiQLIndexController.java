@@ -24,12 +24,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @ConditionalOnWebApplication
 public class GraphiQLIndexController {
 
-	@Value("${graphiql.index:/graphiql/graphiql.html}")
-	private String graphiqlHtml;
+    @Value("${graphiql.index:/graphiql/graphiql.html}")
+    private String graphiqlHtml;
 
     @GetMapping("/graphiql")
     public String getIndex() {
-        return "forward:/"+graphiqlHtml;
+        return "forward:/" + graphiqlHtml;
     }
-
 }

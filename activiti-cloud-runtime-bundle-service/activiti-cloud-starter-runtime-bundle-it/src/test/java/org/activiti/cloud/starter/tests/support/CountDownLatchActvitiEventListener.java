@@ -16,12 +16,11 @@
 
 package org.activiti.cloud.starter.tests.support;
 
+import java.util.concurrent.CountDownLatch;
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CountDownLatch;
 
 public class CountDownLatchActvitiEventListener implements ActivitiEventListener {
 
@@ -44,5 +43,4 @@ public class CountDownLatchActvitiEventListener implements ActivitiEventListener
     public boolean isFailOnException() {
         return false;
     }
-
 }

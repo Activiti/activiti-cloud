@@ -16,6 +16,9 @@
 
 package org.activiti.cloud.common.messaging;
 
+import java.util.*;
+import java.util.function.Function;
+import javax.validation.constraints.*;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,17 +26,15 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
-import java.util.*;
-import java.util.function.Function;
-
 @ConfigurationProperties(prefix = ActivitiCloudMessagingProperties.ACTIVITI_CLOUD_MESSAGING_PREFIX)
 @Validated
 public class ActivitiCloudMessagingProperties {
+
     public static final String ACTIVITI_CLOUD_MESSAGING_PREFIX = "activiti.cloud.messaging";
 
     public enum MessagingBroker {
-        rabbitmq, kafka
+        rabbitmq,
+        kafka
     }
 
     /**
@@ -101,7 +102,7 @@ public class ActivitiCloudMessagingProperties {
 
     private Map<String, InputConverterFunction> inputConverters;
 
-    ActivitiCloudMessagingProperties() { }
+    ActivitiCloudMessagingProperties() {}
 
     public Boolean isPartitioned() {
         return partitioned;
@@ -176,12 +177,11 @@ public class ActivitiCloudMessagingProperties {
     }
 
     public Function<String, String> transformDestination() {
-        return (input) -> {
+        return input -> {
             InputConverter<String> converter = new InputConverter<>(input);
 
-            for (String it: destinationTransformers) {
-                InputConverterFunction func = Optional.ofNullable(inputConverters.get(it))
-                                                      .orElseThrow();
+            for (String it : destinationTransformers) {
+                InputConverterFunction func = Optional.ofNullable(inputConverters.get(it)).orElseThrow();
                 converter = converter.convertBy(func);
             }
 
@@ -207,39 +207,56 @@ public class ActivitiCloudMessagingProperties {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ActivitiCloudMessagingProperties that = (ActivitiCloudMessagingProperties) o;
-        return broker == that.broker
-            && Objects.equals(partitioned, that.partitioned)
-            && Objects.equals(partitionCount, that.partitionCount)
-            && Objects.equals(instanceIndex, that.instanceIndex)
-            && Objects.equals(destinationSeparator, that.destinationSeparator)
-            && Objects.equals(destinationPrefix, that.destinationPrefix)
-            && Objects.equals(destinations, that.destinations);
+        return (
+            broker == that.broker &&
+            Objects.equals(partitioned, that.partitioned) &&
+            Objects.equals(partitionCount, that.partitionCount) &&
+            Objects.equals(instanceIndex, that.instanceIndex) &&
+            Objects.equals(destinationSeparator, that.destinationSeparator) &&
+            Objects.equals(destinationPrefix, that.destinationPrefix) &&
+            Objects.equals(destinations, that.destinations)
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(broker,
-                            partitioned,
-                            partitionCount,
-                            instanceIndex,
-                            destinationSeparator,
-                            destinationPrefix,
-                            destinations);
+        return Objects.hash(
+            broker,
+            partitioned,
+            partitionCount,
+            instanceIndex,
+            destinationSeparator,
+            destinationPrefix,
+            destinations
+        );
     }
 
     @Override
     public String toString() {
-        return "ActivitiCloudMessagingProperties{" +
-            "broker=" + broker +
-            ", partitioned=" + partitioned +
-            ", partitionCount=" + partitionCount +
-            ", instanceIndex=" + instanceIndex +
-            ", destinationSeparator='" + destinationSeparator + '\'' +
-            ", destinationPrefix='" + destinationPrefix + '\'' +
-            ", destinations=" + destinations +
-            ", destinationIllegalCharsReplacement=" + destinationIllegalCharsReplacement +
-            ", destinationIllegalCharsRegex=" + destinationIllegalCharsRegex +
-            '}';
+        return (
+            "ActivitiCloudMessagingProperties{" +
+            "broker=" +
+            broker +
+            ", partitioned=" +
+            partitioned +
+            ", partitionCount=" +
+            partitionCount +
+            ", instanceIndex=" +
+            instanceIndex +
+            ", destinationSeparator='" +
+            destinationSeparator +
+            '\'' +
+            ", destinationPrefix='" +
+            destinationPrefix +
+            '\'' +
+            ", destinations=" +
+            destinations +
+            ", destinationIllegalCharsReplacement=" +
+            destinationIllegalCharsReplacement +
+            ", destinationIllegalCharsRegex=" +
+            destinationIllegalCharsRegex +
+            '}'
+        );
     }
 
     @Validated
@@ -301,12 +318,22 @@ public class ActivitiCloudMessagingProperties {
 
         @Override
         public String toString() {
-            return "DestinationProperties{" +
-                ", name='" + name + '\'' +
-                ", scope='" + scope + '\'' +
-                ", prefix='" + prefix + '\'' +
-                ", separator='" + separator + '\'' +
-                '}';
+            return (
+                "DestinationProperties{" +
+                ", name='" +
+                name +
+                '\'' +
+                ", scope='" +
+                scope +
+                '\'' +
+                ", prefix='" +
+                prefix +
+                '\'' +
+                ", separator='" +
+                separator +
+                '\'' +
+                '}'
+            );
         }
     }
 
@@ -326,6 +353,4 @@ public class ActivitiCloudMessagingProperties {
             return data;
         }
     }
-
-
 }

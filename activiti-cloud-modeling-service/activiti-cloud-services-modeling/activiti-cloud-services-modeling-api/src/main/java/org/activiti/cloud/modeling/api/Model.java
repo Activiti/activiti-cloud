@@ -24,7 +24,6 @@ import org.activiti.cloud.services.auditable.Auditable;
  * Interface for models
  */
 public interface Model<A extends Project, U> extends Auditable<U> {
-
     String getId();
 
     void setId(String id);
@@ -55,9 +54,9 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setContent(byte[] content);
 
-    Map<String,Object> getExtensions();
+    Map<String, Object> getExtensions();
 
-    void setExtensions(Map<String,Object> extensions);
+    void setExtensions(Map<String, Object> extensions);
 
     String getTemplate();
 

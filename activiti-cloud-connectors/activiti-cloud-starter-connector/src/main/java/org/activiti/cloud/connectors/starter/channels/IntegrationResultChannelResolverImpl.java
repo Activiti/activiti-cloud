@@ -25,8 +25,10 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
 
     private final IntegrationResultDestinationBuilder integrationResultDestinationBuilder;
 
-    public IntegrationResultChannelResolverImpl(BinderAwareChannelResolver resolver,
-                                                IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
+    public IntegrationResultChannelResolverImpl(
+        BinderAwareChannelResolver resolver,
+        IntegrationResultDestinationBuilder integrationResultDestinationBuilder
+    ) {
         this.resolver = resolver;
         this.integrationResultDestinationBuilder = integrationResultDestinationBuilder;
     }
@@ -37,8 +39,4 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
 
         return resolver.resolveDestination(destination);
     }
-
-
-
-
 }

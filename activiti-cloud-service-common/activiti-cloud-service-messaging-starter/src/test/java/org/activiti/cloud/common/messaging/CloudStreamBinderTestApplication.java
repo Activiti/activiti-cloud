@@ -19,6 +19,4 @@ package org.activiti.cloud.common.messaging;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CloudStreamBinderTestApplication {
-
-}
+public class CloudStreamBinderTestApplication {}

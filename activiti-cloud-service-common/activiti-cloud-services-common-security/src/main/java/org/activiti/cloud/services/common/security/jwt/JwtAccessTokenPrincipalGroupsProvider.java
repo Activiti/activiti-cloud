@@ -26,15 +26,18 @@ public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsPro
     private final JwtAccessTokenProvider jwtAccessTokenProvider;
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
-    public JwtAccessTokenPrincipalGroupsProvider(@NonNull JwtAccessTokenProvider jwtAccessTokenProvider,
-        @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
+    public JwtAccessTokenPrincipalGroupsProvider(
+        @NonNull JwtAccessTokenProvider jwtAccessTokenProvider,
+        @NonNull JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
         this.jwtAccessTokenProvider = jwtAccessTokenProvider;
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
-        return jwtAccessTokenProvider.accessToken(principal)
+        return jwtAccessTokenProvider
+            .accessToken(principal)
             .filter(jwtAccessTokenValidator::isValid)
             .map(JwtAdapter::getGroups)
             .orElseGet(this::empty);
@@ -43,5 +46,4 @@ public class JwtAccessTokenPrincipalGroupsProvider implements PrincipalGroupsPro
     protected @Nullable List<String> empty() {
         return null;
     }
-
 }

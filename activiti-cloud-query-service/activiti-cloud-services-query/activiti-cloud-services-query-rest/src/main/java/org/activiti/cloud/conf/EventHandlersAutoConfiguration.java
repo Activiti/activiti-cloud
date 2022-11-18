@@ -15,18 +15,17 @@
  */
 package org.activiti.cloud.conf;
 
+import java.util.Set;
+import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.*;
+import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.persistence.EntityManager;
-import java.util.Set;
 
 @Configuration
 @EnableBinding(QueryConsumerChannels.class)
@@ -34,10 +33,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueryConsumerChannelHandler queryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
-                                                                   QueryEventHandlerContextOptimizer fetchingOptimizer) {
-        return new QueryConsumerChannelHandler(eventHandlerContext,
-                                               fetchingOptimizer);
+    public QueryConsumerChannelHandler queryConsumerChannelHandler(
+        QueryEventHandlerContext eventHandlerContext,
+        QueryEventHandlerContextOptimizer fetchingOptimizer
+    ) {
+        return new QueryConsumerChannelHandler(eventHandlerContext, fetchingOptimizer);
     }
 
     @Bean
@@ -132,10 +132,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(EntityManager entityManager,
-                                                                                       EntityManagerFinder entityManagerFinder) {
-        return new TaskCandidateGroupRemovedEventHandler(entityManager,
-                                                         entityManagerFinder);
+    public TaskCandidateGroupRemovedEventHandler taskCandidateGroupRemovedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder
+    ) {
+        return new TaskCandidateGroupRemovedEventHandler(entityManager, entityManagerFinder);
     }
 
     @Bean
@@ -146,10 +147,11 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(EntityManager entityManager,
-                                                                                     EntityManagerFinder entityManagerFinder) {
-        return new TaskCandidateUserRemovedEventHandler(entityManager,
-                                                        entityManagerFinder);
+    public TaskCandidateUserRemovedEventHandler taskCandidateUserRemovedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder
+    ) {
+        return new TaskCandidateUserRemovedEventHandler(entityManager, entityManagerFinder);
     }
 
     @Bean
@@ -178,26 +180,38 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableCreatedEventHandler variableCreatedEventHandler(EntityManager entityManager,
-                                                                   EntityManagerFinder entityManagerFinder) {
-        return new VariableCreatedEventHandler(new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
-                                               new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder));
+    public VariableCreatedEventHandler variableCreatedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder
+    ) {
+        return new VariableCreatedEventHandler(
+            new TaskVariableCreatedEventHandler(entityManager, entityManagerFinder),
+            new ProcessVariableCreatedEventHandler(entityManager, entityManagerFinder)
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableDeletedEventHandler variableDeletedEventHandler(EntityManager entityManager,
-                                                                   EntityManagerFinder entityManagerFinder) {
-        return new VariableDeletedEventHandler(new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
-                                               new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder));
+    public VariableDeletedEventHandler variableDeletedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder
+    ) {
+        return new VariableDeletedEventHandler(
+            new ProcessVariableDeletedEventHandler(entityManager, entityManagerFinder),
+            new TaskVariableDeletedEventHandler(entityManager, entityManagerFinder)
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public VariableUpdatedEventHandler variableUpdatedEventHandler(EntityManager entityManager,
-                                                                   EntityManagerFinder entityManagerFinder) {
-        return new VariableUpdatedEventHandler(new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
-                                               new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder)));
+    public VariableUpdatedEventHandler variableUpdatedEventHandler(
+        EntityManager entityManager,
+        EntityManagerFinder entityManagerFinder
+    ) {
+        return new VariableUpdatedEventHandler(
+            new ProcessVariableUpdateEventHandler(new ProcessVariableUpdater(entityManager, entityManagerFinder)),
+            new TaskVariableUpdatedEventHandler(new TaskVariableUpdater(entityManager, entityManagerFinder))
+        );
     }
 
     @Bean
@@ -250,33 +264,42 @@ public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApplicationDeployedEventHandler applicationDeployedEventHandler(EntityManager entityManager,
-                                                                           ApplicationRepository applicationRepository) {
-        return new ApplicationDeployedEventHandler(entityManager,
-                                                   applicationRepository);
+    public ApplicationDeployedEventHandler applicationDeployedEventHandler(
+        EntityManager entityManager,
+        ApplicationRepository applicationRepository
+    ) {
+        return new ApplicationDeployedEventHandler(entityManager, applicationRepository);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterUserAddedEventHandler processCandidateStarterUserAddedEventHandler(EntityManager entityManager) {
+    public ProcessCandidateStarterUserAddedEventHandler processCandidateStarterUserAddedEventHandler(
+        EntityManager entityManager
+    ) {
         return new ProcessCandidateStarterUserAddedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterUserRemovedEventHandler processCandidateStarterUserRemovedEventHandler(EntityManager entityManager) {
+    public ProcessCandidateStarterUserRemovedEventHandler processCandidateStarterUserRemovedEventHandler(
+        EntityManager entityManager
+    ) {
         return new ProcessCandidateStarterUserRemovedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterGroupAddedEventHandler processCandidateStarterGroupAddedEventHandler(EntityManager entityManager) {
+    public ProcessCandidateStarterGroupAddedEventHandler processCandidateStarterGroupAddedEventHandler(
+        EntityManager entityManager
+    ) {
         return new ProcessCandidateStarterGroupAddedEventHandler(entityManager);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterGroupRemovedEventHandler processCandidateStarterGroupRemovedEventHandler(EntityManager entityManager) {
+    public ProcessCandidateStarterGroupRemovedEventHandler processCandidateStarterGroupRemovedEventHandler(
+        EntityManager entityManager
+    ) {
         return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
     }
 }

@@ -22,15 +22,14 @@ import org.junit.jupiter.api.Test;
 
 public class SpELRoutingKeyTest {
 
-
     @Test
-    public void testRoutingKey () {
+    public void testRoutingKey() {
         RoutingKeyResolver routingKeyResolver = new SpELTemplateRoutingKeyResolver();
 
         EngineEvent notification = new EngineEvent();
 
         notification.put("serviceName", "my-rb");
-        notification.put("appName","app");
+        notification.put("appName", "app");
         notification.put("eventType", "PROCESS_STARTED");
         notification.put("processDefinitionKey", "Simple");
         notification.put("processInstanceId", 12);
@@ -39,7 +38,5 @@ public class SpELRoutingKeyTest {
         String routingKey = routingKeyResolver.resolveRoutingKey(notification);
 
         assertThat(routingKey).isEqualTo("engineEvents.my-rb.app.PROCESS_STARTED.Simple.12._");
-
     }
-
 }

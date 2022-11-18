@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.api.task.model.Task;
-import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
+import org.activiti.api.task.model.Task;
+import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;
 
 @MappedSuperclass
 public abstract class TaskAuditEventEntity extends AuditEventEntity {
@@ -34,8 +33,7 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
 
     private String taskName;
 
-    public TaskAuditEventEntity() {
-    }
+    public TaskAuditEventEntity() {}
 
     public TaskAuditEventEntity(CloudTaskRuntimeEvent cloudEvent) {
         super(cloudEvent);
@@ -73,15 +71,16 @@ public abstract class TaskAuditEventEntity extends AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskAuditEventEntity [task=")
-               .append(task)
-               .append(", taskId=")
-               .append(taskId)
-               .append(", taskName=")
-               .append(taskName)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("TaskAuditEventEntity [task=")
+            .append(task)
+            .append(", taskId=")
+            .append(taskId)
+            .append(", taskName=")
+            .append(taskName)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

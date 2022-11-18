@@ -50,54 +50,70 @@ public class CloudTaskModelAutoConfiguration {
     //this bean will be automatically injected inside boot's ObjectMapper
     @Bean
     public Module customizeCloudTaskModelObjectMapper() {
-        SimpleModule module = new SimpleModule("mapCloudTaskModelInterfaces",
-                                               Version.unknownVersion());
+        SimpleModule module = new SimpleModule("mapCloudTaskModelInterfaces", Version.unknownVersion());
 
-        module.registerSubtypes(new NamedType(CloudTaskCreatedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_CREATED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskUpdatedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskAssignedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskCompletedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskSuspendedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskActivatedEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskCancelledEventImpl.class,
-                                              TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name()));
+        module.registerSubtypes(
+            new NamedType(CloudTaskCreatedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_CREATED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskUpdatedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskAssignedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskCompletedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskSuspendedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskActivatedEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name())
+        );
+        module.registerSubtypes(
+            new NamedType(CloudTaskCancelledEventImpl.class, TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name())
+        );
 
-        module.registerSubtypes(new NamedType(CloudTaskCandidateUserAddedEventImpl.class,
-                                              TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskCandidateUserRemovedEventImpl.class,
-                                              TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudTaskCandidateUserAddedEventImpl.class,
+                TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudTaskCandidateUserRemovedEventImpl.class,
+                TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name()
+            )
+        );
 
-
-        module.registerSubtypes(new NamedType(CloudTaskCandidateGroupAddedEventImpl.class,
-                                              TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name()));
-        module.registerSubtypes(new NamedType(CloudTaskCandidateGroupRemovedEventImpl.class,
-                                              TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name()));
+        module.registerSubtypes(
+            new NamedType(
+                CloudTaskCandidateGroupAddedEventImpl.class,
+                TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name()
+            )
+        );
+        module.registerSubtypes(
+            new NamedType(
+                CloudTaskCandidateGroupRemovedEventImpl.class,
+                TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name()
+            )
+        );
 
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
             @Override
-            public JavaType resolveAbstractType(DeserializationConfig config,
-                                                BeanDescription typeDesc) {
-                return findTypeMapping(config,
-                                       typeDesc.getType());
+            public JavaType resolveAbstractType(DeserializationConfig config, BeanDescription typeDesc) {
+                return findTypeMapping(config, typeDesc.getType());
             }
         };
 
-        resolver.addMapping(CloudTask.class,
-                            CloudTaskImpl.class);
-        resolver.addMapping(QueryCloudTask.class,
-                            QueryCloudTaskImpl.class);
+        resolver.addMapping(CloudTask.class, CloudTaskImpl.class);
+        resolver.addMapping(QueryCloudTask.class, QueryCloudTaskImpl.class);
 
         module.setAbstractTypes(resolver);
 
         return module;
     }
-
 }

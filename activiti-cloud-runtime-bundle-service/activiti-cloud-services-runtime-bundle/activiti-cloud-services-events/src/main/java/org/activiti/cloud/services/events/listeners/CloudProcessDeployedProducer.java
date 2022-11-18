@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -27,10 +30,6 @@ import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFac
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.Message;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
 public class CloudProcessDeployedProducer {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
@@ -38,48 +37,49 @@ public class CloudProcessDeployedProducer {
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
     private int chunkSize;
 
-    public CloudProcessDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                        ProcessEngineChannels producer,
-                                        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-                                        RuntimeBundleProperties properties) {
+    public CloudProcessDeployedProducer(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ProcessEngineChannels producer,
+        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+        RuntimeBundleProperties properties
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.producer = producer;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
-        this.chunkSize = properties.getEventsProperties()
-                                   .getChunkSize();
+        this.chunkSize = properties.getEventsProperties().getChunkSize();
     }
 
     @EventListener
     public void sendProcessDeployedEvents(ProcessDeployedEvents processDeployedEvents) {
         final AtomicInteger counter = new AtomicInteger();
 
-        processDeployedEvents.getProcessDeployedEvents()
-                             .stream()
-                             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
-                             .values()
-                             .stream()
-                             .map(this::toCloudProcessDeployedEvents)
-                             .forEach(this::sendCloudProcessDeployedEvent);
+        processDeployedEvents
+            .getProcessDeployedEvents()
+            .stream()
+            .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
+            .values()
+            .stream()
+            .map(this::toCloudProcessDeployedEvents)
+            .forEach(this::sendCloudProcessDeployedEvent);
     }
 
     protected void sendCloudProcessDeployedEvent(List<CloudProcessDeployedEvent> cloudProcessDeployedEvents) {
-        CloudRuntimeEvent<?, ?>[] payload = cloudProcessDeployedEvents.toArray(new CloudRuntimeEvent<?, ?>[]{ });
+        CloudRuntimeEvent<?, ?>[] payload = cloudProcessDeployedEvents.toArray(new CloudRuntimeEvent<?, ?>[] {});
 
-        Message<?> message = runtimeBundleMessageBuilderFactory.create()
-                                                               .withPayload(payload)
-                                                               .build();
-        producer.auditProducer()
-                .send(message);
+        Message<?> message = runtimeBundleMessageBuilderFactory.create().withPayload(payload).build();
+        producer.auditProducer().send(message);
     }
 
-    protected List<CloudProcessDeployedEvent> toCloudProcessDeployedEvents(List<ProcessDeployedEvent> processDeployedEvents) {
-        return processDeployedEvents.stream()
-                                    .map(this::toCloudProcessDeployedEvent)
-                                    .collect(Collectors.toList());
+    protected List<CloudProcessDeployedEvent> toCloudProcessDeployedEvents(
+        List<ProcessDeployedEvent> processDeployedEvents
+    ) {
+        return processDeployedEvents.stream().map(this::toCloudProcessDeployedEvent).collect(Collectors.toList());
     }
 
     protected CloudProcessDeployedEvent toCloudProcessDeployedEvent(ProcessDeployedEvent processDeployedEvent) {
-        CloudProcessDeployedEventImpl cloudProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDeployedEvent.getEntity());
+        CloudProcessDeployedEventImpl cloudProcessDeployedEvent = new CloudProcessDeployedEventImpl(
+            processDeployedEvent.getEntity()
+        );
         cloudProcessDeployedEvent.setProcessModelContent(processDeployedEvent.getProcessModelContent());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDeployedEvent);
 
@@ -93,5 +93,4 @@ public class CloudProcessDeployedProducer {
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
     }
-
 }

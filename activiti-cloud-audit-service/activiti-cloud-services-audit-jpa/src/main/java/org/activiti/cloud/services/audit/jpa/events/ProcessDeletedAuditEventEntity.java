@@ -27,8 +27,7 @@ public class ProcessDeletedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_DELETED_EVENT = "ProcessDeletedEvent";
 
-    public ProcessDeletedAuditEventEntity() {
-    }
+    public ProcessDeletedAuditEventEntity() {}
 
     public ProcessDeletedAuditEventEntity(CloudProcessDeletedEvent cloudEvent) {
         super(cloudEvent);

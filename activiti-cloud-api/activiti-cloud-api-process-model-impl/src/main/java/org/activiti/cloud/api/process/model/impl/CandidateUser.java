@@ -23,8 +23,7 @@ public class CandidateUser {
         this.user = user;
     }
 
-    public CandidateUser() {
-    }
+    public CandidateUser() {}
 
     public String getUser() {
         return user;

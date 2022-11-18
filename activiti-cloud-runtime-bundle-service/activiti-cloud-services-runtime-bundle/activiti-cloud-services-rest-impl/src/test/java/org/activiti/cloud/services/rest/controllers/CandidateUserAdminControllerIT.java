@@ -15,9 +15,14 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.List;
-
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
@@ -43,22 +48,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(CandidateUserAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         TaskSamples.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class
+    }
+)
 public class CandidateUserAdminControllerIT {
 
     @Autowired
@@ -88,42 +91,37 @@ public class CandidateUserAdminControllerIT {
 
     @Test
     public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaType.APPLICATION_JSON))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[0].entry.user")
-                .isEqualTo("hruser");
+            .node("list.entries[0].entry.user")
+            .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[1].entry.user")
-                .isEqualTo("testuser");
+            .node("list.entries[1].entry.user")
+            .isEqualTo("testuser");
     }
 
     @Test
     public void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
-
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaTypes.HAL_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateUsers[0].user")
-                .isEqualTo("hruser");
+            .node("_embedded.candidateUsers[0].user")
+            .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateUsers[1].user")
-                .isEqualTo("testuser");
+            .node("_embedded.candidateUsers[1].user")
+            .isEqualTo("testuser");
     }
-
 }

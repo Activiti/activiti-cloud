@@ -17,7 +17,6 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.cloud.api.model.shared.impl.CloudVariableInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
@@ -34,19 +33,20 @@ public class RuntimeBundleLinkRelationProvider implements LinkRelationProvider {
 
     public RuntimeBundleLinkRelationProvider() {
         resourceRelationDescriptors = new HashMap<>();
-        resourceRelationDescriptors.put(CloudProcessDefinitionImpl.class,
-                                        new ResourceRelationDescriptor("processDefinition",
-                                                                       "processDefinitions"));
-        resourceRelationDescriptors.put(CloudProcessInstanceImpl.class,
-                                        new ResourceRelationDescriptor("processInstance",
-                                                                       "processInstances"));
-        resourceRelationDescriptors.put(CloudTaskImpl.class,
-                                        new ResourceRelationDescriptor("task",
-                                                                       "tasks"));
+        resourceRelationDescriptors.put(
+            CloudProcessDefinitionImpl.class,
+            new ResourceRelationDescriptor("processDefinition", "processDefinitions")
+        );
+        resourceRelationDescriptors.put(
+            CloudProcessInstanceImpl.class,
+            new ResourceRelationDescriptor("processInstance", "processInstances")
+        );
+        resourceRelationDescriptors.put(CloudTaskImpl.class, new ResourceRelationDescriptor("task", "tasks"));
 
-        resourceRelationDescriptors.put(CloudVariableInstanceImpl.class,
-                                        new ResourceRelationDescriptor("variable",
-                                                                       "variables"));
+        resourceRelationDescriptors.put(
+            CloudVariableInstanceImpl.class,
+            new ResourceRelationDescriptor("variable", "variables")
+        );
     }
 
     @Override
@@ -70,8 +70,7 @@ public class RuntimeBundleLinkRelationProvider implements LinkRelationProvider {
 
         private LinkRelation collectionResourceRel;
 
-        public ResourceRelationDescriptor(String itemResourceRel,
-                                          String collectionResourceRel) {
+        public ResourceRelationDescriptor(String itemResourceRel, String collectionResourceRel) {
             this.itemResourceRel = LinkRelation.of(itemResourceRel);
             this.collectionResourceRel = LinkRelation.of(collectionResourceRel);
         }

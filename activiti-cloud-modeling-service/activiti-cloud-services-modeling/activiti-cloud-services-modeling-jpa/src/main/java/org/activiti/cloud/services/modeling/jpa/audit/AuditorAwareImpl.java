@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.jpa.audit;
 
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.springframework.data.domain.AuditorAware;
-
-import java.util.Optional;
 
 /**
  * Auditor implementation.

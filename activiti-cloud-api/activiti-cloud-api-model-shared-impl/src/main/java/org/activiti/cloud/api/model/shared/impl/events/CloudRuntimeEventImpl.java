@@ -16,12 +16,12 @@
 package org.activiti.cloud.api.model.shared.impl.events;
 
 import java.util.Objects;
-
 import org.activiti.api.runtime.event.impl.RuntimeEventImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
-        implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
+public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
+    extends RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE>
+    implements CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
 
     private String appName;
     private String serviceFullName;
@@ -33,19 +33,14 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     private Integer sequenceNumber;
     private String messageId;
 
-    public CloudRuntimeEventImpl() {
-    }
+    public CloudRuntimeEventImpl() {}
 
     public CloudRuntimeEventImpl(ENTITY_TYPE entity) {
         super(entity);
     }
 
-    public CloudRuntimeEventImpl(String id,
-                                 Long timestamp,
-                                 ENTITY_TYPE entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudRuntimeEventImpl(String id, Long timestamp, ENTITY_TYPE entity) {
+        super(id, timestamp, entity);
     }
 
     @Override
@@ -132,42 +127,45 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudRuntimeEventImpl [appName=")
-               .append(appName)
-               .append(", serviceFullName=")
-               .append(serviceFullName)
-               .append(", appVersion=")
-               .append(appVersion)
-               .append(", serviceName=")
-               .append(serviceName)
-               .append(", serviceVersion=")
-               .append(serviceVersion)
-               .append(", serviceType=")
-               .append(serviceType)
-               .append(", entityId=")
-               .append(entityId)
-               .append(", sequenceNumber=")
-               .append(sequenceNumber)
-               .append(", messageId=")
-               .append(messageId)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("CloudRuntimeEventImpl [appName=")
+            .append(appName)
+            .append(", serviceFullName=")
+            .append(serviceFullName)
+            .append(", appVersion=")
+            .append(appVersion)
+            .append(", serviceName=")
+            .append(serviceName)
+            .append(", serviceVersion=")
+            .append(serviceVersion)
+            .append(", serviceType=")
+            .append(serviceType)
+            .append(", entityId=")
+            .append(entityId)
+            .append(", sequenceNumber=")
+            .append(sequenceNumber)
+            .append(", messageId=")
+            .append(messageId)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(appName,
-                            appVersion,
-                            entityId,
-                            messageId,
-                            sequenceNumber,
-                            serviceFullName,
-                            serviceName,
-                            serviceType,
-                            serviceVersion,
-                            super.hashCode());
+        return Objects.hash(
+            appName,
+            appVersion,
+            entityId,
+            messageId,
+            sequenceNumber,
+            serviceFullName,
+            serviceName,
+            serviceType,
+            serviceVersion,
+            super.hashCode()
+        );
     }
 
     @Override
@@ -185,15 +183,16 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             return false;
         }
         CloudRuntimeEventImpl other = (CloudRuntimeEventImpl) obj;
-        return Objects.equals(appName, other.appName)
-                && Objects.equals(appVersion, other.appVersion)
-                && Objects.equals(entityId, other.entityId)
-                && Objects.equals(messageId, other.messageId)
-                && Objects.equals(sequenceNumber, other.sequenceNumber)
-                && Objects.equals(serviceFullName, other.serviceFullName)
-                && Objects.equals(serviceName, other.serviceName)
-                && Objects.equals(serviceType, other.serviceType)
-                && Objects.equals(serviceVersion, other.serviceVersion);
+        return (
+            Objects.equals(appName, other.appName) &&
+            Objects.equals(appVersion, other.appVersion) &&
+            Objects.equals(entityId, other.entityId) &&
+            Objects.equals(messageId, other.messageId) &&
+            Objects.equals(sequenceNumber, other.sequenceNumber) &&
+            Objects.equals(serviceFullName, other.serviceFullName) &&
+            Objects.equals(serviceName, other.serviceName) &&
+            Objects.equals(serviceType, other.serviceType) &&
+            Objects.equals(serviceVersion, other.serviceVersion)
+        );
     }
-
 }

@@ -28,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-
 @ExtendWith(MockitoExtension.class)
 public class JwtSecurityContextTokenProviderTest {
 
@@ -49,10 +48,8 @@ public class JwtSecurityContextTokenProviderTest {
         Optional<String> result = securityContextTokenProvider.getCurrentToken();
 
         // then
-        assertThat(result).isPresent()
-                          .contains(TOKEN_VALUE);
+        assertThat(result).isPresent().contains(TOKEN_VALUE);
     }
-
 
     @Test
     public void should_getEmptyCurrentToken() {
@@ -65,5 +62,4 @@ public class JwtSecurityContextTokenProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

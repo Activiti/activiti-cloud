@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.common.swagger.apidocs;
 
+import java.util.Properties;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-
-import java.util.Properties;
 
 @TestConfiguration
 public class BuildPropertiesConfig {
@@ -34,5 +33,4 @@ public class BuildPropertiesConfig {
         entries.setProperty("organization.url", "alfresco.com");
         return new BuildProperties(entries);
     }
-
 }

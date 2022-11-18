@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.util.ArrayList;
 import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.EndEvent;
@@ -25,12 +30,6 @@ import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
 
@@ -51,15 +50,24 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         userTask.setIncomingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
-            .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName,
-                        ModelValidationError::getReferenceId)
-            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
-                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
-                                   userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                            userTaskId));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName,
+                ModelValidationError::getReferenceId
+            )
+            .contains(
+                tuple(
+                    IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM,
+                    format(
+                        IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_INCOMING_FLOW_PROBLEM_DESCRIPTION,
+                        userTaskName,
+                        userTaskId
+                    ),
+                    IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                    userTaskId
+                )
+            );
     }
 
     @Test
@@ -70,15 +78,24 @@ public class IntermediateFlowNodeIncomingOutgoingFlowValidatorTest {
         userTask.setOutgoingFlows(new ArrayList<>());
 
         assertThat(intermediateFlowNodeIncomingOutgoingFlowValidator.validate(userTask))
-            .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName,
-                        ModelValidationError::getReferenceId)
-            .contains(tuple(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
-                            format(IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
-                                   userTaskName, userTaskId),
-                            IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
-                            userTaskId));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName,
+                ModelValidationError::getReferenceId
+            )
+            .contains(
+                tuple(
+                    IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM,
+                    format(
+                        IntermediateFlowNodeIncomingOutgoingFlowValidator.NO_OUTGOING_FLOW_PROBLEM_DESCRIPTION,
+                        userTaskName,
+                        userTaskId
+                    ),
+                    IntermediateFlowNodeIncomingOutgoingFlowValidator.INTERMEDIATE_FLOWS_VALIDATOR_NAME,
+                    userTaskId
+                )
+            );
     }
 
     @Test

@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.acc.shared.rest.httpclient;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 
 public class Serializer {
@@ -27,18 +26,14 @@ public class Serializer {
     private static ObjectMapper objectMapper;
 
     static {
-        objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                           false);
+        objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public static AuthToken toAuthToken(String token) throws IOException {
-        return objectMapper.readValue(token,
-                                      AuthToken.class);
+        return objectMapper.readValue(token, AuthToken.class);
     }
 
     public static String toJsonString(Object object) throws JsonProcessingException {
-
         return objectMapper.writeValueAsString(object);
     }
 }

@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.events.converter;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.api.model.shared.event.VariableCreatedEvent;
 import org.activiti.api.model.shared.event.VariableDeletedEvent;
 import org.activiti.api.model.shared.event.VariableUpdatedEvent;
@@ -28,17 +31,15 @@ import org.activiti.core.common.model.connector.VariableDefinition;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
 public class ToCloudVariableEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final CachingProcessExtensionService processExtensionService;
 
-    public ToCloudVariableEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                         CachingProcessExtensionService processExtensionService) {
+    public ToCloudVariableEventConverter(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        CachingProcessExtensionService processExtensionService
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.processExtensionService = processExtensionService;
     }
@@ -52,7 +53,10 @@ public class ToCloudVariableEventConverter {
     }
 
     public CloudVariableUpdatedEvent from(VariableUpdatedEvent event) {
-        CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl<>(event.getEntity(), event.getPreviousValue());
+        CloudVariableUpdatedEventImpl cloudEvent = new CloudVariableUpdatedEventImpl<>(
+            event.getEntity(),
+            event.getPreviousValue()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
         return cloudEvent;
     }
@@ -77,5 +81,4 @@ public class ToCloudVariableEventConverter {
             .findFirst()
             .orElse(null);
     }
-
 }

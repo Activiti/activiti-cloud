@@ -76,16 +76,15 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(executions);
-
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
 
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
         verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
-        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(
-            CompositeCommand.class);
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
         assertThat(command.getCommands()).hasSize(2);
@@ -133,5 +132,4 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientType(CLIENT_TYPE);
         return integrationContext;
     }
-
 }

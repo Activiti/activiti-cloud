@@ -21,7 +21,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface MessageClientStream {
-
     String MY_CMD_PRODUCER = "myCmdProducer";
     String MY_CMD_RESULTS = "myCmdResults";
 

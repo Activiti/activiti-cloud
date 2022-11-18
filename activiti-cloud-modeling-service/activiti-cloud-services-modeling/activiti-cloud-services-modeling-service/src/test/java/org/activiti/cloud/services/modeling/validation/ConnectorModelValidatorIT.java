@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.validation;
 
 import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+
 import java.io.IOException;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
@@ -28,7 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-@ContextConfiguration(classes = {JsonSchemaModelValidatorConfiguration.class, ModelingApiAutoConfiguration.class})
+@ContextConfiguration(classes = { JsonSchemaModelValidatorConfiguration.class, ModelingApiAutoConfiguration.class })
 public class ConnectorModelValidatorIT {
 
     @Autowired
@@ -40,10 +41,14 @@ public class ConnectorModelValidatorIT {
 
     @Test
     public void should_notThrowException_when_validatingAValidConnectorWithExtendedProperties() throws IOException {
-        ConnectorModelValidator connectorModelValidator = new ConnectorModelValidator(connectorSchemaLoader, connectorModelType);
+        ConnectorModelValidator connectorModelValidator = new ConnectorModelValidator(
+            connectorSchemaLoader,
+            connectorModelType
+        );
 
         connectorModelValidator.validateModelContent(
-            resourceAsByteArray("connector/connector-with-model.json"), EMPTY_CONTEXT);
+            resourceAsByteArray("connector/connector-with-model.json"),
+            EMPTY_CONTEXT
+        );
     }
-
 }

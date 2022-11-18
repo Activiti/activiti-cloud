@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
 @DiscriminatorValue(value = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
@@ -28,8 +27,7 @@ public class VariableCreatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_CREATED_EVENT = "VariableCreatedEvent";
 
-    public VariableCreatedEventEntity() {
-    }
+    public VariableCreatedEventEntity() {}
 
     public VariableCreatedEventEntity(CloudVariableCreatedEvent cloudEvent) {
         super(cloudEvent);

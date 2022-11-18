@@ -17,7 +17,6 @@ package org.activiti.cloud.acc.shared.serenity;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import net.serenitybdd.jbehave.SerenityStepFactory;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.failures.FailingUponPendingStep;
@@ -31,28 +30,18 @@ public class ExtendedSerenityStepsFactory extends SerenityStepFactory {
 
     private Configuration configuration;
 
-    public ExtendedSerenityStepsFactory(Configuration configuration,
-                                        String rootPackage,
-                                        ClassLoader classLoader) {
-        super(configuration,
-              rootPackage,
-              classLoader);
-        this.configuration = configuration
-                .usePendingStepStrategy(new FailingUponPendingStep());
+    public ExtendedSerenityStepsFactory(Configuration configuration, String rootPackage, ClassLoader classLoader) {
+        super(configuration, rootPackage, classLoader);
+        this.configuration = configuration.usePendingStepStrategy(new FailingUponPendingStep());
     }
 
     @Override
     public List<CandidateSteps> createCandidateSteps() {
         super.createCandidateSteps();
         return stepsTypes()
-                .stream()
-                .map(type -> new Steps(configuration,
-                                       type,
-                                       this))
-                .map(steps -> new ExtendedSerenityCandidateSteps(steps,
-                                                                 configuration,
-                                                                 this))
-                .collect(Collectors.toList());
+            .stream()
+            .map(type -> new Steps(configuration, type, this))
+            .map(steps -> new ExtendedSerenityCandidateSteps(steps, configuration, this))
+            .collect(Collectors.toList());
     }
-
 }

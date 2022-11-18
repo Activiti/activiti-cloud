@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
 import java.util.Optional;
 import javax.persistence.Column;
@@ -25,16 +30,10 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Model version entity
@@ -61,11 +60,9 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
 
     @Column(columnDefinition = "TEXT")
     @Convert(converter = ExtensionsJsonConverter.class)
-    private Map<String,Object> extensions;
+    private Map<String, Object> extensions;
 
-    public ModelVersionEntity() {
-
-    }
+    public ModelVersionEntity() {}
 
     public ModelVersionEntity(ModelVersionEntity version) {
         setContent(version.getContent());
@@ -107,19 +104,17 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
         this.content = content;
     }
 
-    public Map<String,Object> getExtensions() {
+    public Map<String, Object> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(Map<String,Object> extensions) {
+    public void setExtensions(Map<String, Object> extensions) {
         this.extensions = extensions;
     }
 
     @Transient
     @Override
     public String getVersion() {
-        return Optional.ofNullable(versionIdentifier)
-                .map(VersionIdentifier::getVersion)
-                .orElse(null);
+        return Optional.ofNullable(versionIdentifier).map(VersionIdentifier::getVersion).orElse(null);
     }
 }

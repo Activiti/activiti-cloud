@@ -23,7 +23,7 @@ import org.activiti.cloud.services.audit.api.AuditException;
 
 public class VariableValueJpaConverter implements AttributeConverter<VariableValue<?>, String> {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(VariableValue<?> entity) {

@@ -25,8 +25,10 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
 
     private final IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder;
 
-    public IntegrationErrorChannelResolverImpl(BinderAwareChannelResolver resolver,
-                                               IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
+    public IntegrationErrorChannelResolverImpl(
+        BinderAwareChannelResolver resolver,
+        IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder
+    ) {
         this.resolver = resolver;
         this.integrationErrorDestinationBuilder = integrationErrorDestinationBuilder;
     }
@@ -37,8 +39,4 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
 
         return resolver.resolveDestination(destination);
     }
-
-
-
-
 }

@@ -20,8 +20,8 @@ import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class ApplicationRepresentationModelAssembler implements
-        RepresentationModelAssembler<ApplicationEntity, EntityModel<CloudApplication>> {
+public class ApplicationRepresentationModelAssembler
+    implements RepresentationModelAssembler<ApplicationEntity, EntityModel<CloudApplication>> {
 
     @Override
     public EntityModel<CloudApplication> toModel(ApplicationEntity entity) {

@@ -24,8 +24,10 @@ public class CloudProcessSuspendedProducer implements ProcessEventListener<Proce
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessSuspendedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessSuspendedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +36,4 @@ public class CloudProcessSuspendedProducer implements ProcessEventListener<Proce
     public void onEvent(ProcessSuspendedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
-
 }

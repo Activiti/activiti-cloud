@@ -15,8 +15,13 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
 import org.activiti.common.util.DateFormatterProvider;
@@ -24,12 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
 @TestPropertySource("classpath:application-test.properties")
@@ -109,7 +108,9 @@ public class ProcessVariableValueConverterTest {
     @Test
     public void testProcessVariableValueConverterDateValue() {
         // when
-        Date dateValue = variableValueConverter.convert(new ProcessVariableValue("Date", DATE_1970_01_01T01_01_01_001Z));
+        Date dateValue = variableValueConverter.convert(
+            new ProcessVariableValue("Date", DATE_1970_01_01T01_01_01_001Z)
+        );
 
         // then
         assertThat(dateValue).isEqualTo(dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z));
@@ -132,5 +133,4 @@ public class ProcessVariableValueConverterTest {
         // then
         assertThat(jsonNodeValue).isEqualTo(JsonNodeFactory.instance.objectNode());
     }
-
 }

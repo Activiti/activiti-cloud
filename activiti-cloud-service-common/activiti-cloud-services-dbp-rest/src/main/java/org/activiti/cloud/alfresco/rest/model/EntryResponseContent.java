@@ -15,20 +15,17 @@
  */
 package org.activiti.cloud.alfresco.rest.model;
 
-public class EntryResponseContent<T>
-{
+public class EntryResponseContent<T> {
+
     private T entry;
 
-    public EntryResponseContent() {
-    }
+    public EntryResponseContent() {}
 
     public EntryResponseContent(T entry) {
         this.entry = entry;
     }
 
-    public T getEntry()
-    {
+    public T getEntry() {
         return entry;
     }
-
 }

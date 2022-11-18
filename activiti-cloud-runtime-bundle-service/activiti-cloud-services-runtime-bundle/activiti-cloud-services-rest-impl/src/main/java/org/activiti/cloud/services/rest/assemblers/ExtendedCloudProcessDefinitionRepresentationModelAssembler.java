@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
@@ -24,10 +27,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-public class ExtendedCloudProcessDefinitionRepresentationModelAssembler implements RepresentationModelAssembler<ProcessDefinition, EntityModel<ExtendedCloudProcessDefinition>> {
+public class ExtendedCloudProcessDefinitionRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessDefinition, EntityModel<ExtendedCloudProcessDefinition>> {
 
     private ToCloudProcessDefinitionConverter converter;
 
@@ -38,12 +39,13 @@ public class ExtendedCloudProcessDefinitionRepresentationModelAssembler implemen
     @Override
     public EntityModel<ExtendedCloudProcessDefinition> toModel(ProcessDefinition processDefinition) {
         ExtendedCloudProcessDefinition cloudProcessDefinition = converter.from(processDefinition);
-        Link selfRel = linkTo(methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())).withSelfRel();
-        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null)).withRel("startProcess");
+        Link selfRel = linkTo(
+            methodOn(ProcessDefinitionControllerImpl.class).getProcessDefinition(cloudProcessDefinition.getId())
+        )
+            .withSelfRel();
+        Link startProcessLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).startProcess(null))
+            .withRel("startProcess");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return EntityModel.of(cloudProcessDefinition,
-            selfRel,
-            startProcessLink,
-            homeLink);
+        return EntityModel.of(cloudProcessDefinition, selfRel, startProcessLink, homeLink);
     }
 }

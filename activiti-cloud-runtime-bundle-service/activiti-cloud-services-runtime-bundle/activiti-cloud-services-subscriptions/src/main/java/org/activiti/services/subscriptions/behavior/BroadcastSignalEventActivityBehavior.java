@@ -34,14 +34,17 @@ public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSigna
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public BroadcastSignalEventActivityBehavior(ApplicationEventPublisher eventPublisher, SignalEventDefinition signalEventDefinition,
-                                                        Signal signal) {
+    public BroadcastSignalEventActivityBehavior(
+        ApplicationEventPublisher eventPublisher,
+        SignalEventDefinition signalEventDefinition,
+        Signal signal
+    ) {
         super(signalEventDefinition, signal);
         this.eventPublisher = eventPublisher;
     }
 
     public void execute(DelegateExecution execution) {
-    	if (processInstanceScope) {
+        if (processInstanceScope) {
             super.execute(execution);
             return;
         }
@@ -49,17 +52,18 @@ public class BroadcastSignalEventActivityBehavior extends IntermediateThrowSigna
         CommandContext commandContext = Context.getCommandContext();
         String eventSubscriptionName;
         if (signalEventName != null) {
-             eventSubscriptionName = signalEventName;
+            eventSubscriptionName = signalEventName;
         } else {
-             Expression expressionObject = commandContext.getProcessEngineConfiguration().getExpressionManager().createExpression(signalExpression);
-             eventSubscriptionName = expressionObject.getValue(execution).toString();
+            Expression expressionObject = commandContext
+                .getProcessEngineConfiguration()
+                .getExpressionManager()
+                .createExpression(signalExpression);
+            eventSubscriptionName = expressionObject.getValue(execution).toString();
         }
 
         SignalPayload signalPayload = new SignalPayload(eventSubscriptionName, execution.getVariables());
         eventPublisher.publishEvent(signalPayload);
 
-        Context.getAgenda().planTakeOutgoingSequenceFlowsOperation((ExecutionEntity) execution,
-                true);
-
+        Context.getAgenda().planTakeOutgoingSequenceFlowsOperation((ExecutionEntity) execution, true);
     }
 }

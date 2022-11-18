@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.helper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -32,10 +33,10 @@ import org.springframework.util.LinkedMultiValueMap;
 public class ProcessDefinitionRestTemplate {
 
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER =
-        new LinkedMultiValueMap<>(Map.of("Content-type", List.of("application/json")));
-    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {
-    };
+    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
+        Map.of("Content-type", List.of("application/json"))
+    );
+    private static final ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> PAGED_DEFINITIONS_RESPONSE_TYPE = new ParameterizedTypeReference<>() {};
 
     private TestRestTemplate testRestTemplate;
 
@@ -48,7 +49,8 @@ public class ProcessDefinitionRestTemplate {
             PROCESS_DEFINITIONS_URL,
             HttpMethod.GET,
             null,
-            PAGED_DEFINITIONS_RESPONSE_TYPE);
+            PAGED_DEFINITIONS_RESPONSE_TYPE
+        );
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
@@ -59,11 +61,10 @@ public class ProcessDefinitionRestTemplate {
             PROCESS_DEFINITIONS_URL + id + "/static-values",
             HttpMethod.GET,
             null,
-            new ParameterizedTypeReference<>() {
-            });
+            new ParameterizedTypeReference<>() {}
+        );
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-
 }

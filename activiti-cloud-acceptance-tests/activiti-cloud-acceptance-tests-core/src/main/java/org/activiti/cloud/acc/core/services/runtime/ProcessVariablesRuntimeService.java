@@ -24,14 +24,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.ResponseEntity;
 
 public interface ProcessVariablesRuntimeService {
-
     @RequestLine("GET /v1/process-instances/{id}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CollectionModel<CloudVariableInstance> getVariables(@Param("id") String id);
 
     @RequestLine("POST /v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<Void> setVariables(@Param("id") String id,
-                                      SetProcessVariablesPayload setProcessVariablesPayload);
-
+    ResponseEntity<Void> setVariables(@Param("id") String id, SetProcessVariablesPayload setProcessVariablesPayload);
 }

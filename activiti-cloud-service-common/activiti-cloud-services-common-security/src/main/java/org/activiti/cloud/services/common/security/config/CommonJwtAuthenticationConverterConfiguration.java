@@ -16,8 +16,8 @@
 package org.activiti.cloud.services.common.security.config;
 
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConverter;
+import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -48,17 +48,23 @@ public class CommonJwtAuthenticationConverterConfiguration {
         this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
-
     @Bean("commonJwtAuthenticationConverter")
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(JwtAccessTokenProvider jwtAccessTokenProvider) {
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
+        JwtAccessTokenProvider jwtAccessTokenProvider
+    ) {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(iamName);
-        JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(jwtAccessTokenProvider);
-        return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration, oAuth2UserService);
+        JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(
+            jwtAccessTokenProvider
+        );
+        return new JwtUserInfoUriAuthenticationConverter(
+            jwtGrantedAuthoritiesConverter,
+            clientRegistration,
+            oAuth2UserService
+        );
     }
 
     public void setIamName(String iamName) {
         this.iamName = iamName;
     }
-
 }

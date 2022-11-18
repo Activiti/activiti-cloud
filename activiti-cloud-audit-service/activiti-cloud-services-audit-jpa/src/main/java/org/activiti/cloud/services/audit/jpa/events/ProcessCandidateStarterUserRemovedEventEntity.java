@@ -15,30 +15,29 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.ProcessCandidateStarterUser;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterUserJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = ProcessCandidateStarterUserRemovedEventEntity.PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT)
 @DiscriminatorValue(value = ProcessCandidateStarterUserRemovedEventEntity.PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT)
 @DynamicInsert
 public class ProcessCandidateStarterUserRemovedEventEntity extends AuditEventEntity {
 
-    protected static final String PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT = "ProcessCandidateStarterUserRemovedEvent";
+    protected static final String PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT =
+        "ProcessCandidateStarterUserRemovedEvent";
 
     @Convert(converter = ProcessCandidateStarterUserJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private ProcessCandidateStarterUserImpl candidateStarterUser;
 
-    public ProcessCandidateStarterUserRemovedEventEntity() {
-    }
+    public ProcessCandidateStarterUserRemovedEventEntity() {}
 
     public ProcessCandidateStarterUserRemovedEventEntity(CloudProcessCandidateStarterUserRemovedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +49,19 @@ public class ProcessCandidateStarterUserRemovedEventEntity extends AuditEventEnt
     }
 
     public void setCandidateStarterUser(ProcessCandidateStarterUser candidateUser) {
-        this.candidateStarterUser = new ProcessCandidateStarterUserImpl(candidateUser.getProcessDefinitionId(), candidateUser.getUserId());
+        this.candidateStarterUser =
+            new ProcessCandidateStarterUserImpl(candidateUser.getProcessDefinitionId(), candidateUser.getUserId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessCandidateStarterUserRemovedEventEntity [candidateStarterUser=")
-               .append(candidateStarterUser)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessCandidateStarterUserRemovedEventEntity [candidateStarterUser=")
+            .append(candidateStarterUser)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

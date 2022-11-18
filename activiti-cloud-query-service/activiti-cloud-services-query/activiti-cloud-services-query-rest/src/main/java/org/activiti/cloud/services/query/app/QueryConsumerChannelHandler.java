@@ -29,16 +29,16 @@ public class QueryConsumerChannelHandler {
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
 
-    public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
-                                       QueryEventHandlerContextOptimizer optimizer) {
+    public QueryConsumerChannelHandler(
+        QueryEventHandlerContext eventHandlerContext,
+        QueryEventHandlerContextOptimizer optimizer
+    ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
     }
 
     @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        eventHandlerContext.handle(optimizer.optimize(events)
-                                            .toArray(new CloudRuntimeEvent[]{}));
+        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
     }
-
 }

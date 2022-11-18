@@ -16,12 +16,11 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @TestComponent
 @EnableBinding(CanFailConnectorChannels.class)
@@ -34,8 +33,10 @@ public class CanFailConnector {
     private final IntegrationResultSender integrationResultSender;
     private final IntegrationErrorSender integrationErrorSender;
 
-    public CanFailConnector(IntegrationResultSender integrationResultSender,
-                            IntegrationErrorSender integrationErrorSender) {
+    public CanFailConnector(
+        IntegrationResultSender integrationResultSender,
+        IntegrationErrorSender integrationErrorSender
+    ) {
         this.integrationResultSender = integrationResultSender;
         this.integrationErrorSender = integrationErrorSender;
     }
@@ -50,11 +51,9 @@ public class CanFailConnector {
         integrationErrorSent.set(false);
         if (shouldSendError) {
             integrationErrorSent.set(true);
-            integrationErrorSender.send(integrationRequest,
-                                        new RuntimeException("task failed"));
+            integrationErrorSender.send(integrationRequest, new RuntimeException("task failed"));
         } else {
-            integrationResultSender.send(integrationRequest,
-                integrationRequest.getIntegrationContext());
+            integrationResultSender.send(integrationRequest, integrationRequest.getIntegrationContext());
         }
     }
 

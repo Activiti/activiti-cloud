@@ -15,8 +15,16 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -27,15 +35,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.handler.annotation.Headers;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 @TestComponent
 @EnableBinding(ConnectorIntegrationChannels.class)
@@ -65,8 +64,7 @@ public class ServiceTaskConsumerHandler {
     private List<String> meals = Arrays.asList("pizza", "pasta");
     private List<String> sizes = Arrays.asList("small", "medium");
 
-    public ServiceTaskConsumerHandler(ObjectMapper objectMapper,
-        IntegrationResultSender integrationResultSender) {
+    public ServiceTaskConsumerHandler(ObjectMapper objectMapper, IntegrationResultSender integrationResultSender) {
         this.integrationResultSender = integrationResultSender;
         this.objectMapper = objectMapper;
     }
@@ -84,15 +82,23 @@ public class ServiceTaskConsumerHandler {
         String variableToUpdate = "age";
 
         HashMap<String, Object> resultVariables = new HashMap<>();
-        resultVariables.put(variableToUpdate,
-            ((Integer) requestVariables.get(variableToUpdate)) + 1);
+        resultVariables.put(variableToUpdate, ((Integer) requestVariables.get(variableToUpdate)) + 1);
         //invert value of boolean
         resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
 
-        resultVariables.put("customPojoTypeInConnector", "Type of customPojo var in connector is " + customPojo.getClass());
-        resultVariables.put("customPojoField1InConnector", "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1());
+        resultVariables.put(
+            "customPojoTypeInConnector",
+            "Type of customPojo var in connector is " + customPojo.getClass()
+        );
+        resultVariables.put(
+            "customPojoField1InConnector",
+            "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1()
+        );
         //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
-        resultVariables.put("customPojoAnnotatedTypeInConnector", "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass());
+        resultVariables.put(
+            "customPojoAnnotatedTypeInConnector",
+            "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass()
+        );
 
         integrationContext.addOutBoundVariables(resultVariables);
 
@@ -100,7 +106,8 @@ public class ServiceTaskConsumerHandler {
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) throws Exception {
+    public void receiveVariablesConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers)
+        throws Exception {
         assertIntegrationContextHeaders(integrationRequest, headers);
 
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
@@ -115,33 +122,28 @@ public class ServiceTaskConsumerHandler {
         Integer offSet = (Integer) inBoundVariables.get(variableThree);
 
         assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
+            .extracting(Map.Entry::getKey, Map.Entry::getValue)
             .containsOnly(
-                tuple(variableOne,
-                    "inName"),
-                tuple(variableTwo,
-                    20),
-                tuple(variableThree,
-                    5),
-                tuple(constant,
-                    "myConstantValue"));
+                tuple(variableOne, "inName"),
+                tuple(variableTwo, 20),
+                tuple(variableThree, 5),
+                tuple(constant, "myConstantValue")
+            );
 
-        integrationContext.addOutBoundVariable("out_variable_name_1",
-            "outName");
-        integrationContext.addOutBoundVariable("out_variable_name_2",
-            currentAge + offSet);
-        integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
-            "outTest");
-        integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
-            "outTest");
+        integrationContext.addOutBoundVariable("out_variable_name_1", "outName");
+        integrationContext.addOutBoundVariable("out_variable_name_2", currentAge + offSet);
+        integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name", "outTest");
+        integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name", "outTest");
 
-        JsonNode value = new ObjectMapper().readTree("{\n"
-            + "  \"city\": {\n"
-            + "    \"name\": \"London\",\n"
-            + "    \"place\": \"Tower of London\"\n"
-            + "  }\n"
-            + "}");
+        JsonNode value = new ObjectMapper()
+            .readTree(
+                "{\n" +
+                "  \"city\": {\n" +
+                "    \"name\": \"London\",\n" +
+                "    \"place\": \"Tower of London\"\n" +
+                "  }\n" +
+                "}"
+            );
         integrationContext.addOutBoundVariable("sightSeeing", value);
         integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
 
@@ -149,8 +151,7 @@ public class ServiceTaskConsumerHandler {
     }
 
     @StreamListener(value = ConnectorIntegrationChannels.CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
-    public void receiveConstantsConnector(IntegrationRequest integrationRequest,
-        @Headers Map<String, Object> headers) {
+    public void receiveConstantsConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
         assertIntegrationContextHeaders(integrationRequest, headers);
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
@@ -158,14 +159,8 @@ public class ServiceTaskConsumerHandler {
         Object constantValue = inBoundVariables.get("_constant_value_");
 
         assertThat(inBoundVariables.entrySet())
-            .extracting(Map.Entry::getKey,
-                Map.Entry::getValue)
-            .containsOnly(tuple("name",
-                "inName"),
-                tuple("age",
-                    20),
-                tuple("_constant_value_",
-                    "myConstantValue"));
+            .extracting(Map.Entry::getKey, Map.Entry::getValue)
+            .containsOnly(tuple("name", "inName"), tuple("age", 20), tuple("_constant_value_", "myConstantValue"));
 
         integrationContext.addOutBoundVariable("name", "outName");
         integrationContext.addOutBoundVariable("age", 25);
@@ -174,8 +169,10 @@ public class ServiceTaskConsumerHandler {
         integrationResultSender.send(integrationRequest, integrationContext);
     }
 
-    @StreamListener(value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
-        condition = "headers['processDefinitionVersion']!=null")
+    @StreamListener(
+        value = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
+        condition = "headers['processDefinitionVersion']!=null"
+    )
     public void receiveRestConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
         assertIntegrationContextHeaders(integrationRequest, headers);
 
@@ -185,12 +182,12 @@ public class ServiceTaskConsumerHandler {
         integrationResultSender.send(integrationRequest, integrationContext);
     }
 
-
     private void assertIntegrationContextHeaders(IntegrationRequest integrationRequest, Map<String, Object> headers) {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
         // Mandatory headers assertions
-        Assertions.assertThat(headers)
+        Assertions
+            .assertThat(headers)
             .containsKey(ROUTING_KEY)
             .containsKey(MESSAGE_PAYLOAD_TYPE)
             .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
@@ -208,13 +205,13 @@ public class ServiceTaskConsumerHandler {
 
         // conditional on existing businessKey in integration context
         if (integrationContext.getBusinessKey() != null) {
-            Assertions.assertThat(headers)
-                .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
+            Assertions.assertThat(headers).containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
         }
 
         // conditional on existing parentProcessInstanceId in integration context
         if (integrationContext.getParentProcessInstanceId() != null) {
-            Assertions.assertThat(headers)
+            Assertions
+                .assertThat(headers)
                 .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
         }
     }

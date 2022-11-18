@@ -30,5 +30,4 @@ public class MessageGroupProcessorHandlerChain implements MessageGroupProcessor 
     public Object processMessageGroup(MessageGroup group) {
         return chain.handle(group);
     }
-
 }

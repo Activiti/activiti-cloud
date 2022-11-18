@@ -15,12 +15,9 @@
  */
 package org.activiti.cloud.api.process.model;
 
+import java.util.List;
 import org.activiti.api.process.model.VariableDefinition;
 
-import java.util.List;
-
 public interface ExtendedCloudProcessDefinition extends CloudProcessDefinition {
-
     List<VariableDefinition> getVariableDefinitions();
-
 }

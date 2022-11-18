@@ -28,8 +28,10 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
     private final ProcessVariableCreatedEventHandler processVariableCreatedEventHandler;
     private final TaskVariableCreatedEventHandler taskVariableCreatedEventHandler;
 
-    public VariableCreatedEventHandler(TaskVariableCreatedEventHandler taskVariableCreatedEventHandler,
-                                       ProcessVariableCreatedEventHandler processVariableCreatedEventHandler) {
+    public VariableCreatedEventHandler(
+        TaskVariableCreatedEventHandler taskVariableCreatedEventHandler,
+        ProcessVariableCreatedEventHandler processVariableCreatedEventHandler
+    ) {
         this.taskVariableCreatedEventHandler = taskVariableCreatedEventHandler;
         this.processVariableCreatedEventHandler = processVariableCreatedEventHandler;
     }
@@ -45,10 +47,8 @@ public class VariableCreatedEventHandler implements QueryEventHandler {
             } else {
                 processVariableCreatedEventHandler.handle(variableCreatedEvent);
             }
-
         } catch (Exception cause) {
-            LOGGER.error("Error handling VariableCreatedEvent[" + event + "]",
-                         cause);
+            LOGGER.error("Error handling VariableCreatedEvent[" + event + "]", cause);
         }
     }
 

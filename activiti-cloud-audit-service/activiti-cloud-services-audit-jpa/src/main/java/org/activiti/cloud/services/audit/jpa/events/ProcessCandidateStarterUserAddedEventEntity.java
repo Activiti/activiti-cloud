@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.ProcessCandidateStarterUser;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterUserJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 
 @Entity(name = ProcessCandidateStarterUserAddedEventEntity.PROCESS_CANDIDATE_STARTER_USER_ADDED_EVENT)
 @DiscriminatorValue(value = ProcessCandidateStarterUserAddedEventEntity.PROCESS_CANDIDATE_STARTER_USER_ADDED_EVENT)
@@ -37,8 +36,7 @@ public class ProcessCandidateStarterUserAddedEventEntity extends AuditEventEntit
     @Column(columnDefinition = "text")
     private ProcessCandidateStarterUserImpl candidateStarterUser;
 
-    public ProcessCandidateStarterUserAddedEventEntity() {
-    }
+    public ProcessCandidateStarterUserAddedEventEntity() {}
 
     public ProcessCandidateStarterUserAddedEventEntity(CloudProcessCandidateStarterUserAddedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +48,19 @@ public class ProcessCandidateStarterUserAddedEventEntity extends AuditEventEntit
     }
 
     public void setCandidateStarterUser(ProcessCandidateStarterUser candidateUser) {
-        this.candidateStarterUser = new ProcessCandidateStarterUserImpl(candidateUser.getProcessDefinitionId(), candidateUser.getUserId());
+        this.candidateStarterUser =
+            new ProcessCandidateStarterUserImpl(candidateUser.getProcessDefinitionId(), candidateUser.getUserId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessCandidateStarterUserAddedEventEntity [candidateStarterUser=")
-               .append(candidateStarterUser)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessCandidateStarterUserAddedEventEntity [candidateStarterUser=")
+            .append(candidateStarterUser)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

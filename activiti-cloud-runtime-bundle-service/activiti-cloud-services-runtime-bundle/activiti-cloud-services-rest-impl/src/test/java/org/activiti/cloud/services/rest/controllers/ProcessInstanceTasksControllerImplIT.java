@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.List;
-
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.model.Task;
@@ -58,12 +57,16 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class
+    }
+)
 public class ProcessInstanceTasksControllerImplIT {
 
     @Autowired
@@ -103,30 +106,33 @@ public class ProcessInstanceTasksControllerImplIT {
     @Test
     public void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<Task> tasks = new PageImpl<>(taskList,
-                                          taskList.size());
+        Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
 
-        when(taskRuntime.tasks(any(),any())).thenReturn(tasks);
+        when(taskRuntime.tasks(any(), any())).thenReturn(tasks);
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1)
-                .accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/v1/process-instances/{processInstanceId}/tasks?page=10&size=10", 1, 1)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         Task task = buildDefaultAssignedTask();
         List<Task> taskList = Collections.singletonList(task);
-        Page<Task> taskPage = new PageImpl<>(taskList,
-                                             taskList.size());
+        Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
 
-        when(taskRuntime.tasks(any(),
-                                            any())).thenReturn(taskPage);
+        when(taskRuntime.tasks(any(), any())).thenReturn(taskPage);
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
-                                 task.getProcessInstanceId(),
-                                 1).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/tasks?skipCount=10&maxItems=10",
+                    task.getProcessInstanceId(),
+                    1
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk());
     }
-
 }

@@ -18,6 +18,7 @@ package org.activiti.cloud.identity.model;
 import java.util.List;
 
 public class SecurityResponseRepresentation {
+
     private String role;
 
     private List<Group> groups;

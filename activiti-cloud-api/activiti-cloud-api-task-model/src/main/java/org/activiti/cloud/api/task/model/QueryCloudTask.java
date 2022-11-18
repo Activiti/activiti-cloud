@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.api.task.model;
 
-import org.activiti.cloud.api.model.shared.CloudVariableInstance;
-
 import java.util.List;
 import java.util.Set;
+import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 
-public interface QueryCloudTask extends CloudTask{
+public interface QueryCloudTask extends CloudTask {
     String getProcessDefinitionName();
 
     List<TaskPermissions> getPermissions();

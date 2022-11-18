@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
 
 public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventHandler {
 
@@ -37,12 +36,13 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
         org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserAddedEvent.getEntity();
 
         try {
-            ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(processCandidateStarterUser.getProcessDefinitionId(),
-                                                                                             processCandidateStarterUser.getUserId());
+            ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(
+                processCandidateStarterUser.getProcessDefinitionId(),
+                processCandidateStarterUser.getUserId()
+            );
             entityManager.persist(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling ProcessCandidateStarterUserAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling ProcessCandidateStarterUserAddedEvent[" + event + "]", cause);
         }
     }
 

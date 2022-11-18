@@ -16,7 +16,8 @@
 package org.activiti.cloud.identity.exceptions;
 
 public class IdentityInvalidGroupRoleException extends IdentityException {
+
     public IdentityInvalidGroupRoleException(String groupName, String role) {
-        super("role {" + role  + "} can't be assigned to group {" + groupName + "}");
+        super("role {" + role + "} can't be assigned to group {" + groupName + "}");
     }
 }

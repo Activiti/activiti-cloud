@@ -36,9 +36,11 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private OAuth2UserService oAuth2UserService;
     private String usernameClaim = "preferred_username";
 
-    public JwtUserInfoUriAuthenticationConverter(Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
-                                                 ClientRegistration clientRegistration,
-                                                 OAuth2UserService oAuth2UserService) {
+    public JwtUserInfoUriAuthenticationConverter(
+        Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
+        ClientRegistration clientRegistration,
+        OAuth2UserService oAuth2UserService
+    ) {
         this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
         this.clientRegistration = clientRegistration;
         this.oAuth2UserService = oAuth2UserService;
@@ -57,15 +59,19 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
 
     public String getPrincipalClaimName(Jwt jwt) {
         String username = jwt.getClaimAsString(usernameClaim);
-        if(username == null) {
+        if (username == null) {
             Instant issuedAt = jwt.getIssuedAt();
             Instant expiresAt = jwt.getExpiresAt();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
+            OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                TokenType.BEARER,
+                jwt.getTokenValue(),
+                issuedAt,
+                expiresAt
+            );
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
             username = oAuth2User.getName();
         }
         return username;
     }
-
 }

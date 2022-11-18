@@ -19,6 +19,5 @@ import org.activiti.cloud.api.process.model.IntegrationError;
 import org.springframework.messaging.Message;
 
 public interface IntegrationErrorSender {
-
     void send(Message<IntegrationError> message);
 }

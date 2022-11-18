@@ -17,12 +17,12 @@ package org.activiti.cloud.identity.web.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -34,10 +34,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -58,9 +58,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithActivitiMockUser(
-        roles = {"role1"}
-    )
+    @WithActivitiMockUser(roles = { "role1" })
     public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
         this.mockMvc.perform(get("/v1/roles"))
             .andExpect(status().isOk())
@@ -68,15 +66,10 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithActivitiMockUser(
-        resourcesRoles = {@ResourceRoles(
-            resource = "app1",
-            roles = {"role1"}
-        )}
-    )
+    @WithActivitiMockUser(resourcesRoles = { @ResourceRoles(resource = "app1", roles = { "role1" }) })
     public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
-        this.mockMvc.perform(get("/v1/roles")).
-            andExpect(status().isOk())
+        this.mockMvc.perform(get("/v1/roles"))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$.globalAccess").exists())
             .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
     }
@@ -92,35 +85,40 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnUsers_when_searchByUsername() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
         this.mockMvc.perform(get("/v1/users?group=hr"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
             .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByEmail() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("hruser")));
     }
 
     @Test
     public void should_returnUsers_when_searchByLastName() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=snow"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
     @Test
     public void should_returnUsers_when_searchByFirstName() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=john"))
-            .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].username", is("johnsnow")));
     }
 
@@ -238,10 +236,13 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    @WithActivitiMockUser(roles = {"role1"}, resourcesRoles = {
-        @ResourceRoles(resource="app1", roles={"role1","role2"}),
-        @ResourceRoles(resource="app2", roles="role1")
-    })
+    @WithActivitiMockUser(
+        roles = { "role1" },
+        resourcesRoles = {
+            @ResourceRoles(resource = "app1", roles = { "role1", "role2" }),
+            @ResourceRoles(resource = "app2", roles = "role1")
+        }
+    )
     public void should_returnAccessRoles() throws Exception {
         mockMvc
             .perform(get("/v1/roles"))
@@ -251,34 +252,42 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")))
             .andExpect(jsonPath("$.applicationAccess", hasSize(2)))
             .andExpect(jsonPath("$.applicationAccess[0].name", is("app2")))
-            .andExpect(jsonPath("$.applicationAccess[0].roles",contains("role1")))
+            .andExpect(jsonPath("$.applicationAccess[0].roles", contains("role1")))
             .andExpect(jsonPath("$.applicationAccess[1].name", is("app1")))
-            .andExpect(jsonPath("$.applicationAccess[1].roles",contains("role1", "role2")));
+            .andExpect(jsonPath("$.applicationAccess[1].roles", contains("role1", "role2")));
     }
 
     @Test
     public void should_returnStatusOk_when_addingAppPermissions() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "test-client")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
-                    + "    \"users\":[\"hradmin\"],\n"
-                    + "    \"groups\":[]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "test-client")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                        "    \"users\":[\"hradmin\"],\n" +
+                        "    \"groups\":[]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isOk());
     }
 
     @Test
     public void should_returnNotFound_when_addingAppPermissionsToInvalidApplication() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "fakeApp")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
-                    + "    \"users\":[\"hradmin\"],\n"
-                    + "    \"groups\":[]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "fakeApp")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                        "    \"users\":[\"hradmin\"],\n" +
+                        "    \"groups\":[]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isNotFound())
             .andExpect(status().reason("Invalid Security data: application {fakeApp} is invalid or doesn't exist"));
     }
@@ -286,13 +295,17 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnBadRequest_when_addingAppPermissionsWithInvalidRole() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "test-client")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"fakeRole\",\n"
-                    + "    \"users\":[\"testUser\"],\n"
-                    + "    \"groups\":[]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "test-client")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"fakeRole\",\n" +
+                        "    \"users\":[\"testUser\"],\n" +
+                        "    \"groups\":[]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Invalid Security data: role {fakeRole} is invalid or doesn't exist"));
     }
@@ -300,28 +313,37 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnBadRequest_when_addingAppPermissionsWithInvalidUserRole() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "test-client")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
-                    + "    \"users\":[\"hruser\"],\n"
-                    + "    \"groups\":[]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "test-client")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                        "    \"users\":[\"hruser\"],\n" +
+                        "    \"groups\":[]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isBadRequest())
-            .andExpect(status()
-                .reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to user {hruser}"));
+            .andExpect(
+                status().reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to user {hruser}")
+            );
     }
 
     @Test
     public void should_returnBadRequest_when_addingAppPermissionsWithInvalidGroup() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "test-client")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
-                    + "    \"users\":[\"testadmin\"],\n"
-                    + "    \"groups\":[\"fakeGroup\"]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "test-client")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                        "    \"users\":[\"testadmin\"],\n" +
+                        "    \"groups\":[\"fakeGroup\"]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Invalid Security data: group {fakeGroup} is invalid or doesn't exist"));
     }
@@ -329,28 +351,29 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnBadRequest_when_addingAppPermissionsWithInvalidGroupRole() throws Exception {
         mockMvc
-            .perform(post("/v1/permissions/{application}", "test-client")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("[\n"
-                    + "    {\"role\":\"ACTIVITI_ADMIN\",\n"
-                    + "    \"users\":[\"testadmin\"],\n"
-                    + "    \"groups\":[\"hr\"]}\n"
-                    + "  ]"))
+            .perform(
+                post("/v1/permissions/{application}", "test-client")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "[\n" +
+                        "    {\"role\":\"ACTIVITI_ADMIN\",\n" +
+                        "    \"users\":[\"testadmin\"],\n" +
+                        "    \"groups\":[\"hr\"]}\n" +
+                        "  ]"
+                    )
+            )
             .andExpect(status().isBadRequest())
             .andExpect(status().reason("Invalid Security data: role {ACTIVITI_ADMIN} can't be assigned to group {hr}"));
     }
 
     @Test
     public void should_returnApplicationPermissions_when_filteringByRole() throws Exception {
-        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}",
-            "activiti", "ACTIVITI_USER")).
-            andExpect(status().isOk())
+        this.mockMvc.perform(get("/v1/permissions/{application}?role={role}", "activiti", "ACTIVITI_USER"))
+            .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
-            .andExpect(jsonPath("$[0].users[?(@.username)].username",
-                containsInAnyOrder("hruser", "testuser")))
-            .andExpect(jsonPath("$[0].groups[?(@.name)].name",
-                containsInAnyOrder( "salesgroup")));
+            .andExpect(jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser")))
+            .andExpect(jsonPath("$[0].groups[?(@.name)].name", containsInAnyOrder("salesgroup")));
     }
 
     @Test
@@ -358,8 +381,18 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(5)))
-            .andExpect(jsonPath("$[?(@.role)].role", containsInAnyOrder("ACTIVITI_USER",
-                "ACTIVITI_ADMIN", "APPLICATION_MANAGER", "uma_authorization", "offline_access")));
+            .andExpect(
+                jsonPath(
+                    "$[?(@.role)].role",
+                    containsInAnyOrder(
+                        "ACTIVITI_USER",
+                        "ACTIVITI_ADMIN",
+                        "APPLICATION_MANAGER",
+                        "uma_authorization",
+                        "offline_access"
+                    )
+                )
+            );
     }
 
     @Test
@@ -371,17 +404,11 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnGroups_when_searchByNameWithCache() throws Exception {
-        mockMvc
-            .perform(get("/v1/groups?search=search"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/groups?search=search")).andExpect(status().isOk());
 
-        mockMvc
-            .perform(get("/v1/groups?search=search&role=role"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/groups?search=search&role=role")).andExpect(status().isOk());
 
-        mockMvc
-            .perform(get("/v1/groups?role=role"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/groups?role=role")).andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache("groupSearch");
         assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null))).isNotNull();
@@ -391,27 +418,19 @@ public abstract class AbstractIdentityManagementControllerIT {
 
     @Test
     public void should_returnUsers_when_searchByLastNameCache() throws Exception {
-        mockMvc
-            .perform(get("/v1/users?search=search"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/users?search=search")).andExpect(status().isOk());
 
-        mockMvc
-            .perform(get("/v1/users?search=search&group=group"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/users?search=search&group=group")).andExpect(status().isOk());
 
-        mockMvc
-            .perform(get("/v1/users?search=search&role=role"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/users?search=search&role=role")).andExpect(status().isOk());
 
-        mockMvc
-            .perform(get("/v1/users?search=search&role=role&group=group"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/users?search=search&role=role&group=group")).andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache("userSearch");
         assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null))).isNotNull();
         assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null)))
+            .isNotNull();
         assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null))).isNotNull();
     }
-
 }

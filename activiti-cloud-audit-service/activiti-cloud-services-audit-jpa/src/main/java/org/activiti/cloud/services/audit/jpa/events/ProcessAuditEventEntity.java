@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.MappedSuperclass;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class ProcessAuditEventEntity extends AuditEventEntity {
@@ -31,15 +30,14 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private ProcessInstance processInstance;
 
-    public ProcessAuditEventEntity() {
-    }
+    public ProcessAuditEventEntity() {}
 
     public ProcessAuditEventEntity(CloudProcessRuntimeEvent cloudEvent) {
         super(cloudEvent);
         setProcessInstance(cloudEvent.getEntity());
     }
 
-    public ProcessAuditEventEntity(CloudRuntimeEvent<?,?> cloudEvent) {
+    public ProcessAuditEventEntity(CloudRuntimeEvent<?, ?> cloudEvent) {
         super(cloudEvent);
     }
 
@@ -54,12 +52,12 @@ public abstract class ProcessAuditEventEntity extends AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessAuditEventEntity [processInstance=")
-               .append(processInstance)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessAuditEventEntity [processInstance=")
+            .append(processInstance)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

@@ -20,11 +20,10 @@ import org.activiti.api.process.model.events.MessageSubscriptionEvent;
 import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSubscriptionEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudMessageSubscriptionCancelledEvent extends CloudRuntimeEvent<MessageSubscription, MessageSubscriptionEvent.MessageSubscriptionEvents> {
-
+public interface CloudMessageSubscriptionCancelledEvent
+    extends CloudRuntimeEvent<MessageSubscription, MessageSubscriptionEvent.MessageSubscriptionEvents> {
     @Override
     default MessageSubscriptionEvents getEventType() {
         return MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED;
     }
-
 }

@@ -24,8 +24,10 @@ public class CloudActivityCancelledProducer implements BPMNElementEventListener<
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudActivityCancelledProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                          ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudActivityCancelledProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

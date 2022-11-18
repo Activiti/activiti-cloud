@@ -18,6 +18,4 @@ package org.activiti.cloud.services.messages.core.processor;
 import org.activiti.cloud.services.messages.core.support.Chain;
 import org.springframework.integration.store.MessageGroup;
 
-public interface MessageGroupProcessorChain extends Chain<MessageGroup, Object>{
-
-}
+public interface MessageGroupProcessorChain extends Chain<MessageGroup, Object> {}

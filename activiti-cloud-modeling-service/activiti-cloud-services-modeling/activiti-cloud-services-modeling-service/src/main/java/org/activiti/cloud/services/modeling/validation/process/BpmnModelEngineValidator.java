@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ValidationError;
-
-import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnCommonModelValidator} based on the default BPMN activiti engine validator
@@ -35,16 +34,16 @@ public class BpmnModelEngineValidator implements BpmnCommonModelValidator {
     }
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-                                                 ValidationContext validationContext) {
-        return processValidator.validate(bpmnModel)
-                .stream()
-                .map(this::toModelValidationError);
+    public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
+        return processValidator.validate(bpmnModel).stream().map(this::toModelValidationError);
     }
 
     private ModelValidationError toModelValidationError(ValidationError validationError) {
-        return new ModelValidationError(validationError.getProblem(),
-            validationError.getDefaultDescription(), validationError.getValidatorSetName(),
-            validationError.isWarning());
+        return new ModelValidationError(
+            validationError.getProblem(),
+            validationError.getDefaultDescription(),
+            validationError.getValidatorSetName(),
+            validationError.isWarning()
+        );
     }
 }

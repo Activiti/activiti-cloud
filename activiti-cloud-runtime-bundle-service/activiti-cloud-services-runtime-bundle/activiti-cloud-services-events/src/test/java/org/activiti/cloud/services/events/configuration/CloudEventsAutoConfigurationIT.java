@@ -34,6 +34,7 @@ public class CloudEventsAutoConfigurationIT {
 
     @SpringBootApplication
     static class MockRuntimeBundleApplication {
+
         @MockBean
         private ProcessEngineChannels processEngineChannels;
 
@@ -63,5 +64,4 @@ public class CloudEventsAutoConfigurationIT {
     public void contextLoads() {
         // success
     }
-
 }

@@ -19,7 +19,6 @@ package org.activiti.cloud.modeling.api;
  * Model type interface
  */
 public interface ModelType {
-
     String getName();
 
     String getFolderName();

@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +34,6 @@ import org.activiti.cloud.services.audit.jpa.events.AuditEventEntityAssert;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessDeletedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,92 +41,90 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
 @ExtendWith(MockitoExtension.class)
 public class ProcessDeletedEventConverterTest {
 
-  private ProcessDeletedEventConverter converter;
+    private ProcessDeletedEventConverter converter;
 
-  @Mock
-  private EventsRepository eventsRepository;
+    @Mock
+    private EventsRepository eventsRepository;
 
-  @Mock
-  private EventContextInfoAppender eventContextInfoAppender;
+    @Mock
+    private EventContextInfoAppender eventContextInfoAppender;
 
-  @BeforeEach
-  public void setUp(){
-    converter = new ProcessDeletedEventConverter(eventsRepository, eventContextInfoAppender);
-  }
+    @BeforeEach
+    public void setUp() {
+        converter = new ProcessDeletedEventConverter(eventsRepository, eventContextInfoAppender);
+    }
 
-  @Test
-  public void getSupportedEventShouldReturnProcessDeleted() {
-    assert(converter.getSupportedEvent()).equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
-  }
+    @Test
+    public void getSupportedEventShouldReturnProcessDeleted() {
+        assert (converter.getSupportedEvent()).equals(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name());
+    }
 
-  @Test
-  public void createEventEntityShouldReturnEntity() {
-    //given
-    String processDefinitionId = UUID.randomUUID().toString();
-    String processInstanceId = UUID.randomUUID().toString();
-    given(eventsRepository.findAll(any(), any(Sort.class)))
-        .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
+    @Test
+    public void createEventEntityShouldReturnEntity() {
+        //given
+        String processDefinitionId = UUID.randomUUID().toString();
+        String processInstanceId = UUID.randomUUID().toString();
+        given(eventsRepository.findAll(any(), any(Sort.class)))
+            .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
 
-    CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
+        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
 
-    //when
-    ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
+        //when
+        ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
 
-    //then
-    AuditEventEntityAssert.assertThat(event).hasProcessInstanceId(runtimeEvent.getProcessInstanceId());
-    AuditEventEntityAssert.assertThat(event).hasProcessDefinitionId(processDefinitionId);
-  }
+        //then
+        AuditEventEntityAssert.assertThat(event).hasProcessInstanceId(runtimeEvent.getProcessInstanceId());
+        AuditEventEntityAssert.assertThat(event).hasProcessDefinitionId(processDefinitionId);
+    }
 
-  @Test
-  public void createAPIEventShouldReturnEvent(){
-    //given
-    String processDefinitionId = UUID.randomUUID().toString();
-    String processInstanceId = UUID.randomUUID().toString();
-    given(eventsRepository.findAll(any(), any(Sort.class)))
-        .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
+    @Test
+    public void createAPIEventShouldReturnEvent() {
+        //given
+        String processDefinitionId = UUID.randomUUID().toString();
+        String processInstanceId = UUID.randomUUID().toString();
+        given(eventsRepository.findAll(any(), any(Sort.class)))
+            .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
 
-    CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
+        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
 
-    //when
-    ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
-    CloudRuntimeEventImpl<?,?> apiEvent = converter.createAPIEvent(event);
+        //when
+        ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
+        CloudRuntimeEventImpl<?, ?> apiEvent = converter.createAPIEvent(event);
 
-    //then
-    assertThat(apiEvent.getProcessDefinitionId()).isEqualTo(processDefinitionId);
-    assertThat(apiEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
-  }
+        //then
+        assertThat(apiEvent.getProcessDefinitionId()).isEqualTo(processDefinitionId);
+        assertThat(apiEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
+    }
 
-  private CloudRuntimeEvent<?,?> buildEvent(String processInstanceId){
-    ProcessInstanceImpl instance = new ProcessInstanceImpl();
-    instance.setId(processInstanceId);
+    private CloudRuntimeEvent<?, ?> buildEvent(String processInstanceId) {
+        ProcessInstanceImpl instance = new ProcessInstanceImpl();
+        instance.setId(processInstanceId);
 
-    CloudProcessDeletedEventImpl event= new CloudProcessDeletedEventImpl(instance);
-    event.setProcessInstanceId(processInstanceId);
-    event.setSequenceNumber(1);
-    return event;
-  }
+        CloudProcessDeletedEventImpl event = new CloudProcessDeletedEventImpl(instance);
+        event.setProcessInstanceId(processInstanceId);
+        event.setSequenceNumber(1);
+        return event;
+    }
 
-  private ProcessInstance buildProcessInstance(String processInstanceId, String processDefinitionId){
-    ProcessInstanceImpl instance = new ProcessInstanceImpl();
-    instance.setId(processInstanceId);
-    instance.setProcessDefinitionId(processDefinitionId);
-    return instance;
-  }
+    private ProcessInstance buildProcessInstance(String processInstanceId, String processDefinitionId) {
+        ProcessInstanceImpl instance = new ProcessInstanceImpl();
+        instance.setId(processInstanceId);
+        instance.setProcessDefinitionId(processDefinitionId);
+        return instance;
+    }
 
-  private List<? extends AuditEventEntity> buildCompletedEntities(String processDefinitionId, String processInstanceId){
-    ProcessCompletedEventEntity event = new ProcessCompletedEventEntity();
-    event.setProcessDefinitionId(processDefinitionId);
-    event.setEventType(CloudRuntimeEventType.PROCESS_COMPLETED.name());
-    event.setProcessInstanceId(processInstanceId);
-    event.setProcessInstance(buildProcessInstance(processInstanceId, processDefinitionId));
-    return Arrays.asList(event);
-  }
-
+    private List<? extends AuditEventEntity> buildCompletedEntities(
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        ProcessCompletedEventEntity event = new ProcessCompletedEventEntity();
+        event.setProcessDefinitionId(processDefinitionId);
+        event.setEventType(CloudRuntimeEventType.PROCESS_COMPLETED.name());
+        event.setProcessInstanceId(processInstanceId);
+        event.setProcessInstance(buildProcessInstance(processInstanceId, processDefinitionId));
+        return Arrays.asList(event);
+    }
 }

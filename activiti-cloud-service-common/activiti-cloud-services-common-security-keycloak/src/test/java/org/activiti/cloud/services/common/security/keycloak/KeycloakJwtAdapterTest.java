@@ -44,25 +44,22 @@ public class KeycloakJwtAdapterTest {
     }
 
     @Test
-    public void shouldNotThrowAnyExceptionWhenRolesIsNull(){
+    public void shouldNotThrowAnyExceptionWhenRolesIsNull() {
         JSONObject rolesParent = new JSONObject();
         rolesParent.put("roles", null);
         when(jwt.hasClaim("realm_access")).thenReturn(true);
         when(jwt.getClaim("realm_access")).thenReturn(rolesParent);
 
-       assertDoesNotThrow(() -> keycloakJwtAdapter.getRoles());
+        assertDoesNotThrow(() -> keycloakJwtAdapter.getRoles());
     }
 
     @Test
-    public void shouldReturnRoles(){
+    public void shouldReturnRoles() {
         JSONObject rolesParent = new JSONObject();
         rolesParent.put("roles", List.of("roleA", "roleB"));
         when(jwt.hasClaim("realm_access")).thenReturn(true);
         when(jwt.getClaim("realm_access")).thenReturn(rolesParent);
 
-        assertThat(keycloakJwtAdapter.getRoles())
-            .hasSize(2)
-            .containsExactly("roleA", "roleB");
+        assertThat(keycloakJwtAdapter.getRoles()).hasSize(2).containsExactly("roleA", "roleB");
     }
-
 }

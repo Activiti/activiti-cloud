@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceController;
@@ -24,20 +27,18 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-public class ProcessInstanceRepresentationModelAssembler implements RepresentationModelAssembler<ProcessInstanceEntity, EntityModel<CloudProcessInstance>> {
+public class ProcessInstanceRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessInstanceEntity, EntityModel<CloudProcessInstance>> {
 
     @Override
     public EntityModel<CloudProcessInstance> toModel(ProcessInstanceEntity entity) {
         Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getId())).withSelfRel();
-        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null)).withRel("tasks");
-        Link variablesRel = linkTo(methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(),null,null)).withRel("variables");
-        return EntityModel.of(entity,
-                              selfRel,
-                              tasksRel,
-                              variablesRel);
+        Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null))
+            .withRel("tasks");
+        Link variablesRel = linkTo(
+            methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(), null, null)
+        )
+            .withRel("variables");
+        return EntityModel.of(entity, selfRel, tasksRel, variablesRel);
     }
-
 }

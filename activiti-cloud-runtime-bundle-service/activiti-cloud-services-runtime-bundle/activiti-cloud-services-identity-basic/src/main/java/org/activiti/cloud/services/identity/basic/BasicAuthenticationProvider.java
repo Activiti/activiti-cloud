@@ -26,33 +26,36 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public class BasicAuthenticationProvider implements AuthenticationProvider {
 
-  private UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
-  @Autowired
-  public BasicAuthenticationProvider(UserDetailsService userDetailsService){
-    this.userDetailsService = userDetailsService;
-  }
-
-  @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    String name = authentication.getName();
-    String password = authentication.getCredentials().toString();
-
-    UserDetails userDetails = userDetailsService.loadUserByUsername(name);
-
-    boolean authenticated = userDetails.getPassword().equals(password) && userDetails.isAccountNonExpired() && userDetails.isEnabled() && userDetails.isCredentialsNonExpired();
-
-    if (authenticated) {
-      org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(name);
-      return new UsernamePasswordAuthenticationToken(name, password, userDetails.getAuthorities());
-    } else {
-      throw new BadCredentialsException("Authentication failed for this username and password");
+    @Autowired
+    public BasicAuthenticationProvider(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
-  }
 
-  @Override
-  public boolean supports(Class<?> authentication) {
-    return authentication.equals(UsernamePasswordAuthenticationToken.class);
-  }
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String name = authentication.getName();
+        String password = authentication.getCredentials().toString();
 
+        UserDetails userDetails = userDetailsService.loadUserByUsername(name);
+
+        boolean authenticated =
+            userDetails.getPassword().equals(password) &&
+            userDetails.isAccountNonExpired() &&
+            userDetails.isEnabled() &&
+            userDetails.isCredentialsNonExpired();
+
+        if (authenticated) {
+            org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(name);
+            return new UsernamePasswordAuthenticationToken(name, password, userDetails.getAuthorities());
+        } else {
+            throw new BadCredentialsException("Authentication failed for this username and password");
+        }
+    }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return authentication.equals(UsernamePasswordAuthenticationToken.class);
+    }
 }

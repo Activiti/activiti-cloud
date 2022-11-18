@@ -103,5 +103,4 @@ public class ConnectorProperties {
     public void setMqDestinationSeparator(String mqDestinationSeparator) {
         this.mqDestinationSeparator = mqDestinationSeparator;
     }
-
 }

@@ -51,8 +51,7 @@ public class ProjectConfigurationEntity implements ProjectConfiguration {
 
     Boolean enableCandidateStarters;
 
-    public ProjectConfigurationEntity() {  // for JPA
-    }
+    public ProjectConfigurationEntity() {} // for JPA
 
     public ProjectConfigurationEntity(Boolean enableCandidateStarters) {
         this.enableCandidateStarters = Optional.of(enableCandidateStarters).orElse(false);

@@ -29,24 +29,16 @@ public class IntegrationResultSender {
 
     private final BinderAwareChannelResolver resolver;
 
-    public IntegrationResultSender(
-        BinderAwareChannelResolver resolver) {
+    public IntegrationResultSender(BinderAwareChannelResolver resolver) {
         this.resolver = resolver;
     }
 
-
-    public void send(IntegrationRequest integrationRequest,
-        IntegrationContext integrationContext) {
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest,
-            integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
-            .build();
+    public void send(IntegrationRequest integrationRequest, IntegrationContext integrationContext) {
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getResultDestination();
 
-        resolver
-            .resolveDestination(destination)
-            .send(message);
+        resolver.resolveDestination(destination).send(message);
     }
-
 }

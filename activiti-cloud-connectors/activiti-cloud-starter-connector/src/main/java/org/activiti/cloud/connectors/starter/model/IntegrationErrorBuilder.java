@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import java.util.Objects;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
@@ -23,37 +24,35 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 
-import java.util.Objects;
-
 public class IntegrationErrorBuilder {
 
     private final IntegrationRequest integrationRequest;
     private final ConnectorProperties connectorProperties;
     private final Throwable error;
 
-    private IntegrationErrorBuilder(IntegrationRequest integrationRequest,
-                                    ConnectorProperties connectorProperties,
-                                    Throwable error) {
+    private IntegrationErrorBuilder(
+        IntegrationRequest integrationRequest,
+        ConnectorProperties connectorProperties,
+        Throwable error
+    ) {
         this.integrationRequest = integrationRequest;
         this.connectorProperties = connectorProperties;
         this.error = error;
-
     }
 
-    public static IntegrationErrorBuilder errorFor(IntegrationRequest integrationRequest,
-                                                   ConnectorProperties connectorProperties,
-                                                   Throwable error) {
-        return new IntegrationErrorBuilder(integrationRequest,
-                                           connectorProperties,
-                                           error);
+    public static IntegrationErrorBuilder errorFor(
+        IntegrationRequest integrationRequest,
+        ConnectorProperties connectorProperties,
+        Throwable error
+    ) {
+        return new IntegrationErrorBuilder(integrationRequest, connectorProperties, error);
     }
 
     public IntegrationError build() {
         Objects.requireNonNull(integrationRequest);
         Objects.requireNonNull(error);
 
-        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest,
-                                                                         error);
+        IntegrationErrorImpl integrationError = new IntegrationErrorImpl(integrationRequest, error);
         if (connectorProperties != null) {
             integrationError.setAppVersion(connectorProperties.getAppVersion());
             integrationError.setServiceFullName(connectorProperties.getServiceFullName());
@@ -72,9 +71,10 @@ public class IntegrationErrorBuilder {
     public MessageBuilder<IntegrationError> getMessageBuilder() {
         IntegrationError integrationError = build();
 
-        return MessageBuilder.withPayload(integrationError)
-                             .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
-                             .setHeader("targetAppName", integrationRequest.getAppName())
-                             .setHeader("targetService", integrationRequest.getServiceFullName());
+        return MessageBuilder
+            .withPayload(integrationError)
+            .setHeader(MessageHeaders.CONTENT_TYPE, "application/json")
+            .setHeader("targetAppName", integrationRequest.getAppName())
+            .setHeader("targetService", integrationRequest.getServiceFullName());
     }
 }

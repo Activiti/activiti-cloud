@@ -38,8 +38,8 @@ public class AuthorizationProperties {
     @ConfigurationProperties
     public static class SecurityConstraint {
 
-        private String[] authRoles = new String[]{};
-        private SecurityCollection[] securityCollections = new SecurityCollection[]{};
+        private String[] authRoles = new String[] {};
+        private SecurityCollection[] securityCollections = new SecurityCollection[] {};
 
         public String[] getAuthRoles() {
             return this.authRoles;
@@ -61,8 +61,8 @@ public class AuthorizationProperties {
     @ConfigurationProperties
     public static class SecurityCollection {
 
-        private String[] patterns = new String[]{};
-        private String[] omittedMethods = new String[]{};
+        private String[] patterns = new String[] {};
+        private String[] omittedMethods = new String[] {};
 
         public String[] getPatterns() {
             return patterns;
@@ -82,11 +82,14 @@ public class AuthorizationProperties {
 
         @Override
         public String toString() {
-            return "{" +
-                "patterns=" + Arrays.toString(patterns) +
-                ", omittedMethods=" + Arrays.toString(omittedMethods) +
-                '}';
+            return (
+                "{" +
+                "patterns=" +
+                Arrays.toString(patterns) +
+                ", omittedMethods=" +
+                Arrays.toString(omittedMethods) +
+                '}'
+            );
         }
     }
-
 }

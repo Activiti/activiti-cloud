@@ -24,7 +24,10 @@ public class PagedModelConverter extends InternalModelConverter<ListResponseCont
 
     @Override
     protected boolean applies(JavaType javaType) {
-        return PagedModel.class.equals(javaType.getRawClass()) && EntityModel.class.equals(javaType.containedType(0).getRawClass());
+        return (
+            PagedModel.class.equals(javaType.getRawClass()) &&
+            EntityModel.class.equals(javaType.containedType(0).getRawClass())
+        );
     }
 
     @Override
@@ -36,5 +39,4 @@ public class PagedModelConverter extends InternalModelConverter<ListResponseCont
     protected JavaType getContainedType(JavaType javaType) {
         return javaType.containedType(0).containedType(0);
     }
-
 }

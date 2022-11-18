@@ -46,70 +46,82 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public void validate(byte[] bytes,
-                         ValidationContext validationContext) {
+    public void validate(byte[] bytes, ValidationContext validationContext) {
         JSONObject processExtensionJson = null;
         try {
             log.debug("Validating json model content: " + new String(bytes));
             processExtensionJson = new JSONObject(new JSONTokener(new String(bytes)));
-            schemaLoader()
-                    .load()
-                    .build()
-                    .validate(processExtensionJson);
+            schemaLoader().load().build().validate(processExtensionJson);
         } catch (JSONException jsonException) {
-            log.debug("Syntactic model JSON validation errors encountered",
-                      jsonException);
+            log.debug("Syntactic model JSON validation errors encountered", jsonException);
             throw new SyntacticModelValidationException(jsonException);
         } catch (ValidationException validationException) {
-            log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
-                      validationException);
-            throw new SemanticModelValidationException(validationException.getMessage(),
-                                                       getValidationErrors(validationException, processExtensionJson));
+            log.debug(
+                "Semantic model validation errors encountered: " + validationException.toJSON(),
+                validationException
+            );
+            throw new SemanticModelValidationException(
+                validationException.getMessage(),
+                getValidationErrors(validationException, processExtensionJson)
+            );
         }
     }
 
-    private List<ModelValidationError> getValidationErrors(ValidationException validationException, JSONObject prcessExtenstionJson) {
+    private List<ModelValidationError> getValidationErrors(
+        ValidationException validationException,
+        JSONObject prcessExtenstionJson
+    ) {
         return getValidationExceptions(validationException)
-                .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
-                .distinct()
-                .collect(Collectors.toList());
+            .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     private Stream<ValidationException> getValidationExceptions(ValidationException validationException) {
-        return Optional.ofNullable(validationException.getCausingExceptions())
-                .filter(CollectionUtils::isNotEmpty)
-                .map(exceptions -> exceptions
-                        .stream()
-                        .flatMap(this::getValidationExceptions))
-                .orElseGet(() -> Stream.of(validationException));
+        return Optional
+            .ofNullable(validationException.getCausingExceptions())
+            .filter(CollectionUtils::isNotEmpty)
+            .map(exceptions -> exceptions.stream().flatMap(this::getValidationExceptions))
+            .orElseGet(() -> Stream.of(validationException));
     }
 
-    private ModelValidationError toModelValidationError(ValidationException validationException, JSONObject prcessExtenstionJson) {
+    private ModelValidationError toModelValidationError(
+        ValidationException validationException,
+        JSONObject prcessExtenstionJson
+    ) {
         String description = null;
 
-        Map<String, Object>  unProcessedProperties = Optional.ofNullable(validationException.getViolatedSchema())
-                .map(Schema::getUnprocessedProperties).orElse(null);
+        Map<String, Object> unProcessedProperties = Optional
+            .ofNullable(validationException.getViolatedSchema())
+            .map(Schema::getUnprocessedProperties)
+            .orElse(null);
 
-        if(unProcessedProperties != null && unProcessedProperties.get("message") != null){
+        if (unProcessedProperties != null && unProcessedProperties.get("message") != null) {
             HashMap<String, String> errorMessages = (HashMap<String, String>) unProcessedProperties.get("message");
             String errorMessage = errorMessages.get(validationException.getKeyword());
-            if(errorMessage != null) {
-                description = resolveExpression(errorMessages.get(validationException.getKeyword()), validationException.getPointerToViolation(), prcessExtenstionJson);
+            if (errorMessage != null) {
+                description =
+                    resolveExpression(
+                        errorMessages.get(validationException.getKeyword()),
+                        validationException.getPointerToViolation(),
+                        prcessExtenstionJson
+                    );
             }
         }
 
-        if(description == null || description.equals("")) {
+        if (description == null || description.equals("")) {
             // set default value if custom error message not found
             description = validationException.getMessage();
         }
 
-        String schema = Optional.ofNullable(validationException.getViolatedSchema())
-                .map(Schema::getSchemaLocation)
-                .orElse(null);
+        String schema = Optional
+            .ofNullable(validationException.getViolatedSchema())
+            .map(Schema::getSchemaLocation)
+            .orElse(null);
         return new ModelValidationError(validationException.getErrorMessage(), description, schema);
     }
 
-    private String resolveExpression(String message, String  pointerToViolation, JSONObject prcessExtenstionJson) {
+    private String resolveExpression(String message, String pointerToViolation, JSONObject prcessExtenstionJson) {
         final String path[] = pointerToViolation.replace("#/", "").split("/");
         final int lastIndex = path.length - 1;
 
@@ -125,17 +137,17 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
             return resolveExpression(message, pointerToViolation, prcessExtenstionJson);
         }
 
-        return  message;
+        return message;
     }
 
     private String getValueFromJson(String[] path, JSONObject processExtensionJson) {
         JSONObject parent = null;
         String value = "";
 
-        if(path.length > 1) {
+        if (path.length > 1) {
             parent = processExtensionJson.getJSONObject(path[0]);
 
-            for(int iterator=1; iterator < path.length - 1; iterator++) {
+            for (int iterator = 1; iterator < path.length - 1; iterator++) {
                 parent = parent.getJSONObject(path[iterator]);
             }
 
@@ -146,6 +158,6 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
             value = processExtensionJson.getString(path[0]);
         }
 
-        return  value;
+        return value;
     }
 }

@@ -21,7 +21,6 @@ import java.util.Date;
  * Auditable interface
  */
 public interface Auditable<U> {
-
     U getCreatedBy();
 
     void setCreatedBy(U createdBy);
@@ -52,5 +51,4 @@ public interface Auditable<U> {
             setLastModifiedDate(source.getLastModifiedDate());
         }
     }
-
 }

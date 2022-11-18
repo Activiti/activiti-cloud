@@ -19,7 +19,6 @@ import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface JwtAdapter {
-
     Jwt getJwt();
 
     String getUserName();
@@ -27,5 +26,4 @@ public interface JwtAdapter {
     List<String> getRoles();
 
     List<String> getGroups();
-
 }

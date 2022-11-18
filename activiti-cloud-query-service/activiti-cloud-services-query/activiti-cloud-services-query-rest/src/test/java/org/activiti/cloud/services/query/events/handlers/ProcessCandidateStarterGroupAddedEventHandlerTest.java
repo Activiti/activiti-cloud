@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
@@ -25,12 +30,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCandidateStarterGroupAddedEventHandlerTest {
@@ -44,15 +43,21 @@ public class ProcessCandidateStarterGroupAddedEventHandlerTest {
     @Test
     public void handleShouldStoreNewProcessCandidateGroupUser() {
         //given
-        ProcessCandidateStarterGroupImpl candidateGroup = new ProcessCandidateStarterGroupImpl(UUID.randomUUID().toString(),
-                                                                        UUID.randomUUID().toString());
-        CloudProcessCandidateStarterGroupAddedEventImpl event = new CloudProcessCandidateStarterGroupAddedEventImpl(candidateGroup);
+        ProcessCandidateStarterGroupImpl candidateGroup = new ProcessCandidateStarterGroupImpl(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString()
+        );
+        CloudProcessCandidateStarterGroupAddedEventImpl event = new CloudProcessCandidateStarterGroupAddedEventImpl(
+            candidateGroup
+        );
 
         //when
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessCandidateStarterGroupEntity> captor = ArgumentCaptor.forClass(ProcessCandidateStarterGroupEntity.class);
+        ArgumentCaptor<ProcessCandidateStarterGroupEntity> captor = ArgumentCaptor.forClass(
+            ProcessCandidateStarterGroupEntity.class
+        );
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
         assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
@@ -65,8 +70,8 @@ public class ProcessCandidateStarterGroupAddedEventHandlerTest {
 
         //then
         assertThat(handledEvent)
-            .isEqualTo(ProcessCandidateStarterGroupEvent
-                       .ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name());
+            .isEqualTo(
+                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name()
+            );
     }
-
 }

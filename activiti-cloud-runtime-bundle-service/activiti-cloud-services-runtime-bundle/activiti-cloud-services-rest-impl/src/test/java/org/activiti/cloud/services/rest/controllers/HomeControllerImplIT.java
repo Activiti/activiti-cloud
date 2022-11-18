@@ -36,8 +36,7 @@ public class HomeControllerImplIT {
     @Test
     public void getHomeInfo() throws Exception {
         this.mockMvc.perform(get("/v1/"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
     }
-
 }

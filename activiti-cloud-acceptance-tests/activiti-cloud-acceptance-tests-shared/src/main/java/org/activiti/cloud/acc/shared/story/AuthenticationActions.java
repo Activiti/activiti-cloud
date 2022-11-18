@@ -30,13 +30,8 @@ public class AuthenticationActions {
 
     @Given("the user is authenticated as $authUsername")
     @When("another user is authenticated as $authUsername")
-    public void authenticateUser(String authUsername) throws Exception{
+    public void authenticateUser(String authUsername) throws Exception {
         authenticationSteps.authenticateUser(authUsername);
         authenticationSteps.ensureUserIsAuthenticated();
     }
-
-
-
-
-
 }

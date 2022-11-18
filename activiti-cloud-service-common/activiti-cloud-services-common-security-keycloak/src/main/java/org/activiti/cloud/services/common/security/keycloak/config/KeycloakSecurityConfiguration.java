@@ -26,8 +26,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:keycloak-configuration.properties" )
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
+@PropertySource("classpath:keycloak-configuration.properties")
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
 public class KeycloakSecurityConfiguration {
 
     @Bean
@@ -40,8 +44,7 @@ public class KeycloakSecurityConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "true")
-    public JwtAccessTokenProvider jwtResourceAccessTokenProvider(@Value("${keycloak.resource}" ) String resource) {
+    public JwtAccessTokenProvider jwtResourceAccessTokenProvider(@Value("${keycloak.resource}") String resource) {
         return new JwtAccessTokenProvider(jwt -> new KeycloakResourceJwtAdapter(resource, jwt));
     }
-
 }

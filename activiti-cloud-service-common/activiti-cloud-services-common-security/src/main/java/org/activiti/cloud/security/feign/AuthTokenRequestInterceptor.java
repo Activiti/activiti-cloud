@@ -20,7 +20,6 @@ import feign.RequestTemplate;
 import java.util.Optional;
 
 public interface AuthTokenRequestInterceptor extends RequestInterceptor {
-
     String AUTHORIZATION = "Authorization";
     String BEARER = "Bearer";
 
@@ -31,11 +30,7 @@ public interface AuthTokenRequestInterceptor extends RequestInterceptor {
         getToken()
             .ifPresent(token -> {
                 template.removeHeader(AUTHORIZATION);
-                template.header(AUTHORIZATION,
-                                String.format("%s %s",
-                                              BEARER,
-                                              token));
+                template.header(AUTHORIZATION, String.format("%s %s", BEARER, token));
             });
     }
-
 }

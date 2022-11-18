@@ -118,10 +118,6 @@ public class JwtAccessTokenValidatorTest {
             claims.put("nbf", Instant.now().minusSeconds(10));
         }
 
-        return new Jwt(TOKEN_VALUE,
-            issuedAt,
-            expiresAt,
-            headers,
-            claims);
+        return new Jwt(TOKEN_VALUE, issuedAt, expiresAt, headers, claims);
     }
 }

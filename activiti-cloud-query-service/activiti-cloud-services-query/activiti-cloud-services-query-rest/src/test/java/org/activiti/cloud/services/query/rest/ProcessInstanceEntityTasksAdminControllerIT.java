@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Collections;
+import javax.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -41,25 +51,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessInstanceTasksAdminController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @WithMockUser
 @TestPropertySource("classpath:application-test.properties")
 public class ProcessInstanceEntityTasksAdminControllerIT {
@@ -101,22 +98,37 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
         TaskEntity taskEntity = buildDefaultTask();
 
         given(taskRepository.findAll(any(), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(taskEntity),
-                                           new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)), 12));
+            .willReturn(
+                new PageImpl<>(
+                    Collections.singletonList(taskEntity),
+                    new AlfrescoPageRequest(11, 10, PageRequest.of(0, 10)),
+                    12
+                )
+            );
 
         //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
-                                               taskEntity.getProcessInstanceId())
-                                                   .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(
+                get(
+                    "/admin/v1/process-instances/{processInstanceId}/tasks?skipCount=11&maxItems=10",
+                    taskEntity.getProcessInstanceId()
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 }

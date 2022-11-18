@@ -27,9 +27,11 @@ public class ProcessDeletedAuditEventEntityTest {
     public void shouldSetAllInformationAvailableFromCloudEvent() {
         //given
         long timestamp = System.currentTimeMillis();
-        CloudProcessDeletedEventImpl processDeletedEvent = new CloudProcessDeletedEventImpl("eventId",
-                                                                                            timestamp,
-                                                                                            new ProcessInstanceImpl());
+        CloudProcessDeletedEventImpl processDeletedEvent = new CloudProcessDeletedEventImpl(
+            "eventId",
+            timestamp,
+            new ProcessInstanceImpl()
+        );
         processDeletedEvent.setAppName("appName");
         processDeletedEvent.setAppVersion("appV1");
         processDeletedEvent.setServiceName("serviceName");
@@ -50,22 +52,22 @@ public class ProcessDeletedAuditEventEntityTest {
 
         //then
         assertThat(auditEventEntity)
-                .hasEventId(processDeletedEvent.getId())
-                .hasTimestamp(timestamp)
-                .hasEventType(processDeletedEvent.getEventType().name())
-                .hasAppName("appName")
-                .hasAppVersion("appV1")
-                .hasServiceName("serviceName")
-                .hasServiceFullName("serviceFN")
-                .hasServiceType("Audit")
-                .hasServiceVersion("serviceV2")
-                .hasMessageId("messageId")
-                .hasSequenceNumber(3)
-                .hasEntityId("entityID")
-                .hasProcessInstanceId("procInstId")
-                .hasProcessDefinitionId("procDefId")
-                .hasProcessDefinitionKey("procDefKey")
-                .hasBusinessKey("BusinessKey")
-                .hasParentProcessInstanceId("parentProcId");
+            .hasEventId(processDeletedEvent.getId())
+            .hasTimestamp(timestamp)
+            .hasEventType(processDeletedEvent.getEventType().name())
+            .hasAppName("appName")
+            .hasAppVersion("appV1")
+            .hasServiceName("serviceName")
+            .hasServiceFullName("serviceFN")
+            .hasServiceType("Audit")
+            .hasServiceVersion("serviceV2")
+            .hasMessageId("messageId")
+            .hasSequenceNumber(3)
+            .hasEntityId("entityID")
+            .hasProcessInstanceId("procInstId")
+            .hasProcessDefinitionId("procDefId")
+            .hasProcessDefinitionKey("procDefKey")
+            .hasBusinessKey("BusinessKey")
+            .hasParentProcessInstanceId("parentProcId");
     }
 }

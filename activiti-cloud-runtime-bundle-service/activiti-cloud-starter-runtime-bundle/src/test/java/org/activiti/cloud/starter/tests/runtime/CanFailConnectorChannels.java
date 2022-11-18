@@ -20,9 +20,8 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface CanFailConnectorChannels {
-
     String CAN_FAIL_CONNECTOR = "canFailConnector";
+
     @Input(CAN_FAIL_CONNECTOR)
     SubscribableChannel canFailConnector();
-
 }

@@ -19,16 +19,14 @@ package org.activiti.cloud.modeling.api;
  * Business logic related with validation of a model content
  */
 public interface ModelContentValidator extends ModelValidator {
-
-   /**
+    /**
      * Validate the given model content.
      *
      * @param modelContent      the model content to validate
      * @param validationContext the validation context
      */
-    default void validateModelContent(byte[] modelContent,
-                              ValidationContext validationContext) {
-        validate(modelContent,validationContext);
+    default void validateModelContent(byte[] modelContent, ValidationContext validationContext) {
+        validate(modelContent, validationContext);
     }
 
     /**
@@ -39,10 +37,12 @@ public interface ModelContentValidator extends ModelValidator {
      * @param validationContext the validation context
      * @param validateUsage validate the usage of the model
      */
-    default void validateModelContent(Model model,
-                                      byte[] modelContent,
-                                      ValidationContext validationContext,
-                                      boolean validateUsage) {
+    default void validateModelContent(
+        Model model,
+        byte[] modelContent,
+        ValidationContext validationContext,
+        boolean validateUsage
+    ) {
         validate(model, modelContent, validationContext, validateUsage);
     }
 }

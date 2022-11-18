@@ -32,5 +32,4 @@ public class MockMessageChannel implements MessageChannel {
         messageResult = message;
         return false;
     }
-
 }

@@ -30,6 +30,7 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
@@ -74,7 +74,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class ProcessDefinitionControllerImpl implements ProcessDefinitionController {
 
     private final RepositoryService repositoryService;
@@ -96,7 +96,8 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     private final CachingProcessExtensionService cachingProcessExtensionService;
 
     @Autowired
-    public ProcessDefinitionControllerImpl(RepositoryService repositoryService,
+    public ProcessDefinitionControllerImpl(
+        RepositoryService repositoryService,
         ProcessDiagramGeneratorWrapper processDiagramGenerator,
         ProcessDefinitionRepresentationModelAssembler representationModelAssembler,
         ExtendedCloudProcessDefinitionRepresentationModelAssembler extendedCloudProcessDefinitionRepresentationModelAssembler,
@@ -104,11 +105,13 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         AlfrescoPagedModelAssembler<ProcessDefinition> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         ProcessDefinitionService processDefinitionService,
-        CachingProcessExtensionService cachingProcessExtensionService) {
+        CachingProcessExtensionService cachingProcessExtensionService
+    ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;
         this.representationModelAssembler = representationModelAssembler;
-        this.extendedCloudProcessDefinitionRepresentationModelAssembler = extendedCloudProcessDefinitionRepresentationModelAssembler;
+        this.extendedCloudProcessDefinitionRepresentationModelAssembler =
+            extendedCloudProcessDefinitionRepresentationModelAssembler;
         this.processRuntime = processRuntime;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
@@ -118,14 +121,18 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     @Override
     public PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(
-        @RequestParam(required = false, defaultValue = "")
-            List<String> include,
-        Pageable pageable) {
+        @RequestParam(required = false, defaultValue = "") List<String> include,
+        Pageable pageable
+    ) {
         Page<ProcessDefinition> page = processDefinitionService.getProcessDefinitions(
-            pageConverter.toAPIPageable(pageable), include);
-        return pagedCollectionModelAssembler.toModel(pageable,
+            pageConverter.toAPIPageable(pageable),
+            include
+        );
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             pageConverter.toSpringPage(pageable, page),
-            extendedCloudProcessDefinitionRepresentationModelAssembler);
+            extendedCloudProcessDefinitionRepresentationModelAssembler
+        );
     }
 
     @Override
@@ -138,12 +145,12 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         checkUserCanReadProcessDefinition(id);
 
         try (final InputStream resourceStream = repositoryService.getProcessModel(id)) {
-            return new String(IoUtil.readInputStream(resourceStream,
-                null),
-                StandardCharsets.UTF_8);
+            return new String(IoUtil.readInputStream(resourceStream, null), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new ActivitiException("Error occured while getting process model '" + id + "' : " + e.getMessage(),
-                e);
+            throw new ActivitiException(
+                "Error occured while getting process model '" + id + "' : " + e.getMessage(),
+                e
+            );
         }
     }
 
@@ -166,8 +173,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         checkUserCanReadProcessDefinition(id);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
-        return new String(processDiagramGenerator.generateDiagram(bpmnModel),
-            StandardCharsets.UTF_8);
+        return new String(processDiagramGenerator.generateDiagram(bpmnModel), StandardCharsets.UTF_8);
     }
 
     @Override
@@ -179,21 +185,25 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         Process process = bpmnModel.getMainProcess();
 
         if (bpmnModel.getStartFormKey(process.getId()) != null) {
-            Optional<FlowElement> startEvent = process.getFlowElements().stream()
-                .filter(flowElement -> flowElement.getClass().equals(StartEvent.class)).findFirst();
+            Optional<FlowElement> startEvent = process
+                .getFlowElements()
+                .stream()
+                .filter(flowElement -> flowElement.getClass().equals(StartEvent.class))
+                .findFirst();
 
             if (startEvent.isPresent()) {
                 Extension extensions = cachingProcessExtensionService.getExtensionsForId(id);
-                if(extensions != null) {
-                    ProcessVariablesMapping startEventMappings = extensions.getMappings()
-                        .get(startEvent.get().getId());
+                if (extensions != null) {
+                    ProcessVariablesMapping startEventMappings = extensions.getMappings().get(startEvent.get().getId());
 
-                    if(startEventMappings != null) {
-                        startEventMappings.getInputs().forEach((input, mapping) -> {
-                            if (SourceMappingType.VALUE.equals(mapping.getType())) {
-                                result.put(input, mapping.getValue());
-                            }
-                        });
+                    if (startEventMappings != null) {
+                        startEventMappings
+                            .getInputs()
+                            .forEach((input, mapping) -> {
+                                if (SourceMappingType.VALUE.equals(mapping.getType())) {
+                                    result.put(input, mapping.getValue());
+                                }
+                            });
                     }
                 }
             }

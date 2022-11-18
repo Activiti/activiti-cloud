@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.test.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterGroupJpaJsonConverter;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterUserJpaJsonConverter;
 import org.junit.jupiter.api.Test;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.test.Assertions.assertThat;
 
 public class ProcessCandidateStartersJpaJsonConverterTest {
 
@@ -32,65 +32,66 @@ public class ProcessCandidateStartersJpaJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentationForUserConverter() throws Exception {
         //given
-        ProcessCandidateStarterUserImpl candidateStarterUser = new ProcessCandidateStarterUserImpl("aprocessId", "auserId");
+        ProcessCandidateStarterUserImpl candidateStarterUser = new ProcessCandidateStarterUserImpl(
+            "aprocessId",
+            "auserId"
+        );
 
         //when
         String jsonRepresentation = candidateStarterUserConverter.convertToDatabaseColumn(candidateStarterUser);
 
         //then
         assertThatJson(jsonRepresentation)
-                .node("userId").isEqualTo("auserId")
-                .node("processDefinitionId").isEqualTo("aprocessId");
-
+            .node("userId")
+            .isEqualTo("auserId")
+            .node("processDefinitionId")
+            .isEqualTo("aprocessId");
     }
 
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentationForGroupConverter() throws Exception {
         //given
-        ProcessCandidateStarterGroupImpl candidateStarterGroup = new ProcessCandidateStarterGroupImpl("aprocessId", "agroupId");
+        ProcessCandidateStarterGroupImpl candidateStarterGroup = new ProcessCandidateStarterGroupImpl(
+            "aprocessId",
+            "agroupId"
+        );
 
         //when
         String jsonRepresentation = candidateStarterGroupConverter.convertToDatabaseColumn(candidateStarterGroup);
 
         //then
         assertThatJson(jsonRepresentation)
-            .node("groupId").isEqualTo("agroupId")
-            .node("processDefinitionId").isEqualTo("aprocessId");
+            .node("groupId")
+            .isEqualTo("agroupId")
+            .node("processDefinitionId")
+            .isEqualTo("aprocessId");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateTaskCandidateForUserConvertor() throws Exception {
         //given
-        String jsonRepresentation =
-                "{\"processDefinitionId\":\"aprocessId\"," +
-                        "\"userId\":\"auserId\"}";
+        String jsonRepresentation = "{\"processDefinitionId\":\"aprocessId\"," + "\"userId\":\"auserId\"}";
 
         //when
-        ProcessCandidateStarterUserImpl candidateStarterUser = (ProcessCandidateStarterUserImpl)candidateStarterUserConverter.convertToEntityAttribute(jsonRepresentation);
+        ProcessCandidateStarterUserImpl candidateStarterUser = (ProcessCandidateStarterUserImpl) candidateStarterUserConverter.convertToEntityAttribute(
+            jsonRepresentation
+        );
 
         //then
-        assertThat(candidateStarterUser)
-                .isNotNull()
-                .hasUserId("auserId");
-
+        assertThat(candidateStarterUser).isNotNull().hasUserId("auserId");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateTaskCandidateForGroupConvertor() throws Exception {
         //given
-        String jsonRepresentation =
-            "{\"processDefinitionId\":\"aprocessId\"," +
-                "\"groupId\":\"agroupId\"}";
+        String jsonRepresentation = "{\"processDefinitionId\":\"aprocessId\"," + "\"groupId\":\"agroupId\"}";
 
         //when
-        ProcessCandidateStarterGroupImpl candidateStarterGroup = (ProcessCandidateStarterGroupImpl)candidateStarterGroupConverter.convertToEntityAttribute(jsonRepresentation);
+        ProcessCandidateStarterGroupImpl candidateStarterGroup = (ProcessCandidateStarterGroupImpl) candidateStarterGroupConverter.convertToEntityAttribute(
+            jsonRepresentation
+        );
 
         //then
-        assertThat(candidateStarterGroup)
-            .isNotNull()
-            .hasGroupId("agroupId");
-
+        assertThat(candidateStarterGroup).isNotNull().hasGroupId("agroupId");
     }
-
-
 }

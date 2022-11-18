@@ -15,29 +15,29 @@
  */
 package org.activiti.cloud.services.modeling.rest.assembler;
 
+import java.util.ArrayList;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.activiti.cloud.services.modeling.rest.resource.ValidationErrorResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
-import java.util.ArrayList;
-
-public class ValidationErrorRepresentationModelAssembler extends RepresentationModelAssemblerSupport<ModelValidationError, ValidationErrorResource> {
+public class ValidationErrorRepresentationModelAssembler
+    extends RepresentationModelAssemblerSupport<ModelValidationError, ValidationErrorResource> {
 
     public ValidationErrorRepresentationModelAssembler() {
-        super(ModelController.class,
-              ValidationErrorResource.class);
+        super(ModelController.class, ValidationErrorResource.class);
     }
 
     @Override
     public ValidationErrorResource toModel(ModelValidationError validationError) {
-        return new ValidationErrorResource(validationError,
-                                           new ArrayList<>());
+        return new ValidationErrorResource(validationError, new ArrayList<>());
     }
 
     @Override
-    public CollectionModel<ValidationErrorResource> toCollectionModel(Iterable<? extends ModelValidationError> entities) {
+    public CollectionModel<ValidationErrorResource> toCollectionModel(
+        Iterable<? extends ModelValidationError> entities
+    ) {
         return super.toCollectionModel(entities);
     }
 }

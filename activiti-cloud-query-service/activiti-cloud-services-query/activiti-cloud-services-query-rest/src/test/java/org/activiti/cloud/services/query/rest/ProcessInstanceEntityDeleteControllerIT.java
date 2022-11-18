@@ -15,7 +15,21 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.EntityManagerFactory;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -42,29 +56,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @TestPropertySource("classpath:application-test.properties")
 @WebMvcTest(ProcessInstanceDeleteController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
@@ -113,29 +110,31 @@ public class ProcessInstanceEntityDeleteControllerIT {
     }
 
     @Test
-    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem() throws Exception{
-
+    public void deleteProcessInstancesShouldReturnAllProcessInstancesAndDeleteThem() throws Exception {
         //given
         List<ProcessInstanceEntity> processInstanceEntities = Collections.singletonList(buildDefaultProcessInstance());
-        given(processInstanceRepository.findAll(any(Predicate.class)))
-                .willReturn(processInstanceEntities);
+        given(processInstanceRepository.findAll(any(Predicate.class))).willReturn(processInstanceEntities);
 
         //when
-        mockMvc.perform(delete("/admin/v1/process-instances")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(delete("/admin/v1/process-instances").with(csrf()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk());
 
         verify(processInstanceRepository).deleteAll(processInstanceEntities);
-
     }
 
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                UUID.randomUUID().toString(),
-                UUID.randomUUID().toString(),
-                ProcessInstance.ProcessInstanceStatus.RUNNING,
-                new Date());
+        return new ProcessInstanceEntity(
+            "My-app",
+            "My-app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            new Date()
+        );
     }
 }

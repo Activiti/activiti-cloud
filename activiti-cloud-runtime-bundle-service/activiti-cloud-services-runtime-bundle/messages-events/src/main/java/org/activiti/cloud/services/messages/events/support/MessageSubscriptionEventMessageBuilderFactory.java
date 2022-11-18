@@ -29,7 +29,8 @@ public class MessageSubscriptionEventMessageBuilderFactory {
     }
 
     public MessageBuilderAppenderChain create(MessageSubscription messageSubscription) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new MessageSubscriptionMessageBuilderAppender(messageSubscription));
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(new MessageSubscriptionMessageBuilderAppender(messageSubscription));
     }
 }

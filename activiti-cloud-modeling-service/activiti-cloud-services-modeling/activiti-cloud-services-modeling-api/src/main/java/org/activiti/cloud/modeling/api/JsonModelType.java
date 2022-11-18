@@ -29,6 +29,6 @@ public abstract class JsonModelType implements ModelType {
 
     @Override
     public String[] getAllowedContentFileExtension() {
-        return new String[]{JSON};
+        return new String[] { JSON };
     }
 }

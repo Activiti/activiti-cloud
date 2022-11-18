@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.common.zip;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,11 +27,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import org.activiti.cloud.services.common.file.FileContent;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
-
 
 /**
  * Builder for zip content
@@ -57,10 +55,7 @@ public class ZipBuilder {
      * @return this
      */
     public ZipBuilder appendFolder(String... path) {
-        String entry = Arrays.stream(path)
-                .collect(Collectors.joining(ZIP_PATH_DELIMITATOR,
-                                            "",
-                                            ZIP_PATH_DELIMITATOR));
+        String entry = Arrays.stream(path).collect(Collectors.joining(ZIP_PATH_DELIMITATOR, "", ZIP_PATH_DELIMITATOR));
         entries.add(entry);
         return this;
     }
@@ -72,13 +67,10 @@ public class ZipBuilder {
      * @param path the path of the file
      * @return this
      */
-    public ZipBuilder appendFile(byte[] content,
-                                 String... path) {
-        String entry = String.join(ZIP_PATH_DELIMITATOR,
-                                   path);
+    public ZipBuilder appendFile(byte[] content, String... path) {
+        String entry = String.join(ZIP_PATH_DELIMITATOR, path);
         entries.add(entry);
-        contentMap.put(entry,
-                       content);
+        contentMap.put(entry, content);
         return this;
     }
 
@@ -90,12 +82,10 @@ public class ZipBuilder {
      * @param path the folders path
      * @return this
      */
-    public ZipBuilder appendFile(FileContent fileContent,
-                                 String... path) {
+    public ZipBuilder appendFile(FileContent fileContent, String... path) {
         String[] newPath = Arrays.copyOf(path, path.length + 1);
         newPath[path.length] = fileContent.getFilename();
-        return appendFile(fileContent.getFileContent(),
-                          newPath);
+        return appendFile(fileContent.getFileContent(), newPath);
     }
 
     /**
@@ -104,14 +94,15 @@ public class ZipBuilder {
      * @throws IOException in case of I/O error
      */
     public byte[] toZipBytes() throws IOException {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+        try (
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)
+        ) {
             for (String entry : entries) {
                 zipOutputStream.putNextEntry(new ZipEntry(entry));
                 byte[] content = contentMap.get(entry);
                 if (content != null) {
-                    writeChunked(content,
-                                 zipOutputStream);
+                    writeChunked(content, zipOutputStream);
                 }
                 zipOutputStream.closeEntry();
             }
@@ -126,13 +117,10 @@ public class ZipBuilder {
      * @throws IOException in case of I/O error
      */
     public FileContent toZipFileContent() throws IOException {
-        return new FileContent(name + ".zip",
-                               CONTENT_TYPE_ZIP,
-                               toZipBytes());
+        return new FileContent(name + ".zip", CONTENT_TYPE_ZIP, toZipBytes());
     }
 
     private void writeChunked(byte[] data, ZipOutputStream output) throws IOException {
-
         if (data != null) {
             int bytes = data.length;
             int offset = 0;
@@ -143,6 +131,5 @@ public class ZipBuilder {
                 offset += chunk;
             }
         }
-
     }
 }

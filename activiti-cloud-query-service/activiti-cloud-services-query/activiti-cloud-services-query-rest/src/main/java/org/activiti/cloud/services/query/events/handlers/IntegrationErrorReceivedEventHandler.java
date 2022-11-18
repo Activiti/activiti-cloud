@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -22,10 +25,6 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationC
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 

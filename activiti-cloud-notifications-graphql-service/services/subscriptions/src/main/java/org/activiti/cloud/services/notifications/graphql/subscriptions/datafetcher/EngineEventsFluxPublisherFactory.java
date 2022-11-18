@@ -15,14 +15,12 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.springframework.messaging.Message;
-
-import graphql.schema.DataFetchingEnvironment;
 import reactor.core.publisher.Flux;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -34,8 +32,10 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
     private final Flux<Message<List<EngineEvent>>> engineEventsFlux;
     private final EngineEventsPredicateFactory predicateFactory;
 
-    public EngineEventsFluxPublisherFactory(Flux<Message<List<EngineEvent>>> engineEventsFlux,
-                                            EngineEventsPredicateFactory predicateFactory) {
+    public EngineEventsFluxPublisherFactory(
+        Flux<Message<List<EngineEvent>>> engineEventsFlux,
+        EngineEventsPredicateFactory predicateFactory
+    ) {
         this.engineEventsFlux = engineEventsFlux;
         this.predicateFactory = predicateFactory;
     }
@@ -44,10 +44,16 @@ public class EngineEventsFluxPublisherFactory implements EngineEventsPublisherFa
     public Flux<List<EngineEvent>> getPublisher(DataFetchingEnvironment environment) {
         Predicate<? super EngineEvent> predicate = predicateFactory.getPredicate(environment);
 
-        return Flux.from(engineEventsFlux.log(logger, Level.CONFIG, true)
-                                         .flatMapSequential(message -> Flux.fromIterable(message.getPayload())
-                                                                           .filter(predicate)
-                                                                           .collectList()
-                                                                           .filter(list -> !list.isEmpty())));
+        return Flux.from(
+            engineEventsFlux
+                .log(logger, Level.CONFIG, true)
+                .flatMapSequential(message ->
+                    Flux
+                        .fromIterable(message.getPayload())
+                        .filter(predicate)
+                        .collectList()
+                        .filter(list -> !list.isEmpty())
+                )
+        );
     }
 }

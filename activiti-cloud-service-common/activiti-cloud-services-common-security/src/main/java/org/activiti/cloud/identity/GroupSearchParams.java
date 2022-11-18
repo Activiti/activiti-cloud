@@ -46,5 +46,4 @@ public class GroupSearchParams {
     public void setApplication(String application) {
         this.application = application;
     }
-
 }

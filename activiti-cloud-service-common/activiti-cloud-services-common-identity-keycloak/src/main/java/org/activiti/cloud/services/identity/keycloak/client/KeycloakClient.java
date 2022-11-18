@@ -30,15 +30,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "keycloak",
+@FeignClient(
+    value = "keycloak",
     url = "${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/",
-    configuration = ClientCredentialsAuthConfiguration.class)
+    configuration = ClientCredentialsAuthConfiguration.class
+)
 public interface KeycloakClient {
-
     @RequestMapping(method = RequestMethod.GET, value = "/users")
     @Headers("Content-Type: application/json")
-    List<KeycloakUser> searchUsers(@RequestParam(value = "search") String search,
-                                   @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+    List<KeycloakUser> searchUsers(
+        @RequestParam(value = "search") String search,
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
@@ -52,8 +56,11 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
-    List<KeycloakGroup> searchGroups(@RequestParam(value = "search") String search,
-                                     @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+    List<KeycloakGroup> searchGroups(
+        @RequestParam(value = "search") String search,
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
@@ -64,17 +71,23 @@ public interface KeycloakClient {
     @Headers("Content-Type: application/json")
     List<KeycloakClientRepresentation> searchClients(
         @RequestParam(value = "clientId", required = false) String clientId,
-        @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/clients/{client}/composite")
     @Headers("Content-Type: application/json")
-    List<KeycloakRoleMapping> getUserClientRoleMapping(@PathVariable("id") String id,
-                                                       @PathVariable("client") String client);
+    List<KeycloakRoleMapping> getUserClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("client") String client
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings/clients/{client}/composite")
     @Headers("Content-Type: application/json")
-    List<KeycloakRoleMapping> getGroupClientRoleMapping(@PathVariable("id") String id,
-                                                        @PathVariable("client") String client);
+    List<KeycloakRoleMapping> getGroupClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("client") String client
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles")
     @Headers("Content-Type: application/json")
@@ -82,23 +95,33 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/users/{id}/role-mappings/clients/{client}")
     @Headers("Content-Type: application/json")
-    List<KeycloakRoleMapping> addUserClientRoleMapping(@PathVariable("id") String id,
-                                                       @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+    List<KeycloakRoleMapping> addUserClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("client") String client,
+        @RequestBody List<KeycloakRoleMapping> roles
+    );
 
     @RequestMapping(method = RequestMethod.POST, value = "/groups/{id}/role-mappings/clients/{client}")
     @Headers("Content-Type: application/json")
-    List<KeycloakRoleMapping> addGroupClientRoleMapping(@PathVariable("id") String id,
-                                                        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+    List<KeycloakRoleMapping> addGroupClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("client") String client,
+        @RequestBody List<KeycloakRoleMapping> roles
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/users")
     @Headers("Content-Type: application/json")
-    List<KeycloakUser> getUsersClientRoleMapping(@PathVariable("id") String id,
-                                                 @PathVariable("role-name") String roleName);
+    List<KeycloakUser> getUsersClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("role-name") String roleName
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/groups")
     @Headers("Content-Type: application/json")
-    List<KeycloakGroup> getGroupsClientRoleMapping(@PathVariable("id") String id,
-                                                   @PathVariable("role-name") String roleName);
+    List<KeycloakGroup> getGroupsClientRoleMapping(
+        @PathVariable("id") String id,
+        @PathVariable("role-name") String roleName
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{groupId}/members")
     @Headers("Content-Type: application/json")

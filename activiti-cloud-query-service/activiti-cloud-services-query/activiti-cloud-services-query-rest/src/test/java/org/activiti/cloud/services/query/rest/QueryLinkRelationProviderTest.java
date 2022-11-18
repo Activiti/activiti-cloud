@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.query.model.ActivitiEntityMetadata;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
@@ -25,8 +27,6 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.LinkRelation;
 import org.springframework.hateoas.server.LinkRelationProvider;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class QueryLinkRelationProviderTest {
 
@@ -143,7 +143,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessDefinitionEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessDefinitionEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(ProcessDefinitionEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -152,7 +154,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessInstanceEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessInstanceEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(ProcessInstanceEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -170,7 +174,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldSupportProcessVariableEntity() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ProcessVariableEntity.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(ProcessVariableEntity.class)
+        );
 
         //then
         assertThat(supports).isTrue();
@@ -188,7 +194,9 @@ public class QueryLinkRelationProviderTest {
     @Test
     public void shouldNotSupportUncoveredClasses() {
         //when
-        boolean supports = relProvider.supports(LinkRelationProvider.LookupContext.forType(ActivitiEntityMetadata.class));
+        boolean supports = relProvider.supports(
+            LinkRelationProvider.LookupContext.forType(ActivitiEntityMetadata.class)
+        );
 
         //then
         assertThat(supports).isFalse();
@@ -202,5 +210,4 @@ public class QueryLinkRelationProviderTest {
         //then
         assertThat(supports).isTrue();
     }
-
 }

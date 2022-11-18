@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-
 import java.util.Optional;
 import org.activiti.cloud.services.modeling.rest.api.ModelsSchemaRestApi;
 import org.activiti.cloud.services.modeling.service.SchemaService;
@@ -37,7 +36,6 @@ public class ModelsSchemaController implements ModelsSchemaRestApi {
 
     @Override
     public ResponseEntity<String> getSchema(String modelType) {
-
         Optional<JSONObject> jsonSchema = schemaService.getJsonSchemaFromType(modelType);
         if (jsonSchema.isPresent()) {
             return new ResponseEntity<>(jsonSchema.get().toString(), HttpStatus.OK);

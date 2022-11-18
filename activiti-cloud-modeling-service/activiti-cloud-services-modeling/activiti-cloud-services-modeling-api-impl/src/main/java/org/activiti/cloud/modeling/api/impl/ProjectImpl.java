@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.modeling.api.impl;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Implementation for {@link Project}
@@ -47,12 +47,9 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Schema(description = "The configuration of the project")
     private ProjectConfiguration configuration;
 
-    public ProjectImpl() {
+    public ProjectImpl() {}
 
-    }
-
-    public ProjectImpl(String id,
-                       String name) {
+    public ProjectImpl(String id, String name) {
         this.id = id;
         this.name = name;
     }

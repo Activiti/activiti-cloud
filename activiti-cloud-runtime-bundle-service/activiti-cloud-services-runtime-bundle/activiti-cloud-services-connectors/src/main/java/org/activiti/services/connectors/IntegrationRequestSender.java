@@ -23,26 +23,28 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 public class IntegrationRequestSender {
+
     public static final String CONNECTOR_TYPE = "connectorType";
 
     private final BinderAwareChannelResolver resolver;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
-    public IntegrationRequestSender(BinderAwareChannelResolver resolver,
-                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+    public IntegrationRequestSender(
+        BinderAwareChannelResolver resolver,
+        IntegrationContextMessageBuilderFactory messageBuilderFactory
+    ) {
         this.resolver = resolver;
         this.messageBuilderFactory = messageBuilderFactory;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
-        resolver.resolveDestination(event.getIntegrationContext()
-                                         .getConnectorType()).send(buildIntegrationRequestMessage(event));
+        resolver
+            .resolveDestination(event.getIntegrationContext().getConnectorType())
+            .send(buildIntegrationRequestMessage(event));
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
-        return messageBuilderFactory.create(event.getIntegrationContext())
-                .withPayload(event)
-                .build();
+        return messageBuilderFactory.create(event.getIntegrationContext()).withPayload(event).build();
     }
 }

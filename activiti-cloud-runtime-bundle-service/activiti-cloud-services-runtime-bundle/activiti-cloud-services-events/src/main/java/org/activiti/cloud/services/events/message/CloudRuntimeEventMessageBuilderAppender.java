@@ -21,9 +21,9 @@ import org.springframework.util.Assert;
 
 public class CloudRuntimeEventMessageBuilderAppender implements MessageBuilderAppender {
 
-    private final CloudRuntimeEvent<?,?> event;
+    private final CloudRuntimeEvent<?, ?> event;
 
-    public CloudRuntimeEventMessageBuilderAppender(CloudRuntimeEvent<?,?> event) {
+    public CloudRuntimeEventMessageBuilderAppender(CloudRuntimeEvent<?, ?> event) {
         Assert.notNull(event, "event must not be null");
 
         this.event = event;
@@ -33,13 +33,12 @@ public class CloudRuntimeEventMessageBuilderAppender implements MessageBuilderAp
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
 
-        return request.setHeader(CloudRuntimeEventMessageHeaders.EVENT_TYPE, event.getEventType().name())
-                .setHeader(CloudRuntimeEventMessageHeaders.BUSINESS_KEY, event.getBusinessKey())
-                .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_DEFINITION_KEY, event.getProcessDefinitionKey())
-                .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_DEFINITION_VERSION, event.getProcessDefinitionVersion())
-                .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_INSTANCE_ID, event.getProcessInstanceId())
-                .setHeader(CloudRuntimeEventMessageHeaders.PARENT_PROCESS_INSTANCE_ID, event.getParentProcessInstanceId())
-       ;
+        return request
+            .setHeader(CloudRuntimeEventMessageHeaders.EVENT_TYPE, event.getEventType().name())
+            .setHeader(CloudRuntimeEventMessageHeaders.BUSINESS_KEY, event.getBusinessKey())
+            .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_DEFINITION_KEY, event.getProcessDefinitionKey())
+            .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_DEFINITION_VERSION, event.getProcessDefinitionVersion())
+            .setHeader(CloudRuntimeEventMessageHeaders.PROCESS_INSTANCE_ID, event.getProcessInstanceId())
+            .setHeader(CloudRuntimeEventMessageHeaders.PARENT_PROCESS_INSTANCE_ID, event.getParentProcessInstanceId());
     }
-
 }

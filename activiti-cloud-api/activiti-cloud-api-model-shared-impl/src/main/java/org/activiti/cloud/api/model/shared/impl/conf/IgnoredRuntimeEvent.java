@@ -18,9 +18,9 @@ package org.activiti.cloud.api.model.shared.impl.conf;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-
-public class IgnoredRuntimeEvent extends CloudRuntimeEventImpl<Void, IgnoredRuntimeEvent.IgnoredRuntimeEvents>
-        implements CloudRuntimeEvent<Void,IgnoredRuntimeEvent.IgnoredRuntimeEvents> {
+public class IgnoredRuntimeEvent
+    extends CloudRuntimeEventImpl<Void, IgnoredRuntimeEvent.IgnoredRuntimeEvents>
+    implements CloudRuntimeEvent<Void, IgnoredRuntimeEvent.IgnoredRuntimeEvents> {
 
     public enum IgnoredRuntimeEvents {
         IGNORED

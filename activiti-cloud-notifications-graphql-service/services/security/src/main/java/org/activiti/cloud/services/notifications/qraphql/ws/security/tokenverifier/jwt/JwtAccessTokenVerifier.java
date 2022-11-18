@@ -20,10 +20,10 @@ import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.authentication.BadCredentialsException;
 
 public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
 
@@ -31,9 +31,11 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     private final JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter;
     private final JwtDecoder jwtDecoder;
 
-    public JwtAccessTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
-                                  JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                  JwtDecoder jwtDecoder) {
+    public JwtAccessTokenVerifier(
+        JwtAccessTokenValidator jwtAccessTokenValidator,
+        JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+        JwtDecoder jwtDecoder
+    ) {
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
         this.jwtDecoder = jwtDecoder;
@@ -42,8 +44,10 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     @Override
     public GraphQLAccessToken verifyToken(String tokenString) {
         Jwt jwt = jwtDecoder.decode(tokenString);
-        if(jwtAccessTokenValidator.isValid(jwt)) {
-            JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(jwt);
+        if (jwtAccessTokenValidator.isValid(jwt)) {
+            JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(
+                jwt
+            );
             return new GraphQLAccessToken(
                 accessToken.getName(),
                 Set.copyOf(jwt.getClaimAsStringList("role")),
@@ -52,7 +56,5 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
         } else {
             throw new BadCredentialsException("Invalid JWT token");
         }
-
     }
-
 }

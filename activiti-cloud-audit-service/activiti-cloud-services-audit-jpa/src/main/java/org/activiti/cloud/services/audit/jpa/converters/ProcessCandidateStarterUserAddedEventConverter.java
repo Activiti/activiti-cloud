@@ -36,15 +36,19 @@ public class ProcessCandidateStarterUserAddedEventConverter extends BaseEventToE
 
     @Override
     public ProcessCandidateStarterUserAddedEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new ProcessCandidateStarterUserAddedEventEntity((CloudProcessCandidateStarterUserAddedEvent) cloudRuntimeEvent);
+        return new ProcessCandidateStarterUserAddedEventEntity(
+            (CloudProcessCandidateStarterUserAddedEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessCandidateStarterUserAddedEventEntity eventEntity = (ProcessCandidateStarterUserAddedEventEntity) auditEventEntity;
 
-        return new CloudProcessCandidateStarterUserAddedEventImpl(eventEntity.getEventId(),
-                                                        eventEntity.getTimestamp(),
-                                                        eventEntity.getCandidateStarterUser());
+        return new CloudProcessCandidateStarterUserAddedEventImpl(
+            eventEntity.getEventId(),
+            eventEntity.getTimestamp(),
+            eventEntity.getCandidateStarterUser()
+        );
     }
 }

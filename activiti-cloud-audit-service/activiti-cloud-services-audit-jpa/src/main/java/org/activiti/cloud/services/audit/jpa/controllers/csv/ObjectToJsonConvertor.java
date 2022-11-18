@@ -47,6 +47,7 @@ public class ObjectToJsonConvertor extends AbstractBeanField {
     }
 
     class ObjectToJsonConversionException extends RuntimeException {
+
         ObjectToJsonConversionException(String message) {
             super(message);
         }

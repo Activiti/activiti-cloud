@@ -21,9 +21,7 @@ public class QueryException extends RuntimeException {
         super(message);
     }
 
-    public QueryException(String message,
-                          Throwable cause) {
-        super(message,
-              cause);
+    public QueryException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

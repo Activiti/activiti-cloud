@@ -97,17 +97,51 @@ public class ProcessDeletedEventHandlerTest {
 
         assertThat(processInstanceRepository.existsById(completedProcessId)).isTrue();
         assertThat(taskRepository.exists(QTaskEntity.taskEntity.processInstanceId.eq(completedProcessId))).isTrue();
-        assertThat(serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(completedProcessId))).isTrue();
-        assertThat(variableRepository.exists(QProcessVariableEntity.processVariableEntity.processInstanceId.eq(completedProcessId))).isTrue();
-        assertThat(bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(completedProcessId))).isTrue();
-        assertThat(bpmnSequenceFlowRepository.exists(QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(completedProcessId))).isTrue();
+        assertThat(
+            serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(completedProcessId))
+        )
+            .isTrue();
+        assertThat(
+            variableRepository.exists(
+                QProcessVariableEntity.processVariableEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isTrue();
+        assertThat(
+            bpmnActivityRepository.exists(
+                QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isTrue();
+        assertThat(
+            bpmnSequenceFlowRepository.exists(
+                QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isTrue();
 
         assertThat(processInstanceRepository.existsById(runningProcessId)).isTrue();
         assertThat(taskRepository.exists(QTaskEntity.taskEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(variableRepository.exists(QProcessVariableEntity.processVariableEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(bpmnSequenceFlowRepository.exists(QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(runningProcessId))).isTrue();
+        assertThat(
+            serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(runningProcessId))
+        )
+            .isTrue();
+        assertThat(
+            variableRepository.exists(
+                QProcessVariableEntity.processVariableEntity.processInstanceId.eq(runningProcessId)
+            )
+        )
+            .isTrue();
+        assertThat(
+            bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(runningProcessId))
+        )
+            .isTrue();
+        assertThat(
+            bpmnSequenceFlowRepository.exists(
+                QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(runningProcessId)
+            )
+        )
+            .isTrue();
     }
 
     @AfterEach
@@ -134,17 +168,51 @@ public class ProcessDeletedEventHandlerTest {
         //then
         assertThat(processInstanceRepository.existsById(completedProcessId)).isFalse();
         assertThat(taskRepository.exists(QTaskEntity.taskEntity.processInstanceId.eq(completedProcessId))).isFalse();
-        assertThat(serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(completedProcessId))).isFalse();
-        assertThat(variableRepository.exists(QProcessVariableEntity.processVariableEntity.processInstanceId.eq(completedProcessId))).isFalse();
-        assertThat(bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(completedProcessId))).isFalse();
-        assertThat(bpmnSequenceFlowRepository.exists(QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(completedProcessId))).isFalse();
+        assertThat(
+            serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(completedProcessId))
+        )
+            .isFalse();
+        assertThat(
+            variableRepository.exists(
+                QProcessVariableEntity.processVariableEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isFalse();
+        assertThat(
+            bpmnActivityRepository.exists(
+                QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isFalse();
+        assertThat(
+            bpmnSequenceFlowRepository.exists(
+                QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(completedProcessId)
+            )
+        )
+            .isFalse();
 
         assertThat(processInstanceRepository.existsById(runningProcessId)).isTrue();
         assertThat(taskRepository.exists(QTaskEntity.taskEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(variableRepository.exists(QProcessVariableEntity.processVariableEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(runningProcessId))).isTrue();
-        assertThat(bpmnSequenceFlowRepository.exists(QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(runningProcessId))).isTrue();
+        assertThat(
+            serviceTaskRepository.exists(QServiceTaskEntity.serviceTaskEntity.processInstanceId.eq(runningProcessId))
+        )
+            .isTrue();
+        assertThat(
+            variableRepository.exists(
+                QProcessVariableEntity.processVariableEntity.processInstanceId.eq(runningProcessId)
+            )
+        )
+            .isTrue();
+        assertThat(
+            bpmnActivityRepository.exists(QBPMNActivityEntity.bPMNActivityEntity.processInstanceId.eq(runningProcessId))
+        )
+            .isTrue();
+        assertThat(
+            bpmnSequenceFlowRepository.exists(
+                QBPMNSequenceFlowEntity.bPMNSequenceFlowEntity.processInstanceId.eq(runningProcessId)
+            )
+        )
+            .isTrue();
     }
 
     @Test
@@ -158,7 +226,11 @@ public class ProcessDeletedEventHandlerTest {
         //when
         assertThatExceptionOfType(IllegalStateException.class)
             .isThrownBy(() -> handler.handle(event))
-            .withMessage(handler.INVALID_PROCESS_INSTANCE_STATE, eventProcessInstance.getId(), ProcessInstanceStatus.RUNNING.name());
+            .withMessage(
+                handler.INVALID_PROCESS_INSTANCE_STATE,
+                eventProcessInstance.getId(),
+                ProcessInstanceStatus.RUNNING.name()
+            );
 
         assertThat(processInstanceRepository.existsById(completedProcessId)).isTrue();
         assertThat(processInstanceRepository.existsById(runningProcessId)).isTrue();
@@ -200,16 +272,47 @@ public class ProcessDeletedEventHandlerTest {
         processInstance.getVariables().add(buildProcessVariableEntity(id + "_Var_B", processInstance));
         processInstance.getVariables().add(buildProcessVariableEntity(id + "_Var_C", processInstance));
 
-        processInstance.getActivities().add(buildBPMNActivityEntity(UUID.randomUUID().toString(), "MyApp", "My_Test_Application",
-            "1", "MyAppName","2", processInstance));
+        processInstance
+            .getActivities()
+            .add(
+                buildBPMNActivityEntity(
+                    UUID.randomUUID().toString(),
+                    "MyApp",
+                    "My_Test_Application",
+                    "1",
+                    "MyAppName",
+                    "2",
+                    processInstance
+                )
+            );
 
-        processInstance.getServiceTasks().add(
-            buildServiceTaskEntity(UUID.randomUUID().toString(), "MyApp", "My_Test_Application", "1", "MyAppName",
-                "2", processInstance));
+        processInstance
+            .getServiceTasks()
+            .add(
+                buildServiceTaskEntity(
+                    UUID.randomUUID().toString(),
+                    "MyApp",
+                    "My_Test_Application",
+                    "1",
+                    "MyAppName",
+                    "2",
+                    processInstance
+                )
+            );
 
-        processInstance.getSequenceFlows().add(
-            buildBPMNSequenceFlowEntity(UUID.randomUUID().toString(), "MyApp", "My_Test_Application", "1",
-                "MyAppName", "2", processInstance));
+        processInstance
+            .getSequenceFlows()
+            .add(
+                buildBPMNSequenceFlowEntity(
+                    UUID.randomUUID().toString(),
+                    "MyApp",
+                    "My_Test_Application",
+                    "1",
+                    "MyAppName",
+                    "2",
+                    processInstance
+                )
+            );
 
         processInstanceRepository.save(processInstance);
     }
@@ -236,27 +339,65 @@ public class ProcessDeletedEventHandlerTest {
         return variableRepository.save(processVariableEntity);
     }
 
-    private BPMNActivityEntity buildBPMNActivityEntity(String id, String serviceName, String serviceFullName, String serviceVersion, String appName,
-        String appVersion, ProcessInstanceEntity processInstance) {
-        BPMNActivityEntity bpmnActivityEntity = new BPMNActivityEntity(serviceName, serviceFullName, serviceVersion, appName, appVersion);
+    private BPMNActivityEntity buildBPMNActivityEntity(
+        String id,
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        ProcessInstanceEntity processInstance
+    ) {
+        BPMNActivityEntity bpmnActivityEntity = new BPMNActivityEntity(
+            serviceName,
+            serviceFullName,
+            serviceVersion,
+            appName,
+            appVersion
+        );
         bpmnActivityEntity.setId(id);
         bpmnActivityEntity.setProcessInstanceId(processInstance.getId());
         return bpmnActivityRepository.save(bpmnActivityEntity);
     }
 
-    private ServiceTaskEntity buildServiceTaskEntity(String id, String serviceName, String serviceFullName, String serviceVersion, String appName,
-        String appVersion, ProcessInstanceEntity processInstance) {
-
-        ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(serviceName, serviceFullName, serviceVersion, appName, appVersion);
+    private ServiceTaskEntity buildServiceTaskEntity(
+        String id,
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        ProcessInstanceEntity processInstance
+    ) {
+        ServiceTaskEntity serviceTaskEntity = new ServiceTaskEntity(
+            serviceName,
+            serviceFullName,
+            serviceVersion,
+            appName,
+            appVersion
+        );
         serviceTaskEntity.setId(id);
         serviceTaskEntity.setProcessInstanceId(processInstance.getId());
         serviceTaskEntity.setActivityType("serviceTask");
         return serviceTaskRepository.save(serviceTaskEntity);
     }
 
-    private BPMNSequenceFlowEntity buildBPMNSequenceFlowEntity(String id, String serviceName, String serviceFullName, String serviceVersion, String appName,
-        String appVersion, ProcessInstanceEntity processInstance) {
-        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(serviceName, serviceFullName, serviceVersion, appName, appVersion);
+    private BPMNSequenceFlowEntity buildBPMNSequenceFlowEntity(
+        String id,
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        ProcessInstanceEntity processInstance
+    ) {
+        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(
+            serviceName,
+            serviceFullName,
+            serviceVersion,
+            appName,
+            appVersion
+        );
         bpmnSequenceFlowEntity.setId(id);
         bpmnSequenceFlowEntity.setProcessInstanceId(processInstance.getId());
         return bpmnSequenceFlowRepository.save(bpmnSequenceFlowEntity);

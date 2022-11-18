@@ -32,18 +32,12 @@ public class IntegrationErrorSender {
         this.resolver = resolver;
     }
 
-    public void send(IntegrationRequest integrationRequest,
-                     Exception error) {
-        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(integrationRequest,
-                                                                          error);
-        Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationResult)
-            .build();
+    public void send(IntegrationRequest integrationRequest, Exception error) {
+        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(integrationRequest, error);
+        Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getErrorDestination();
 
-        resolver
-            .resolveDestination(destination)
-            .send(message);
+        resolver.resolveDestination(destination).send(message);
     }
-
 }

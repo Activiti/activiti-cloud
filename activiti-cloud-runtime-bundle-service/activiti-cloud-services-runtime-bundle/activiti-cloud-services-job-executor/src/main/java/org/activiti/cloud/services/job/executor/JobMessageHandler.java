@@ -27,7 +27,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-public class JobMessageHandler  implements MessageHandler {
+public class JobMessageHandler implements MessageHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(JobMessageHandler.class);
 
@@ -42,14 +42,13 @@ public class JobMessageHandler  implements MessageHandler {
         logger.debug("Handling job message: {} ", message);
 
         try {
-
             String jobId = new String((byte[]) message.getPayload());
 
             logger.info("Received job message with id: " + jobId);
 
             JobEntity job = findJobById(jobId);
 
-            if(job != null) {
+            if (job != null) {
                 logger.debug("Found existing job: {}", job);
 
                 executeJob(job);
@@ -58,7 +57,6 @@ public class JobMessageHandler  implements MessageHandler {
             } else {
                 logger.info("Job " + jobId + " does not exist. Job message has been dropped.");
             }
-
         } catch (Exception cause) {
             logger.error("Exception '{}' when handling job message {}", cause.getMessage(), message);
 
@@ -67,20 +65,21 @@ public class JobMessageHandler  implements MessageHandler {
     }
 
     public JobEntity findJobById(String jobId) {
-        return processEngineConfiguration.getCommandExecutor()
-                                         .execute(new Command<JobEntity>() {
-                                             @Override
-                                             public JobEntity execute(CommandContext commandContext) {
-                                                 return commandContext.getJobEntityManager().findById(jobId);
-                                             }
-                                         });
+        return processEngineConfiguration
+            .getCommandExecutor()
+            .execute(
+                new Command<JobEntity>() {
+                    @Override
+                    public JobEntity execute(CommandContext commandContext) {
+                        return commandContext.getJobEntityManager().findById(jobId);
+                    }
+                }
+            );
     }
 
     public void executeJob(JobEntity job) {
-        ExecuteAsyncRunnable executeAsyncRunnable = new ExecuteAsyncRunnable(job,
-                                                                             processEngineConfiguration);
+        ExecuteAsyncRunnable executeAsyncRunnable = new ExecuteAsyncRunnable(job, processEngineConfiguration);
 
         executeAsyncRunnable.run();
     }
-
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.ws.config;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -76,9 +75,7 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
     @PropertySource("classpath:META-INF/graphql-ws.properties")
     @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true)
     @EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
-    public static class AutoConfiguration {
-
-    }
+    public static class AutoConfiguration {}
 
     public Boolean isEnabled() {
         return enabled;
@@ -136,16 +133,13 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
         this.allowedOrigins = allowedOrigins;
     }
 
-
     public Integer getBufferCount() {
         return bufferCount;
     }
 
-
     public void setBufferCount(Integer bufferCount) {
         this.bufferCount = bufferCount;
     }
-
 
     public Integer getBufferTimeSpanMs() {
         return bufferTimeSpanMs;

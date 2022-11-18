@@ -15,7 +15,20 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.List;
+import javax.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -43,26 +56,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-import java.util.List;
-
-import static org.activiti.cloud.services.query.rest.ProcessDefinitionBuilder.buildDefaultProcessDefinition;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessDefinitionController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -115,20 +112,16 @@ public class ProcessDefinitionControllerIT {
         //given
         Predicate predicate = mock(Predicate.class);
         given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
-        PageRequest pageRequest = PageRequest.of(0,
-                                                 10);
-        given(processDefinitionRepository.findAll(predicate,
-                                                  pageRequest))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           pageRequest,
-                                           1));
+            .willReturn(predicate);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        given(processDefinitionRepository.findAll(predicate, pageRequest))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), pageRequest, 1));
 
         //when
-        mockMvc.perform(get("/v1/process-definitions?page=0&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -136,17 +129,16 @@ public class ProcessDefinitionControllerIT {
         //given
         Predicate predicate = mock(Predicate.class);
         given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
+            .willReturn(predicate);
         given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
-                                           PageRequest.of(1,10),
-                                           11));
+            .willReturn(
+                new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()), PageRequest.of(1, 10), 11)
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk());
     }
-
 }

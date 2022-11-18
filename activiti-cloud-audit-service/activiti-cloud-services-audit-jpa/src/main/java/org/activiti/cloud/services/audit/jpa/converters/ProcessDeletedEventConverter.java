@@ -42,7 +42,10 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
     private final EventsRepository eventsRepository;
 
-    public ProcessDeletedEventConverter(EventsRepository eventsRepository, EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessDeletedEventConverter(
+        EventsRepository eventsRepository,
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         super(eventContextInfoAppender);
         this.eventsRepository = eventsRepository;
     }
@@ -62,16 +65,21 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessDeletedAuditEventEntity processDeletedAuditEventEntity = (ProcessDeletedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessDeletedEventImpl(processDeletedAuditEventEntity.getEventId(),
+        return new CloudProcessDeletedEventImpl(
+            processDeletedAuditEventEntity.getEventId(),
             processDeletedAuditEventEntity.getTimestamp(),
-            processDeletedAuditEventEntity.getProcessInstance());
+            processDeletedAuditEventEntity.getProcessInstance()
+        );
     }
 
     protected ProcessAuditEventEntity findEvent(String processInstanceId) {
-        Specification<AuditEventEntity> specification = new EventSpecificationsBuilder().with(
-            new SpecSearchCriteria(PROCESS_INSTANCE_ID, SearchOperation.EQUALITY, processInstanceId)).build();
+        Specification<AuditEventEntity> specification = new EventSpecificationsBuilder()
+            .with(new SpecSearchCriteria(PROCESS_INSTANCE_ID, SearchOperation.EQUALITY, processInstanceId))
+            .build();
         List<AuditEventEntity> events = eventsRepository.findAll(specification, Sort.by(Order.desc(TIMESTAMP)));
-        AuditEventEntity lastEvent = events.stream().findFirst()
+        AuditEventEntity lastEvent = events
+            .stream()
+            .findFirst()
             .orElseThrow(() -> new IllegalStateException(String.format(MISSING_PROCESS_INSTANCE, processInstanceId)));
         return ProcessAuditEventEntity.class.cast(lastEvent);
     }

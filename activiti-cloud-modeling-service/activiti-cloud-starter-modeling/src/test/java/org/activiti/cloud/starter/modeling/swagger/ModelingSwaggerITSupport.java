@@ -45,13 +45,15 @@ public class ModelingSwaggerITSupport {
      */
     @Test
     public void generateSwagger() throws Exception {
-        mockMvc.perform(get("/v3/api-docs/Modeling").accept(MediaType.APPLICATION_JSON))
-            .andDo((result) -> {
+        mockMvc
+            .perform(get("/v3/api-docs/Modeling").accept(MediaType.APPLICATION_JSON))
+            .andDo(result -> {
                 JsonNode jsonNodeTree = objectMapper.readTree(result.getResponse().getContentAsByteArray());
-                Files.write(new File("target/swagger.json").toPath(),
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree));
-                Files.write(new File("target/swagger.yaml").toPath(),
-                    new YAMLMapper().writeValueAsBytes(jsonNodeTree));
+                Files.write(
+                    new File("target/swagger.json").toPath(),
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(jsonNodeTree)
+                );
+                Files.write(new File("target/swagger.yaml").toPath(), new YAMLMapper().writeValueAsBytes(jsonNodeTree));
             });
     }
 }

@@ -17,6 +17,11 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -36,8 +41,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,17 +50,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = RuntimeITConfiguration.class,
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class TaskVariablesIT {
 
     @Autowired
@@ -92,10 +93,11 @@ public class TaskVariablesIT {
     public void shouldRetrieveTaskVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
-        variables.put("var1",
-            "test1");
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            variables);
+        variables.put("var1", "test1");
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            variables
+        );
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -105,7 +107,9 @@ public class TaskVariablesIT {
         taskRestTemplate.createVariable(taskId, "var2", "test2");
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(
+            taskId
+        );
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -146,18 +150,17 @@ public class TaskVariablesIT {
         assertThat(variablesContainEntry("var2", "test2-update", variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var1", "test1", variablesResponse.getBody().getContent())).isTrue();
         assertThat(variablesContainEntry("var3", "test3-update", variablesResponse.getBody().getContent())).isTrue();
-
-
     }
 
     @Test
     public void adminShouldSetGetUpdateTaskVariables() {
         //given
         Map<String, Object> variables = new HashMap<>();
-        variables.put("var1",
-            "test1");
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            variables);
+        variables.put("var1", "test1");
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            variables
+        );
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -166,7 +169,9 @@ public class TaskVariablesIT {
         taskRestTemplate.adminCreateVariable(taskId, "var2", "test2");
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(
+            taskId
+        );
 
         //then
         assertThat(variablesResponse).isNotNull();
@@ -204,8 +209,10 @@ public class TaskVariablesIT {
         //given
         Date date = new Date();
 
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            null);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            null
+        );
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
@@ -216,12 +223,28 @@ public class TaskVariablesIT {
         taskRestTemplate.createVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(
+            taskId
+        );
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("variableDateTime", variablesUtil.getExpectedDateTimeFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("variableDate", variablesUtil.getExpectedDateFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
+        assertThat(
+            variablesContainEntry(
+                "variableDateTime",
+                variablesUtil.getExpectedDateTimeFormattedString(date),
+                variablesResponse.getBody().getContent()
+            )
+        )
+            .isTrue();
+        assertThat(
+            variablesContainEntry(
+                "variableDate",
+                variablesUtil.getExpectedDateFormattedString(date),
+                variablesResponse.getBody().getContent()
+            )
+        )
+            .isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
@@ -239,28 +262,54 @@ public class TaskVariablesIT {
         //given
         Date date = new Date();
 
-        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            null);
+        ResponseEntity<CloudProcessInstance> startResponse = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            null
+        );
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startResponse);
 
         String taskId = tasks.getBody().getContent().iterator().next().getId();
 
         identityTokenProducer.withTestUser("testadmin");
 
-        taskRestTemplate.adminCreateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.adminCreateVariable(
+            taskId,
+            "variableDateTime",
+            variablesUtil.getDateTimeFormattedString(date)
+        );
         taskRestTemplate.adminCreateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
         //when
-        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(taskId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.adminGetVariables(
+            taskId
+        );
 
         //then
         assertThat(variablesResponse).isNotNull();
-        assertThat(variablesContainEntry("variableDateTime", variablesUtil.getExpectedDateTimeFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
-        assertThat(variablesContainEntry("variableDate", variablesUtil.getExpectedDateFormattedString(date), variablesResponse.getBody().getContent())).isTrue();
+        assertThat(
+            variablesContainEntry(
+                "variableDateTime",
+                variablesUtil.getExpectedDateTimeFormattedString(date),
+                variablesResponse.getBody().getContent()
+            )
+        )
+            .isTrue();
+        assertThat(
+            variablesContainEntry(
+                "variableDate",
+                variablesUtil.getExpectedDateFormattedString(date),
+                variablesResponse.getBody().getContent()
+            )
+        )
+            .isTrue();
 
         // when
         date = new Date(date.getTime() + 3600000);
-        taskRestTemplate.adminUpdateVariable(taskId, "variableDateTime", variablesUtil.getDateTimeFormattedString(date));
+        taskRestTemplate.adminUpdateVariable(
+            taskId,
+            "variableDateTime",
+            variablesUtil.getDateTimeFormattedString(date)
+        );
         taskRestTemplate.adminUpdateVariable(taskId, "variableDate", variablesUtil.getDateFormattedString(date));
 
         // when
@@ -269,7 +318,11 @@ public class TaskVariablesIT {
         processInstanceRestTemplate.adminDelete(startResponse);
     }
 
-    private boolean variablesContainEntry(String key, Object value, Collection<CloudVariableInstance> variableCollection) {
+    private boolean variablesContainEntry(
+        String key,
+        Object value,
+        Collection<CloudVariableInstance> variableCollection
+    ) {
         Iterator<CloudVariableInstance> iterator = variableCollection.iterator();
         while (iterator.hasNext()) {
             VariableInstance variable = iterator.next();
@@ -287,11 +340,7 @@ public class TaskVariablesIT {
     }
 
     private ResponseEntity<PagedModel<CloudProcessDefinition>> getProcessDefinitions() {
-        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {
-        };
-        return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL,
-            HttpMethod.GET,
-            null,
-            responseType);
+        ParameterizedTypeReference<PagedModel<CloudProcessDefinition>> responseType = new ParameterizedTypeReference<PagedModel<CloudProcessDefinition>>() {};
+        return restTemplate.exchange(ProcessDefinitionIT.PROCESS_DEFINITIONS_URL, HttpMethod.GET, null, responseType);
     }
 }

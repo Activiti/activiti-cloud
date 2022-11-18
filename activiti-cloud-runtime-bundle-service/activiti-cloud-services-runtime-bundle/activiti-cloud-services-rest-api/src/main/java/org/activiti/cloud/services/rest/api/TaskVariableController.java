@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -27,20 +29,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 public interface TaskVariableController {
-
     @GetMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable(value = "taskId") String taskId);
 
     @PostMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> createVariable(@PathVariable(value = "taskId") String taskId,
-        @RequestBody CreateTaskVariablePayload createTaskVariablePayload);
+    ResponseEntity<Void> createVariable(
+        @PathVariable(value = "taskId") String taskId,
+        @RequestBody CreateTaskVariablePayload createTaskVariablePayload
+    );
 
     @PutMapping(value = "/v1/tasks/{taskId}/variables/{variableName}", consumes = APPLICATION_JSON_VALUE)
-    ResponseEntity<Void> updateVariable(@PathVariable(value = "taskId") String taskId,
+    ResponseEntity<Void> updateVariable(
+        @PathVariable(value = "taskId") String taskId,
         @PathVariable(value = "variableName") String variableName,
-        @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload);
-
+        @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload
+    );
 }

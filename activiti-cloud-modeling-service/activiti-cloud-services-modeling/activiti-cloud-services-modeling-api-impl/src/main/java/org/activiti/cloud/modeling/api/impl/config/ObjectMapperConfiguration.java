@@ -19,12 +19,12 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ProjectConfiguration;
+import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectConfigurationImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
-import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -34,20 +34,16 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureBefore(JacksonAutoConfiguration.class)
 public class ObjectMapperConfiguration {
 
-  @Bean
-  public Module jsonModelingModuleImpl() {
-    SimpleModule module = new SimpleModule("jsonModelingModuleImpl",
-      Version.unknownVersion());
-    SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
+    @Bean
+    public Module jsonModelingModuleImpl() {
+        SimpleModule module = new SimpleModule("jsonModelingModuleImpl", Version.unknownVersion());
+        SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver();
 
-    resolver.addMapping(Project.class,
-      ProjectImpl.class);
-    resolver.addMapping(ProjectConfiguration.class,
-        ProjectConfigurationImpl.class);
-    resolver.addMapping(Model.class,
-      ModelImpl.class);
+        resolver.addMapping(Project.class, ProjectImpl.class);
+        resolver.addMapping(ProjectConfiguration.class, ProjectConfigurationImpl.class);
+        resolver.addMapping(Model.class, ModelImpl.class);
 
-    module.setAbstractTypes(resolver);
-    return module;
-  }
+        module.setAbstractTypes(resolver);
+        return module;
+    }
 }

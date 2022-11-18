@@ -16,15 +16,15 @@
 package org.activiti.cloud.api.process.model;
 
 import java.util.Date;
-
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
-public interface CloudBPMNActivity extends CloudRuntimeEntity,
-        BPMNActivity {
-
+public interface CloudBPMNActivity extends CloudRuntimeEntity, BPMNActivity {
     public static enum BPMNActivityStatus {
-        STARTED, COMPLETED, CANCELLED, ERROR
+        STARTED,
+        COMPLETED,
+        CANCELLED,
+        ERROR
     }
 
     String getId();
@@ -42,5 +42,4 @@ public interface CloudBPMNActivity extends CloudRuntimeEntity,
     Date getCompletedDate();
 
     Date getCancelledDate();
-
 }

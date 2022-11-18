@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
-
-import javax.persistence.EntityManager;
 
 public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
 
@@ -37,12 +36,13 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
         org.activiti.api.task.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
 
         try {
-            TaskCandidateUserEntity entity = new TaskCandidateUserEntity(taskCandidateUser.getTaskId(),
-                                                                         taskCandidateUser.getUserId());
+            TaskCandidateUserEntity entity = new TaskCandidateUserEntity(
+                taskCandidateUser.getTaskId(),
+                taskCandidateUser.getUserId()
+            );
             entityManager.persist(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]", cause);
         }
     }
 

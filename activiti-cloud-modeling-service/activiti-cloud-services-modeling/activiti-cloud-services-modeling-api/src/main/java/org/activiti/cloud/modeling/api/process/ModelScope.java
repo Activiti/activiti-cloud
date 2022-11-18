@@ -16,5 +16,6 @@
 package org.activiti.cloud.modeling.api.process;
 
 public enum ModelScope {
-    PROJECT,GLOBAL
+    PROJECT,
+    GLOBAL
 }

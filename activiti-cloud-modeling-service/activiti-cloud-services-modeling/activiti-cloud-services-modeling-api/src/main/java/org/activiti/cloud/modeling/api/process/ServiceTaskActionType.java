@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Optional;
 
 /**
  * Extensions service task action types
@@ -29,10 +28,7 @@ public enum ServiceTaskActionType {
 
     @JsonCreator
     public static ServiceTaskActionType fromValue(String value) {
-        return Optional.ofNullable(value)
-                .map(String::toUpperCase)
-                .map(ServiceTaskActionType::valueOf)
-                .orElse(null);
+        return Optional.ofNullable(value).map(String::toUpperCase).map(ServiceTaskActionType::valueOf).orElse(null);
     }
 
     @JsonValue

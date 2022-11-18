@@ -41,5 +41,4 @@ public class TestProducerAutoConfiguration {
             return new MyProducer(producer);
         }
     }
-
 }

@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.util.Date;
-
-import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
-import org.junit.jupiter.api.Test;
-
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
+
+import java.util.Date;
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.services.audit.jpa.converters.json.ProcessInstanceJpaJsonConverter;
+import org.junit.jupiter.api.Test;
 
 public class ProcessInstanceJpaJsonConverterTest {
 
@@ -41,37 +40,40 @@ public class ProcessInstanceJpaJsonConverterTest {
         processInstance.setBusinessKey("business-key");
         processInstance.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
 
-
-
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(processInstance);
 
         //then
         assertThatJson(jsonRepresentation)
-                .node("name").isEqualTo("My instance")
-                .node("status").isEqualTo("RUNNING")
-                .node("processDefinitionId").isEqualTo("proc-def-id")
-                .node("businessKey").isEqualTo("business-key")
-                .node("id").isEqualTo("\"20\"");
+            .node("name")
+            .isEqualTo("My instance")
+            .node("status")
+            .isEqualTo("RUNNING")
+            .node("processDefinitionId")
+            .isEqualTo("proc-def-id")
+            .node("businessKey")
+            .isEqualTo("business-key")
+            .node("id")
+            .isEqualTo("\"20\"");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateAProcessInstanceWithFieldsSet() throws Exception {
         //given
         String jsonRepresentation =
-                "{\"id\":\"20\"," +
-                        "\"status\":\"RUNNING\"," +
-                        "\"name\":\"My instance\"," +
-                        "\"processDefinitionId\":\"proc-def-id\"}";
+            "{\"id\":\"20\"," +
+            "\"status\":\"RUNNING\"," +
+            "\"name\":\"My instance\"," +
+            "\"processDefinitionId\":\"proc-def-id\"}";
 
         //when
         ProcessInstance processInstance = converter.convertToEntityAttribute(jsonRepresentation);
 
         //then
         assertThat(processInstance)
-                .isNotNull()
-                .hasId("20")
-                .hasStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
-                .hasProcessDefinitionId("proc-def-id");
+            .isNotNull()
+            .hasId("20")
+            .hasStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
+            .hasProcessDefinitionId("proc-def-id");
     }
 }

@@ -20,21 +20,19 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.RabbitMQContainer;
 
-public class RabbitMQContainerApplicationInitializer implements
-        ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class RabbitMQContainerApplicationInitializer
+    implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
-            .withReuse(true);
+        .withReuse(true);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-
         if (!rabbitMQContainer.isRunning()) {
             rabbitMQContainer.start();
         }
 
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
-
     }
 
     public static RabbitMQContainer getContainer() {
@@ -44,6 +42,7 @@ public class RabbitMQContainerApplicationInitializer implements
     public static String[] getContainerProperties() {
         return new String[] {
             "spring.rabbitmq.host=" + rabbitMQContainer.getContainerIpAddress(),
-            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()};
+            "spring.rabbitmq.port=" + rabbitMQContainer.getAmqpPort()
+        };
     }
 }

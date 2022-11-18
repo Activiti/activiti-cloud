@@ -19,13 +19,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ProcessCandidateStarterGroupId implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String processDefinitionId;
     private String groupId;
 
-    public ProcessCandidateStarterGroupId() {
-    }
+    public ProcessCandidateStarterGroupId() {}
 
     public ProcessCandidateStarterGroupId(String processDefinitionId, String groupId) {
         this.processDefinitionId = processDefinitionId;
@@ -54,8 +54,6 @@ public class ProcessCandidateStarterGroupId implements Serializable {
             return false;
         }
         ProcessCandidateStarterGroupId other = (ProcessCandidateStarterGroupId) obj;
-        return Objects.equals(processDefinitionId, other.processDefinitionId) &&
-                Objects.equals(groupId, other.groupId);
+        return Objects.equals(processDefinitionId, other.processDefinitionId) && Objects.equals(groupId, other.groupId);
     }
-
 }

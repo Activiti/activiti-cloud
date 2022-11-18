@@ -20,21 +20,21 @@ import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 
-public class CloudProcessDeployedEventImpl extends CloudRuntimeEventImpl<ProcessDefinition, ProcessDefinitionEvent.ProcessDefinitionEvents> implements CloudProcessDeployedEvent {
+public class CloudProcessDeployedEventImpl
+    extends CloudRuntimeEventImpl<ProcessDefinition, ProcessDefinitionEvent.ProcessDefinitionEvents>
+    implements CloudProcessDeployedEvent {
 
     private String processModelContent;
 
-    public CloudProcessDeployedEventImpl() {
-    }
+    public CloudProcessDeployedEventImpl() {}
 
     public CloudProcessDeployedEventImpl(ProcessDefinition entity) {
         super(entity);
         setEntityId(entity.getId());
         setAppVersion(entity.getAppVersion());
     }
-    public CloudProcessDeployedEventImpl(String id,
-                                         Long timestamp,
-                                         ProcessDefinition entity) {
+
+    public CloudProcessDeployedEventImpl(String id, Long timestamp, ProcessDefinition entity) {
         super(id, timestamp, entity);
         setEntityId(entity.getId());
         setAppVersion(entity.getAppVersion());
@@ -53,5 +53,4 @@ public class CloudProcessDeployedEventImpl extends CloudRuntimeEventImpl<Process
     public void setProcessModelContent(String processModelContent) {
         this.processModelContent = processModelContent;
     }
-
 }

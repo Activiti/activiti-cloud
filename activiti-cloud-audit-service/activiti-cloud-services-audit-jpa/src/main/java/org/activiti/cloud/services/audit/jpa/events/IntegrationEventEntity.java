@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
-import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.MappedSuperclass;
+import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
+import org.activiti.cloud.services.audit.jpa.converters.json.IntegrationContextJpaJsonConverter;
 
 @MappedSuperclass
 public abstract class IntegrationEventEntity extends AuditEventEntity {
@@ -30,14 +29,12 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private IntegrationContext integrationContext;
 
-    IntegrationEventEntity() { }
+    IntegrationEventEntity() {}
 
     public IntegrationEventEntity(CloudIntegrationEvent event) {
         super(event);
-
         this.integrationContext = event.getEntity();
     }
-
 
     public IntegrationContext getIntegrationContext() {
         return integrationContext;
@@ -46,12 +43,12 @@ public abstract class IntegrationEventEntity extends AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("IntegrationEventEntity [integrationContext=")
-               .append(integrationContext)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("IntegrationEventEntity [integrationContext=")
+            .append(integrationContext)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

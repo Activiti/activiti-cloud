@@ -15,6 +15,16 @@
  */
 package org.activiti.services.connectors.behavior;
 
+import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
@@ -40,16 +50,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEventPublisher;
-
-import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MQServiceTaskBehaviorTest {
@@ -95,13 +95,18 @@ public class MQServiceTaskBehaviorTest {
 
     @BeforeEach
     public void setUp() {
-        behavior = spy(new MQServiceTaskBehavior(integrationContextManager,
-                                                 eventPublisher,
-                                                 integrationContextBuilder,
-            defaultServiceTaskBehavior,
-                                                 processEngineEventsAggregator,
-                                                 runtimeBundleProperties,
-            integrationRequestBuilder));
+        behavior =
+            spy(
+                new MQServiceTaskBehavior(
+                    integrationContextManager,
+                    eventPublisher,
+                    integrationContextBuilder,
+                    defaultServiceTaskBehavior,
+                    processEngineEventsAggregator,
+                    runtimeBundleProperties,
+                    integrationRequestBuilder
+                )
+            );
     }
 
     @Test
@@ -124,11 +129,11 @@ public class MQServiceTaskBehaviorTest {
         serviceTask.setImplementation(CONNECTOR_TYPE);
 
         DelegateExecution execution = anExecution()
-                .withId(EXECUTION_ID)
-                .withProcessInstanceId(PROC_INST_ID)
-                .withProcessDefinitionId(PROC_DEF_ID)
-                .withFlowNodeId(FLOW_NODE_ID)
-                .build();
+            .withId(EXECUTION_ID)
+            .withProcessInstanceId(PROC_INST_ID)
+            .withProcessDefinitionId(PROC_DEF_ID)
+            .withFlowNodeId(FLOW_NODE_ID)
+            .build();
         IntegrationContextEntityImpl entity = new IntegrationContextEntityImpl();
         entity.setId(INTEGRATION_CONTEXT_ID);
         given(integrationContextManager.create()).willReturn(entity);
@@ -144,14 +149,13 @@ public class MQServiceTaskBehaviorTest {
         ((ExecutionEntity) execution).getProcessInstance();
 
         assertThat(entity)
-                .hasExecutionId(EXECUTION_ID)
-                .hasProcessDefinitionId(PROC_DEF_ID)
-                .hasProcessInstanceId(PROC_INST_ID);
+            .hasExecutionId(EXECUTION_ID)
+            .hasProcessDefinitionId(PROC_DEF_ID)
+            .hasProcessInstanceId(PROC_INST_ID);
 
         verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
-        assertThat(integrationRequest.getIntegrationContext())
-                .isEqualTo(integrationContext);
+        assertThat(integrationRequest.getIntegrationContext()).isEqualTo(integrationContext);
 
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
 

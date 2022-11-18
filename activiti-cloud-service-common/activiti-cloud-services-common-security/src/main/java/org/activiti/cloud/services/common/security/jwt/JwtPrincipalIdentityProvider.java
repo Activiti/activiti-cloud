@@ -15,28 +15,30 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
+import java.security.Principal;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.springframework.lang.NonNull;
-
-import java.security.Principal;
 
 public class JwtPrincipalIdentityProvider implements PrincipalIdentityProvider {
 
     private final JwtAccessTokenProvider keycloakAccessTokenProvider;
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
-    public JwtPrincipalIdentityProvider(@NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
-                                             @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
+    public JwtPrincipalIdentityProvider(
+        @NonNull JwtAccessTokenProvider keycloakAccessTokenProvider,
+        @NonNull JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
         this.keycloakAccessTokenProvider = keycloakAccessTokenProvider;
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public String getUserId(@NonNull Principal principal) {
-        return keycloakAccessTokenProvider.accessToken(principal)
-                                          .filter(jwtAccessTokenValidator::isValid)
-                                          .map(JwtAdapter::getUserName)
-                                          .orElseThrow(this::securityException);
+        return keycloakAccessTokenProvider
+            .accessToken(principal)
+            .filter(jwtAccessTokenValidator::isValid)
+            .map(JwtAdapter::getUserName)
+            .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {

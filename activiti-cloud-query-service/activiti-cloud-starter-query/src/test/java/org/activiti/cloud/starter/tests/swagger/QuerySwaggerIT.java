@@ -15,18 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
-import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.both;
@@ -42,10 +30,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class QuerySwaggerIT {
 
     @Autowired
@@ -65,16 +67,19 @@ public class QuerySwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.info.title").value("OpenAPI definition"))
-            .andExpect(content().string(
+            .andExpect(
+                content()
+                    .string(
                         both(notNullValue(String.class))
-                                .and(not(containsString("ListResponseContent«")))
-                                .and(not(containsString("EntriesResponseContent«")))
-                                .and(not(containsString("EntryResponseContent«")))
-                                .and(not(containsString("PagedResources«")))
-                                .and(not(containsString("PagedResources«")))
-                                .and(not(containsString("Resources«Resource«")))
-                                .and(not(containsString("Resource«")))
-            ))
+                            .and(not(containsString("ListResponseContent«")))
+                            .and(not(containsString("EntriesResponseContent«")))
+                            .and(not(containsString("EntryResponseContent«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("PagedResources«")))
+                            .and(not(containsString("Resources«Resource«")))
+                            .and(not(containsString("Resource«")))
+                    )
+            )
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andReturn();
@@ -85,7 +90,7 @@ public class QuerySwaggerIT {
             .contains(
                 "{name: \"variables.name\", required: false}",
                 "{name: \"variables.value\", required: false}",
-                "{name: \"variables.type\", required: false}");
+                "{name: \"variables.type\", required: false}"
+            );
     }
-
 }

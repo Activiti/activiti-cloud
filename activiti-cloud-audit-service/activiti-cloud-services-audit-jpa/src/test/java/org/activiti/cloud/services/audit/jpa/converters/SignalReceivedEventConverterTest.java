@@ -15,18 +15,21 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
-import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
+import org.activiti.cloud.services.audit.jpa.events.SignalReceivedAuditEventEntity;
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class SignalReceivedEventConverterTest {
 
-    private SignalReceivedEventConverter eventConverter = new SignalReceivedEventConverter(new EventContextInfoAppender());
+    private SignalReceivedEventConverter eventConverter = new SignalReceivedEventConverter(
+        new EventContextInfoAppender()
+    );
 
     @Test
     public void checkConvertToEntitySignalReceivedEvent() {
@@ -34,7 +37,9 @@ public class SignalReceivedEventConverterTest {
         CloudBPMNSignalReceivedEventImpl event = createSignalReceivedEvent();
 
         //when
-        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(event);
+        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(
+            event
+        );
 
         //then
         assertThat(auditEventEntity).isNotNull();
@@ -44,18 +49,25 @@ public class SignalReceivedEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(event.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(event.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getId()).isEqualTo(event.getEntity().getSignalPayload().getId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getName()).isEqualTo(event.getEntity().getSignalPayload().getName());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables()).isEqualTo(event.getEntity().getSignalPayload().getVariables());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getId())
+            .isEqualTo(event.getEntity().getSignalPayload().getId());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getName())
+            .isEqualTo(event.getEntity().getSignalPayload().getName());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables())
+            .isEqualTo(event.getEntity().getSignalPayload().getVariables());
     }
 
     @Test
     public void checkConvertToAPISignalReceivedEvent() {
         //given
-        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(createSignalReceivedEvent());
+        SignalReceivedAuditEventEntity auditEventEntity = (SignalReceivedAuditEventEntity) eventConverter.convertToEntity(
+            createSignalReceivedEvent()
+        );
 
         //when
-        CloudBPMNSignalReceivedEventImpl cloudEvent= (CloudBPMNSignalReceivedEventImpl) eventConverter.convertToAPI(auditEventEntity);
+        CloudBPMNSignalReceivedEventImpl cloudEvent = (CloudBPMNSignalReceivedEventImpl) eventConverter.convertToAPI(
+            auditEventEntity
+        );
         assertThat(cloudEvent).isNotNull();
         assertThat(auditEventEntity.getEntityId()).isEqualTo(cloudEvent.getEntityId());
         assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(cloudEvent.getProcessInstanceId());
@@ -63,9 +75,12 @@ public class SignalReceivedEventConverterTest {
         assertThat(auditEventEntity.getProcessDefinitionKey()).isEqualTo(cloudEvent.getProcessDefinitionKey());
         assertThat(auditEventEntity.getBusinessKey()).isEqualTo(cloudEvent.getBusinessKey());
         assertThat(auditEventEntity.getParentProcessInstanceId()).isEqualTo(cloudEvent.getParentProcessInstanceId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getId()).isEqualTo(cloudEvent.getEntity().getSignalPayload().getId());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getName()).isEqualTo(cloudEvent.getEntity().getSignalPayload().getName());
-        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables()).isEqualTo(cloudEvent.getEntity().getSignalPayload().getVariables());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getId())
+            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getId());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getName())
+            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getName());
+        assertThat(auditEventEntity.getSignal().getSignalPayload().getVariables())
+            .isEqualTo(cloudEvent.getEntity().getSignalPayload().getVariables());
     }
 
     private CloudBPMNSignalReceivedEventImpl createSignalReceivedEvent() {
@@ -81,18 +96,20 @@ public class SignalReceivedEventConverterTest {
         signal.setProcessDefinitionId(processInstanceStarted.getProcessDefinitionId());
         signal.setProcessInstanceId(processInstanceStarted.getId());
 
-        SignalPayload signalPayload = ProcessPayloadBuilder.signal()
-                .withName("SignalName")
-                .withVariable("signal-variable",
-                              "test")
-                .build();
+        SignalPayload signalPayload = ProcessPayloadBuilder
+            .signal()
+            .withName("SignalName")
+            .withVariable("signal-variable", "test")
+            .build();
         signal.setSignalPayload(signalPayload);
 
-        CloudBPMNSignalReceivedEventImpl event = new CloudBPMNSignalReceivedEventImpl("eventId",
-                                                                                      System.currentTimeMillis(),
-                                                                                      signal,
-                                                                                      signal.getProcessDefinitionId(),
-                                                                                      signal.getProcessInstanceId());
+        CloudBPMNSignalReceivedEventImpl event = new CloudBPMNSignalReceivedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            signal,
+            signal.getProcessDefinitionId(),
+            signal.getProcessInstanceId()
+        );
 
         //Set explicitly to be sure
         event.setEntityId("entityId");
@@ -103,7 +120,6 @@ public class SignalReceivedEventConverterTest {
         event.setParentProcessInstanceId(processInstanceStarted.getParentId());
         event.setMessageId("message-id");
         event.setSequenceNumber(0);
-
 
         return event;
     }

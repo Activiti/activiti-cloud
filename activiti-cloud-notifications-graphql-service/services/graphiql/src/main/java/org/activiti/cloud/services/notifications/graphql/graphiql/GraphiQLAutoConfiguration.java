@@ -21,13 +21,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@ConditionalOnProperty(name="spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
 public class GraphiQLAutoConfiguration {
 
     @Configuration
-    @PropertySource(value="classpath:keycloak-json.properties", ignoreResourceNotFound = true)
-    @Import({KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class})
-    public static class DefaultGraphiQLConfiguration {
-
-    }
+    @PropertySource(value = "classpath:keycloak-json.properties", ignoreResourceNotFound = true)
+    @Import({ KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class })
+    public static class DefaultGraphiQLConfiguration {}
 }

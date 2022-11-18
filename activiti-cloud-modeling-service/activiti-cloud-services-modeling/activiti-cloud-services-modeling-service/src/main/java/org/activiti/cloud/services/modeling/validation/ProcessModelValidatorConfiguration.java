@@ -17,20 +17,20 @@ package org.activiti.cloud.services.modeling.validation;
 
 import java.util.List;
 import java.util.Set;
-
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsProcessVariablesValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsTaskMappingsValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsValidator;
-import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnCommonModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelCallActivityValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelEngineValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelIncomingOutgoingFlowValidator;
@@ -39,7 +39,6 @@ import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequence
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUniqueIdValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
-import org.activiti.cloud.services.modeling.validation.process.BpmnCommonModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.EndEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.FlowElementsExtractor;
@@ -79,16 +78,20 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessExtensionsModelValidator processExtensionsModelValidator(SchemaLoader processExtensionsSchemaLoader,
-                                                                           Set<ProcessExtensionsValidator> processExtensionsValidators,
-                                                                           ProcessModelType processModelType,
-                                                                           JsonConverter<Extensions> jsonExtensionsConverter,
-                                                                           ProcessModelContentConverter processModelContentConverter) {
-        return new ProcessExtensionsModelValidator(processExtensionsSchemaLoader,
-                                                   processExtensionsValidators,
-                                                   processModelType,
-                                                   jsonExtensionsConverter,
-                                                   processModelContentConverter);
+    public ProcessExtensionsModelValidator processExtensionsModelValidator(
+        SchemaLoader processExtensionsSchemaLoader,
+        Set<ProcessExtensionsValidator> processExtensionsValidators,
+        ProcessModelType processModelType,
+        JsonConverter<Extensions> jsonExtensionsConverter,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
+        return new ProcessExtensionsModelValidator(
+            processExtensionsSchemaLoader,
+            processExtensionsValidators,
+            processModelType,
+            jsonExtensionsConverter,
+            processModelContentConverter
+        );
     }
 
     @Bean
@@ -99,7 +102,9 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessExtensionsTaskMappingsValidator processExtensionsTaskMappingsValidator(Set<TaskMappingsValidator> taskMappingsValidators) {
+    public ProcessExtensionsTaskMappingsValidator processExtensionsTaskMappingsValidator(
+        Set<TaskMappingsValidator> taskMappingsValidators
+    ) {
         return new ProcessExtensionsTaskMappingsValidator(taskMappingsValidators);
     }
 
@@ -111,10 +116,11 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskMappingsServiceTaskImplementationValidator taskMappingsServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
-                                                                                                         ConnectorModelContentConverter connectorModelContentConverter) {
-        return new TaskMappingsServiceTaskImplementationValidator(connectorModelType,
-                                                                  connectorModelContentConverter);
+    public TaskMappingsServiceTaskImplementationValidator taskMappingsServiceTaskImplementationValidator(
+        ConnectorModelType connectorModelType,
+        ConnectorModelContentConverter connectorModelContentConverter
+    ) {
+        return new TaskMappingsServiceTaskImplementationValidator(connectorModelType, connectorModelContentConverter);
     }
 
     @Bean
@@ -131,19 +137,20 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorModelValidator connectorModelValidator(SchemaLoader connectorSchemaLoader,
-                                                           ConnectorModelType connectorModelType) {
-        return new ConnectorModelValidator(connectorSchemaLoader,
-                                           connectorModelType);
+    public ConnectorModelValidator connectorModelValidator(
+        SchemaLoader connectorSchemaLoader,
+        ConnectorModelType connectorModelType
+    ) {
+        return new ConnectorModelValidator(connectorSchemaLoader, connectorModelType);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelCallActivityValidator bpmnModelCallActivityValidator(ProcessModelType processModelType,
-                                                                         ProcessModelContentConverter processModelContentConverter) {
-        return new BpmnModelCallActivityValidator(processModelType,
-                                                  processModelContentConverter);
-
+    public BpmnModelCallActivityValidator bpmnModelCallActivityValidator(
+        ProcessModelType processModelType,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
+        return new BpmnModelCallActivityValidator(processModelType, processModelContentConverter);
     }
 
     @Bean
@@ -160,15 +167,23 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelServiceTaskImplementationValidator bpmnModelServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
-        ConnectorModelContentConverter connectorModelContentConverter, FlowElementsExtractor flowElementsExtractor) {
-        return new BpmnModelServiceTaskImplementationValidator(connectorModelType,
-                                                               connectorModelContentConverter, flowElementsExtractor);
+    public BpmnModelServiceTaskImplementationValidator bpmnModelServiceTaskImplementationValidator(
+        ConnectorModelType connectorModelType,
+        ConnectorModelContentConverter connectorModelContentConverter,
+        FlowElementsExtractor flowElementsExtractor
+    ) {
+        return new BpmnModelServiceTaskImplementationValidator(
+            connectorModelType,
+            connectorModelContentConverter,
+            flowElementsExtractor
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelUserTaskAssigneeValidator bpmnModelUserTaskAssigneeValidator(FlowElementsExtractor flowElementsExtractor) {
+    public BpmnModelUserTaskAssigneeValidator bpmnModelUserTaskAssigneeValidator(
+        FlowElementsExtractor flowElementsExtractor
+    ) {
         return new BpmnModelUserTaskAssigneeValidator(flowElementsExtractor);
     }
 
@@ -180,19 +195,21 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelUniqueIdValidator bpmnModelUniqueIdValidator(ProcessModelType processModelType, ProcessModelContentConverter processModelContentConverter) {
+    public BpmnModelUniqueIdValidator bpmnModelUniqueIdValidator(
+        ProcessModelType processModelType,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
         return new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessModelValidator processModelValidator(ProcessModelType processModelType,
-                                                       Set<BpmnCommonModelValidator> mpmnModelValidators,
-                                                       ProcessModelContentConverter processModelContentConverter) {
-        return new ProcessModelValidator(processModelType,
-                                         mpmnModelValidators,
-                                         processModelContentConverter);
-
+    public ProcessModelValidator processModelValidator(
+        ProcessModelType processModelType,
+        Set<BpmnCommonModelValidator> mpmnModelValidators,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
+        return new ProcessModelValidator(processModelType, mpmnModelValidators, processModelContentConverter);
     }
 
     @Bean
@@ -203,8 +220,10 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator(List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
-        FlowElementsExtractor flowElementsExtractor) {
+    public BpmnModelIncomingOutgoingFlowValidator bpmnModelIncomingOutgoingFlowValidator(
+        List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
+        FlowElementsExtractor flowElementsExtractor
+    ) {
         return new BpmnModelIncomingOutgoingFlowValidator(flowNodeFlowsValidators, flowElementsExtractor);
     }
 

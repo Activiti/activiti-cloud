@@ -27,15 +27,9 @@ public class User {
     private String email;
     private String displayName;
 
-    public User() {
-    }
+    public User() {}
 
-    public User(String id,
-        String firstName,
-        String lastName,
-        String username,
-        String email,
-        String displayName) {
+    public User(String id, String firstName, String lastName, String username, String email, String displayName) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -115,14 +109,28 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-            "id='" + id + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", lastName='" + lastName + '\'' +
-            ", username='" + username + '\'' +
-            ", email='" + email + '\'' +
-            ", displayName='" + displayName + '\'' +
-            '}';
+        return (
+            "User{" +
+            "id='" +
+            id +
+            '\'' +
+            ", firstName='" +
+            firstName +
+            '\'' +
+            ", lastName='" +
+            lastName +
+            '\'' +
+            ", username='" +
+            username +
+            '\'' +
+            ", email='" +
+            email +
+            '\'' +
+            ", displayName='" +
+            displayName +
+            '\'' +
+            '}'
+        );
     }
 
     public static class UserBuilder {

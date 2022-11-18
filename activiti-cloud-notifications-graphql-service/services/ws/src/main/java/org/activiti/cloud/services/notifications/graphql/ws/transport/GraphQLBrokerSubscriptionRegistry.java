@@ -22,121 +22,126 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-
 import org.springframework.util.Assert;
-
 
 public class GraphQLBrokerSubscriptionRegistry {
 
-	private final ConcurrentHashMap<String, SessionSubscriptionInfo> subscriptionRegistry;
+    private final ConcurrentHashMap<String, SessionSubscriptionInfo> subscriptionRegistry;
 
     public GraphQLBrokerSubscriptionRegistry() {
-		this.subscriptionRegistry = new ConcurrentHashMap<>();
-	}
-
-    public void subscribe(String sessionId, String subscriptionId, GraphQLBrokerChannelSubscriber subscriber) {
-    	this.subscribe(sessionId, subscriptionId, subscriber, null);
+        this.subscriptionRegistry = new ConcurrentHashMap<>();
     }
 
-    public void subscribe(String sessionId, String subscriptionId, GraphQLBrokerChannelSubscriber subscriber, Runnable callback) {
-    	SessionSubscriptionInfo sessionSubscription = Optional.ofNullable(subscriptionRegistry.get(sessionId))
-			.orElseGet(() -> {
-				SessionSubscriptionInfo subscriptionInfo = new SessionSubscriptionInfo(sessionId);
-				subscriptionRegistry.put(sessionId, subscriptionInfo);
+    public void subscribe(String sessionId, String subscriptionId, GraphQLBrokerChannelSubscriber subscriber) {
+        this.subscribe(sessionId, subscriptionId, subscriber, null);
+    }
 
-				return subscriptionInfo;
-			});
+    public void subscribe(
+        String sessionId,
+        String subscriptionId,
+        GraphQLBrokerChannelSubscriber subscriber,
+        Runnable callback
+    ) {
+        SessionSubscriptionInfo sessionSubscription = Optional
+            .ofNullable(subscriptionRegistry.get(sessionId))
+            .orElseGet(() -> {
+                SessionSubscriptionInfo subscriptionInfo = new SessionSubscriptionInfo(sessionId);
+                subscriptionRegistry.put(sessionId, subscriptionInfo);
 
-    	sessionSubscription.addSubscription(subscriptionId, subscriber);
+                return subscriptionInfo;
+            });
 
-		if(callback != null) {
-			callback.run();
-		}
+        sessionSubscription.addSubscription(subscriptionId, subscriber);
+
+        if (callback != null) {
+            callback.run();
+        }
     }
 
     public void unsubscribe(String sessionId, String subscriptionId) {
-    	unsubscribe(sessionId, subscriptionId, null);
+        unsubscribe(sessionId, subscriptionId, null);
     }
 
-    public void unsubscribe(String sessionId, String subscriptionId, Consumer<GraphQLBrokerChannelSubscriber> callback) {
-    	SessionSubscriptionInfo subscriptionInfo = subscriptionRegistry.get(sessionId);
+    public void unsubscribe(
+        String sessionId,
+        String subscriptionId,
+        Consumer<GraphQLBrokerChannelSubscriber> callback
+    ) {
+        SessionSubscriptionInfo subscriptionInfo = subscriptionRegistry.get(sessionId);
 
-    	if(subscriptionInfo != null)  {
-    		GraphQLBrokerChannelSubscriber subscriber = subscriptionInfo.removeSubscription(subscriptionId);
-    		if(callback != null) {
-    			if(subscriber != null)
-    				callback.accept(subscriber);
-    		}
-    	}
-
+        if (subscriptionInfo != null) {
+            GraphQLBrokerChannelSubscriber subscriber = subscriptionInfo.removeSubscription(subscriptionId);
+            if (callback != null) {
+                if (subscriber != null) callback.accept(subscriber);
+            }
+        }
     }
 
-    public void unsubscribe(String sessionId,  Consumer<GraphQLBrokerChannelSubscriber> callback) {
-    	SessionSubscriptionInfo subscriptionInfo = subscriptionRegistry.remove(sessionId);
+    public void unsubscribe(String sessionId, Consumer<GraphQLBrokerChannelSubscriber> callback) {
+        SessionSubscriptionInfo subscriptionInfo = subscriptionRegistry.remove(sessionId);
 
-    	if(subscriptionInfo != null)  {
-    		subscriptionInfo.removeAll().forEach(subscriber -> {
-	    		if(callback != null) {
-	    			if(subscriber != null)
-	    				callback.accept(subscriber);
-	    		}
-			});
-    	}
+        if (subscriptionInfo != null) {
+            subscriptionInfo
+                .removeAll()
+                .forEach(subscriber -> {
+                    if (callback != null) {
+                        if (subscriber != null) callback.accept(subscriber);
+                    }
+                });
+        }
     }
-
 
     public SessionSubscriptionInfo get(String sessionId) {
         return subscriptionRegistry.getOrDefault(sessionId, new SessionSubscriptionInfo(sessionId));
     }
 
-
-	/**
-	 * Hold subscriptions for a session.
-	 */
+    /**
+     * Hold subscriptions for a session.
+     */
     public static class SessionSubscriptionInfo {
 
-		private final String sessionId;
+        private final String sessionId;
 
-		// subscriptionId -> subscribers
-		private final Map<String, GraphQLBrokerChannelSubscriber> subscriberLookup =
-				new ConcurrentHashMap<String, GraphQLBrokerChannelSubscriber>(4);
+        // subscriptionId -> subscribers
+        private final Map<String, GraphQLBrokerChannelSubscriber> subscriberLookup = new ConcurrentHashMap<String, GraphQLBrokerChannelSubscriber>(
+            4
+        );
 
-		public SessionSubscriptionInfo(String sessionId) {
-			Assert.notNull(sessionId, "'sessionId' must not be null");
-			this.sessionId = sessionId;
-		}
+        public SessionSubscriptionInfo(String sessionId) {
+            Assert.notNull(sessionId, "'sessionId' must not be null");
+            this.sessionId = sessionId;
+        }
 
-		public String getSessionId() {
-			return this.sessionId;
-		}
+        public String getSessionId() {
+            return this.sessionId;
+        }
 
-		public Set<String> getSubscriptions() {
-			return this.subscriberLookup.keySet();
-		}
+        public Set<String> getSubscriptions() {
+            return this.subscriberLookup.keySet();
+        }
 
-		public GraphQLBrokerChannelSubscriber getSubscriber(String subscriptionId) {
-			return this.subscriberLookup.get(subscriptionId);
-		}
+        public GraphQLBrokerChannelSubscriber getSubscriber(String subscriptionId) {
+            return this.subscriberLookup.get(subscriptionId);
+        }
 
-		public void addSubscription(String subscriptionId, GraphQLBrokerChannelSubscriber subscriber) {
-			subscriberLookup.put(subscriptionId, subscriber);
-		}
+        public void addSubscription(String subscriptionId, GraphQLBrokerChannelSubscriber subscriber) {
+            subscriberLookup.put(subscriptionId, subscriber);
+        }
 
-		public GraphQLBrokerChannelSubscriber removeSubscription(String destination) {
-			return this.subscriberLookup.remove(destination);
-		}
+        public GraphQLBrokerChannelSubscriber removeSubscription(String destination) {
+            return this.subscriberLookup.remove(destination);
+        }
 
-		public Collection<GraphQLBrokerChannelSubscriber> removeAll() {
-			Collection<GraphQLBrokerChannelSubscriber> values = new ArrayList<>(this.subscriberLookup.values());
-			this.subscriberLookup.clear();
+        public Collection<GraphQLBrokerChannelSubscriber> removeAll() {
+            Collection<GraphQLBrokerChannelSubscriber> values = new ArrayList<>(this.subscriberLookup.values());
+            this.subscriberLookup.clear();
 
-			return values;
-		}
+            return values;
+        }
 
-		@Override
-		public String toString() {
-			return "[sessionId=" + this.sessionId + ", subscriptions=" + this.subscriberLookup + "]";
-		}
-	}
-
+        @Override
+        public String toString() {
+            return "[sessionId=" + this.sessionId + ", subscriptions=" + this.subscriberLookup + "]";
+        }
+    }
 }

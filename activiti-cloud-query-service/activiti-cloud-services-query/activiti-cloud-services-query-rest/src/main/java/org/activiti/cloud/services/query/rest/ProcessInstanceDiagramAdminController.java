@@ -33,18 +33,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessInstanceDiagramAdminController extends ProcessInstanceDiagramControllerBase {
 
     @Autowired
-    public ProcessInstanceDiagramAdminController(ProcessModelRepository processModelRepository,
-                                            BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
-                                            ProcessDiagramGeneratorWrapper processDiagramGenerator,
-                                            ProcessInstanceRepository processInstanceRepository,
-                                            BPMNActivityRepository bpmnActivityRepository,
-                                            EntityFinder entityFinder) {
-        super(processModelRepository,
-              bpmnSequenceFlowRepository,
-              processDiagramGenerator,
-              processInstanceRepository,
-              bpmnActivityRepository,
-              entityFinder);
+    public ProcessInstanceDiagramAdminController(
+        ProcessModelRepository processModelRepository,
+        BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+        ProcessDiagramGeneratorWrapper processDiagramGenerator,
+        ProcessInstanceRepository processInstanceRepository,
+        BPMNActivityRepository bpmnActivityRepository,
+        EntityFinder entityFinder
+    ) {
+        super(
+            processModelRepository,
+            bpmnSequenceFlowRepository,
+            processDiagramGenerator,
+            processInstanceRepository,
+            bpmnActivityRepository,
+            entityFinder
+        );
     }
 
     @GetMapping(produces = IMAGE_SVG_XML)
@@ -52,5 +56,4 @@ public class ProcessInstanceDiagramAdminController extends ProcessInstanceDiagra
     public String getProcessDiagram(@PathVariable String processInstanceId) {
         return generateDiagram(processInstanceId);
     }
-
 }

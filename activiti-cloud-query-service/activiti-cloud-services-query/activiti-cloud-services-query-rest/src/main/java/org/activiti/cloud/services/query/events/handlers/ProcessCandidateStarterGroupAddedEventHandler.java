@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterGroupEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
 
 public class ProcessCandidateStarterGroupAddedEventHandler implements QueryEventHandler {
 
@@ -37,12 +36,13 @@ public class ProcessCandidateStarterGroupAddedEventHandler implements QueryEvent
         org.activiti.api.process.model.ProcessCandidateStarterGroup processCandidateStarterGroup = processCandidateStarterGroupAddedEvent.getEntity();
 
         try {
-            ProcessCandidateStarterGroupEntity entity = new ProcessCandidateStarterGroupEntity(processCandidateStarterGroup.getProcessDefinitionId(),
-                                                                                             processCandidateStarterGroup.getGroupId());
+            ProcessCandidateStarterGroupEntity entity = new ProcessCandidateStarterGroupEntity(
+                processCandidateStarterGroup.getProcessDefinitionId(),
+                processCandidateStarterGroup.getGroupId()
+            );
             entityManager.persist(entity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling ProcessCandidateStarterGroupAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling ProcessCandidateStarterGroupAddedEvent[" + event + "]", cause);
         }
     }
 

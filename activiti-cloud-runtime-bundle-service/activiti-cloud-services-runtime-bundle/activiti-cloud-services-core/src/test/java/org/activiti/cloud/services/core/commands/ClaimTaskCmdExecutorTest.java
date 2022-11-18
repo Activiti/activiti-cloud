@@ -38,8 +38,7 @@ public class ClaimTaskCmdExecutorTest {
     @Test
     public void claimTaskCmdExecutorTest() {
         //given
-        ClaimTaskPayload claimTaskPayload = new ClaimTaskPayload("taskId",
-                                                                 "assignee");
+        ClaimTaskPayload claimTaskPayload = new ClaimTaskPayload("taskId", "assignee");
 
         assertThat(claimTaskCmdExecutor.getHandledType()).isEqualTo(ClaimTaskPayload.class.getName());
 

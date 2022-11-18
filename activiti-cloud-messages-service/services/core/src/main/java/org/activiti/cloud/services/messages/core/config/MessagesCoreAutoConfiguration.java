@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
+import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
+
+import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
@@ -72,11 +76,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
-
 /**
  * A Processor app that performs aggregation.
  *
@@ -101,73 +100,78 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
-        return IntegrationFlows.from(ControlBusGateway.class)
-                               .controlBus(spec -> spec.id(CONTROL_BUS))
-                               .get();
+        return IntegrationFlows.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
     }
 
     @Bean
     @DependsOn(MESSAGE_CONNECTOR_AGGREGATOR_FACTORY_BEAN)
     @ConditionalOnMissingBean(name = MESSAGE_CONNECTOR_INTEGRATION_FLOW)
-    public IntegrationFlow messageConnectorIntegrationFlow(MessageConnectorProcessor processor,
-                                                           MessageConnectorAggregator aggregator,
-                                                           IdempotentReceiverInterceptor interceptor,
-                                                           List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           CommandConsumerMessageRouter router) {
-        return new MessageConnectorIntegrationFlow(processor,
-                                                   aggregator,
-                                                   interceptor,
-                                                   adviceChain,
-                                                   properties,
-                                                   router);
+    public IntegrationFlow messageConnectorIntegrationFlow(
+        MessageConnectorProcessor processor,
+        MessageConnectorAggregator aggregator,
+        IdempotentReceiverInterceptor interceptor,
+        List<MessageConnectorHandlerAdvice> adviceChain,
+        CommandConsumerMessageRouter router
+    ) {
+        return new MessageConnectorIntegrationFlow(processor, aggregator, interceptor, adviceChain, properties, router);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerDestinationMapper commandConsumerDestinationMapper(ActivitiCloudMessagingProperties properties) {
+    public CommandConsumerDestinationMapper commandConsumerDestinationMapper(
+        ActivitiCloudMessagingProperties properties
+    ) {
         return new CommandConsumerDestinationMapper(properties.getDestinationSeparator());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
-                                                                                       BindingService bindingService,
-                                                                                       BinderAwareChannelResolver binderAwareChannelResolver) {
-        return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
-                                                         binderAwareChannelResolver,
-                                                         bindingService);
+    public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(
+        CommandConsumerDestinationMapper commandConsumerDestinationMapper,
+        BindingService bindingService,
+        BinderAwareChannelResolver binderAwareChannelResolver
+    ) {
+        return new CommandConsumerMessageChannelResolver(
+            commandConsumerDestinationMapper,
+            binderAwareChannelResolver,
+            bindingService
+        );
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public CommandConsumerMessageRouter commandConsumerMessageRouter(CommandConsumerMessageChannelResolver destinationResolver) {
+    public CommandConsumerMessageRouter commandConsumerMessageRouter(
+        CommandConsumerMessageChannelResolver destinationResolver
+    ) {
         return new CommandConsumerMessageRouter(destinationResolver);
     }
 
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
-        return MessageChannels.direct()
-                              .get();
+        return MessageChannels.direct().get();
     }
 
     @Bean
     @ConditionalOnMissingBean(MessageConnectorAggregator.class)
-    public MessageConnectorAggregatorFactoryBean messageConnectorAggregatorFactoryBean(CorrelationStrategy correlationStrategy,
-                                                                                       ReleaseStrategy releaseStrategy,
-                                                                                       MessageGroupProcessor processorBean,
-                                                                                       MessageGroupStore messageStore,
-                                                                                       LockRegistry lockRegistry,
-                                                                                       BeanFactory beanFactory,
-                                                                                       MessageChannel discardChannel) {
-        return new MessageConnectorAggregatorFactoryBean().discardChannel(discardChannel)
-                                                          .groupTimeoutExpression(this.properties.getGroupTimeout())
-                                                          .lockRegistry(lockRegistry)
-                                                          .correlationStrategy(correlationStrategy)
-                                                          .releaseStrategy(releaseStrategy)
-                                                          .beanFactory(beanFactory)
-                                                          .processorBean(processorBean)
-                                                          .messageStore(messageStore);
+    public MessageConnectorAggregatorFactoryBean messageConnectorAggregatorFactoryBean(
+        CorrelationStrategy correlationStrategy,
+        ReleaseStrategy releaseStrategy,
+        MessageGroupProcessor processorBean,
+        MessageGroupStore messageStore,
+        LockRegistry lockRegistry,
+        BeanFactory beanFactory,
+        MessageChannel discardChannel
+    ) {
+        return new MessageConnectorAggregatorFactoryBean()
+            .discardChannel(discardChannel)
+            .groupTimeoutExpression(this.properties.getGroupTimeout())
+            .lockRegistry(lockRegistry)
+            .correlationStrategy(correlationStrategy)
+            .releaseStrategy(releaseStrategy)
+            .beanFactory(beanFactory)
+            .processorBean(processorBean)
+            .messageStore(messageStore);
     }
 
     @Bean
@@ -185,38 +189,40 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "metadataStoreKeyStrategy")
     public MessageProcessor<String> metadataStoreKeyStrategy() {
-        return m -> Optional.ofNullable(m.getHeaders().get(MessageEventHeaders.MESSAGE_EVENT_ID))
-                            .map(Object::toString)
-                            .orElseGet(() -> m.getHeaders().getId()
-                                                           .toString());
+        return m ->
+            Optional
+                .ofNullable(m.getHeaders().get(MessageEventHeaders.MESSAGE_EVENT_ID))
+                .map(Object::toString)
+                .orElseGet(() -> m.getHeaders().getId().toString());
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "messageReceivedHandlerAdvice")
-    public MessageConnectorHandlerAdvice messageReceivedHandlerAdvice(MessageGroupStore messageStore,
-                                                                      CorrelationStrategy correlationStrategy,
-                                                                      LockTemplate lockTemplate) {
-        return new MessageReceivedHandlerAdvice(messageStore,
-                                                correlationStrategy,
-                                                lockTemplate);
+    public MessageConnectorHandlerAdvice messageReceivedHandlerAdvice(
+        MessageGroupStore messageStore,
+        CorrelationStrategy correlationStrategy,
+        LockTemplate lockTemplate
+    ) {
+        return new MessageReceivedHandlerAdvice(messageStore, correlationStrategy, lockTemplate);
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "subscriptionCancelledHandlerAdvice")
-    public MessageConnectorHandlerAdvice subscriptionCancelledHandlerAdvice(MessageGroupStore messageStore,
-                                                                            CorrelationStrategy correlationStrategy,
-                                                                            LockTemplate lockTemplate) {
-        return new SubscriptionCancelledHandlerAdvice(messageStore,
-                                                      correlationStrategy,
-                                                      lockTemplate);
+    public MessageConnectorHandlerAdvice subscriptionCancelledHandlerAdvice(
+        MessageGroupStore messageStore,
+        CorrelationStrategy correlationStrategy,
+        LockTemplate lockTemplate
+    ) {
+        return new SubscriptionCancelledHandlerAdvice(messageStore, correlationStrategy, lockTemplate);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public MetadataStoreSelector metadataStoreSelector(ConcurrentMetadataStore metadataStore,
-                                                       MessageProcessor<String> metadataStoreKeyStrategy) {
-        return new MetadataStoreSelector(metadataStoreKeyStrategy,
-                                         metadataStore);
+    public MetadataStoreSelector metadataStoreSelector(
+        ConcurrentMetadataStore metadataStore,
+        MessageProcessor<String> metadataStoreKeyStrategy
+    ) {
+        return new MetadataStoreSelector(metadataStoreKeyStrategy, metadataStore);
     }
 
     @Bean
@@ -232,24 +238,25 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupProcessorChain messageGroupProcessorChain(MessageGroupStore messageGroupStore) {
-        return ChainBuilder.of(MessageGroupProcessorChain.class)
-                           .first(new StartMessagePayloadGroupProcessor(messageGroupStore))
-                           .then(new ReceiveMessagePayloadGroupProcessor(messageGroupStore))
-                           .build();
+        return ChainBuilder
+            .of(MessageGroupProcessorChain.class)
+            .first(new StartMessagePayloadGroupProcessor(messageGroupStore))
+            .then(new ReceiveMessagePayloadGroupProcessor(messageGroupStore))
+            .build();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageGroupProcessor messageConnectorPayloadGroupProcessor(MessageGroupProcessorChain messageGroupProcessorChain) {
+    public MessageGroupProcessor messageConnectorPayloadGroupProcessor(
+        MessageGroupProcessorChain messageGroupProcessorChain
+    ) {
         return new MessageGroupProcessorHandlerChain(messageGroupProcessorChain);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public MessageGroupReleaseChain messageGroupReleaseChain(MessageGroupStore messageGroupStore) {
-        return ChainBuilder.of(MessageGroupReleaseChain.class)
-                           .first(new MessageSentReleaseHandler())
-                           .build();
+        return ChainBuilder.of(MessageGroupReleaseChain.class).first(new MessageSentReleaseHandler()).build();
     }
 
     @Bean
@@ -261,7 +268,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PlatformTransactionManager transactionManager() {
-      return new PseudoTransactionManager();
+        return new PseudoTransactionManager();
     }
 
     @Bean
@@ -281,6 +288,4 @@ public class MessagesCoreAutoConfiguration {
     public LockRegistry lockRegistry() {
         return new DefaultLockRegistry();
     }
-
-
 }

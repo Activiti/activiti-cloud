@@ -18,22 +18,18 @@ package org.activiti.cloud.api.model.shared.impl.events;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.model.shared.model.VariableInstance;
 
-public abstract class CloudVariableEventImpl extends CloudRuntimeEventImpl<VariableInstance, VariableEvent.VariableEvents> {
+public abstract class CloudVariableEventImpl
+    extends CloudRuntimeEventImpl<VariableInstance, VariableEvent.VariableEvents> {
 
-    public CloudVariableEventImpl() {
-    }
+    public CloudVariableEventImpl() {}
 
     public CloudVariableEventImpl(VariableInstance entity) {
         super(entity);
         setEntityId(entity.getName());
     }
 
-    public CloudVariableEventImpl(String id,
-                                  Long timestamp,
-                                  VariableInstance entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudVariableEventImpl(String id, Long timestamp, VariableInstance entity) {
+        super(id, timestamp, entity);
         setEntityId(entity.getName());
     }
 }

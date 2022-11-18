@@ -30,12 +30,14 @@ public class FileMagicNumberValidator {
     }
 
     public boolean checkFileIsExecutable(byte[] fileContent) {
-        return fileMagicNumber != null && fileMagicNumber
-            .stream()
-            .filter(filter -> filter.accept(fileContent))
-            .peek(filter -> logger.info("The file is executable because it is a $1", filter.getName()))
-            .findAny()
-            .isPresent();
+        return (
+            fileMagicNumber != null &&
+            fileMagicNumber
+                .stream()
+                .filter(filter -> filter.accept(fileContent))
+                .peek(filter -> logger.info("The file is executable because it is a $1", filter.getName()))
+                .findAny()
+                .isPresent()
+        );
     }
-
 }

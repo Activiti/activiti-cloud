@@ -40,13 +40,18 @@ import org.springframework.core.annotation.Order;
 
 @Configuration
 @PropertySource("classpath:keycloak-client.properties")
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
-@EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
+@EnableConfigurationProperties({ ActivitiKeycloakProperties.class, KeycloakProperties.class })
 @EnableFeignClients(clients = KeycloakClient.class)
 public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
     private String cacheExpireAfterWrite;
+
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
 
@@ -65,7 +70,9 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
+    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(
+        KeycloakInstanceWrapper keycloakInstanceWrapper
+    ) {
         return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
     }
 
@@ -77,29 +84,38 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     public CaffeineCache groupRoleMappingCache() {
-        return new CaffeineCache("groupRoleMapping",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "groupRoleMapping",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean
     public CaffeineCache userRoleMappingCache() {
-        return new CaffeineCache("userRoleMapping",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "userRoleMapping",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean
     public CaffeineCache userGroupsCache() {
-        return new CaffeineCache("userGroups",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "userGroups",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean(name = "identityHealthService")
@@ -107,5 +123,4 @@ public class ActivitiKeycloakAutoConfiguration {
     public KeycloakHealthService keycloakHealthService(KeycloakUserGroupManager keycloakUserGroupManager) {
         return new KeycloakHealthService(keycloakUserGroupManager);
     }
-
 }

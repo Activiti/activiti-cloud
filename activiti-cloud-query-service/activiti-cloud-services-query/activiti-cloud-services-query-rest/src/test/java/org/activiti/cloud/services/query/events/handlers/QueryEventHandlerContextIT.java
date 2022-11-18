@@ -18,14 +18,13 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
-import org.activiti.api.process.model.events.ProcessDefinitionEvent;
-import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
+import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
+import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
@@ -47,7 +46,8 @@ public class QueryEventHandlerContextIT {
         Map<String, QueryEventHandler> handlers = context.getHandlers();
 
         //then
-        assertThat(handlers).containsOnlyKeys(
+        assertThat(handlers)
+            .containsOnlyKeys(
                 ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name(),
                 ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name(),
@@ -83,42 +83,93 @@ public class QueryEventHandlerContextIT {
                 ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name(),
                 ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name(),
                 ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name()
-        );
+            );
 
-        assertThat(handlers.get(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name())).isInstanceOf(ProcessDeployedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name())).isInstanceOf(ProcessCreatedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name())).isInstanceOf(ProcessStartedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name())).isInstanceOf(ProcessCompletedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name())).isInstanceOf(ProcessSuspendedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name())).isInstanceOf(ProcessResumedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name())).isInstanceOf(ProcessCancelledEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name())).isInstanceOf(ProcessUpdatedEventHandler.class);
-        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name())).isInstanceOf(ProcessDeletedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name())).isInstanceOf(TaskCreatedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())).isInstanceOf(TaskAssignedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name())).isInstanceOf(TaskSuspendedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name())).isInstanceOf(TaskActivatedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name())).isInstanceOf(TaskCompletedEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name())).isInstanceOf(TaskCancelledEventHandler.class);
-        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name())).isInstanceOf(TaskUpdatedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name())).isInstanceOf(TaskCandidateUserAddedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name())).isInstanceOf(TaskCandidateGroupAddedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name())).isInstanceOf(TaskCandidateUserRemovedEventHandler.class);
-        assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name())).isInstanceOf(TaskCandidateGroupRemovedEventHandler.class);
-        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_CREATED.name())).isInstanceOf(VariableCreatedEventHandler.class);
-        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_UPDATED.name())).isInstanceOf(VariableUpdatedEventHandler.class);
-        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_DELETED.name())).isInstanceOf(VariableDeletedEventHandler.class);
-        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name())).isInstanceOf(BPMNActivityStartedEventHandler.class);
-        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name())).isInstanceOf(BPMNActivityCompletedEventHandler.class);
-        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name())).isInstanceOf(BPMNActivityCancelledEventHandler.class);
-        assertThat(handlers.get(SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name())).isInstanceOf(BPMNSequenceFlowTakenEventHandler.class);
-        assertThat(handlers.get(IntegrationEvents.INTEGRATION_REQUESTED.name())).isInstanceOf(IntegrationRequestedEventHandler.class);
-        assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name())).isInstanceOf(IntegrationResultReceivedEventHandler.class);
-        assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name())).isInstanceOf(IntegrationErrorReceivedEventHandler.class);
-        assertThat(handlers.get(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name())).isInstanceOf(ApplicationDeployedEventHandler.class);
-        assertThat(handlers.get(ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name())).isInstanceOf(ProcessCandidateStarterUserAddedEventHandler.class);
-        assertThat(handlers.get(ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name())).isInstanceOf(ProcessCandidateStarterUserRemovedEventHandler.class);
-        assertThat(handlers.get(ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name())).isInstanceOf(ProcessCandidateStarterGroupAddedEventHandler.class);
-        assertThat(handlers.get(ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name())).isInstanceOf(ProcessCandidateStarterGroupRemovedEventHandler.class);
+        assertThat(handlers.get(ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED.name()))
+            .isInstanceOf(ProcessDeployedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED.name()))
+            .isInstanceOf(ProcessCreatedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED.name()))
+            .isInstanceOf(ProcessStartedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name()))
+            .isInstanceOf(ProcessCompletedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_SUSPENDED.name()))
+            .isInstanceOf(ProcessSuspendedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_RESUMED.name()))
+            .isInstanceOf(ProcessResumedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED.name()))
+            .isInstanceOf(ProcessCancelledEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_UPDATED.name()))
+            .isInstanceOf(ProcessUpdatedEventHandler.class);
+        assertThat(handlers.get(ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name()))
+            .isInstanceOf(ProcessDeletedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CREATED.name()))
+            .isInstanceOf(TaskCreatedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name()))
+            .isInstanceOf(TaskAssignedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_SUSPENDED.name()))
+            .isInstanceOf(TaskSuspendedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_ACTIVATED.name()))
+            .isInstanceOf(TaskActivatedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_COMPLETED.name()))
+            .isInstanceOf(TaskCompletedEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name()))
+            .isInstanceOf(TaskCancelledEventHandler.class);
+        assertThat(handlers.get(TaskRuntimeEvent.TaskEvents.TASK_UPDATED.name()))
+            .isInstanceOf(TaskUpdatedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name()))
+            .isInstanceOf(TaskCandidateUserAddedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name()))
+            .isInstanceOf(TaskCandidateGroupAddedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED.name()))
+            .isInstanceOf(TaskCandidateUserRemovedEventHandler.class);
+        assertThat(handlers.get(TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_REMOVED.name()))
+            .isInstanceOf(TaskCandidateGroupRemovedEventHandler.class);
+        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_CREATED.name()))
+            .isInstanceOf(VariableCreatedEventHandler.class);
+        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_UPDATED.name()))
+            .isInstanceOf(VariableUpdatedEventHandler.class);
+        assertThat(handlers.get(VariableEvent.VariableEvents.VARIABLE_DELETED.name()))
+            .isInstanceOf(VariableDeletedEventHandler.class);
+        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name()))
+            .isInstanceOf(BPMNActivityStartedEventHandler.class);
+        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED.name()))
+            .isInstanceOf(BPMNActivityCompletedEventHandler.class);
+        assertThat(handlers.get(BPMNActivityEvent.ActivityEvents.ACTIVITY_CANCELLED.name()))
+            .isInstanceOf(BPMNActivityCancelledEventHandler.class);
+        assertThat(handlers.get(SequenceFlowEvent.SequenceFlowEvents.SEQUENCE_FLOW_TAKEN.name()))
+            .isInstanceOf(BPMNSequenceFlowTakenEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_REQUESTED.name()))
+            .isInstanceOf(IntegrationRequestedEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_RESULT_RECEIVED.name()))
+            .isInstanceOf(IntegrationResultReceivedEventHandler.class);
+        assertThat(handlers.get(IntegrationEvents.INTEGRATION_ERROR_RECEIVED.name()))
+            .isInstanceOf(IntegrationErrorReceivedEventHandler.class);
+        assertThat(handlers.get(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()))
+            .isInstanceOf(ApplicationDeployedEventHandler.class);
+        assertThat(
+            handlers.get(
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name()
+            )
+        )
+            .isInstanceOf(ProcessCandidateStarterUserAddedEventHandler.class);
+        assertThat(
+            handlers.get(
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name()
+            )
+        )
+            .isInstanceOf(ProcessCandidateStarterUserRemovedEventHandler.class);
+        assertThat(
+            handlers.get(
+                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name()
+            )
+        )
+            .isInstanceOf(ProcessCandidateStarterGroupAddedEventHandler.class);
+        assertThat(
+            handlers.get(
+                ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name()
+            )
+        )
+            .isInstanceOf(ProcessCandidateStarterGroupRemovedEventHandler.class);
     }
 }

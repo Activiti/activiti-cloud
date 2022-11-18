@@ -20,21 +20,24 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupRemovedEvent;
 
-public class CloudProcessCandidateStarterGroupRemovedEventImpl extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
+public class CloudProcessCandidateStarterGroupRemovedEventImpl
+    extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
     implements CloudProcessCandidateStarterGroupRemovedEvent {
 
     public CloudProcessCandidateStarterGroupRemovedEventImpl() {}
 
-    public CloudProcessCandidateStarterGroupRemovedEventImpl(ProcessCandidateStarterGroup processCandidateStarterGroup) {
+    public CloudProcessCandidateStarterGroupRemovedEventImpl(
+        ProcessCandidateStarterGroup processCandidateStarterGroup
+    ) {
         super(processCandidateStarterGroup);
     }
 
-    public CloudProcessCandidateStarterGroupRemovedEventImpl(String id,
-                                                             Long timestamp,
-                                                             ProcessCandidateStarterGroup processCandidateStarterGroup) {
-        super(id,
-              timestamp,
-              processCandidateStarterGroup);
+    public CloudProcessCandidateStarterGroupRemovedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessCandidateStarterGroup processCandidateStarterGroup
+    ) {
+        super(id, timestamp, processCandidateStarterGroup);
         setEntityId(processCandidateStarterGroup.getGroupId());
     }
 

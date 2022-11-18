@@ -43,12 +43,14 @@ public class ServiceTaskIntegrationResultEventHandler {
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final VariablesPropagator variablesPropagator;
 
-    public ServiceTaskIntegrationResultEventHandler(RuntimeService runtimeService,
+    public ServiceTaskIntegrationResultEventHandler(
+        RuntimeService runtimeService,
         IntegrationContextService integrationContextService,
         RuntimeBundleProperties runtimeBundleProperties,
         ManagementService managementService,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        VariablesPropagator variablesPropagator) {
+        VariablesPropagator variablesPropagator
+    ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
         this.runtimeBundleProperties = runtimeBundleProperties;
@@ -60,48 +62,64 @@ public class ServiceTaskIntegrationResultEventHandler {
     @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
-        IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
+        IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
+            integrationContext.getId()
+        );
 
         String executionId = integrationContext.getExecutionId();
-        List<Execution> executions = runtimeService.createExecutionQuery()
-                                                   .executionId(executionId)
-                                                   .list();
+        List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
         if (integrationContextEntity != null) {
             integrationContextService.deleteIntegrationContext(integrationContextEntity);
 
             if (executions.size() > 0) {
                 Execution execution = executions.get(0);
 
-                if (execution.getActivityId()
-                             .equals(integrationContext.getClientId())) {
+                if (execution.getActivityId().equals(integrationContext.getClientId())) {
                     triggerIntegrationContextExecution(integrationContext);
                     return;
                 } else {
-                    LOGGER.warn("Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
-                                integrationContext.getClientId(),
-                                integrationResult,
-                                execution.getId());
+                    LOGGER.warn(
+                        "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
+                        integrationContext.getClientId(),
+                        integrationResult,
+                        execution.getId()
+                    );
                 }
             } else {
-                String message = "No task is in this RB is waiting for integration result with execution id `" +
+                String message =
+                    "No task is in this RB is waiting for integration result with execution id `" +
                     executionId +
-                    ", flow node id `" + integrationContext.getClientId() +
-                    "`. The integration result for the integration context `" + integrationContext.getId() + "` will be ignored.";
+                    ", flow node id `" +
+                    integrationContext.getClientId() +
+                    "`. The integration result for the integration context `" +
+                    integrationContext.getId() +
+                    "` will be ignored.";
                 LOGGER.warn(message);
             }
-            managementService.executeCommand(new AggregateIntegrationResultReceivedEventCmd(
-                integrationContext, runtimeBundleProperties, processEngineEventsAggregator));
+            managementService.executeCommand(
+                new AggregateIntegrationResultReceivedEventCmd(
+                    integrationContext,
+                    runtimeBundleProperties,
+                    processEngineEventsAggregator
+                )
+            );
         }
     }
 
     private void triggerIntegrationContextExecution(IntegrationContext integrationContext) {
         managementService.executeCommand(
             CompositeCommand.of(
-                new TriggerCmd(integrationContext.getExecutionId(), integrationContext.getOutBoundVariables(),
-                    variablesPropagator),
-                new AggregateIntegrationResultReceivedEventCmd(integrationContext,
-                    runtimeBundleProperties, processEngineEventsAggregator)
-            ));
+                new TriggerCmd(
+                    integrationContext.getExecutionId(),
+                    integrationContext.getOutBoundVariables(),
+                    variablesPropagator
+                ),
+                new AggregateIntegrationResultReceivedEventCmd(
+                    integrationContext,
+                    runtimeBundleProperties,
+                    processEngineEventsAggregator
+                )
+            )
+        );
     }
-
 }

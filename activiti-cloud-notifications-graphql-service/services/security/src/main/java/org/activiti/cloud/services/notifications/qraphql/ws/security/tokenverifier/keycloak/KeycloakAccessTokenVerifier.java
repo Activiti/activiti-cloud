@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.keycloak;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -25,11 +26,9 @@ import java.util.Base64.Decoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
-import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.keycloak.TokenVerifier;
 import org.keycloak.common.VerificationException;
 import org.keycloak.jose.jws.JWSHeader;
@@ -39,7 +38,7 @@ public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
 
     private final KeycloakProperties config;
     private final ConcurrentHashMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public KeycloakAccessTokenVerifier(KeycloakProperties config) {
         this.config = config;
@@ -54,12 +53,12 @@ public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
      */
     @SuppressWarnings("deprecation")
     public GraphQLAccessToken verifyToken(String tokenString) throws Exception {
-
         TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(tokenString, AccessToken.class);
 
         PublicKey pk = getPublicKey(tokenVerifier.getHeader());
 
-        AccessToken accessToken = tokenVerifier.withDefaultChecks()
+        AccessToken accessToken = tokenVerifier
+            .withDefaultChecks()
             .realmUrl(getRealmUrl())
             .publicKey(pk)
             .verify()
@@ -73,8 +72,10 @@ public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     }
 
     protected PublicKey getPublicKey(JWSHeader jwsHeader) {
-        return publicKeys.computeIfAbsent(getRealmCertsUrl(),
-                                          (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
+        return publicKeys.computeIfAbsent(
+            getRealmCertsUrl(),
+            url -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader)
+        );
     }
 
     @SuppressWarnings("unchecked")
@@ -104,7 +105,6 @@ public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
             BigInteger publicExponent = new BigInteger(1, urlDecoder.decode(exponentBase64));
 
             return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,5 +118,4 @@ public class KeycloakAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     public String getRealmCertsUrl() {
         return getRealmUrl() + "/protocol/openid-connect/certs";
     }
-
 }

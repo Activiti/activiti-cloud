@@ -32,19 +32,21 @@ public class ClientCredentialsAuthConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
-                                                                                           ClientRegistrationRepository clientRegistrationRepository,
-                                                                                           ClientRegistration clientRegistration) {
+    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(
+        OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
+        ClientRegistrationRepository clientRegistrationRepository,
+        ClientRegistration clientRegistration
+    ) {
+        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+            clientRegistrationRepository,
+            oAuth2AuthorizedClientService
+        );
 
-        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
-            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
-
-
-        OAuth2AuthorizedClientProvider authorizedClientProvider =
-            OAuth2AuthorizedClientProviderBuilder.builder()
-                .refreshToken()
-                .clientCredentials()
-                .build();
+        OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder
+            .builder()
+            .refreshToken()
+            .clientCredentials()
+            .build();
 
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
@@ -53,9 +55,10 @@ public class ClientCredentialsAuthConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ClientRegistration clientRegistration(ClientRegistrationRepository clientRegistrationRepository,
-                                                 @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName) {
+    public ClientRegistration clientRegistration(
+        ClientRegistrationRepository clientRegistrationRepository,
+        @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName
+    ) {
         return clientRegistrationRepository.findByRegistrationId(clientName);
     }
-
 }

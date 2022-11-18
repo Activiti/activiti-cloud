@@ -34,5 +34,4 @@ public class QueryRepositoryAutoConfiguration {
     public EntityFinder entityFinder() {
         return new EntityFinder();
     }
-
 }

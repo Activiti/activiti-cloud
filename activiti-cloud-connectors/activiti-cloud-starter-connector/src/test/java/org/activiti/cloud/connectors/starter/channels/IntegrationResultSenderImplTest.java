@@ -53,8 +53,10 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-                integrationRequest.getIntegrationContext());
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(
+            integrationRequest,
+            integrationRequest.getIntegrationContext()
+        );
 
         given(resolver.resolveDestination(integrationRequest)).willReturn(messageChannel);
 
@@ -66,5 +68,4 @@ public class IntegrationResultSenderImplTest {
         //then
         verify(messageChannel).send(message);
     }
-
 }

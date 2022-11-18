@@ -39,11 +39,9 @@ public class KeycloakResourceJwtAdapterTest {
     @InjectMocks
     KeycloakResourceJwtAdapter keycloakResourceJwtAdapter;
 
-
     @BeforeEach
     public void setUp() {
-        ReflectionTestUtils.setField(keycloakResourceJwtAdapter, "resourceId",
-            "app");
+        ReflectionTestUtils.setField(keycloakResourceJwtAdapter, "resourceId", "app");
     }
 
     @Test
@@ -53,7 +51,7 @@ public class KeycloakResourceJwtAdapterTest {
     }
 
     @Test
-    public void shouldNotThrowAnyExceptionWhenRolesIsNull(){
+    public void shouldNotThrowAnyExceptionWhenRolesIsNull() {
         JSONObject rolesParent = new JSONObject();
         rolesParent.put("roles", null);
         when(jwt.hasClaim("resource_access")).thenReturn(true);
@@ -63,7 +61,7 @@ public class KeycloakResourceJwtAdapterTest {
     }
 
     @Test
-    public void shouldReturnRoles(){
+    public void shouldReturnRoles() {
         JSONObject client = new JSONObject();
         JSONObject roles = new JSONObject();
         roles.put("roles", List.of("roleA", "roleB"));
@@ -71,9 +69,6 @@ public class KeycloakResourceJwtAdapterTest {
         when(jwt.hasClaim("resource_access")).thenReturn(true);
         when(jwt.getClaim("resource_access")).thenReturn(client);
 
-        assertThat(keycloakResourceJwtAdapter.getRoles())
-            .hasSize(2)
-            .containsExactly("roleA", "roleB");
+        assertThat(keycloakResourceJwtAdapter.getRoles()).hasSize(2).containsExactly("roleA", "roleB");
     }
-
 }

@@ -21,9 +21,10 @@ public class AuditProducerRoutingKeyResolver extends AbstractMessageHeadersRouti
 
     public final String ROUTING_KEY_PREFIX = "engineEvents";
 
-    public final String[] HEADER_KEYS = {RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
-                                         RuntimeBundleInfoMessageHeaders.APP_NAME
-                                        };
+    public final String[] HEADER_KEYS = {
+        RuntimeBundleInfoMessageHeaders.SERVICE_NAME,
+        RuntimeBundleInfoMessageHeaders.APP_NAME
+    };
 
     @Override
     public String resolve(Map<String, Object> headers) {
@@ -34,5 +35,4 @@ public class AuditProducerRoutingKeyResolver extends AbstractMessageHeadersRouti
     public String getPrefix() {
         return ROUTING_KEY_PREFIX;
     }
-
 }

@@ -15,23 +15,22 @@
  */
 package org.activiti.cloud.acc.core.helper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 public class SvgToPng {
 
-    public static byte[] svgToPng(byte[] streamBytes)
-            throws TranscoderException, IOException {
-        try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            new PNGTranscoder().transcode(new TranscoderInput(input),
-                    new TranscoderOutput(output));
+    public static byte[] svgToPng(byte[] streamBytes) throws TranscoderException, IOException {
+        try (
+            ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
+            ByteArrayOutputStream output = new ByteArrayOutputStream()
+        ) {
+            new PNGTranscoder().transcode(new TranscoderInput(input), new TranscoderOutput(output));
             output.flush();
             return output.toByteArray();
         }

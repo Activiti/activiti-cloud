@@ -42,12 +42,15 @@ public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(BindingServiceProperties bindingServiceProperties,
-                                                                                             ConnectorImplementationsProvider destinationsProvider,
-                                                                                             ConnectorDestinationMappingStrategy destinationMappingStrategy) {
-        return new ConnectorMessagingDestinationsConfigurer(destinationsProvider,
-                                                            destinationMappingStrategy,
-                                                            bindingServiceProperties);
+    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(
+        BindingServiceProperties bindingServiceProperties,
+        ConnectorImplementationsProvider destinationsProvider,
+        ConnectorDestinationMappingStrategy destinationMappingStrategy
+    ) {
+        return new ConnectorMessagingDestinationsConfigurer(
+            destinationsProvider,
+            destinationMappingStrategy,
+            bindingServiceProperties
+        );
     }
-
 }

@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.io.Serializable;
-
-import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
-import org.activiti.api.model.shared.model.VariableInstance;
-import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
-import org.junit.jupiter.api.Test;
-
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
 import static org.activiti.test.Assertions.assertThat;
+
+import java.io.Serializable;
+import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.cloud.services.audit.jpa.converters.json.VariableJpaJsonConverter;
+import org.junit.jupiter.api.Test;
 
 public class VariablesJpaJsonConverterTest {
 
@@ -32,79 +31,91 @@ public class VariablesJpaJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
         //given
-        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>("var-name",
-                                                                 "String",
-                                                                 "my string value",
-                                                                 "proc-inst-id", "task-id");
+        VariableInstanceImpl<String> variable = new VariableInstanceImpl<>(
+            "var-name",
+            "String",
+            "my string value",
+            "proc-inst-id",
+            "task-id"
+        );
 
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);
 
         //then
         assertThatJson(jsonRepresentation)
-                .node("name").isEqualTo("var-name")
-                .node("type").isEqualTo("String")
-                .node("value").isEqualTo("my string value")
-                .node("taskId").isEqualTo("task-id")
-                .node("processInstanceId").isEqualTo("proc-inst-id");
+            .node("name")
+            .isEqualTo("var-name")
+            .node("type")
+            .isEqualTo("String")
+            .node("value")
+            .isEqualTo("my string value")
+            .node("taskId")
+            .isEqualTo("task-id")
+            .node("processInstanceId")
+            .isEqualTo("proc-inst-id");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateAProcessInstanceWithFieldsSet() throws Exception {
         //given
         String jsonRepresentation =
-                "{\"name\":\"var-name\"," +
-                        "\"type\":\"String\"," +
-                        "\"value\":\"my string value\"," +
-                        "\"taskId\":\"task-id\"," +
-                        "\"processInstanceId\":\"proc-inst-id\"}";
+            "{\"name\":\"var-name\"," +
+            "\"type\":\"String\"," +
+            "\"value\":\"my string value\"," +
+            "\"taskId\":\"task-id\"," +
+            "\"processInstanceId\":\"proc-inst-id\"}";
 
         //when
         VariableInstance variableInstance = converter.convertToEntityAttribute(jsonRepresentation);
 
         //then
         assertThat(variableInstance)
-                .isNotNull()
-                .hasType("String")
-                .hasName("var-name")
-                .hasValue("my string value")
-                .hasProcessInstanceId("proc-inst-id")
-                .hasTaskId("task-id");
+            .isNotNull()
+            .hasType("String")
+            .hasName("var-name")
+            .hasValue("my string value")
+            .hasProcessInstanceId("proc-inst-id")
+            .hasTaskId("task-id");
     }
 
     @Test
     public void converterShouldDealWithDifferentTypes() throws Exception {
-
         Invoice invoice = new Invoice("inv-id", "customer");
         //given
-        VariableInstanceImpl variable = new VariableInstanceImpl("var-name",
-                                                                 "Invoice",
-                                                                 invoice,
-                                                                 "proc-inst-id", "task-id");
+        VariableInstanceImpl variable = new VariableInstanceImpl(
+            "var-name",
+            "Invoice",
+            invoice,
+            "proc-inst-id",
+            "task-id"
+        );
 
         //when
         String jsonRepresentation = converter.convertToDatabaseColumn(variable);
 
         //then
         assertThatJson(jsonRepresentation)
-                .node("name").isEqualTo("var-name")
-                .node("type").isEqualTo("Invoice")
-                .node("value").isEqualTo(invoice)
-                .node("taskId").isEqualTo("task-id")
-                .node("processInstanceId").isEqualTo("proc-inst-id");
+            .node("name")
+            .isEqualTo("var-name")
+            .node("type")
+            .isEqualTo("Invoice")
+            .node("value")
+            .isEqualTo(invoice)
+            .node("taskId")
+            .isEqualTo("task-id")
+            .node("processInstanceId")
+            .isEqualTo("proc-inst-id");
     }
 
+    private class Invoice implements Serializable {
 
-
-    private class Invoice implements Serializable{
         private String id;
         private String customer;
 
-        public Invoice() {
-        }
+        public Invoice() {}
 
-        public Invoice(String id,
-                       String customer) {
+        public Invoice(String id, String customer) {
             this.id = id;
             this.customer = customer;
         }

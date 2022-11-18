@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -45,6 +44,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
@@ -55,10 +58,6 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskActivatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskAssignedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
@@ -70,7 +69,6 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
-
 
 public class CloudRuntimeEventRegistry {
 
@@ -125,16 +123,19 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudProcessCandidateStarterGroupAddedEventImpl());
         eventImplementations.add(new CloudProcessCandidateStarterGroupRemovedEventImpl());
         return eventImplementations
-                .stream()
-                .collect(Collectors.toMap(
-                        event -> event.getEventType().name(),
-                        this::findInterface));
+            .stream()
+            .collect(Collectors.toMap(event -> event.getEventType().name(), this::findInterface));
     }
 
     private Class<?> findInterface(RuntimeEvent<?, ?> eventImplementationClass) {
-        return Arrays.stream(eventImplementationClass.getClass().getInterfaces())
-                .filter(eventInterFace ->
-                                eventImplementationClass.getClass().getSimpleName().contains(eventInterFace.getSimpleName()))
-                .findFirst().orElseThrow(() -> new IllegalStateException("Unable to find interface for " + eventImplementationClass.getClass()));
+        return Arrays
+            .stream(eventImplementationClass.getClass().getInterfaces())
+            .filter(eventInterFace ->
+                eventImplementationClass.getClass().getSimpleName().contains(eventInterFace.getSimpleName())
+            )
+            .findFirst()
+            .orElseThrow(() ->
+                new IllegalStateException("Unable to find interface for " + eventImplementationClass.getClass())
+            );
     }
 }

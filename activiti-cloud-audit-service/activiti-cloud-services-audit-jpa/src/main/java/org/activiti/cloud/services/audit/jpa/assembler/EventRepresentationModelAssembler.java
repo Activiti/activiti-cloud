@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.audit.jpa.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
@@ -22,16 +25,15 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-public class EventRepresentationModelAssembler implements RepresentationModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>, EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> {
+public class EventRepresentationModelAssembler
+    implements
+        RepresentationModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>, EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>>> {
 
     @Override
-    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> toModel(CloudRuntimeEvent<?, CloudRuntimeEventType> event) {
+    public EntityModel<CloudRuntimeEvent<?, CloudRuntimeEventType>> toModel(
+        CloudRuntimeEvent<?, CloudRuntimeEventType> event
+    ) {
         Link selfRel = linkTo(methodOn(AuditEventsControllerImpl.class).findById(event.getId())).withSelfRel();
-        return EntityModel.of(event,
-                              selfRel);
+        return EntityModel.of(event, selfRel);
     }
-
 }

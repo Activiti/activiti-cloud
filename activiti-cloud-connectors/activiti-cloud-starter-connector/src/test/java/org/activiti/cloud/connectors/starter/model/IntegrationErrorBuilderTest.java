@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.model;
 
+import static org.activiti.test.Assertions.assertThat;
+
+import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
@@ -23,10 +26,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-
-import java.util.Collections;
-
-import static org.activiti.test.Assertions.assertThat;
 
 public class IntegrationErrorBuilderTest {
 
@@ -54,20 +53,18 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        IntegrationError integrationError = IntegrationErrorBuilder.errorFor(integrationRequestEvent,
-                                                                             connectorProperties,
-                                                                             error)
-                                                                   .build();
+        IntegrationError integrationError = IntegrationErrorBuilder
+            .errorFor(integrationRequestEvent, connectorProperties, error)
+            .build();
         //then
         assertThat(integrationError)
-                .hasIntegrationContext(integrationContext)
-                .hasIntegrationRequest(integrationRequestEvent)
-                .hasErrorClassName("java.lang.Error")
-                .hasErrorMessage("Boom!")
-                .hasStackTraceElements(error.getStackTrace());
+            .hasIntegrationContext(integrationContext)
+            .hasIntegrationRequest(integrationRequestEvent)
+            .hasErrorClassName("java.lang.Error")
+            .hasErrorMessage("Boom!")
+            .hasStackTraceElements(error.getStackTrace());
 
-        assertThat(integrationContext)
-                .hasClientId(ACTIVITY_ELEMENT_ID);
+        assertThat(integrationContext).hasClientId(ACTIVITY_ELEMENT_ID);
     }
 
     @Test
@@ -86,15 +83,15 @@ public class IntegrationErrorBuilderTest {
         integrationRequestEvent.setServiceFullName(RB_NAME);
 
         //when
-        Message<IntegrationError> message = IntegrationErrorBuilder.errorFor(integrationRequestEvent,
-                                                                             connectorProperties,
-                                                                             error)
-                                                                   .buildMessage();
+        Message<IntegrationError> message = IntegrationErrorBuilder
+            .errorFor(integrationRequestEvent, connectorProperties, error)
+            .buildMessage();
 
         //then
-        Assertions.assertThat(message.getHeaders())
-                  .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
-                  .containsEntry("targetService", RB_NAME)
-                  .containsEntry("targetAppName", APP_NAME);
+        Assertions
+            .assertThat(message.getHeaders())
+            .containsEntry(MessageHeaders.CONTENT_TYPE, "application/json")
+            .containsEntry("targetService", RB_NAME)
+            .containsEntry("targetAppName", APP_NAME);
     }
 }

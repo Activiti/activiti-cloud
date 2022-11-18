@@ -34,7 +34,5 @@ import org.activiti.engine.query.Query;
 import org.springframework.data.domain.Pageable;
 
 public interface SortApplier<T extends Query<?, ?>> {
-
     void applySort(T query, Pageable pageable);
-
 }

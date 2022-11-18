@@ -262,10 +262,10 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public void addOutBoundVariable(String name,
-                                    Object value) {
+    public void addOutBoundVariable(String name, Object value) {
         outBoundVariables.put(name, value);
     }
+
     @Override
     public void addOutBoundVariables(Map<String, Object> variables) {
         outBoundVariables.putAll(variables);
@@ -274,62 +274,59 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name) {
-        return Optional.ofNullable(inBoundVariables)
-                       .map(it -> (T) inBoundVariables.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(inBoundVariables)
-                       .map(it -> (T) inBoundVariables.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name) {
-        return Optional.ofNullable(outBoundVariables)
-                       .map(it -> (T) it.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(outBoundVariables)
-                       .map(it -> (T) it.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(businessKey,
-                                               clientId,
-                                               clientName,
-                                               clientType,
-                                               connectorType,
-                                               errorClassName,
-                                               errorDate,
-                                               errorCode,
-                                               errorMessage,
-                                               executionId,
-                                               id,
-                                               inBoundVariables,
-                                               outBoundVariables,
-                                               parentProcessInstanceId,
-                                               rootProcessInstanceId,
-                                               processDefinitionId,
-                                               processDefinitionKey,
-                                               processDefinitionVersion,
-                                               processInstanceId,
-                                               requestDate,
-                                               resultDate,
-                                               stackTraceElements,
-                                               status);
+        result =
+            prime *
+            result +
+            Objects.hash(
+                businessKey,
+                clientId,
+                clientName,
+                clientType,
+                connectorType,
+                errorClassName,
+                errorDate,
+                errorCode,
+                errorMessage,
+                executionId,
+                id,
+                inBoundVariables,
+                outBoundVariables,
+                parentProcessInstanceId,
+                rootProcessInstanceId,
+                processDefinitionId,
+                processDefinitionKey,
+                processDefinitionVersion,
+                processInstanceId,
+                requestDate,
+                resultDate,
+                stackTraceElements,
+                status
+            );
         return result;
     }
 
@@ -345,82 +342,85 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
             return false;
         }
         CloudIntegrationContextImpl other = (CloudIntegrationContextImpl) obj;
-        return Objects.equals(businessKey, other.businessKey) &&
-               Objects.equals(clientId, other.clientId) &&
-               Objects.equals(clientName, other.clientName) &&
-               Objects.equals(clientType, other.clientType) &&
-               Objects.equals(connectorType, other.connectorType) &&
-               Objects.equals(errorClassName, other.errorClassName) &&
-               Objects.equals(errorDate, other.errorDate) &&
-               Objects.equals(errorCode, other.errorCode) &&
-               Objects.equals(errorMessage, other.errorMessage) &&
-               Objects.equals(executionId, other.executionId) &&
-               Objects.equals(id, other.id) &&
-               Objects.equals(inBoundVariables, other.inBoundVariables) &&
-               Objects.equals(outBoundVariables, other.outBoundVariables) &&
-               Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
-               Objects.equals(processDefinitionId, other.processDefinitionId) &&
-               Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
-               Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
-               Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
-               Objects.equals(processInstanceId, other.processInstanceId) &&
-               Objects.equals(requestDate, other.requestDate) &&
-               Objects.equals(resultDate, other.resultDate) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements) &&
-               status == other.status;
+        return (
+            Objects.equals(businessKey, other.businessKey) &&
+            Objects.equals(clientId, other.clientId) &&
+            Objects.equals(clientName, other.clientName) &&
+            Objects.equals(clientType, other.clientType) &&
+            Objects.equals(connectorType, other.connectorType) &&
+            Objects.equals(errorClassName, other.errorClassName) &&
+            Objects.equals(errorDate, other.errorDate) &&
+            Objects.equals(errorCode, other.errorCode) &&
+            Objects.equals(errorMessage, other.errorMessage) &&
+            Objects.equals(executionId, other.executionId) &&
+            Objects.equals(id, other.id) &&
+            Objects.equals(inBoundVariables, other.inBoundVariables) &&
+            Objects.equals(outBoundVariables, other.outBoundVariables) &&
+            Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
+            Objects.equals(processDefinitionId, other.processDefinitionId) &&
+            Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+            Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+            Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
+            Objects.equals(processInstanceId, other.processInstanceId) &&
+            Objects.equals(requestDate, other.requestDate) &&
+            Objects.equals(resultDate, other.resultDate) &&
+            Objects.equals(stackTraceElements, other.stackTraceElements) &&
+            status == other.status
+        );
     }
 
     @Override
     public String toString() {
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudIntegrationContextImpl [id=")
-               .append(id)
-               .append(", rootProcessInstanceId=")
-               .append(rootProcessInstanceId)
-               .append(", processInstanceId=")
-               .append(processInstanceId)
-               .append(", parentProcessInstanceId=")
-               .append(parentProcessInstanceId)
-               .append(", executionId=")
-               .append(executionId)
-               .append(", processDefinitionId=")
-               .append(processDefinitionId)
-               .append(", processDefinitionKey=")
-               .append(processDefinitionKey)
-               .append(", processDefinitionVersion=")
-               .append(processDefinitionVersion)
-               .append(", businessKey=")
-               .append(businessKey)
-               .append(", clientId=")
-               .append(clientId)
-               .append(", clientName=")
-               .append(clientName)
-               .append(", clientType=")
-               .append(clientType)
-               .append(", connectorType=")
-               .append(connectorType)
-               .append(", requestDate=")
-               .append(requestDate)
-               .append(", resultDate=")
-               .append(resultDate)
-               .append(", errorDate=")
-               .append(errorDate)
-               .append(", errorCode=")
-               .append(errorCode)
-               .append(", errorMessage=")
-               .append(errorMessage)
-               .append(", errorClassName=")
-               .append(errorClassName)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
-               .append(", status=")
-               .append(status)
-               .append(", inBoundVariables=")
-               .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
-               .append(", outBoundVariables=")
-               .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
-               .append("]");
+        builder
+            .append("CloudIntegrationContextImpl [id=")
+            .append(id)
+            .append(", rootProcessInstanceId=")
+            .append(rootProcessInstanceId)
+            .append(", processInstanceId=")
+            .append(processInstanceId)
+            .append(", parentProcessInstanceId=")
+            .append(parentProcessInstanceId)
+            .append(", executionId=")
+            .append(executionId)
+            .append(", processDefinitionId=")
+            .append(processDefinitionId)
+            .append(", processDefinitionKey=")
+            .append(processDefinitionKey)
+            .append(", processDefinitionVersion=")
+            .append(processDefinitionVersion)
+            .append(", businessKey=")
+            .append(businessKey)
+            .append(", clientId=")
+            .append(clientId)
+            .append(", clientName=")
+            .append(clientName)
+            .append(", clientType=")
+            .append(clientType)
+            .append(", connectorType=")
+            .append(connectorType)
+            .append(", requestDate=")
+            .append(requestDate)
+            .append(", resultDate=")
+            .append(resultDate)
+            .append(", errorDate=")
+            .append(errorDate)
+            .append(", errorCode=")
+            .append(errorCode)
+            .append(", errorMessage=")
+            .append(errorMessage)
+            .append(", errorClassName=")
+            .append(errorClassName)
+            .append(", stackTraceElements=")
+            .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
+            .append(", status=")
+            .append(status)
+            .append(", inBoundVariables=")
+            .append(inBoundVariables != null ? toString(inBoundVariables.entrySet(), maxLen) : null)
+            .append(", outBoundVariables=")
+            .append(outBoundVariables != null ? toString(outBoundVariables.entrySet(), maxLen) : null)
+            .append("]");
         return builder.toString();
     }
 
@@ -437,6 +437,4 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
         builder.append("]");
         return builder.toString();
     }
-
-
 }

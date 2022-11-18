@@ -18,20 +18,22 @@ package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 
 public class SchemaTitleOpenApiCustomizer implements DefaultOpenApiCustomizer {
 
     @Override
     public void customise(OpenAPI openApi) {
-        Optional.ofNullable(openApi.getComponents())
+        Optional
+            .ofNullable(openApi.getComponents())
             .map(Components::getSchemas)
-            .ifPresent(schemas -> schemas.forEach((schemaName, schema) -> {
-                if (StringUtils.isBlank(schema.getTitle())) {
-                    schema.setTitle(schemaName);
-                }
-            }));
+            .ifPresent(schemas ->
+                schemas.forEach((schemaName, schema) -> {
+                    if (StringUtils.isBlank(schema.getTitle())) {
+                        schema.setTitle(schemaName);
+                    }
+                })
+            );
     }
 }

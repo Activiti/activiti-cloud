@@ -22,15 +22,13 @@ import org.springframework.validation.Validator;
 /**
  * Abstract payload validator.
  */
-public abstract class GenericPayloadValidator<T> implements Validator,
-                                                            ModelValidationErrorProducer {
+public abstract class GenericPayloadValidator<T> implements Validator, ModelValidationErrorProducer {
 
     protected boolean validateRequiredFields;
 
     protected Class<T> supportedClass;
 
-    public GenericPayloadValidator(Class<T> supportedClass,
-                                   boolean validateRequiredFields) {
+    public GenericPayloadValidator(Class<T> supportedClass, boolean validateRequiredFields) {
         this.supportedClass = supportedClass;
         this.validateRequiredFields = validateRequiredFields;
     }
@@ -41,12 +39,9 @@ public abstract class GenericPayloadValidator<T> implements Validator,
     }
 
     @Override
-    public void validate(Object target,
-                         Errors errors) {
-        validatePayload(supportedClass.cast(target),
-                        errors);
+    public void validate(Object target, Errors errors) {
+        validatePayload(supportedClass.cast(target), errors);
     }
 
-    protected abstract void validatePayload(T target,
-                                            Errors errors);
+    protected abstract void validatePayload(T target, Errors errors);
 }

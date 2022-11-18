@@ -22,6 +22,9 @@ import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -30,8 +33,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.Extensions;
@@ -54,8 +55,7 @@ public class MockFactory {
         return new ProjectEntity(name);
     }
 
-    public static ProjectEntity projectWithDescription(String name,
-                                                       String description) {
+    public static ProjectEntity projectWithDescription(String name, String description) {
         ProjectEntity project = new ProjectEntity(name);
         project.setDescription(description);
         return project;
@@ -69,50 +69,40 @@ public class MockFactory {
     }
 
     public static ModelEntity processModel(String name) {
-        return processModelWithExtensions(name,
-                                          null);
+        return processModelWithExtensions(name, null);
     }
 
-    public static ModelEntity processModel(ProjectEntity parentProject,
-                                           String name) {
+    public static ModelEntity processModel(ProjectEntity parentProject, String name) {
         ModelEntity model = processModel(name);
         model.addProject(parentProject);
         return model;
     }
 
-    public static ModelEntity processModelWithExtensions(String name,
-                                                         Map<String, Extensions> extensions) {
-        return processModelWithExtensions(null,
-                                          name,
-                                          extensions!=null ? extensions.get(name) : null);
+    public static ModelEntity processModelWithExtensions(String name, Map<String, Extensions> extensions) {
+        return processModelWithExtensions(null, name, extensions != null ? extensions.get(name) : null);
     }
 
-    public static ModelEntity processModelWithExtensions(String name,
-                                                         Extensions extensions,
-                                                         byte[] content) {
-        return processModelWithExtensions(null,
-                                          name,
-                                          extensions,
-                                          content);
+    public static ModelEntity processModelWithExtensions(String name, Extensions extensions, byte[] content) {
+        return processModelWithExtensions(null, name, extensions, content);
     }
 
-    public static ModelEntity processModelWithExtensions(ProjectEntity parentProject,
-                                                         String name,
-                                                         Extensions extensions) {
-        return processModelWithExtensions(parentProject,
-                                          name,
-                                          extensions,
-                                          null);
+    public static ModelEntity processModelWithExtensions(
+        ProjectEntity parentProject,
+        String name,
+        Extensions extensions
+    ) {
+        return processModelWithExtensions(parentProject, name, extensions, null);
     }
 
-    public static ModelEntity processModelWithExtensions(ProjectEntity parentProject,
-                                                         String name,
-                                                         Extensions extensions,
-                                                         byte[] content) {
-        ModelEntity processModel = new ModelEntity(name,
-                                                   PROCESS);
+    public static ModelEntity processModelWithExtensions(
+        ProjectEntity parentProject,
+        String name,
+        Extensions extensions,
+        byte[] content
+    ) {
+        ModelEntity processModel = new ModelEntity(name, PROCESS);
         processModel.addProject(parentProject);
-        processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
+        processModel.setExtensions(extensions != null ? buildExtensions(name, extensions) : null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(content);
@@ -126,47 +116,36 @@ public class MockFactory {
         return generatedExtension;
     }
 
-    public static ModelEntity processModelWithContent(String name,
-                                                      String content) {
-        return processModelWithContent(null,
-                                       name,
-                                       content);
+    public static ModelEntity processModelWithContent(String name, String content) {
+        return processModelWithContent(null, name, content);
     }
 
-    public static ModelEntity processModelWithContent(ProjectEntity project,
-                                                      String name,
-                                                      byte[] content) {
-        return processModelWithContent(project,
-                                       name,
-                                       new String(content));
+    public static ModelEntity processModelWithContent(ProjectEntity project, String name, byte[] content) {
+        return processModelWithContent(project, name, new String(content));
     }
 
-    public static ModelEntity processModelWithContent(ProjectEntity project,
-                                                      String name,
-                                                      String content) {
-        return processModelWithContent(project,
-                                       name,
-                                       null,
-                                       content);
+    public static ModelEntity processModelWithContent(ProjectEntity project, String name, String content) {
+        return processModelWithContent(project, name, null, content);
     }
 
-    public static ModelEntity processModelWithContent(ProjectEntity project,
-                                                      String name,
-                                                      Extensions extensions,
-                                                      byte[] content) {
-        return processModelWithContent(project,
-                                       name,
-                                       extensions,
-                                       new String(content));
+    public static ModelEntity processModelWithContent(
+        ProjectEntity project,
+        String name,
+        Extensions extensions,
+        byte[] content
+    ) {
+        return processModelWithContent(project, name, extensions, new String(content));
     }
 
-    public static ModelEntity processModelWithContent(ProjectEntity project,
-                                                      String name,
-                                                      Extensions extensions,
-                                                      String content) {
+    public static ModelEntity processModelWithContent(
+        ProjectEntity project,
+        String name,
+        Extensions extensions,
+        String content
+    ) {
         ModelEntity processModel = processModel(name);
         processModel.addProject(project);
-        processModel.setExtensions(extensions!=null? buildExtensions(name, extensions):null);
+        processModel.setExtensions(extensions != null ? buildExtensions(name, extensions) : null);
         if (content != null) {
             processModel.setContentType(CONTENT_TYPE_XML);
             processModel.setContent(content.getBytes());
@@ -176,36 +155,39 @@ public class MockFactory {
 
     public static Map<String, Extensions> extensions(byte[] bytes) {
         try {
-            return getExtensionMapFromJson(new ObjectMapper()
-                    .readValue(bytes,
-                               ModelEntity.class)
-                    .getExtensions());
+            return getExtensionMapFromJson(new ObjectMapper().readValue(bytes, ModelEntity.class).getExtensions());
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private static Map<String, Extensions> getExtensionMapFromJson(Map<String,Object> map) throws IOException {
+    private static Map<String, Extensions> getExtensionMapFromJson(Map<String, Object> map) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String exstensionJson = objectMapper.writeValueAsString(map);
         if (StringUtils.isEmpty(exstensionJson)) {
             return null;
         }
-        return objectMapper.readValue(exstensionJson, objectMapper.getTypeFactory().constructMapType(Map.class,String.class, Extensions.class));
+        return objectMapper.readValue(
+            exstensionJson,
+            objectMapper.getTypeFactory().constructMapType(Map.class, String.class, Extensions.class)
+        );
     }
 
-    public static Extensions extensions(String serviceTask,
-                                        String... processVariables) {
-        return extensions(serviceTask,
-                          processVariables(processVariables),
-                          inputsMappings(processVariables),
-                          outputsMappings(processVariables));
+    public static Extensions extensions(String serviceTask, String... processVariables) {
+        return extensions(
+            serviceTask,
+            processVariables(processVariables),
+            inputsMappings(processVariables),
+            outputsMappings(processVariables)
+        );
     }
 
-    public static Extensions extensions(String serviceTask,
-                                        Map<String, ProcessVariable> processVariables,
-                                        Map<String, ProcessVariableMapping> inputsMappings,
-                                        Map<String, ProcessVariableMapping> outputsMappings) {
+    public static Extensions extensions(
+        String serviceTask,
+        Map<String, ProcessVariable> processVariables,
+        Map<String, ProcessVariableMapping> inputsMappings,
+        Map<String, ProcessVariableMapping> outputsMappings
+    ) {
         Extensions extensions = new Extensions();
         TaskVariableMapping taskVariableMapping = new TaskVariableMapping();
         taskVariableMapping.setInputs(inputsMappings);
@@ -216,22 +198,22 @@ public class MockFactory {
     }
 
     public static Map<String, ProcessVariable> processVariables(String... processVariables) {
-        return Arrays.stream(processVariables)
-                .map(MockFactory::processVariable)
-                .collect(Collectors.toMap(ProcessVariable::getId,
-                                          Function.identity()));
+        return Arrays
+            .stream(processVariables)
+            .map(MockFactory::processVariable)
+            .collect(Collectors.toMap(ProcessVariable::getId, Function.identity()));
     }
 
     public static Map<String, ProcessVariableMapping> inputsMappings(String... processVariables) {
-        return Arrays.stream(processVariables)
-                .collect(Collectors.toMap(Function.identity(),
-                                          MockFactory::processVariableMapping));
+        return Arrays
+            .stream(processVariables)
+            .collect(Collectors.toMap(Function.identity(), MockFactory::processVariableMapping));
     }
 
     public static Map<String, ProcessVariableMapping> outputsMappings(String... processVariables) {
-        return Arrays.stream(processVariables)
-                .collect(Collectors.toMap(Function.identity(),
-                                          MockFactory::processVariableMapping));
+        return Arrays
+            .stream(processVariables)
+            .collect(Collectors.toMap(Function.identity(), MockFactory::processVariableMapping));
     }
 
     public static ProcessVariable processVariable(String name) {
@@ -248,8 +230,7 @@ public class MockFactory {
             value = new Date(0);
         } else if (name.startsWith("json")) {
             type = "json";
-            value = json("json-field-name",
-                         name);
+            value = json("json-field-name", name);
         } else {
             type = "string";
             value = name;
@@ -262,15 +243,13 @@ public class MockFactory {
         return processVariable;
     }
 
-    public static JsonNode json(String field,
-                                String value) {
+    public static JsonNode json(String field, String value) {
         return json("{\"" + field + "\": \"" + value + "\"}");
     }
 
     public static JsonNode json(String json) {
         try {
-            return new ObjectMapper().readValue(json,
-                                                JsonNode.class);
+            return new ObjectMapper().readValue(json, JsonNode.class);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -284,20 +263,14 @@ public class MockFactory {
     }
 
     public static ModelEntity connectorModel(String name) {
-        return new ModelEntity(name,
-                               ConnectorModelType.NAME);
+        return new ModelEntity(name, ConnectorModelType.NAME);
     }
 
-    public static ModelEntity connectorModel(ProjectEntity parentProject,
-                                             String name) {
-        return connectorModel(parentProject,
-                              name,
-                              null);
+    public static ModelEntity connectorModel(ProjectEntity parentProject, String name) {
+        return connectorModel(parentProject, name, null);
     }
 
-    public static ModelEntity connectorModel(ProjectEntity parentProject,
-                                             String name,
-                                             byte[] content) {
+    public static ModelEntity connectorModel(ProjectEntity parentProject, String name, byte[] content) {
         ModelEntity modelEntity = connectorModel(name);
         modelEntity.addProject(parentProject);
         if (content != null) {
@@ -311,47 +284,38 @@ public class MockFactory {
         return UUID.randomUUID().toString();
     }
 
-    public static FileContent processFileContent(String processName,
-                                                 byte[] content) {
-        return new FileContent(processName + "." + BPMN20_XML,
-                               CONTENT_TYPE_XML,
-                               content);
+    public static FileContent processFileContent(String processName, byte[] content) {
+        return new FileContent(processName + "." + BPMN20_XML, CONTENT_TYPE_XML, content);
     }
 
-    public static FileContent connectorFileContent(String connectorName,
-                                                   byte[] content) {
-        return new FileContent(connectorName + "." + JSON,
-                               CONTENT_TYPE_JSON,
-                               content);
+    public static FileContent connectorFileContent(String connectorName, byte[] content) {
+        return new FileContent(connectorName + "." + JSON, CONTENT_TYPE_JSON, content);
     }
 
-    public static FileContent processFileContentWithCallActivity(String mainProcessName,
-                                                                 Model callActivity,
-                                                                 byte[] content) {
-        return new FileContent(mainProcessName + "." + BPMN20_XML,
-                               CONTENT_TYPE_XML,
-                               new String(content)
-                                       .replaceFirst("calledElement=\".*\"",
-                                                     "calledElement=\"" + callActivity.getName() + "\"")
-                                       .getBytes());
+    public static FileContent processFileContentWithCallActivity(
+        String mainProcessName,
+        Model callActivity,
+        byte[] content
+    ) {
+        return new FileContent(
+            mainProcessName + "." + BPMN20_XML,
+            CONTENT_TYPE_XML,
+            new String(content)
+                .replaceFirst("calledElement=\".*\"", "calledElement=\"" + callActivity.getName() + "\"")
+                .getBytes()
+        );
     }
 
-    public static MockMultipartFile multipartExtensionsFile(Model model,
-                                                            byte[] content) {
-        return new MockMultipartFile("file",
-                                     model.getName() + "-extensions.json",
-                                     CONTENT_TYPE_JSON,
-                                     new String(content)
-                                             .replaceAll("\"id\": \".*\"",
-                                                         "\"id\": \"process-" + model.getId() + "\"")
-                                             .getBytes());
+    public static MockMultipartFile multipartExtensionsFile(Model model, byte[] content) {
+        return new MockMultipartFile(
+            "file",
+            model.getName() + "-extensions.json",
+            CONTENT_TYPE_JSON,
+            new String(content).replaceAll("\"id\": \".*\"", "\"id\": \"process-" + model.getId() + "\"").getBytes()
+        );
     }
 
-    public static MockMultipartFile multipartProcessFile(Model model,
-                                                         byte[] content) {
-        return new MockMultipartFile("file",
-                                     model.getName() + "." + BPMN20_XML,
-                                     CONTENT_TYPE_XML,
-                                     content);
+    public static MockMultipartFile multipartProcessFile(Model model, byte[] content) {
+        return new MockMultipartFile("file", model.getName() + "." + BPMN20_XML, CONTENT_TYPE_XML, content);
     }
 }

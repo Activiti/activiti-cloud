@@ -17,7 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties(prefix="org.activiti.cloud.services.notifications.graphql.subscriptions")
+@ConfigurationProperties(prefix = "org.activiti.cloud.services.notifications.graphql.subscriptions")
 public class GraphQLSubscriptionSchemaProperties {
 
     /**
@@ -122,6 +121,4 @@ public class GraphQLSubscriptionSchemaProperties {
     public void setClientPasscode(String relayPasscode) {
         this.clientPasscode = relayPasscode;
     }
-
-
 }

@@ -26,10 +26,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface TaskQueryService {
-
     @RequestLine("GET /v1/tasks?status={status}&id={taskId}")
-    PagedModel<CloudTask> queryTasksByIdAnsStatus(@Param("taskId") String taskId,
-                                                  @Param("status") Task.TaskStatus taskStatus);
+    PagedModel<CloudTask> queryTasksByIdAnsStatus(
+        @Param("taskId") String taskId,
+        @Param("status") Task.TaskStatus taskStatus
+    );
 
     @RequestLine("GET /v1/tasks?id={taskId}")
     PagedModel<CloudTask> getTask(@Param("taskId") String taskId);
@@ -46,7 +47,9 @@ public interface TaskQueryService {
     @Headers("Content-Type: application/json")
     PagedModel<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
-    @RequestLine("GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc")
+    @RequestLine(
+        "GET /v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc"
+    )
     @Headers("Content-Type: application/json")
     PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
@@ -59,8 +62,10 @@ public interface TaskQueryService {
     PagedModel<CloudTask> getNonStandaloneTasks();
 
     @RequestLine("GET /v1/tasks?name={taskName}&description={taskDescription}")
-    PagedModel<CloudTask> getTasksByNameAndDescription(@Param("taskName") String taskName,
-                                                       @Param("taskDescription") String taskDescription);
+    PagedModel<CloudTask> getTasksByNameAndDescription(
+        @Param("taskName") String taskName,
+        @Param("taskDescription") String taskDescription
+    );
 
     @RequestLine("GET /v1/tasks/{id}/variables")
     @Headers("Accept: application/hal+json;charset=UTF-8")
@@ -73,5 +78,4 @@ public interface TaskQueryService {
     @RequestLine("GET /v1/tasks/{taskId}/candidate-users")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     List<String> getTaskCandidateUsers(@Param("taskId") String taskId);
-
 }

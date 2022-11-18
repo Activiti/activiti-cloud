@@ -33,13 +33,10 @@ public class CommonSecurityAutoConfigurationIT {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class Application {
-
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
         assertThat(commonSecurityAutoConfiguration).isNotNull();
     }
-
 }

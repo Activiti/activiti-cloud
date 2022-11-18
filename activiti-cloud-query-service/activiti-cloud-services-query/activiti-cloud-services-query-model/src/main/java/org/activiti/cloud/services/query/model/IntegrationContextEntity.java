@@ -18,21 +18,27 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.*;
+import javax.persistence.*;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
-import java.util.*;
-
-@Entity(name="IntegrationContext")
-@Table(name="INTEGRATION_CONTEXT", indexes={
-    @Index(name="integration_context_status_idx", columnList="status", unique=false),
-    @Index(name="integration_context_processInstance_idx", columnList="processInstanceId", unique=false),
-    @Index(name="integration_context_processInstance_elementId_idx", columnList="processInstanceId,clientId,executionId", unique=true)
-})
+@Entity(name = "IntegrationContext")
+@Table(
+    name = "INTEGRATION_CONTEXT",
+    indexes = {
+        @Index(name = "integration_context_status_idx", columnList = "status", unique = false),
+        @Index(name = "integration_context_processInstance_idx", columnList = "processInstanceId", unique = false),
+        @Index(
+            name = "integration_context_processInstance_elementId_idx",
+            columnList = "processInstanceId,clientId,executionId",
+            unique = true
+        )
+    }
+)
 @DynamicInsert
 @DynamicUpdate
 public class IntegrationContextEntity extends ActivitiEntityMetadata implements CloudIntegrationContext {
@@ -43,11 +49,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String id;
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
-    @Column(columnDefinition="text", name = "inbound_variables")
+    @Column(columnDefinition = "text", name = "inbound_variables")
     private Map<String, Object> inBoundVariables = new HashMap<>();
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private Map<String, Object> outBoundVariables = new HashMap<>();
 
     private String rootProcessInstanceId;
@@ -80,7 +86,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String errorClassName;
 
     @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
 
     @JsonFormat(shape = Shape.STRING)
@@ -97,16 +103,14 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         this.id = UUID.randomUUID().toString();
     }
 
-    public IntegrationContextEntity(String serviceName,
-                                    String serviceFullName,
-                                    String serviceVersion,
-                                    String appName,
-                                    String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public IntegrationContextEntity(
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion
+    ) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     @Override
@@ -200,7 +204,6 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return clientName;
     }
 
-
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
@@ -210,11 +213,9 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return clientType;
     }
 
-
     public void setClientType(String clientType) {
         this.clientType = clientType;
     }
-
 
     @Override
     public String getBusinessKey() {
@@ -339,24 +340,20 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
         return status;
     }
 
-
     public void setStatus(IntegrationContextStatus status) {
         this.status = status;
     }
 
-
     public ServiceTaskEntity getServiceTask() {
         return serviceTask;
     }
-
 
     public void setServiceTask(ServiceTaskEntity serviceTask) {
         if (serviceTask == null) {
             if (this.serviceTask != null) {
                 this.serviceTask.setIntegrationContext(null);
             }
-        }
-        else {
+        } else {
             serviceTask.setIntegrationContext(this);
         }
 
@@ -373,10 +370,10 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public void addOutBoundVariable(String name,
-                                    Object value) {
+    public void addOutBoundVariable(String name, Object value) {
         outBoundVariables.put(name, value);
     }
+
     @Override
     public void addOutBoundVariables(Map<String, Object> variables) {
         outBoundVariables.putAll(variables);
@@ -385,43 +382,37 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name) {
-        return Optional.ofNullable(inBoundVariables)
-                       .map(it -> (T) inBoundVariables.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getInBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(inBoundVariables)
-                       .map(it -> (T) inBoundVariables.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(inBoundVariables).map(it -> (T) inBoundVariables.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name) {
-        return Optional.ofNullable(outBoundVariables)
-                       .map(it -> (T) it.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getOutBoundVariable(String name, Class<T> type) {
-        return Optional.ofNullable(outBoundVariables)
-                       .map(it -> (T) it.get(name))
-                       .orElse(null);
+        return Optional.ofNullable(outBoundVariables).map(it -> (T) it.get(name)).orElse(null);
     }
 
     public static class IdBuilderHelper {
+
         public static String from(IntegrationContext integrationContext) {
-            return new StringBuilder().append(integrationContext.getProcessInstanceId())
-                                      .append(":")
-                                      .append(integrationContext.getClientId())
-                                      .append(":")
-                                      .append(integrationContext.getExecutionId())
-                                      .toString();
+            return new StringBuilder()
+                .append(integrationContext.getProcessInstanceId())
+                .append(":")
+                .append(integrationContext.getClientId())
+                .append(":")
+                .append(integrationContext.getExecutionId())
+                .toString();
         }
     }
 }

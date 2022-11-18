@@ -25,8 +25,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 public class ModelingRestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ModelingRestApplication.class,
-                              args);
+        SpringApplication.run(ModelingRestApplication.class, args);
     }
-
 }

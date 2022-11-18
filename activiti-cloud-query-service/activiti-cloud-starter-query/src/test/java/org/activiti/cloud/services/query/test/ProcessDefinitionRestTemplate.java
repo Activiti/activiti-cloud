@@ -22,15 +22,15 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 @TestComponent
 public class ProcessDefinitionRestTemplate extends BaseProcessDefinitionRestTemplate {
 
-    protected ProcessDefinitionRestTemplate(TestRestTemplate testRestTemplate,
-                                            IdentityTokenProducer identityTokenProducer) {
-        super(testRestTemplate,
-              identityTokenProducer);
+    protected ProcessDefinitionRestTemplate(
+        TestRestTemplate testRestTemplate,
+        IdentityTokenProducer identityTokenProducer
+    ) {
+        super(testRestTemplate, identityTokenProducer);
     }
 
     @Override
     protected String getProcessDefinitionsURL() {
         return "/v1/process-definitions";
     }
-
 }

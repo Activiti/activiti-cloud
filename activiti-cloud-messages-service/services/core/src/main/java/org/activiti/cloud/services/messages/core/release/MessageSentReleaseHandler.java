@@ -20,14 +20,12 @@ import static org.activiti.cloud.services.messages.core.support.Predicates.MESSA
 import static org.activiti.cloud.services.messages.core.support.Predicates.START_MESSAGE_DEPLOYED;
 
 import java.util.Collection;
-
 import org.springframework.integration.store.MessageGroup;
 import org.springframework.messaging.Message;
 
 public class MessageSentReleaseHandler implements MessageGroupReleaseHandler {
 
-    public MessageSentReleaseHandler() {
-    }
+    public MessageSentReleaseHandler() {}
 
     @Override
     public Boolean handle(MessageGroup group) {
@@ -41,8 +39,9 @@ public class MessageSentReleaseHandler implements MessageGroupReleaseHandler {
     protected boolean canRelease(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
 
-        return messages.stream().anyMatch(MESSAGE_WAITING.or(START_MESSAGE_DEPLOYED))
-                && messages.stream().anyMatch(MESSAGE_SENT);
+        return (
+            messages.stream().anyMatch(MESSAGE_WAITING.or(START_MESSAGE_DEPLOYED)) &&
+            messages.stream().anyMatch(MESSAGE_SENT)
+        );
     }
-
 }

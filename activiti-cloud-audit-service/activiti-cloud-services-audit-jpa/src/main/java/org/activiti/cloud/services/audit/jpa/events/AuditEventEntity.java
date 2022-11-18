@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import java.util.Objects;
+import javax.persistence.*;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.hibernate.annotations.Immutable;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "TYPE")
@@ -29,8 +28,9 @@ public abstract class AuditEventEntity {
 
     @Id
     @GeneratedValue(generator = "audit_sequence", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="audit_sequence", sequenceName = "audit_sequence", allocationSize=50)
+    @SequenceGenerator(name = "audit_sequence", sequenceName = "audit_sequence", allocationSize = 50)
     private Long id;
+
     private String eventId;
     private Long timestamp;
     private String eventType;
@@ -53,10 +53,9 @@ public abstract class AuditEventEntity {
     private String parentProcessInstanceId;
     private String businessKey;
 
-    public AuditEventEntity() {
-    }
+    public AuditEventEntity() {}
 
-    public AuditEventEntity(CloudRuntimeEvent<?,?> cloudEvent) {
+    public AuditEventEntity(CloudRuntimeEvent<?, ?> cloudEvent) {
         this.eventId = cloudEvent.getId();
         this.timestamp = cloudEvent.getTimestamp();
         this.eventType = cloudEvent.getEventType().name();
@@ -243,43 +242,44 @@ public abstract class AuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("AuditEventEntity [id=")
-               .append(id)
-               .append(", eventId=")
-               .append(eventId)
-               .append(", timestamp=")
-               .append(timestamp)
-               .append(", eventType=")
-               .append(eventType)
-               .append(", appName=")
-               .append(appName)
-               .append(", appVersion=")
-               .append(appVersion)
-               .append(", serviceName=")
-               .append(serviceName)
-               .append(", serviceFullName=")
-               .append(serviceFullName)
-               .append(", serviceType=")
-               .append(serviceType)
-               .append(", serviceVersion=")
-               .append(serviceVersion)
-               .append(", sequenceNumber=")
-               .append(sequenceNumber)
-               .append(", messageId=")
-               .append(messageId)
-               .append(", entityId=")
-               .append(entityId)
-               .append(", processDefinitionId=")
-               .append(processDefinitionId)
-               .append(", processInstanceId=")
-               .append(processInstanceId)
-               .append(", processDefinitionKey=")
-               .append(processDefinitionKey)
-               .append(", parentProcessInstanceId=")
-               .append(parentProcessInstanceId)
-               .append(", businessKey=")
-               .append(businessKey)
-               .append("]");
+        builder
+            .append("AuditEventEntity [id=")
+            .append(id)
+            .append(", eventId=")
+            .append(eventId)
+            .append(", timestamp=")
+            .append(timestamp)
+            .append(", eventType=")
+            .append(eventType)
+            .append(", appName=")
+            .append(appName)
+            .append(", appVersion=")
+            .append(appVersion)
+            .append(", serviceName=")
+            .append(serviceName)
+            .append(", serviceFullName=")
+            .append(serviceFullName)
+            .append(", serviceType=")
+            .append(serviceType)
+            .append(", serviceVersion=")
+            .append(serviceVersion)
+            .append(", sequenceNumber=")
+            .append(sequenceNumber)
+            .append(", messageId=")
+            .append(messageId)
+            .append(", entityId=")
+            .append(entityId)
+            .append(", processDefinitionId=")
+            .append(processDefinitionId)
+            .append(", processInstanceId=")
+            .append(processInstanceId)
+            .append(", processDefinitionKey=")
+            .append(processDefinitionKey)
+            .append(", parentProcessInstanceId=")
+            .append(parentProcessInstanceId)
+            .append(", businessKey=")
+            .append(businessKey)
+            .append("]");
         return builder.toString();
     }
 }

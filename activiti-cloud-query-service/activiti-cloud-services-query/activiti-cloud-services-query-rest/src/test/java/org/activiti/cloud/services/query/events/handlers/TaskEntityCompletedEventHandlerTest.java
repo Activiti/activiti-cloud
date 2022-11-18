@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -26,17 +36,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCompletedEventHandlerTest {
@@ -53,9 +52,9 @@ public class TaskEntityCompletedEventHandlerTest {
         CloudTaskCompletedEventImpl event = buildTaskCompletedEvent();
         String taskId = event.getEntity().getId();
         TaskEntity eventTaskEntity = aTask()
-                                    .withCreatedDate(new Date(System.currentTimeMillis() - 86400000L))
-                                    .withCompletedDate(new Date())
-                                    .build();
+            .withCreatedDate(new Date(System.currentTimeMillis() - 86400000L))
+            .withCompletedDate(new Date())
+            .build();
 
         given(entityManager.find(TaskEntity.class, taskId)).willReturn(eventTaskEntity);
 
@@ -69,9 +68,9 @@ public class TaskEntityCompletedEventHandlerTest {
     }
 
     private CloudTaskCompletedEventImpl buildTaskCompletedEvent() {
-        return new CloudTaskCompletedEventImpl(new TaskImpl(UUID.randomUUID().toString(),
-                                                            "my task",
-                                                            Task.TaskStatus.COMPLETED));
+        return new CloudTaskCompletedEventImpl(
+            new TaskImpl(UUID.randomUUID().toString(), "my task", Task.TaskStatus.COMPLETED)
+        );
     }
 
     @Test

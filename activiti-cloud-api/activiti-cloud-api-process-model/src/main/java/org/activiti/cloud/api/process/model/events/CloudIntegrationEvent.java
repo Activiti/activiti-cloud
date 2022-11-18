@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 package org.activiti.cloud.api.process.model.events;
+
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-
-public interface CloudIntegrationEvent extends CloudRuntimeEvent<IntegrationContext, IntegrationEvent.IntegrationEvents> {
-
-}
+public interface CloudIntegrationEvent
+    extends CloudRuntimeEvent<IntegrationContext, IntegrationEvent.IntegrationEvents> {}

@@ -33,59 +33,45 @@ public class TaskCandidatesJpaJsonConverterTest {
     @Test
     public void convertToDatabaseColumnShouldReturnTheEntityJsonRepresentation() throws Exception {
         //given
-        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("user-id","task-id");
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl("user-id", "task-id");
 
         //when
         String jsonRepresentation = converterCandidateUser.convertToDatabaseColumn(candidateUser);
 
         //then
-        assertThatJson(jsonRepresentation)
-                .node("userId").isEqualTo("user-id")
-                .node("taskId").isEqualTo("task-id");
+        assertThatJson(jsonRepresentation).node("userId").isEqualTo("user-id").node("taskId").isEqualTo("task-id");
 
         //given
-        TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id","task-id");
+        TaskCandidateGroupImpl candidateGroup = new TaskCandidateGroupImpl("group-id", "task-id");
 
         //when
         jsonRepresentation = converterCandidateGroup.convertToDatabaseColumn(candidateGroup);
 
         //then
-        assertThatJson(jsonRepresentation)
-                .node("groupId").isEqualTo("group-id")
-                .node("taskId").isEqualTo("task-id");
-
+        assertThatJson(jsonRepresentation).node("groupId").isEqualTo("group-id").node("taskId").isEqualTo("task-id");
     }
 
     @Test
     public void convertToEntityAttributeShouldCreateTaskCandidate() throws Exception {
         //given
-        String jsonRepresentation =
-                "{\"taskId\":\"task-id\"," +
-                        "\"userId\":\"user-id\"}";
+        String jsonRepresentation = "{\"taskId\":\"task-id\"," + "\"userId\":\"user-id\"}";
 
         //when
-        TaskCandidateUserImpl candidateUser = (TaskCandidateUserImpl)converterCandidateUser.convertToEntityAttribute(jsonRepresentation);
+        TaskCandidateUserImpl candidateUser = (TaskCandidateUserImpl) converterCandidateUser.convertToEntityAttribute(
+            jsonRepresentation
+        );
 
         //then
-        assertThat(candidateUser)
-                .isNotNull()
-                .hasUserId("user-id");
+        assertThat(candidateUser).isNotNull().hasUserId("user-id");
 
-        jsonRepresentation =
-                "{\"taskId\":\"task-id\"," +
-                        "\"groupId\":\"group-id\"}";
+        jsonRepresentation = "{\"taskId\":\"task-id\"," + "\"groupId\":\"group-id\"}";
 
-        jsonRepresentation =
-                "{\"groupId\":\"group-id\"}";
+        jsonRepresentation = "{\"groupId\":\"group-id\"}";
 
         //when
         TaskCandidateGroup candidateGroup = converterCandidateGroup.convertToEntityAttribute(jsonRepresentation);
 
         //then
-        assertThat(candidateGroup)
-                .isNotNull()
-                .hasGroupId("group-id");
+        assertThat(candidateGroup).isNotNull().hasGroupId("group-id");
     }
-
-
 }

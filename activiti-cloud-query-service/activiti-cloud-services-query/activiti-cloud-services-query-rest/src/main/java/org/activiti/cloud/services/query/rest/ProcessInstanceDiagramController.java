@@ -45,21 +45,24 @@ public class ProcessInstanceDiagramController extends ProcessInstanceDiagramCont
     private final SecurityManager securityManager;
 
     @Autowired
-    public ProcessInstanceDiagramController(ProcessModelRepository processModelRepository,
-                                            BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
-                                            ProcessDiagramGeneratorWrapper processDiagramGenerator,
-                                            ProcessInstanceRepository processInstanceRepository,
-                                            BPMNActivityRepository bpmnActivityRepository,
-                                            EntityFinder entityFinder,
-                                            SecurityPoliciesManager securityPoliciesManager,
-                                            SecurityManager securityManager) {
-        super(processModelRepository,
-              bpmnSequenceFlowRepository,
-              processDiagramGenerator,
-              processInstanceRepository,
-              bpmnActivityRepository,
-              entityFinder);
-
+    public ProcessInstanceDiagramController(
+        ProcessModelRepository processModelRepository,
+        BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+        ProcessDiagramGeneratorWrapper processDiagramGenerator,
+        ProcessInstanceRepository processInstanceRepository,
+        BPMNActivityRepository bpmnActivityRepository,
+        EntityFinder entityFinder,
+        SecurityPoliciesManager securityPoliciesManager,
+        SecurityManager securityManager
+    ) {
+        super(
+            processModelRepository,
+            bpmnSequenceFlowRepository,
+            processDiagramGenerator,
+            processInstanceRepository,
+            bpmnActivityRepository,
+            entityFinder
+        );
         this.securityPoliciesManager = securityPoliciesManager;
         this.securityManager = securityManager;
     }
@@ -67,18 +70,30 @@ public class ProcessInstanceDiagramController extends ProcessInstanceDiagramCont
     @GetMapping(produces = IMAGE_SVG_XML)
     @ResponseBody
     public String getProcessDiagram(@PathVariable String processInstanceId) {
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            processInstanceId,
+            "Unable to find process for the given id:'" + processInstanceId + "'"
+        );
 
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
-                                                                            processInstanceId,
-                                                                            "Unable to find process for the given id:'" + processInstanceId + "'");
-
-        if (securityPoliciesManager.arePoliciesDefined() && !securityPoliciesManager.canRead(processInstanceEntity.getProcessDefinitionKey(),
-                                                                                             processInstanceEntity.getServiceName())) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey());
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey());
+        if (
+            securityPoliciesManager.arePoliciesDefined() &&
+            !securityPoliciesManager.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            )
+        ) {
+            LOGGER.debug(
+                "User " +
+                securityManager.getAuthenticatedUserId() +
+                " not permitted to access definition " +
+                processInstanceEntity.getProcessDefinitionKey()
+            );
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey()
+            );
         }
 
         return generateDiagram(processInstanceId);
     }
-
 }

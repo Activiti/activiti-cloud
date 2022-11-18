@@ -45,10 +45,13 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
     public GroupedOpenApi runtimeBundleApi(@Value("${activiti.cloud.swagger.rb-base-path:}") String swaggerBasePath) {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Runtime Bundle")
             .packagesToScan("org.activiti.cloud.services.rest")
-            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .addOpenApiCustomiser(openApi ->
+                openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
+            )
             .build();
     }
 
@@ -56,18 +59,42 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         SwaggerDocUtils.replaceWithClass(StartProcessPayload.class, PayloadApiModels.StartProcessPayloadApiModel.class);
         SwaggerDocUtils.replaceWithClass(SignalPayload.class, PayloadApiModels.SignalPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(UpdateProcessPayload.class, PayloadApiModels.UpdateProcessPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(SetProcessVariablesPayload.class, PayloadApiModels.SetProcessVariablesPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(RemoveProcessVariablesPayload.class, PayloadApiModels.RemoveProcessVariablesPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(
+            UpdateProcessPayload.class,
+            PayloadApiModels.UpdateProcessPayloadApiModel.class
+        );
+        SwaggerDocUtils.replaceWithClass(
+            SetProcessVariablesPayload.class,
+            PayloadApiModels.SetProcessVariablesPayloadApiModel.class
+        );
+        SwaggerDocUtils.replaceWithClass(
+            RemoveProcessVariablesPayload.class,
+            PayloadApiModels.RemoveProcessVariablesPayloadApiModel.class
+        );
         SwaggerDocUtils.replaceWithClass(AssignTaskPayload.class, PayloadApiModels.AssignTaskPayloadApiModel.class);
         SwaggerDocUtils.replaceWithClass(CompleteTaskPayload.class, PayloadApiModels.CompleteTaskPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(CandidateGroupsPayload.class, PayloadApiModels.CandidateGroupsPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(CandidateUsersPayload.class, PayloadApiModels.CandidateUsersPayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(
+            CandidateGroupsPayload.class,
+            PayloadApiModels.CandidateGroupsPayloadApiModel.class
+        );
+        SwaggerDocUtils.replaceWithClass(
+            CandidateUsersPayload.class,
+            PayloadApiModels.CandidateUsersPayloadApiModel.class
+        );
         SwaggerDocUtils.replaceWithClass(CreateTaskPayload.class, PayloadApiModels.CreateTaskPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(CreateTaskVariablePayload.class, PayloadApiModels.CreateTaskVariablePayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(UpdateTaskVariablePayload.class, PayloadApiModels.UpdateTaskVariablePayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(
+            CreateTaskVariablePayload.class,
+            PayloadApiModels.CreateTaskVariablePayloadApiModel.class
+        );
+        SwaggerDocUtils.replaceWithClass(
+            UpdateTaskVariablePayload.class,
+            PayloadApiModels.UpdateTaskVariablePayloadApiModel.class
+        );
         SwaggerDocUtils.replaceWithClass(UpdateTaskPayload.class, PayloadApiModels.UpdateTaskPayloadApiModel.class);
         SwaggerDocUtils.replaceWithClass(SaveTaskPayload.class, PayloadApiModels.SaveTaskPayloadApiModel.class);
-        SwaggerDocUtils.replaceWithClass(CreateProcessInstancePayload.class, PayloadApiModels.CreateProcessInstancePayloadApiModel.class);
+        SwaggerDocUtils.replaceWithClass(
+            CreateProcessInstancePayload.class,
+            PayloadApiModels.CreateProcessInstancePayloadApiModel.class
+        );
     }
 }

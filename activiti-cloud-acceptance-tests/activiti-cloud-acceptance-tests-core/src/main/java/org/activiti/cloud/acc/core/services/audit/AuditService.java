@@ -22,7 +22,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.hateoas.PagedModel;
 
 public interface AuditService {
-
     @RequestLine("GET /v1/events?search={search}&sort=timestamp%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
@@ -30,5 +29,4 @@ public interface AuditService {
     @RequestLine("GET /v1/events?sort=timestamp%2Cdesc&sort=id%2Cdesc")
     @Headers("Content-Type: application/json")
     PagedModel<CloudRuntimeEvent> getEvents();
-
 }

@@ -32,26 +32,35 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @Configuration
-@ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
+@ConditionalOnProperty(
+    name = "spring.activiti.cloud.services.notification.graphql.ws.security.enabled",
+    matchIfMissing = true
+)
 @Import(WebSocketMessageBrokerSecurityConfigurer.class)
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
 
     @Configuration
-    @PropertySources(value= {
-            @PropertySource(value="classpath:META-INF/graphql-security.properties"),
-            @PropertySource(value="classpath:graphql-security.properties", ignoreResourceNotFound = true)
-    })
+    @PropertySources(
+        value = {
+            @PropertySource(value = "classpath:META-INF/graphql-security.properties"),
+            @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true)
+        }
+    )
     public static class DefaultWebSocketMessageBrokerSecurityConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(JWSAuthenticationManager keycloakWebSocketAuthManager) {
+        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(
+            JWSAuthenticationManager keycloakWebSocketAuthManager
+        ) {
             return new JWSAuthenticationInterceptorConfigurer(keycloakWebSocketAuthManager);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
+        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(
+            GraphQLAccessTokenVerifier keycloakTokenVerifier
+        ) {
             return new JwtInterceptorConfigurer(keycloakTokenVerifier);
         }
 
@@ -65,10 +74,16 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnExpression("'${activiti.cloud.services.oauth2.iam-name}'!='keycloak'")
-        public GraphQLAccessTokenVerifier jwtTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
-                                                           JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                                           JwtDecoder jwtDecoder) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder);
+        public GraphQLAccessTokenVerifier jwtTokenVerifier(
+            JwtAccessTokenValidator jwtAccessTokenValidator,
+            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+            JwtDecoder jwtDecoder
+        ) {
+            return new JwtAccessTokenVerifier(
+                jwtAccessTokenValidator,
+                jwtUserInfoUriAuthenticationConverter,
+                jwtDecoder
+            );
         }
 
         @Bean

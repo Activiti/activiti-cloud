@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -22,9 +24,6 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
 
 public class ProcessCreatedEventHandler implements QueryEventHandler {
 
@@ -59,7 +58,9 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         createdProcessInstanceEntity.setStartDate(createdEvent.getEntity().getStartDate());
 
         createdProcessInstanceEntity.setParentId(createdEvent.getEntity().getParentId());
-        createdProcessInstanceEntity.setProcessDefinitionVersion(createdEvent.getEntity().getProcessDefinitionVersion());
+        createdProcessInstanceEntity.setProcessDefinitionVersion(
+            createdEvent.getEntity().getProcessDefinitionVersion()
+        );
         createdProcessInstanceEntity.setProcessDefinitionName(createdEvent.getEntity().getProcessDefinitionName());
 
         entityManager.persist(createdProcessInstanceEntity);

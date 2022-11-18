@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import java.util.Map;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Map;
 import org.activiti.cloud.modeling.api.ModelContent;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Implementation for the {@link ModelContent} corresponding to connector model type

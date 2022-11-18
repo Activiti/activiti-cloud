@@ -17,14 +17,13 @@ package org.activiti.cloud.starter.tests.services.audit;
 
 import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
 
+import java.util.*;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.handler.annotation.Headers;
-
-import java.util.*;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestComponent
@@ -33,11 +32,11 @@ public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> allReceivedEvents = new ArrayList<>();
 
     @StreamListener(AuditConsumer.AUDIT_CONSUMER)
-    public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
+    public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?, ?>... events) {
         latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
         allReceivedEvents = new ArrayList<>(allReceivedEvents);
         allReceivedEvents.addAll(latestReceivedEvents);

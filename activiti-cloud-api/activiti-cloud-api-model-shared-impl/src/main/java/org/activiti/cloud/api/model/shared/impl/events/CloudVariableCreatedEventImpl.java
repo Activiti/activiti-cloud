@@ -23,19 +23,14 @@ public class CloudVariableCreatedEventImpl extends CloudVariableEventImpl implem
 
     private String variableDefinitionId;
 
-    public CloudVariableCreatedEventImpl() {
-    }
+    public CloudVariableCreatedEventImpl() {}
 
     public CloudVariableCreatedEventImpl(VariableInstance entity) {
         super(entity);
     }
 
-    public CloudVariableCreatedEventImpl(String id,
-                                         Long timestamp,
-                                         VariableInstance entity) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudVariableCreatedEventImpl(String id, Long timestamp, VariableInstance entity) {
+        super(id, timestamp, entity);
     }
 
     @Override

@@ -39,7 +39,10 @@ public class JuelExpressionResolverService {
         try {
             final String expression = (String) inputVariables.get(EXPRESSION);
             final Map<String, Object> conditionVariables = (Map<String, Object>) inputVariables.get(VARIABLES);
-            return Map.of(RESULT, new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class));
+            return Map.of(
+                RESULT,
+                new JuelExpressionResolver().resolveExpression(expression, conditionVariables, Object.class)
+            );
         } catch (Exception e) {
             throw new JuelRuntimeException(e.getMessage(), e);
         }

@@ -19,6 +19,4 @@ import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudBPMNErrorReceivedEvent extends CloudRuntimeEvent<BPMNError, BPMNErrorReceivedEvent.ErrorEvents> {
-
-}
+public interface CloudBPMNErrorReceivedEvent extends CloudRuntimeEvent<BPMNError, BPMNErrorReceivedEvent.ErrorEvents> {}

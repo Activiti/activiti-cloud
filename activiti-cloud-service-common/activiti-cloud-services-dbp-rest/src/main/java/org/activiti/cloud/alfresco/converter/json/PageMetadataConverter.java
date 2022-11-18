@@ -21,18 +21,19 @@ import org.springframework.hateoas.PagedModel;
 
 public class PageMetadataConverter {
 
-    public PaginationMetadata toAlfrescoPageMetadata(PagedModel.PageMetadata basePageMetadata,
-                                                     long count) {
+    public PaginationMetadata toAlfrescoPageMetadata(PagedModel.PageMetadata basePageMetadata, long count) {
         long skipCount = basePageMetadata.getNumber() * basePageMetadata.getSize();
         if (basePageMetadata instanceof ExtendedPageMetadata) {
             skipCount = ((ExtendedPageMetadata) basePageMetadata).getSkipCount();
         }
 
         // the page number starts from zero, so it's necessary to increment by one before comparing with total pages
-        return new PaginationMetadata(skipCount,
-                                      basePageMetadata.getSize(),
-                                      count,
-                                      basePageMetadata.getTotalPages() > basePageMetadata.getNumber() + 1,
-                                      basePageMetadata.getTotalElements());
+        return new PaginationMetadata(
+            skipCount,
+            basePageMetadata.getSize(),
+            count,
+            basePageMetadata.getTotalPages() > basePageMetadata.getNumber() + 1,
+            basePageMetadata.getTotalElements()
+        );
     }
 }

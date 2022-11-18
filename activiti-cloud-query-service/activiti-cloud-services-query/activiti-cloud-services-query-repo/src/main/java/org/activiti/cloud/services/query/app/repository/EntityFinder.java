@@ -16,31 +16,23 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Optional;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.Optional;
-
 public class EntityFinder {
 
-    public <T, ID> T findById(CrudRepository<T, ID> repository,
-                              ID id,
-                              String notFoundMessage) {
+    public <T, ID> T findById(CrudRepository<T, ID> repository, ID id, String notFoundMessage) {
         Optional<T> findResult = repository.findById(id);
-        return getEntity(findResult,
-                         notFoundMessage);
+        return getEntity(findResult, notFoundMessage);
     }
 
-    private <T> T getEntity(Optional<T> result,
-                            String notFoundMessage) {
+    private <T> T getEntity(Optional<T> result, String notFoundMessage) {
         return result.orElseThrow(() -> new IllegalStateException(notFoundMessage));
     }
 
-    public <T> T findOne(QuerydslPredicateExecutor<T> predicateExecutor,
-                         Predicate predicate,
-                         String notFoundMessage) {
+    public <T> T findOne(QuerydslPredicateExecutor<T> predicateExecutor, Predicate predicate, String notFoundMessage) {
         Optional<T> findResult = predicateExecutor.findOne(predicate);
-        return getEntity(findResult,
-                         notFoundMessage);
+        return getEntity(findResult, notFoundMessage);
     }
 }

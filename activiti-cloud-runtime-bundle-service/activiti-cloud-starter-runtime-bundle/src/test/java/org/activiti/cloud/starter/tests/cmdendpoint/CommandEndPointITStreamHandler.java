@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
@@ -34,8 +35,6 @@ import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Profile;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Profile(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @TestComponent

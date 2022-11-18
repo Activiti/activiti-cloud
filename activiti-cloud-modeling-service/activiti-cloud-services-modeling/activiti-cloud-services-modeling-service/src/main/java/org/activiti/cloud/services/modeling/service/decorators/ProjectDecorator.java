@@ -16,12 +16,10 @@
 
 package org.activiti.cloud.services.modeling.service.decorators;
 
+import java.util.List;
 import org.activiti.cloud.modeling.api.Project;
 
-import java.util.List;
-
 public interface ProjectDecorator {
-
     String decoratorName();
 
     void decorate(Project project);

@@ -16,7 +16,6 @@
 package org.activiti.cloud.modeling.api;
 
 public interface ProjectConfiguration {
-
     void setEnableCandidateStarters(Boolean enableCandidateStarters);
 
     Boolean getEnableCandidateStarters();

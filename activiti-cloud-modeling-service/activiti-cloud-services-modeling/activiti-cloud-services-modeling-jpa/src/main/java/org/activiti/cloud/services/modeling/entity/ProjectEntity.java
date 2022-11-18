@@ -15,38 +15,36 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 /**
  * Project model entity
  */
-@Table(name = "Project", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "createdBy"}))
+@Table(name = "Project", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "createdBy" }))
 @Entity(name = "Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
-public class ProjectEntity extends AuditableEntity<String> implements Project<String>,
-                                                                      ModelValidationErrorProducer {
+public class ProjectEntity extends AuditableEntity<String> implements Project<String>, ModelValidationErrorProducer {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "projects")
@@ -67,8 +65,7 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @PrimaryKeyJoinColumn
     private ProjectConfigurationEntity configuration;
 
-    public ProjectEntity() {  // for JPA
-    }
+    public ProjectEntity() {} // for JPA
 
     public ProjectEntity(String name) {
         this.name = name;
@@ -122,33 +119,32 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
         this.description = description;
     }
 
-     @Override
+    @Override
     public void setConfiguration(ProjectConfiguration configuration) {
-         if (configuration == null) {
-             if (this.configuration != null) {
-                 this.configuration.setProject(null);
-             }
-         }
-         else {
-             configuration.setProject(this);
-         }
-         this.configuration = (ProjectConfigurationEntity) configuration;
+        if (configuration == null) {
+            if (this.configuration != null) {
+                this.configuration.setProject(null);
+            }
+        } else {
+            configuration.setProject(this);
+        }
+        this.configuration = (ProjectConfigurationEntity) configuration;
     }
 
-   @Override
+    @Override
     public ProjectConfiguration getConfiguration() {
         return configuration;
     }
 
-    public void addModel(ModelEntity model){
-        if(! models.contains(model)){
+    public void addModel(ModelEntity model) {
+        if (!models.contains(model)) {
             models.add(model);
             model.addProject(this);
         }
     }
 
-    public void removeModel(ModelEntity model){
-        if(models.contains(model)){
+    public void removeModel(ModelEntity model) {
+        if (models.contains(model)) {
             models.remove(model);
             model.removeProject(this);
         }

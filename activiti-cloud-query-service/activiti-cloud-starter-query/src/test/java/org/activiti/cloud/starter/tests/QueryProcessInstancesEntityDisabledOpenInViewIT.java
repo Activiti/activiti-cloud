@@ -18,6 +18,4 @@ package org.activiti.cloud.starter.tests;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(locations = "classpath:application-test.properties", properties = "spring.jpa.open-in-view=false")
-public class QueryProcessInstancesEntityDisabledOpenInViewIT extends QueryProcessInstancesEntityIT {
-
-}
+public class QueryProcessInstancesEntityDisabledOpenInViewIT extends QueryProcessInstancesEntityIT {}

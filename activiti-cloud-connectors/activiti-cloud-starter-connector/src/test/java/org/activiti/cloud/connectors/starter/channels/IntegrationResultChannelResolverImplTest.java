@@ -55,8 +55,7 @@ public class IntegrationResultChannelResolverImplTest {
 
         builder = spy(new IntegrationResultDestinationBuilderImpl(connectorProperties));
 
-        subject = new IntegrationResultChannelResolverImpl(resolver,
-                                                     builder);
+        subject = new IntegrationResultChannelResolverImpl(resolver, builder);
     }
 
     @Test
@@ -78,5 +77,4 @@ public class IntegrationResultChannelResolverImplTest {
 
         verify(builder).buildDestination(integrationRequest);
     }
-
 }

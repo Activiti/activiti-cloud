@@ -32,7 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 public class ProcessInstanceAdminService {
 
     private final ProcessInstanceRepository processInstanceRepository;
@@ -42,41 +41,41 @@ public class ProcessInstanceAdminService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ProcessInstanceAdminService(ProcessInstanceRepository processInstanceRepository,
-        EntityFinder entityFinder){
+    public ProcessInstanceAdminService(ProcessInstanceRepository processInstanceRepository, EntityFinder entityFinder) {
         this.processInstanceRepository = processInstanceRepository;
         this.entityFinder = entityFinder;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
-
-        return processInstanceRepository.findAll(Optional.ofNullable(predicate)
-                .orElseGet(BooleanBuilder::new),
-            pageable);
-
+        return processInstanceRepository.findAll(
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new),
+            pageable
+        );
     }
 
     @Transactional
-    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, Pageable pageable) {
-
+    public Page<ProcessInstanceEntity> findAllWithVariables(
+        Predicate predicate,
+        List<String> variableKeys,
+        Pageable pageable
+    ) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
         filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
         // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
         // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
-        processInstanceEntities.forEach(processInstanceEntity -> Hibernate.initialize(processInstanceEntity.getVariables()));
+        processInstanceEntities.forEach(processInstanceEntity ->
+            Hibernate.initialize(processInstanceEntity.getVariables())
+        );
         return processInstanceEntities;
-
     }
 
-    public  ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
-
-        return entityFinder.findById(processInstanceRepository,
+    public ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
+        return entityFinder.findById(
+            processInstanceRepository,
             processInstanceId,
-            "Unable to find task for the given id:'" + processInstanceId + "'");
-
+            "Unable to find task for the given id:'" + processInstanceId + "'"
+        );
     }
-
-
 }

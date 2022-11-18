@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Optional;
 
 /**
  * Extensions variable mapping types
@@ -29,10 +28,7 @@ public enum VariableMappingType {
 
     @JsonCreator
     public static VariableMappingType fromValue(String value) {
-        return Optional.ofNullable(value)
-                .map(String::toUpperCase)
-                .map(VariableMappingType::valueOf)
-                .orElse(null);
+        return Optional.ofNullable(value).map(String::toUpperCase).map(VariableMappingType::valueOf).orElse(null);
     }
 
     @JsonValue

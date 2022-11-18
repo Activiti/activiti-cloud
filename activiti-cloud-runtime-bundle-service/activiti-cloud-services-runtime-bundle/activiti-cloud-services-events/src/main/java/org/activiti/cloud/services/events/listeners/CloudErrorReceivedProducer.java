@@ -24,8 +24,10 @@ public class CloudErrorReceivedProducer implements BPMNElementEventListener<BPMN
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudErrorReceivedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudErrorReceivedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

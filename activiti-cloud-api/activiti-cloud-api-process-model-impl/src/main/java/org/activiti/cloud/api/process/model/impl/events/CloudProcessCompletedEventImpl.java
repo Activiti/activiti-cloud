@@ -19,21 +19,18 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 
-public class CloudProcessCompletedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessCompletedEvent {
+public class CloudProcessCompletedEventImpl
+    extends CloudProcessInstanceEventImpl
+    implements CloudProcessCompletedEvent {
 
-    public CloudProcessCompletedEventImpl() {
-    }
+    public CloudProcessCompletedEventImpl() {}
 
     public CloudProcessCompletedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessCompletedEventImpl(String id,
-                                          Long timestamp,
-                                          ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessCompletedEventImpl(String id, Long timestamp, ProcessInstance processInstance) {
+        super(id, timestamp, processInstance);
     }
 
     @Override

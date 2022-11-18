@@ -78,5 +78,4 @@ public class JwtPrincipalIdentityProviderTest {
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
     }
-
 }

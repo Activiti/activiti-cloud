@@ -19,6 +19,7 @@ import org.activiti.api.process.model.ProcessCandidateStarterUser;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudProcessCandidateStarterUserEvent extends CloudRuntimeEvent<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>,
-                                                               ProcessCandidateStarterUserEvent {
-}
+public interface CloudProcessCandidateStarterUserEvent
+    extends
+        CloudRuntimeEvent<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>,
+        ProcessCandidateStarterUserEvent {}

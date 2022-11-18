@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.events.message;
 
 import java.util.Optional;
-
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
@@ -37,13 +36,14 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
 
-        if(executionContext != null) {
+        if (executionContext != null) {
             ExecutionEntity processInstance = executionContext.getProcessInstance();
             ProcessDefinition processDefinition = executionContext.getProcessDefinition();
             DeploymentEntity deploymentEntity = executionContext.getDeployment();
 
-            if(processInstance != null) {
-                request.setHeader(ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY, processInstance.getBusinessKey())
+            if (processInstance != null) {
+                request
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY, processInstance.getBusinessKey())
                     .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, processInstance.getId())
                     .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_NAME, processInstance.getName());
 
@@ -51,37 +51,51 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
                 applyParent(processInstance, request);
             }
 
-            if(processDefinition != null) {
-                request.setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID, processDefinition.getId())
+            if (processDefinition != null) {
+                request
+                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID, processDefinition.getId())
                     .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_KEY, processDefinition.getKey())
-                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION, processDefinition.getVersion())
-                    .setHeader(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME, processDefinition.getName());
+                    .setHeader(
+                        ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION,
+                        processDefinition.getVersion()
+                    )
+                    .setHeader(
+                        ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME,
+                        processDefinition.getName()
+                    );
             }
 
-            if(deploymentEntity != null) {
-                 request.setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_ID, deploymentEntity.getId())
-                        .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, deploymentEntity.getName())
-                        .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_VERSION, deploymentEntity.getVersion());
+            if (deploymentEntity != null) {
+                request
+                    .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_ID, deploymentEntity.getId())
+                    .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, deploymentEntity.getName())
+                    .setHeader(ExecutionContextMessageHeaders.DEPLOYMENT_VERSION, deploymentEntity.getVersion());
             }
-
         }
 
         return request;
-
     }
 
     protected <P> MessageBuilder<P> applyParent(ExecutionEntity processInstance, MessageBuilder<P> request) {
         // Let's do it lazy way
         if (processInstance.getSuperExecutionId() != null) {
-            Optional.ofNullable(processInstance.getSuperExecution())
+            Optional
+                .ofNullable(processInstance.getSuperExecution())
                 .ifPresent(superExecution -> {
-                    request.setHeader(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, superExecution.getProcessInstanceId());
+                    request.setHeader(
+                        ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID,
+                        superExecution.getProcessInstanceId()
+                    );
 
                     // Let's do it lazy way
-                    if(superExecution.getProcessInstanceId() != null) {
-                        Optional.ofNullable(superExecution.getProcessInstance())
+                    if (superExecution.getProcessInstanceId() != null) {
+                        Optional
+                            .ofNullable(superExecution.getProcessInstance())
                             .ifPresent(parentInstance -> {
-                                request.setHeader(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME, parentInstance.getName());
+                                request.setHeader(
+                                    ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME,
+                                    parentInstance.getName()
+                                );
                             });
                     }
                 });
@@ -89,6 +103,4 @@ public class ExecutionContextMessageBuilderAppender implements MessageBuilderApp
 
         return request;
     }
-
-
 }

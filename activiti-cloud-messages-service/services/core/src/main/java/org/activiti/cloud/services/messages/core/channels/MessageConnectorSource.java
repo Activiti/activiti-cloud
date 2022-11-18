@@ -19,10 +19,8 @@ import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSource {
-
     String OUTPUT = "messageConnectorOutput";
 
     @Output(MessageConnectorSource.OUTPUT)
     MessageChannel output();
-
 }

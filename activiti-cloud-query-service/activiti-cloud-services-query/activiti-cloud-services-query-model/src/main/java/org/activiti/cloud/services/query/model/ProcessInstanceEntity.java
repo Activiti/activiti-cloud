@@ -19,12 +19,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Filter;
-import org.springframework.format.annotation.DateTimeFormat;
-
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -36,43 +37,50 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Filter;
+import org.springframework.format.annotation.DateTimeFormat;
 
-@Entity(name="ProcessInstance")
-@Table(name = "PROCESS_INSTANCE",
-		indexes= {
-				@Index(name="pi_status_idx", columnList="status", unique=false),
-				@Index(name="pi_businessKey_idx", columnList="businessKey", unique=false),
-				@Index(name="pi_name_idx", columnList="name", unique=false),
-				@Index(name="pi_processDefinitionId_idx", columnList="processDefinitionId", unique=false),
-				@Index(name="pi_processDefinitionKey_idx", columnList="processDefinitionKey", unique=false),
-                @Index(name="pi_processDefinitionName_idx", columnList="processDefinitionName", unique=false)
-        })
+@Entity(name = "ProcessInstance")
+@Table(
+    name = "PROCESS_INSTANCE",
+    indexes = {
+        @Index(name = "pi_status_idx", columnList = "status", unique = false),
+        @Index(name = "pi_businessKey_idx", columnList = "businessKey", unique = false),
+        @Index(name = "pi_name_idx", columnList = "name", unique = false),
+        @Index(name = "pi_processDefinitionId_idx", columnList = "processDefinitionId", unique = false),
+        @Index(name = "pi_processDefinitionKey_idx", columnList = "processDefinitionKey", unique = false),
+        @Index(name = "pi_processDefinitionName_idx", columnList = "processDefinitionName", unique = false)
+    }
+)
 @DynamicInsert
 @DynamicUpdate
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
     private String id;
+
     private String name;
     private String processDefinitionId;
     private String processDefinitionKey;
     private String initiator;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date startDate;
+
     private String businessKey;
+
     @Enumerated(EnumType.STRING)
     private ProcessInstanceStatus status;
+
     private Integer processDefinitionVersion;
     private String processDefinitionName;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date completedDate;
+
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date suspendedDate;
 
@@ -122,55 +130,77 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Date suspendedFrom;
 
     @JsonIgnore
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-    	, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
     @JsonView(JsonViews.ProcessVariables.class)
     @Filter(name = "variablesFilter")
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-		, foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private Set<ProcessVariableEntity> variables = new LinkedHashSet<>();
 
     @JsonIgnore
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private Set<BPMNActivityEntity> activities = new LinkedHashSet<>();
 
     @JsonIgnore
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private List<ServiceTaskEntity> serviceTasks = new LinkedList<>();
 
     @JsonIgnore
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name = "processInstanceId", referencedColumnName = "id", insertable = false, updatable = false
-        , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "processInstanceId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
 
     private String parentId;
 
-    public ProcessInstanceEntity() {
-    }
+    public ProcessInstanceEntity() {}
 
-    public ProcessInstanceEntity(String serviceName,
-                                 String serviceFullName,
-                                 String serviceVersion,
-                                 String appName,
-                                 String appVersion,
-                                 String processInstanceId,
-                                 String processDefinitionId,
-                                 ProcessInstanceStatus status,
-                                 Date lastModified) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public ProcessInstanceEntity(
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        String processInstanceId,
+        String processDefinitionId,
+        ProcessInstanceStatus status,
+        Date lastModified
+    ) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
         this.id = processInstanceId;
         this.processDefinitionId = processDefinitionId;
         this.status = status;
@@ -238,10 +268,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     }
 
     public Optional<ProcessVariableEntity> getVariable(String variableName) {
-        return getVariables().stream()
-                             .filter(v -> v.getName()
-                                           .equals(variableName))
-                             .findFirst();
+        return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
     }
 
     @Override
@@ -330,7 +357,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return startFrom;
     }
 
-
     public void setStartFrom(Date startFrom) {
         this.startFrom = startFrom;
     }
@@ -339,7 +365,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     public Date getStartTo() {
         return startTo;
     }
-
 
     public void setStartTo(Date startTo) {
         this.startTo = startTo;
@@ -394,17 +419,17 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.suspendedFrom = suspendedFrom;
     }
 
-    public boolean isInFinalState(){
-        return  !(ProcessInstanceStatus.CREATED.equals(status) ||
-                  ProcessInstanceStatus.RUNNING.equals(status)||
-                  ProcessInstanceStatus.SUSPENDED.equals(status));
+    public boolean isInFinalState() {
+        return !(
+            ProcessInstanceStatus.CREATED.equals(status) ||
+            ProcessInstanceStatus.RUNNING.equals(status) ||
+            ProcessInstanceStatus.SUSPENDED.equals(status)
+        );
     }
-
 
     public Set<BPMNActivityEntity> getActivities() {
         return activities;
     }
-
 
     public void setActivities(Set<BPMNActivityEntity> bpmnActivities) {
         this.activities = bpmnActivities;
@@ -421,7 +446,6 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     public List<BPMNSequenceFlowEntity> getSequenceFlows() {
         return sequenceFlows;
     }
-
 
     public void setSequenceFlows(List<BPMNSequenceFlowEntity> sequenceFlows) {
         this.sequenceFlows = sequenceFlows;

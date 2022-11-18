@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
@@ -23,13 +24,14 @@ import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 
-import java.util.List;
-
 public class ProcessDefinitionService extends BaseProcessDefinitionService {
 
     private final ProcessRuntime processRuntime;
 
-    public ProcessDefinitionService(ProcessRuntime processRuntime, List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    public ProcessDefinitionService(
+        ProcessRuntime processRuntime,
+        List<ProcessDefinitionDecorator> processDefinitionDecorators
+    ) {
         super(processDefinitionDecorators);
         this.processRuntime = processRuntime;
     }
@@ -39,5 +41,4 @@ public class ProcessDefinitionService extends BaseProcessDefinitionService {
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
     }
-
 }

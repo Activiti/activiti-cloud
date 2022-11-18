@@ -15,7 +15,19 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
@@ -44,29 +56,20 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(TaskVariableControllerImpl.class)
-@EnableSpringDataWebSupport()
+@EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
+@Import(
+    {
+        CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class})
+        ServicesRestWebMvcAutoConfiguration.class
+    }
+)
 public class TaskVariableControllerImplIT {
 
     @Autowired
@@ -110,30 +113,45 @@ public class TaskVariableControllerImplIT {
 
     @Test
     public void getVariables() throws Exception {
-        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
-                                                                       String.class.getName(),
-                                                                       "Paul",
-                                                                       PROCESS_INSTANCE_ID, TASK_ID);
-        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
-                                                                       Integer.class.getName(),
-                                                                       12,
-                                                                       PROCESS_INSTANCE_ID, TASK_ID);
-        given(taskRuntime.variables(any())).willReturn(Arrays.asList(name,
-                                                                     age));
-        this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",
-                                 TASK_ID).accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
+            "name",
+            String.class.getName(),
+            "Paul",
+            PROCESS_INSTANCE_ID,
+            TASK_ID
+        );
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>(
+            "age",
+            Integer.class.getName(),
+            12,
+            PROCESS_INSTANCE_ID,
+            TASK_ID
+        );
+        given(taskRuntime.variables(any())).willReturn(Arrays.asList(name, age));
+        this.mockMvc.perform(
+                get("/v1/tasks/{taskId}/variables", TASK_ID)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(APPLICATION_JSON)
+            )
+            .andExpect(status().isOk());
     }
-
 
     @Test
     public void createVariable() throws Exception {
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(
-                mapper.writeValueAsString(TaskPayloadBuilder.createVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                post("/v1/tasks/{taskId}/variables/", TASK_ID)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder
+                                .createVariable()
+                                .withTaskId(TASK_ID)
+                                .withVariable("name", "Alice")
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
 
         verify(taskRuntime).createVariable(any());
     }
@@ -141,12 +159,20 @@ public class TaskVariableControllerImplIT {
     @Test
     public void updateVariable() throws Exception {
         //WHEN
-        this.mockMvc.perform(put("/v1/tasks/{taskId}/variables/{variableName}",
-                                  TASK_ID,
-                                 "name").contentType(MediaType.APPLICATION_JSON).content(
-                mapper.writeValueAsString(TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder
+                                .updateVariable()
+                                .withTaskId(TASK_ID)
+                                .withVariable("name", "Alice")
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
 
         verify(taskRuntime).updateVariable(any());
     }

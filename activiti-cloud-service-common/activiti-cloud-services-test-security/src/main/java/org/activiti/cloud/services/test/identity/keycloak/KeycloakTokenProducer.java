@@ -112,11 +112,6 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     }
 
     private AccessTokenResponse getAccessTokenResponse(String user, String password) {
-        return Keycloak.getInstance(authServerUrl,
-                                    realm,
-                                    user,
-                                    password,
-                                    resource).tokenManager().getAccessToken();
+        return Keycloak.getInstance(authServerUrl, realm, user, password, resource).tokenManager().getAccessToken();
     }
-
 }

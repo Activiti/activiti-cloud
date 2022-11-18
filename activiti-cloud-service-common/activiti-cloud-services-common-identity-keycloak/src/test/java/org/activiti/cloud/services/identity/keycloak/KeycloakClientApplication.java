@@ -30,17 +30,21 @@ import org.springframework.context.annotation.Import;
 public class KeycloakClientApplication {
 
     @Bean
-    public SecurityContextTokenProvider securityContextTokenProvider(@Value("${keycloak.auth-server-url:}") String authServerUrl,
-                                                                     @Value("${keycloak.realm:}") String realm) {
-        return () -> Optional.of(new KeycloakTokenProducer(authServerUrl, realm)
-                                     .withTestUser("testuser")
-                                     .withTestPassword("password")
-                                     .withResource("activiti")
-                                     .getAccessTokenString());
+    public SecurityContextTokenProvider securityContextTokenProvider(
+        @Value("${keycloak.auth-server-url:}") String authServerUrl,
+        @Value("${keycloak.realm:}") String realm
+    ) {
+        return () ->
+            Optional.of(
+                new KeycloakTokenProducer(authServerUrl, realm)
+                    .withTestUser("testuser")
+                    .withTestPassword("password")
+                    .withResource("activiti")
+                    .getAccessTokenString()
+            );
     }
 
-	public static void main(String[] args) {
-		SpringApplication.run(KeycloakClientApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(KeycloakClientApplication.class, args);
+    }
 }

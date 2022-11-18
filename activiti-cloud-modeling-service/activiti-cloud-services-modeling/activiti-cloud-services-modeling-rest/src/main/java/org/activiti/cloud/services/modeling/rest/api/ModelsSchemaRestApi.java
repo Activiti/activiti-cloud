@@ -16,8 +16,9 @@
 package org.activiti.cloud.services.modeling.rest.api;
 
 import static org.activiti.cloud.services.modeling.rest.api.ModelRestApi.MODELS;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = MODELS)
 @RequestMapping(value = "/v1/schemas")
 public interface ModelsSchemaRestApi {
-
     @Operation(
         tags = MODELS,
         summary = "Get validation schema for model type",

@@ -29,15 +29,13 @@
  */
 package org.activiti.cloud.services.core.utils;
 
-import org.mockito.Answers;
-
 import static org.mockito.Mockito.mock;
+
+import org.mockito.Answers;
 
 public class MockUtils {
 
     public static <T> T selfReturningMock(Class<T> clazz) {
-        return mock(clazz,
-                    Answers.RETURNS_SELF);
+        return mock(clazz, Answers.RETURNS_SELF);
     }
-
 }

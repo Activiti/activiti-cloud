@@ -28,7 +28,8 @@ public class JwtAccessTokenValidator {
     }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
-        return Optional.ofNullable(jwtAdapter)
+        return Optional
+            .ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
             .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
@@ -47,18 +48,18 @@ public class JwtAccessTokenValidator {
      * @return if the nbf claim is either in the past or the future
      */
     private boolean isNotBefore(Jwt accessToken) {
-        return accessToken.getNotBefore() == null ||
-            currentTime() >= accessToken.getNotBefore().toEpochMilli();
+        return accessToken.getNotBefore() == null || currentTime() >= accessToken.getNotBefore().toEpochMilli();
     }
 
     private boolean isExpired(Jwt accessToken) {
-        return accessToken.getExpiresAt() != null &&
+        return (
+            accessToken.getExpiresAt() != null &&
             accessToken.getExpiresAt().toEpochMilli() != 0 &&
-            currentTime() > accessToken.getExpiresAt().toEpochMilli();
+            currentTime() > accessToken.getExpiresAt().toEpochMilli()
+        );
     }
 
     private long currentTime() {
         return System.currentTimeMillis() + offset;
     }
-
 }

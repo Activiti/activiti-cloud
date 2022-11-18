@@ -48,8 +48,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     private final BpmnXMLConverter bpmnConverter;
 
-    public ProcessModelContentConverter(ProcessModelType processModelType,
-                                        BpmnXMLConverter bpmnConverter) {
+    public ProcessModelContentConverter(ProcessModelType processModelType, BpmnXMLConverter bpmnConverter) {
         this.bpmnConverter = bpmnConverter;
         this.processModelType = processModelType;
     }
@@ -65,18 +64,16 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             return Optional.empty();
         }
 
-        return Optional.ofNullable(convertToBpmnModel(bytes))
-                .map(BpmnProcessModelContent::new);
+        return Optional.ofNullable(convertToBpmnModel(bytes)).map(BpmnProcessModelContent::new);
     }
 
     @Override
     public byte[] convertToBytes(BpmnProcessModelContent bpmnProcessModelContent) {
-         return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
+        return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
     }
 
     public Optional<BpmnProcessModelContent> convertToModelContent(BpmnModel bpmnModel) {
-        return Optional.ofNullable(bpmnModel)
-                .map(BpmnProcessModelContent::new);
+        return Optional.ofNullable(bpmnModel).map(BpmnProcessModelContent::new);
     }
 
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
@@ -93,10 +90,10 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     }
 
     @Override
-    public FileContent overrideModelId(FileContent fileContent,
-                                       Map<String, String> modelIdentifiers) {
+    public FileContent overrideModelId(FileContent fileContent, Map<String, String> modelIdentifiers) {
         FileContent newFileContent;
-        Optional<BpmnProcessModelContent> processModelContent = this.convertToModelContent(fileContent.getFileContent());
+        Optional<BpmnProcessModelContent> processModelContent =
+            this.convertToModelContent(fileContent.getFileContent());
 
         if (processModelContent.isPresent()) {
             BpmnProcessModelContent modelContent = processModelContent.get();
@@ -105,22 +102,27 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             this.overrideAllProcessDefinition(modelContent, referenceIdOverrider);
             byte[] overriddenContent = this.convertToBytes(modelContent);
 
-            newFileContent = new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
+            newFileContent =
+                new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
         } else {
             newFileContent = fileContent;
         }
         return newFileContent;
     }
 
-    public void overrideAllProcessDefinition(BpmnProcessModelContent processModelContent,
-                                             ReferenceIdOverrider referenceIdOverrider) {
-        processModelContent.getBpmnModel().getProcesses().forEach(process -> {
-            overrideAllIdReferences(process, referenceIdOverrider);
-        });
+    public void overrideAllProcessDefinition(
+        BpmnProcessModelContent processModelContent,
+        ReferenceIdOverrider referenceIdOverrider
+    ) {
+        processModelContent
+            .getBpmnModel()
+            .getProcesses()
+            .forEach(process -> {
+                overrideAllIdReferences(process, referenceIdOverrider);
+            });
     }
 
-    private void overrideAllIdReferences(Process process,
-                                         ReferenceIdOverrider referenceIdOverrider) {
+    private void overrideAllIdReferences(Process process, ReferenceIdOverrider referenceIdOverrider) {
         process.accept(referenceIdOverrider);
     }
 }

@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import java.io.IOException;
-import javax.persistence.AttributeConverter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import javax.persistence.AttributeConverter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.util.StringUtils;
@@ -29,7 +28,7 @@ import org.springframework.util.StringUtils;
  */
 public abstract class JpaJsonConverter<T> implements AttributeConverter<T, String> {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(T entity) {
@@ -39,8 +38,7 @@ public abstract class JpaJsonConverter<T> implements AttributeConverter<T, Strin
             }
             return getObjectMapper().writeValueAsString(entity);
         } catch (JsonProcessingException ex) {
-            throw new DataIntegrityViolationException("Cannot convert entity to json data: " + entity,
-                                                      ex);
+            throw new DataIntegrityViolationException("Cannot convert entity to json data: " + entity, ex);
         }
     }
 
@@ -50,11 +48,9 @@ public abstract class JpaJsonConverter<T> implements AttributeConverter<T, Strin
             if (StringUtils.isEmpty(json)) {
                 return null;
             }
-            return getObjectMapper().readValue(json,
-                                               getEntityClass());
+            return getObjectMapper().readValue(json, getEntityClass());
         } catch (IOException ex) {
-            throw new DataRetrievalFailureException("Cannot convert the json data to entity: " + json,
-                                                    ex);
+            throw new DataRetrievalFailureException("Cannot convert the json data to entity: " + json, ex);
         }
     }
 

@@ -19,7 +19,6 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ProcessEngineIntegrationChannels {
-
     String INTEGRATION_RESULTS_CONSUMER = "integrationResultsConsumer";
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
@@ -29,5 +28,4 @@ public interface ProcessEngineIntegrationChannels {
 
     @Input(INTEGRATION_ERRORS_CONSUMER)
     SubscribableChannel integrationErrorsConsumer();
-
 }

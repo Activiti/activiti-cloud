@@ -15,13 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.api.task.model.Task;
-import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.Test;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class TaskCreatedEventConverterTest {
 
@@ -51,7 +52,7 @@ public class TaskCreatedEventConverterTest {
         AuditEventEntity auditEventEntity = eventConverter.convertToEntity(createTaskCreatedEvent());
 
         //when
-        CloudRuntimeEvent cloudEvent= eventConverter.convertToAPI(auditEventEntity);
+        CloudRuntimeEvent cloudEvent = eventConverter.convertToAPI(auditEventEntity);
         assertThat(cloudEvent).isNotNull();
         assertThat(auditEventEntity.getEntityId()).isEqualTo(cloudEvent.getEntityId());
         assertThat(auditEventEntity.getProcessInstanceId()).isEqualTo(cloudEvent.getProcessInstanceId());
@@ -63,13 +64,13 @@ public class TaskCreatedEventConverterTest {
 
     private CloudTaskCreatedEventImpl createTaskCreatedEvent() {
         //given
-        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def",
-                                            "my task",
-                                            Task.TaskStatus.CREATED);
+        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def", "my task", Task.TaskStatus.CREATED);
         taskCreated.setTaskDefinitionKey("taskDefinitionKey");
-        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
-                                                                                        System.currentTimeMillis(),
-                                                                                        taskCreated);
+        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl(
+            "TaskCreatedEventId",
+            System.currentTimeMillis(),
+            taskCreated
+        );
         cloudTaskCreatedEvent.setEntityId("entityId");
         cloudTaskCreatedEvent.setProcessInstanceId("processInstanceId");
         cloudTaskCreatedEvent.setProcessDefinitionId("processDefinitionId");

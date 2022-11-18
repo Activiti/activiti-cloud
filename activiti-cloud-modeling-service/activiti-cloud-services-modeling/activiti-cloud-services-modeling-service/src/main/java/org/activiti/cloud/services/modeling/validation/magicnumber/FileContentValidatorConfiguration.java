@@ -27,5 +27,4 @@ public class FileContentValidatorConfiguration {
     public FileMagicNumberValidator fileContentValidator(FileMagicNumberList fileMagicNumber) {
         return new FileMagicNumberValidator(fileMagicNumber.getMagicNumber());
     }
-
 }

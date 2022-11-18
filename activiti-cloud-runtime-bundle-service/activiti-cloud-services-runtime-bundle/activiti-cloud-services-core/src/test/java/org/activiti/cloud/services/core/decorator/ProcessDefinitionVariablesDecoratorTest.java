@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.core.decorator;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.cloud.api.process.model.impl.CloudProcessDefinitionImpl;
 import org.activiti.spring.process.CachingProcessExtensionService;
@@ -28,11 +32,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionVariablesDecoratorTest {
 
@@ -43,7 +42,7 @@ class ProcessDefinitionVariablesDecoratorTest {
     private CachingProcessExtensionService processExtensionService;
 
     @ParameterizedTest
-    @CsvSource({"variables, true", "VARIABLES, true", "else, false"})
+    @CsvSource({ "variables, true", "VARIABLES, true", "else, false" })
     void should_applyToVariablesParam(String includeParam, boolean shouldApply) {
         boolean applies = processDefinitionVariablesDecorator.applies(includeParam);
         assertThat(applies).isEqualTo(shouldApply);
@@ -66,10 +65,14 @@ class ProcessDefinitionVariablesDecoratorTest {
 
         when(processExtensionService.getExtensionsForId("PROC_ID")).thenReturn(extension);
 
-        ExtendedCloudProcessDefinition decoratedProcessDefinition = processDefinitionVariablesDecorator.decorate(givenProcessDefinition);
+        ExtendedCloudProcessDefinition decoratedProcessDefinition = processDefinitionVariablesDecorator.decorate(
+            givenProcessDefinition
+        );
 
         assertThat(decoratedProcessDefinition.getVariableDefinitions()).hasSize(1);
-        org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition.getVariableDefinitions().get(0);
+        org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition
+            .getVariableDefinitions()
+            .get(0);
         assertThat(variableDefinition.getId()).isEqualTo("VAR_ID");
         assertThat(variableDefinition.getName()).isEqualTo("var1");
         assertThat(variableDefinition.getDescription()).isEqualTo("Variable no 1");
@@ -94,10 +97,14 @@ class ProcessDefinitionVariablesDecoratorTest {
 
         when(processExtensionService.getExtensionsForId("PROC_ID")).thenReturn(extension);
 
-        ExtendedCloudProcessDefinition decoratedProcessDefinition = processDefinitionVariablesDecorator.decorate(givenProcessDefinition);
+        ExtendedCloudProcessDefinition decoratedProcessDefinition = processDefinitionVariablesDecorator.decorate(
+            givenProcessDefinition
+        );
 
         assertThat(decoratedProcessDefinition.getVariableDefinitions()).hasSize(1);
-        org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition.getVariableDefinitions().get(0);
+        org.activiti.api.process.model.VariableDefinition variableDefinition = decoratedProcessDefinition
+            .getVariableDefinitions()
+            .get(0);
         assertThat(variableDefinition.getDisplay()).isEqualTo(true);
         assertThat(variableDefinition.getDisplayName()).isEqualTo("Variable 2");
     }

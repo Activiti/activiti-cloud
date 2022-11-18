@@ -25,7 +25,7 @@ public class KeycloakJwtAdapter implements JwtAdapter {
 
     private final Jwt jwt;
 
-    public KeycloakJwtAdapter(Jwt jwt){
+    public KeycloakJwtAdapter(Jwt jwt) {
         this.jwt = jwt;
     }
 
@@ -35,7 +35,7 @@ public class KeycloakJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getRoles() {
-        if(jwt.hasClaim("realm_access")) {
+        if (jwt.hasClaim("realm_access")) {
             return getRoles(jwt.getClaim("realm_access"));
         } else {
             return Collections.emptyList();

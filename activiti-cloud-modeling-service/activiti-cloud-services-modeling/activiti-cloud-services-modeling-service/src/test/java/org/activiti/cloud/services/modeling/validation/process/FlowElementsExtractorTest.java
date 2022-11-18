@@ -46,9 +46,7 @@ public class FlowElementsExtractorTest {
         final Set<UserTask> userTasks = flowElementsExtractor.extractFlowElements(model, UserTask.class);
 
         //then
-        assertThat(userTasks)
-            .extracting(UserTask::getName)
-            .containsExactlyInAnyOrder("Task 1", "Task 2");
+        assertThat(userTasks).extracting(UserTask::getName).containsExactlyInAnyOrder("Task 1", "Task 2");
     }
 
     @Test

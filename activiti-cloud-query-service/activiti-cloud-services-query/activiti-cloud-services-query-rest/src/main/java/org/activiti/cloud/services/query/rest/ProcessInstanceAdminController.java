@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -39,15 +40,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/process-instances",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceAdminController {
 
     private final ProcessInstanceAdminService processInstanceAdminService;
@@ -57,9 +54,11 @@ public class ProcessInstanceAdminController {
     private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
     @Autowired
-    public ProcessInstanceAdminController(ProcessInstanceAdminService processInstanceAdminService,
-                                          ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-                                          AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler) {
+    public ProcessInstanceAdminController(
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler
+    ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -67,28 +66,36 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                  Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAll(
+        @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceAdminService.findAll(predicate, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(
+        @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
         @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> variableKeys,
-        Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
-
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceAdminService.findById(processInstanceId));
+        return processInstanceRepresentationModelAssembler.toModel(
+            processInstanceAdminService.findById(processInstanceId)
+        );
     }
-
 }

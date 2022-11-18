@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -29,12 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCreatedEventHandlerTest {
@@ -60,14 +59,15 @@ public class ProcessCreatedEventHandlerTest {
         verify(entityManager).persist(argumentCaptor.capture());
 
         ProcessInstanceEntity processInstanceEntity = argumentCaptor.getValue();
-        Assertions.assertThat(processInstanceEntity)
-                .hasId(event.getEntity().getId())
-                .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
-                .hasServiceName(event.getServiceName())
-                .hasProcessDefinitionKey(event.getEntity().getProcessDefinitionKey())
-                .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED)
-                .hasName(event.getEntity().getName())
-                .hasProcessDefinitionName(event.getEntity().getProcessDefinitionName());
+        Assertions
+            .assertThat(processInstanceEntity)
+            .hasId(event.getEntity().getId())
+            .hasProcessDefinitionId(event.getEntity().getProcessDefinitionId())
+            .hasServiceName(event.getServiceName())
+            .hasProcessDefinitionKey(event.getEntity().getProcessDefinitionKey())
+            .hasStatus(ProcessInstance.ProcessInstanceStatus.CREATED)
+            .hasName(event.getEntity().getName())
+            .hasProcessDefinitionName(event.getEntity().getProcessDefinitionName());
     }
 
     private CloudProcessCreatedEvent buildProcessCreatedEvent() {

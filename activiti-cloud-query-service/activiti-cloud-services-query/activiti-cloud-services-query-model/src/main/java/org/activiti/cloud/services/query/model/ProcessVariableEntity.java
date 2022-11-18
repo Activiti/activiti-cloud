@@ -15,11 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
-
+import java.util.Date;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,69 +24,79 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.util.Date;
-import java.util.Objects;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
-@FilterDef(name = "variablesFilter",
-        parameters = {
-            @ParamDef(name = "variableKeys", type = "string")
-        },
-        defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)")
-@Entity(name="ProcessVariable")
-@Table(name = "PROCESS_VARIABLE",
-        indexes = {
-                @Index(name = "proc_var_processInstanceId_idx", columnList = "processInstanceId", unique = false),
-                @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
-                @Index(name = "proc_var_executionId_idx", columnList = "executionId", unique = false)
-        })
+@FilterDef(
+    name = "variablesFilter",
+    parameters = { @ParamDef(name = "variableKeys", type = "string") },
+    defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)"
+)
+@Entity(name = "ProcessVariable")
+@Table(
+    name = "PROCESS_VARIABLE",
+    indexes = {
+        @Index(name = "proc_var_processInstanceId_idx", columnList = "processInstanceId", unique = false),
+        @Index(name = "proc_var_name_idx", columnList = "name", unique = false),
+        @Index(name = "proc_var_executionId_idx", columnList = "executionId", unique = false)
+    }
+)
 @DynamicInsert
 @DynamicUpdate
 public class ProcessVariableEntity extends AbstractVariableEntity {
 
     @Id
     @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="process_variable_sequence", sequenceName = "process_variable_sequence", allocationSize=50)
+    @SequenceGenerator(
+        name = "process_variable_sequence",
+        sequenceName = "process_variable_sequence",
+        allocationSize = 50
+    )
     private Long id;
 
     private String variableDefinitionId;
 
     private String processDefinitionKey;
 
-    public ProcessVariableEntity() {
-    }
+    public ProcessVariableEntity() {}
 
-    public ProcessVariableEntity(Long id,
-                          String type,
-                          String name,
-                          String processInstanceId,
-                          String serviceName,
-                          String serviceFullName,
-                          String serviceVersion,
-                          String appName,
-                          String appVersion,
-                          Date createTime,
-                          Date lastUpdatedTime,
-                          String executionId) {
-        super(type,
-              name,
-              processInstanceId,
-              serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion,
-              createTime,
-              lastUpdatedTime,
-              executionId);
-
+    public ProcessVariableEntity(
+        Long id,
+        String type,
+        String name,
+        String processInstanceId,
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion,
+        Date createTime,
+        Date lastUpdatedTime,
+        String executionId
+    ) {
+        super(
+            type,
+            name,
+            processInstanceId,
+            serviceName,
+            serviceFullName,
+            serviceVersion,
+            appName,
+            appVersion,
+            createTime,
+            lastUpdatedTime,
+            executionId
+        );
         this.id = id;
-
     }
 
     @Override
     public Long getId() {
         return id;
     }
+
     @Override
     public String getTaskId() {
         return null;
@@ -136,5 +143,4 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
         return this.getId() != null && Objects.equals(this.getId(), other.getId());
     }
-
 }

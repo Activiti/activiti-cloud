@@ -31,10 +31,10 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuditConsumerChannelHandler auditConsumerChannelHandler(EventsRepository eventsRepository,
-                                                                   APIEventToEntityConverters eventConverters) {
-        return new AuditConsumerChannelHandlerImpl(eventsRepository,
-                                                   eventConverters);
+    public AuditConsumerChannelHandler auditConsumerChannelHandler(
+        EventsRepository eventsRepository,
+        APIEventToEntityConverters eventConverters
+    ) {
+        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters);
     }
-
 }

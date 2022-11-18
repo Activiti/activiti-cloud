@@ -28,15 +28,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 
-public class MessageSubscriptionCancelledEventMessageProducer implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent> {
+public class MessageSubscriptionCancelledEventMessageProducer
+    implements ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MessageSubscriptionCancelledEventMessageProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        MessageSubscriptionCancelledEventMessageProducer.class
+    );
 
     private final MessageSubscriptionEventMessageBuilderFactory messageBuilderFactory;
     private final MessageEventsDispatcher messageEventsDispatcher;
 
-    public MessageSubscriptionCancelledEventMessageProducer(@NonNull MessageEventsDispatcher messageEventsDispatcher,
-                                                            @NonNull MessageSubscriptionEventMessageBuilderFactory messageBuilderFactory) {
+    public MessageSubscriptionCancelledEventMessageProducer(
+        @NonNull MessageEventsDispatcher messageEventsDispatcher,
+        @NonNull MessageSubscriptionEventMessageBuilderFactory messageBuilderFactory
+    ) {
         this.messageEventsDispatcher = messageEventsDispatcher;
         this.messageBuilderFactory = messageBuilderFactory;
     }
@@ -47,19 +52,17 @@ public class MessageSubscriptionCancelledEventMessageProducer implements Process
 
         MessageSubscription messageSubscription = event.getEntity();
 
-        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder.messageEvent(messageSubscription.getEventName())
-                                                                            .withCorrelationKey(messageSubscription.getConfiguration())
-                                                                            .build();
+        MessageEventPayload messageEventPayload = MessageEventPayloadBuilder
+            .messageEvent(messageSubscription.getEventName())
+            .withCorrelationKey(messageSubscription.getConfiguration())
+            .build();
 
-        Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
-                                                                    .withPayload(messageEventPayload)
-                                                                    .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE,
-                                                                               event.getEventType()
-                                                                                    .name())
-                                                                    .build();
+        Message<MessageEventPayload> message = messageBuilderFactory
+            .create(event.getEntity())
+            .withPayload(messageEventPayload)
+            .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE, event.getEventType().name())
+            .build();
 
         messageEventsDispatcher.dispatch(message);
     }
-
-
 }

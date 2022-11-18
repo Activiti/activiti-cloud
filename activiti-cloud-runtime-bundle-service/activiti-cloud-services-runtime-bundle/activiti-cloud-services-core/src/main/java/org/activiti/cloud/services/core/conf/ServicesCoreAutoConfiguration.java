@@ -17,6 +17,10 @@ package org.activiti.cloud.services.core.conf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -63,17 +67,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
 public class ServicesCoreAutoConfiguration {
 
     @Bean
-    public SpringPageConverter pageConverter(){
+    public SpringPageConverter pageConverter() {
         return new SpringPageConverter();
     }
 
@@ -109,7 +108,9 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public RemoveProcessVariablesCmdExecutor removeProcessVariablesCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new RemoveProcessVariablesCmdExecutor(processAdminRuntime);
     }
 
@@ -139,7 +140,9 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
+    public SuspendProcessInstanceCmdExecutor suspendProcessInstanceCmdExecutor(
+        ProcessAdminRuntime processAdminRuntime
+    ) {
         return new SuspendProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
@@ -193,25 +196,30 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
+    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(
+        ProcessDiagramGenerator processDiagramGenerator
+    ) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(DateFormatterProvider dateFormatterProvider) {
+    public ProcessVariableValueSpringConverter<Date> processVariableDateConverter(
+        DateFormatterProvider dateFormatterProvider
+    ) {
         return new ProcessVariableDateConverter(dateFormatterProvider);
     }
 
     @Bean
-    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(
-        ObjectMapper objectMapper) {
+    public ProcessVariableValueSpringConverter<JsonNode> processVariableJsonNodeConverter(ObjectMapper objectMapper) {
         return new ProcessVariableJsonNodeConverter(objectMapper);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableValueConverter processVariableValueConverter(List<ProcessVariableValueSpringConverter<?>> converters,
-                                                                       DateFormatterProvider dateFormatterProvider) {
+    public ProcessVariableValueConverter processVariableValueConverter(
+        List<ProcessVariableValueSpringConverter<?>> converters,
+        DateFormatterProvider dateFormatterProvider
+    ) {
         FormattingConversionService conversionService = new ApplicationConversionService();
 
         converters.forEach(conversionService::addConverter);
@@ -226,27 +234,35 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
+    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(
+        ProcessVariableValueConverter variableValueConverter
+    ) {
         return new ProcessVariablesPayloadConverter(variableValueConverter);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator(CachingProcessExtensionService cachingProcessExtensionService) {
+    public ProcessDefinitionVariablesDecorator processDefinitionVariablesDecorator(
+        CachingProcessExtensionService cachingProcessExtensionService
+    ) {
         return new ProcessDefinitionVariablesDecorator(cachingProcessExtensionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionService processDefinitionService(ProcessRuntime processRuntime,
-                                                             List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    public ProcessDefinitionService processDefinitionService(
+        ProcessRuntime processRuntime,
+        List<ProcessDefinitionDecorator> processDefinitionDecorators
+    ) {
         return new ProcessDefinitionService(processRuntime, processDefinitionDecorators);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDefinitionAdminService processDefinitionAdminService(ProcessAdminRuntime processAdminRuntime,
-        List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    public ProcessDefinitionAdminService processDefinitionAdminService(
+        ProcessAdminRuntime processAdminRuntime,
+        List<ProcessDefinitionDecorator> processDefinitionDecorators
+    ) {
         return new ProcessDefinitionAdminService(processAdminRuntime, processDefinitionDecorators);
     }
 }

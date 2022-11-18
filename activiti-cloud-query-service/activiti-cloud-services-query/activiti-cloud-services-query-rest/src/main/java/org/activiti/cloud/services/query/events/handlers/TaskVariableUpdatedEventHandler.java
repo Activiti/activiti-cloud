@@ -31,7 +31,9 @@ public class TaskVariableUpdatedEventHandler {
         String variableName = updatedVariableEntity.getName();
         String taskId = updatedVariableEntity.getTaskId();
 
-        variableUpdater.update(updatedVariableEntity,
-                               "Unable to find variable named '" + variableName + "' for task '" + taskId + "'");
+        variableUpdater.update(
+            updatedVariableEntity,
+            "Unable to find variable named '" + variableName + "' for task '" + taskId + "'"
+        );
     }
 }

@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -46,23 +50,20 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test-admin.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class QueryAdminVariablesIT {
 
-    private static final String ADMIN_PROCESS_VARIABLES_URL = "/admin/v1/process-instances/{processInstanceId}/variables";
+    private static final String ADMIN_PROCESS_VARIABLES_URL =
+        "/admin/v1/process-instances/{processInstanceId}/variables";
     private static final String ADMIN_TASK_VARIABLES_URL = "/admin/v1/tasks/{taskId}/variables";
 
-    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {
-    };
-    private static final ParameterizedTypeReference<PagedModel<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<TaskVariableEntity>>() {
-    };
+    private static final ParameterizedTypeReference<PagedModel<ProcessVariableEntity>> PAGED_PROCESSVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ProcessVariableEntity>>() {};
+    private static final ParameterizedTypeReference<PagedModel<TaskVariableEntity>> PAGED_TASKVARIABLE_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<TaskVariableEntity>>() {};
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -94,7 +95,9 @@ public class QueryAdminVariablesIT {
     @BeforeEach
     public void setUp() {
         eventsAggregator = new EventsAggregator(producer);
-        ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
+        ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(
+            eventsAggregator
+        );
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
 
@@ -112,243 +115,188 @@ public class QueryAdminVariablesIT {
     @Test
     public void shouldRetrieveAllProcessVariable() {
         //given
-        variableEventContainedBuilder.anUpdatedVariable("varUpdated",
-                                                        "v2-up",
-            "beforeUpdateValue", "string")
-                .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .anUpdatedVariable("varUpdated", "v2-up", "beforeUpdateValue", "string")
+            .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aDeletedVariable("varDeleted",
-                                                       "v1",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aDeletedVariable("varDeleted", "v1", "string")
+            .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROCESS_VARIABLES_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
+                    runningProcessInstance.getId()
+                );
 
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL,
-                                                                                                      HttpMethod.GET,
-                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
-                                                                                                      runningProcessInstance.getId());
-
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody().getContent())
                     .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue,
-                            ProcessVariableEntity::getMarkedAsDeleted)
-                    .containsExactly(
-                            tuple(
-                                    "varUpdated",
-                                    "v2-up",
-                                    false)
-                    );
-        });
+                        ProcessVariableEntity::getName,
+                        ProcessVariableEntity::getValue,
+                        ProcessVariableEntity::getMarkedAsDeleted
+                    )
+                    .containsExactly(tuple("varUpdated", "v2-up", false));
+            });
     }
 
     @Test
     public void shouldRetrieveAllTaskVariables() {
         //given
-        Task task = taskEventContainedBuilder.aCreatedTask("Created task",
-                                                           runningProcessInstance);
+        Task task = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("varCreated",
-                                                       "v1",
-                                                       "string")
-                .onTask(task);
-        variableEventContainedBuilder.anUpdatedVariable("varUpdated",
-                                                        "v2-up",
-            "beforeUpdateValue", "string")
-                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("varCreated", "v1", "string").onTask(task);
+        variableEventContainedBuilder
+            .anUpdatedVariable("varUpdated", "v2-up", "beforeUpdateValue", "string")
+            .onTask(task);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_TASK_VARIABLES_URL,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKVARIABLE_RESPONSE_TYPE,
+                    task.getId()
+                );
 
-            //when
-            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL,
-                                                                                                      HttpMethod.GET,
-                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_TASKVARIABLE_RESPONSE_TYPE,
-                                                                                                      task.getId());
-
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            TaskVariableEntity::getName,
-                            TaskVariableEntity::getValue)
-                    .containsExactly(
-                            tuple(
-                                    "varCreated",
-                                    "v1"),
-                            tuple(
-                                    "varUpdated",
-                                    "v2-up"));
-        });
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody().getContent())
+                    .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
+                    .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
+            });
     }
 
     @Test
     public void shouldFilterOnProcessVariableName() {
-
         //given
-        variableEventContainedBuilder.aCreatedVariable("var1",
-                                                       "v1",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
-        variableEventContainedBuilder.aCreatedVariable("var2",
-                                                       "v2",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
-        variableEventContainedBuilder.aCreatedVariable("var3",
-                                                       "v3",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aCreatedVariable("var1", "v1", "string")
+            .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aCreatedVariable("var2", "v2", "string")
+            .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aCreatedVariable("var3", "v3", "string")
+            .onProcessInstance(runningProcessInstance);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
-
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<ProcessVariableEntity>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROCESS_VARIABLES_URL + "?name={varName}",
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
                     PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
                     runningProcessInstance.getId(),
-                    "var2");
+                    "var2"
+                );
 
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue)
-                    .containsExactly(
-                            tuple("var2",
-                                    "v2")
-                    );
-        });
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody().getContent())
+                    .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                    .containsExactly(tuple("var2", "v2"));
+            });
     }
 
     @Test
     public void shouldFilterOnTaskVariableName() {
-
         //given
-        Task task = taskEventContainedBuilder.aCreatedTask("Created task",
-                                                           runningProcessInstance);
+        Task task = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("var1",
-                                                       "v1",
-                                                       "string")
-                .onTask(task);
-        variableEventContainedBuilder.aCreatedVariable("var2",
-                                                       "v2",
-                                                       "string")
-                .onTask(task);
-        variableEventContainedBuilder.aCreatedVariable("var3",
-                                                       "v3",
-                                                       "string")
-                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var1", "v1", "string").onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var2", "v2", "string").onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var3", "v3", "string").onTask(task);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
-
-            //when
-            ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
-                                                                                                          HttpMethod.GET,
-                                                                                                          identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                          PAGED_TASKVARIABLE_RESPONSE_TYPE,
-                                                                                                          task.getId(),
-                                                                                                          "var2");
-            //then
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(responseEntity.getBody().getContent())
-                    .extracting(
-                            TaskVariableEntity::getName,
-                            TaskVariableEntity::getValue)
-                    .containsExactly(
-                            tuple("var2",
-                                    "v2")
-                    );
-        });
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKVARIABLE_RESPONSE_TYPE,
+                    task.getId(),
+                    "var2"
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody().getContent())
+                    .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
+                    .containsExactly(tuple("var2", "v2"));
+            });
     }
 
     //Test a case when a processInstance and a task have variable with the same name
     @Test
     public void shouldFilterOnProcessAndTaskVariableName() {
-
         //given
-        variableEventContainedBuilder.aCreatedVariable("var1",
-                                                       "pv1",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aCreatedVariable("var1", "pv1", "string")
+            .onProcessInstance(runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("var2",
-                                                       "pv2",
-                                                       "string")
-                .onProcessInstance(runningProcessInstance);
+        variableEventContainedBuilder
+            .aCreatedVariable("var2", "pv2", "string")
+            .onProcessInstance(runningProcessInstance);
 
-        Task task = taskEventContainedBuilder.aCreatedTask("Created task",
-                                                           runningProcessInstance);
+        Task task = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
 
         //One of task variables has same name like processInstance variable
-        variableEventContainedBuilder.aCreatedVariable("var1",
-                                                       "tv1",
-                                                       "string")
-                .onTask(task);
-        variableEventContainedBuilder.aCreatedVariable("var2",
-                                                       "tv2",
-                                                       "string")
-                .onTask(task);
-        variableEventContainedBuilder.aCreatedVariable("var3",
-                                                       "v3",
-                                                       "string")
-                .onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var1", "tv1", "string").onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var2", "tv2", "string").onTask(task);
+        variableEventContainedBuilder.aCreatedVariable("var3", "v3", "string").onTask(task);
 
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<TaskVariableEntity>> taskResponseEntity = testRestTemplate.exchange(
+                    ADMIN_TASK_VARIABLES_URL + "?name={varName}",
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_TASKVARIABLE_RESPONSE_TYPE,
+                    task.getId(),
+                    "var1"
+                );
+                //then
+                assertThat(taskResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(taskResponseEntity.getBody().getContent())
+                    .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
+                    .containsExactly(tuple("var1", "tv1"));
 
-            //when
-            ResponseEntity<PagedModel<TaskVariableEntity>> taskResponseEntity = testRestTemplate.exchange(ADMIN_TASK_VARIABLES_URL + "?name={varName}",
-                                                                                                          HttpMethod.GET,
-                                                                                                          identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                          PAGED_TASKVARIABLE_RESPONSE_TYPE,
-                                                                                                          task.getId(),
-                                                                                                          "var1");
-            //then
-            assertThat(taskResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(taskResponseEntity.getBody().getContent())
-                    .extracting(
-                            TaskVariableEntity::getName,
-                            TaskVariableEntity::getValue)
-                    .containsExactly(
-                            tuple("var1",
-                                   "tv1")
-                    );
+                //when
+                ResponseEntity<PagedModel<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(
+                    ADMIN_PROCESS_VARIABLES_URL + "?name={varName}",
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
+                    runningProcessInstance.getId(),
+                    "var1"
+                );
 
-            //when
-            ResponseEntity<PagedModel<ProcessVariableEntity>> processResponseEntity = testRestTemplate.exchange(ADMIN_PROCESS_VARIABLES_URL +  "?name={varName}",
-                                                                                                      HttpMethod.GET,
-                                                                                                      identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                      PAGED_PROCESSVARIABLE_RESPONSE_TYPE,
-                                                                                                      runningProcessInstance.getId(),
-                                                                                                      "var1");
-
-            //then
-            assertThat(processResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-            assertThat(processResponseEntity.getBody().getContent())
-                    .extracting(
-                            ProcessVariableEntity::getName,
-                            ProcessVariableEntity::getValue)
-                    .containsExactly(
-                            tuple("var1",
-                                   "pv1")
-                    );
-        });
+                //then
+                assertThat(processResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(processResponseEntity.getBody().getContent())
+                    .extracting(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                    .containsExactly(tuple("var1", "pv1"));
+            });
     }
 }

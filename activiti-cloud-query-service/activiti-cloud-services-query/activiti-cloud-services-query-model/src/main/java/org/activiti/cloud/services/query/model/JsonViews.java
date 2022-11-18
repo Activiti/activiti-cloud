@@ -17,10 +17,7 @@ package org.activiti.cloud.services.query.model;
 
 public class JsonViews {
 
-    public static class General {
-    }
+    public static class General {}
 
-    public static class ProcessVariables {
-    }
-
+    public static class ProcessVariables {}
 }

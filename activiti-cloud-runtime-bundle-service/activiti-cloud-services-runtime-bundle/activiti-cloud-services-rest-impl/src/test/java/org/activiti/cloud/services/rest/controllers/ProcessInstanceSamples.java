@@ -17,7 +17,6 @@ package org.activiti.cloud.services.rest.controllers;
 
 import java.util.Date;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 

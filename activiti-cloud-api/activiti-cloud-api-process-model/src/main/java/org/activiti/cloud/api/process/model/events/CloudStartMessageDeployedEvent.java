@@ -20,12 +20,12 @@ import org.activiti.api.process.model.events.MessageDefinitionEvent;
 import org.activiti.api.process.model.events.StartMessageDeployedEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudStartMessageDeployedEvent extends CloudRuntimeEvent<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>,
-                                                        StartMessageDeployedEvent {
-
+public interface CloudStartMessageDeployedEvent
+    extends
+        CloudRuntimeEvent<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>,
+        StartMessageDeployedEvent {
     @Override
     default MessageDefinitionEvents getEventType() {
         return MessageDefinitionEvents.START_MESSAGE_DEPLOYED;
     }
-
 }
