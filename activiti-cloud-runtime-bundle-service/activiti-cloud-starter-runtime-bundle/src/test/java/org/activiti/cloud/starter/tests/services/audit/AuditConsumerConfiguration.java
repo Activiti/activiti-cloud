@@ -15,12 +15,20 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
-public interface AuditConsumer {
+@TestConfiguration
+public class AuditConsumerConfiguration implements AuditConsumer {
 
-    String AUDIT_CONSUMER = "auditConsumer";
-
-    SubscribableChannel auditConsumer();
+    @Bean(AuditConsumer.AUDIT_CONSUMER)
+    @ConditionalOnMissingBean(name = AuditConsumer.AUDIT_CONSUMER)
+    @Override
+    public SubscribableChannel auditConsumer() {
+        return MessageChannels.publishSubscribe(AuditConsumer.AUDIT_CONSUMER)
+            .get();
+    }
 }

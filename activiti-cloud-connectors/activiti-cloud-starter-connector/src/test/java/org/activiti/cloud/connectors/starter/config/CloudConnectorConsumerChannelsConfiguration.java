@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.tests.cmdendpoint;
+package org.activiti.cloud.connectors.starter.config;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
+import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
-public interface MessageClientStream {
+@Configuration
+public class CloudConnectorConsumerChannelsConfiguration implements CloudConnectorConsumerChannels {
 
-    String MY_CMD_PRODUCER = "myCmdProducer";
-    String MY_CMD_RESULTS = "myCmdResults";
-
-    MessageChannel myCmdProducer();
-
-    SubscribableChannel myCmdResults();
+    @Bean
+    @Override
+    public SubscribableChannel integrationEventConsumer() {
+        return MessageChannels.publishSubscribe(CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER)
+            .get();
+    }
 }

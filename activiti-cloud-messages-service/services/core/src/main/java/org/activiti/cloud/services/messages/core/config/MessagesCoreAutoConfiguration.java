@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.SubscriptionCancelledHandlerAdvice;
@@ -45,11 +46,11 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.aggregator.CorrelationStrategy;
@@ -81,10 +82,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableIntegration
-//@EnableBinding(MessageConnectorProcessor.class)
 @EnableIntegrationManagement
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
 @EnableTransactionManagement
+@Import(MessageConnectorProcessorConfiguration.class)
 @PropertySource("classpath:config/activiti-cloud-services-messages-core.properties")
 public class MessagesCoreAutoConfiguration {
 
@@ -130,10 +131,10 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
                                                                                        BindingService bindingService,
-                                                                                       BinderAwareChannelResolver binderAwareChannelResolver) {
+                                                                                       ChannelResolver channelResolver) {
         return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
-                                                         binderAwareChannelResolver,
-                                                         bindingService);
+                                                        channelResolver,
+                                                        bindingService);
     }
 
     @Bean

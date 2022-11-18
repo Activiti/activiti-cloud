@@ -19,6 +19,7 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -70,7 +71,7 @@ public class IntegrationRequestSenderTest {
     private IntegrationRequestSender integrationRequestSender;
 
     @Mock
-    private BinderAwareChannelResolver resolver;
+    private ChannelResolver resolver;
 
     @Mock
     private MessageChannel integrationProducer;
