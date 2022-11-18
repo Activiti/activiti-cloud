@@ -32,20 +32,26 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
-//@EnableBinding({
-//    MessageEventsSource.class
-//})
-public class MessageEventsAutoConfiguration {
-
+public class MessageEventsAutoConfiguration implements MessageEventsSource {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(MessageEventsSource messageEventsSource,
+    @Override
+    public MessageChannel messageEventsOutput() {
+        return MessageChannels.direct(MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
+            .get();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public MessageEventsDispatcher messageEventsDispatcher(MessageChannel messageEventsOutput,
                                                            BindingServiceProperties bindingServiceProperties) {
-        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(),
+        return new MessageEventsDispatcher(messageEventsOutput,
                                            bindingServiceProperties);
     }
 
@@ -106,4 +112,5 @@ public class MessageEventsAutoConfiguration {
         return new MessageSubscriptionCancelledEventMessageProducer(messageEventsDispatcher,
                                                                     messageBuilderFactory);
     }
+
 }

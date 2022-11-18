@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -35,8 +36,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 @Configuration
-//@EnableBinding(QueryConsumerChannels.class)
-public class EventHandlersAutoConfiguration implements QueryConsumerChannels {
+@Import(QueryConsumerChannelsConfiguration.class)
+public class EventHandlersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
@@ -284,12 +285,6 @@ public class EventHandlersAutoConfiguration implements QueryConsumerChannels {
     @ConditionalOnMissingBean
     public ProcessCandidateStarterGroupRemovedEventHandler processCandidateStarterGroupRemovedEventHandler(EntityManager entityManager) {
         return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
-    }
-
-    @Bean
-    @Override
-    public SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QueryConsumerChannels.QUERY_CONSUMER).get();
     }
 
     @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)

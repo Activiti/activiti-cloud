@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.services.subscription.channel;
+package org.activiti.cloud.conf;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
-import org.springframework.messaging.MessageChannel;
+import org.activiti.cloud.services.query.app.QueryConsumerChannels;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
-public interface ProcessEngineSignalChannels {
+@Configuration
+public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
 
-    String SIGNAL_CONSUMER = "signalConsumer";
-
-    String SIGNAL_PRODUCER = "signalProducer";
-
-    SubscribableChannel signalConsumer();
-
-    MessageChannel signalProducer();
+    @Bean(QueryConsumerChannels.QUERY_CONSUMER)
+    @Override
+    public SubscribableChannel queryConsumer() {
+        return MessageChannels.publishSubscribe(QueryConsumerChannels.QUERY_CONSUMER).get();
+    }
 }
