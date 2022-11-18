@@ -495,7 +495,7 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <configuration>
-          <deployAtEnd>false</deployAtEnd>
+          <deployAtEnd>true</deployAtEnd>
         </configuration>
       </plugin>
       <plugin>
