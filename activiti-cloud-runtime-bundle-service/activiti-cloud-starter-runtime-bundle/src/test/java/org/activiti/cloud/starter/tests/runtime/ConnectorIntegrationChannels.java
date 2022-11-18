@@ -28,22 +28,16 @@ public interface ConnectorIntegrationChannels {
     String MEALS_CONNECTOR_CONSUMER  = "mealsConnectorConsumer";
     String VALUE_PROCESSOR_CONSUMER = "valueProcessorConsumer";
 
-    @Input(INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel integrationEventsConsumer();
 
-    @Input(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel varMappingIntegrationEventsConsumer();
 
-    @Input(CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
     SubscribableChannel constantsIntegrationEventsConsumer();
 
-    @Input(REST_CONNECTOR_CONSUMER)
     SubscribableChannel restConnectorConsumer();
 
-    @Input(MEALS_CONNECTOR_CONSUMER)
     SubscribableChannel mealsConnectorConsumer();
 
-    @Input(VALUE_PROCESSOR_CONSUMER)
     SubscribableChannel valueProcessorConsumer();
 
 }

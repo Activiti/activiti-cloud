@@ -16,12 +16,12 @@
 package org.activiti.cloud.services.job.executor;
 
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -57,7 +57,7 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageProducer jobMessageProducer(BinderAwareChannelResolver resolver,
+    public JobMessageProducer jobMessageProducer(ChannelResolver resolver,
                                                  ApplicationEventPublisher eventPublisher,
                                                  JobMessageBuilderFactory jobMessageBuilderFactory) {
         return new DefaultJobMessageProducer(resolver,
