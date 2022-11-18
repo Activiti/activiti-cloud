@@ -87,6 +87,9 @@ public class ModelingRestExceptionHandler {
                     errorAttributes.put(ERRORS,
                                         collectedErrors);
                 }
+
+                errorAttributes.put("message", "");
+
                 return errorAttributes;
             }
 
