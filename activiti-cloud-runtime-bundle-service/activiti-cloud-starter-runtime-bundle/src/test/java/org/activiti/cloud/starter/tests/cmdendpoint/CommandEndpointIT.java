@@ -73,7 +73,8 @@ import java.util.Map;
 @DirtiesContext
 @Import({CommandEndPointITStreamHandler.class,
     ProcessInstanceRestTemplate.class,
-    TaskRestTemplate.class})
+    TaskRestTemplate.class,
+    MessageClientStreamConfiguration.class})
 @ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class CommandEndpointIT {
 

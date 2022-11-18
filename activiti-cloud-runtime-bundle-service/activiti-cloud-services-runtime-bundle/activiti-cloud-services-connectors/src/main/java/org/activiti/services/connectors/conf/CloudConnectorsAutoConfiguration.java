@@ -19,6 +19,7 @@ package org.activiti.services.connectors.conf;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -42,9 +43,8 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEven
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -100,7 +100,7 @@ public class CloudConnectorsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
+    public IntegrationRequestSender integrationRequestSender(ChannelResolver resolver,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         return new IntegrationRequestSender(resolver,
                                             messageBuilderFactory);

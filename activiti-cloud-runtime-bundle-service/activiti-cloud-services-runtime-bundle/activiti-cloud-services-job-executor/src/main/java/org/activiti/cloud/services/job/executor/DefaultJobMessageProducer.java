@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.job.executor;
 
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +34,11 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
 
     private static final String ROUTING_KEY = "routingKey";
 
-    private final BinderAwareChannelResolver resolver;
+    private final ChannelResolver resolver;
     private final ApplicationEventPublisher eventPublisher;
     private final JobMessageBuilderFactory jobMessageBuilderFactory;
 
-    public DefaultJobMessageProducer(BinderAwareChannelResolver resolver,
+    public DefaultJobMessageProducer(ChannelResolver resolver,
                                      ApplicationEventPublisher eventPublisher,
                                      JobMessageBuilderFactory jobMessageBuilderFactory) {
         this.resolver = resolver;
