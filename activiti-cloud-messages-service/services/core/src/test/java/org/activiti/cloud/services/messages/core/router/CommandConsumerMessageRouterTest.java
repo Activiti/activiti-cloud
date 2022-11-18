@@ -69,8 +69,7 @@ public class CommandConsumerMessageRouterTest {
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)
-            .isThrownBy(//when
-            () -> messageRouter.determineTargetChannels(messageWithoutHeaders)
+            .isThrownBy(() -> messageRouter.determineTargetChannels(messageWithoutHeaders) //when
             )
             .withMessage("Unable to determine target channel for message");
     }
@@ -88,8 +87,7 @@ public class CommandConsumerMessageRouterTest {
 
         //then
         assertThatExceptionOfType(MessageMappingException.class)
-            .isThrownBy(//when
-            () -> messageRouter.determineTargetChannels(message)
+            .isThrownBy(() -> messageRouter.determineTargetChannels(message) //when
             )
             .withMessage("Unable to determine target channel for message");
     }
