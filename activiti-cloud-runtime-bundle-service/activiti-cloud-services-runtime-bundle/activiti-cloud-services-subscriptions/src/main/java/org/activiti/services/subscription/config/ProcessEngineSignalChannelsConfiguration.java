@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.config;
+package org.activiti.services.subscription.config;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
+import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -29,34 +30,27 @@ import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 
 @Configuration
-public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
+public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSignalChannels {
 
-    @Bean
+    @Bean(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
     @Override
-    public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
+    public SubscribableChannel signalConsumer() {
+        return MessageChannels.publishSubscribe(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
             .get();
     }
 
-    @Bean
+    @Bean(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
     @Override
-    public MessageChannel commandResults() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
+    public MessageChannel signalProducer() {
+        return MessageChannels.direct(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
             .get();
     }
 
+    @FunctionBinding(output = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
     @Bean
-    @Override
-    public MessageChannel auditProducer() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
-            .get();
-    }
-
-    @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
-    @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier(MessageChannel auditProducer) {
-        return () -> Flux.from(IntegrationFlows.from(auditProducer)
-            .log(LoggingHandler.Level.INFO,"auditSupplier")
+    public Supplier<Flux<Message<?>>> signalProducerSupplier(@Qualifier(ProcessEngineSignalChannels.SIGNAL_PRODUCER) MessageChannel signalProducer) {
+        return () -> Flux.from(IntegrationFlows.from(signalProducer)
+            .log(LoggingHandler.Level.INFO,"signalProducer")
             .toReactivePublisher());
     }
 }

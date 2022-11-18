@@ -20,7 +20,8 @@ import org.springframework.messaging.MessageChannel;
 
 public interface MessageEventsSource {
 
-    @Output
+    String MESSAGE_EVENTS_OUTPUT = "messageEventsOutput";
+
     MessageChannel messageEventsOutput();
 
 }

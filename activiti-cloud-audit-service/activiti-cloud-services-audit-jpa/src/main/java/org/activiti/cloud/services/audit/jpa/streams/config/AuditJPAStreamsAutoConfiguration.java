@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.streams.config;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -43,8 +46,13 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)
     @Bean
-    public Consumer<Message<CloudRuntimeEvent<?, ?>[]>> auditConsumerChannelHandlerConsumer(AuditConsumerChannelHandler handler) {
-        return message -> handler.receiveCloudRuntimeEvent(message.getHeaders(), message.getPayload());
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerChannelHandlerConsumer(AuditConsumerChannelHandler handler) {
+        return message -> {
+            handler.receiveCloudRuntimeEvent(message.getHeaders(),
+                Optional.ofNullable(message.getPayload())
+                    .orElse(Collections.emptyList())
+                    .toArray(new CloudRuntimeEvent[0]));
+        };
     }
 
 }
