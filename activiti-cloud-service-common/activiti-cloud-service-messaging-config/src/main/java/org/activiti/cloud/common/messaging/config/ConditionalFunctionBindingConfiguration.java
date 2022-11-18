@@ -25,8 +25,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.config.RoutingFunction;
+import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +39,8 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.util.StringUtils;
 
 @Configuration
+@AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
+@ConditionalOnClass(BindingServiceProperties.class)
 public class ConditionalFunctionBindingConfiguration {
 
     @Autowired
