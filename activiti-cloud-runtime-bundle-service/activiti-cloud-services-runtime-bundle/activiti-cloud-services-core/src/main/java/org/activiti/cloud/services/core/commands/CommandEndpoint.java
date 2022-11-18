@@ -40,6 +40,7 @@ public class CommandEndpoint<T extends Payload> {
                                                                       Function.identity()));
     }
 
+    // TODO: pay attenction to migrate since generic
     @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
     @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
     public <R> R execute(T payload) {

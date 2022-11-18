@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.connectors.starter.config;
+package org.activiti.cloud.starter.rb.configuration;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -29,30 +31,38 @@ import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 
 @Configuration
-public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
+public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {
 
-    @Bean
+    @Bean(ProcessEngineChannels.COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
+        return MessageChannels.publishSubscribe(ProcessEngineChannels.COMMAND_CONSUMER)
             .get();
     }
 
-    @Bean
+    @Bean(ProcessEngineChannels.COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
+        return MessageChannels.direct(ProcessEngineChannels.COMMAND_RESULTS)
             .get();
+    }
+
+    @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
+    @Bean
+    public Supplier<Flux<Message<?>>> commandResultsSupplier(@Qualifier(ProcessEngineChannels.COMMAND_RESULTS) MessageChannel commandResults) {
+        return () -> Flux.from(IntegrationFlows.from(commandResults)
+            .log(LoggingHandler.Level.INFO,"commandResults")
+            .toReactivePublisher());
     }
 
     @Bean
     @Override
     public MessageChannel auditProducer() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+        return MessageChannels.direct(ProcessEngineChannels.AUDIT_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
     @Bean
     public Supplier<Flux<Message<?>>> auditProducerSupplier(MessageChannel auditProducer) {
         return () -> Flux.from(IntegrationFlows.from(auditProducer)
