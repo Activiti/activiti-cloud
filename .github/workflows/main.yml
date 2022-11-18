@@ -25,7 +25,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v1.22.0
 
   build:
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.22.0
         id: update-pom-to-next-version
         if: github.event_name == 'push'
 
@@ -173,7 +173,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.22.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -415,7 +415,7 @@ jobs:
       - name: Update POM files to the next version
         run: mvn ${MAVEN_CLI_OPTS} versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$VERSION
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.22.0
         if: github.event_name == 'push'
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
@@ -442,7 +442,7 @@ jobs:
       UPDATEBOT_FULL_CHART_REPO_PATH: .updatebot-repos/github/activiti/activiti-cloud-full-chart
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.22.0
       - name: Run updatebot for Maven
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
@@ -480,12 +480,12 @@ jobs:
           yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.22.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.22.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -508,7 +508,7 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.22.0
         with:
           channel-id: 'eng-hxp-studio-activiti-gh-notifs'
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
