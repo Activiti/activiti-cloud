@@ -95,20 +95,31 @@ docker/%:
 docker-delete/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
 
-	@echo "Delete image from Docker Hub for $(MODULE):$(RELEASE_VERSION)..."
+	@echo "Retrieve token"
 	$(eval TOKEN=$(shell curl --silent --show-error --fail \
 		-X POST \
 		-H "Content-Type: application/json" \
 		-H "Accept: application/json" \
 		-d '{"username":"${DOCKERHUB_USERNAME}","password":"${DOCKERHUB_PASSWORD}"}' \
 		https://hub.docker.com/v2/users/login/ | jq ".token"))
-	@curl --silent --show-error --fail \
+	$(eval URL=https://hub.docker.com/v2/repositories/activiti/$(MODULE)/tags/$(RELEASE_VERSION))
+	@echo "Delete image from Docker Hub at $(URL)"
+	$(eval HTTP_CODE=$(shell curl --silent --show-error --fail \
+		--write-out "%{http_code}" \
 		-X DELETE \
 		-H "Authorization: JWT $(TOKEN)" \
-		https://hub.docker.com/v2/repositories/activiti/$(MODULE)/tags/$(RELEASE_VERSION); \
-	e=$$?; \
-	curl --silent --show-error --fail \
-	  -X POST \
+		$(URL)))
+	$(eval e=0)
+	@if [ $(HTTP_CODE) -ne 200 ]; then \
+		e=1; \
+	fi
+	@if [ $(HTTP_CODE) -eq 404 ]; then \
+		echo "::warning title=Image not found::Image not found: $(MODULE):$(RELEASE_VERSION)"; \
+		e=0; \
+	fi
+	@echo "Delete token"
+	@curl --silent --show-error --fail \
+		-X POST \
 		-H "Accept: application/json" \
 		-H "Authorization: JWT $(TOKEN)" \
 		https://hub.docker.com/v2/logout/; \
