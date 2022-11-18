@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -32,14 +33,18 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
+    @Scope("singleton")
     @Bean(MessageConnectorProcessor.INPUT)
+    @ConditionalOnMissingBean(name = MessageConnectorProcessor.INPUT)
     @Override
     public MessageChannel input() {
         return MessageChannels.direct(MessageConnectorProcessor.INPUT)
             .get();
     }
 
+    @Scope("singleton")
     @Bean(MessageConnectorProcessor.OUTPUT)
+    @ConditionalOnMissingBean(name = MessageConnectorProcessor.OUTPUT)
     @Override
     public MessageChannel output() {
         return MessageChannels.direct(MessageConnectorProcessor.OUTPUT)
@@ -48,7 +53,8 @@ public class MessageConnectorProcessorConfiguration implements MessageConnectorP
 
     @Scope("singleton")
     @FunctionBinding(output = MessageConnectorProcessor.OUTPUT)
-    @Bean
+    @Bean(MessageConnectorProcessor.OUTPUT + "Supplier")
+    @ConditionalOnMissingBean(name = MessageConnectorProcessor.OUTPUT + "Supplier")
     public Supplier<Flux<Message<?>>> messageConnectorOutput(@Qualifier(MessageConnectorProcessor.OUTPUT) MessageChannel output) {
         return () -> Flux.from(IntegrationFlows.from(output)
             .log(LoggingHandler.Level.INFO,"messageConnectorOutput")
