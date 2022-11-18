@@ -16,6 +16,7 @@
 package org.activiti.services.connectors;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.messaging.Message;
@@ -25,10 +26,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class IntegrationRequestSender {
     public static final String CONNECTOR_TYPE = "connectorType";
 
-    private final BinderAwareChannelResolver resolver;
+    private final ChannelResolver resolver;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
-    public IntegrationRequestSender(BinderAwareChannelResolver resolver,
+    public IntegrationRequestSender(ChannelResolver resolver,
                                     IntegrationContextMessageBuilderFactory messageBuilderFactory) {
         this.resolver = resolver;
         this.messageBuilderFactory = messageBuilderFactory;

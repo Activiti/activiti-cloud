@@ -149,10 +149,5 @@
       <artifactId>activiti-api-task-runtime-impl</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream-test-support</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>
