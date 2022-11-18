@@ -55,7 +55,6 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
-    @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());

@@ -64,5 +64,9 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
+    </dependency>
   </dependencies>
 </project>

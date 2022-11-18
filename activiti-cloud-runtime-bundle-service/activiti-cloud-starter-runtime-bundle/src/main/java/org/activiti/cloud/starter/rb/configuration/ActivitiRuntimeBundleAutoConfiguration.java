@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(RuntimeBundleSwaggerConfig.class)
+@Import({RuntimeBundleSwaggerConfig.class, ProcessEngineChannelsConfiguration.class})
 public class ActivitiRuntimeBundleAutoConfiguration {
 
     @Bean

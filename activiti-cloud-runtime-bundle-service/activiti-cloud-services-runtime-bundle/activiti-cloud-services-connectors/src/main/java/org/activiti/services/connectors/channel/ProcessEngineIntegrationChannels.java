@@ -24,10 +24,8 @@ public interface ProcessEngineIntegrationChannels {
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
-    @Input(INTEGRATION_RESULTS_CONSUMER)
     SubscribableChannel integrationResultsConsumer();
 
-    @Input(INTEGRATION_ERRORS_CONSUMER)
     SubscribableChannel integrationErrorsConsumer();
 
 }
