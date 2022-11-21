@@ -36,8 +36,6 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
 
-    private StreamBridge streamBridge;
-
     public CommandConsumerMessageChannelResolver(Function<String, String> destinationMapper,
                                                 ChannelResolver channelResolver,
                                                 BindingService bindingService) {
