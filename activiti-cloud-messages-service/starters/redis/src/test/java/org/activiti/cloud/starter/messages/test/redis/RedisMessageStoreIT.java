@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.messages.test.redis;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -26,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 @ContextConfiguration(initializers = RedisApplicationInitializer.class)
 public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
