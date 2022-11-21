@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.messages.test.hazelcast;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,6 +33,7 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
+@Disabled
 public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
