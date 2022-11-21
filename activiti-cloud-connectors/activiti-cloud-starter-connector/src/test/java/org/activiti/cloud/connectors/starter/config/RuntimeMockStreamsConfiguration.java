@@ -30,7 +30,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.support.ChannelInterceptor;
 import reactor.core.publisher.Flux;
 
 @Configuration
@@ -38,13 +37,6 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
 
     @Autowired
     private ObjectMapper mapper;
-
-
-    private MappingJackson2MessageConverter messageConverter() {
-        MappingJackson2MessageConverter messageConverter = new MappingJackson2MessageConverter();
-        messageConverter.setObjectMapper(mapper);
-        return messageConverter;
-    }
 
     @Bean
     @Override
