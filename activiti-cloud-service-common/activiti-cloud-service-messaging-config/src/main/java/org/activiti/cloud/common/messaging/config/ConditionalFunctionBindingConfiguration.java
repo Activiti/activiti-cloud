@@ -35,7 +35,6 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -85,7 +84,7 @@ public class ConditionalFunctionBindingConfiguration {
                                         .filter(StringUtils::hasText)
                                         .ifPresentOrElse(condition -> {
                                                 try {
-                                                    RoutingFunction router = beanFactory.getBean(routerName, RoutingFunction.class);
+                                                    beanFactory.getBean(routerName, RoutingFunction.class);
                                                     try {
                                                         ConditionalMessageRoutingCallback callback = beanFactory.getBean(routerCallbackName,
                                                             ConditionalMessageRoutingCallback.class);
@@ -98,7 +97,7 @@ public class ConditionalFunctionBindingConfiguration {
                                                     ConditionalMessageRoutingCallback callback = createCallback(beanFactory, routerCallbackName);
                                                     callback.addRoutingExpression(beanName, condition);
 
-                                                    RoutingFunction router = createRouter(beanFactory, routerName, callback);
+                                                    createRouter(beanFactory, routerName, callback);
                                                     functionDefinitionPropertySource.register(routerName);
                                                     streamFunctionProperties.getBindings().put(routerName + "-in-0", input);
                                                 }
