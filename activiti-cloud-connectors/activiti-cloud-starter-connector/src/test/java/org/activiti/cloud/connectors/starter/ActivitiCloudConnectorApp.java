@@ -63,9 +63,6 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
     @Autowired
     private ConnectorProperties connectorProperties;
 
-    @Autowired
-    private Environment environment;
-
 
     public static void main(String[] args) {
         SpringApplication.run(ActivitiCloudConnectorApp.class,
@@ -74,18 +71,6 @@ public class ActivitiCloudConnectorApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        String[] functions = environment.getProperty("spring.cloud.function.definition", "")
-//            .split(";");
-//
-//        assertThat(functions).containsExactlyInAnyOrder(
-//            "mockTypeIntegrationRequestEventsListener",
-//            "mockTypeIntegrationRuntimeErrorListener",
-//            "mockTypeIntegrationErrorSenderListener",
-//            "mockTypeIntegrationCloudBpmnErrorSenderListener",
-//            "mockTypeIntegrationCloudBpmnErrorRootCauseSenderListener",
-//            "mockTypeIntegrationCloudBpmnErrorMessageSenderListener",
-//            "integrationRequestErrorChannelListener");
-
         assertThat(processRuntimeChannels.runtimeCmdProducer()).isNotNull();
     }
 

@@ -17,8 +17,6 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

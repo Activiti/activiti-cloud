@@ -152,7 +152,7 @@ public class ServiceTaskConsumerHandler {
 
                 integrationResultSender.send(message.getPayload(), integrationContext);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
 
         };
