@@ -20,12 +20,16 @@ import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -53,17 +57,18 @@ import org.springframework.util.StringUtils;
 public class ConnectorConfiguration {
 
     @Bean
+    @ConditionalOnBean(IntegrationFlowContext.class)
     public BeanPostProcessor connectorBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         IntegrationFlowContext integrationFlowContext,
         StreamFunctionProperties streamFunctionProperties,
         StreamBridge streamBridge,
         FunctionBindingPropertySource functionBindingPropertySource,
-        Function<String, String> resolveExpression,
+        @Qualifier("resolveExpression") Function<String, String> resolveExpression,
         BindingServiceProperties bindingServiceProperties) {
 
         return new BeanPostProcessor() {
             @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
                 if (Connector.class.isInstance(bean)) {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
@@ -146,7 +151,7 @@ public class ConnectorConfiguration {
         };
     }
 
-    @Bean
+    @Bean("resolveExpression")
     Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
         return value -> {
             BeanExpressionResolver resolver = applicationContext.getBeanFactory()

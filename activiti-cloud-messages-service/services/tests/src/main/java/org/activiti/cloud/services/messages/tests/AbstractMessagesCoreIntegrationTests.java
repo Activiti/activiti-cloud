@@ -76,7 +76,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
 
-@Disabled
 /**
  * Tests for the Message Connector Aggregator Processor.
  *
