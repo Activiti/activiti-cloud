@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -38,30 +40,35 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
     @Autowired
     private ObjectMapper mapper;
 
-    @Bean
+    @Bean(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
+    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     @Override
     public SubscribableChannel integrationResultsConsumer() {
         return MessageChannels.publishSubscribe(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
             .get();
     }
 
-    @Scope("singleton")
-    @Bean
+
+    @Bean(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
+    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
     @Override
     public MessageChannel integrationEventsProducer() {
         return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).get();
     }
 
-    @Scope("singleton")
+
     @FunctionBinding(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
-    @Bean
-    public Supplier<Flux<Message<?>>> integrationEventsSupplier(MessageChannel integrationEventsProducer) {
+    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER+"Supplier")
+    @Bean(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER+"Supplier")
+    public Supplier<Flux<Message<?>>> integrationEventsSupplier(
+            @Qualifier(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER) MessageChannel integrationEventsProducer) {
         return () -> Flux.from(IntegrationFlows.from(integrationEventsProducer)
             .log(LoggingHandler.Level.INFO,"integrationEventsSupplier")
             .toReactivePublisher());
     }
 
-    @Bean
+    @Bean(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
+    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
     @Override
     public SubscribableChannel integrationErrorConsumer() {
         return MessageChannels.publishSubscribe(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)

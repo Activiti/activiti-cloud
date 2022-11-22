@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.rb.configuration;
+package org.activiti.cloud.services.events.configuration;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
@@ -31,9 +32,11 @@ import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 
 @Configuration
+@Primary
 public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {
 
     @Bean(ProcessEngineChannels.COMMAND_CONSUMER)
+    @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(ProcessEngineChannels.COMMAND_CONSUMER)
@@ -41,6 +44,7 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
     }
 
     @Bean(ProcessEngineChannels.COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
         return MessageChannels.direct(ProcessEngineChannels.COMMAND_RESULTS)
@@ -48,14 +52,16 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
     }
 
     @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
-    @Bean
+    @Bean(ProcessEngineChannels.COMMAND_RESULTS + "Supplier")
+    @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_RESULTS + "Supplier")
     public Supplier<Flux<Message<?>>> commandResultsSupplier(@Qualifier(ProcessEngineChannels.COMMAND_RESULTS) MessageChannel commandResults) {
         return () -> Flux.from(IntegrationFlows.from(commandResults)
-            .log(LoggingHandler.Level.INFO,"commandResults")
+            .log(LoggingHandler.Level.INFO, "commandResults")
             .toReactivePublisher());
     }
 
-    @Bean
+    @Bean(ProcessEngineChannels.AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = ProcessEngineChannels.AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
         return MessageChannels.direct(ProcessEngineChannels.AUDIT_PRODUCER)
@@ -63,10 +69,11 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
     }
 
     @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
-    @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier(MessageChannel auditProducer) {
+    @ConditionalOnMissingBean(name = ProcessEngineChannels.AUDIT_PRODUCER + "Supplier")
+    @Bean(ProcessEngineChannels.AUDIT_PRODUCER + "Supplier")
+    public Supplier<Flux<Message<?>>> auditProducerSupplier(@Qualifier(ProcessEngineChannels.AUDIT_PRODUCER) MessageChannel auditProducer) {
         return () -> Flux.from(IntegrationFlows.from(auditProducer)
-            .log(LoggingHandler.Level.INFO,"auditSupplier")
+            .log(LoggingHandler.Level.INFO, "auditSupplier")
             .toReactivePublisher());
     }
 }

@@ -15,21 +15,35 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.util.function.Consumer;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 
-@TestConfiguration()
+@TestConfiguration
+@Import(CanFailConnector.class)
 public class CanFailConnectorChannelsConfiguration implements CanFailConnectorChannels {
 
-    @Bean(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
-    @ConditionalOnMissingBean(name = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
+    @Bean(CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
+    @ConditionalOnMissingBean(name = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
     @Override
     public SubscribableChannel canFailConnector() {
         return MessageChannels.publishSubscribe(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
             .get();
+    }
+
+    @FunctionBinding(input = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
+    @Bean("canFailConnectorConsumer")
+    public Consumer<Message<IntegrationRequest>> canFailConnector(CanFailConnector canFailConnector) {
+        return message -> {
+            canFailConnector.canFailConnector(message);
+        };
     }
 }

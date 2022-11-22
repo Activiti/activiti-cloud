@@ -18,6 +18,8 @@ package org.activiti.cloud.connectors.starter.config;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -31,7 +33,8 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
 
-    @Bean
+    @Bean(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
     @Override
     public MessageChannel runtimeCmdProducer() {
         return MessageChannels.direct(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
@@ -39,14 +42,17 @@ public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChanne
     }
 
     @FunctionBinding(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
-    @Bean
-    public Supplier<Flux<Message<?>>> runtimeCmdSupplier(MessageChannel runtimeCmdProducer) {
+    @ConditionalOnMissingBean(name = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER+"Supplier")
+    @Bean(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER+"Supplier")
+    public Supplier<Flux<Message<?>>> runtimeCmdSupplier(
+            @Qualifier(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER) MessageChannel runtimeCmdProducer) {
         return () -> Flux.from(IntegrationFlows.from(runtimeCmdProducer)
             .log(LoggingHandler.Level.INFO,"runtimeCmdSupplier")
             .toReactivePublisher());
     }
 
-    @Bean
+    @Bean(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
+    @ConditionalOnMissingBean(name = ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
     @Override
     public SubscribableChannel runtimeCmdResults() {
         return MessageChannels.publishSubscribe(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
