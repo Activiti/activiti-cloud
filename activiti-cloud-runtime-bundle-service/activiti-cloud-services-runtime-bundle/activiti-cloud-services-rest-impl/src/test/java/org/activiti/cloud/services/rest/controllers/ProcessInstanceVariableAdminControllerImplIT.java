@@ -90,7 +90,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @Autowired
@@ -105,7 +105,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private RepositoryService repositoryService;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

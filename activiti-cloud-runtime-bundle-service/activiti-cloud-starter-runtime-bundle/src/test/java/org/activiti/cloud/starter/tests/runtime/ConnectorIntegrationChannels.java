@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.mockito.InjectMocks;
-import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ConnectorIntegrationChannels {

@@ -81,7 +81,7 @@ public class CandidateUserControllerImplIT {
     @SpyBean
     private SpringPageConverter springPageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
