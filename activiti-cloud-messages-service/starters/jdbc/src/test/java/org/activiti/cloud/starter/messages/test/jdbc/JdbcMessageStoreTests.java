@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
 import org.springframework.test.context.TestPropertySource;
-@Disabled
 @TestPropertySource(properties = {
     "spring.datasource.platform=h2"
 })

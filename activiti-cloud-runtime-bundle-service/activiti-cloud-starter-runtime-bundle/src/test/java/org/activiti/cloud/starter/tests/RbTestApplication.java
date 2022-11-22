@@ -15,19 +15,9 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle

@@ -33,7 +33,6 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
-@Disabled
 public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication

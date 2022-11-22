@@ -24,7 +24,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.integration.store.SimpleMessageStore;
 
-@Disabled
 @SpringBootConfiguration
 @EnableAutoConfiguration
 public class SimpleMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
