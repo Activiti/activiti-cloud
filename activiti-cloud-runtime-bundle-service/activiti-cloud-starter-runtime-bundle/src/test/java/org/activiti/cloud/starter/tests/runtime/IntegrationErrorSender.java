@@ -20,16 +20,17 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 @TestComponent
 public class IntegrationErrorSender {
 
-    private final ChannelResolver resolver;
+    private final StreamBridge streamBridge;
 
-    public IntegrationErrorSender(ChannelResolver resolver) {
-        this.resolver = resolver;
+    public IntegrationErrorSender(StreamBridge streamBridge) {
+        this.streamBridge = streamBridge;
     }
 
     public void send(IntegrationRequest integrationRequest,
@@ -41,9 +42,8 @@ public class IntegrationErrorSender {
 
         String destination = integrationRequest.getErrorDestination();
 
-        resolver
-            .resolveDestination(destination)
-            .send(message);
+        streamBridge
+            .send(destination, message);
     }
 
 }

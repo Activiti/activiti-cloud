@@ -102,7 +102,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -114,7 +114,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean

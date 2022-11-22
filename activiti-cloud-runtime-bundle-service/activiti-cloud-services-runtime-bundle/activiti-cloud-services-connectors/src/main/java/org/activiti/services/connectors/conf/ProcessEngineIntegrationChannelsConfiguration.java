@@ -16,7 +16,6 @@
 package org.activiti.services.connectors.conf;
 
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,6 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
-@AutoConfigureBefore(CloudConnectorsAutoConfiguration.class)
 public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEngineIntegrationChannels {
 
     @Bean(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)

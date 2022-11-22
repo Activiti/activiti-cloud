@@ -88,7 +88,7 @@ public class ProcessInstanceAdminControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -100,7 +100,7 @@ public class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean
