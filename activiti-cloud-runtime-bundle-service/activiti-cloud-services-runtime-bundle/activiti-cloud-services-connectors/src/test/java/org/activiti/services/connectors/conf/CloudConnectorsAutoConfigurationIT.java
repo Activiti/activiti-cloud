@@ -60,13 +60,10 @@ public class CloudConnectorsAutoConfigurationIT {
     @MockBean
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @MockBean(name = "auditProducer")
-    private  MessageChannel auditProducer;
-
     @MockBean
     private ApplicationEventPublisher eventPublisher;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
