@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -33,6 +34,7 @@ import reactor.core.publisher.Flux;
 public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSignalChannels {
 
     @Bean(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
+    @ConditionalOnMissingBean(name = ProcessEngineSignalChannels.SIGNAL_CONSUMER)
     @Override
     public SubscribableChannel signalConsumer() {
         return MessageChannels.publishSubscribe(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
@@ -40,6 +42,7 @@ public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSi
     }
 
     @Bean(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
+    @ConditionalOnMissingBean(name = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
     @Override
     public MessageChannel signalProducer() {
         return MessageChannels.direct(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
@@ -47,7 +50,8 @@ public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSi
     }
 
     @FunctionBinding(output = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
-    @Bean
+    @ConditionalOnMissingBean(name = ProcessEngineSignalChannels.SIGNAL_PRODUCER + "Supplier")
+    @Bean(ProcessEngineSignalChannels.SIGNAL_PRODUCER + "Supplier")
     public Supplier<Flux<Message<?>>> signalProducerSupplier(@Qualifier(ProcessEngineSignalChannels.SIGNAL_PRODUCER) MessageChannel signalProducer) {
         return () -> Flux.from(IntegrationFlows.from(signalProducer)
             .log(LoggingHandler.Level.INFO,"signalProducer")
