@@ -25,34 +25,46 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Configuration
-@AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
-@ConditionalOnClass(BindingServiceProperties.class)
-public class ConditionalFunctionBindingConfiguration {
+@ConditionalOnClass(FunctionBindingConfiguration.class)
+@AutoConfigureAfter(FunctionBindingConfiguration.class)
+public class ConditionalFunctionBindingConfiguration implements ApplicationContextAware {
 
-    @Autowired
-    private FunctionCatalog functionCatalog;
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        Assert.notNull(applicationContext,
+            "ConditionalFunctionBindingConfiguration can not process beans because the application context is null");
+        this.applicationContext = applicationContext;
+    }
 
     @Bean
     public BeanPostProcessor conditionalFunctionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         FunctionBindingPropertySource functionDefinitionPropertySource,
         StreamFunctionProperties streamFunctionProperties,
         BindingServiceProperties bindingServiceProperties) {
+
         return new BeanPostProcessor() {
             @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
                 if (Consumer.class.isInstance(bean) ||
                     Function.class.isInstance(bean)) {
 
@@ -114,6 +126,10 @@ public class ConditionalFunctionBindingConfiguration {
         };
     }
 
+    private FunctionCatalog getFunctionCatalog() {
+        return applicationContext.getBean(FunctionCatalog.class);
+    }
+
     protected ConditionalMessageRoutingCallback createCallback(DefaultListableBeanFactory beanFactory, String routerCallbackName) {
         ConditionalMessageRoutingCallback callback = new ConditionalMessageRoutingCallback();
         beanFactory.registerSingleton(routerCallbackName, callback);
@@ -121,7 +137,7 @@ public class ConditionalFunctionBindingConfiguration {
     }
 
     protected RoutingFunction createRouter(DefaultListableBeanFactory beanFactory, String routerName, ConditionalMessageRoutingCallback callback) {
-        RoutingFunction routingFunction = new RoutingFunction(functionCatalog, Collections.emptyMap(), new BeanFactoryResolver(beanFactory), callback);
+        RoutingFunction routingFunction = new RoutingFunction(getFunctionCatalog(), Collections.emptyMap(), new BeanFactoryResolver(beanFactory), callback);
         beanFactory.registerSingleton(routerName, routingFunction);
         return routingFunction;
     }
