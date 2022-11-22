@@ -17,12 +17,12 @@ package org.activiti.cloud.services.core.conf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.function.Function;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
-import org.activiti.cloud.common.messaging.functional.Connector;
-import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
@@ -170,10 +170,10 @@ public class ServicesCoreAutoConfiguration {
         return new CommandEndpoint<T>(cmdExecutors);
     }
 
-    @ConnectorBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
-    @Bean
-    public <T extends Payload, R> Connector<T, R> commandEndpointConnector(CommandEndpoint<T> commandEndpoint){
-        return payload -> commandEndpoint.execute(payload);
+    @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
+    @Bean("commandConnectorConsumer")
+    public <T extends Payload, R> Function<T, R> commandEndpointConnector(CommandEndpoint<T> commandEndpoint){
+        return commandEndpoint::execute;
     }
 
     @Bean

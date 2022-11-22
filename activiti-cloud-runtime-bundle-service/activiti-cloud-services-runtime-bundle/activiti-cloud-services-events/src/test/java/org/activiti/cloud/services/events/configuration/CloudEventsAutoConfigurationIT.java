@@ -24,18 +24,18 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class CloudEventsAutoConfigurationIT {
 
     @SpringBootApplication
     static class MockRuntimeBundleApplication {
-        @MockBean
-        private ProcessEngineChannels processEngineChannels;
 
         @MockBean
         private RuntimeService runtimeService;

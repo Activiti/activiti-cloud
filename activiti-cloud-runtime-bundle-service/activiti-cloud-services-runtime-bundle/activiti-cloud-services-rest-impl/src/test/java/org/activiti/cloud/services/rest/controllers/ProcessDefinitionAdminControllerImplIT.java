@@ -85,7 +85,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -94,7 +94,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean
