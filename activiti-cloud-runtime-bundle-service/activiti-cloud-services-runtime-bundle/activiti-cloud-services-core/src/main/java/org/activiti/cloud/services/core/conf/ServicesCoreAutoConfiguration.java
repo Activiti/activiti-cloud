@@ -58,6 +58,7 @@ import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.spring.process.CachingProcessExtensionService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
@@ -70,6 +71,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import org.springframework.messaging.Message;
 
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -164,7 +166,7 @@ public class ServicesCoreAutoConfiguration {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
-    @Bean
+    @Bean("commandEndpoint")
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         return new CommandEndpoint<T>(cmdExecutors);
@@ -172,8 +174,8 @@ public class ServicesCoreAutoConfiguration {
 
     @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
     @Bean("commandConnectorConsumer")
-    public <T extends Payload, R> Function<T, R> commandEndpointConnector(CommandEndpoint<T> commandEndpoint){
-        return commandEndpoint::execute;
+    public <T extends Payload, R> Function<Message<T>, R> commandEndpointConnector(@Qualifier("commandEndpoint") CommandEndpoint<T> commandEndpoint){
+        return message -> commandEndpoint.execute(message.getPayload());
     }
 
     @Bean

@@ -19,9 +19,8 @@ import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-@Disabled
+
 public class PostgresApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private PostgreSQLContainer container = (PostgreSQLContainer) new PostgreSQLContainer("postgres:10")

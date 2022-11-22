@@ -27,7 +27,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
 @ContextConfiguration(initializers = RedisApplicationInitializer.class)
 public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
