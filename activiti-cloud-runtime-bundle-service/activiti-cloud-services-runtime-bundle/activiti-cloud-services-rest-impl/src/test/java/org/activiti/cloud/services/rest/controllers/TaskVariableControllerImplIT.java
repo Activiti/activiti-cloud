@@ -87,7 +87,7 @@ public class TaskVariableControllerImplIT {
     @SpyBean
     private CollectionModelAssembler resourcesAssembler;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

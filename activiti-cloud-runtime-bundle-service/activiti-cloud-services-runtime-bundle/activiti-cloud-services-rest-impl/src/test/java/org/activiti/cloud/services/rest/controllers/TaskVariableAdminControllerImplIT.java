@@ -92,7 +92,7 @@ public class TaskVariableAdminControllerImplIT {
     @SpyBean
     private CollectionModelAssembler resourcesAssembler;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

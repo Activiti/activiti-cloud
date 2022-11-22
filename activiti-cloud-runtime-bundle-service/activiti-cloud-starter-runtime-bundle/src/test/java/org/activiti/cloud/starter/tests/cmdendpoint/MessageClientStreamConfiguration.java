@@ -17,9 +17,10 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
@@ -28,26 +29,28 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 
-@TestConfiguration
+@Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {
 
-    @Bean
+    @Bean(MessageClientStream.MY_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_PRODUCER)
     @Override
     public MessageChannel myCmdProducer() {
         return MessageChannels.direct(MessageClientStream.MY_CMD_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = "")
-    @Bean
+    @FunctionBinding(output = MessageClientStream.MY_CMD_PRODUCER)
+    @Bean(MessageClientStream.MY_CMD_PRODUCER + "Supplier")
     @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_PRODUCER + "Supplier")
-    public Supplier<Flux<Message<?>>> messageConnectorOutput(MessageChannel myCmdProducer) {
+    public Supplier<Flux<Message<?>>> messageConnectorOutput(@Qualifier(MessageClientStream.MY_CMD_PRODUCER) MessageChannel myCmdProducer) {
         return () -> Flux.from(IntegrationFlows.from(myCmdProducer)
             .log(LoggingHandler.Level.INFO,"myCmdProducer")
             .toReactivePublisher());
     }
 
-    @Bean
+    @Bean(MessageClientStream.MY_CMD_RESULTS)
+    @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_RESULTS)
     @Override
     public SubscribableChannel myCmdResults() {
         return MessageChannels.publishSubscribe(MessageClientStream.MY_CMD_RESULTS)

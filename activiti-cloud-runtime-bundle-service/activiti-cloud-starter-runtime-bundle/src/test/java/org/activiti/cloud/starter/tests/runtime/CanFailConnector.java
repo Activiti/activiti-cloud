@@ -30,8 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 
-@TestConfiguration
-@Import(CanFailConnectorChannelsConfiguration.class)
+@TestComponent
 public class CanFailConnector {
 
     private boolean shouldSendError = true;
@@ -48,21 +47,18 @@ public class CanFailConnector {
         this.shouldSendError = shouldSendError;
     }
 
-    @FunctionBinding(input = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
-    @Bean
-    public Consumer<Message<IntegrationRequest>> canFailConnector() {
-        return message -> {
-            latestReceivedIntegrationRequest = message.getPayload();
-            integrationErrorSent.set(false);
-            if (shouldSendError) {
-                integrationErrorSent.set(true);
-                integrationErrorSender.send(message.getPayload(),
-                    new RuntimeException("task failed"));
-            } else {
-                integrationResultSender.send(message.getPayload(),
-                    message.getPayload().getIntegrationContext());
-            }
-        };
+
+    public void canFailConnector(Message<IntegrationRequest> message) {
+        latestReceivedIntegrationRequest = message.getPayload();
+        integrationErrorSent.set(false);
+        if (shouldSendError) {
+            integrationErrorSent.set(true);
+            integrationErrorSender.send(message.getPayload(),
+                new RuntimeException("task failed"));
+        } else {
+            integrationResultSender.send(message.getPayload(),
+                message.getPayload().getIntegrationContext());
+        }
     }
 
     public AtomicBoolean errorSent() {

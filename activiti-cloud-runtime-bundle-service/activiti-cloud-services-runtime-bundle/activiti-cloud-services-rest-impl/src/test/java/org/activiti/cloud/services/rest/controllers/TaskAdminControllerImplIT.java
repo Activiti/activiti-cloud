@@ -88,7 +88,7 @@ public class TaskAdminControllerImplIT {
     @SpyBean
     private SpringPageConverter pageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

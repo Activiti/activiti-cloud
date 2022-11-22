@@ -80,7 +80,7 @@ public class CandidateGroupControllerImplIT {
     @SpyBean
     private SpringPageConverter springPageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

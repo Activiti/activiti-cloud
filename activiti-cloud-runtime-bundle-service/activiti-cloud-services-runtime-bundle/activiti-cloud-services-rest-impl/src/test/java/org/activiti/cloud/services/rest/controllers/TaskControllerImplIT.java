@@ -105,7 +105,7 @@ public class TaskControllerImplIT {
     @SpyBean
     private SpringPageConverter springPageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @Mock

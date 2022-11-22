@@ -18,6 +18,8 @@ package org.activiti.cloud.connectors.starter.config;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -31,21 +33,24 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
 
-    @Bean
+    @Bean(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
+    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
             .get();
     }
 
-    @Bean
+    @Bean(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
         return MessageChannels.direct(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
             .get();
     }
 
-    @Bean
+    @Bean(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
         return MessageChannels.direct(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
@@ -53,8 +58,9 @@ public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRun
     }
 
     @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER+"Supplier")
     @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier(MessageChannel auditProducer) {
+    public Supplier<Flux<Message<?>>> auditProducerSupplier(@Qualifier(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER) MessageChannel auditProducer) {
         return () -> Flux.from(IntegrationFlows.from(auditProducer)
             .log(LoggingHandler.Level.INFO,"auditSupplier")
             .toReactivePublisher());

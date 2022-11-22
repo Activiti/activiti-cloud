@@ -73,7 +73,7 @@ public class CandidateUserAdminControllerIT {
     @SpyBean
     private SpringPageConverter pageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

@@ -78,7 +78,7 @@ public class ProcessInstanceTasksControllerImplIT {
     @SpyBean
     private SpringPageConverter pageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -87,7 +87,7 @@ public class ProcessInstanceTasksControllerImplIT {
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean
