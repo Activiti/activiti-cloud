@@ -16,15 +16,13 @@
 package org.activiti.services.subscription.config;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -47,13 +45,13 @@ public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSi
             .get();
     }
 
-    @FunctionBinding(output = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
+    @FunctionBinding(input = ProcessEngineSignalChannels.SIGNAL_PRODUCER, output = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
+    @ConditionalOnMissingBean(name = "signalProducerSupplier")
     @Bean
-    public Supplier<Flux<Message<?>>> signalProducerSupplier(@Qualifier(ProcessEngineSignalChannels.SIGNAL_PRODUCER) MessageChannel signalProducer) {
+    public Function<Flux<Message<?>>, Flux<Message<?>>> signalProducerSupplier() {
 
-        return () -> Flux.from(IntegrationFlows.from(signalProducer)
-            .log(LoggingHandler.Level.INFO,"signalProducer")
-            .toReactivePublisher());
+        return flux -> flux
+            .log("signalProducer", Level.INFO);
     }
-    
+
 }
