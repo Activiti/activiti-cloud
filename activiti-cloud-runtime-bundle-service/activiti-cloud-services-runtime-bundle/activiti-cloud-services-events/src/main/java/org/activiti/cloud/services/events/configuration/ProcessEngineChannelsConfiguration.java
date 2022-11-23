@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,13 +53,12 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
-    @Bean(ProcessEngineChannels.COMMAND_RESULTS + "Supplier")
-    @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_RESULTS + "Supplier")
-    public Supplier<Flux<Message<?>>> commandResultsSupplier(@Qualifier(ProcessEngineChannels.COMMAND_RESULTS) MessageChannel commandResults) {
-        return () -> Flux.from(IntegrationFlows.from(commandResults)
-            .log(LoggingHandler.Level.INFO, "commandResults")
-            .toReactivePublisher());
+    @FunctionBinding(input = ProcessEngineChannels.COMMAND_RESULTS, output = ProcessEngineChannels.COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = "commandResultsSupplier")
+    @Bean
+    public Function<Flux<Message<?>>, Flux<Message<?>>> commandResultsSupplier() {
+        return flux -> flux
+            .log("commandResults", Level.INFO);
     }
 
     @Bean(ProcessEngineChannels.AUDIT_PRODUCER)
@@ -68,12 +69,11 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = ProcessEngineChannels.AUDIT_PRODUCER + "Supplier")
-    @Bean(ProcessEngineChannels.AUDIT_PRODUCER + "Supplier")
-    public Supplier<Flux<Message<?>>> auditProducerSupplier(@Qualifier(ProcessEngineChannels.AUDIT_PRODUCER) MessageChannel auditProducer) {
-        return () -> Flux.from(IntegrationFlows.from(auditProducer)
-            .log(LoggingHandler.Level.INFO, "auditSupplier")
-            .toReactivePublisher());
+    @FunctionBinding(input = ProcessEngineChannels.AUDIT_PRODUCER, output = ProcessEngineChannels.AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = "auditProducerSupplier")
+    @Bean
+    public Function<Flux<Message<?>>, Flux<Message<?>>> auditProducerSupplier() {
+        return flux -> flux
+            .log("auditSupplier", Level.INFO);
     }
 }

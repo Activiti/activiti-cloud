@@ -15,17 +15,14 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
@@ -33,7 +30,6 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
-    @Scope("singleton")
     @Bean(MessageConnectorProcessor.INPUT)
     @ConditionalOnMissingBean(name = MessageConnectorProcessor.INPUT)
     @Override
@@ -42,7 +38,6 @@ public class MessageConnectorProcessorConfiguration implements MessageConnectorP
             .get();
     }
 
-    @Scope("singleton")
     @Bean(MessageConnectorProcessor.OUTPUT)
     @ConditionalOnMissingBean(name = MessageConnectorProcessor.OUTPUT)
     @Override
@@ -51,14 +46,12 @@ public class MessageConnectorProcessorConfiguration implements MessageConnectorP
             .get();
     }
 
-    @Scope("singleton")
-    @FunctionBinding(output = MessageConnectorProcessor.OUTPUT)
-    @Bean(MessageConnectorProcessor.OUTPUT + "Supplier")
-    @ConditionalOnMissingBean(name = MessageConnectorProcessor.OUTPUT + "Supplier")
-    public Supplier<Flux<Message<?>>> messageConnectorOutput(@Qualifier(MessageConnectorProcessor.OUTPUT) MessageChannel output) {
-        return () -> Flux.from(IntegrationFlows.from(output)
-            .log(LoggingHandler.Level.INFO,"messageConnectorOutput")
-            .toReactivePublisher());
+    @FunctionBinding(input = MessageConnectorProcessor.OUTPUT, output = MessageConnectorProcessor.OUTPUT)
+    @ConditionalOnMissingBean(name = "messageConnectorOutput")
+    @Bean
+    public Function<Flux<Message<?>>, Flux<Message<?>>> messageConnectorOutput() {
+        return flux -> flux
+            .log("messageConnectorOutput", Level.INFO);
     }
 
 }
