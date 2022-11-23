@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.messages.events.config;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import org.activiti.cloud.api.process.model.IntegrationError;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.messages.events.channels.MessageEventsSource;
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
@@ -33,8 +37,12 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import reactor.core.publisher.Flux;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
@@ -46,6 +54,16 @@ public class MessageEventsAutoConfiguration implements MessageEventsSource {
     public MessageChannel messageEventsOutput() {
         return MessageChannels.direct(MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
             .get();
+    }
+
+    @FunctionBinding(output = MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
+    @ConditionalOnMissingBean(name = MessageEventsSource.MESSAGE_EVENTS_OUTPUT + "Supplier")
+    @Bean(MessageEventsSource.MESSAGE_EVENTS_OUTPUT + "Supplier")
+    public Supplier<Flux<Message<?>>> messageEventsOutputSupplier(
+        @Qualifier(MessageEventsSource.MESSAGE_EVENTS_OUTPUT) MessageChannel messageEventsOutput) {
+        return () -> Flux.from(IntegrationFlows.from(messageEventsOutput)
+            .log(LoggingHandler.Level.INFO,"messageEventsOutputSupplier")
+            .toReactivePublisher());
     }
 
     @Bean
