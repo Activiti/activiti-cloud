@@ -72,6 +72,10 @@ public class ConnectorConfiguration {
                 if (Connector.class.isInstance(bean)) {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
+
+                    final String beanOutName = FunctionalBindingHelper.getOutBinding(beanName);
+                    final String beanInName = FunctionalBindingHelper.getInBinding(beanName);
+
                     Connector<?, ?> connector = Connector.class.cast(bean);
 
                     functionBindingPropertySource.register(functionName);
@@ -84,9 +88,9 @@ public class ConnectorConfiguration {
                                     Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
                                         .ifPresentOrElse(
                                             binding -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", binding),
+                                                .put(beanOutName, binding),
                                             () -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", output)
+                                                .put(beanOutName, output)
                                         );
                                 });
 
@@ -94,7 +98,7 @@ public class ConnectorConfiguration {
                                 .filter(StringUtils::hasText)
                                 .ifPresent(input -> {
                                     streamFunctionProperties.getBindings()
-                                        .put(functionName + "-in-0", input);
+                                        .put(beanInName, input);
                                 });
                         });
 
