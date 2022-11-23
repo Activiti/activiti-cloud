@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -35,10 +35,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(FunctionBindingConfiguration.class);
 
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
@@ -62,7 +69,7 @@ public class FunctionBindingConfiguration {
                     Function.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)) {
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, FunctionBinding.class))
+                    Optional.ofNullable(findAnnotationOnBean(beanName, beanFactory))
                         .ifPresent(functionDefinition -> {
                             functionDefinitionPropertySource.register(beanName);
 
@@ -98,6 +105,16 @@ public class FunctionBindingConfiguration {
                 return bean;
             }
         };
+    }
+
+    @Nullable
+    private FunctionBinding findAnnotationOnBean(String beanName, DefaultListableBeanFactory beanFactory) {
+        try {
+            return beanFactory.findAnnotationOnBean(beanName, FunctionBinding.class);
+        } catch (NoSuchBeanDefinitionException e) {
+            log.warn("Bean with name {} not found.", beanName);
+            return null;
+        }
     }
 
     @FunctionalInterface
