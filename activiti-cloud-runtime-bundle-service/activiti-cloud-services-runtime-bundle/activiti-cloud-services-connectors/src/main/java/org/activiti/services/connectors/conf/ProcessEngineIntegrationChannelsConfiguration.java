@@ -26,7 +26,7 @@ import org.springframework.messaging.SubscribableChannel;
 public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEngineIntegrationChannels {
 
     @Bean(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     @Override
     public SubscribableChannel integrationResultsConsumer() {
         return MessageChannels.publishSubscribe(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
@@ -34,7 +34,7 @@ public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEng
     }
 
     @Bean(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
-    @ConditionalOnMissingBean
+    @ConditionalOnMissingBean(name = ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     @Override
     public SubscribableChannel integrationErrorsConsumer() {
         return MessageChannels.publishSubscribe(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
