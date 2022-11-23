@@ -16,22 +16,18 @@
 package org.activiti.cloud.connectors.starter.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import reactor.core.publisher.Flux;
 
 @Configuration
@@ -57,14 +53,12 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
     }
 
 
-    @FunctionBinding(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
-    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER+"Supplier")
-    @Bean(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER+"Supplier")
-    public Supplier<Flux<Message<?>>> integrationEventsSupplier(
-            @Qualifier(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER) MessageChannel integrationEventsProducer) {
-        return () -> Flux.from(IntegrationFlows.from(integrationEventsProducer)
-            .log(LoggingHandler.Level.INFO,"integrationEventsSupplier")
-            .toReactivePublisher());
+    @FunctionBinding(input = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER, output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
+    @ConditionalOnMissingBean(name = "integrationEventsSupplier")
+    @Bean
+    public Function<Flux<Message<?>>, Flux<Message<?>>> integrationEventsSupplier() {
+        return flux -> flux
+            .log("integrationEventsSupplier", Level.INFO);
     }
 
     @Bean(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
