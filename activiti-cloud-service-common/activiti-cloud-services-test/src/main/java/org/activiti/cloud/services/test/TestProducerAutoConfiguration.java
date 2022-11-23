@@ -19,11 +19,9 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -36,7 +34,6 @@ import reactor.core.publisher.Flux;
 import java.util.function.Supplier;
 
 @Configuration
-@AutoConfigureAfter(value = BindingServiceConfiguration.class)
 public class TestProducerAutoConfiguration {
 
     @ConditionalOnBean(BindingService.class)

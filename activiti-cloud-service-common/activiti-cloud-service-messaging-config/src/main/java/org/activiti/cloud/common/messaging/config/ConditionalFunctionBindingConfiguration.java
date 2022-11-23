@@ -72,6 +72,8 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
                         .ifPresent(functionDefinition -> {
                             String listenerName = beanName;
 
+                            final String beanOutName = FunctionalBindingHelper.getOutBinding(beanName);
+
                             functionDefinitionPropertySource.register(listenerName);
 
                             Optional.of(functionDefinition.output())
@@ -80,9 +82,9 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
                                     Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
                                         .ifPresentOrElse(
                                             binding -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", binding),
+                                                .put(beanOutName, binding),
                                             () -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", output)
+                                                .put(beanOutName, output)
                                         );
                                 });
 
@@ -111,11 +113,12 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
 
                                                     createRouter(beanFactory, routerName, callback);
                                                     functionDefinitionPropertySource.register(routerName);
-                                                    streamFunctionProperties.getBindings().put(routerName + "-in-0", input);
+                                                    streamFunctionProperties.getBindings().put(
+                                                        FunctionalBindingHelper.getInBinding(routerName), input);
                                                 }
                                             },
                                             () -> streamFunctionProperties.getBindings()
-                                                .put(listenerName + "-in-0", input)
+                                                .put(FunctionalBindingHelper.getInBinding(listenerName), input)
                                         );
                                 });
                         });
