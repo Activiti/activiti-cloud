@@ -25,7 +25,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -67,23 +66,31 @@ public class FunctionBindingConfiguration {
                         .ifPresent(functionDefinition -> {
                             functionDefinitionPropertySource.register(beanName);
 
+                            final String beanInName = FunctionalBindingHelper.getInBinding(beanName);
+                            final String beanOutName = FunctionalBindingHelper.getOutBinding(beanName);
+
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(output -> {
                                     Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
                                         .ifPresentOrElse(
                                             binding -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", binding),
+                                                .put(beanOutName, binding),
                                             () -> streamFunctionProperties.getBindings()
-                                                .put(beanName + "-out-0", output)
+                                                .put(beanOutName, output)
                                         );
+
+                                    Optional.ofNullable(bindingServiceProperties.getProducerProperties(output))
+                                        .ifPresent(producerProperties -> {
+                                            bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
+                                        });
                                 });
 
                             Optional.of(functionDefinition.input())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(input -> {
                                     streamFunctionProperties.getBindings()
-                                        .put(beanName + "-in-0", input);
+                                        .put(beanInName, input);
                                 });
                         });
                 }
