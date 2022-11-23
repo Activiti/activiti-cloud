@@ -28,7 +28,9 @@ import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,6 +40,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
  * Test context configuration for integration tests over Activiti process engine
  */
 @TestConfiguration
+@Import(TestChannelBinderConfiguration.class)
 public class TestProcessEngineConfiguration {
 
     @Bean
@@ -102,7 +105,7 @@ public class TestProcessEngineConfiguration {
 
     @Bean
     public MessageChannel commandResults() {
-        return new MockMessageChannel();
+        return new MockSubscribableChannel();
     }
 
     @Bean

@@ -15,13 +15,17 @@
  */
 package org.activiti.cloud.services.test;
 
+import java.util.function.Function;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.binding.BindingService;
+import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -36,7 +40,6 @@ import java.util.function.Supplier;
 @Configuration
 public class TestProducerAutoConfiguration {
 
-    @ConditionalOnBean(BindingService.class)
     @Configuration
     static class MyProducerConfiguration implements StreamProducer {
 
@@ -53,13 +56,12 @@ public class TestProducerAutoConfiguration {
             return new MyProducer(producer);
         }
 
-        @FunctionBinding(output = StreamProducer.PRODUCER)
-        @Bean(StreamProducer.PRODUCER + "Supplier")
-        @ConditionalOnMissingBean(name = StreamProducer.PRODUCER + "Supplier")
-        public Supplier<Flux<Message<?>>> myProducerSupplier(@Qualifier(StreamProducer.PRODUCER) MessageChannel producer) {
-            return () -> Flux.from(IntegrationFlows.from(producer)
-                .log(LoggingHandler.Level.INFO,"myProducer")
-                .toReactivePublisher());
+        @FunctionBinding(input = StreamProducer.PRODUCER, output = StreamProducer.PRODUCER)
+        @ConditionalOnMissingBean(name = "myProducerSupplier")
+        @Bean
+        public Function<Flux<Message<?>>, Flux<Message<?>>> myProducerSupplier() {
+            return flux -> flux
+                .log("myProducer", Level.INFO);
         }
 
     }

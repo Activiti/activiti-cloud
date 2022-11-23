@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.StringUtils;
 
 public class FunctionBindingPropertySource extends PropertySource {
 
@@ -52,8 +53,8 @@ public class FunctionBindingPropertySource extends PropertySource {
             return null;
         }
 
-        return Stream.concat(Stream.of(definition.split(";")),
-                             functions.stream())
+        return Stream.concat(Stream.of(definition.split(";")).filter(StringUtils::hasText),
+                             functions.stream().filter(StringUtils::hasText))
                      .distinct()
                      .collect(Collectors.joining(";"));
     }

@@ -15,15 +15,13 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -40,13 +38,12 @@ public class MessageClientStreamConfiguration implements MessageClientStream {
             .get();
     }
 
-    @FunctionBinding(output = MessageClientStream.MY_CMD_PRODUCER)
-    @Bean(MessageClientStream.MY_CMD_PRODUCER + "Supplier")
-    @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_PRODUCER + "Supplier")
-    public Supplier<Flux<Message<?>>> messageConnectorOutput(@Qualifier(MessageClientStream.MY_CMD_PRODUCER) MessageChannel myCmdProducer) {
-        return () -> Flux.from(IntegrationFlows.from(myCmdProducer)
-            .log(LoggingHandler.Level.INFO,"myCmdProducer")
-            .toReactivePublisher());
+    @FunctionBinding(input = MessageClientStream.MY_CMD_PRODUCER, output = MessageClientStream.MY_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = "messageConnectorOutput")
+    @Bean
+    public Function<Flux<Message<?>>, Flux<Message<?>>> messageConnectorOutput() {
+        return flux -> flux
+            .log("myCmdProducer", Level.INFO);
     }
 
     @Bean(MessageClientStream.MY_CMD_RESULTS)
