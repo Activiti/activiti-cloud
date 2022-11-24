@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Optional;
-import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.springframework.beans.BeansException;
@@ -25,13 +23,10 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -52,6 +47,9 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
@@ -65,7 +63,8 @@ public class ConnectorConfiguration {
         StreamBridge streamBridge,
         FunctionBindingPropertySource functionBindingPropertySource,
         @Qualifier("resolveExpression") Function<String, String> resolveExpression,
-        BindingServiceProperties bindingServiceProperties) {
+        BindingServiceProperties bindingServiceProperties,
+        FunctionAnnotationService functionAnnotationService) {
 
         return new BeanPostProcessor() {
             @Override
@@ -81,7 +80,7 @@ public class ConnectorConfiguration {
 
                     functionBindingPropertySource.register(functionName);
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
