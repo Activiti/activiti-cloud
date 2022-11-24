@@ -61,9 +61,6 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
                                                           .setHeader(ROUTING_KEY, destination)
                                                           .build();
 
-        // Let's try to resolve message channel while inside main Activiti transaction to minimize infrastructure errors
-//        MessageChannel messageChannel = resolver.resolveDestination(destination);
-
         // Let's send message right after the main transaction has successfully committed.
         TransactionSynchronizationManager.registerSynchronization(new JobMessageTransactionSynchronization(message,
                                                                                                            destination));
