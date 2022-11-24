@@ -58,7 +58,7 @@ public class MessageEventsAutoConfiguration implements MessageEventsSource {
     @FunctionBinding(output = MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
     @ConditionalOnMissingBean(name = "messageEventsOutputSupplier")
     @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
+    public Supplier<Flux<Message<?>>> messageEventsOutputSupplier() {
         return () -> Flux.from(IntegrationFlows.from(messageEventsOutput())
             .log(LoggingHandler.Level.INFO,"messageEventsOutputSupplier")
             .toReactivePublisher());
