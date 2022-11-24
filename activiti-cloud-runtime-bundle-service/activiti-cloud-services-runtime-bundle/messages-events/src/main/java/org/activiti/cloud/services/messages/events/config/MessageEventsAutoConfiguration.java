@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.messages.events.config;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
@@ -35,7 +36,9 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
@@ -52,12 +55,13 @@ public class MessageEventsAutoConfiguration implements MessageEventsSource {
             .get();
     }
 
-    @FunctionBinding(input = MessageEventsSource.MESSAGE_EVENTS_OUTPUT, output = MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
+    @FunctionBinding(output = MessageEventsSource.MESSAGE_EVENTS_OUTPUT)
     @ConditionalOnMissingBean(name = "messageEventsOutputSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> messageEventsOutputSupplier() {
-        return flux -> flux
-            .log("messageEventsOutputSupplier", Level.INFO);
+    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(messageEventsOutput())
+            .log(LoggingHandler.Level.INFO,"messageEventsOutputSupplier")
+            .toReactivePublisher());
     }
 
     @Bean

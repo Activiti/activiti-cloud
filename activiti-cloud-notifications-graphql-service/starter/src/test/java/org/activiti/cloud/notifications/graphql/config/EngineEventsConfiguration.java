@@ -16,13 +16,16 @@
 package org.activiti.cloud.notifications.graphql.config;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
@@ -31,7 +34,6 @@ import reactor.core.publisher.Flux;
 public class EngineEventsConfiguration implements EngineEvents {
 
 
-    @Scope("singleton")
     @Bean(EngineEvents.ENGINE_EVENTS_PRODUCER)
     @Override
     public MessageChannel output() {
@@ -39,12 +41,12 @@ public class EngineEventsConfiguration implements EngineEvents {
             .get();
     }
 
-    @Scope("singleton")
-    @FunctionBinding(input = EngineEvents.ENGINE_EVENTS_PRODUCER, output = EngineEvents.ENGINE_EVENTS_PRODUCER)
+    @FunctionBinding(output = EngineEvents.ENGINE_EVENTS_PRODUCER)
     @ConditionalOnMissingBean(name = "engineEventsOutputSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> engineEventsOutputSupplier() {
-        return flux -> flux
-            .log("engineEventsOutput", Level.INFO);
+    public Supplier<Flux<Message<?>>> engineEventsOutputSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(output())
+            .log(LoggingHandler.Level.INFO,"engineEventsOutputSupplier")
+            .toReactivePublisher());
     }
 }
