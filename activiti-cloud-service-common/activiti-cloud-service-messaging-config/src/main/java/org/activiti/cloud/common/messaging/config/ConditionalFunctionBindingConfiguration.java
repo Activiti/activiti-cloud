@@ -15,23 +15,15 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.ConditionalMessageRoutingCallback;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionCatalog;
 import org.springframework.cloud.function.context.config.RoutingFunction;
-import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ApplicationContext;
@@ -41,6 +33,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Configuration
 @ConditionalOnClass(FunctionBindingConfiguration.class)
@@ -60,7 +57,8 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
     public BeanPostProcessor conditionalFunctionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         FunctionBindingPropertySource functionDefinitionPropertySource,
         StreamFunctionProperties streamFunctionProperties,
-        BindingServiceProperties bindingServiceProperties) {
+        BindingServiceProperties bindingServiceProperties,
+        FunctionAnnotationService functionAnnotationService) {
 
         return new BeanPostProcessor() {
             @Override
@@ -68,7 +66,7 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
                 if (Consumer.class.isInstance(bean) ||
                     Function.class.isInstance(bean)) {
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionBinding.class))
+                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConditionalFunctionBinding.class))
                         .ifPresent(functionDefinition -> {
                             String listenerName = beanName;
 

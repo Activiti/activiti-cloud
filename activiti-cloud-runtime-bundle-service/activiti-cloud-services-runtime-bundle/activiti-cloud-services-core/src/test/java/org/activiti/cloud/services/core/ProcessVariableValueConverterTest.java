@@ -129,7 +129,7 @@ public class ProcessVariableValueConverterTest {
         // when
         JsonNode jsonNodeValue = variableValueConverter.convert(new ProcessVariableValue("json", "{}"));
 
-        // thenÏ
+        // then
         assertThat(jsonNodeValue).isEqualTo(JsonNodeFactory.instance.objectNode());
     }
 
