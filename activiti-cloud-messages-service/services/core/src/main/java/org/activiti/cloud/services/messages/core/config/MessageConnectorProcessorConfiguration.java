@@ -16,13 +16,16 @@
 package org.activiti.cloud.services.messages.core.config;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
@@ -46,12 +49,13 @@ public class MessageConnectorProcessorConfiguration implements MessageConnectorP
             .get();
     }
 
-    @FunctionBinding(input = MessageConnectorProcessor.OUTPUT, output = MessageConnectorProcessor.OUTPUT)
+    @FunctionBinding(output = MessageConnectorProcessor.OUTPUT)
     @ConditionalOnMissingBean(name = "messageConnectorOutput")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> messageConnectorOutput() {
-        return flux -> flux
-            .log("messageConnectorOutput", Level.INFO);
+    public Supplier<Flux<Message<?>>> messageConnectorOutput() {
+        return () -> Flux.from(IntegrationFlows.from(output())
+            .log(LoggingHandler.Level.INFO,"messageConnectorOutput")
+            .toReactivePublisher());
     }
 
 }

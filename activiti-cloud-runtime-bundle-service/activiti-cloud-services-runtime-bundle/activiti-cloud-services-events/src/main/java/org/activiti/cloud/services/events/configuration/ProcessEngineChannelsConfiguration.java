@@ -53,12 +53,13 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(input = ProcessEngineChannels.COMMAND_RESULTS, output = ProcessEngineChannels.COMMAND_RESULTS)
+    @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
     @ConditionalOnMissingBean(name = "commandResultsSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> commandResultsSupplier() {
-        return flux -> flux
-            .log("commandResults", Level.INFO);
+    public Supplier<Flux<Message<?>>> commandResultsSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(commandResults())
+            .log(LoggingHandler.Level.INFO,"commandResultsSupplier")
+            .toReactivePublisher());
     }
 
     @Bean(ProcessEngineChannels.AUDIT_PRODUCER)
@@ -69,11 +70,12 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(input = ProcessEngineChannels.AUDIT_PRODUCER, output = ProcessEngineChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
     @ConditionalOnMissingBean(name = "auditProducerSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> auditProducerSupplier() {
-        return flux -> flux
-            .log("auditSupplier", Level.INFO);
+    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(auditProducer())
+            .log(LoggingHandler.Level.INFO,"auditProducerSupplier")
+            .toReactivePublisher());
     }
 }
