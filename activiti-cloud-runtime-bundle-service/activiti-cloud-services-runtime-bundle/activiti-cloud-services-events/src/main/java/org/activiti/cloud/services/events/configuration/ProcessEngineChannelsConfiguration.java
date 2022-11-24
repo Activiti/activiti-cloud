@@ -20,6 +20,8 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,8 @@ import reactor.core.publisher.Flux;
 @Configuration
 @Primary
 public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessEngineChannelsConfiguration.class);
 
     @Bean(ProcessEngineChannels.COMMAND_CONSUMER)
     @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_CONSUMER)
@@ -56,10 +60,20 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
     @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
     @ConditionalOnMissingBean(name = "commandResultsSupplier")
     @Bean
-    public Supplier<Flux<Message<?>>> commandResultsSupplier() {
+    public Supplier<Flux<Message<Object>>> commandResultsSupplier() {
         return () -> Flux.from(IntegrationFlows.from(commandResults())
             .log(LoggingHandler.Level.INFO,"commandResultsSupplier")
-            .toReactivePublisher());
+            .toReactivePublisher())
+            .onErrorContinue((ex, value) -> LOGGER.error(
+                "Unexpected error while sending message to " + ProcessEngineChannels.COMMAND_RESULTS,
+                ex)
+            )
+            .onErrorResume(ex -> {
+                LOGGER.error(
+                    "Resuming from unexpected error while sending message to " + ProcessEngineChannels.COMMAND_RESULTS,
+                    ex);
+                return Flux.empty();
+            });
     }
 
     @Bean(ProcessEngineChannels.AUDIT_PRODUCER)
@@ -73,9 +87,19 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
     @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
     @ConditionalOnMissingBean(name = "auditProducerSupplier")
     @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
+    public Supplier<Flux<Message<Object>>> auditProducerSupplier() {
         return () -> Flux.from(IntegrationFlows.from(auditProducer())
             .log(LoggingHandler.Level.INFO,"auditProducerSupplier")
-            .toReactivePublisher());
+            .toReactivePublisher())
+            .onErrorContinue((ex, value) -> LOGGER.error(
+                "Unexpected error while sending message to " + ProcessEngineChannels.AUDIT_PRODUCER,
+                ex)
+            )
+            .onErrorResume(ex -> {
+                LOGGER.error(
+                    "Resuming from unexpected error while sending message to " + ProcessEngineChannels.AUDIT_PRODUCER,
+                    ex);
+                return Flux.empty();
+            });
     }
 }
