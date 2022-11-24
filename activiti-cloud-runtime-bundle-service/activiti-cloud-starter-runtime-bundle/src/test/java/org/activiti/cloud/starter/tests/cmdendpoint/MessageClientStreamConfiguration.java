@@ -15,27 +15,26 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Mono;
 
 @Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageClientStreamConfiguration.class);
 
     @Bean(MessageClientStream.MY_CMD_PRODUCER)
     @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_PRODUCER)
@@ -48,10 +47,20 @@ public class MessageClientStreamConfiguration implements MessageClientStream {
     @FunctionBinding(output = MessageClientStream.MY_CMD_PRODUCER)
     @ConditionalOnMissingBean(name = "messageConnectorOutput")
     @Bean
-    public Supplier<Flux<Message<?>>> messageConnectorOutput() {
+    public Supplier<Flux<Message<Object>>> messageConnectorOutput() {
         return () -> Flux.from(IntegrationFlows.from(myCmdProducer())
             .log(LoggingHandler.Level.INFO,"myCmdProducer")
-            .toReactivePublisher());
+            .toReactivePublisher())
+            .onErrorContinue((ex, value) -> LOGGER.error(
+                "Unexpected error while sending message to " + MessageClientStream.MY_CMD_PRODUCER,
+                ex)
+            )
+            .onErrorResume(ex -> {
+                LOGGER.error(
+                    "Resuming from unexpected error while sending message to " + MessageClientStream.MY_CMD_PRODUCER,
+                    ex);
+                return Flux.empty();
+            });
     }
 
     @Bean(MessageClientStream.MY_CMD_RESULTS)
