@@ -59,11 +59,12 @@ public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRun
             .get();
     }
 
-    @FunctionBinding(input = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER, output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
     @ConditionalOnMissingBean(name = "auditProducerSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> auditProducerSupplier() {
-        return flux -> flux
-            .log("auditSupplier", Level.INFO);
+    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(auditProducer())
+            .log(LoggingHandler.Level.INFO,"auditProducerSupplier")
+            .toReactivePublisher());
     }
 }

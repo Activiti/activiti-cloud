@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.test;
 
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
@@ -22,7 +23,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
@@ -49,12 +52,13 @@ public class TestProducerAutoConfiguration {
             return new MyProducer(producer);
         }
 
-        @FunctionBinding(input = StreamProducer.PRODUCER, output = StreamProducer.PRODUCER)
+        @FunctionBinding(output = StreamProducer.PRODUCER)
         @ConditionalOnMissingBean(name = "myProducerSupplier")
         @Bean
-        public Function<Flux<Message<?>>, Flux<Message<?>>> myProducerSupplier() {
-            return flux -> flux
-                .log("myProducer", Level.INFO);
+        public Supplier<Flux<Message<?>>> myProducerSupplier() {
+            return () -> Flux.from(IntegrationFlows.from(producer())
+                .log(LoggingHandler.Level.INFO,"myProducerSupplier")
+                .toReactivePublisher());
         }
 
     }
