@@ -17,8 +17,14 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import java.util.Optional;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
@@ -48,12 +54,32 @@ public class ProcessInstanceDeleteController {
 
     private final ProcessInstanceRepository processInstanceRepository;
 
+    private final TaskRepository taskRepository;
+
+    private final VariableRepository variableRepository;
+
+    private final ServiceTaskRepository serviceTaskRepository;
+
+    private final BPMNActivityRepository bpmnActivityRepository;
+
+    private final BPMNSequenceFlowRepository bpmnSequenceFlowRepository;
+
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
     public ProcessInstanceDeleteController(ProcessInstanceRepository processInstanceRepository,
-                                           ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler) {
+                                            TaskRepository taskRepository,
+                                            VariableRepository variableRepository,
+                                            ServiceTaskRepository serviceTaskRepository,
+                                            BPMNActivityRepository bpmnActivityRepository,
+                                            BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+                                            ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler) {
         this.processInstanceRepository = processInstanceRepository;
+        this.taskRepository = taskRepository;
+        this.variableRepository = variableRepository;
+        this.serviceTaskRepository = serviceTaskRepository;
+        this.bpmnActivityRepository = bpmnActivityRepository;
+        this.bpmnSequenceFlowRepository = bpmnSequenceFlowRepository;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
     }
 
@@ -65,6 +91,12 @@ public class ProcessInstanceDeleteController {
         Iterable <ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         for(ProcessInstanceEntity entity : iterable){
+            Optional.ofNullable(entity.getTasks()).ifPresent(taskRepository::deleteAll);
+            Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
+            Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
+            Optional.ofNullable(entity.getActivities()).ifPresent(bpmnActivityRepository::deleteAll);
+            Optional.ofNullable(entity.getSequenceFlows()).ifPresent(bpmnSequenceFlowRepository::deleteAll);
+
             result.add(processInstanceRepresentationModelAssembler.toModel(entity));
         }
 
