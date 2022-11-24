@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.nio.charset.StandardCharsets;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
 import org.activiti.cloud.services.job.executor.*;
@@ -46,6 +47,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.sleuth.SpanName;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEvent;
@@ -131,7 +133,7 @@ public class JobExecutorIT {
     private RuntimeBundleProperties properties;
 
     @Captor
-    private ArgumentCaptor<Message<String>> messageArgumentCaptor;
+    private ArgumentCaptor<Message<byte[]>> messageArgumentCaptor;
 
     @Autowired
     private ConfigurableApplicationContext applicationContext;
@@ -142,14 +144,14 @@ public class JobExecutorIT {
     @MockBean(name = "spyAsyncExecutorJobs")
     private SubscribableChannel spyJobMessageChannel;
 
-    @Configuration
-    public static class JobExecutorConfiguration {
-        @Bean("spyAsyncExecutorJobs")
-        public SubscribableChannel spyJobMessageChannel() {
-            return MessageChannels.publishSubscribe("spyJobMessageChannel")
-                .get();
-        }
-    }
+//    @Configuration
+//    public static class JobExecutorConfiguration {
+//        @Bean("spyAsyncExecutorJobs")
+//        public SubscribableChannel spyJobMessageChannel() {
+//            return MessageChannels.publishSubscribe("spyJobMessageChannel")
+//                .get();
+//        }
+//    }
 
     @TestConfiguration
     @Profile(JOB_EXECUTOR_IT)
@@ -642,9 +644,10 @@ public class JobExecutorIT {
         // then
         verify(spyJobMessageChannel).send(messageArgumentCaptor.capture());
 
-        Message<String> message = messageArgumentCaptor.getValue();
+        Message<byte[]> message = messageArgumentCaptor.getValue();
 
-        assertThat(message.getPayload()).as("should build job id as payload")
+        assertThat(new String(message.getPayload(), StandardCharsets.UTF_8))
+            .as("should build job id as payload")
             .isEqualTo(jobId);
 
         assertThat(message.getHeaders()).as("should build common headers")
