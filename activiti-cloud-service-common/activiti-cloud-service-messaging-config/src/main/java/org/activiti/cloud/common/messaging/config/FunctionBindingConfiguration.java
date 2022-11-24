@@ -16,18 +16,12 @@
 package org.activiti.cloud.common.messaging.config;
 
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ApplicationContext;
@@ -47,8 +41,6 @@ import java.util.function.Supplier;
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(FunctionBindingConfiguration.class);
-
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
         return new FunctionBindingPropertySource(applicationContext.getEnvironment());
@@ -60,10 +52,15 @@ public class FunctionBindingConfiguration {
     }
 
     @Bean
-    public BeanPostProcessor functionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
-        FunctionBindingPropertySource functionDefinitionPropertySource,
-        StreamFunctionProperties streamFunctionProperties,
-        BindingServiceProperties bindingServiceProperties) {
+    public FunctionAnnotationService functionAnnotationService(DefaultListableBeanFactory beanFactory) {
+        return new FunctionAnnotationService(beanFactory);
+    }
+
+    @Bean
+    public BeanPostProcessor functionBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
+                                                              FunctionBindingPropertySource functionDefinitionPropertySource,
+                                                              StreamFunctionProperties streamFunctionProperties,
+                                                              BindingServiceProperties bindingServiceProperties) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -71,7 +68,7 @@ public class FunctionBindingConfiguration {
                     Function.class.isInstance(bean) ||
                     Consumer.class.isInstance(bean)) {
 
-                    Optional.ofNullable(findAnnotationOnBean(beanName, beanFactory))
+                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
                         .ifPresent(functionDefinition -> {
                             functionDefinitionPropertySource.register(beanName);
 
@@ -107,16 +104,6 @@ public class FunctionBindingConfiguration {
                 return bean;
             }
         };
-    }
-
-    @Nullable
-    private FunctionBinding findAnnotationOnBean(String beanName, DefaultListableBeanFactory beanFactory) {
-        try {
-            return beanFactory.findAnnotationOnBean(beanName, FunctionBinding.class);
-        } catch (NoSuchBeanDefinitionException e) {
-            log.warn("Bean with name {} not found.", beanName);
-            return null;
-        }
     }
 
     @FunctionalInterface
