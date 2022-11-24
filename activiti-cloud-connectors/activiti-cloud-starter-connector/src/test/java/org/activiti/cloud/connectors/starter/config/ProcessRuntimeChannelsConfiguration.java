@@ -16,13 +16,16 @@
 package org.activiti.cloud.connectors.starter.config;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -39,12 +42,13 @@ public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChanne
             .get();
     }
 
-    @FunctionBinding(input = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER, output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    @FunctionBinding(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
     @ConditionalOnMissingBean(name = "runtimeCmdSupplier")
     @Bean
-    public Function<Flux<Message<?>>, Flux<Message<?>>> runtimeCmdSupplier() {
-        return flux -> flux
-            .log("runtimeCmdSupplier", Level.INFO);
+    public Supplier<Flux<Message<?>>> runtimeCmdSupplier() {
+        return () -> Flux.from(IntegrationFlows.from(runtimeCmdProducer())
+            .log(LoggingHandler.Level.INFO,"runtimeCmdSupplier")
+            .toReactivePublisher());
     }
 
     @Bean(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
