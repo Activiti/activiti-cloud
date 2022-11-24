@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -85,6 +86,7 @@ public class ProcessInstanceDeleteController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
+    @Transactional
     public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
 
         Collection<EntityModel<CloudProcessInstance>> result = new ArrayList<>();
