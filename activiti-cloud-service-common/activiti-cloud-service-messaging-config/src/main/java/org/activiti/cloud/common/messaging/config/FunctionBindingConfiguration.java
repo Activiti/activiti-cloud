@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -24,17 +28,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
-
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -44,11 +41,6 @@ public class FunctionBindingConfiguration {
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
         return new FunctionBindingPropertySource(applicationContext.getEnvironment());
-    }
-
-    @Bean
-    public ChannelResolver channelResolver(ApplicationContext context) {
-        return channelName -> context.getBean(channelName, MessageChannel.class);
     }
 
     @Bean
@@ -104,11 +96,6 @@ public class FunctionBindingConfiguration {
                 return bean;
             }
         };
-    }
-
-    @FunctionalInterface
-    public interface ChannelResolver {
-        MessageChannel resolveDestination(String channelName);
     }
 
 }

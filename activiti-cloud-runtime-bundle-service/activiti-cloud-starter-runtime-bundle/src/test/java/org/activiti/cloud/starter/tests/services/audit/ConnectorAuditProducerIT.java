@@ -28,7 +28,6 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -38,8 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -86,13 +85,13 @@ public class ConnectorAuditProducerIT {
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
     @Autowired
+    private StreamBridge streamBridge;
+
+    @Autowired
     private TaskRestTemplate taskRestTemplate;
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
-
-    @Autowired
-    private ChannelResolver channelResolver;
 
     @Value("integrationResult_${spring.application.name}")
     private String integrationResultDestination;
@@ -258,8 +257,6 @@ public class ConnectorAuditProducerIT {
 
             });
 
-        MessageChannel resultsChannel = channelResolver.resolveDestination(integrationErrorDestination);
-
         Error error = new Error("IntegrationError");
         error.fillInStackTrace();
 
@@ -271,7 +268,7 @@ public class ConnectorAuditProducerIT {
             })
             .map(payload -> MessageBuilder.withPayload(payload)
                 .build())
-            .forEach(resultsChannel::send);
+            .forEach(request -> streamBridge.send(integrationErrorDestination, request));
         //then
         await()
             .untilAsserted(() -> {
@@ -594,8 +591,6 @@ public class ConnectorAuditProducerIT {
 
     private void sendIntegrationResultFor(
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
-        MessageChannel resultsChannel = channelResolver
-            .resolveDestination(integrationResultDestination);
 
         // complete cloud connector tasks
         integrationRequestedEvents.stream()
@@ -605,7 +600,7 @@ public class ConnectorAuditProducerIT {
             })
             .map(payload -> MessageBuilder.withPayload(payload)
                 .build())
-            .forEach(resultsChannel::send);
+            .forEach(request -> streamBridge.send(integrationResultDestination, request));
     }
 
     @Test
@@ -691,9 +686,6 @@ public class ConnectorAuditProducerIT {
         RuntimeException cause = new RuntimeException("Runtime exception");
         CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR", cause);
 
-        MessageChannel errorChannel = channelResolver
-            .resolveDestination(integrationErrorDestination);
-
         integrationRequestedEvents.stream()
             .map(request -> {
                 return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
@@ -701,7 +693,7 @@ public class ConnectorAuditProducerIT {
             })
             .map(payload -> MessageBuilder.withPayload(payload)
                 .build())
-            .forEach(errorChannel::send);
+            .forEach(request -> streamBridge.send(integrationErrorDestination, request));
     }
 
     private List<CloudRuntimeEvent<?, ?>> getProcessInstanceEvents(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
