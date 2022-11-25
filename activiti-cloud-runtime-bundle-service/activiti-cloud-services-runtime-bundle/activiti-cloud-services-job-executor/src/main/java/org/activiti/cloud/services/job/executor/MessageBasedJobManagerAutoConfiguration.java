@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.job.executor;
 
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;

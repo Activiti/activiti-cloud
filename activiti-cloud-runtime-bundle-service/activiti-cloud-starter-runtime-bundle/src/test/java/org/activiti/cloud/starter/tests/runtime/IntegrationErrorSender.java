@@ -18,7 +18,6 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;

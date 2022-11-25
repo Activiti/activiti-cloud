@@ -19,7 +19,6 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -28,7 +27,6 @@ import org.springframework.messaging.support.MessageBuilder;
 @TestComponent
 public class IntegrationResultSender {
 
-//    private final ChannelResolver resolver;
     private StreamBridge streamBridge;
 
     public IntegrationResultSender(

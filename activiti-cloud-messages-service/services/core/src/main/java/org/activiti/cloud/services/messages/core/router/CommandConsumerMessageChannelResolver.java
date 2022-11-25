@@ -16,11 +16,9 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.ChannelResolver;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.DestinationResolver;
@@ -32,12 +30,12 @@ import java.util.function.Function;
 public class CommandConsumerMessageChannelResolver implements DestinationResolver<MessageChannel> {
 
     // TODO: take care -> we have to remove binderAwareChannelResolver returning a MessageChannel
-    private final ChannelResolver channelResolver;
+    private final DestinationResolver<MessageChannel> channelResolver;
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
 
     public CommandConsumerMessageChannelResolver(Function<String, String> destinationMapper,
-                                                ChannelResolver channelResolver,
+                                                DestinationResolver<MessageChannel> channelResolver,
                                                 BindingService bindingService) {
         this.destinationMapper = destinationMapper;
         this.channelResolver = channelResolver;
