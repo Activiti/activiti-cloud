@@ -40,7 +40,7 @@ public class CommandConsumerMessageRouter extends AbstractMessageRouter {
     protected Collection<MessageChannel> determineTargetChannels(Message<?> message) {
         Optional<String> destination = getHeader(message, MESSAGE_EVENT_OUTPUT_DESTINATION);
 
-        MessageChannel messageChannel = destination.map(destinationResolver::resolveDestination)
+        MessageChannel messageChannel = destination.map(this.getChannelResolver()::resolveDestination)
                                                    .orElseThrow(() -> new MessageMappingException(message,
                                                                                                   "Unable to determine target channel for message"));
         return Arrays.asList(messageChannel);
