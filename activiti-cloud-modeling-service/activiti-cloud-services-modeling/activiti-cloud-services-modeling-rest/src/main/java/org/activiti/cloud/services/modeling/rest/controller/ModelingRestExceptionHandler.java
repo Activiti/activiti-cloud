@@ -21,6 +21,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +64,17 @@ public class ModelingRestExceptionHandler {
 
     public static final String ERRORS = "errors";
 
+    public static final String MESSAGE = "message";
+
+    public static final String[] TECHNICAL_INFO_BLACKLIST = {
+        "java.",
+        "javax.",
+        "org.",
+        "com.",
+        "net.",
+        "io.",
+    };
+
     public static final String DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE = "Data integrity violation";
 
     public static final String DATA_ACCESS_EXCEPTION_MESSAGE = "Data access error";
@@ -75,7 +87,7 @@ public class ModelingRestExceptionHandler {
                                                           ErrorAttributeOptions options) {
                 Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
                         options);
-                Stream<ModelValidationError> bindingErrors = Optional.ofNullable((List<ObjectError>) errorAttributes.get("errors"))
+                Stream<ModelValidationError> bindingErrors = Optional.ofNullable((List<ObjectError>) errorAttributes.get(ERRORS))
                         .map(this::transformBindingErrors)
                         .orElse(Stream.empty());
                 Stream<ModelValidationError> semanticErrors = resolveSemanticErrors(webRequest,
@@ -88,7 +100,11 @@ public class ModelingRestExceptionHandler {
                                         collectedErrors);
                 }
 
-                errorAttributes.put("message", "");
+                if (errorAttributes.containsKey(MESSAGE)) {
+                    final String message = (String) errorAttributes.get(MESSAGE);
+                    final String censoredMessage = containsTechnicalInfo(message) ? "" : message;
+                    errorAttributes.put(MESSAGE, censoredMessage);
+                }
 
                 return errorAttributes;
             }
@@ -169,5 +185,9 @@ public class ModelingRestExceptionHandler {
         modelValidationError.setDescription(objectError.getDefaultMessage());
         modelValidationError.setValidatorSetName(objectError.getObjectName());
         return modelValidationError;
+    }
+
+    private boolean containsTechnicalInfo(String message) {
+        return Arrays.stream(TECHNICAL_INFO_BLACKLIST).anyMatch(message::contains);
     }
 }
