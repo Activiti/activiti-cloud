@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

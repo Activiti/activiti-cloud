@@ -66,11 +66,9 @@ public class MessageEventsAutoConfiguration implements MessageEventsSource {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(
-            @Qualifier(MessageEventsSource.MESSAGE_EVENTS_OUTPUT) MessageChannel messageEventsOutput,
-            BindingServiceProperties bindingServiceProperties) {
+    public MessageEventsDispatcher messageEventsDispatcher(BindingServiceProperties bindingServiceProperties) {
 
-        return new MessageEventsDispatcher(messageEventsOutput,
+        return new MessageEventsDispatcher(messageEventsOutput(),
             bindingServiceProperties);
     }
 
