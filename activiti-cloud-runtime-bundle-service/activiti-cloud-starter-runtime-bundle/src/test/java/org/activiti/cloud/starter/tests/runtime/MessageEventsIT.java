@@ -32,7 +32,11 @@ import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
-import org.activiti.cloud.services.messages.events.producer.*;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -64,10 +68,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -716,7 +725,7 @@ public class MessageEventsIT {
     }
 
     private void assertOutputDestination() {
-        Message<?> message = messageEventsQueue.receive();
+        Message<?> message = messageEventsQueue.receive(30000);
 
         assertThat(message)
             .extracting(Message::getHeaders)
