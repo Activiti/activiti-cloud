@@ -17,6 +17,9 @@ package org.activiti.cloud.services.messages.core.integration;
 
 import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
 import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
+
+import java.util.List;
+import java.util.Objects;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -33,10 +36,9 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.router.AbstractMessageRouter;
+import org.springframework.integration.router.MessageRouter;
 import org.springframework.messaging.Message;
-
-import java.util.List;
-import java.util.Objects;
+import org.springframework.messaging.MessageHandler;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
@@ -71,8 +73,9 @@ public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
     @Override
     protected IntegrationFlowDefinition<?> buildFlow() {
-        return this.from(processor.input())
+        return this.from(MessageConnectorInputGateway.class)
                    .headerFilter(properties.getInputHeadersToRemove())
+                   .headerFilter(new EmptyErrorChannelHeaderFilter(), null)
                    .gateway(flow -> flow.log(LoggingHandler.Level.DEBUG)
                                         .enrichHeaders(enricher -> enricher.headerChannelsToString(properties.getHeaderChannelsTimeToLiveExpression()))
                                         .filter(Message.class,
