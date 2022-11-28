@@ -19,7 +19,6 @@ package org.activiti.cloud.services.messages.tests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.function.Consumer;
 import org.activiti.api.process.model.builders.MessageEventPayloadBuilder;
 import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
@@ -33,7 +32,6 @@ import org.activiti.cloud.services.messages.core.config.MessageAggregatorPropert
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
@@ -57,20 +55,30 @@ import org.springframework.integration.transformer.MessageTransformationExceptio
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.MimeTypeUtils;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
-import org.springframework.util.MimeTypeUtils;
 
 import static java.util.Collections.singletonMap;
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.*;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.APP_NAME;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_CORRELATION_KEY;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_ID;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_NAME;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_OUTPUT_DESTINATION;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.SERVICE_FULL_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
@@ -176,7 +184,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    @Timeout(20000)
+    @Timeout(20)
     public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
@@ -223,7 +231,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    @Timeout(20000)
+    @Timeout(20)
     public void shouldProcessMessageEventsConcurrentlyInReversedOrder() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
