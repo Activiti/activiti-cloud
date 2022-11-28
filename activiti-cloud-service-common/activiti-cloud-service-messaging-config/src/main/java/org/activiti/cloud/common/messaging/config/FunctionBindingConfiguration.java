@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -32,6 +28,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -72,16 +73,11 @@ public class FunctionBindingConfiguration {
                                 .ifPresent(output -> {
                                     Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
                                         .ifPresentOrElse(
-                                            binding -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, binding),
-                                            () -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, output)
+                                            binding -> setOutProperties(streamFunctionProperties, beanOutName,
+                                                    binding, bindingServiceProperties, output),
+                                            () -> setOutProperties(streamFunctionProperties, beanOutName,
+                                                    output, bindingServiceProperties, output)
                                         );
-
-                                    Optional.ofNullable(bindingServiceProperties.getProducerProperties(output))
-                                        .ifPresent(producerProperties -> {
-                                            bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
-                                        });
                                 });
 
                             Optional.of(functionDefinition.input())
@@ -96,6 +92,19 @@ public class FunctionBindingConfiguration {
                 return bean;
             }
         };
+    }
+
+    private void setOutProperties(StreamFunctionProperties streamFunctionProperties,
+                                  String beanOutName,
+                                  String binding,
+                                  BindingServiceProperties bindingServiceProperties,
+                                  String functionDefinitionOutput) {
+        streamFunctionProperties.getBindings().put(beanOutName, binding);
+        Optional.ofNullable(bindingServiceProperties.getProducerProperties(functionDefinitionOutput))
+                .ifPresent(producerProperties -> {
+                    bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
+                    bindingServiceProperties.getBindingProperties(binding).setProducer(producerProperties);
+                });
     }
 
 }
