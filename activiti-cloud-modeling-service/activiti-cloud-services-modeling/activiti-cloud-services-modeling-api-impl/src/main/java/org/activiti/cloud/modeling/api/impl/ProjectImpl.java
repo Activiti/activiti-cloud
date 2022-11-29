@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -43,9 +42,6 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     @Schema(description = "The version of the project")
     private String version;
-
-    @Schema(description = "The configuration of the project")
-    private ProjectConfiguration configuration;
 
     public ProjectImpl() {
 
@@ -95,15 +91,5 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public void setConfiguration(ProjectConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
-    @Override
-    public ProjectConfiguration getConfiguration() {
-        return configuration;
     }
 }

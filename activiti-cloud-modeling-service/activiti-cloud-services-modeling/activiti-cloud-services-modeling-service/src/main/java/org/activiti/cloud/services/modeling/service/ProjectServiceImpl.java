@@ -21,7 +21,6 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
@@ -160,20 +159,7 @@ public class ProjectServiceImpl implements ProjectService {
                                  Project newProject) {
         Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
         Optional.ofNullable(newProject.getName()).ifPresent(projectToUpdate::setName);
-        Optional.ofNullable(newProject.getConfiguration())
-            .ifPresent(newConf -> updateProjectConfiguration(projectToUpdate, newConf));
-
         return projectRepository.updateProject(projectToUpdate);
-    }
-
-    private void updateProjectConfiguration (Project projectToUpdate, ProjectConfiguration newProjectConfiguration) {
-        ProjectConfiguration configurationToUpdate = projectToUpdate.getConfiguration();
-        if(configurationToUpdate != null) {
-            Optional.ofNullable(newProjectConfiguration.getEnableCandidateStarters())
-                .ifPresent(configurationToUpdate::setEnableCandidateStarters);
-        } else {
-            projectToUpdate.setConfiguration(newProjectConfiguration);
-        }
     }
 
     /**

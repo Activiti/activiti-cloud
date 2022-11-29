@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
-import org.activiti.cloud.modeling.api.ProjectConfiguration;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
-import org.activiti.cloud.services.modeling.entity.ProjectConfigurationEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,20 +78,7 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     default ProjectEntity copyProject(ProjectEntity projectToCopy, String newProjectName) {
         ProjectEntity projectEntityClone = new ProjectEntity(newProjectName);
         projectEntityClone.setDescription(projectToCopy.getDescription());
-
-        ProjectConfiguration configurationToCopy = projectToCopy.getConfiguration();
-        if(configurationToCopy != null) {
-            projectEntityClone.setConfiguration(copyProjectConfiguration(configurationToCopy));
-        }
-
         return save(projectEntityClone);
-    }
-
-    private ProjectConfiguration copyProjectConfiguration(ProjectConfiguration configurationToCopy) {
-        ProjectConfigurationEntity projectConfigurationEntityClone = new ProjectConfigurationEntity();
-        projectConfigurationEntityClone
-            .setEnableCandidateStarters(configurationToCopy.getEnableCandidateStarters());
-        return  projectConfigurationEntityClone;
     }
 
     @Override
