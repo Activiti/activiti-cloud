@@ -36,9 +36,7 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.advice.HandleMessageAdvice;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.router.AbstractMessageRouter;
-import org.springframework.integration.router.MessageRouter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 
