@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.service;
 import java.util.Date;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.ProjectConfiguration;
 
 public class ProjectDescriptor {
 
@@ -80,10 +79,6 @@ public class ProjectDescriptor {
 
     public Project toProject(){
         return this.project;
-    }
-
-    public ProjectConfiguration getConfiguration() {
-        return project.getConfiguration();
     }
 
 }

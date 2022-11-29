@@ -37,9 +37,4 @@ public interface Project<U> extends Auditable<U> {
     String getDescription();
 
     void setDescription(String description);
-
-    void setConfiguration(ProjectConfiguration configuration);
-
-    ProjectConfiguration getConfiguration();
-
 }
