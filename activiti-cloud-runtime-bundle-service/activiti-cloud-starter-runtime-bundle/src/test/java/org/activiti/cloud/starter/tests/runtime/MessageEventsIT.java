@@ -50,8 +50,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,6 +85,7 @@ import static org.mockito.Mockito.verify;
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class, MessageEventsIT.TestConfigurationContext.class},
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import(TestChannelBinderConfiguration.class)
 public class MessageEventsIT {
 
     private static final String BUSINESS_KEY = "businessKey";
@@ -130,8 +133,8 @@ public class MessageEventsIT {
     @TestConfiguration
     static class TestConfigurationContext {
 
-        @Bean
-        @BridgeFrom("messageEventsOutput")
+        @Bean("messageEventsOutputSupplier")
+        @BridgeFrom(value = "messageEventsOutput")
         QueueChannel messageEventsQueue() {
             return MessageChannels.queue()
                                   .get();
