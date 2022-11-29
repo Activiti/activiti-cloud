@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ProjectConfiguration;
-import org.activiti.cloud.modeling.api.impl.ProjectConfigurationImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -42,8 +40,6 @@ public class ObjectMapperConfiguration {
 
     resolver.addMapping(Project.class,
       ProjectImpl.class);
-    resolver.addMapping(ProjectConfiguration.class,
-        ProjectConfigurationImpl.class);
     resolver.addMapping(Model.class,
       ModelImpl.class);
 
