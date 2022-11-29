@@ -15,38 +15,22 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletResponse;
-
-import org.activiti.cloud.common.error.attributes.ErrorAttributesCustomizer;
-import org.activiti.cloud.modeling.core.error.ImportModelException;
-import org.activiti.cloud.modeling.core.error.ImportProjectException;
-import org.activiti.cloud.modeling.core.error.ModelConversionException;
-import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
-import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
-import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
-import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
+import org.activiti.cloud.modeling.core.error.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.error.ErrorAttributeOptions;
-import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
-import org.springframework.boot.web.servlet.error.ErrorAttributes;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
+
+import javax.persistence.PersistenceException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.SQLException;
+
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * Handler for REST exceptions

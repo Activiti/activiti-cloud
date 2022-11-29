@@ -58,4 +58,3 @@ public class ErrorAttributesAutoConfiguration {
         return new ErrorAttributesMessageSanitizer();
     }
 }
-
