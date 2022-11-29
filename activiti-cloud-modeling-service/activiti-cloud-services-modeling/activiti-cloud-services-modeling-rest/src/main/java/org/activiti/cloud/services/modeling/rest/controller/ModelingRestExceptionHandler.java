@@ -20,13 +20,12 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.activiti.cloud.common.error.attributes.ErrorAttributesBuilder;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesCustomizer;
-import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.ModelConversionException;
@@ -35,7 +34,6 @@ import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
-import org.activiti.cloud.services.modeling.rest.controller.error.attributes.ErrorAttributesModelValidationErrorsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -62,26 +60,6 @@ public class ModelingRestExceptionHandler {
     public static final String DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE = "Data integrity violation";
 
     public static final String DATA_ACCESS_EXCEPTION_MESSAGE = "Data access error";
-
-    @Bean
-    public ErrorAttributes errorAttributes() {
-
-        return new DefaultErrorAttributes() {
-            @Override
-            public Map<String, Object> getErrorAttributes(WebRequest webRequest,
-                                                          ErrorAttributeOptions options) {
-                Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
-                        options);
-
-                ErrorAttributesCustomizer[] customizers = {
-                    new ErrorAttributesModelValidationErrorsBuilder(),
-                    new ErrorAttributesMessageSanitizer()
-                };
-
-                return ErrorAttributesBuilder.build(errorAttributes, getError(webRequest), customizers);
-            }
-        };
-    }
 
     @ExceptionHandler({
             UnknownModelTypeException.class,
