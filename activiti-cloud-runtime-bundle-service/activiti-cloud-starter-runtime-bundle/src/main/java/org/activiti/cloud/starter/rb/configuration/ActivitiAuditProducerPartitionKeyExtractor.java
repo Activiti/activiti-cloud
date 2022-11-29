@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
-import org.springframework.cloud.stream.binder.PartitionHandler;
 import org.springframework.cloud.stream.binder.PartitionKeyExtractorStrategy;
 import org.springframework.messaging.Message;
 
