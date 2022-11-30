@@ -32,7 +32,8 @@ class ErrorAttributesMessageSanitizerTest {
         "Could not serialize @[javax.validation]",
         "Missing bean @[org.springframework]",
         "Error at com.google.guava",
-        "Error at io.zipkin.brave"
+        "Error at io.zipkin.brave",
+        "Error at org._int.obscurepackage"
     })
     void should_replaceMessageWithErrorNotDisclosed_when_matchesBlacklistedItems(String message) {
         ErrorAttributesCustomizer sanitizer = getNewSanitizer();

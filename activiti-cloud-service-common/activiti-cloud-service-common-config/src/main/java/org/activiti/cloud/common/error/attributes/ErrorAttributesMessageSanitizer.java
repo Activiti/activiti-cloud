@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.common.error.attributes;
 
+import javax.xml.stream.events.Characters;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
         "java.",
         "javax.",
         "jakarta.",
-        "java_cup",
+        "java_cup.",
         "org.",
         "com.",
         "net.",
@@ -56,16 +57,6 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
         return Arrays.stream(TECHNICAL_INFO_BLACKLIST).anyMatch(containsPackageIdentifier(message));
     }
 
-    /**
-     * Builds a {@link Predicate} that performs a naive check for package identifiers on the <b>message</b> parameter.
-     * <br/><br/><b>Examples:
-     * <br/>"Contact support at support.domain.com." -> predicate returns false
-     * <br/>"Error at com.fasterxml.jackson." -> predicate returns true</b>
-     * <br/><br/>If the message contains any of the blacklisted items,
-     * they must be at the very end or followed by a whitespace character.
-     * @param message
-     * @return A {@link Predicate} that performs the check on the given message
-     */
     private Predicate<String> containsPackageIdentifier(String message) {
         return (item) -> {
             List<Integer> indexes = IntStream.iterate(
@@ -75,8 +66,13 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
             ).boxed().collect(Collectors.toList());
 
             for (Integer i : indexes) {
-                if (i + item.length() >= message.length()) continue;
-                if (!Character.isWhitespace(message.charAt(i + item.length()))) return true;
+                final int trailingIndex = i + item.length();
+                if (trailingIndex < message.length()) {
+                    final char trailingCharacter = message.charAt(trailingIndex);
+                    if (Character.isLetterOrDigit(trailingCharacter) || trailingCharacter == '_') {
+                        return true;
+                    }
+                }
             }
 
             return false;
