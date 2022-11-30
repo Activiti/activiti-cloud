@@ -120,12 +120,16 @@ public class FunctionBindingConfiguration {
                 property -> String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, channelName, property),
                 property -> environment.getProperty(String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, outputBinding, property))));
 
-        String propertySourceName = String.format("%s_RabbitProducerProperties", channelName);
-        if(!producerProperties.isEmpty() && !environment.getPropertySources().contains(propertySourceName)) {
-            environment.getPropertySources()
-                .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                    new MapPropertySource(propertySourceName,
-                        producerProperties));
+        if(!producerProperties.isEmpty()){
+            if(environment.getPropertySources().contains(this.getClass().getSimpleName())){
+                MapPropertySource existingSource = (MapPropertySource)environment.getPropertySources().get(this.getClass().getSimpleName());
+                existingSource.getSource().putAll(producerProperties);
+            } else {
+                environment.getPropertySources()
+                    .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                        new MapPropertySource(this.getClass().getSimpleName(),
+                            producerProperties));
+            }
         }
     }
 

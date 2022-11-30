@@ -34,6 +34,7 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -77,13 +78,12 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = "auditProducerSupplier")
     @Bean("auditProducerSupplier")
-    public Supplier<Flux<Message<?>>> auditProducerSupplier(){
-        return () -> Flux.from(IntegrationFlows.from(auditProducer())
+    @Transactional(propagation = Propagation.REQUIRED)
+    public IntegrationFlow auditProducerSupplier(){
+        return IntegrationFlows.from(AuditProducerGateway.class, gateway -> gateway.beanName(AuditProducerGateway.GATEWAY_NAME).replyTimeout(0L))
             .log(LoggingHandler.Level.INFO, "auditProducerSupplier")
-            .toReactivePublisher());
+            .bridge().get();
     }
 
 }
