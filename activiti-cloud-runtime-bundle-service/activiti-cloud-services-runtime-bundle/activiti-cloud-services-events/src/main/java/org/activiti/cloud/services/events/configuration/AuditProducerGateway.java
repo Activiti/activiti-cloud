@@ -16,17 +16,18 @@
 package org.activiti.cloud.services.events.configuration;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 
 @FunctionBinding(input = ProcessEngineChannels.AUDIT_PRODUCER, output = ProcessEngineChannels.AUDIT_PRODUCER)
-public interface AuditProducerGateway extends Consumer<Message<?>> {
+public interface AuditProducerGateway extends Function<Message<?>, Message<?>> {
 
     String GATEWAY_NAME = "auditProducerGateway";
 
     @Override
-    void accept(Message<?> message) throws MessagingException;
+    Message<?> apply(Message<?> message) throws MessagingException;
 
 }
