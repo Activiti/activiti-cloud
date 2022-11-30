@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.error.attributes;
 
-import javax.xml.stream.events.Characters;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
