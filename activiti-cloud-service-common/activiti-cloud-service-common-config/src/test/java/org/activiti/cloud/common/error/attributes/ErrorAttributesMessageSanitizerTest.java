@@ -26,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ErrorAttributesMessageSanitizerTest {
 
+    private ErrorAttributesMessageSanitizer sanitizer = new ErrorAttributesMessageSanitizer();
+
     @ParameterizedTest
     @ValueSource(strings = {
         "An exception occurred @[java.lang.utils]",
@@ -36,8 +38,7 @@ class ErrorAttributesMessageSanitizerTest {
         "Error at org._int.obscurepackage"
     })
     void should_replaceMessageWithErrorNotDisclosed_when_matchesBlacklistedItems(String message) {
-        ErrorAttributesCustomizer sanitizer = getNewSanitizer();
-        Map<String, Object> errorAttributes = getNewErrorAttributes();
+        Map<String, Object> errorAttributes = new HashMap<>();
         errorAttributes.put(ErrorAttributesMessageSanitizer.MESSAGE, message);
 
         errorAttributes = sanitizer.customize(errorAttributes, null);
@@ -60,21 +61,13 @@ class ErrorAttributesMessageSanitizerTest {
         "Please visit support.domain.com.",
         "Somejava.com is not a real site"
     })
+    
     void should_letMessagePass_when_doesNotMatchBlacklistedItems(String message) {
-        ErrorAttributesCustomizer sanitizer = getNewSanitizer();
-        Map<String, Object> errorAttributes = getNewErrorAttributes();
+        Map<String, Object> errorAttributes = new HashMap<>();
         errorAttributes.put(ErrorAttributesMessageSanitizer.MESSAGE, message);
 
         errorAttributes = sanitizer.customize(errorAttributes, null);
 
         assertThat(errorAttributes).containsEntry(ErrorAttributesMessageSanitizer.MESSAGE, message);
-    }
-
-    private static ErrorAttributesCustomizer getNewSanitizer() {
-        return new ErrorAttributesMessageSanitizer();
-    }
-
-    private static Map<String, Object> getNewErrorAttributes() {
-        return new HashMap<>();
     }
 }

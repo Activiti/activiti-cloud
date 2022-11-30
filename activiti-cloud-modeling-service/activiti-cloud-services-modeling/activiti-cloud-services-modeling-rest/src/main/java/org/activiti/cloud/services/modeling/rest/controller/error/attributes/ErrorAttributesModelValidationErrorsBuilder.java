@@ -38,8 +38,7 @@ public class ErrorAttributesModelValidationErrorsBuilder implements ErrorAttribu
         Stream<ModelValidationError> bindingErrors = Optional.ofNullable((List<ObjectError>) errorAttributes.get(ERRORS))
             .map(this::transformBindingErrors)
             .orElse(Stream.empty());
-        Stream<ModelValidationError> semanticErrors = resolveSemanticErrors(error,
-            errorAttributes);
+        Stream<ModelValidationError> semanticErrors = resolveSemanticErrors(error);
         Stream<ModelValidationError> modelValidationErrorStream = Stream.concat(bindingErrors,
             semanticErrors);
         List<ModelValidationError> collectedErrors = modelValidationErrorStream.collect(Collectors.toList());
@@ -51,8 +50,7 @@ public class ErrorAttributesModelValidationErrorsBuilder implements ErrorAttribu
         return errorAttributes;
     }
 
-    private Stream<ModelValidationError> resolveSemanticErrors(Throwable error,
-                                                               Map<String, Object> errorAttributes) {
+    private Stream<ModelValidationError> resolveSemanticErrors(Throwable error) {
         return Optional.ofNullable(error)
             .filter(SemanticModelValidationException.class::isInstance)
             .map(SemanticModelValidationException.class::cast)

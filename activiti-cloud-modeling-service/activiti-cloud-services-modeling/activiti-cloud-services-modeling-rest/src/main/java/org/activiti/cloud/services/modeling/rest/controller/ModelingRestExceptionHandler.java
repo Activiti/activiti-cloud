@@ -15,7 +15,14 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import org.activiti.cloud.modeling.core.error.*;
+import org.activiti.cloud.modeling.core.error.ImportModelException;
+import org.activiti.cloud.modeling.core.error.ImportProjectException;
+import org.activiti.cloud.modeling.core.error.ModelConversionException;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
+import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
+import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
@@ -30,7 +37,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 
 /**
  * Handler for REST exceptions

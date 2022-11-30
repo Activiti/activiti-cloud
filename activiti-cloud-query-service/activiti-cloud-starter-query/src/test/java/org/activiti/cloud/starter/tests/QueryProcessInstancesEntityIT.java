@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
@@ -24,6 +25,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
+import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -961,5 +963,17 @@ public class QueryProcessInstancesEntityIT {
         assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables).hasSize(2);
         assertThat(responseEntityFiltered.getBody().getContent()).flatExtracting(ProcessInstanceEntity::getVariables)
             .extracting(AbstractVariableEntity::getValue).containsExactly("111", "222");
+    }
+
+    @Test
+    void should_containMessageNotDisclosed_whenExceptionMessageIsNotHandled() {
+        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate
+            .exchange(PROC_URL + "?startDate=2022-14-14T000000", HttpMethod.GET,
+                identityTokenProducer.entityWithAuthorizationHeader(),
+                new ParameterizedTypeReference<ActivitiErrorMessageImpl>(){});
+
+        assertThat(responseEntity.getBody().getMessage())
+            .isEqualTo(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
+
     }
 }
