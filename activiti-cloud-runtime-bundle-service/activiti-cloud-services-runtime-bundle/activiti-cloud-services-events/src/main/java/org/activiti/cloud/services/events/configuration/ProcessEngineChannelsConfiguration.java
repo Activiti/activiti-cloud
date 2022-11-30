@@ -22,21 +22,15 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.integration.channel.FluxMessageChannel;
-import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 @Configuration
@@ -78,12 +72,21 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
+    @FunctionBinding(input = ProcessEngineChannels.AUDIT_PRODUCER, output = ProcessEngineChannels.AUDIT_PRODUCER)
     @Bean("auditProducerSupplier")
-    @Transactional(propagation = Propagation.REQUIRED)
-    public IntegrationFlow auditProducerSupplier(){
-        return IntegrationFlows.from(AuditProducerGateway.class, gateway -> gateway.beanName(AuditProducerGateway.GATEWAY_NAME).replyTimeout(0L))
-            .log(LoggingHandler.Level.INFO, "auditProducerSupplier")
-            .bridge().get();
+    public Function<Message<?>, Message<?>> auditProducerSupplier() {
+        return message -> {
+            LOGGER.info("auditProducerSupplier", message);
+            return message;
+        };
     }
+
+//    @Bean("auditProducerSupplier")
+//    public IntegrationFlow auditProducerSupplier(){
+//        return IntegrationFlows.from(AuditProducerGateway.class,
+//                gateway -> gateway.beanName(AuditProducerGateway.GATEWAY_NAME).replyTimeout(0L))
+//            .log(LoggingHandler.Level.INFO, "auditProducerSupplier")
+//            .bridge().get();
+//    }
 
 }
