@@ -16,7 +16,9 @@
 
 package org.activiti.cloud.common.error.attributes;
 
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -30,13 +32,13 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 public class ErrorAttributesAutoConfiguration {
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public ErrorAttributes errorAttributes(List<ErrorAttributesCustomizer> errorAttributesCustomizers) {
         return new DefaultErrorAttributes() {
-
             @Override
             public Map<String, Object> getErrorAttributes(WebRequest webRequest,
                                                           ErrorAttributeOptions options) {
@@ -58,3 +60,4 @@ public class ErrorAttributesAutoConfiguration {
         return new ErrorAttributesMessageSanitizer();
     }
 }
+
