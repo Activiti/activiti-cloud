@@ -61,7 +61,7 @@ class ErrorAttributesMessageSanitizerTest {
         "Please visit support.domain.com.",
         "Somejava.com is not a real site"
     })
-    
+
     void should_letMessagePass_when_doesNotMatchBlacklistedItems(String message) {
         Map<String, Object> errorAttributes = new HashMap<>();
         errorAttributes.put(ErrorAttributesMessageSanitizer.MESSAGE, message);
