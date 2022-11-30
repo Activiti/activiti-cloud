@@ -15,18 +15,32 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
@@ -38,6 +52,10 @@ import java.util.function.Supplier;
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration {
+
+    private static String SPRING_CLOUD_STREAM_RABBIT = "spring.cloud.stream.rabbit.bindings";
+    private static final Set<String> SPRING_CLOUD_STREAM_RABBIT_PRODUCER_PROPERTIES =
+        Set.of("exchangeType", "routingKeyExpression", "transacted");
 
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
@@ -53,7 +71,8 @@ public class FunctionBindingConfiguration {
     public BeanPostProcessor functionBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                               FunctionBindingPropertySource functionDefinitionPropertySource,
                                                               StreamFunctionProperties streamFunctionProperties,
-                                                              BindingServiceProperties bindingServiceProperties) {
+                                                              BindingServiceProperties bindingServiceProperties,
+                                                              ConfigurableEnvironment environment) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -71,13 +90,13 @@ public class FunctionBindingConfiguration {
                             Optional.of(functionDefinition.output())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(output -> {
-                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
-                                        .ifPresentOrElse(
-                                            binding -> setOutProperties(streamFunctionProperties, beanOutName,
-                                                    binding, bindingServiceProperties, output),
-                                            () -> setOutProperties(streamFunctionProperties, beanOutName,
-                                                    output, bindingServiceProperties, output)
-                                        );
+                                    String outputDestination = Optional.ofNullable(bindingServiceProperties.getBindingDestination(output)).orElse(output);
+                                    setOutProperties(streamFunctionProperties, beanOutName,
+                                        outputDestination, bindingServiceProperties, output);
+
+                                    if(!output.equals(outputDestination)) {
+                                        setRabbitProducerProperties(environment, outputDestination, output);
+                                    }
                                 });
 
                             Optional.of(functionDefinition.input())
@@ -92,6 +111,22 @@ public class FunctionBindingConfiguration {
                 return bean;
             }
         };
+    }
+
+    private void setRabbitProducerProperties(ConfigurableEnvironment environment, String channelName, String outputBinding) {
+        Map<String, Object> producerProperties = SPRING_CLOUD_STREAM_RABBIT_PRODUCER_PROPERTIES.stream()
+            .filter(property -> environment.containsProperty(String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, outputBinding, property)))
+            .collect(Collectors.toMap(
+                property -> String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, channelName, property),
+                property -> environment.getProperty(String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, outputBinding, property))));
+
+        String propertySourceName = String.format("%s_RabbitProducerProperties", channelName);
+        if(!producerProperties.isEmpty() && !environment.getPropertySources().contains(propertySourceName)) {
+            environment.getPropertySources()
+                .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+                    new MapPropertySource(propertySourceName,
+                        producerProperties));
+        }
     }
 
     private void setOutProperties(StreamFunctionProperties streamFunctionProperties,
