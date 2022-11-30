@@ -48,9 +48,9 @@ public class MessageConnectorProcessorConfiguration implements MessageConnectorP
     }
 
     @FunctionBinding(output = MessageConnectorProcessor.OUTPUT)
-    @ConditionalOnMissingBean(name = "messageConnectorOutput")
+    @ConditionalOnMissingBean(name = "messageConnectorOutputSupplier")
     @Bean
-    public Supplier<Flux<Message<?>>> messageConnectorOutput() {
+    public Supplier<Flux<Message<?>>> messageConnectorOutputSupplier() {
         return () -> Flux.from(IntegrationFlows.from(output())
             .log(LoggingHandler.Level.INFO,"messageConnectorOutput")
             .toReactivePublisher());
