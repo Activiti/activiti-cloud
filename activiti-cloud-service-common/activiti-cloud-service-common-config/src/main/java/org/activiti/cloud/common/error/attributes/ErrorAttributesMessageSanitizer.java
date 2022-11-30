@@ -57,24 +57,17 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
     }
 
     private Predicate<String> containsPackageIdentifier(String message) {
-        return (item) -> {
-            List<Integer> indexes = IntStream.iterate(
+        return item -> IntStream.iterate(
                 message.indexOf(item),
                 index -> index >= 0,
                 index -> message.indexOf(item, index + 1)
-            ).boxed().collect(Collectors.toList());
-
-            for (Integer i : indexes) {
+            ).anyMatch(i -> {
                 final int trailingIndex = i + item.length();
                 if (trailingIndex < message.length()) {
                     final char trailingCharacter = message.charAt(trailingIndex);
-                    if (Character.isLetterOrDigit(trailingCharacter) || trailingCharacter == '_') {
-                        return true;
-                    }
+                    return Character.isLetterOrDigit(trailingCharacter) || trailingCharacter == '_';
                 }
-            }
-
-            return false;
-        };
+                return false;
+            });
     }
 }
