@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ErrorAttributesAutoConfiguration {
 
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
     public ErrorAttributes errorAttributes(List<ErrorAttributesCustomizer> errorAttributesCustomizers) {
         return new DefaultErrorAttributes() {
 
