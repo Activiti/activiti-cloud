@@ -56,7 +56,9 @@ class ErrorAttributesMessageSanitizerTest {
         "Come visit us at domain.com.\nGoodbye!",
         "Come visit us at domain.com. Goodbye!",
         "Learn java.",
-        "Please visit support.domain.com."
+        "Learn java. and stuff",
+        "Please visit support.domain.com.",
+        "Somejava.com is not a real site"
     })
     void should_letMessagePass_when_doesNotMatchBlacklistedItems(String message) {
         ErrorAttributesCustomizer sanitizer = getNewSanitizer();

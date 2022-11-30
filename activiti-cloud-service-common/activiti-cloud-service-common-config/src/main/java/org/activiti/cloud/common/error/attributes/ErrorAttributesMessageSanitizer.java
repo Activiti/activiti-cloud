@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,6 +42,8 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
         "dev.",
         "de."
     };
+    public static final Pattern VALIDATION_REGEX = compileValidationRegex();
+
 
     @Override
     public Map<String, Object> customize(Map<String, Object> errorAttributes, Throwable error) {
@@ -53,21 +57,19 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
     }
 
     private boolean containsTechnicalInfo(String message) {
-        return Arrays.stream(TECHNICAL_INFO_BLACKLIST).anyMatch(containsPackageIdentifier(message));
+        return VALIDATION_REGEX.matcher(message).find();
     }
 
-    private Predicate<String> containsPackageIdentifier(String message) {
-        return item -> IntStream.iterate(
-                message.indexOf(item),
-                index -> index >= 0,
-                index -> message.indexOf(item, index + 1)
-            ).anyMatch(i -> {
-                final int trailingIndex = i + item.length();
-                if (trailingIndex < message.length()) {
-                    final char trailingCharacter = message.charAt(trailingIndex);
-                    return Character.isLetterOrDigit(trailingCharacter) || trailingCharacter == '_';
-                }
-                return false;
-            });
+    private static Pattern compileValidationRegex(){
+        String pipedBlacklist = Arrays.stream(TECHNICAL_INFO_BLACKLIST)
+            .map(s -> s.replaceAll("\\.",""))
+            .collect(Collectors.joining("|"));
+
+        String regex = "\\W(".concat(pipedBlacklist).concat(")\\.\\w");
+
+        //RETURNS \W(java|javax|jakarta|java_cup|org|com|net|io|dev|de)\.\w
+
+        return Pattern.compile(regex);
     }
+
 }
