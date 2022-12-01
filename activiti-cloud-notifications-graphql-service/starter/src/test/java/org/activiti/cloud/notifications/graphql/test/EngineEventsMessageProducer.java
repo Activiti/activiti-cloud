@@ -36,7 +36,8 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 import reactor.util.retry.RetrySpec;
 
-@Component
+// TODO: verify if it is required since it makes fail tests in ActivitiGraphQLStarterIT
+//@Component
 public class EngineEventsMessageProducer implements SmartLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(EngineEventsMessageProducer.class);
@@ -55,7 +56,7 @@ public class EngineEventsMessageProducer implements SmartLifecycle {
 
             control = Flux.interval(Duration.ofMillis(0), Duration.ofMillis(1000), Schedulers.single())
                           .doOnNext(m -> logger.info("Emitting interval: {}", m))
-                          .flatMap(interval -> Mono.subscriberContext()
+                          .flatMap(interval -> Mono.deferContextual(Mono::just)
                                                    .map(ctx -> ctx.get(AtomicInteger.class).toString())
                                                    .map(routingKey -> MessageBuilder.withPayload(events)
                                                                                     .setHeader("routingKey", routingKey)
@@ -63,8 +64,8 @@ public class EngineEventsMessageProducer implements SmartLifecycle {
                           .doOnNext(producerChannels.output()::send)
                           .doOnError(e -> logger.error("Error during processing: ", e))
                           .retryWhen(RetrySpec.backoff(Integer.MAX_VALUE, Duration.ofSeconds(1)))
-                          .doOnEach(signal -> signal.getContext().get(AtomicInteger.class).getAndIncrement())
-                          .subscriberContext(Context.of(AtomicInteger.class, new AtomicInteger()))
+                          .doOnEach(signal -> signal.getContextView().get(AtomicInteger.class).getAndIncrement())
+                          .contextWrite(Context.of(AtomicInteger.class, new AtomicInteger()))
                           .subscribe();
         } catch (IOException e) {
             throw new RuntimeException(e);
