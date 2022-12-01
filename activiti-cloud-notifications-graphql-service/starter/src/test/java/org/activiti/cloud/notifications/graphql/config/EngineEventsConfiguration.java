@@ -15,14 +15,11 @@
  */
 package org.activiti.cloud.notifications.graphql.config;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
@@ -49,4 +46,5 @@ public class EngineEventsConfiguration implements EngineEvents {
             .log(LoggingHandler.Level.INFO,"engineEventsOutputSupplier")
             .toReactivePublisher());
     }
+
 }
