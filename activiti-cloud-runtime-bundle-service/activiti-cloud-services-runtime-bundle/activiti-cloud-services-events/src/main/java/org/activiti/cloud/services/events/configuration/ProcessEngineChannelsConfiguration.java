@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -72,21 +72,12 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
             .get();
     }
 
-    @FunctionBinding(input = ProcessEngineChannels.AUDIT_PRODUCER, output = ProcessEngineChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
     @Bean("auditProducerSupplier")
-    public Function<Message<?>, Message<?>> auditProducerSupplier() {
-        return message -> {
-            LOGGER.info("auditProducerSupplier", message);
-            return message;
-        };
+    public Supplier<Flux<Message<Object>>> auditProducerSupplier(){
+        return () -> Flux.from(IntegrationFlows.from(auditProducer())
+            .log(LoggingHandler.Level.INFO, "auditProducerSupplier")
+            .toReactivePublisher());
     }
-
-//    @Bean("auditProducerSupplier")
-//    public IntegrationFlow auditProducerSupplier(){
-//        return IntegrationFlows.from(AuditProducerGateway.class,
-//                gateway -> gateway.beanName(AuditProducerGateway.GATEWAY_NAME).replyTimeout(0L))
-//            .log(LoggingHandler.Level.INFO, "auditProducerSupplier")
-//            .bridge().get();
-//    }
 
 }
