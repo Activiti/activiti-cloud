@@ -100,7 +100,8 @@ public class EngineEventsConsumerAutoConfiguration {
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler,
                 @Qualifier(EngineEventsConsumerChannels.SOURCE) SubscribableChannel source) {
 
-            return IntegrationFlows.from(source)
+            return IntegrationFlows.from(EngineEventsGateway.class,
+                                        gateway -> gateway.beanName("engineEventsGateway").replyTimeout(0L))
                                    .log(LoggingHandler.Level.DEBUG)
                                    .transform(engineEventsMessageHandler)
                                    .toReactivePublisher();
