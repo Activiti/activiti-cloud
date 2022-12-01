@@ -24,10 +24,8 @@ import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
 import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSubscriptionEvents;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
-import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.controlbus.ControlBusGateway;
 import org.activiti.cloud.services.messages.core.correlation.Correlations;
@@ -40,13 +38,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cloud.stream.binder.test.OutputDestination;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.test.binder.MessageCollector;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.annotation.BridgeFrom;
-import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.config.GlobalChannelInterceptor;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.store.MessageGroup;
 import org.springframework.integration.store.MessageGroupStore;
@@ -55,11 +55,12 @@ import org.springframework.integration.transformer.MessageTransformationExceptio
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.util.MimeTypeUtils;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -68,7 +69,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static java.util.Collections.singletonMap;
@@ -109,10 +109,10 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                   .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Autowired
-    protected MessageConnectorProcessor channels;
+    protected StreamBridge streamBridge;
 
     @Autowired
-    protected MessageCollector collector;
+    private OutputDestination outputDestination;
 
     @Autowired
     protected MessageGroupStore messageGroupStore;
@@ -136,9 +136,6 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected MessageAggregatorProperties messageAggregatorProperties;
 
     @Autowired
-    protected AbstractMessageChannel messageConnectorOutput;
-
-    @Autowired
     private BindingServiceProperties bindingServiceProperties;
 
     @Value("${activiti.cloud.application.name}")
@@ -148,6 +145,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     protected String springApplicationName;
 
     @TestConfiguration
+    @Import(TestChannelBinderConfiguration.class)
     static class TestConfigurationContext {
 
         @Bean
@@ -165,10 +163,17 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         }
 
         @Bean
-        @FunctionBinding(input = "commandConsumer")
-        public Consumer<Message<?>> consumerTest(){
-            return message -> {
-                assertThat(message).isNotNull();
+        @GlobalChannelInterceptor
+        public ChannelInterceptor channelInterceptor() {
+            return new ChannelInterceptor() {
+                @Override
+                public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                    MessageHeaders headers = message.getHeaders();
+                    if (headers.containsKey(MESSAGE_EVENT_NAME) && "errorInterceptor".equals(headers.get(MESSAGE_EVENT_NAME))){
+                        throw new IllegalArgumentException("transaction failed");
+                    }
+                    return message;
+                }
             };
         }
     }
@@ -220,7 +225,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // then
         IntStream.range(0, count)
-                 .mapToObj(i -> Try.call(() -> poll(1, TimeUnit.SECONDS)))
+                 .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(1))))
                  .forEach(out -> assertThat(out).isNotNull());
 
         exec.shutdownNow();
@@ -267,7 +272,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
         // then
         IntStream.range(0, count)
-                 .mapToObj(i -> Try.call(() -> poll(3, TimeUnit.SECONDS)))
+                 .mapToObj(i -> Try.call(() -> poll(TimeUnit.SECONDS.toMillis(3))))
                  .forEach(out ->
                      assertThat(out).isNotNull()
                  );
@@ -295,7 +300,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent1"));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(peek()).isNull();
 
@@ -314,7 +319,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent2"));
 
         // then
-        out = poll(0, TimeUnit.SECONDS);
+        out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(peek()).isNull();
 
@@ -346,7 +351,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(startMessageDeployedEvent(messageName));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(peek()).isNull();
 
@@ -365,7 +370,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, null, "sent2"));
 
         // then
-        out = poll(0, TimeUnit.SECONDS);
+        out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(peek()).isNull();
 
@@ -398,7 +403,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
@@ -431,7 +436,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, correlationKey, "sent2"));
 
         // then
-        out = poll(1, TimeUnit.SECONDS);
+        out = poll(TimeUnit.SECONDS.toMillis(1));
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
@@ -472,7 +477,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, businessKey));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
@@ -503,7 +508,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageSentEvent(messageName, correlationKey, businessKey));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
@@ -533,7 +538,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, "waiting1"));
 
         // then
-        Message<?> out = poll(0, TimeUnit.SECONDS);
+        Message<?> out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(out).isNotNull()
                        .extracting(Message::getPayload)
@@ -564,7 +569,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         send(messageWaitingEvent(messageName, correlationKey, "waiting2"));
 
         // then
-        out = poll(0, TimeUnit.SECONDS);
+        out = poll(TimeUnit.SECONDS.toMillis(0));
 
         assertThat(peek()).isNull();
 
@@ -659,15 +664,14 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                        .setHeader(CONTENT_TYPE, "text/plain")
                                                        .build();
         // when
-        this.channels.input().send(invalidMessage);
+        streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
 
         // then
         assertThat(peek()).isNull();
 
         Message<?> out = discardQueue.receive(0);
 
-        assertThat(out.getPayload()).isEqualTo("message");
-
+        assertThat(new String((byte[]) out.getPayload())).isEqualTo("message");
     }
 
     @Test
@@ -679,7 +683,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                                                        .build();
         // when
         Throwable thrown = catchThrowable(() -> {
-            this.channels.input().send(invalidMessage);
+            streamBridge.send(MessageConnectorProcessor.INPUT, invalidMessage);
         });
 
         // then
@@ -702,9 +706,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             send(messageSentEvent(messageName, null, "error"));
         });
 
-        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
-
         this.controlBus.send("@aggregator.start()");
+
+        assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
     }
 
 
@@ -721,23 +725,9 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
 
         // when
-        ChannelInterceptor assertionInterceptor =
-                new ChannelInterceptor() {
-
-                    @Override
-                    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                        throw new RuntimeException("transaction failed");
-                    }
-
-                };
-
-        messageConnectorOutput.addInterceptor(assertionInterceptor);
-
         Throwable thrown = catchThrowable(() -> {
-            send(messageSentEvent(messageName, null, "error"));
+            send(messageSentEvent("errorInterceptor", null, "errorInterceptor"));
         });
-
-        messageConnectorOutput.removeInterceptor(assertionInterceptor);
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(1);
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
@@ -769,7 +759,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
                              .setHeader(MESSAGE_EVENT_CORRELATION_KEY, correlationKey)
                              .setHeader(MESSAGE_EVENT_ID, UUID.randomUUID())
                              .setHeader(APP_NAME, activitiCloudApplicationName)
-                             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION, bindingServiceProperties.getBindingDestination(MessageConnectorSource.OUTPUT))
+                             .setHeader(MESSAGE_EVENT_OUTPUT_DESTINATION,
+                                     bindingServiceProperties.getBindingDestination("messageConnectorInput-out-0"))
                              .setHeader(SERVICE_FULL_NAME, springApplicationName);
     }
 
@@ -858,19 +849,16 @@ public abstract class AbstractMessagesCoreIntegrationTests {
             throw new RuntimeException(e);
         }
 
-        this.channels.input()
-                     .send(MessageBuilder.withPayload(json)
-                                         .copyHeaders(message.getHeaders())
-                         .setHeader(CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON)
-                                         .build());
+        streamBridge.send(MessageConnectorProcessor.INPUT,
+                MessageBuilder.withPayload(json)
+                        .copyHeaders(message.getHeaders())
+                        .build());
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> Message<T> poll(long timeout, TimeUnit unit) throws InterruptedException {
+    protected <T> Message<T> poll(long timeout) {
 
-
-        Message<T> message = (Message<T>) this.collector.forChannel(this.channels.output())
-                                                        .poll(timeout, unit);
+        Message<T> message = (Message<T>) this.outputDestination.receive(timeout);
 
         return (Message<T>) Optional.ofNullable(message)
                                     .map(it -> MessageBuilder.withPayload(messageEventPayload(it))
@@ -881,8 +869,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     @SuppressWarnings("unchecked")
     protected <T> Message<T> peek() {
-        return (Message<T>) this.collector.forChannel(this.channels.output())
-                                          .peek();
+        return (Message<T>) this.outputDestination.receive();
     }
 
     protected MessageGroup messageGroup(String groupName) {
@@ -957,13 +944,15 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     private Object messageEventPayload(Message<?> message) {
         Object payload = message.getPayload();
-        if (payload instanceof String) {
-            try {
+        try {
+            if (payload instanceof String) {
                 return objectMapper.readValue((String) payload, MessageEventPayload.class);
-            } catch (JsonProcessingException e) {
-                LOGGER.warn("The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}", payload, e);
-                return payload;
+            } else if (payload instanceof byte[]) {
+                return objectMapper.readValue((byte[]) payload, MessageEventPayload.class);
             }
+        } catch (IOException e) {
+            LOGGER.warn("The payload {} cannot be converted to MessageEventPayload, so it is returned as is: {}", payload, e);
+            return payload;
         }
         return payload;
     }
