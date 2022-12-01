@@ -17,6 +17,7 @@ package org.activiti.cloud.security.feign.configuration;
 
 import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 @Configuration
-@Conditional(ClientsConfiguredCondition.class)
+@ConditionalOnBean(OAuth2AuthorizedClientService.class)
 public class ClientCredentialsAuthConfiguration {
 
     @Bean
