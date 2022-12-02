@@ -33,6 +33,7 @@ import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -53,7 +54,7 @@ import java.util.function.Function;
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
-public class ConnectorConfiguration {
+public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean
     @ConditionalOnBean(IntegrationFlowContext.class)
@@ -64,7 +65,8 @@ public class ConnectorConfiguration {
         FunctionBindingPropertySource functionBindingPropertySource,
         @Qualifier("resolveExpression") Function<String, String> resolveExpression,
         BindingServiceProperties bindingServiceProperties,
-        FunctionAnnotationService functionAnnotationService) {
+        FunctionAnnotationService functionAnnotationService,
+        ConfigurableEnvironment environment) {
 
         return new BeanPostProcessor() {
             @Override
@@ -73,8 +75,8 @@ public class ConnectorConfiguration {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
 
-                    final String beanOutName = FunctionalBindingHelper.getOutBinding(beanName);
-                    final String beanInName = FunctionalBindingHelper.getInBinding(beanName);
+                    final String beanOutName = getOutBinding(beanName);
+                    final String beanInName = getInBinding(beanName);
 
                     Connector<?, ?> connector = Connector.class.cast(bean);
 
@@ -82,24 +84,8 @@ public class ConnectorConfiguration {
 
                     Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
-                            Optional.of(functionDefinition.output())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(output -> {
-                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
-                                        .ifPresentOrElse(
-                                            binding -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, binding),
-                                            () -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, output)
-                                        );
-                                });
-
-                            Optional.of(functionDefinition.input())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(input -> {
-                                    streamFunctionProperties.getBindings()
-                                        .put(beanInName, input);
-                                });
+                            setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
+                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
                         });
 
                     final MessagingMethodInvokerHelper connectorInvoker = new MessagingMethodInvokerHelper(connector, ServiceActivator.class, false);
