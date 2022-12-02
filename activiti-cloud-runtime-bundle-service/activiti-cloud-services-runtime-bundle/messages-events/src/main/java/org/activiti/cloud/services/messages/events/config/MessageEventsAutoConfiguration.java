@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.messages.events.config;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.messages.events.channels.MessageEventsSource;
@@ -30,7 +28,6 @@ import org.activiti.cloud.services.messages.events.support.BpmnMessageEventMessa
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
 import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
