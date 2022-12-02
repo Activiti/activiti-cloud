@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.app;
 
-import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface QueryConsumerChannels {
