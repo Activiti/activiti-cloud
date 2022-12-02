@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,10 +31,6 @@ import reactor.core.publisher.Flux;
 
 @Configuration
 public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
-
-    @Autowired
-    private ObjectMapper mapper;
-
     @Bean(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     @Override

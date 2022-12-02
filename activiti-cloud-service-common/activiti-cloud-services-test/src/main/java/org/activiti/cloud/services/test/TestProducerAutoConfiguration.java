@@ -30,9 +30,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
 
-import java.util.function.Function;
-import java.util.logging.Level;
-
 @Configuration
 public class TestProducerAutoConfiguration {
 
