@@ -41,7 +41,6 @@ import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,14 +85,11 @@ public class SignalAuditProducerIT {
 
     @AfterEach
     public void cleanUp() {
-        List<String> processInstanceIds = runtimeService.createProcessInstanceQuery()
-            .list()
-            .stream()
-            .map(ProcessInstance::getProcessInstanceId)
-            .collect(Collectors.toList());
+        String processInstanceId = runtimeService.createProcessInstanceQuery()
+            .singleResult()
+            .getProcessInstanceId();
 
-        processInstanceIds.forEach(processInstanceId -> runtimeService
-            .deleteProcessInstance(processInstanceId, "clean up"));
+       runtimeService.deleteProcessInstance(processInstanceId, "clean up");
     }
 
     @Test
