@@ -50,6 +50,7 @@ import org.springframework.util.StringUtils;
 public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
 
     private static final String ROUTER_BEAN_NAME_PATTERN = "%sRouter";
+
     private static final String ROUTER_CALLBACK_BEAN_NAME_PATTERN = "%sCallback";
 
     private ApplicationContext applicationContext;
@@ -64,7 +65,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
     @Bean
     @Primary
     @ConditionalOnMissingBean
-    public MessageRoutingCallback defaultMessageRoutingCallback(){
+    public MessageRoutingCallback defaultMessageRoutingCallback() {
         return null;
     }
 
@@ -90,51 +91,62 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
 
                             functionDefinitionPropertySource.register(listenerName);
 
-                            setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
+                            String input = Optional.of(functionDefinition.input()).orElseThrow(() ->
+                                new IllegalArgumentException("ConditionalFunctionBinding can be declared only with an input binding. "
+                                    + "Please, consider using FunctionBinding."));
 
-                            Optional.of(functionDefinition.input())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(input -> {
-                                    String routerName = String.format(ROUTER_BEAN_NAME_PATTERN, input);
-                                    String routerCallbackName = String.format(ROUTER_CALLBACK_BEAN_NAME_PATTERN, routerName);
+                            String condition = Optional.of(functionDefinition.condition()).orElseThrow(() ->
+                                new IllegalArgumentException("ConditionalFunctionBinding can be declared only with a condition. "
+                                    + "Please, consider using FunctionBinding."));
 
-                                    Optional.of(functionDefinition.condition())
-                                        .filter(StringUtils::hasText)
-                                        .ifPresentOrElse(condition -> {
-                                                try {
-                                                    beanFactory.getBean(routerName, RoutingFunction.class);
-                                                    try {
-                                                        ConditionalMessageRoutingCallback callback = beanFactory.getBean(routerCallbackName,
-                                                            ConditionalMessageRoutingCallback.class);
-                                                        callback.addRoutingExpression(beanName, condition);
-                                                    } catch (BeansException e) {
-                                                        throw new IllegalStateException(
-                                                            String.format("Router %s is defined, but it has no proper callback", routerName));
-                                                    }
-                                                } catch (BeansException e) {
-                                                    ConditionalMessageRoutingCallback callback = createCallback(beanFactory, routerCallbackName);
-                                                    callback.addRoutingExpression(beanName, condition);
+//                            Optional.ofNullable(functionDefinition.output())
+//                                .filter(StringUtils::hasText)
+//                                .ifPresent(output -> {
+//                                    setOutput(getOutBinding(beanName), output, bindingServiceProperties, streamFunctionProperties, environment);
+//                                });
 
-                                                    createRouter(beanFactory, routerName, callback);
-                                                    functionDefinitionPropertySource.register(routerName);
-                                                    streamFunctionProperties.getBindings().put(
-                                                        getInBinding(routerName), input);
-                                                }
-                                            },
-                                            () -> streamFunctionProperties.getBindings()
-                                                .put(getInBinding(listenerName), input)
-                                        );
-                                });
+                            String routerName = String.format(ROUTER_BEAN_NAME_PATTERN, input);
+
+                            String routerCallbackName = String.format(ROUTER_CALLBACK_BEAN_NAME_PATTERN, routerName);
+
+                            ConditionalMessageRoutingCallback callback = createRouterCallback(input, routerName, routerCallbackName,
+                                beanFactory, functionDefinitionPropertySource, streamFunctionProperties);
+                            callback.addRoutingExpression(beanName, condition);
                         });
                 }
 
                 return bean;
             }
+
+
         };
     }
 
     private FunctionCatalog getFunctionCatalog() {
         return applicationContext.getBean(FunctionCatalog.class);
+    }
+
+    private ConditionalMessageRoutingCallback createRouterCallback(String input, String routerName,
+        String routerCallbackName, DefaultListableBeanFactory beanFactory, FunctionBindingPropertySource functionDefinitionPropertySource,
+        StreamFunctionProperties streamFunctionProperties) {
+        try {
+            beanFactory.getBean(routerName, RoutingFunction.class);
+            try {
+                ConditionalMessageRoutingCallback callback = beanFactory.getBean(routerCallbackName,
+                    ConditionalMessageRoutingCallback.class);
+                return callback;
+            } catch (BeansException e) {
+                throw new IllegalStateException(
+                    String.format("Router %s is defined, but it has no proper routing callback", routerName));
+            }
+        } catch (BeansException e) {
+            ConditionalMessageRoutingCallback callback = createCallback(beanFactory, routerCallbackName);
+
+            createRouter(beanFactory, routerName, callback);
+            functionDefinitionPropertySource.register(routerName);
+            setInput(getInBinding(routerName), input, streamFunctionProperties);
+            return callback;
+        }
     }
 
     protected ConditionalMessageRoutingCallback createCallback(DefaultListableBeanFactory beanFactory, String routerCallbackName) {
