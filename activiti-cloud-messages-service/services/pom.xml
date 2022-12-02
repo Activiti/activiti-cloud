@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-messages-dependencies</artifactId>
-    <version>7.7.0-alpha.25</version>
+    <version>7.7.0-mock</version>
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-messages</artifactId>
