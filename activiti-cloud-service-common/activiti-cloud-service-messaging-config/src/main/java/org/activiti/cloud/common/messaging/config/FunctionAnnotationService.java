@@ -16,13 +16,12 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.lang.annotation.Annotation;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-
-import java.lang.annotation.Annotation;
 
 public class FunctionAnnotationService {
 
