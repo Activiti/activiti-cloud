@@ -29,7 +29,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {

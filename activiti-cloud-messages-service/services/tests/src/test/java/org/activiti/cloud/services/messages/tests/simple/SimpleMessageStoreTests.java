@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.messages.tests.simple;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.integration.store.SimpleMessageStore;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration
