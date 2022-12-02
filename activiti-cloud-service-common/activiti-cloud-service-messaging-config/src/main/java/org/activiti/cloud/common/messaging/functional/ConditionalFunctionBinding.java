@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @Target( ElementType.METHOD )
 @Qualifier
 public @interface ConditionalFunctionBinding {
-    String output() default "";
+//    String output() default "";
 
     String input() default "";
 
