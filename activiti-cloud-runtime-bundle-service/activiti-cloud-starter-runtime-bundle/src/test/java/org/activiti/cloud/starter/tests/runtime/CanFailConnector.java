@@ -16,18 +16,10 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 
 @TestComponent
