@@ -15,14 +15,22 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.ConditionalMessageRoutingCallback;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionCatalog;
+import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.config.RoutingFunction;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -30,19 +38,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import java.util.Collections;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Configuration
 @ConditionalOnClass(FunctionBindingConfiguration.class)
 @AutoConfigureAfter(FunctionBindingConfiguration.class)
-public class ConditionalFunctionBindingConfiguration implements ApplicationContextAware {
+public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
+
+    private static final String ROUTER_BEAN_NAME_PATTERN = "%sRouter";
+    private static final String ROUTER_CALLBACK_BEAN_NAME_PATTERN = "%sCallback";
 
     private ApplicationContext applicationContext;
 
@@ -54,11 +62,19 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
     }
 
     @Bean
+    @Primary
+    @ConditionalOnMissingBean
+    public MessageRoutingCallback defaultMessageRoutingCallback(){
+        return null;
+    }
+
+    @Bean
     public BeanPostProcessor conditionalFunctionBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         FunctionBindingPropertySource functionDefinitionPropertySource,
         StreamFunctionProperties streamFunctionProperties,
         BindingServiceProperties bindingServiceProperties,
-        FunctionAnnotationService functionAnnotationService) {
+        FunctionAnnotationService functionAnnotationService,
+        ConfigurableEnvironment environment) {
 
         return new BeanPostProcessor() {
             @Override
@@ -70,27 +86,17 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
                         .ifPresent(functionDefinition -> {
                             String listenerName = beanName;
 
-                            final String beanOutName = FunctionalBindingHelper.getOutBinding(beanName);
+                            final String beanOutName = getOutBinding(beanName);
 
                             functionDefinitionPropertySource.register(listenerName);
 
-                            Optional.of(functionDefinition.output())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(output -> {
-                                    Optional.ofNullable(bindingServiceProperties.getBindingDestination(output))
-                                        .ifPresentOrElse(
-                                            binding -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, binding),
-                                            () -> streamFunctionProperties.getBindings()
-                                                .put(beanOutName, output)
-                                        );
-                                });
+                            setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
 
                             Optional.of(functionDefinition.input())
                                 .filter(StringUtils::hasText)
                                 .ifPresent(input -> {
-                                    String routerName = input + "Router";
-                                    String routerCallbackName = routerName + "Callback";
+                                    String routerName = String.format(ROUTER_BEAN_NAME_PATTERN, input);
+                                    String routerCallbackName = String.format(ROUTER_CALLBACK_BEAN_NAME_PATTERN, routerName);
 
                                     Optional.of(functionDefinition.condition())
                                         .filter(StringUtils::hasText)
@@ -112,11 +118,11 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
                                                     createRouter(beanFactory, routerName, callback);
                                                     functionDefinitionPropertySource.register(routerName);
                                                     streamFunctionProperties.getBindings().put(
-                                                        FunctionalBindingHelper.getInBinding(routerName), input);
+                                                        getInBinding(routerName), input);
                                                 }
                                             },
                                             () -> streamFunctionProperties.getBindings()
-                                                .put(FunctionalBindingHelper.getInBinding(listenerName), input)
+                                                .put(getInBinding(listenerName), input)
                                         );
                                 });
                         });
@@ -133,13 +139,15 @@ public class ConditionalFunctionBindingConfiguration implements ApplicationConte
 
     protected ConditionalMessageRoutingCallback createCallback(DefaultListableBeanFactory beanFactory, String routerCallbackName) {
         ConditionalMessageRoutingCallback callback = new ConditionalMessageRoutingCallback();
-        beanFactory.registerSingleton(routerCallbackName, callback);
+        beanFactory.registerBeanDefinition(routerCallbackName,
+            new RootBeanDefinition(ConditionalMessageRoutingCallback.class, BeanDefinition.SCOPE_SINGLETON, () -> callback));
         return callback;
     }
 
     protected RoutingFunction createRouter(DefaultListableBeanFactory beanFactory, String routerName, ConditionalMessageRoutingCallback callback) {
         RoutingFunction routingFunction = new RoutingFunction(getFunctionCatalog(), Collections.emptyMap(), new BeanFactoryResolver(beanFactory), callback);
-        beanFactory.registerSingleton(routerName, routingFunction);
+        beanFactory.registerBeanDefinition(routerName,
+            new RootBeanDefinition(RoutingFunction.class, BeanDefinition.SCOPE_SINGLETON, () -> routingFunction));
         return routingFunction;
     }
 
