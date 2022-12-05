@@ -64,7 +64,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                 if (Connector.class.isInstance(bean)) {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
-                    Connector connector = Connector.class.cast(bean);
 
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
@@ -126,7 +125,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                         .get();
 
-                    integrationFlowContext.registration(connectorFlow)
+                    integrationFlowContext.registration(inputChannelFlow)
                         .register();
                 }
                 return bean;
