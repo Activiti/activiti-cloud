@@ -22,7 +22,6 @@ import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,13 +30,11 @@ import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-@Disabled
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
@@ -63,7 +60,16 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
 
     @Autowired
-    private TestBindingsChannels channels;
+    private FunctionBindingPropertySource functionBindingPropertySource;
+
+    @Autowired
+    private FunctionRegistry functionRegistry;
+
+    @Autowired
+    private InputDestination input;
+
+    @Autowired
+    private OutputDestination output;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -96,21 +102,6 @@ public class ConnectorConfigurationIT {
         }
     }
 
-    @Autowired
-    private FunctionBindingPropertySource functionBindingPropertySource;
-
-    @Autowired
-    private FunctionRegistry functionRegistry;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
-    private InputDestination input;
-
-    @Autowired
-    private OutputDestination output;
-
     @BeforeEach
     public void setUp(){
         output.clear();
@@ -141,9 +132,10 @@ public class ConnectorConfigurationIT {
 
 
     @Test
-    public void testConnectorsResolvesFunctionAndReplies() throws InterruptedException {
+    public void testConnectorsResolvesFunctionAndReplies() {
         // given
-        Message<String> message = MessageBuilder.withPayload("TestC").setHeader("type", "TestAuditConsumerC").build();
+        Message<String> message = MessageBuilder.withPayload("TestC").setHeader("type", "TestAuditConsumerC")
+            .setHeader("resultDestination", "commandResults").build();
 
         // when
         input.send(message, "engineEvents");
