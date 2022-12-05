@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,12 +26,16 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.function.context.config.JsonMessageConverter;
+import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 @Configuration
@@ -38,7 +43,11 @@ import org.springframework.core.env.ConfigurableEnvironment;
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
-
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public JsonMessageConverter jsonMessageConverter() {
+//        return new JsonMessageConverter(new JacksonMapper(new ObjectMapper()));
+//    }
 
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
@@ -50,7 +59,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         return new FunctionAnnotationService(beanFactory);
     }
 
-    @Bean
+    @Bean(name = "functionBindingBeanPostProcessor")
     public BeanPostProcessor functionBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                               FunctionBindingPropertySource functionDefinitionPropertySource,
                                                               StreamFunctionProperties streamFunctionProperties,
@@ -71,7 +80,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             final String beanOutName = getOutBinding(beanName);
 
                             setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
+                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
                         });
                 }
 
