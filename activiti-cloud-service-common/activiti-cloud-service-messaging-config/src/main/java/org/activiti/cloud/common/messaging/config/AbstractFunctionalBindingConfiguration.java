@@ -20,18 +20,45 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-public abstract class AbstractFunctionalBindingConfiguration {
+public abstract class AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     private static String SPRING_CLOUD_STREAM_RABBIT = "spring.cloud.stream.rabbit.bindings";
     private static final Set<String> SPRING_CLOUD_STREAM_RABBIT_PRODUCER_PROPERTIES =
         Set.of("exchangeType", "routingKeyExpression", "transacted");
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        Assert.notNull(applicationContext,
+            this.getClass().getSimpleName() + " can not process beans because the application context is null");
+        this.applicationContext = applicationContext;
+    }
+
+    protected StreamBridge getStreamBridge() {
+        return this.applicationContext.getBean(StreamBridge.class);
+    }
 
     public static String getOutBinding(String bindingName) {
         return getOutBinding(bindingName, 0);
@@ -65,13 +92,15 @@ public abstract class AbstractFunctionalBindingConfiguration {
             });
     }
 
-    protected void setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties) {
+    protected void setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
+        BindingServiceProperties bindingServiceProperties) {
 
         Optional.of(inputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(input -> {
                 streamFunctionProperties.getBindings()
                     .put(beanInName, input);
+                setInProperties(streamFunctionProperties, beanInName, input, bindingServiceProperties);
             });
     }
 
@@ -106,5 +135,44 @@ public abstract class AbstractFunctionalBindingConfiguration {
                 bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
                 bindingServiceProperties.getBindingProperties(binding).setProducer(producerProperties);
             });
+    }
+
+    protected void setInProperties(StreamFunctionProperties streamFunctionProperties,
+        String beanInName,
+        String binding,
+        BindingServiceProperties bindingServiceProperties) {
+
+        Optional.ofNullable(bindingServiceProperties.getBindingProperties(binding))
+            .ifPresent(bindingProperties -> {
+                bindingServiceProperties.getBindings().putIfAbsent(beanInName, new BindingProperties());
+                bindingServiceProperties.getBindingProperties(beanInName).setDestination(binding);
+                bindingServiceProperties.getBindingProperties(beanInName).setContentType(bindingProperties.getContentType());
+            });
+    }
+
+    @Bean("resolveExpression")
+    @ConditionalOnMissingBean(name = "resolveExpression")
+    public Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
+        return value -> {
+            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
+                .getBeanExpressionResolver();
+            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
+                null);
+
+            String resolvedValue = applicationContext.getBeanFactory()
+                .resolveEmbeddedValue(value);
+            if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
+                resolvedValue = (String) resolver.evaluate(resolvedValue,
+                    expressionContext);
+            }
+            return resolvedValue;
+        };
+    }
+
+    protected FunctionInvocationWrapper functionFromDefinition(String definition) {
+        FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
+        FunctionInvocationWrapper function = functionRegistry.lookup(definition);
+        Assert.notNull(function, "Failed to lookup function '" + definition + "'");
+        return function;
     }
 }
