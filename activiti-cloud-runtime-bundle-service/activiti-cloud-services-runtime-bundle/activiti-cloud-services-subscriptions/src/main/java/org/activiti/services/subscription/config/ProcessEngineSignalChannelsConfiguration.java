@@ -15,9 +15,7 @@
  */
 package org.activiti.services.subscription.config;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
