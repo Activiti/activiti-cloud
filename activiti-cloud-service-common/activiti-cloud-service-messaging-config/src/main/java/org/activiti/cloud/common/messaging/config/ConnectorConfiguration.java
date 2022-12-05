@@ -15,16 +15,16 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Optional;
+import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -34,7 +34,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -42,15 +41,10 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.integration.handler.LoggingHandler.Level;
-import org.springframework.integration.handler.support.MessagingMethodInvokerHelper;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
-
-import java.util.Optional;
-import java.util.function.Function;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -80,25 +74,12 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
 
-                            final String beanInName = getInBinding(beanName);
-                            final String beanOutName = getOutBinding(beanName);
+                            final String beanInName = getInBinding(functionName);
+                            final String beanOutName = getOutBinding(functionName);
 
                             setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-//                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
+                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
 
-//                            Optional.of(functionDefinition.output())
-//                                .filter(StringUtils::hasText)
-//                                .ifPresent(output -> {
-//                                    streamFunctionProperties.getBindings()
-//                                        .put(functionName + "-out-0", output);
-//                                });
-//
-                            Optional.of(functionDefinition.input())
-                                .filter(StringUtils::hasText)
-                                .ifPresent(input -> {
-                                    streamFunctionProperties.getBindings()
-                                        .put(functionName + "-in-0", input);
-                                });
                         });
 
                     GenericHandler<Message> handler = (message, headers) -> {
@@ -134,16 +115,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .bridge()
                         .get();
 
-                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-                        .stream()
-                        .findFirst()
-                        .orElse(functionName);
+//                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
+//                        .stream()
+//                        .findFirst()
+//                        .orElse(functionName);
 
-                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-                        .get();
+//                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+//                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
+//                        .get();
 
-                    integrationFlowContext.registration(inputChannelFlow)
+                    integrationFlowContext.registration(connectorFlow)
                         .register();
                 }
                 return bean;
