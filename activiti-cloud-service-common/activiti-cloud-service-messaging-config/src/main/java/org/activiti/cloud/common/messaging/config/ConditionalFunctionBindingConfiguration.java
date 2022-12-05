@@ -79,7 +79,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
 
         return new BeanPostProcessor() {
             @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (Consumer.class.isInstance(bean) ||
                     Function.class.isInstance(bean)) {
 
