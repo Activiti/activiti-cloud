@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.starter.messages.test.jdbc;
 
-import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
