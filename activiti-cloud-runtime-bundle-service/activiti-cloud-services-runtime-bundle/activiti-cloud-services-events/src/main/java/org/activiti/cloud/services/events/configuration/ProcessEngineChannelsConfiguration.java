@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.slf4j.Logger;
@@ -30,8 +31,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
-
-import java.util.function.Supplier;
 
 @Configuration
 @Primary
