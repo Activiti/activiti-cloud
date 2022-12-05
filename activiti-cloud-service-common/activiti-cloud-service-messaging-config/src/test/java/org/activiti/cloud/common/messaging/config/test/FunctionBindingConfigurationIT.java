@@ -61,6 +61,24 @@ public class FunctionBindingConfigurationIT {
 
     private static Message<?> consumerMessage = null;
 
+    @Autowired
+    private TestBindingsChannels channels;
+
+    @Autowired
+    private FunctionBindingPropertySource functionBindingPropertySource;
+
+    @Autowired
+    private FunctionRegistry functionRegistry;
+
+    @Autowired
+    private StreamFunctionProperties streamFunctionProperties;
+
+    @Autowired
+    private InputDestination input;
+
+    @Autowired
+    private OutputDestination output;
+
     @TestConfiguration
     static class ApplicationConfig {
 
@@ -84,24 +102,6 @@ public class FunctionBindingConfigurationIT {
         }
 
     }
-
-    @Autowired
-    private TestBindingsChannels channels;
-
-    @Autowired
-    private FunctionBindingPropertySource functionBindingPropertySource;
-
-    @Autowired
-    private FunctionRegistry functionRegistry;
-
-    @Autowired
-    private StreamFunctionProperties streamFunctionProperties;
-
-    @Autowired
-    private InputDestination input;
-
-    @Autowired
-    private OutputDestination output;
 
     @BeforeEach
     public void setUp() {

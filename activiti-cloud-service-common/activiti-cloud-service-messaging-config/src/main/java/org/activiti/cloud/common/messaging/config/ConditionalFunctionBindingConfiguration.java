@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,7 +29,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.core.GenericSelector;
+import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
@@ -46,7 +45,6 @@ import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.LoggingHandler.Level;
 import org.springframework.messaging.Message;
-import org.springframework.util.MimeType;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -84,8 +82,6 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                             functionBindingPropertySource.register(beanName);
                             functionBindingPropertySource.register(gatewayName);
 
-                            final boolean hasOutput = StringUtils.hasText(functionDefinition.output());
-
                             final String gatewayInName = getInBinding(gatewayName);
                             final String gatewayOutName = getOutBinding(gatewayName);
 
@@ -100,19 +96,24 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            MimeType bindingContentTypeTransformer = getContentTypeTransformer(bindingServiceProperties, functionDefinition.input());
-
-                            IntegrationFlowBuilder connectorFlowBuilder = createFlowBuilder(gatewayName, hasOutput)
+                            IntegrationFlow connectorFlow = createFlowBuilder(gatewayName)
                                 .log(Level.INFO, gatewayName + ".request")
                                 .filter(selector)
-                                .handle(Message.class, createHandler(beanName));
+                                .handle(Message.class, createHandler(beanName, Optional.of(functionDefinition.output())))
+                                .log(LoggingHandler.Level.INFO, gatewayName + ".result")
+                                .bridge()
+                                .get();
 
-                            if (hasOutput) {
-                                connectorFlowBuilder.log(LoggingHandler.Level.INFO, gatewayName + ".result")
-                                    .bridge();
-                            }
+                            String inputChannel = streamFunctionProperties.getInputBindings(gatewayName)
+                                .stream()
+                                .findFirst()
+                                .orElse(gatewayName);
 
-                            integrationFlowContext.registration(connectorFlowBuilder.get())
+                            IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
+                                .get();
+
+                            integrationFlowContext.registration(inputChannelFlow)
                                 .register();
                         });
                 }
@@ -121,28 +122,17 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
         };
     }
 
-    protected MimeType getContentTypeTransformer(BindingServiceProperties bindingServiceProperties, String binding){
-        return Optional.ofNullable(bindingServiceProperties.getBindingProperties(binding))
-            .filter(Objects::nonNull)
-            .map(BindingProperties::getContentType)
-            .map(MimeType::valueOf)
-            .orElse(null);
+    protected IntegrationFlowBuilder createFlowBuilder(String functionName){
+        return IntegrationFlows.from(ConnectorGateway.class, (gateway) -> gateway.beanName(functionName)
+            .replyTimeout(0L).errorChannel("errorChannel"));
     }
 
-    protected IntegrationFlowBuilder createFlowBuilder(String functionName, boolean hasOutput){
-        if(hasOutput){
-            return IntegrationFlows.from(ConnectorGateway.class, (gateway) -> gateway.beanName(functionName)
-                .replyTimeout(0L));
-        } else {
-            return IntegrationFlows.from(ConsumerGateway.class, (gateway) -> gateway.beanName(functionName)
-                .replyTimeout(0L));
-        }
-    }
-
-    protected GenericHandler<Message> createHandler(String beanName) {
+    protected GenericHandler<Message> createHandler(String beanName, Optional<String> output) {
         return (message, headers) -> {
             FunctionInvocationWrapper function = this.functionFromDefinition(beanName);
-            return function.apply(message);
+            final Object response = function.apply(message);
+            output.ifPresent(outputDestination -> getStreamBridge().send(outputDestination, response));
+            return null;
         };
     }
 
