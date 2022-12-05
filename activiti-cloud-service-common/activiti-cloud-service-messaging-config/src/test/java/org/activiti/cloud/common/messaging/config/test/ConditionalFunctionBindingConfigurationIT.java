@@ -61,7 +61,16 @@ public class ConditionalFunctionBindingConfigurationIT {
     private static Message<?> consumedMessage = null;
 
     @Autowired
-    private TestBindingsChannels channels;
+    private FunctionBindingPropertySource functionBindingPropertySource;
+
+    @Autowired
+    private FunctionRegistry functionRegistry;
+
+    @Autowired
+    private InputDestination input;
+
+    @Autowired
+    private OutputDestination output;
 
     @TestConfiguration
     static class ApplicationConfig {
@@ -93,18 +102,6 @@ public class ConditionalFunctionBindingConfigurationIT {
             };
         }
     }
-
-    @Autowired
-    private FunctionBindingPropertySource functionBindingPropertySource;
-
-    @Autowired
-    private FunctionRegistry functionRegistry;
-
-    @Autowired
-    private InputDestination input;
-
-    @Autowired
-    private OutputDestination output;
 
     @BeforeEach
     public void setUp(){

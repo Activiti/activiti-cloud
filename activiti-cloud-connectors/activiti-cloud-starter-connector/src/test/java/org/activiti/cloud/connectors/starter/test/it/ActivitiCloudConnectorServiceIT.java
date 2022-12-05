@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
+import java.time.Duration;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -22,6 +23,7 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
