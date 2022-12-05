@@ -457,7 +457,7 @@ jobs:
     env:
       VERSION: ${{ needs.build.outputs.version }}
       FULL_CHART_DIR: full-chart
-      FULL_CHART_BASE_BRANCH: master
+      FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
       - uses: actions/checkout@v3
