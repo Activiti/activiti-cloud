@@ -16,21 +16,20 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanExpressionContext;
-import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -42,21 +41,19 @@ import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
-@ConditionalOnClass(BindingServiceProperties.class)
+@AutoConfigureAfter(FunctionBindingConfiguration.class)
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
-    @Bean
-    public BeanPostProcessor connectorBeanPostProcessor(DefaultListableBeanFactory beanFactory,
+    @Bean(name = "connectorBindingPostProcessor")
+    public BeanPostProcessor connectorBindingPostProcessor(DefaultListableBeanFactory beanFactory,
         IntegrationFlowContext integrationFlowContext,
         StreamFunctionProperties streamFunctionProperties,
         BindingServiceProperties bindingServiceProperties,
-        StreamBridge streamBridge,
         FunctionBindingPropertySource functionBindingPropertySource,
         Function<String, String> resolveExpression,
         ConfigurableEnvironment environment) {
@@ -69,29 +66,34 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     String functionName = connectorName + "Connector";
                     Connector connector = Connector.class.cast(bean);
 
-                    functionBindingPropertySource.register(functionName);
+                    final AtomicReference<String> responseDestination = new AtomicReference<>();
 
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
+
+                            functionBindingPropertySource.register(beanName);
+                            functionBindingPropertySource.register(functionName);
+
+                            responseDestination.set(functionDefinition.outputHeader());
 
                             final String beanInName = getInBinding(functionName);
                             final String beanOutName = getOutBinding(functionName);
 
                             setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
+                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
 
                         });
 
                     GenericHandler<Message> handler = (message, headers) -> {
-                        Object result = connector.apply(message.getPayload());
+                        FunctionInvocationWrapper function = functionFromDefinition(beanName);
+                        Object result = function.apply(message.getPayload());
 
                         Message<?> response = MessageBuilder.withPayload(result)
                             .build();
-                        String destination = headers.get("resultDestination", String.class);
+                        String destination = headers.get(responseDestination.get(), String.class);
 
                         if (StringUtils.hasText(destination)) {
-                            streamBridge.send(destination,
-                                response);
+                            getStreamBridge().send(destination, response);
                             return null;
                         }
 
@@ -105,7 +107,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .map(ExpressionEvaluatingSelector::new)
                         .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                    IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorMessageFunction.class,
+                    IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
                             (gateway) -> gateway.beanName(functionName)
                                 .replyTimeout(0L))
                         .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
@@ -115,44 +117,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .bridge()
                         .get();
 
-//                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-//                        .stream()
-//                        .findFirst()
-//                        .orElse(functionName);
-
-//                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-//                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-//                        .get();
-
-                    integrationFlowContext.registration(connectorFlow)
-                        .register();
+                    try {
+                        integrationFlowContext.registration(connectorFlow)
+                            .register();
+                    } catch (Exception e){
+                        throw e;
+                    }
                 }
                 return bean;
             }
         };
     }
 
-    @Bean
-    Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
-        return value -> {
-            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
-                .getBeanExpressionResolver();
-            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
-                null);
-
-            String resolvedValue = applicationContext.getBeanFactory()
-                .resolveEmbeddedValue(value);
-            if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
-                resolvedValue = (String) resolver.evaluate(resolvedValue,
-                    expressionContext);
-            }
-            return resolvedValue;
-        };
-    }
-
-    public interface ConnectorMessageFunction extends Function<Message<?>,Message<?>> {
-        @Override
-        Message<?> apply(Message<?> message) throws MessagingException;
-
-    }
 }
