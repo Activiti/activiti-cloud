@@ -26,9 +26,10 @@ import java.lang.annotation.Target;
 @Target( {ElementType.METHOD, ElementType.TYPE} )
 @Qualifier
 public @interface ConditionalFunctionBinding {
-//    String output() default "";
+    String output() default "";
 
     String input() default "";
 
     String condition() default "";
+
 }

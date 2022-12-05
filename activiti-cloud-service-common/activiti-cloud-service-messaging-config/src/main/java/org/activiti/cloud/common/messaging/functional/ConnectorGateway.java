@@ -15,23 +15,12 @@
  */
 package org.activiti.cloud.common.messaging.functional;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import java.util.function.Function;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention( RetentionPolicy.RUNTIME )
-@Target( {ElementType.METHOD, ElementType.TYPE} )
-@Qualifier
-public @interface ConnectorBinding {
-    String output() default "";
-
-    String input() default "";
-
-    String condition() default "";
-
-    String outputHeader() default "resultDestination";
+public interface ConnectorGateway extends Function<Message<?>, Message<?>> {
+    @Override
+    Message<?> apply(Message<?> message) throws MessagingException;
 
 }

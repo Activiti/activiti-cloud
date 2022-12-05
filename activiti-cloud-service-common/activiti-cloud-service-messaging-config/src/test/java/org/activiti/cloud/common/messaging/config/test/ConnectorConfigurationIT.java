@@ -16,12 +16,9 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
-import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistry;
-import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -137,15 +133,15 @@ public class ConnectorConfigurationIT {
 
     @Test
     public void testFunctionRegistry() {
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A)).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B)).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A + "Connector")).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + "Connector")).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + "Connector")).isNotNull();
     }
 
 
 
     @Test
-    public void testFunctionRoutingCallbacksResolvesFunctionAndReplies() throws InterruptedException {
+    public void testConnectorsResolvesFunctionAndReplies() throws InterruptedException {
         // given
         Message<String> message = MessageBuilder.withPayload("TestC").setHeader("type", "TestAuditConsumerC").build();
 
