@@ -45,6 +45,8 @@ import org.springframework.messaging.support.MessageBuilder;
     "activiti.cloud.application.name=foo",
     "spring.application.name=bar",
 
+    "spring.cloud.stream.function.autodetect=false",
+
     "activiti.cloud.messaging.destination-transformers-enabled=false",
 
     "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
@@ -63,8 +65,6 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_B = "auditConsumerHandlerB";
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
 
-    private static final String AUDIT_CONSUMER_ROUTER = "auditConsumerRouter";
-
     @Autowired
     private TestBindingsChannels channels;
 
@@ -73,28 +73,28 @@ public class ConnectorConfigurationIT {
 
         @Bean(FUNCTION_NAME_A)
         @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerA'")
-        public Connector<Message<?>, Void> auditConsumerHandlerA() {
-            return message -> {
-                assertThat(message.getHeaders().get("type", String.class)).isEqualTo("TestAuditConsumerA");
+        public Connector<?, Void> auditConsumerHandlerA() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("TestA");
                 return null;
             };
         }
 
         @Bean(FUNCTION_NAME_B)
         @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerB'")
-        public Connector<Message<?>, Void> auditConsumerHandlerB() {
-            return message -> {
-                assertThat(message.getHeaders().get("type", String.class)).isEqualTo("TestAuditConsumerB");
+        public Connector<?, Void> auditConsumerHandlerB() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("TestB");
                 return null;
             };
         }
 
         @Bean(FUNCTION_NAME_C)
         @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, output=TestBindingsChannels.COMMAND_RESULTS, condition = "headers['type']=='TestAuditConsumerC'")
-        public Connector<Message<?>, Message<?>> auditProcessorHandler() {
-            return message -> {
-                assertThat(message.getHeaders().get("type", String.class)).isEqualTo("TestAuditConsumerC");
-                return MessageBuilder.withPayload(message.getPayload()).setHeader("type", "TestAuditConsumerReply").build();
+        public Connector<?, ?> auditProcessorHandler() {
+            return payload -> {
+                assertThat(payload).isNotNull().isEqualTo("TestC");
+                return payload;
             };
         }
     }
@@ -143,22 +143,20 @@ public class ConnectorConfigurationIT {
 
 
 
-//    @Test
-//    public void testFunctionRoutingCallbacksResolvesFunctionAndReplies() throws InterruptedException {
-//        // given
-//        FunctionInvocationWrapper auditConsumerRouter = functionRegistry.<FunctionInvocationWrapper>lookup(AUDIT_CONSUMER_ROUTER);
-//
-//        Message<String> message = MessageBuilder.withPayload("TestA").setHeader("type", "TestAuditConsumerC").build();
-//
-//        // when
-//        input.send(message, "engineEvents");
-//
-//        // then
-//        Message<byte[]> reply = output.receive(10000, "commandResults_foo");
-//        assertThat(reply).isNotNull()
-//            .extracting(Message::getHeaders)
-//            .extracting(headers -> headers.get("type", String.class))
-//            .isNotNull()
-//            .isEqualTo("TestAuditConsumerReply");
-//    }
+    @Test
+    public void testFunctionRoutingCallbacksResolvesFunctionAndReplies() throws InterruptedException {
+        // given
+        Message<String> message = MessageBuilder.withPayload("TestC").setHeader("type", "TestAuditConsumerC").build();
+
+        // when
+        input.send(message, "engineEvents");
+
+        // then
+        Message<byte[]> reply = output.receive(10000, "commandResults_foo");
+        assertThat(reply).isNotNull()
+            .extracting(Message::getHeaders)
+            .extracting(headers -> headers.get("type", String.class))
+            .isNotNull()
+            .isEqualTo("TestAuditConsumerReply");
+    }
 }

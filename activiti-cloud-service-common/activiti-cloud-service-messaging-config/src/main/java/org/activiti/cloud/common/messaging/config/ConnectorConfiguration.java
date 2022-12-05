@@ -41,6 +41,7 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.GenericHandler;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.LoggingHandler.Level;
 import org.springframework.integration.handler.support.MessagingMethodInvokerHelper;
 import org.springframework.messaging.Message;
@@ -57,50 +58,59 @@ import java.util.function.Function;
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean
-    @ConditionalOnBean(IntegrationFlowContext.class)
     public BeanPostProcessor connectorBeanPostProcessor(DefaultListableBeanFactory beanFactory,
         IntegrationFlowContext integrationFlowContext,
         StreamFunctionProperties streamFunctionProperties,
+        BindingServiceProperties bindingServiceProperties,
         StreamBridge streamBridge,
         FunctionBindingPropertySource functionBindingPropertySource,
-        @Qualifier("resolveExpression") Function<String, String> resolveExpression,
-        BindingServiceProperties bindingServiceProperties,
-        FunctionAnnotationService functionAnnotationService,
+        Function<String, String> resolveExpression,
         ConfigurableEnvironment environment) {
 
         return new BeanPostProcessor() {
             @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (Connector.class.isInstance(bean)) {
                     String connectorName = beanName;
                     String functionName = connectorName + "Connector";
-
-                    final String beanOutName = getOutBinding(beanName);
-                    final String beanInName = getInBinding(beanName);
-
-                    Connector<?, ?> connector = Connector.class.cast(bean);
+                    Connector connector = Connector.class.cast(bean);
 
                     functionBindingPropertySource.register(functionName);
 
-                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
+
+                            final String beanInName = getInBinding(beanName);
+                            final String beanOutName = getOutBinding(beanName);
+
                             setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
+//                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties);
+
+//                            Optional.of(functionDefinition.output())
+//                                .filter(StringUtils::hasText)
+//                                .ifPresent(output -> {
+//                                    streamFunctionProperties.getBindings()
+//                                        .put(functionName + "-out-0", output);
+//                                });
+//
+                            Optional.of(functionDefinition.input())
+                                .filter(StringUtils::hasText)
+                                .ifPresent(input -> {
+                                    streamFunctionProperties.getBindings()
+                                        .put(functionName + "-in-0", input);
+                                });
                         });
 
-                    final MessagingMethodInvokerHelper connectorInvoker = new MessagingMethodInvokerHelper(connector, ServiceActivator.class, false);
-                    connectorInvoker.setBeanFactory(beanFactory);
-
-                    GenericHandler<?> handler = (payload, headers) -> {
-                        Message<?> message = MessageBuilder.createMessage(payload, headers);
-                        Object result = connectorInvoker.process(message);
+                    GenericHandler<Message> handler = (message, headers) -> {
+                        Object result = connector.apply(message.getPayload());
 
                         Message<?> response = MessageBuilder.withPayload(result)
                             .build();
                         String destination = headers.get("resultDestination", String.class);
 
                         if (StringUtils.hasText(destination)) {
-                            streamBridge.send(destination, response);
+                            streamBridge.send(destination,
+                                response);
                             return null;
                         }
 
@@ -117,10 +127,10 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorMessageFunction.class,
                             (gateway) -> gateway.beanName(functionName)
                                 .replyTimeout(0L))
-                        .log(Level.INFO,functionName + ".integrationRequest")
+                        .log(LoggingHandler.Level.INFO,functionName + ".integrationRequest")
                         .filter(selector)
-                        .handle(handler)
-                        .log(Level.INFO,functionName + ".integrationResult")
+                        .handle(Message.class, handler)
+                        .log(LoggingHandler.Level.INFO,functionName + ".integrationResult")
                         .bridge()
                         .get();
 
@@ -141,7 +151,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         };
     }
 
-    @Bean("resolveExpression")
+    @Bean
     Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
         return value -> {
             BeanExpressionResolver resolver = applicationContext.getBeanFactory()
@@ -160,7 +170,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
     }
 
     public interface ConnectorMessageFunction extends Function<Message<?>,Message<?>> {
-
         @Override
         Message<?> apply(Message<?> message) throws MessagingException;
 
