@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config.test;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
@@ -94,7 +95,7 @@ public class ConnectorConfigurationIT {
         public Connector<?, ?> auditProcessorHandler() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestC");
-                return payload;
+                return "TestReply";
             };
         }
     }
@@ -154,9 +155,8 @@ public class ConnectorConfigurationIT {
         // then
         Message<byte[]> reply = output.receive(10000, "commandResults_foo");
         assertThat(reply).isNotNull()
-            .extracting(Message::getHeaders)
-            .extracting(headers -> headers.get("type", String.class))
+            .extracting(Message::getPayload)
             .isNotNull()
-            .isEqualTo("TestAuditConsumerReply");
+            .isEqualTo("TestReply".getBytes(StandardCharsets.UTF_8));
     }
 }
