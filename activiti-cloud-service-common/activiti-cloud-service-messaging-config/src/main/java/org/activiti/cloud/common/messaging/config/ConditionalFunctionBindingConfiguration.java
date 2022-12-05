@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
-import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
