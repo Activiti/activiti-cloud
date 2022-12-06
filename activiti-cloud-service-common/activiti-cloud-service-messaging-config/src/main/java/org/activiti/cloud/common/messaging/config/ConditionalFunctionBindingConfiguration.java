@@ -123,14 +123,16 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
 
     protected IntegrationFlowBuilder createFlowBuilder(String functionName){
         return IntegrationFlows.from(ConnectorGateway.class, (gateway) -> gateway.beanName(functionName)
-            .replyTimeout(0L).errorChannel("errorChannel"));
+            .replyTimeout(0L));
     }
 
     protected GenericHandler<Message> createHandler(String beanName, Optional<String> output) {
         return (message, headers) -> {
             FunctionInvocationWrapper function = this.functionFromDefinition(beanName);
             final Object response = function.apply(message);
-            output.ifPresent(outputDestination -> getStreamBridge().send(outputDestination, response));
+            if(response != null) {
+                output.ifPresent(outputDestination -> getStreamBridge().send(outputDestination, response));
+            }
             return null;
         };
     }
