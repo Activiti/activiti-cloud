@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.persistence.EntityManager;
@@ -25,6 +26,8 @@ import javax.transaction.Transactional;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
@@ -39,13 +42,16 @@ public class ProcessInstanceAdminService {
 
     private final EntityFinder entityFinder;
 
+    private final QueryDslPredicateAggregator predicateAggregator;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     public ProcessInstanceAdminService(ProcessInstanceRepository processInstanceRepository,
-        EntityFinder entityFinder){
+        EntityFinder entityFinder, QueryDslPredicateAggregator queryDslPredicateAggregator) {
         this.processInstanceRepository = processInstanceRepository;
         this.entityFinder = entityFinder;
+        this.predicateAggregator = queryDslPredicateAggregator;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -53,16 +59,17 @@ public class ProcessInstanceAdminService {
         return processInstanceRepository.findAll(Optional.ofNullable(predicate)
                 .orElseGet(BooleanBuilder::new),
             pageable);
-
     }
 
     @Transactional
-    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, Pageable pageable) {
+    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, List<QueryDslPredicateFilter> filters,
+        Pageable pageable) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
-        filter.setParameterList("variableKeys", variableKeys);
-        Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
+        filter.setParameterList("variableKeys", getVariableKeys(variableKeys));
+        Page<ProcessInstanceEntity> processInstanceEntities = findAll(extendedPredicate, pageable);
         // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
         // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
         processInstanceEntities.forEach(processInstanceEntity -> Hibernate.initialize(processInstanceEntity.getVariables()));
@@ -70,12 +77,20 @@ public class ProcessInstanceAdminService {
 
     }
 
-    public  ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
+    public ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
 
         return entityFinder.findById(processInstanceRepository,
             processInstanceId,
             "Unable to find task for the given id:'" + processInstanceId + "'");
+    }
 
+    private List<String> getVariableKeys(List<String> variableKeys) {
+        if (variableKeys == null || variableKeys.isEmpty()) {
+            // Due to filter implementation we have to use an empty string as impossible match for process variable keys
+            // and exclude values
+            return Collections.singletonList("");
+        }
+        return variableKeys;
     }
 
 

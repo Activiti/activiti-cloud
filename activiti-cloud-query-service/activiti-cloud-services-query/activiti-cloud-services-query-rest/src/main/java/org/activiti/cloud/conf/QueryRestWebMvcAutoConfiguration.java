@@ -221,6 +221,6 @@ public class QueryRestWebMvcAutoConfiguration  {
     public ProcessInstanceAdminService processInstanceAdminService(ProcessInstanceRepository processInstanceRepository,
         EntityFinder entityFinder
     ) {
-        return new ProcessInstanceAdminService(processInstanceRepository, entityFinder);
+        return new ProcessInstanceAdminService(processInstanceRepository, entityFinder, new QueryDslPredicateAggregator());
     }
 }

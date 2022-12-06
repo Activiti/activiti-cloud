@@ -17,6 +17,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -32,11 +37,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.List;
 
 public class TaskControllerHelper {
 
@@ -109,7 +109,7 @@ public class TaskControllerHelper {
     private void addProcessVariablesFilter(List<String> processVariableKeys) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
-        filter.setParameterList("variableKeys", processVariableKeys);
+        filter.setParameterList("variableKeys", getVariableKeys(processVariableKeys));
     }
 
     private Page<TaskEntity> findAllByInvolvedUser(Predicate predicate, Pageable pageable) {
@@ -135,6 +135,13 @@ public class TaskControllerHelper {
             page = taskRepository.findAll(extendedPredicate, pageable);
         }
         return page;
+    }
+
+    private List<String> getVariableKeys(List<String> variableKeys){
+        if(variableKeys == null || variableKeys.isEmpty()){
+            return Collections.singletonList("");
+        }
+        return variableKeys;
     }
 
 }
