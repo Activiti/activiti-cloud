@@ -20,7 +20,6 @@ import com.querydsl.core.types.Predicate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -32,7 +31,6 @@ import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelA
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
-import org.activiti.cloud.services.query.rest.predicate.StatusProcessInstanceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
