@@ -20,6 +20,7 @@ import com.querydsl.core.types.Predicate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -31,6 +32,7 @@ import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelA
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
+import org.activiti.cloud.services.query.rest.predicate.StatusProcessInstanceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -38,6 +40,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -100,17 +103,23 @@ public class TaskAdminController {
             new StandAloneTaskFilter(standalone)), processVariableKeys);
     }
 
-    @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.POST)
-    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(
-        @RequestBody TasksQueryBody queryBody,
+    public MappingJacksonValue findAllFromBody(@RequestBody TasksQueryBody queryBody,
         VariableSearch variableSearch,
         Pageable pageable) {
 
-
-        return taskControllerHelper.findAllWithProcessVariables(null, variableSearch, pageable,
+        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(variableSearch, pageable,
             Arrays.asList(new RootTasksFilter(queryBody.isRootTasksOnly()), new StandAloneTaskFilter(queryBody.isStandalone())),
             queryBody.getVariableKeys());
+
+        MappingJacksonValue result = new MappingJacksonValue(pagedModel);
+        if(queryBody.hasVariableKeys()) {
+            result.setSerializationView(JsonViews.ProcessVariables.class);
+        } else {
+            result.setSerializationView(JsonViews.General.class);
+        }
+
+        return result;
     }
 
     @JsonView(JsonViews.General.class)

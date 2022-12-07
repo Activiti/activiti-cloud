@@ -30,4 +30,8 @@ public abstract class VariableKeysQueryBody {
         this.variableKeys = variableKeys;
     }
 
+    public boolean hasVariableKeys() {
+        return this.variableKeys != null && !this.variableKeys.isEmpty();
+    }
+
 }

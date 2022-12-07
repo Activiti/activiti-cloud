@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,20 +82,26 @@ public class ProcessInstanceAdminController {
         @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> variableKeys,
         Pageable pageable) {
         return pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceAdminService.findAllWithVariables(predicate, variableKeys, Collections.emptyList(), pageable),
+            processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable),
             processInstanceRepresentationModelAssembler);
     }
 
-    @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.POST)
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllFromBody(
-        @RequestBody ProcessInstanceQueryBody queryBody,
-        Pageable pageable) {
+    public MappingJacksonValue findAllFromBody(@RequestBody ProcessInstanceQueryBody queryBody, Pageable pageable) {
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceAdminService.findAllWithVariables(null, queryBody.getVariableKeys(),
+        PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(pageable,
+            processInstanceAdminService.findAllFromBody(queryBody.getVariableKeys(),
                 Arrays.asList(new StatusProcessInstanceFilter(queryBody.getStatus())), pageable),
             processInstanceRepresentationModelAssembler);
+
+        MappingJacksonValue result = new MappingJacksonValue(pagedModel);
+        if(queryBody.hasVariableKeys()) {
+            result.setSerializationView(JsonViews.ProcessVariables.class);
+        } else {
+            result.setSerializationView(JsonViews.General.class);
+        }
+
+        return result;
     }
 
     @JsonView(JsonViews.General.class)

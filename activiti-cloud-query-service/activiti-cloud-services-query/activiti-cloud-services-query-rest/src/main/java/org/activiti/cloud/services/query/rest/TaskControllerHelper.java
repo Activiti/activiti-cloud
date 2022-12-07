@@ -17,7 +17,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -90,6 +89,18 @@ public class TaskControllerHelper {
                                                      taskRepresentationModelAssembler);
     }
 
+    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(VariableSearch variableSearch,
+                                                                Pageable pageable,
+                                                                List<QueryDslPredicateFilter> filters,
+                                                                List<String> processVariableKeys) {
+
+        if(processVariableKeys == null || processVariableKeys.isEmpty()){
+            return this.findAll(null, variableSearch, pageable, filters);
+        } else {
+            return this.findAllWithProcessVariables(null, variableSearch, pageable, filters, processVariableKeys);
+        }
+    }
+
     @Transactional
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(Predicate predicate,
                                                                                                   List<String> processVariableKeys,
@@ -109,7 +120,7 @@ public class TaskControllerHelper {
     private void addProcessVariablesFilter(List<String> processVariableKeys) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
-        filter.setParameterList("variableKeys", getVariableKeys(processVariableKeys));
+        filter.setParameterList("variableKeys", processVariableKeys);
     }
 
     private Page<TaskEntity> findAllByInvolvedUser(Predicate predicate, Pageable pageable) {
@@ -135,13 +146,6 @@ public class TaskControllerHelper {
             page = taskRepository.findAll(extendedPredicate, pageable);
         }
         return page;
-    }
-
-    private List<String> getVariableKeys(List<String> variableKeys){
-        if(variableKeys == null || variableKeys.isEmpty()){
-            return Collections.singletonList("");
-        }
-        return variableKeys;
     }
 
 }
