@@ -43,6 +43,7 @@ import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
@@ -113,7 +114,7 @@ public class MessagesCoreAutoConfiguration {
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
                                                            List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           AbstractMessageRouter router) {
+                                                           @Qualifier("commandConsumerMessageRouter") AbstractMessageRouter router) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
@@ -138,7 +139,7 @@ public class MessagesCoreAutoConfiguration {
             bindingService);
     }
 
-    @Bean
+    @Bean("commandConsumerMessageRouter")
     @ConditionalOnMissingBean
     public CommandConsumerMessageRouter commandConsumerMessageRouter(CommandConsumerMessageChannelResolver destinationResolver) {
         return new CommandConsumerMessageRouter(destinationResolver);
