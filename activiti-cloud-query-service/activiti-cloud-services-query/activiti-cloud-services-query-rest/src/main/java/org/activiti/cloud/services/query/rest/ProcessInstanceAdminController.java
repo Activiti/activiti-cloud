@@ -26,6 +26,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
+import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -86,12 +87,12 @@ public class ProcessInstanceAdminController {
 
     @RequestMapping(method = RequestMethod.POST)
     public MappingJacksonValue findAllFromBody(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-        @RequestBody(required = false) ProcessInstanceQueryBody queryBody, Pageable pageable) {
+        @RequestBody(required = false) ProcessInstanceQueryBody payload, Pageable pageable) {
 
-        List<String> variableKeys = Optional.ofNullable(queryBody).orElse(new ProcessInstanceQueryBody()).getVariableKeys();
+        ProcessInstanceQueryBody queryBody = Optional.ofNullable(payload).orElse(new ProcessInstanceQueryBody());
 
         PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceAdminService.findAllFromBody(predicate, variableKeys, Collections.emptyList(), pageable),
+            processInstanceAdminService.findAllFromBody(predicate, queryBody.getVariableKeys(), Collections.emptyList(), pageable),
             processInstanceRepresentationModelAssembler);
 
         MappingJacksonValue result = new MappingJacksonValue(pagedModel);

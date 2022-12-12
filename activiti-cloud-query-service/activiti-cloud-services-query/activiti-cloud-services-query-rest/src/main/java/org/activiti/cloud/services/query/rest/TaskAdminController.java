@@ -105,11 +105,11 @@ public class TaskAdminController {
     @RequestMapping(method = RequestMethod.POST)
     public MappingJacksonValue findAllFromBody(
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-        @RequestBody(required = false) TasksQueryBody queryBody,
+        @RequestBody(required = false) TasksQueryBody payload,
         VariableSearch variableSearch,
         Pageable pageable) {
 
-        queryBody = Optional.ofNullable(queryBody).orElse(new TasksQueryBody());
+        TasksQueryBody queryBody = Optional.ofNullable(payload).orElse(new TasksQueryBody());
 
         PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(predicate, variableSearch, pageable,
             Arrays.asList(new RootTasksFilter(queryBody.isRootTasksOnly()), new StandAloneTaskFilter(queryBody.isStandalone())),
