@@ -31,4 +31,7 @@ public class TasksQueryBody extends VariableKeysQueryBody {
         return rootTasksOnly;
     }
 
+    public void setRootTasksOnly(boolean rootTasksOnly) {
+        this.rootTasksOnly = rootTasksOnly;
+    }
 }

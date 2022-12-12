@@ -17,15 +17,15 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
-import org.activiti.cloud.services.query.rest.predicate.StatusProcessInstanceFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -85,11 +85,13 @@ public class ProcessInstanceAdminController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(@RequestBody ProcessInstanceQueryBody queryBody, Pageable pageable) {
+    public MappingJacksonValue findAllFromBody(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
+        @RequestBody(required = false) ProcessInstanceQueryBody queryBody, Pageable pageable) {
+
+        List<String> variableKeys = Optional.ofNullable(queryBody).orElse(new ProcessInstanceQueryBody()).getVariableKeys();
 
         PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceAdminService.findAllFromBody(queryBody.getVariableKeys(),
-                Arrays.asList(new StatusProcessInstanceFilter(queryBody.getStatus())), pageable),
+            processInstanceAdminService.findAllFromBody(predicate, variableKeys, Collections.emptyList(), pageable),
             processInstanceRepresentationModelAssembler);
 
         MappingJacksonValue result = new MappingJacksonValue(pagedModel);

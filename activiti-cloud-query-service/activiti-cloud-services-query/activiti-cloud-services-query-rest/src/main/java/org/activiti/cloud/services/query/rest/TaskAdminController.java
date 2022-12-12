@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -102,11 +103,15 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(@RequestBody TasksQueryBody queryBody,
+    public MappingJacksonValue findAllFromBody(
+        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+        @RequestBody(required = false) TasksQueryBody queryBody,
         VariableSearch variableSearch,
         Pageable pageable) {
 
-        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(variableSearch, pageable,
+        queryBody = Optional.ofNullable(queryBody).orElse(new TasksQueryBody());
+
+        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(predicate, variableSearch, pageable,
             Arrays.asList(new RootTasksFilter(queryBody.isRootTasksOnly()), new StandAloneTaskFilter(queryBody.isStandalone())),
             queryBody.getVariableKeys());
 

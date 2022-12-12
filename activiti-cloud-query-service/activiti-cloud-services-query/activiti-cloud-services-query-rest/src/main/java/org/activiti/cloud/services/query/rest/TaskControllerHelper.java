@@ -89,15 +89,16 @@ public class TaskControllerHelper {
                                                      taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(VariableSearch variableSearch,
+    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(Predicate predicate,
+                                                                VariableSearch variableSearch,
                                                                 Pageable pageable,
                                                                 List<QueryDslPredicateFilter> filters,
                                                                 List<String> processVariableKeys) {
 
         if(processVariableKeys == null || processVariableKeys.isEmpty()){
-            return this.findAll(null, variableSearch, pageable, filters);
+            return this.findAll(predicate, variableSearch, pageable, filters);
         } else {
-            return this.findAllWithProcessVariables(null, variableSearch, pageable, filters, processVariableKeys);
+            return this.findAllWithProcessVariables(predicate, variableSearch, pageable, filters, processVariableKeys);
         }
     }
 

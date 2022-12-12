@@ -16,13 +16,5 @@
 package org.activiti.cloud.services.query.rest.payload;
 
 public class ProcessInstanceQueryBody extends VariableKeysQueryBody {
-    private String status;
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }

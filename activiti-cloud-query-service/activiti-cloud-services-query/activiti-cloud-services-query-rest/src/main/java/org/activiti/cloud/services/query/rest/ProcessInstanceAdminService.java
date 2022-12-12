@@ -62,8 +62,9 @@ public class ProcessInstanceAdminService {
 
 
 
-    public Page<ProcessInstanceEntity> findAllFromBody(List<String> variableKeys, List<QueryDslPredicateFilter> filters, Pageable pageable){
-        Predicate extendedPredicate = predicateAggregator.applyFilters(null, filters);
+    public Page<ProcessInstanceEntity> findAllFromBody(Predicate predicate, List<String> variableKeys, List<QueryDslPredicateFilter> filters,
+                                                       Pageable pageable){
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
         if(variableKeys == null || variableKeys.isEmpty()){
             return this.findAll(extendedPredicate, pageable);
         } else {
