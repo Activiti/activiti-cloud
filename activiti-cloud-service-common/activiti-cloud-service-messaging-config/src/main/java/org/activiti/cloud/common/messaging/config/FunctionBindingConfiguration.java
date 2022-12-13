@@ -32,8 +32,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
