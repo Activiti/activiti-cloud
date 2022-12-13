@@ -87,13 +87,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         FunctionInvocationWrapper function = functionFromDefinition(beanName);
                         Object result = function.apply(message.getPayload());
 
-                        Message<?> response = MessageBuilder.withPayload(result)
-                            .build();
-                        String destination = headers.get(responseDestination.get(), String.class);
+                        Message<?> response = null;
+                        if(result != null) {
+                            response = MessageBuilder.withPayload(result)
+                                .build();
+                            String destination = headers.get(responseDestination.get(), String.class);
 
-                        if (StringUtils.hasText(destination)) {
-                            getStreamBridge().send(destination, response);
-                            return null;
+                            if (StringUtils.hasText(destination)) {
+                                getStreamBridge().send(destination, response);
+                                return null;
+                            }
                         }
 
                         return response;
