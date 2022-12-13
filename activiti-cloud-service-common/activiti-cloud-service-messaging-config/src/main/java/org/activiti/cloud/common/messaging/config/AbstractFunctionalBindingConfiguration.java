@@ -20,7 +20,10 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -76,24 +79,47 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         return String.format("%s-in-%d", bindingName, arity);
     }
 
-    protected void setOutput(String beanOutName, String outputAnnotation, BindingServiceProperties bindingServiceProperties,
+    protected void checkConfiguration(Object bean, String beanName, String inputDefinition, String input, String outputDefinition, String output) {
+        if (Supplier.class.isInstance(bean)) {
+            Assert.hasText(output, () -> String.format("Missing `output` value for supplier %s", beanName));
+        } else if(Function.class.isInstance(bean)){
+            Assert.hasText(input, () -> String.format("Missing `input` value for function %s", beanName));
+            Assert.hasText(output, () -> String.format("Missing `output` value for function %s", beanName));
+            Assert.state(!input.equals(output),
+                () -> String.format("Input and output destination matches for %s: %s -> %s", beanName, input, output));
+        } else if(Consumer.class.isInstance(bean)){
+            Assert.hasText(input, () -> String.format("Missing `input` value for consumer %s", beanName));
+        }
+    }
+
+    protected String setOutput(String beanOutName, String outputAnnotation, BindingServiceProperties bindingServiceProperties,
         StreamFunctionProperties streamFunctionProperties, ConfigurableEnvironment environment) {
+
+        AtomicReference<String> outputDestination = new AtomicReference<>(null);
 
         Optional.of(outputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(output -> {
-                String outputDestination = Optional.ofNullable(bindingServiceProperties.getBindingDestination(output)).orElse(output);
+                String destination = Optional.ofNullable(bindingServiceProperties.getBindingDestination(output)).orElse(output);
                 setOutProperties(streamFunctionProperties, beanOutName,
-                    outputDestination, bindingServiceProperties, output);
+                    destination, bindingServiceProperties, output);
 
-                if (!output.equals(outputDestination)) {
-                    setRabbitProducerProperties(environment, outputDestination, output);
+                if(output.equals(destination)){
+                    destination = createFunctionalDestination(bindingServiceProperties, streamFunctionProperties, output);
                 }
+
+                outputDestination.set(destination);
+
+                setRabbitProducerProperties(environment, destination, output);
             });
+
+        return outputDestination.get();
     }
 
-    protected void setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
+    protected String setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
         BindingServiceProperties bindingServiceProperties) {
+
+        AtomicReference<String> inputDestination = new AtomicReference<>(null);
 
         Optional.of(inputAnnotation)
             .filter(StringUtils::hasText)
@@ -101,7 +127,10 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
                 streamFunctionProperties.getBindings()
                     .put(beanInName, input);
                 setInProperties(streamFunctionProperties, beanInName, input, bindingServiceProperties);
+                inputDestination.set(input);
             });
+
+        return inputDestination.get();
     }
 
     protected void setRabbitProducerProperties(ConfigurableEnvironment environment, String channelName, String outputBinding) {
@@ -174,5 +203,25 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         FunctionInvocationWrapper function = functionRegistry.lookup(definition);
         Assert.notNull(function, "Failed to lookup function '" + definition + "'");
         return function;
+    }
+
+    protected String createFunctionalDestination(BindingServiceProperties bindingServiceProperties,
+        StreamFunctionProperties streamFunctionProperties, String destination) {
+
+        final BindingProperties destinationProperties = bindingServiceProperties.getBindingProperties(destination);
+        Assert.notNull(destinationProperties, () -> String.format("'%s' has no binding properties.", destination));
+
+        final String functionBinding = String.format("%sFunctional", destination);
+        if(!bindingServiceProperties.getBindings().containsKey(functionBinding)) {
+            final BindingProperties functionBindingProperties = bindingServiceProperties.getBindingProperties(destination);
+            functionBindingProperties.setDestination(destinationProperties.getDestination());
+            functionBindingProperties.setContentType(destinationProperties.getContentType());
+            functionBindingProperties.setGroup(destinationProperties.getGroup());
+        } else {
+            final BindingProperties functionBindingProperties = bindingServiceProperties.getBindingProperties(functionBinding);
+            Assert.state(destination.equals(functionBindingProperties.getDestination()),
+                () -> String.format("'%s' binding name clashes with auto-generated functional bindings.", functionBinding));
+        }
+        return functionBinding;
     }
 }

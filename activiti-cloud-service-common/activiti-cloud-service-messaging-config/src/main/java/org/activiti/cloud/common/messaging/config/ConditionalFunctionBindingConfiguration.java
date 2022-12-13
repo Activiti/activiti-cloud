@@ -84,8 +84,11 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                             final String gatewayInName = getInBinding(gatewayName);
                             final String gatewayOutName = getOutBinding(gatewayName);
 
-                            setOutput(gatewayOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-                            setInput(gatewayInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
+                            final String output = setOutput(gatewayOutName, functionDefinition.output(), bindingServiceProperties,
+                                streamFunctionProperties, environment);
+                            final String input =setInput(gatewayInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
+
+                            checkConfiguration(bean, beanName, functionDefinition.input(), input, functionDefinition.output(), output);
 
                             GenericSelector<Message<?>> selector = Optional.ofNullable(
                                     beanFactory.findAnnotationOnBean(beanName, ConditionalFunctionBinding.class))

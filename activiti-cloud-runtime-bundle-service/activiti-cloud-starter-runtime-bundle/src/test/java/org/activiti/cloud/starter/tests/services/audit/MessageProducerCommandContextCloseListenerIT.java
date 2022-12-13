@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -36,6 +38,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -96,15 +100,19 @@ public class MessageProducerCommandContextCloseListenerIT {
         verify(subject, never()).closed(any(CommandContext.class));
     }
 
-    @Disabled //TODO fix & enable before merge
+    // @Disabled //TODO fix & enable before merge
     @Test
     public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given
         String processDefinitionKey = "SimpleProcess";
+        Thread.sleep(2000);
 
+        System.out.println("should_rollbackSentMessages_when_exceptionOccursAfterSent - START - " + streamHandler.getAllReceivedEvents().size());
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) {
+                System.out.println("should_rollbackSentMessages_when_exceptionOccursAfterSent - SYNC - " + TransactionSynchronizationManager.isSynchronizationActive());
+
                 CommandContext commandContext = invocation.getArgument(0);
 
                 doCallRealMethod().when(subject)
@@ -124,6 +132,8 @@ public class MessageProducerCommandContextCloseListenerIT {
                           .start();
         });
 
+        System.out.println("should_rollbackSentMessages_when_exceptionOccursAfterSent - MIDDLE - " + streamHandler.getAllReceivedEvents().size());
+
         // then
         ProcessInstance result = runtimeService.createProcessInstanceQuery()
                                                .processDefinitionKey(processDefinitionKey)
@@ -131,8 +141,11 @@ public class MessageProducerCommandContextCloseListenerIT {
         assertThat(result).isNull();
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
 
+        System.out.println("should_rollbackSentMessages_when_exceptionOccursAfterSent - PRE-WAIT - " + streamHandler.getAllReceivedEvents().size());
+
         // let's wait
         Thread.sleep(2000);
+        System.out.println("should_rollbackSentMessages_when_exceptionOccursAfterSent - END - " + streamHandler.getAllReceivedEvents().size());
         assertThat(streamHandler.getAllReceivedEvents()).isEmpty();
     }
 }

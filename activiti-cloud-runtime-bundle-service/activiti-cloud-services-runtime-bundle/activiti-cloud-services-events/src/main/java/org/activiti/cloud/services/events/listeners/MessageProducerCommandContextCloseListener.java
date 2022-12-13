@@ -22,11 +22,13 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
+import org.activiti.cloud.services.events.support.MessageSenderTransactionSynchronization;
 import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.interceptor.CommandContextCloseListener;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 @Transactional
@@ -73,7 +75,12 @@ public class MessageProducerCommandContextCloseListener implements CommandContex
                                                                                    .withPayload(payload)
                                                                                    .build();
             // Send message to audit producer channel
-            producer.auditProducer().send(message);
+            if(TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(
+                    new MessageSenderTransactionSynchronization(message, producer.auditProducer()));
+            } else {
+                producer.auditProducer().send(message);
+            }
         }
     }
 

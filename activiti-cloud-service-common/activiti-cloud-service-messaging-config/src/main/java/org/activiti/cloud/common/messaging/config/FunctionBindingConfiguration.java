@@ -32,6 +32,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -68,8 +70,10 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             final String beanInName = getInBinding(beanName);
                             final String beanOutName = getOutBinding(beanName);
 
-                            setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
-                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
+                            final String output = setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
+                            final String input = setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
+
+                            checkConfiguration(bean, beanName, functionDefinition.input(), input, functionDefinition.output(), output);
                         });
                 }
 
