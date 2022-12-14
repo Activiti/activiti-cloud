@@ -16,6 +16,7 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -37,6 +38,13 @@ import org.springframework.core.env.ConfigurableEnvironment;
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
+
+    @Bean
+    public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties){
+       return destination ->  Optional
+            .ofNullable(bindingServiceProperties.getBindingDestination(destination))
+            .orElse(destination);
+    }
 
     @Bean
     public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
@@ -78,4 +86,5 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         };
     }
 
+    public interface BindingResolver extends Function<String, String> {}
 }
