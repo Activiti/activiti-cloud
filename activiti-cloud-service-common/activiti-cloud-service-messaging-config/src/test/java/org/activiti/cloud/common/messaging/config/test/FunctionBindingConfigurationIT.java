@@ -19,6 +19,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +73,9 @@ public class FunctionBindingConfigurationIT {
 
     @Autowired
     private StreamFunctionProperties streamFunctionProperties;
+
+    @Autowired
+    private BindingResolver bindingResolver;
 
     @Autowired
     private InputDestination input;
@@ -179,7 +183,7 @@ public class FunctionBindingConfigurationIT {
         Thread.sleep(1000);
 
         // then
-        Message<?> outputMessage = output.receive(10000, "commandResults_foo");
+        Message<?> outputMessage = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
         assertThat(outputMessage).isNotNull();
         assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
 
