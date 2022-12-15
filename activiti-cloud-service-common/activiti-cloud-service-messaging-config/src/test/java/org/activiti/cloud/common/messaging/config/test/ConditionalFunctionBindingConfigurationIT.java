@@ -20,6 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +66,9 @@ public class ConditionalFunctionBindingConfigurationIT {
 
     @Autowired
     private FunctionRegistry functionRegistry;
+
+    @Autowired
+    private BindingResolver bindingResolver;
 
     @Autowired
     private InputDestination input;
@@ -156,7 +160,7 @@ public class ConditionalFunctionBindingConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, "commandResults_foo");
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
         assertThat(reply).isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
