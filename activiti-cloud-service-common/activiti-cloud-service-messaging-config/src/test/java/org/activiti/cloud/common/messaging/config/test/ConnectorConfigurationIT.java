@@ -18,6 +18,7 @@ package org.activiti.cloud.common.messaging.config.test;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.nio.charset.StandardCharsets;
+import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
@@ -64,6 +65,9 @@ public class ConnectorConfigurationIT {
 
     @Autowired
     private FunctionRegistry functionRegistry;
+
+    @Autowired
+    private BindingResolver bindingResolver;
 
     @Autowired
     private InputDestination input;
@@ -141,7 +145,7 @@ public class ConnectorConfigurationIT {
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, "commandResults_foo");
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
         assertThat(reply).isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
