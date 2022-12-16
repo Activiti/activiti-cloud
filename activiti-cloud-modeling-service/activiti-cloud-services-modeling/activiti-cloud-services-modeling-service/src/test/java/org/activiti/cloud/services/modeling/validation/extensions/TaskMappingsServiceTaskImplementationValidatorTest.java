@@ -67,6 +67,16 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
     }
 
     @Test
+    public void should_returnEmpty_when_validatingTaskMappingsOnHxPContentServiceImplementation() {
+        ServiceTask serviceTask = new ServiceTask();
+        serviceTask.setImplementation("hxp-content-service.");
+
+        when(mappingModel.getFlowNode()).thenReturn(serviceTask);
+
+        assertThat(validator.validateTaskMappings(List.of(mappingModel), null, validationContext).count()).isEqualTo(0);
+    }
+
+    @Test
     public void should_returnError_when_validatingTaskMappingsInvalidConnectorAction() {
         ServiceTask serviceTask = new ServiceTask();
         serviceTask.setId(ID_TEXT);

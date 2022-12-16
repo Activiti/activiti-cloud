@@ -106,7 +106,8 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
             Arguments.of("script.EXECUTE"),
             Arguments.of("email-service.SEND"),
             Arguments.of("docgen-service.GENERATE"),
-            Arguments.of("content-service.MOVE_FOLDER")
+            Arguments.of("content-service.MOVE_FOLDER"),
+            Arguments.of("hxp-content-service.SET_PERMISSION")
         );
     }
 
