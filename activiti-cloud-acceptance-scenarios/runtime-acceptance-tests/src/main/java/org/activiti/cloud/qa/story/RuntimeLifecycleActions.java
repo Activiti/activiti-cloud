@@ -33,7 +33,6 @@ import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * Lifecycle steps
  */
@@ -48,20 +47,25 @@ public class RuntimeLifecycleActions {
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+
     @Steps
     private ProcessRuntimeAdminSteps processRuntimeAdminSteps;
 
     @Steps
     private ProcessQuerySteps processQuerySteps;
+
     @Steps
     private TaskQuerySteps taskQuerySteps;
+
     @Steps
     private ProcessQueryAdminSteps processQueryAdminSteps;
 
     @Steps
     private AuditSteps auditSteps;
+
     @Steps
     private AuditAdminSteps auditAdminSteps;
 
@@ -71,8 +75,7 @@ public class RuntimeLifecycleActions {
     @Steps
     private ProcessVariablesRuntimeAdminSteps processVariablesRuntimeAdminSteps;
 
-    public RuntimeLifecycleActions() {
-    }
+    public RuntimeLifecycleActions() {}
 
     @BeforeStories
     public void checkServicesHealth() throws Exception {
@@ -93,5 +96,4 @@ public class RuntimeLifecycleActions {
     public void cleanup() {
         dirtyContextHandler.cleanup();
     }
-
 }

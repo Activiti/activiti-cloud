@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -28,16 +37,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.activiti.api.process.model.events.BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 public class ProcessInstanceSignalEvents {
 
@@ -76,13 +75,13 @@ public class ProcessInstanceSignalEvents {
     @Then("the task '$taskName' is created")
     public void checkTaskIsCreated(String taskName) {
         List<Task> tasks = new ArrayList<>(
-                runtimeBundleSteps.getTaskByProcessInstanceId(processInstanceBoundarySignal.getId()));
+            runtimeBundleSteps.getTaskByProcessInstanceId(processInstanceBoundarySignal.getId())
+        );
         assertThat(tasks).isNotEmpty();
 
         Task currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
         assertThat(currentTask.getName()).isEqualTo(taskName);
-
     }
 
     @When("the user starts a process with a boundary signal")
@@ -99,14 +98,18 @@ public class ProcessInstanceSignalEvents {
 
     @Then("the process throwing a signal is completed")
     public void sheckSignalThrowProcessInstance() throws Exception {
-        processQuerySteps.checkProcessInstanceStatus(processInstanceThrowSignal.getId(),
-                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(
+            processInstanceThrowSignal.getId(),
+            ProcessInstance.ProcessInstanceStatus.COMPLETED
+        );
     }
 
     @Then("the process catching a signal is completed")
     public void sheckSignalCatchProcessInstance() throws Exception {
-        processQuerySteps.checkProcessInstanceStatus(processInstanceCatchSignal.getId(),
-                                                     ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(
+            processInstanceCatchSignal.getId(),
+            ProcessInstance.ProcessInstanceStatus.COMPLETED
+        );
     }
 
     @Then("the SIGNAL_RECEIVED event was catched up by intermediateCatchEvent process")
@@ -119,7 +122,6 @@ public class ProcessInstanceSignalEvents {
         checkSignalEventReceivedByProcess(processInstanceBoundarySignal);
     }
 
-
     @Then("query number of processes with processDefinitionKey $processDefinitionKey")
     public void checkProcessCount(String processDefinitionKey) throws Exception {
         List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
@@ -129,18 +131,17 @@ public class ProcessInstanceSignalEvents {
     @Then("check number of processes with processDefinitionKey $processDefinitionKey increased")
     public void checkProcessCountIncreased(String processDefinitionKey) throws Exception {
         Integer checkCnt = Serenity.sessionVariableCalled("checkCnt");
-        await().untilAsserted(() -> {
-            List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
-            assertThat(processes).isNotEmpty();
-            assertThat(processes.size()).isGreaterThan(checkCnt);
-        });
+        await()
+            .untilAsserted(() -> {
+                List<CloudProcessInstance> processes = getProcessesByProcessDefinitionKey(processDefinitionKey);
+                assertThat(processes).isNotEmpty();
+                assertThat(processes.size()).isGreaterThan(checkCnt);
+            });
     }
-
 
     @When("the admin deletes boundary signal process")
     public void deleteBoundarySignalProcesses() throws Exception {
         runtimeBundleAdminSteps.deleteProcessInstance(processInstanceBoundarySignal.getId());
-
     }
 
     @Then("boundary signal process is deleted")
@@ -150,31 +151,30 @@ public class ProcessInstanceSignalEvents {
 
     public List<CloudProcessInstance> getProcessesByProcessDefinitionKey(String processDefinitionKey) throws Exception {
         return processQueryAdminSteps
-                .getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
-                .getContent()
-                .stream()
-                .collect(Collectors.toList());
+            .getProcessInstancesByProcessDefinitionKey(processDefinitionKey)
+            .getContent()
+            .stream()
+            .collect(Collectors.toList());
     }
 
-    public void checkSignalEventReceivedByProcess(CloudProcessInstance process) throws Exception  {
+    public void checkSignalEventReceivedByProcess(CloudProcessInstance process) throws Exception {
         assertThat(process).isNotNull();
 
-        await().untilAsserted(() -> {
-            Collection<CloudRuntimeEvent> receivedEvents = auditSteps.getEventsByProcessInstanceIdAndEventType(process.getId(),
-                                                                                                               "SIGNAL_RECEIVED");
+        await()
+            .untilAsserted(() -> {
+                Collection<CloudRuntimeEvent> receivedEvents = auditSteps.getEventsByProcessInstanceIdAndEventType(
+                    process.getId(),
+                    "SIGNAL_RECEIVED"
+                );
 
-            assertThat(receivedEvents)
-                .isNotEmpty()
-                .extracting( CloudRuntimeEvent::getEventType,
-                             CloudRuntimeEvent::getProcessInstanceId,
-                             CloudRuntimeEvent::getProcessDefinitionKey)
-                .contains(
-                    tuple(SIGNAL_RECEIVED,
-                          process.getId(),
-                          process.getProcessDefinitionKey()));
-        });
+                assertThat(receivedEvents)
+                    .isNotEmpty()
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionKey
+                    )
+                    .contains(tuple(SIGNAL_RECEIVED, process.getId(), process.getProcessDefinitionKey()));
+            });
     }
-
-
-
 }

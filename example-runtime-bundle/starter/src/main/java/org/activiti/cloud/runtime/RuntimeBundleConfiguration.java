@@ -25,9 +25,10 @@ import org.springframework.context.annotation.Configuration;
 public class RuntimeBundleConfiguration {
 
     @Bean(name = "baseOpenApi")
-    public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder,
-                               @Value("${server.servlet.context-path:/}") String swaggerBasePath) {
+    public OpenAPI baseOpenApi(
+        BaseOpenApiBuilder baseOpenApiBuilder,
+        @Value("${server.servlet.context-path:/}") String swaggerBasePath
+    ) {
         return baseOpenApiBuilder.build("Runtime Bundle ReST API", swaggerBasePath);
     }
-
 }

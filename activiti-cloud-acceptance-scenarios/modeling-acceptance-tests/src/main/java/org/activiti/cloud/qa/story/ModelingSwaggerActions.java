@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.modeling.steps.SwaggerModelingSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelingSwaggerActions {
 
@@ -30,19 +30,18 @@ public class ModelingSwaggerActions {
     private String swaggerSpecification;
 
     @When("the user asks for swagger specification")
-    public void getSwaggerSpecification(){
+    public void getSwaggerSpecification() {
         swaggerSpecification = swaggerModelingSteps.getSwaggerSpecification();
     }
 
     @Then("the user gets swagger specification following Alfresco MediaType")
-    public void isFollowingAlfrescoMediaType(){
+    public void isFollowingAlfrescoMediaType() {
         assertThat(swaggerSpecification)
-                .contains("ListResponseContent")
-                .contains("EntriesResponseContent")
-                .contains("EntryResponseContent")
-                .doesNotContain("PagedModel")
-                .doesNotContain("ResourcesResource")
-                .doesNotContain("\"Resource\"");
+            .contains("ListResponseContent")
+            .contains("EntriesResponseContent")
+            .contains("EntryResponseContent")
+            .doesNotContain("PagedModel")
+            .doesNotContain("ResourcesResource")
+            .doesNotContain("\"Resource\"");
     }
-
 }

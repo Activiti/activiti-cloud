@@ -43,9 +43,7 @@ public class IdentityManagementSteps {
 
     public void containsGlobalAccessRole(String role) {
         UserRoles roles = Serenity.sessionVariableCalled(ROLES);
-        Assertions
-            .assertThat(roles.getGlobalAccess().getRoles())
-            .contains(role);
+        Assertions.assertThat(roles.getGlobalAccess().getRoles()).contains(role);
     }
 
     public void containsApplicationAccessRole(String applicationName, String role) {
@@ -55,9 +53,7 @@ public class IdentityManagementSteps {
             .stream()
             .filter(a -> a.getName().equals(applicationName))
             .flatMap(ar -> ar.getRoles().stream());
-        Assertions
-            .assertThat(applicationRoles)
-            .contains(role);
+        Assertions.assertThat(applicationRoles).contains(role);
     }
 
     public void searchUsers(String searchKey) {
@@ -67,18 +63,12 @@ public class IdentityManagementSteps {
 
     public void usersSearchResultContains(String username) {
         List<User> result = Serenity.sessionVariableCalled(USERS);
-        Assertions
-            .assertThat(result)
-            .extracting("username")
-            .contains(username);
+        Assertions.assertThat(result).extracting("username").contains(username);
     }
 
     public void usersSearchResultDoesNotContain(String username) {
         List<User> result = Serenity.sessionVariableCalled(USERS);
-        Assertions
-            .assertThat(result)
-            .extracting("username")
-            .doesNotContain(username);
+        Assertions.assertThat(result).extracting("username").doesNotContain(username);
     }
 
     public void searchGroups(String searchKey) {
@@ -88,19 +78,11 @@ public class IdentityManagementSteps {
 
     public void groupsSearchResultContains(String groupName) {
         List<Group> result = Serenity.sessionVariableCalled(GROUPS);
-        Assertions
-            .assertThat(result)
-            .extracting("name")
-            .contains(groupName);
-
+        Assertions.assertThat(result).extracting("name").contains(groupName);
     }
 
     public void groupsSearchResultDoesNotContain(String groupName) {
         List<Group> result = Serenity.sessionVariableCalled(GROUPS);
-        Assertions
-            .assertThat(result)
-            .extracting("name")
-            .doesNotContain(groupName);
-
+        Assertions.assertThat(result).extracting("name").doesNotContain(groupName);
     }
 }

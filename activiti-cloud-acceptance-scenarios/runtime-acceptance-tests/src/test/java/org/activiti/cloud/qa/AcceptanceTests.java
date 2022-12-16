@@ -25,5 +25,4 @@ public class AcceptanceTests extends ExtendedSerenityStories {
     protected String getRootPackage() {
         return "org.activiti.cloud";
     }
-
 }

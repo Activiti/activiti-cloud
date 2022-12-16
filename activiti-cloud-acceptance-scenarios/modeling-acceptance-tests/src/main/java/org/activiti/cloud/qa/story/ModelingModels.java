@@ -15,19 +15,18 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.activiti.cloud.acc.modeling.modeling.ModelIdentifier.identified;
+import static org.activiti.cloud.acc.modeling.modeling.ModelingNamingIdentifier.modelNamed;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.modeling.steps.ModelingModelsSteps;
 import org.activiti.cloud.acc.modeling.steps.ModelingProjectsSteps;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import static org.activiti.cloud.acc.modeling.modeling.ModelIdentifier.identified;
-import static org.activiti.cloud.acc.modeling.modeling.ModelingNamingIdentifier.modelNamed;
 
 /**
  * Modeling models scenarios
@@ -41,36 +40,23 @@ public class ModelingModels {
     private ModelingModelsSteps modelingModelsSteps;
 
     @When("creates the $modelType model '$modelName'")
-    public void createModel(String modelType,
-                            String modelName) {
-        createModel(modelType,
-                    modelName,
-                    null);
+    public void createModel(String modelType, String modelName) {
+        createModel(modelType, modelName, null);
     }
 
     @When("creates the $modelType model $modelName with process variables '$processVariables'")
-    public void createModel(String modelType,
-                            String modelName,
-                            List<String> processVariables) {
-        modelingModelsSteps.create(modelName,
-                                   modelType,
-                                   processVariables);
+    public void createModel(String modelType, String modelName, List<String> processVariables) {
+        modelingModelsSteps.create(modelName, modelType, processVariables);
     }
 
     @Then("the $modelType model '$modelName' is created")
-    public void checkModelExistsInCurrentProject(String modelType,
-                                                 String modelName) {
-        modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
-                                                                   modelType));
+    public void checkModelExistsInCurrentProject(String modelType, String modelName) {
+        modelingModelsSteps.checkExistsInCurrentContext(identified(modelName, modelType));
     }
 
     @Then("the version of the $modelType model '$modelName' is $modelVersion")
-    public void checkModelVersionInCurrentProject(String modelType,
-                                                  String modelName,
-                                                  String modelVersion) {
-        modelingModelsSteps.checkExistsInCurrentContext(identified(modelName,
-                                                                   modelType,
-                                                                   modelVersion));
+    public void checkModelVersionInCurrentProject(String modelType, String modelName, String modelVersion) {
+        modelingModelsSteps.checkExistsInCurrentContext(identified(modelName, modelType, modelVersion));
     }
 
     @Then("it contains process variables '$procressVariables'")
@@ -85,10 +71,8 @@ public class ModelingModels {
     }
 
     @When("opens the $modelType model '$modelName'")
-    public void openModel(String modelType,
-                          String modelName) {
-        modelingModelsSteps.openModelingObject(identified(modelName,
-                                                          modelType));
+    public void openModel(String modelType, String modelName) {
+        modelingModelsSteps.openModelingObject(identified(modelName, modelType));
     }
 
     @When("edits and saves the model")
@@ -123,11 +107,15 @@ public class ModelingModels {
 
     @Then("$numberOfErrors validation errors are shown for extensions")
     public void checkCurrentModelValidationErrorsForExtensions(String numberOfErrors) throws IOException {
-        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#: " + numberOfErrors + " schema violations found");
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions(
+            "#: " + numberOfErrors + " schema violations found"
+        );
     }
 
     @Then("$propertySchema not valid find in extensions")
     public void checkCurrentModelValidationSchemaMatchesForExtensions(String propertySchema) throws IOException {
-        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions("#/extensions: extraneous key [" + propertySchema + "] is not permitted");
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions(
+            "#/extensions: extraneous key [" + propertySchema + "] is not permitted"
+        );
     }
 }

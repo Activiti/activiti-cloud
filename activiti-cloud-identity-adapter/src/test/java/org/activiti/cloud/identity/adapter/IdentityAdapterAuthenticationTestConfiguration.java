@@ -26,13 +26,17 @@ import org.springframework.context.annotation.Configuration;
 public class IdentityAdapterAuthenticationTestConfiguration {
 
     @Bean
-    public SecurityContextTokenProvider securityContextTokenProvider(@Value("${keycloak.auth-server-url:}") String authServerUrl,
-                                                                     @Value("${keycloak.realm:}") String realm) {
-        return () -> Optional.of(new KeycloakTokenProducer(authServerUrl, realm)
-                                     .withTestUser("testuser")
-                                     .withTestPassword("password")
-                                     .withResource("activiti")
-                                     .getAccessTokenString());
+    public SecurityContextTokenProvider securityContextTokenProvider(
+        @Value("${keycloak.auth-server-url:}") String authServerUrl,
+        @Value("${keycloak.realm:}") String realm
+    ) {
+        return () ->
+            Optional.of(
+                new KeycloakTokenProducer(authServerUrl, realm)
+                    .withTestUser("testuser")
+                    .withTestPassword("password")
+                    .withResource("activiti")
+                    .getAccessTokenString()
+            );
     }
-
 }

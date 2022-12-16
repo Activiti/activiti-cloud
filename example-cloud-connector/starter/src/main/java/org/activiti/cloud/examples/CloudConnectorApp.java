@@ -24,8 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CloudConnectorApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(CloudConnectorApp.class,
-                              args);
-
+        SpringApplication.run(CloudConnectorApp.class, args);
     }
 }

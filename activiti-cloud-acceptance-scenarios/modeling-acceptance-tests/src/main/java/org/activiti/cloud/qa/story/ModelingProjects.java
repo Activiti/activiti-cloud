@@ -23,7 +23,7 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsFile;
 
 import java.io.IOException;
 import java.util.List;
-
+import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.modeling.steps.ModelingModelsSteps;
 import org.activiti.cloud.acc.modeling.steps.ModelingProjectsSteps;
 import org.activiti.cloud.modeling.api.Model;
@@ -31,8 +31,6 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.EntityModel;
-
-import net.thucydides.core.annotations.Steps;
 
 /**
  * Modeling projects scenarios
@@ -120,75 +118,64 @@ public class ModelingProjects {
     }
 
     @Given("an project '$projectName' with $modelType model '$modelName'")
-    public void ensureProjectWithModelExists(String projectName,
-                                             String modelType,
-                                             String modelName) {
-        ensureProjectWithModelExists(projectName,
-                                     modelType,
-                                     modelName,
-                                     null);
+    public void ensureProjectWithModelExists(String projectName, String modelType, String modelName) {
+        ensureProjectWithModelExists(projectName, modelType, modelName, null);
     }
 
     @Given("an project '$projectName' with $modelType model $modelName and process variables '$processVariables'")
-    public void ensureProjectWithModelWithVariablesExists(String projectName,
-                                                          String modelType,
-                                                          String modelName,
-                                                          List<String> processVariables) {
-        ensureProjectWithModelExists(projectName,
-                                     modelType,
-                                     modelName,
-                                     null,
-                                     processVariables);
+    public void ensureProjectWithModelWithVariablesExists(
+        String projectName,
+        String modelType,
+        String modelName,
+        List<String> processVariables
+    ) {
+        ensureProjectWithModelExists(projectName, modelType, modelName, null, processVariables);
     }
 
     @Given("an project '$projectName' with $modelType model '$modelName' version $modelVersion")
-    public void ensureProjectWithModelExists(String projectName,
-                                             String modelType,
-                                             String modelName,
-                                             String modelVersion) {
-        ensureProjectWithModelExists(projectName,
-                                     modelType,
-                                     modelName,
-                                     modelVersion,
-                                     null);
+    public void ensureProjectWithModelExists(
+        String projectName,
+        String modelType,
+        String modelName,
+        String modelVersion
+    ) {
+        ensureProjectWithModelExists(projectName, modelType, modelName, modelVersion, null);
     }
 
-    public void ensureProjectWithModelExists(String projectName,
-                                             String modelType,
-                                             String modelName,
-                                             String modelVersion,
-                                             List<String> processVariables) {
-
+    public void ensureProjectWithModelExists(
+        String projectName,
+        String modelType,
+        String modelName,
+        String modelVersion,
+        List<String> processVariables
+    ) {
         ensureProjectExists(projectName);
         openProject(projectName);
-        if (!modelingModelsSteps.existsInCurrentContext(identified(modelName,
-                                                                   modelType,
-                                                                   modelVersion))) {
-            resourceAsFile(modelType + "/" + setExtension(modelName,
-                                                          modelingModelsSteps.getModelType(modelType).getContentFileExtension()))
-                    .map(file -> {
-                        EntityModel<Model> model = modelingProjectsSteps.importModelInCurrentProject(file);
-                        if (processVariables != null) {
-                            modelingModelsSteps.addProcessVariableToModelModel(model.getContent(),
-                                                                               processVariables);
-                            modelingModelsSteps.saveModel(model);
-                        }
-                        return model;
-                    })
-                    .orElseGet(() -> modelingModelsSteps.create(modelName,
-                                                                modelType,
-                                                                processVariables));
+        if (!modelingModelsSteps.existsInCurrentContext(identified(modelName, modelType, modelVersion))) {
+            resourceAsFile(
+                modelType +
+                "/" +
+                setExtension(modelName, modelingModelsSteps.getModelType(modelType).getContentFileExtension())
+            )
+                .map(file -> {
+                    EntityModel<Model> model = modelingProjectsSteps.importModelInCurrentProject(file);
+                    if (processVariables != null) {
+                        modelingModelsSteps.addProcessVariableToModelModel(model.getContent(), processVariables);
+                        modelingModelsSteps.saveModel(model);
+                    }
+                    return model;
+                })
+                .orElseGet(() -> modelingModelsSteps.create(modelName, modelType, processVariables));
         }
     }
 
     @Then("the exported project contains the $modelType model $modelName with process variables '$processVariables'")
-    public void checkExportedProjectContainsModel(String modelType,
-                                                  String modelName,
-                                                  List<String> processVariables) {
+    public void checkExportedProjectContainsModel(String modelType, String modelName, List<String> processVariables) {
         modelingProjectsSteps.checkExportedProjectContainsModel(
-                modelingProjectsSteps.getModelType(modelType),
-                modelName,
-                processVariables);
+            modelingProjectsSteps.getModelType(modelType),
+            modelName,
+            processVariables
+        );
     }
 
     @Then("the project can be exported due to validation errors")

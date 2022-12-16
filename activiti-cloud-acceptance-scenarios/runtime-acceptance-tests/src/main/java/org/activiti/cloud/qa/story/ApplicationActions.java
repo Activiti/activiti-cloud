@@ -37,6 +37,7 @@ public class ApplicationActions {
 
     @Steps
     private AuditSteps auditSteps;
+
     @Steps
     private ApplicationQuerySteps applicationQuerySteps;
 
@@ -48,24 +49,21 @@ public class ApplicationActions {
 
     @Then("application deployed events are emitted on start")
     public void verifyApplicationDeployedEvents() throws Exception {
-
-        await().untilAsserted(() -> {
-            Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEventType(
-                    ApplicationEvents.APPLICATION_DEPLOYED.name());
-            assertThat(events)
-                    .extracting(CloudRuntimeEvent::getEventType,
-                            event -> deployment(event).getVersion()
-                    ).contains(tuple(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED,
-                    1));
-        });
+        await()
+            .untilAsserted(() -> {
+                Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEventType(
+                    ApplicationEvents.APPLICATION_DEPLOYED.name()
+                );
+                assertThat(events)
+                    .extracting(CloudRuntimeEvent::getEventType, event -> deployment(event).getVersion())
+                    .contains(tuple(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED, 1));
+            });
     }
 
     @Then("the user can get applications")
-    public void checkIfApplicationsArePresent(){
-        Collection <CloudApplication> applications = applicationQuerySteps.getAllApplications().getContent();
-        assertThat(applications)
-                .extracting(CloudApplication::getName)
-                .containsExactly("default-app");
+    public void checkIfApplicationsArePresent() {
+        Collection<CloudApplication> applications = applicationQuerySteps.getAllApplications().getContent();
+        assertThat(applications).extracting(CloudApplication::getName).containsExactly("default-app");
     }
 
     private Deployment deployment(CloudRuntimeEvent<?, ?> event) {

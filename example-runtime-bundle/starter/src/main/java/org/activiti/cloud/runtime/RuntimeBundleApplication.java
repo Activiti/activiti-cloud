@@ -24,7 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RuntimeBundleApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(RuntimeBundleApplication.class,
-                              args);
+        SpringApplication.run(RuntimeBundleApplication.class, args);
     }
 }

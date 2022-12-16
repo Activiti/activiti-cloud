@@ -58,17 +58,14 @@ public class MultipleRuntimeBundleSteps {
 
     @Step
     public CloudProcessInstance startProcess(String process, boolean isPrimaryService) {
-
-        StartProcessPayload startProcessCmd = ProcessPayloadBuilder
-            .start()
-            .withProcessDefinitionKey(process)
-            .build();
+        StartProcessPayload startProcessCmd = ProcessPayloadBuilder.start().withProcessDefinitionKey(process).build();
 
         if (isPrimaryService) {
             return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(startProcessCmd).getContent());
         } else {
-            return dirtyContextHandler.dirty(anotherProcessInstanceApiClient.startProcess(startProcessCmd).getContent());
+            return dirtyContextHandler.dirty(
+                anotherProcessInstanceApiClient.startProcess(startProcessCmd).getContent()
+            );
         }
     }
-
 }

@@ -22,5 +22,4 @@ public class IdentityManagementAcceptanceTests extends ExtendedSerenityStories {
     protected String getRootPackage() {
         return "org.activiti.cloud";
     }
-
 }

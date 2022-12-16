@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -65,104 +64,96 @@ public class ProcessInstanceTimers {
 
     @When("the user starts a process with timer events called $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),false);
+        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
     @Then("TIMER_SCHEDULED events are emitted for the timer '$timerId' and timeout $timeoutSeconds seconds")
-    public void verifyTimerScheduleEventsEmitted(String timerId,
-                                                 long timeoutSeconds) throws Exception {
-        if (timeoutSeconds  < 0) {
+    public void verifyTimerScheduleEventsEmitted(String timerId, long timeoutSeconds) throws Exception {
+        if (timeoutSeconds < 0) {
             timeoutSeconds = 0;
         }
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        auditSteps.checkProcessInstanceTimerScheduledEvents(processInstanceId,
-                                                            timerId,
-                                                            timeoutSeconds);
+        auditSteps.checkProcessInstanceTimerScheduledEvents(processInstanceId, timerId, timeoutSeconds);
     }
 
     @Then("TIMER_SCHEDULED boundary events are emitted for the timer '$timerId' and timeout $timeoutSeconds seconds")
-    public void verifyTimerEventsEmitted(String timerId,
-                                         long timeoutSeconds) throws Exception {
-
-        if (timeoutSeconds  < 0) {
+    public void verifyTimerEventsEmitted(String timerId, long timeoutSeconds) throws Exception {
+        if (timeoutSeconds < 0) {
             timeoutSeconds = 0;
         }
 
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        await().atMost(timeoutSeconds,
-                       TimeUnit.SECONDS).untilAsserted(() -> {
-                  Collection <CloudRuntimeEvent> events = auditSteps.getEventsByProcessAndEntityId(processInstanceId,
-                                                                                                   timerId);
-                  assertThat(events)
-                          .isNotEmpty()
-                          .extracting("eventType",
-                                      "entityId",
-                                      "processInstanceId")
-                          .contains(tuple(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED,
-                                          timerId,
-                                          processInstanceId));
-          });
+        await()
+            .atMost(timeoutSeconds, TimeUnit.SECONDS)
+            .untilAsserted(() -> {
+                Collection<CloudRuntimeEvent> events = auditSteps.getEventsByProcessAndEntityId(
+                    processInstanceId,
+                    timerId
+                );
+                assertThat(events)
+                    .isNotEmpty()
+                    .extracting("eventType", "entityId", "processInstanceId")
+                    .contains(tuple(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED, timerId, processInstanceId));
+            });
     }
 
     @Then("TIMER_EXECUTED events are emitted for the timer '$timerId' and timeout $timeoutSeconds seconds")
-    public void verifyTimerExecutedEventsEmitted(String timerId,
-                                                 long timeoutSeconds) throws Exception {
-        if (timeoutSeconds  < 0) {
+    public void verifyTimerExecutedEventsEmitted(String timerId, long timeoutSeconds) throws Exception {
+        if (timeoutSeconds < 0) {
             timeoutSeconds = 0;
         }
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        auditSteps.checkProcessInstanceTimerExecutedEvents(processInstanceId,
-                                                           timerId,
-                                                           timeoutSeconds);
+        auditSteps.checkProcessInstanceTimerExecutedEvents(processInstanceId, timerId, timeoutSeconds);
     }
 
     @Then("the process with timer events is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        processQuerySteps.checkProcessInstanceStatus(processId,
-                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(processId, ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 
     @Then("the admin query returns $number processes called $processName with timeout $timeoutSeconds seconds")
-    public void checkProcessByProcessDefintionKey(long number,
-                                                  String processName,
-                                                  long timeoutSeconds) throws IOException, InterruptedException {
-        if (timeoutSeconds  < 0) {
+    public void checkProcessByProcessDefintionKey(long number, String processName, long timeoutSeconds)
+        throws IOException, InterruptedException {
+        if (timeoutSeconds < 0) {
             timeoutSeconds = 0;
         }
 
-        await().atMost(timeoutSeconds,
-                       TimeUnit.SECONDS).untilAsserted(() -> {
-                PagedModel<CloudProcessInstance> processInstances = processQueryAdminSteps
-                                                                       .getProcessInstancesByProcessDefinitionKey(processDefinitionKeyMatcher(processName));
+        await()
+            .atMost(timeoutSeconds, TimeUnit.SECONDS)
+            .untilAsserted(() -> {
+                PagedModel<CloudProcessInstance> processInstances = processQueryAdminSteps.getProcessInstancesByProcessDefinitionKey(
+                    processDefinitionKeyMatcher(processName)
+                );
 
                 assertThat(processInstances).isNotEmpty();
                 assertThat(processInstances.getContent()).isNotNull();
                 assertThat(processInstances.getContent().size()).isEqualTo(number);
-        });
+            });
     }
 
     @Then("timer events are emitted for processes called $processName")
     public void verifyTimerEventsForProcesses(String processName) throws Exception {
-
         String processDefinitionKey = processDefinitionKeyMatcher(processName);
 
-        Collection<CloudRuntimeEvent> events = auditSteps.getEventsByEntityId("theStart")
-                                                         .stream()
-                                                         .filter(event -> event.getProcessDefinitionId().startsWith(processDefinitionKey))
-                                                         .collect(Collectors.toList());
+        Collection<CloudRuntimeEvent> events = auditSteps
+            .getEventsByEntityId("theStart")
+            .stream()
+            .filter(event -> event.getProcessDefinitionId().startsWith(processDefinitionKey))
+            .collect(Collectors.toList());
 
         assertThat(events)
-                .isNotEmpty()
-                .extracting("eventType")
-                .contains(BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED,
-                          BPMNTimerEvent.TimerEvents.TIMER_FIRED,
-                          BPMNTimerEvent.TimerEvents.TIMER_EXECUTED,
-                          BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
-                          BPMNTimerEvent.TimerEvents.TIMER_FIRED,
-                          BPMNTimerEvent.TimerEvents.TIMER_EXECUTED,
-                          BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED);
+            .isNotEmpty()
+            .extracting("eventType")
+            .contains(
+                BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED,
+                BPMNTimerEvent.TimerEvents.TIMER_FIRED,
+                BPMNTimerEvent.TimerEvents.TIMER_EXECUTED,
+                BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED,
+                BPMNTimerEvent.TimerEvents.TIMER_FIRED,
+                BPMNTimerEvent.TimerEvents.TIMER_EXECUTED,
+                BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED
+            );
     }
-
 }

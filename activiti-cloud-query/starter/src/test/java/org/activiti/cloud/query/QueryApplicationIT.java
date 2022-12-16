@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +34,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@SpringBootTest(classes = {QueryApplication.class})
+@SpringBootTest(classes = { QueryApplication.class })
 @WebAppConfiguration
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryApplicationIT {
 
     @Autowired
@@ -53,17 +53,20 @@ public class QueryApplicationIT {
     @Test
     public void defaultSpecificationFileShouldBeAlfrescoFormat() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(MockMvcRequestBuilders.get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
-               .andExpect(status().isOk())
-               .andExpect(content().string(
-                   both(notNullValue(String.class))
-                       .and(containsString("ListResponseContentCloudProcessDefinition"))
-                       .and(containsString("EntriesResponseContentCloudProcessDefinition"))
-                       .and(containsString("EntryResponseContentCloudProcessDefinition"))
-                       .and(not(containsString("PagedModel")))
-                       .and(not(containsString("ResourcesOfResource")))
-                       .and(not(containsString("Resource")))
-               ));
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(
+                content()
+                    .string(
+                        both(notNullValue(String.class))
+                            .and(containsString("ListResponseContentCloudProcessDefinition"))
+                            .and(containsString("EntriesResponseContentCloudProcessDefinition"))
+                            .and(containsString("EntryResponseContentCloudProcessDefinition"))
+                            .and(not(containsString("PagedModel")))
+                            .and(not(containsString("ResourcesOfResource")))
+                            .and(not(containsString("Resource")))
+                    )
+            );
     }
-
 }

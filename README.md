@@ -9,5 +9,23 @@
 [![stability status](https://www.meterian.com/badge/gh/Activiti/activiti-cloud-application/stability)](https://www.meterian.com/report/gh/Activiti/activiti-cloud-application)
 [![licensing status](https://www.meterian.io/badge/gh/Activiti/activiti-cloud-application/licensing)](https://www.meterian.io/report/gh/Activiti/activiti-cloud-application)
 
-
 Activiti Cloud Application example and acceptance test suite.
+
+## Formatting
+
+The local `.editorconfig` file is leveraged for automated formatting.
+
+Pre-commit hooks run on CI include:
+
+- local hooks
+- shared hooks leveraging prettier
+
+See documentation at [pre-commit](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit) and [pre-commit-default](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit-default)
+
+To run all hooks locally:
+
+```sh
+pre-commit run -a
+pre-commit run -a --config /path/to/config/format-config.yaml
+pre-commit run -a --config /path/to/config/github-config.yaml
+```

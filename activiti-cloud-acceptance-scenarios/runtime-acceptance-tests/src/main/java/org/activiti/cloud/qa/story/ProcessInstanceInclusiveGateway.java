@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -65,11 +64,15 @@ public class ProcessInstanceInclusiveGateway {
         auditSteps.checkServicesHealth();
     }
 
-    @When("the user starts a process with inclusive gateway $processName and set $variableName variable value to $variableValue")
-    public void startProcess(String processName, String variableName, Integer variableValue) throws IOException, InterruptedException {
-        Map<String,Object> variables = new HashMap<>();
-        variables.put(variableName,variableValue);
-        processInstance = processRuntimeBundleSteps.startProcessWithVariables(processDefinitionKeyMatcher(processName),variables);
+    @When(
+        "the user starts a process with inclusive gateway $processName and set $variableName variable value to $variableValue"
+    )
+    public void startProcess(String processName, String variableName, Integer variableValue)
+        throws IOException, InterruptedException {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put(variableName, variableValue);
+        processInstance =
+            processRuntimeBundleSteps.startProcessWithVariables(processDefinitionKeyMatcher(processName), variables);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
@@ -82,16 +85,12 @@ public class ProcessInstanceInclusiveGateway {
 
     public void claimTaskById(String taskId) throws Exception {
         taskRuntimeBundleSteps.claimTask(taskId);
-        checkTaskStatus(taskId,Task.TaskStatus.ASSIGNED);
+        checkTaskStatus(taskId, Task.TaskStatus.ASSIGNED);
     }
 
     public void completeTaskById(String taskId) throws Exception {
-        taskRuntimeBundleSteps.completeTask(taskId,
-                                            TaskPayloadBuilder
-                                                .complete()
-                                                .withTaskId(taskId)
-                                                .build());
-        checkTaskStatus(taskId,Task.TaskStatus.COMPLETED);
+        taskRuntimeBundleSteps.completeTask(taskId, TaskPayloadBuilder.complete().withTaskId(taskId).build());
+        checkTaskStatus(taskId, Task.TaskStatus.COMPLETED);
     }
 
     @When("the user claims and completes the task $taskName")
@@ -109,7 +108,6 @@ public class ProcessInstanceInclusiveGateway {
         auditSteps.checkProcessInstanceInclusiveGatewayEvents(processId, gatewayId);
     }
 
-
     @Then("the user will see $number tasks")
     public void checkNumberOfTasks(Integer number) throws Exception {
         List<Task> tasks = getTasks();
@@ -119,10 +117,8 @@ public class ProcessInstanceInclusiveGateway {
     public List<Task> getTasks() throws Exception {
         assertThat(processInstance).isNotNull();
 
-        return new ArrayList<>(
-                processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
+        return new ArrayList<>(processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
     }
-
 
     public Task getTaskByName(String taskName) throws Exception {
         List<Task> tasks = getTasks();
@@ -137,14 +133,12 @@ public class ProcessInstanceInclusiveGateway {
             assertThat(task).isNotNull();
             assertThat(task.getStatus()).isEqualTo(status);
         }
-        taskQuerySteps.checkTaskStatus(taskId,status);
+        taskQuerySteps.checkTaskStatus(taskId, status);
     }
 
     @Then("the process with inclusive gateway is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        processQuerySteps.checkProcessInstanceStatus(processId,
-                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(processId, ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
-
 }

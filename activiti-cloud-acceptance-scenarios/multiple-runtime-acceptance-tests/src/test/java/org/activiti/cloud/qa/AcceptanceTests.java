@@ -17,6 +17,4 @@ package org.activiti.cloud.qa;
 
 import org.activiti.cloud.acc.shared.serenity.ExtendedSerenityStories;
 
-public class AcceptanceTests extends ExtendedSerenityStories {
-
-}
+public class AcceptanceTests extends ExtendedSerenityStories {}

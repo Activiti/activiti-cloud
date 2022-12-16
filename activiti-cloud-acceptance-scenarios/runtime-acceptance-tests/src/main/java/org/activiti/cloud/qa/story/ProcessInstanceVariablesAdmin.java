@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -36,6 +35,7 @@ import org.jbehave.core.annotations.When;
 import org.springframework.http.ResponseEntity;
 
 public class ProcessInstanceVariablesAdmin {
+
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
 
@@ -49,12 +49,16 @@ public class ProcessInstanceVariablesAdmin {
     public void adminStartProcess(String processName, String variableName1, String variableName2) {
         Map<String, Object> variables = getVariablesMap(variableName1, variableName1, variableName2, variableName2);
         ProcessInstance processInstance = processRuntimeBundleSteps.startProcessWithVariables(
-                processDefinitionKeyMatcher(processName), variables);
+            processDefinitionKeyMatcher(processName),
+            variables
+        );
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
-    @When("the admin update the instance variables $variableName1 with value $value1 and $variableName2 with value $value2")
+    @When(
+        "the admin update the instance variables $variableName1 with value $value1 and $variableName2 with value $value2"
+    )
     public void adminUpdateVariables(String variableName1, String value1, String variableName2, String value2) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
@@ -64,8 +68,10 @@ public class ProcessInstanceVariablesAdmin {
         setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         setProcessVariablesPayload.setVariables(variables);
 
-        ResponseEntity<List<String>> updateVarsErrorMessages = processVariablesRuntimeAdminSteps
-                .updateVariables(processInstanceId, setProcessVariablesPayload);
+        ResponseEntity<List<String>> updateVarsErrorMessages = processVariablesRuntimeAdminSteps.updateVariables(
+            processInstanceId,
+            setProcessVariablesPayload
+        );
 
         Serenity.setSessionVariable("updateVarsErrorMessages").to(updateVarsErrorMessages.getBody());
     }
@@ -75,29 +81,31 @@ public class ProcessInstanceVariablesAdmin {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder
-                                                                      .removeVariables()
-                                                                      .withVariableNames(variableName)
-                                                                      .build();
+            .removeVariables()
+            .withVariableNames(variableName)
+            .build();
 
         processVariablesRuntimeAdminSteps.removeVariables(processInstanceId, removeProcessVariablesPayload);
     }
-
-
 
     @Then("the list of errors messages is empty")
     public void checkUpdateVarsErrorMessagesIsEmpty() {
         List<String> updateVarsErrorMessages = Serenity.sessionVariableCalled("updateVarsErrorMessages");
 
-        if (updateVarsErrorMessages!=null) {
+        if (updateVarsErrorMessages != null) {
             assertThat(updateVarsErrorMessages).isEmpty();
         }
     }
 
-    private Map<String, Object> getVariablesMap(String variableName1, String variableValue1, String variableName2, String variableValue2) {
+    private Map<String, Object> getVariablesMap(
+        String variableName1,
+        String variableValue1,
+        String variableName2,
+        String variableValue2
+    ) {
         Map<String, Object> variables = new HashMap<>();
         variables.put(variableName1, variableValue1);
         variables.put(variableName2, variableValue2);
         return variables;
     }
-
 }

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.acc.core.steps.query.ProcessQuerySteps;
@@ -22,8 +24,6 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.qa.steps.MultipleRuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessInstanceTasks {
 
@@ -36,9 +36,11 @@ public class ProcessInstanceTasks {
     private CloudProcessInstance processInstanceCatchSignal;
     private CloudProcessInstance processInstanceThrowSignal;
 
-    @When("the user starts signal catch process on primary runtime and starts signal throw process on secondary runtime")
+    @When(
+        "the user starts signal catch process on primary runtime and starts signal throw process on secondary runtime"
+    )
     public void startSignalCatchThrowProcessInstance() {
-    	processInstanceCatchSignal = runtimeBundleSteps.startProcess("SignalCatchEventProcess", true);
+        processInstanceCatchSignal = runtimeBundleSteps.startProcess("SignalCatchEventProcess", true);
         assertThat(processInstanceCatchSignal).isNotNull();
         processInstanceThrowSignal = runtimeBundleSteps.startProcess("SignalThrowEventProcess", false);
         assertThat(processInstanceThrowSignal).isNotNull();
@@ -46,9 +48,13 @@ public class ProcessInstanceTasks {
 
     @Then("a signal was received and the signal catch and throw processes were completed")
     public void sheckSignalCatchThrowProcessInstances() throws Exception {
-        processQuerySteps.checkProcessInstanceStatus(processInstanceCatchSignal.getId(),
-                                              ProcessInstance.ProcessInstanceStatus.COMPLETED);
-        processQuerySteps.checkProcessInstanceStatus(processInstanceThrowSignal.getId(),
-                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(
+            processInstanceCatchSignal.getId(),
+            ProcessInstance.ProcessInstanceStatus.COMPLETED
+        );
+        processQuerySteps.checkProcessInstanceStatus(
+            processInstanceThrowSignal.getId(),
+            ProcessInstance.ProcessInstanceStatus.COMPLETED
+        );
     }
 }

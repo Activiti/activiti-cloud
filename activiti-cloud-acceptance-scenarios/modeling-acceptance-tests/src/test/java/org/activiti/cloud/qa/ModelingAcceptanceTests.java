@@ -24,5 +24,4 @@ public class ModelingAcceptanceTests extends ExtendedSerenityStories {
     protected String getRootPackage() {
         return "org.activiti.cloud";
     }
-
 }

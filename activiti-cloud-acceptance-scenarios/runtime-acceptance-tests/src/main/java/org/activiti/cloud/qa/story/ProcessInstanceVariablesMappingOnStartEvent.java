@@ -26,7 +26,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import net.serenitybdd.core.Serenity;
+import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
@@ -39,22 +40,21 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.CollectionModel;
 
-import net.serenitybdd.core.Serenity;
-import net.thucydides.core.annotations.Steps;
-
 public class ProcessInstanceVariablesMappingOnStartEvent {
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+
     @Steps
     private ProcessVariablesRuntimeBundleSteps processVariablesRuntimeBundleSteps;
+
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+
     @Steps
     private TaskVariableRuntimeBundleSteps taskVariableRuntimeBundleSteps;
 
-    public ProcessInstanceVariablesMappingOnStartEvent() throws ParseException {
-    }
+    public ProcessInstanceVariablesMappingOnStartEvent() throws ParseException {}
 
     @When("services are started")
     public void checkServicesStatus() {
@@ -65,85 +65,66 @@ public class ProcessInstanceVariablesMappingOnStartEvent {
 
     @When("the user starts variables mapping process on start event")
     public void startProcessWithVariablesMappingOnStartEvent() throws ParseException {
-
-        Map<String,Object> variables = new HashMap<>();
-        variables.put("Text0xfems","Form name");
-        variables.put("Text0rvs0o","Form email");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("Text0xfems", "Form name");
+        variables.put("Text0rvs0o", "Form email");
 
         ProcessInstance processInstance = processRuntimeBundleSteps.startProcessWithVariables(
-                processDefinitionKeyMatcher("PROCESS_START_EVENT_VARIABLE_MAPPING"),
-                variables);
+            processDefinitionKeyMatcher("PROCESS_START_EVENT_VARIABLE_MAPPING"),
+            variables
+        );
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
 
     @Then("process variables are properly mapped on start event")
     public void checkProcessInstanceVariablesMapping() {
-
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
-        await().untilAsserted(() -> {
-            final CollectionModel<CloudVariableInstance> variables = processVariablesRuntimeBundleSteps
-                                                               .getVariables(processInstanceId);
+        await()
+            .untilAsserted(() -> {
+                final CollectionModel<CloudVariableInstance> variables = processVariablesRuntimeBundleSteps.getVariables(
+                    processInstanceId
+                );
 
-            assertThat(variables)
-                .isNotNull()
-                .hasSize(2)
-                .extracting(CloudVariableInstance::getName,
-                            CloudVariableInstance::getValue)
-                .containsOnly(
-                            tuple("name",
-                                  "Form name"),
-                            tuple("email",
-                                  "Form email")
-            );
-        });
+                assertThat(variables)
+                    .isNotNull()
+                    .hasSize(2)
+                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .containsOnly(tuple("name", "Form name"), tuple("email", "Form email"));
+            });
     }
 
     @Then("process variables are properly mapped to the task variables")
-    public void  checkTaskVariablesMapping() throws Exception {
+    public void checkTaskVariablesMapping() throws Exception {
         List<Task> tasks = getTasks();
 
-        assertThat(tasks)
-            .isNotNull()
-            .hasSize(1);
+        assertThat(tasks).isNotNull().hasSize(1);
 
         Serenity.setSessionVariable("taskId").to(tasks.get(0).getId());
 
-        await().untilAsserted(() -> {
-            final Collection<CloudVariableInstance> variables = taskVariableRuntimeBundleSteps
-                .getVariables(tasks.get(0).getId());
+        await()
+            .untilAsserted(() -> {
+                final Collection<CloudVariableInstance> variables = taskVariableRuntimeBundleSteps.getVariables(
+                    tasks.get(0).getId()
+                );
 
-            assertThat(variables)
-                .isNotNull()
-                .hasSize(2)
-                .extracting(CloudVariableInstance::getName,
-                            CloudVariableInstance::getValue)
-                .containsOnly(
-                            tuple("Text0xfems",
-                                  "Form name"),
-                            tuple("Text0rvs0o",
-                                  "Form email")
-            );
-
-        });
-
+                assertThat(variables)
+                    .isNotNull()
+                    .hasSize(2)
+                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .containsOnly(tuple("Text0xfems", "Form name"), tuple("Text0rvs0o", "Form email"));
+            });
     }
 
     @Then("the user may complete the task")
     public void completeTask() throws Exception {
         String taskId = Serenity.sessionVariableCalled("taskId");
-        taskRuntimeBundleSteps.completeTask(taskId,
-                                            TaskPayloadBuilder
-                                                    .complete()
-                                                    .withTaskId(taskId)
-                                                    .build());
+        taskRuntimeBundleSteps.completeTask(taskId, TaskPayloadBuilder.complete().withTaskId(taskId).build());
     }
 
     public List<Task> getTasks() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        return new ArrayList<>(
-                processRuntimeBundleSteps.getTaskByProcessInstanceId(processId));
+        return new ArrayList<>(processRuntimeBundleSteps.getTaskByProcessInstanceId(processId));
     }
-
 }

@@ -23,7 +23,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ContextConfiguration(classes = {IdentityManagementTestsConfigurationProperties.class, IdentityManagementConfiguration.class})
+@ContextConfiguration(
+    classes = { IdentityManagementTestsConfigurationProperties.class, IdentityManagementConfiguration.class }
+)
 public @interface EnableIdentityManagementContext {
-
 }

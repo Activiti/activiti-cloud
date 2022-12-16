@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -27,9 +29,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Component
 @EnableBinding(HeadersConnectorChannels.class)
 public class HeadersConnector {
@@ -38,25 +37,26 @@ public class HeadersConnector {
     private final ConnectorProperties connectorProperties;
 
     @Autowired
-    public HeadersConnector(IntegrationResultSender integrationResultSender,
-                         ConnectorProperties connectorProperties) {
+    public HeadersConnector(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
 
-    @StreamListener(value = HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER,
-                    condition = "headers['processDefinitionVersion']!=null")
+    @StreamListener(
+        value = HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER,
+        condition = "headers['processDefinitionVersion']!=null"
+    )
     public void receiveHeadersConnector(IntegrationRequest integrationRequest, @Headers Map<String, Object> headers) {
-
         Map<String, Object> result = new HashMap<>();
 
         result.put("processDefinitionVersion", headers.get("processDefinitionVersion"));
         result.put("processDefinitionKey", headers.get("processDefinitionKey"));
         result.put("processDefinitionId", headers.get("processDefinitionId"));
 
-        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
-                .withOutboundVariables(result)
-                .buildMessage();
+        Message<IntegrationResult> message = IntegrationResultBuilder
+            .resultFor(integrationRequest, connectorProperties)
+            .withOutboundVariables(result)
+            .buildMessage();
 
         integrationResultSender.send(message);
     }

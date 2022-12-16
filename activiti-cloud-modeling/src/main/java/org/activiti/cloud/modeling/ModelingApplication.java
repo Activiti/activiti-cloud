@@ -31,5 +31,4 @@ public class ModelingApplication {
     public static void main(String[] args) {
         SpringApplication.run(ModelingApplication.class, args);
     }
-
 }

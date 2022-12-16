@@ -19,12 +19,9 @@ import org.activiti.cloud.query.liquibase.QueryLiquibaseApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = {QueryLiquibaseApplication.class})
+@SpringBootTest(classes = { QueryLiquibaseApplication.class })
 public class QueryLiquibaseApplicationIT {
 
     @Test
-    public void contextLoads() {
-
-    }
-
+    public void contextLoads() {}
 }

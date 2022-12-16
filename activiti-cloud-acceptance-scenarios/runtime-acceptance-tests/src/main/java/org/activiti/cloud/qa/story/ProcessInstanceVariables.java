@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -28,11 +32,8 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.springframework.hateoas.CollectionModel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 public class ProcessInstanceVariables {
+
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
 
@@ -43,26 +44,30 @@ public class ProcessInstanceVariables {
     private ProcessQuerySteps processQuerySteps;
 
     @Then("variable $variableName1 has value $value1 and $variableName2 has value $value2")
-    public void checkProcessInstanceVariables(String variableName1, String value1, String variableName2, String value2) {
-
+    public void checkProcessInstanceVariables(
+        String variableName1,
+        String value1,
+        String variableName2,
+        String value2
+    ) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
                 assertThat(variableName1).isNotNull();
                 assertThat(variableName2).isNotNull();
 
-                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(processInstanceId);
+                final CollectionModel<CloudVariableInstance> cloudVariableInstanceResource = getProcessVariables(
+                    processInstanceId
+                );
 
                 assertThat(cloudVariableInstanceResource).isNotNull();
                 assertThat(cloudVariableInstanceResource).isNotEmpty();
 
-                assertThat(cloudVariableInstanceResource.getContent()).extracting(VariableInstance::getName,
-                                                                                  VariableInstance::getValue)
-                                                                        .contains(
-                                                                                  tuple(variableName1, value1),
-                                                                                  tuple(variableName2, value2)
-                                                                         );
-        });
+                assertThat(cloudVariableInstanceResource.getContent())
+                    .extracting(VariableInstance::getName, VariableInstance::getValue)
+                    .contains(tuple(variableName1, value1), tuple(variableName2, value2));
+            });
     }
 
     @Then("the process variable $variableName is deleted")
@@ -70,13 +75,16 @@ public class ProcessInstanceVariables {
     public void verifyProcessVariableDeleted(String variableName) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
-        await().untilAsserted(() -> {
-            assertThat(variableName).isNotNull();
-            final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
-            if (variableInstances!=null) {
-                assertThat(variableInstances.getContent()).extracting(VariableInstance::getName).doesNotContain(variableName);
-            }
-        });
+        await()
+            .untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
+                final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
+                if (variableInstances != null) {
+                    assertThat(variableInstances.getContent())
+                        .extracting(VariableInstance::getName)
+                        .doesNotContain(variableName);
+                }
+            });
     }
 
     @Then("the process variable $variableName is created")
@@ -84,14 +92,15 @@ public class ProcessInstanceVariables {
     public void verifyProcessVariableCreated(String variableName) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
-        await().untilAsserted(() -> {
-            assertThat(variableName).isNotNull();
-            final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
-            assertThat(variableInstances).isNotNull();
-            assertThat(variableInstances).isNotEmpty();
-            //one of the variables should have name matching variableName
-            assertThat(variableInstances.getContent()).extracting(VariableInstance::getName).contains(variableName);
-        });
+        await()
+            .untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
+                final CollectionModel<CloudVariableInstance> variableInstances = getProcessVariables(processInstanceId);
+                assertThat(variableInstances).isNotNull();
+                assertThat(variableInstances).isNotEmpty();
+                //one of the variables should have name matching variableName
+                assertThat(variableInstances.getContent()).extracting(VariableInstance::getName).contains(variableName);
+            });
     }
 
     @When("the user set the instance variable $variableName1 with value $value1")
@@ -100,19 +109,18 @@ public class ProcessInstanceVariables {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder
-                                                                .setVariables()
-                                                                .withVariable(variableName1, value1)
-                                                                .build();
+            .setVariables()
+            .withVariable(variableName1, value1)
+            .build();
         processVariablesRuntimeBundleSteps.setVariables(processInstanceId, setProcessVariablesPayload);
     }
 
     public CollectionModel<CloudVariableInstance> getProcessVariables(String processInstanceId) {
-        return  processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
+        return processVariablesRuntimeBundleSteps.getVariables(processInstanceId);
     }
 
     @Then("query process instance variable $variableName has value $value")
     public void checkQuerykProcessInstanceVariable(String variableName, String value) {
-
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
 
         // TODO add variable value check in processQuerySteps

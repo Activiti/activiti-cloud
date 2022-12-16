@@ -23,7 +23,6 @@ import static org.awaitility.Awaitility.await;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import net.serenitybdd.core.Serenity;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessInstance;
@@ -71,7 +70,7 @@ public class ProcessInstanceSubProcesses {
 
     @When("the user starts a process with tasks and a subProcess called $processName")
     public void startProcessWithTaks(String processName) throws IOException, InterruptedException {
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),false);
+        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
         checkProcessWithTaskCreated();
@@ -79,7 +78,7 @@ public class ProcessInstanceSubProcesses {
 
     @When("the user starts a process with a subProcess called $processName")
     public void startProcess(String processName) throws IOException, InterruptedException {
-        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName),false);
+        processInstance = processRuntimeBundleSteps.startProcess(processDefinitionKeyMatcher(processName), false);
 
         Serenity.setSessionVariable("processInstanceId").to(processInstance.getId());
     }
@@ -88,7 +87,8 @@ public class ProcessInstanceSubProcesses {
         assertThat(processInstance).isNotNull();
 
         List<Task> tasks = new ArrayList<>(
-                processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId()));
+            processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstance.getId())
+        );
         assertThat(tasks).isNotEmpty();
         currentTask = tasks.get(0);
         assertThat(currentTask).isNotNull();
@@ -103,11 +103,10 @@ public class ProcessInstanceSubProcesses {
 
     @When("the user completes the task declared in the subprocess")
     public void completeTask() throws Exception {
-        taskRuntimeBundleSteps.completeTask(currentTask.getId(),
-                TaskPayloadBuilder
-                        .complete()
-                        .withTaskId(currentTask.getId())
-                        .build());
+        taskRuntimeBundleSteps.completeTask(
+            currentTask.getId(),
+            TaskPayloadBuilder.complete().withTaskId(currentTask.getId()).build()
+        );
     }
 
     @Then("subProcess events are emitted")
@@ -119,17 +118,14 @@ public class ProcessInstanceSubProcesses {
     @Then("the process with embedded subprocess is completed")
     public void verifyProcessCompleted() throws Exception {
         String processId = Serenity.sessionVariableCalled("processInstanceId");
-        processQuerySteps.checkProcessInstanceStatus(processId,
-                ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        processQuerySteps.checkProcessInstanceStatus(processId, ProcessInstance.ProcessInstanceStatus.COMPLETED);
     }
 
     @Then("the subprocess has been created")
-    public void checkSubProcessHasBeenCreated(){
+    public void checkSubProcessHasBeenCreated() {
         String parentProcessId = Serenity.sessionVariableCalled("processInstanceId");
 
-        subprocessInstance = processRuntimeBundleSteps.getSubProcesses(parentProcessId)
-                .iterator()
-                .next();
+        subprocessInstance = processRuntimeBundleSteps.getSubProcesses(parentProcessId).iterator().next();
         assertThat(subprocessInstance).isNotNull();
         assertThat(subprocessInstance.getParentId()).isEqualTo(parentProcessId);
 
@@ -137,43 +133,40 @@ public class ProcessInstanceSubProcesses {
     }
 
     @Then("a subprocess variable $variableName is created with value $variableValue")
-    public void checkSubProcessInstanceVariable(String variableName,
-                                                String variableValue){
+    public void checkSubProcessInstanceVariable(String variableName, String variableValue) {
         assertThat(subprocessInstance).isNotNull();
-        await().untilAsserted(() -> {
-            CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(subprocessInstance.getId());
-            assertThat(processVariables.getContent()).isNotNull();
-            assertThat(processVariables.getContent())
-                    .extracting(CloudVariableInstance::getName,
-                                CloudVariableInstance::getValue)
-                    .contains(tuple(variableName,
-                                    variableValue));
-        });
+        await()
+            .untilAsserted(() -> {
+                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                    subprocessInstance.getId()
+                );
+                assertThat(processVariables.getContent()).isNotNull();
+                assertThat(processVariables.getContent())
+                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .contains(tuple(variableName, variableValue));
+            });
     }
 
     @Then("the parent process instance has a variable named $variableName with value $variableValue")
-    public void checkParentProcessInstanceVariable(String variableName,
-                          String variableValue){
-        await().untilAsserted(() -> {
-            CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(processInstance.getId());
-            assertThat(processVariables.getContent()).isNotNull();
-            assertThat(processVariables.getContent())
-                    .extracting(CloudVariableInstance::getName,
-                                CloudVariableInstance::getValue)
-                    .contains(tuple(variableName,
-                                    variableValue));
-        });
+    public void checkParentProcessInstanceVariable(String variableName, String variableValue) {
+        await()
+            .untilAsserted(() -> {
+                CollectionModel<CloudVariableInstance> processVariables = processVariablesRuntimeBundleSteps.getVariables(
+                    processInstance.getId()
+                );
+                assertThat(processVariables.getContent()).isNotNull();
+                assertThat(processVariables.getContent())
+                    .extracting(CloudVariableInstance::getName, CloudVariableInstance::getValue)
+                    .contains(tuple(variableName, variableValue));
+            });
     }
 
     @When("the user claims and completes the subprocess task $taskName")
-    public void claimAndCompleteSubprocessTask(String taskName) throws Exception{
-        currentTask = processRuntimeBundleSteps
-                            .getTaskByProcessInstanceId(subprocessInstance.getId())
-                            .iterator()
-                            .next();
+    public void claimAndCompleteSubprocessTask(String taskName) throws Exception {
+        currentTask =
+            processRuntimeBundleSteps.getTaskByProcessInstanceId(subprocessInstance.getId()).iterator().next();
         assertThat(currentTask.getName()).isEqualTo(taskName);
         claimTask();
         completeTask();
     }
-
 }

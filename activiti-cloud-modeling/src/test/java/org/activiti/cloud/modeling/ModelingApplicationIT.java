@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.modeling;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +30,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
 /**
  * Test for modeling rest services
  */
 @SpringBootTest(classes = ModelingApplication.class)
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class ModelingApplicationIT {
 
     @Autowired
@@ -49,11 +48,10 @@ public class ModelingApplicationIT {
     public void contextLoads() throws Exception {
         assertThat(applicationContext).isNotNull();
     }
+
     @Test
     public void testGetModels() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        mockMvc.perform(get("/v1/projects"))
-            .andExpect(status().isOk());
-
+        mockMvc.perform(get("/v1/projects")).andExpect(status().isOk());
     }
 }

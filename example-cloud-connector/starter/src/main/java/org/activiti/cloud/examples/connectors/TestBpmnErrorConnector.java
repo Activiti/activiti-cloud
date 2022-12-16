@@ -34,14 +34,15 @@ public class TestBpmnErrorConnector {
     private IntegrationErrorSender integrationErrorSender;
     private ConnectorProperties connectorProperties;
 
-    public TestBpmnErrorConnector(IntegrationErrorSender integrationErrorSender,
-        ConnectorProperties connectorProperties) {
+    public TestBpmnErrorConnector(
+        IntegrationErrorSender integrationErrorSender,
+        ConnectorProperties connectorProperties
+    ) {
         this.integrationErrorSender = integrationErrorSender;
         this.connectorProperties = connectorProperties;
     }
 
     public interface Channels {
-
         String CHANNEL = "testBpmnErrorConnectorInput";
 
         @Input(CHANNEL)
@@ -51,6 +52,8 @@ public class TestBpmnErrorConnector {
     @StreamListener(value = Channels.CHANNEL)
     public void handle(IntegrationRequest integrationRequest) {
         CloudBpmnError bpmnError = new CloudBpmnError("CLOUD_BPMN_ERROR");
-        integrationErrorSender.send(IntegrationErrorBuilder.errorFor(integrationRequest, connectorProperties, bpmnError).buildMessage());
+        integrationErrorSender.send(
+            IntegrationErrorBuilder.errorFor(integrationRequest, connectorProperties, bpmnError).buildMessage()
+        );
     }
 }

@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -29,10 +32,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Component
 @EnableBinding(MultiInstanceConnector.Channels.class)
 public class MultiInstanceConnector {
@@ -42,7 +41,6 @@ public class MultiInstanceConnector {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     public interface Channels {
-
         String CHANNEL = "miCloudConnectorInput";
 
         @Input(CHANNEL)
@@ -50,34 +48,33 @@ public class MultiInstanceConnector {
     }
 
     @Autowired
-    public MultiInstanceConnector(IntegrationResultSender integrationResultSender,
-                         ConnectorProperties connectorProperties) {
+    public MultiInstanceConnector(
+        IntegrationResultSender integrationResultSender,
+        ConnectorProperties connectorProperties
+    ) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
 
     @StreamListener(value = Channels.CHANNEL)
     public void handle(IntegrationRequest integrationRequest) {
-
-        Integer instanceCount = getVariableValue(integrationRequest.getIntegrationContext(),
-                                                 "instanceCount");
-        if(instanceCount == counter.get()) {
+        Integer instanceCount = getVariableValue(integrationRequest.getIntegrationContext(), "instanceCount");
+        if (instanceCount == counter.get()) {
             counter.set(0);
         }
 
         Map<String, Object> result = Collections.singletonMap("executionCount", counter.incrementAndGet());
 
-        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
-                .withOutboundVariables(result)
-                .buildMessage();
+        Message<IntegrationResult> message = IntegrationResultBuilder
+            .resultFor(integrationRequest, connectorProperties)
+            .withOutboundVariables(result)
+            .buildMessage();
 
         integrationResultSender.send(message);
     }
 
     @SuppressWarnings("unchecked")
     private <T> T getVariableValue(IntegrationContext context, String name) {
-        return (T) context.getInBoundVariables()
-                          .get(name);
+        return (T) context.getInBoundVariables().get(name);
     }
-
 }

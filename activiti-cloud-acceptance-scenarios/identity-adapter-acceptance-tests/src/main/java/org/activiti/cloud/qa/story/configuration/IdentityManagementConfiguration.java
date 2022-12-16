@@ -39,13 +39,10 @@ public class IdentityManagementConfiguration {
     private IdentityManagementTestsConfigurationProperties properties;
 
     @Bean
-    public IdentityManagementClient identityManagementClient(){
+    public IdentityManagementClient identityManagementClient() {
         return FeignRestDataClient
-            .builder(new JacksonEncoder(objectMapper),
-                     new HalDecoder(objectMapper))
+            .builder(new JacksonEncoder(objectMapper), new HalDecoder(objectMapper))
             .contract(new SpringMvcContract())
-            .target(IdentityManagementClient.class,
-                    properties.getIdentityManagementUrl());
+            .target(IdentityManagementClient.class, properties.getIdentityManagementUrl());
     }
-
 }

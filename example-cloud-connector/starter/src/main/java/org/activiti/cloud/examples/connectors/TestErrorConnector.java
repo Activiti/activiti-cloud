@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -29,13 +31,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 @Component
 @EnableBinding(TestErrorConnector.Channels.class)
 public class TestErrorConnector {
-    private final static Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
@@ -43,23 +43,23 @@ public class TestErrorConnector {
     private CountDownLatch countDownLatch;
 
     public interface Channels {
-
         String CHANNEL = "testErrorConnectorInput";
 
         @Input(CHANNEL)
         SubscribableChannel testErrorConnectorInput();
     }
 
-    public TestErrorConnector(IntegrationResultSender integrationResultSender,
-                              ConnectorProperties connectorProperties) {
+    public TestErrorConnector(
+        IntegrationResultSender integrationResultSender,
+        ConnectorProperties connectorProperties
+    ) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
 
     @StreamListener(value = Channels.CHANNEL)
     public void handle(IntegrationRequest integrationRequest) throws InterruptedException {
-        String var = integrationRequest.getIntegrationContext()
-                                       .getInBoundVariable("var");
+        String var = integrationRequest.getIntegrationContext().getInBoundVariable("var");
         if (!"replay".equals(var)) {
             throw new RuntimeException("TestErrorConnector");
         } else {
@@ -68,8 +68,9 @@ public class TestErrorConnector {
 
         logger.info("Processing integration request: {}", integrationRequest);
 
-        Message<IntegrationResult> message = IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties)
-                                                                     .buildMessage();
+        Message<IntegrationResult> message = IntegrationResultBuilder
+            .resultFor(integrationRequest, connectorProperties)
+            .buildMessage();
 
         countDownLatch.await(10, TimeUnit.SECONDS);
 

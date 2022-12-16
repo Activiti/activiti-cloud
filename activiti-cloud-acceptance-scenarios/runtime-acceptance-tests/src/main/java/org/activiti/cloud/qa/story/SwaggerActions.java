@@ -17,15 +17,14 @@ package org.activiti.cloud.qa.story;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.thucydides.core.annotations.Steps;
 import org.activiti.cloud.acc.core.steps.audit.SwaggerAuditSteps;
 import org.activiti.cloud.acc.core.steps.query.SwaggerQuerySteps;
 import org.activiti.cloud.acc.core.steps.runtime.SwaggerRuntimeBundleSteps;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class SwaggerActions {
 
@@ -43,43 +42,45 @@ public class SwaggerActions {
     private enum SwaggerSpecifications {
         RUNTIME_BUNDLE,
         QUERY,
-        AUDIT
+        AUDIT,
     }
 
     @When("the user asks for swagger specification")
-    public void getSwaggerSpecification(){
-        swaggerSpecifications.put(SwaggerSpecifications.RUNTIME_BUNDLE, swaggerRuntimeBundleSteps.getSwaggerSpecification());
+    public void getSwaggerSpecification() {
+        swaggerSpecifications.put(
+            SwaggerSpecifications.RUNTIME_BUNDLE,
+            swaggerRuntimeBundleSteps.getSwaggerSpecification()
+        );
         swaggerSpecifications.put(SwaggerSpecifications.QUERY, swaggerQuerySteps.getSwaggerSpecification());
         swaggerSpecifications.put(SwaggerSpecifications.AUDIT, swaggerAuditSteps.getSwaggerSpecification());
     }
 
     @Then("the user gets swagger specification following Alfresco MediaType")
-    public void isFollowingAlfrescoMediaType(){
+    public void isFollowingAlfrescoMediaType() {
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.RUNTIME_BUNDLE))
-                .contains("ListResponseContentExtendedCloudProcessDefinition")
-                .contains("EntryResponseContentCloudProcessDefinition")
-                .contains("payloadType")
-                .doesNotContain("PagedModel")
-                .doesNotContain("ResourcesResource")
-                .doesNotContain("\"Resource\"");
+            .contains("ListResponseContentExtendedCloudProcessDefinition")
+            .contains("EntryResponseContentCloudProcessDefinition")
+            .contains("payloadType")
+            .doesNotContain("PagedModel")
+            .doesNotContain("ResourcesResource")
+            .doesNotContain("\"Resource\"");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.QUERY))
-                .contains("ListResponseContentCloudProcessDefinition")
-                .contains("EntriesResponseContentCloudProcessDefinition")
-                .contains("EntryResponseContentCloudProcessDefinition")
-                .doesNotContain("PagedModel")
-                .doesNotContain("ResourcesResource")
-                .doesNotContain("\"Resource\"");
+            .contains("ListResponseContentCloudProcessDefinition")
+            .contains("EntriesResponseContentCloudProcessDefinition")
+            .contains("EntryResponseContentCloudProcessDefinition")
+            .doesNotContain("PagedModel")
+            .doesNotContain("ResourcesResource")
+            .doesNotContain("\"Resource\"");
 
         assertThat(swaggerSpecifications.get(SwaggerSpecifications.AUDIT))
-                .contains("ListResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
-                .contains("EntriesResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
-                .contains("EntryResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
-                .contains("CloudRuntimeEventModel")
-                .doesNotContain("PagedModel")
-                .doesNotContain("ResourcesResource")
-                .doesNotContain("\"Resource\"")
-                .doesNotContain("Enum");
+            .contains("ListResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
+            .contains("EntriesResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
+            .contains("EntryResponseContentCloudRuntimeEventObjectCloudRuntimeEventType")
+            .contains("CloudRuntimeEventModel")
+            .doesNotContain("PagedModel")
+            .doesNotContain("ResourcesResource")
+            .doesNotContain("\"Resource\"")
+            .doesNotContain("Enum");
     }
-
 }

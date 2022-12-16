@@ -29,8 +29,7 @@ public class QueryLiquibaseApplication {
     private static Logger log = LoggerFactory.getLogger(QueryLiquibaseApplication.class);
 
     public static void main(String[] args) {
-        SpringApplication.run(QueryLiquibaseApplication.class,
-                args);
+        SpringApplication.run(QueryLiquibaseApplication.class, args);
     }
 
     @Configuration

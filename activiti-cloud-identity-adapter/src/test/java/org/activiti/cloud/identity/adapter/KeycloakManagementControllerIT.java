@@ -27,11 +27,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = { IdentityAdapterApplication.class, IdentityAdapterAuthenticationTestConfiguration.class})
+@SpringBootTest(classes = { IdentityAdapterApplication.class, IdentityAdapterAuthenticationTestConfiguration.class })
 @WebAppConfiguration
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @WithMockUser
-class KeycloakManagementControllerIT extends AbstractIdentityManagementControllerIT {
-
-}
+class KeycloakManagementControllerIT extends AbstractIdentityManagementControllerIT {}

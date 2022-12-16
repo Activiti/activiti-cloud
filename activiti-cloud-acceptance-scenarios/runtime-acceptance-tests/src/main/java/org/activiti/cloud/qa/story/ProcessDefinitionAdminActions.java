@@ -15,35 +15,36 @@
  */
 package org.activiti.cloud.qa.story;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import net.thucydides.core.annotations.Steps;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.acc.core.steps.query.admin.ProcessQueryAdminSteps;
 import org.jbehave.core.annotations.Then;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProcessDefinitionAdminActions {
 
     @Steps
     private ProcessQueryAdminSteps processQueryAdminSteps;
 
-    @Then("the user, using the admin endpoint, can get the process model for process with key $processDefinitionKey by passing its id")
+    @Then(
+        "the user, using the admin endpoint, can get the process model for process with key $processDefinitionKey by passing its id"
+    )
     public void getProcessModelAsAdmin(String processDefinitionKey) {
         ProcessDefinition matchingProcessDefinition = processQueryAdminSteps
-                .getProcessDefinitions()
-                .getContent()
-                .stream()
-                .filter(processDefinition -> processDefinition.getKey().equals(processDefinitionKey))
-                .findFirst()
-                .orElse(null);
+            .getProcessDefinitions()
+            .getContent()
+            .stream()
+            .filter(processDefinition -> processDefinition.getKey().equals(processDefinitionKey))
+            .findFirst()
+            .orElse(null);
 
         assertThat(matchingProcessDefinition)
-                .as("No process definition found matching key " + processDefinitionKey)
-                .isNotNull();
+            .as("No process definition found matching key " + processDefinitionKey)
+            .isNotNull();
 
         String processModel = processQueryAdminSteps.getProcessModel(matchingProcessDefinition.getId());
         assertThat(processModel).isNotEmpty();
-        assertThat(processModel).contains("bpmn2:process id=\"" + processDefinitionKey +"\"");
+        assertThat(processModel).contains("bpmn2:process id=\"" + processDefinitionKey + "\"");
     }
-
 }

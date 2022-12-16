@@ -34,16 +34,27 @@ import org.springframework.context.annotation.Primary;
 public class QueryConfiguration {
 
     @Bean(name = "baseOpenApi")
-    public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder,
-                               @Value("${server.servlet.context-path:/}") String swaggerBasePath,
-                               BuildProperties buildProperties) {
+    public OpenAPI baseOpenApi(
+        BaseOpenApiBuilder baseOpenApiBuilder,
+        @Value("${server.servlet.context-path:/}") String swaggerBasePath,
+        BuildProperties buildProperties
+    ) {
         return baseOpenApiBuilder.build(String.format("%s ReST API", buildProperties.getName()), swaggerBasePath);
     }
 
     @Bean
     @Primary
-    public ProcessSecurityPoliciesManager processSecurityPoliciesManager(SecurityManager securityManager, SecurityPoliciesProperties securityPoliciesProperties, SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier, SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier) {
-        return new ProcessSecurityPoliciesManagerImpl(securityManager, securityPoliciesProperties, processDefinitionRestrictionApplier, processInstanceRestrictionApplier);
+    public ProcessSecurityPoliciesManager processSecurityPoliciesManager(
+        SecurityManager securityManager,
+        SecurityPoliciesProperties securityPoliciesProperties,
+        SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier,
+        SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier
+    ) {
+        return new ProcessSecurityPoliciesManagerImpl(
+            securityManager,
+            securityPoliciesProperties,
+            processDefinitionRestrictionApplier,
+            processInstanceRestrictionApplier
+        );
     }
-
 }

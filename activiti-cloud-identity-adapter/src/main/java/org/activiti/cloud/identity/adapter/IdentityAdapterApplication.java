@@ -29,5 +29,4 @@ public class IdentityAdapterApplication {
     public static void main(String[] args) {
         SpringApplication.run(IdentityAdapterApplication.class, args);
     }
-
 }

@@ -59,10 +59,13 @@ public class Tasks {
 
     @Steps
     private ProcessRuntimeBundleSteps processRuntimeBundleSteps;
+
     @Steps
     private TaskRuntimeBundleSteps taskRuntimeBundleSteps;
+
     @Steps
     private TaskVariableRuntimeBundleSteps taskVariableRuntimeBundleSteps;
+
     @Steps
     private TaskRuntimeAdminSteps taskRuntimeAdminSteps;
 
@@ -71,6 +74,7 @@ public class Tasks {
 
     @Steps
     private ProcessQuerySteps processQuerySteps;
+
     @Steps
     private TaskQuerySteps taskQuerySteps;
 
@@ -82,6 +86,7 @@ public class Tasks {
 
     @Steps
     private AuditSteps auditSteps;
+
     @Steps
     private AuditAdminSteps auditAdminSteps;
 
@@ -116,8 +121,7 @@ public class Tasks {
         assertThat(assignedTask).isNotNull();
         assertThat(assignedTask.getStatus()).isEqualTo(Task.TaskStatus.ASSIGNED);
         auditSteps.checkTaskCreatedAndAssignedEventsWhenAlreadyAssigned(assignedTask.getId());
-        taskQuerySteps.checkTaskStatus(assignedTask.getId(),
-            Task.TaskStatus.ASSIGNED);
+        taskQuerySteps.checkTaskStatus(assignedTask.getId(), Task.TaskStatus.ASSIGNED);
     }
 
     @When("the user deletes the standalone task")
@@ -134,9 +138,11 @@ public class Tasks {
     public void checkTaskIsDeleted() throws Exception {
         taskRuntimeBundleSteps.checkTaskNotFound(newTask.getId());
         auditSteps.checkTaskDeletedEvent(newTask.getId());
-        taskQuerySteps.checkTaskStatus(newTask.getId(),
+        taskQuerySteps.checkTaskStatus(
+            newTask.getId(),
             //TODO change to DELETED when RB is ready
-            Task.TaskStatus.CANCELLED);
+            Task.TaskStatus.CANCELLED
+        );
     }
 
     @When("user creates a subtask for the previously created task")
@@ -151,46 +157,36 @@ public class Tasks {
     public void taskWithSubtaskIsCreated() {
         final CloudTask createdSubtask = taskRuntimeBundleSteps.getTaskById(subtask.getId());
         assertThat(createdSubtask).isNotNull();
-        assertThat(createdSubtask.getParentTaskId()).isNotEmpty()
-            .isEqualToIgnoringCase(newTask.getId());
-        auditSteps.checkSubtaskCreated(createdSubtask.getId(),
-            newTask.getId());
-        taskQuerySteps.checkSubtaskHasParentTaskId(subtask.getId(),
-            subtask.getParentTaskId());
+        assertThat(createdSubtask.getParentTaskId()).isNotEmpty().isEqualToIgnoringCase(newTask.getId());
+        auditSteps.checkSubtaskCreated(createdSubtask.getId(), newTask.getId());
+        taskQuerySteps.checkSubtaskHasParentTaskId(subtask.getId(), subtask.getParentTaskId());
     }
 
     @Then("a list of one subtask is be available for the task")
     public void getSubtasksForTask() {
         final Collection<CloudTask> subtasks = taskRuntimeBundleSteps.getSubtasks(newTask.getId());
-        assertThat(subtasks)
-            .isNotNull()
-            .extracting(CloudTask::getId)
-            .containsExactly(subtask.getId());
+        assertThat(subtasks).isNotNull().extracting(CloudTask::getId).containsExactly(subtask.getId());
     }
 
     @Then("the task has the formKey field and correct processInstance fields")
     public void checkIfFormKeyAndProcessInstanceFieldsArePresent() {
         newTask = obtainFirstTaskFromProcess();
-        assertThat(newTask)
-            .isNotNull()
-            .extracting(CloudTask::getFormKey)
-            .isEqualTo("taskForm");
+        assertThat(newTask).isNotNull().extracting(CloudTask::getFormKey).isEqualTo("taskForm");
 
-        CloudProcessInstance processFromQuery = processQuerySteps
-            .getProcessInstance(Serenity.sessionVariableCalled("processInstanceId").toString());
+        CloudProcessInstance processFromQuery = processQuerySteps.getProcessInstance(
+            Serenity.sessionVariableCalled("processInstanceId").toString()
+        );
         assertThat(processFromQuery).isNotNull();
 
         CloudTask taskFromRB = taskRuntimeBundleSteps.getTaskById(newTask.getId());
         assertThat(taskFromRB).isNotNull();
         assertThat(taskFromRB.getFormKey()).isEqualTo("taskForm");
-        assertThat(taskFromRB.getProcessDefinitionId())
-            .isEqualTo(processFromQuery.getProcessDefinitionId());
+        assertThat(taskFromRB.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
 
         CloudTask taskFromQuery = taskQuerySteps.getTaskById(newTask.getId());
         assertThat(taskFromQuery).isNotNull();
         assertThat(taskFromQuery.getFormKey()).isEqualTo("taskForm");
-        assertThat(taskFromQuery.getProcessDefinitionId())
-            .isEqualTo(processFromQuery.getProcessDefinitionId());
+        assertThat(taskFromQuery.getProcessDefinitionId()).isEqualTo(processFromQuery.getProcessDefinitionId());
         assertThat(taskFromQuery.getProcessDefinitionVersion())
             .isEqualTo(processFromQuery.getProcessDefinitionVersion());
     }
@@ -198,7 +194,8 @@ public class Tasks {
     private CloudTask obtainFirstTaskFromProcess() {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId").toString();
         List<CloudTask> tasksFromRB = new ArrayList<>(
-            processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstanceId));
+            processRuntimeBundleSteps.getTaskByProcessInstanceId(processInstanceId)
+        );
         assertThat(tasksFromRB).isNotEmpty();
         newTask = tasksFromRB.get(0);
         assertThat(newTask).isNotNull();
@@ -212,10 +209,12 @@ public class Tasks {
 
         taskQuerySteps.checkTaskHasVariable(newTask.getId(), variableName, variableName);
 
-        auditSteps
-            .checkTaskVariableEvent(Serenity.sessionVariableCalled("processInstanceId").toString(),
-                newTask.getId(), variableName, VariableEvent.VariableEvents.VARIABLE_CREATED);
-
+        auditSteps.checkTaskVariableEvent(
+            Serenity.sessionVariableCalled("processInstanceId").toString(),
+            newTask.getId(),
+            variableName,
+            VariableEvent.VariableEvents.VARIABLE_CREATED
+        );
     }
 
     @Then("task variable $variableName has value $variableValue")
@@ -224,7 +223,6 @@ public class Tasks {
         newTask = obtainFirstTaskFromProcess();
 
         taskQuerySteps.checkTaskHasVariable(newTask.getId(), variableName, variableValue);
-
     }
 
     @Then("we update task variable $variableName to $variableValue")
@@ -232,17 +230,15 @@ public class Tasks {
     public void updateTaskVariableValue(String variableName, String variableValue) {
         newTask = obtainFirstTaskFromProcess();
 
-        taskVariableRuntimeBundleSteps.updateVariable(newTask.getId(),
-            variableName,
-            variableValue);
-
+        taskVariableRuntimeBundleSteps.updateVariable(newTask.getId(), variableName, variableValue);
     }
 
     @When("the user updates the name of the task to $newTaskName")
     public void setTaskName(String newTaskName) {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         Collection<CloudTask> tasksCollection = taskQuerySteps
-            .getTasksByProcessInstance(processInstanceId).getContent();
+            .getTasksByProcessInstance(processInstanceId)
+            .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
         newTask = tasksList.get(0);
         taskRuntimeBundleSteps.setTaskName(newTask.getId(), newTaskName);
@@ -265,7 +261,8 @@ public class Tasks {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         waitForTasks(processInstanceId);
         Collection<CloudTask> tasksCollection = taskQuerySteps
-            .getTasksByProcessInstance(processInstanceId).getContent();
+            .getTasksByProcessInstance(processInstanceId)
+            .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
         newTask = tasksList.get(0);
     }
@@ -274,24 +271,30 @@ public class Tasks {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
         adminWaitForTasks(processInstanceId);
         Collection<CloudTask> tasksCollection = taskQueryAdminSteps
-            .getTasksByProcessInstance(processInstanceId).getContent();
+            .getTasksByProcessInstance(processInstanceId)
+            .getContent();
         List<CloudTask> tasksList = new ArrayList<>(tasksCollection);
         newTask = tasksList.get(0);
     }
 
     private void waitForTasks(String processInstanceId) {
-        await().untilAsserted(() -> {
-            Collection<CloudTask> tasksCollection = taskQuerySteps
-                .getTasksByProcessInstance(processInstanceId).getContent();
-            assertThat(tasksCollection).isNotEmpty();
-        });
+        await()
+            .untilAsserted(() -> {
+                Collection<CloudTask> tasksCollection = taskQuerySteps
+                    .getTasksByProcessInstance(processInstanceId)
+                    .getContent();
+                assertThat(tasksCollection).isNotEmpty();
+            });
     }
+
     private void adminWaitForTasks(String processInstanceId) {
-        await().untilAsserted(() -> {
-            Collection<CloudTask> tasksCollection = taskQueryAdminSteps
-                .getTasksByProcessInstance(processInstanceId).getContent();
-            assertThat(tasksCollection).isNotEmpty();
-        });
+        await()
+            .untilAsserted(() -> {
+                Collection<CloudTask> tasksCollection = taskQueryAdminSteps
+                    .getTasksByProcessInstance(processInstanceId)
+                    .getContent();
+                assertThat(tasksCollection).isNotEmpty();
+            });
     }
 
     @When("the admin updates the updatable fields of the task")
@@ -301,14 +304,16 @@ public class Tasks {
         Date tomorrow = new Date(System.currentTimeMillis() + 86400000);
         Serenity.setSessionVariable("tomorrow").to(tomorrow);
 
-        taskRuntimeAdminSteps.updateTask(newTask.getId(),
+        taskRuntimeAdminSteps.updateTask(
+            newTask.getId(),
             TaskPayloadBuilder
                 .update()
                 .withName("new-task-name")
                 .withPriority(3)
                 .withDueDate(tomorrow)
                 .withFormKey("new-task-form-key")
-                .build());
+                .build()
+        );
     }
 
     @Then("the task has the updated fields")
@@ -316,23 +321,16 @@ public class Tasks {
         Date tomorrow = Serenity.sessionVariableCalled("tomorrow");
 
         //name
-        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getName())
-            .isEqualTo("new-task-name");
-        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getName())
-            .isEqualTo("new-task-name");
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getName()).isEqualTo("new-task-name");
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getName()).isEqualTo("new-task-name");
         //priority
-        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getPriority())
-            .isEqualTo(3);
-        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getPriority())
-            .isEqualTo(3);
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getPriority()).isEqualTo(3);
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getPriority()).isEqualTo(3);
         //dueDate
-        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getDueDate())
-            .isEqualTo(tomorrow);
-        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getDueDate())
-            .isEqualTo(tomorrow);
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getDueDate()).isEqualTo(tomorrow);
+        assertThat(taskQuerySteps.getTaskById(newTask.getId()).getDueDate()).isEqualTo(tomorrow);
         //formKey
-        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getFormKey())
-            .isEqualTo("new-task-form-key");
+        assertThat(taskRuntimeBundleSteps.getTaskById(newTask.getId()).getFormKey()).isEqualTo("new-task-form-key");
         //assertThat(taskQuerySteps.getTaskById(newTask.getId()).getFormKey()).isEqualTo("new-task-form-key");
     }
 
@@ -344,36 +342,33 @@ public class Tasks {
     @Then("the user will get only root tasks when quering for root tasks")
     public void checkRootTasks() {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
-        await().untilAsserted(() -> {
-            Collection<CloudTask> rootTasksCollection = taskQuerySteps
-                .getRootTasksByProcessInstance(processInstanceId).getContent();
+        await()
+            .untilAsserted(() -> {
+                Collection<CloudTask> rootTasksCollection = taskQuerySteps
+                    .getRootTasksByProcessInstance(processInstanceId)
+                    .getContent();
 
-            assertThat(rootTasksCollection).isNotEmpty();
+                assertThat(rootTasksCollection).isNotEmpty();
 
-            rootTasksCollection.forEach(
-                task -> assertThat(task.getParentTaskId()).isNull()
-            );
-        });
+                rootTasksCollection.forEach(task -> assertThat(task.getParentTaskId()).isNull());
+            });
     }
 
     @Then("the user will get only standalone tasks when quering for standalone tasks")
     public void checkStandaloneTasks() {
-        Collection<CloudTask> standaloneTasksCollection = taskQuerySteps.getStandaloneTasks()
-            .getContent();
+        Collection<CloudTask> standaloneTasksCollection = taskQuerySteps.getStandaloneTasks().getContent();
 
         assertThat(standaloneTasksCollection).isNotNull();
         assertThat(standaloneTasksCollection).isNotEmpty();
-        standaloneTasksCollection.forEach(
-            task -> assertThat(task.isStandalone()).isTrue()
-        );
+        standaloneTasksCollection.forEach(task -> assertThat(task.isStandalone()).isTrue());
     }
 
     @Then("the standalone task can be queried using LIKE operator")
     public void queryNameAndDescriptionWithLikeOperator() {
-
-        PagedModel<CloudTask> retrievedTasks = taskQuerySteps
-            .getTasksByNameAndDescription(newTask.getName().substring(0, 2),
-                newTask.getDescription().substring(0, 2));
+        PagedModel<CloudTask> retrievedTasks = taskQuerySteps.getTasksByNameAndDescription(
+            newTask.getName().substring(0, 2),
+            newTask.getDescription().substring(0, 2)
+        );
 
         for (CloudTask task : retrievedTasks) {
             assertThat(task.getName()).contains(newTask.getName().substring(0, 2));
@@ -384,23 +379,22 @@ public class Tasks {
     @When("the user creates task variables")
     public void setTaskVariables() {
         for (Map.Entry<String, Object> entry : VariableGenerator.variables.entrySet()) {
-            taskVariableRuntimeBundleSteps
-                .createVariable(newTask.getId(), entry.getKey(), entry.getValue());
-            taskVariableRuntimeBundleSteps
-                .getVariables(newTask.getId());
+            taskVariableRuntimeBundleSteps.createVariable(newTask.getId(), entry.getKey(), entry.getValue());
+            taskVariableRuntimeBundleSteps.getVariables(newTask.getId());
         }
     }
 
     @Then("task variables are visible in rb and query")
     public void checkTaskVariablesAreTheSameInRBAndQuery() {
-
         Map<String, Object> generatedMapRuntime = new HashMap<>();
         Map<String, Object> generatedMapQuery = new HashMap<>();
 
-        taskVariableRuntimeBundleSteps.getVariables(newTask.getId())
+        taskVariableRuntimeBundleSteps
+            .getVariables(newTask.getId())
             .forEach(element -> generatedMapRuntime.put(element.getName(), element.getValue()));
 
-        taskQuerySteps.getVariables(newTask.getId())
+        taskQuerySteps
+            .getVariables(newTask.getId())
             .forEach(element -> generatedMapQuery.put(element.getName(), element.getValue()));
 
         assertThat(generatedMapRuntime).isEqualTo(VariableGenerator.variables);
@@ -451,9 +445,11 @@ public class Tasks {
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId").toString();
         String currentTaskId = Serenity.sessionVariableCalled("currentTaskId").toString();
 
-        auditSteps.checkProcessInstanceTaskEvent(processInstanceId,
+        auditSteps.checkProcessInstanceTaskEvent(
+            processInstanceId,
             currentTaskId,
-            TaskRuntimeEvent.TaskEvents.TASK_COMPLETED);
+            TaskRuntimeEvent.TaskEvents.TASK_COMPLETED
+        );
 
         taskQuerySteps.checkTaskStatus(currentTaskId, taskStatus);
     }
@@ -466,7 +462,6 @@ public class Tasks {
         List<String> taskCandidateGroups = taskQuerySteps.getCandidateGroups(currentTaskId);
 
         assertThat(taskCandidateGroups).contains(candidateGroups.split(","));
-
     }
 
     @When("the task contains candidate users $user in Query")
@@ -479,10 +474,12 @@ public class Tasks {
     }
 
     private void waitForTask(String currentTaskId) {
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
                 final Throwable throwable = catchThrowableOfType(
                     () -> taskQuerySteps.getTaskById(currentTaskId),
-                    FeignException.class);
+                    FeignException.class
+                );
                 if (throwable != null) {
                     //It's important to clear step failures after an Exception, otherwise,
                     //the step will be marked to be skipped and any subsequent call to
@@ -491,8 +488,7 @@ public class Tasks {
                     StepEventBus.getEventBus().clearStepFailures();
                 }
                 assertThat(throwable).isNull();
-            }
-        );
+            });
     }
 
     @When("the task does not contain candidate user $user in Query")

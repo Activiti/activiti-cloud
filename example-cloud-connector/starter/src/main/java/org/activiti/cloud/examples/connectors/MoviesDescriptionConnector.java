@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.examples.connectors;
 
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
@@ -26,8 +27,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 @EnableBinding(MoviesDescriptionConnectorChannels.class)
 public class MoviesDescriptionConnector {
@@ -37,8 +36,10 @@ public class MoviesDescriptionConnector {
     private IntegrationResultSender integrationResultSender;
     private ConnectorProperties connectorProperties;
 
-    public MoviesDescriptionConnector(IntegrationResultSender integrationResultSender,
-                                      ConnectorProperties connectorProperties) {
+    public MoviesDescriptionConnector(
+        IntegrationResultSender integrationResultSender,
+        ConnectorProperties connectorProperties
+    ) {
         this.integrationResultSender = integrationResultSender;
         this.connectorProperties = connectorProperties;
     }
@@ -48,10 +49,13 @@ public class MoviesDescriptionConnector {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
         Map<String, Object> inBoundVariables = integrationContext.getInBoundVariables();
         logger.info(">>inbound: " + inBoundVariables);
-        integrationContext.addOutBoundVariable("movieDescription",
-                                               "The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien");
+        integrationContext.addOutBoundVariable(
+            "movieDescription",
+            "The Lord of the Rings is an epic high fantasy novel written by English author and scholar J. R. R. Tolkien"
+        );
 
-        integrationResultSender.send(IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties).buildMessage());
+        integrationResultSender.send(
+            IntegrationResultBuilder.resultFor(integrationRequest, connectorProperties).buildMessage()
+        );
     }
-
 }

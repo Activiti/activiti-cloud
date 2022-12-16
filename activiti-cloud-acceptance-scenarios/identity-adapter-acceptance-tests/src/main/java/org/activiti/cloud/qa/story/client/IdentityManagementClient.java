@@ -26,23 +26,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public interface IdentityManagementClient {
-
     @RequestMapping(method = RequestMethod.GET, value = "/roles")
     @Headers("Content-Type: application/json")
     UserRoles getUserRoles();
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
-    List<Group> searchGroups(@RequestParam(value = "search", required = false) String search,
-                          @RequestParam(value = "role", required = false) Set<String> roles,
-                          @RequestParam(value = "application", required = false) String application);
-
+    List<Group> searchGroups(
+        @RequestParam(value = "search", required = false) String search,
+        @RequestParam(value = "role", required = false) Set<String> roles,
+        @RequestParam(value = "application", required = false) String application
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")
     @Headers("Content-Type: application/json")
-    List<User> searchUsers(@RequestParam(value = "search", required = false) String search,
-                        @RequestParam(value = "role", required = false) Set<String> roles,
-                        @RequestParam(value = "group", required = false) Set<String> groups,
-                        @RequestParam(value = "application", required = false) String application);
-
+    List<User> searchUsers(
+        @RequestParam(value = "search", required = false) String search,
+        @RequestParam(value = "role", required = false) Set<String> roles,
+        @RequestParam(value = "group", required = false) Set<String> groups,
+        @RequestParam(value = "application", required = false) String application
+    );
 }

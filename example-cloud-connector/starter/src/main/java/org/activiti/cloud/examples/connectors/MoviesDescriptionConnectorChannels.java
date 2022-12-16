@@ -19,10 +19,8 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface MoviesDescriptionConnectorChannels {
-
     String MOVIES_DESCRIPTION_CONSUMER = "moviesDescriptionConsumer";
 
     @Input(MOVIES_DESCRIPTION_CONSUMER)
     SubscribableChannel moviesDescriptionConsumer();
-
 }

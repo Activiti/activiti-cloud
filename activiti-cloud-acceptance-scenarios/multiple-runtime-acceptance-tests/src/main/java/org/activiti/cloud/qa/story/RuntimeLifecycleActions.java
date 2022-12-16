@@ -26,7 +26,6 @@ import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.BeforeStories;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * Lifecycle steps
  */
@@ -60,5 +59,4 @@ public class RuntimeLifecycleActions {
     public void cleanup() {
         dirtyContextHandler.cleanup();
     }
-
 }

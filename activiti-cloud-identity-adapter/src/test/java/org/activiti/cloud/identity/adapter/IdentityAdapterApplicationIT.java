@@ -26,13 +26,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-
 /**
  * Test for modeling rest services
  */
-@SpringBootTest(classes = {IdentityAdapterApplication.class})
+@SpringBootTest(classes = { IdentityAdapterApplication.class })
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class IdentityAdapterApplicationIT {
 
     @Autowired
@@ -42,5 +41,4 @@ public class IdentityAdapterApplicationIT {
     public void contextLoads() throws Exception {
         assertThat(applicationContext).isNotNull();
     }
-
 }
