@@ -17,6 +17,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -32,11 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.List;
 
 public class TaskControllerHelper {
 
@@ -88,6 +87,19 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable,
                                                      page,
                                                      taskRepresentationModelAssembler);
+    }
+
+    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(Predicate predicate,
+                                                                VariableSearch variableSearch,
+                                                                Pageable pageable,
+                                                                List<QueryDslPredicateFilter> filters,
+                                                                List<String> processVariableKeys) {
+
+        if(processVariableKeys == null || processVariableKeys.isEmpty()){
+            return this.findAll(predicate, variableSearch, pageable, filters);
+        } else {
+            return this.findAllWithProcessVariables(predicate, variableSearch, pageable, filters, processVariableKeys);
+        }
     }
 
     @Transactional
