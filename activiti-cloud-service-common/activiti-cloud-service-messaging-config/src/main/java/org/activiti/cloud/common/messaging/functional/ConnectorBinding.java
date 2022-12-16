@@ -30,7 +30,8 @@ public @interface ConnectorBinding {
 
     String input() default "";
 
-    String condition() default "";
+    String condition() default "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version}"
+        + " and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}";
 
     String outputHeader() default "resultDestination";
 
