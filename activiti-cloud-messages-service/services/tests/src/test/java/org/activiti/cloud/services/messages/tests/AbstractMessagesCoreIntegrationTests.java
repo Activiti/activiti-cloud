@@ -46,7 +46,6 @@ import org.activiti.api.process.model.events.BPMNMessageEvent.MessageEvents;
 import org.activiti.api.process.model.events.MessageDefinitionEvent.MessageDefinitionEvents;
 import org.activiti.api.process.model.events.MessageSubscriptionEvent.MessageSubscriptionEvents;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
-import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
