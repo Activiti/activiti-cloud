@@ -52,6 +52,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
@@ -89,7 +90,8 @@ import org.springframework.test.web.servlet.MvcResult;
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class})
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionControllerImplIT {
 

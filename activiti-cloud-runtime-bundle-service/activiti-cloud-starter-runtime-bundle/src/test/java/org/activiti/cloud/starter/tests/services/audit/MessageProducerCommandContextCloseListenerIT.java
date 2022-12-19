@@ -96,7 +96,6 @@ public class MessageProducerCommandContextCloseListenerIT {
         verify(subject, never()).closed(any(CommandContext.class));
     }
 
-    @Disabled //TODO fix & enable before merge
     @Test
     public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given

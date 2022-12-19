@@ -30,6 +30,7 @@ import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfigura
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
@@ -70,7 +71,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class})
 public class TaskAdminControllerImplIT {
 
     @Autowired
