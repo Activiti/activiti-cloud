@@ -989,4 +989,21 @@ public class ModelValidationControllerIT {
         resultActions.andExpect(status().isNoContent());
     }
 
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToHxPContentService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/hxp-content-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+            .perform(multipart("/v1/models/{model_id}/validate",
+                               processModel.getId())
+                         .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
 }
