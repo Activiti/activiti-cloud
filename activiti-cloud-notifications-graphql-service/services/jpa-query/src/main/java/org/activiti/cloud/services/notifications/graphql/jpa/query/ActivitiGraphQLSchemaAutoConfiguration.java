@@ -15,55 +15,38 @@
  */
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaConfigurer;
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLShemaRegistration;
+import com.introproventures.graphql.jpa.query.autoconfigure.EnableGraphQLJpaQuerySchema;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuilderCustomizer;
+import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaBuilderAutoConfiguration;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaSchemaBuilder;
 import graphql.GraphQL;
-import graphql.schema.GraphQLScalarType;
-import graphql.schema.GraphQLSchema;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Bean;
 
-import javax.persistence.EntityManager;
+import static graphql.schema.GraphQLScalarType.newScalar;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
-@Configuration
+@AutoConfiguration(before = GraphQLSchemaBuilderAutoConfiguration.class)
 @ConditionalOnClass({GraphQL.class, ProcessInstanceEntity.class})
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.jpa-query.enabled", matchIfMissing = true)
+@EnableGraphQLJpaQuerySchema(basePackageClasses = ProcessInstanceEntity.class)
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
-    @Configuration
-    @EntityScan(basePackageClasses = ProcessInstanceEntity.class)
-    public static class ActivitiGraphQLSchemaConfigurer implements GraphQLSchemaConfigurer {
-
-        private final EntityManager entityManager;
-
-        public ActivitiGraphQLSchemaConfigurer(EntityManager entityManager) {
-            this.entityManager = entityManager;
-
-            JavaScalars.register(VariableValue.class,
-                                 GraphQLScalarType.newScalar()
-                                                  .name("VariableValue")
-                                                  .description("VariableValue type")
-                                                  .coercing(new JavaScalars.GraphQLObjectCoercing())
-                                                  .build());
-        }
-
-        @Override
-        public void configure(GraphQLShemaRegistration registry) {
-
-            GraphQLSchema graphQLSchema = new GraphQLJpaSchemaBuilder(entityManager).name("Query")
-                                                  .entityPath(ProcessInstanceEntity.class.getPackage().getName())
-                                                  .description("Activiti Cloud Query Schema").build();
-
-            registry.register(graphQLSchema);
-        }
+    @Bean
+    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer() {
+        return builder -> builder.name("Query")
+                                 .description("Activiti Cloud Query Schema")
+                                 .scalar(VariableValue.class,
+                                         newScalar().name("VariableValue")
+                                                    .description("VariableValue type")
+                                                    .coercing(new JavaScalars.GraphQLObjectCoercing())
+                                                    .build());
     }
+
 }
