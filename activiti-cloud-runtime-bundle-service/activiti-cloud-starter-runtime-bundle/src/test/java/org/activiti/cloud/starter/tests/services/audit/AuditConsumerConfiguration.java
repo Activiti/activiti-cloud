@@ -24,11 +24,11 @@ import org.springframework.messaging.SubscribableChannel;
 @TestConfiguration
 public class AuditConsumerConfiguration implements AuditConsumer {
 
-    @Bean(AuditConsumer.AUDIT_CONSUMER)
-    @ConditionalOnMissingBean(name = AuditConsumer.AUDIT_CONSUMER)
+    @Bean(AUDIT_CONSUMER)
+    @ConditionalOnMissingBean(name = AUDIT_CONSUMER)
     @Override
     public SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AuditConsumer.AUDIT_CONSUMER)
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER)
             .get();
     }
 }

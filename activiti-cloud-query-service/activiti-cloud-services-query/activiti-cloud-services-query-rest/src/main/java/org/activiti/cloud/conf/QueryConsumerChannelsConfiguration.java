@@ -24,9 +24,9 @@ import org.springframework.messaging.SubscribableChannel;
 @Configuration
 public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
 
-    @Bean(QueryConsumerChannels.QUERY_CONSUMER)
+    @Bean(QUERY_CONSUMER)
     @Override
     public SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QueryConsumerChannels.QUERY_CONSUMER).get();
+        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
     }
 }
