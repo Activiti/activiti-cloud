@@ -74,10 +74,10 @@ public class EngineEventsConsumerAutoConfiguration {
             return new SpELTemplateRoutingKeyResolver();
         }
 
-        @Bean(EngineEventsConsumerChannels.SOURCE)
+        @Bean(SOURCE)
         @Override
         public SubscribableChannel input() {
-            return MessageChannels.publishSubscribe(EngineEventsConsumerChannels.SOURCE)
+            return MessageChannels.publishSubscribe(SOURCE)
                 .get();
         }
 
@@ -98,7 +98,7 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler,
-                @Qualifier(EngineEventsConsumerChannels.SOURCE) SubscribableChannel source) {
+                @Qualifier(SOURCE) SubscribableChannel source) {
 
             return IntegrationFlows.from(EngineEventsGateway.class,
                                         gateway -> gateway.beanName("engineEventsGateway").replyTimeout(0L))

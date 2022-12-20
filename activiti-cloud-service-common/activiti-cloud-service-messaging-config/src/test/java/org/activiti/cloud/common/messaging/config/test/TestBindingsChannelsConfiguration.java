@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -29,6 +31,9 @@ import reactor.core.publisher.Flux;
 
 @TestConfiguration
 public class TestBindingsChannelsConfiguration implements TestBindingsChannels {
+
+    private static final String INTERNAL_COMMAND_RESULTS = INTERNAL_CHANNEL_PREFIX + COMMAND_RESULTS;
+    private static final String INTERNAL_AUDIT_PRODUCER = INTERNAL_CHANNEL_PREFIX + AUDIT_PRODUCER;
 
     @Bean(COMMAND_CONSUMER)
     @Override
@@ -48,16 +53,16 @@ public class TestBindingsChannelsConfiguration implements TestBindingsChannels {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).get();
     }
 
-    @Bean(COMMAND_RESULTS)
+    @Bean(INTERNAL_COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
-        return MessageChannels.direct(COMMAND_RESULTS).get();
+        return MessageChannels.direct(INTERNAL_COMMAND_RESULTS).get();
     }
 
-    @Bean(AUDIT_PRODUCER)
+    @Bean(INTERNAL_AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
-        return MessageChannels.direct(AUDIT_PRODUCER).get();
+        return MessageChannels.direct(INTERNAL_AUDIT_PRODUCER).get();
     }
 
     @FunctionBinding(output = TestBindingsChannels.AUDIT_PRODUCER)

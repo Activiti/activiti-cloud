@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
@@ -32,28 +34,29 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
 
-    @Bean(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
-    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
+    private static final String INTERNAL_COMMAND_RESULTS = INTERNAL_CHANNEL_PREFIX + COMMAND_RESULTS;
+    private static final String INTERNAL_AUDIT_PRODUCER = INTERNAL_CHANNEL_PREFIX + AUDIT_PRODUCER;
+
+    @Bean(COMMAND_CONSUMER)
+    @ConditionalOnMissingBean(name = COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(MockCloudRuntimeEventsChannels.COMMAND_CONSUMER)
+        return MessageChannels.publishSubscribe(COMMAND_CONSUMER)
             .get();
     }
 
-    @Bean(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
-    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
+    @Bean(INTERNAL_COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = INTERNAL_COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.COMMAND_RESULTS)
-            .get();
+        return MessageChannels.direct(INTERNAL_COMMAND_RESULTS).get();
     }
 
-    @Bean(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
+    @Bean(INTERNAL_AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = INTERNAL_AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
-        return MessageChannels.direct(MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
-            .get();
+        return MessageChannels.direct(INTERNAL_AUDIT_PRODUCER).get();
     }
 
     @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
