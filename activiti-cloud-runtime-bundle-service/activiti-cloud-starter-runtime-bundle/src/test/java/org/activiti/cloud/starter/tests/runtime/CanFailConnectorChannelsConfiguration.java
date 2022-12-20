@@ -31,15 +31,15 @@ import org.springframework.messaging.SubscribableChannel;
 @Import(CanFailConnector.class)
 public class CanFailConnectorChannelsConfiguration implements CanFailConnectorChannels {
 
-    @Bean(CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
-    @ConditionalOnMissingBean(name = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
+    @Bean(CAN_FAIL_CONNECTOR)
+    @ConditionalOnMissingBean(name = CAN_FAIL_CONNECTOR)
     @Override
     public SubscribableChannel canFailConnector() {
-        return MessageChannels.publishSubscribe(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
+        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR)
             .get();
     }
 
-    @FunctionBinding(input = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
+    @FunctionBinding(input = CAN_FAIL_CONNECTOR)
     @Bean("canFailConnectorConsumer")
     public Consumer<Message<IntegrationRequest>> canFailConnector(CanFailConnector canFailConnector) {
         return message -> {
