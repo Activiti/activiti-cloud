@@ -155,15 +155,6 @@ public class JobExecutorIT {
     @MockBean(name = "spyAsyncExecutorJobs")
     private SubscribableChannel spyJobMessageChannel;
 
-//    @Configuration
-//    public static class JobExecutorConfiguration {
-//        @Bean("spyAsyncExecutorJobs")
-//        public SubscribableChannel spyJobMessageChannel() {
-//            return MessageChannels.publishSubscribe("spyJobMessageChannel")
-//                .get();
-//        }
-//    }
-
     @TestConfiguration
     @Profile(JOB_EXECUTOR_IT)
     static class JobExecutorITProcessEngineConfigurer implements
