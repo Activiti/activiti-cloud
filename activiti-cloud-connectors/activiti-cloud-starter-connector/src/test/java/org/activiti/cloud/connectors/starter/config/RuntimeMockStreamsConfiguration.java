@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
@@ -31,24 +33,27 @@ import reactor.core.publisher.Flux;
 
 @Configuration
 public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
-    @Bean(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
-    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
+
+    private static final String INTERNAL_INTEGRATION_EVENT_PRODUCER = INTERNAL_CHANNEL_PREFIX + INTEGRATION_EVENT_PRODUCER;
+
+    @Bean(INTEGRATION_RESULT_CONSUMER)
+    @ConditionalOnMissingBean(name = INTEGRATION_RESULT_CONSUMER)
     @Override
     public SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER)
             .get();
     }
 
 
-    @Bean(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
-    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
+    @Bean(INTERNAL_INTEGRATION_EVENT_PRODUCER)
+    @ConditionalOnMissingBean(name = INTERNAL_INTEGRATION_EVENT_PRODUCER)
     @Override
     public MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER).get();
+        return MessageChannels.direct(INTERNAL_INTEGRATION_EVENT_PRODUCER).get();
     }
 
 
-    @FunctionBinding(output = RuntimeMockStreams.INTEGRATION_EVENT_PRODUCER)
+    @FunctionBinding(output = INTEGRATION_EVENT_PRODUCER)
     @ConditionalOnMissingBean(name = "integrationEventsSupplier")
     @Bean
     public Supplier<Flux<Message<?>>> integrationEventsSupplier() {
@@ -57,11 +62,11 @@ public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
             .toReactivePublisher());
     }
 
-    @Bean(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
-    @ConditionalOnMissingBean(name = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
+    @Bean(INTEGRATION_ERROR_CONSUMER)
+    @ConditionalOnMissingBean(name = INTEGRATION_ERROR_CONSUMER)
     @Override
     public SubscribableChannel integrationErrorConsumer() {
-        return MessageChannels.publishSubscribe(RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)
+        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER)
             .get();
     }
 }

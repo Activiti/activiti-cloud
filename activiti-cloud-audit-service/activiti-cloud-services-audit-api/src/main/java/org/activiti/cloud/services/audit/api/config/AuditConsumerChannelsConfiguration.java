@@ -24,10 +24,10 @@ import org.springframework.messaging.SubscribableChannel;
 @Configuration
 public class AuditConsumerChannelsConfiguration implements AuditConsumerChannels {
 
-    @Bean(AuditConsumerChannels.AUDIT_CONSUMER)
+    @Bean(AUDIT_CONSUMER)
     @Override
     public SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AuditConsumerChannels.AUDIT_CONSUMER)
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER)
             .get();
     }
 }
