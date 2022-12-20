@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.notifications.graphql.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,11 +32,12 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class EngineEventsConfiguration implements EngineEvents {
 
+    public static final String INTERNAL_ENGINE_EVENTS_PRODUCER = INTERNAL_CHANNEL_PREFIX + ENGINE_EVENTS_PRODUCER;
 
-    @Bean(EngineEvents.ENGINE_EVENTS_PRODUCER)
+    @Bean(INTERNAL_ENGINE_EVENTS_PRODUCER)
     @Override
     public MessageChannel output() {
-        return MessageChannels.publishSubscribe(EngineEvents.ENGINE_EVENTS_PRODUCER)
+        return MessageChannels.direct(INTERNAL_ENGINE_EVENTS_PRODUCER)
             .get();
     }
 

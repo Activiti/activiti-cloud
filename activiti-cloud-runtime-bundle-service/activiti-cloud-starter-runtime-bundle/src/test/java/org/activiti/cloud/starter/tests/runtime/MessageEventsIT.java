@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
@@ -134,7 +135,7 @@ public class MessageEventsIT {
     static class TestConfigurationContext {
 
         @Bean("messageEventsOutputSupplier")
-        @BridgeFrom(value = "messageEventsOutput")
+        @BridgeFrom(value = INTERNAL_CHANNEL_PREFIX + "messageEventsOutput")
         QueueChannel messageEventsQueue() {
             return MessageChannels.queue()
                                   .get();
