@@ -16,7 +16,6 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
@@ -39,10 +38,6 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-
-    private static String SPRING_CLOUD_STREAM_RABBIT = "spring.cloud.stream.rabbit.bindings";
-    private static final Set<String> SPRING_CLOUD_STREAM_RABBIT_PRODUCER_PROPERTIES =
-        Set.of("exchangeType", "routingKeyExpression", "transacted");
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
