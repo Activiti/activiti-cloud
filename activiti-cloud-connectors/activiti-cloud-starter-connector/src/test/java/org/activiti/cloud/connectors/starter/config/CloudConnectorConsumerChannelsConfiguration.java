@@ -27,7 +27,7 @@ public class CloudConnectorConsumerChannelsConfiguration implements CloudConnect
     @Bean
     @Override
     public SubscribableChannel integrationEventConsumer() {
-        return MessageChannels.publishSubscribe(CloudConnectorConsumerChannels.INTEGRATION_EVENT_CONSUMER)
+        return MessageChannels.publishSubscribe(INTEGRATION_EVENT_CONSUMER)
             .get();
     }
 }

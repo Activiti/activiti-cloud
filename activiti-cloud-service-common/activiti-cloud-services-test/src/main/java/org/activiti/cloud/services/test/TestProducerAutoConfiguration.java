@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.test;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
@@ -36,16 +38,18 @@ public class TestProducerAutoConfiguration {
     @Configuration
     static class MyProducerConfiguration implements StreamProducer {
 
-        @Bean(StreamProducer.PRODUCER)
+        private static final String INTERNAL_PRODUCER = INTERNAL_CHANNEL_PREFIX + PRODUCER;
+
+        @Bean(INTERNAL_PRODUCER)
         @Override
-        @ConditionalOnMissingBean(name = StreamProducer.PRODUCER)
+        @ConditionalOnMissingBean(name = INTERNAL_PRODUCER)
         public MessageChannel producer() {
-            return MessageChannels.direct(StreamProducer.PRODUCER).get();
+            return MessageChannels.direct(INTERNAL_PRODUCER).get();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public MyProducer myProducer(@Qualifier(StreamProducer.PRODUCER) MessageChannel producer) {
+        public MyProducer myProducer(@Qualifier(INTERNAL_PRODUCER) MessageChannel producer) {
             return new MyProducer(producer);
         }
 

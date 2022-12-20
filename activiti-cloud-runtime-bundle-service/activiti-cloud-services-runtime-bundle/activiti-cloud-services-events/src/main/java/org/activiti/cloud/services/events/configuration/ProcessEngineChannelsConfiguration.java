@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -36,25 +38,25 @@ import reactor.core.publisher.Flux;
 @Primary
 public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {
 
-    private static final String COMMAND_RESULTS_INTERNAL = COMMAND_RESULTS + "Internal";
-    private static final String AUDIT_PRODUCER_INTERNAL = AUDIT_PRODUCER + "Internal";
+    private static final String INTERNAL_COMMAND_RESULTS = INTERNAL_CHANNEL_PREFIX + COMMAND_RESULTS;
+    private static final String INTERNAL_AUDIT_PRODUCER = INTERNAL_CHANNEL_PREFIX + AUDIT_PRODUCER;
 
-    @Bean(ProcessEngineChannels.COMMAND_CONSUMER)
-    @ConditionalOnMissingBean(name = ProcessEngineChannels.COMMAND_CONSUMER)
+    @Bean(COMMAND_CONSUMER)
+    @ConditionalOnMissingBean(name = COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(ProcessEngineChannels.COMMAND_CONSUMER)
+        return MessageChannels.publishSubscribe(COMMAND_CONSUMER)
             .get();
     }
 
-    @Bean(COMMAND_RESULTS_INTERNAL)
-    @ConditionalOnMissingBean(name = COMMAND_RESULTS_INTERNAL)
+    @Bean(INTERNAL_COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = INTERNAL_COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
-        return MessageChannels.direct(COMMAND_RESULTS_INTERNAL).get();
+        return MessageChannels.direct(INTERNAL_COMMAND_RESULTS).get();
     }
 
-    @FunctionBinding(output = ProcessEngineChannels.COMMAND_RESULTS)
+    @FunctionBinding(output = COMMAND_RESULTS)
     @ConditionalOnMissingBean(name = "commandResultsSupplier")
     @Bean
     public Supplier<Flux<Message<Object>>> commandResultsSupplier() {
@@ -63,15 +65,15 @@ public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels
                 .toReactivePublisher());
     }
 
-    @Bean(AUDIT_PRODUCER_INTERNAL)
-    @ConditionalOnMissingBean(name = AUDIT_PRODUCER_INTERNAL)
+    @Bean(INTERNAL_AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = INTERNAL_AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
-        return MessageChannels.direct(AUDIT_PRODUCER_INTERNAL)
+        return MessageChannels.direct(INTERNAL_AUDIT_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = ProcessEngineChannels.AUDIT_PRODUCER)
+    @FunctionBinding(output = AUDIT_PRODUCER)
     @Bean("auditProducerSupplier")
     @ConditionalOnMissingBean(name = "auditProducerSupplier")
     public Supplier<Flux<Message<?>>> auditProducerSupplier(StreamBridge streamBridge) {

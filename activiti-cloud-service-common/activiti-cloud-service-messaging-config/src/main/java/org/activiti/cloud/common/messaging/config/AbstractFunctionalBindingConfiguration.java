@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
-
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -37,7 +33,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -82,13 +77,8 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         Optional.of(outputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(output -> {
-                String outputDestination = Optional.ofNullable(bindingServiceProperties.getBindingDestination(output)).orElse(output);
                 setOutProperties(streamFunctionProperties, beanOutName,
-                    outputDestination, bindingServiceProperties, output);
-
-                if (!output.equals(outputDestination)) {
-                    setRabbitProducerProperties(environment, outputDestination, output);
-                }
+                    output, bindingServiceProperties);
             });
     }
 
@@ -104,36 +94,14 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             });
     }
 
-    protected void setRabbitProducerProperties(ConfigurableEnvironment environment, String channelName, String outputBinding) {
-        Map<String, Object> producerProperties = SPRING_CLOUD_STREAM_RABBIT_PRODUCER_PROPERTIES.stream()
-            .filter(property -> environment.containsProperty(String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, outputBinding, property)))
-            .collect(Collectors.toMap(
-                property -> String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, channelName, property),
-                property -> environment.getProperty(String.format("%s.%s.producer.%s", SPRING_CLOUD_STREAM_RABBIT, outputBinding, property))));
-
-        if (!producerProperties.isEmpty()) {
-            if (environment.getPropertySources().contains(this.getClass().getSimpleName())) {
-                MapPropertySource existingSource = (MapPropertySource) environment.getPropertySources().get(this.getClass().getSimpleName());
-                existingSource.getSource().putAll(producerProperties);
-            } else {
-                environment.getPropertySources()
-                    .addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                        new MapPropertySource(this.getClass().getSimpleName(),
-                            producerProperties));
-            }
-        }
-    }
-
     protected void setOutProperties(StreamFunctionProperties streamFunctionProperties,
         String beanOutName,
         String binding,
-        BindingServiceProperties bindingServiceProperties,
-        String functionDefinitionOutput) {
+        BindingServiceProperties bindingServiceProperties) {
         streamFunctionProperties.getBindings().put(beanOutName, binding);
-        Optional.ofNullable(bindingServiceProperties.getProducerProperties(functionDefinitionOutput))
+        Optional.ofNullable(bindingServiceProperties.getProducerProperties(binding))
             .ifPresent(producerProperties -> {
                 bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
-                bindingServiceProperties.getBindingProperties(binding).setProducer(producerProperties);
             });
     }
 

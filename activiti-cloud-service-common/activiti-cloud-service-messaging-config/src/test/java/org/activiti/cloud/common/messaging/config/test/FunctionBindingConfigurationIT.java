@@ -139,24 +139,24 @@ public class FunctionBindingConfigurationIT {
     @Test
     public void testStreamBindings() {
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains("queryConsumer"));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.QUERY_CONSUMER));
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains("commandConsumer"));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_CONSUMER));
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains("commandResults_foo"));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains("engineEvents"));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.AUDIT_PRODUCER));
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains("commandResults_foo"));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
     }
 
     @Test
