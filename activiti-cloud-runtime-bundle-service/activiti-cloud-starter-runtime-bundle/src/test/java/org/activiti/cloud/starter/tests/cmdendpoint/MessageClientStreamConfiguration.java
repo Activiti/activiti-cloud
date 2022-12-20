@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.slf4j.Logger;
@@ -33,40 +35,30 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MessageClientStreamConfiguration.class);
+    private static final String INTERNAL_MY_CMD_PRODUCER = INTERNAL_CHANNEL_PREFIX + MY_CMD_PRODUCER;
 
-    @Bean(MessageClientStream.MY_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_PRODUCER)
+    @Bean(INTERNAL_MY_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = INTERNAL_MY_CMD_PRODUCER)
     @Override
     public MessageChannel myCmdProducer() {
-        return MessageChannels.direct(MessageClientStream.MY_CMD_PRODUCER)
+        return MessageChannels.direct(INTERNAL_MY_CMD_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = MessageClientStream.MY_CMD_PRODUCER)
+    @FunctionBinding(output = MY_CMD_PRODUCER)
     @ConditionalOnMissingBean(name = "messageConnectorOutput")
     @Bean
     public Supplier<Flux<Message<Object>>> messageConnectorOutput() {
         return () -> Flux.from(IntegrationFlows.from(myCmdProducer())
             .log(LoggingHandler.Level.INFO,"myCmdProducer")
-            .toReactivePublisher())
-            .onErrorContinue((ex, value) -> LOGGER.error(
-                "Unexpected error while sending message to " + MessageClientStream.MY_CMD_PRODUCER,
-                ex)
-            )
-            .onErrorResume(ex -> {
-                LOGGER.error(
-                    "Resuming from unexpected error while sending message to " + MessageClientStream.MY_CMD_PRODUCER,
-                    ex);
-                return Flux.empty();
-            });
+            .toReactivePublisher());
     }
 
-    @Bean(MessageClientStream.MY_CMD_RESULTS)
-    @ConditionalOnMissingBean(name = MessageClientStream.MY_CMD_RESULTS)
+    @Bean(MY_CMD_RESULTS)
+    @ConditionalOnMissingBean(name = MY_CMD_RESULTS)
     @Override
     public SubscribableChannel myCmdResults() {
-        return MessageChannels.publishSubscribe(MessageClientStream.MY_CMD_RESULTS)
+        return MessageChannels.publishSubscribe(MY_CMD_RESULTS)
             .get();
     }
 }

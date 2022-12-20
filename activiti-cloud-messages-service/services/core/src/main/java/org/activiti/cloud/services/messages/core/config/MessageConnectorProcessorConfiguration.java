@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -31,19 +33,20 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
-    @Bean(MessageConnectorProcessor.INPUT)
-    @ConditionalOnMissingBean(name = MessageConnectorProcessor.INPUT)
+    public final String INTERNAL_OUTPUT = INTERNAL_CHANNEL_PREFIX + MessageConnectorProcessor.OUTPUT;
+
+    @Bean(INPUT)
+    @ConditionalOnMissingBean(name = INPUT)
     @Override
     public MessageChannel input() {
-        return MessageChannels.direct(MessageConnectorProcessor.INPUT)
-            .get();
+        return MessageChannels.direct(INPUT).get();
     }
 
-    @Bean(MessageConnectorProcessor.OUTPUT)
-    @ConditionalOnMissingBean(name = MessageConnectorProcessor.OUTPUT)
+    @Bean(INTERNAL_OUTPUT)
+    @ConditionalOnMissingBean(name = INTERNAL_OUTPUT)
     @Override
     public MessageChannel output() {
-        return MessageChannels.direct(MessageConnectorProcessor.OUTPUT)
+        return MessageChannels.direct(INTERNAL_OUTPUT)
             .get();
     }
 

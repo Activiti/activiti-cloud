@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
@@ -32,15 +34,17 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
 
-    @Bean(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    private static final String INTERNAL_RUNTIME_CMD_PRODUCER = INTERNAL_CHANNEL_PREFIX + RUNTIME_CMD_PRODUCER;
+
+    @Bean(INTERNAL_RUNTIME_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = INTERNAL_RUNTIME_CMD_PRODUCER)
     @Override
     public MessageChannel runtimeCmdProducer() {
-        return MessageChannels.direct(ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+        return MessageChannels.direct(INTERNAL_RUNTIME_CMD_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = ProcessRuntimeChannels.RUNTIME_CMD_PRODUCER)
+    @FunctionBinding(output = RUNTIME_CMD_PRODUCER)
     @ConditionalOnMissingBean(name = "runtimeCmdSupplier")
     @Bean
     public Supplier<Flux<Message<?>>> runtimeCmdSupplier() {
@@ -49,11 +53,11 @@ public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChanne
             .toReactivePublisher());
     }
 
-    @Bean(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
-    @ConditionalOnMissingBean(name = ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
+    @Bean(RUNTIME_CMD_RESULTS)
+    @ConditionalOnMissingBean(name = RUNTIME_CMD_RESULTS)
     @Override
     public SubscribableChannel runtimeCmdResults() {
-        return MessageChannels.publishSubscribe(ProcessRuntimeChannels.RUNTIME_CMD_RESULTS)
+        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS)
             .get();
     }
 }

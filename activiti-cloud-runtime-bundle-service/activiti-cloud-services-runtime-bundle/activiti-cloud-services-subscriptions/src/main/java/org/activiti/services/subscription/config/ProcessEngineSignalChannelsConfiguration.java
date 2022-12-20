@@ -15,6 +15,8 @@
  */
 package org.activiti.services.subscription.config;
 
+import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
+
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
@@ -32,21 +34,22 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSignalChannels {
 
-    @Bean(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
+    private static final String INTERNAL_SIGNAL_PRODUCER = INTERNAL_CHANNEL_PREFIX + SIGNAL_PRODUCER;
+
+    @Bean(SIGNAL_CONSUMER)
     @Override
     public SubscribableChannel signalConsumer() {
-        return MessageChannels.publishSubscribe(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
+        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER)
             .get();
     }
 
-    @Bean(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
+    @Bean(INTERNAL_SIGNAL_PRODUCER)
     @Override
     public MessageChannel signalProducer() {
-        return MessageChannels.direct(ProcessEngineSignalChannels.SIGNAL_PRODUCER)
-            .get();
+        return MessageChannels.direct(INTERNAL_SIGNAL_PRODUCER).get();
     }
 
-    @FunctionBinding(output = ProcessEngineSignalChannels.SIGNAL_PRODUCER)
+    @FunctionBinding(output = SIGNAL_PRODUCER)
     @ConditionalOnMissingBean(name = "signalProducerSupplier")
     @Bean
     public Supplier<Flux<Message<?>>> signalProducerSupplier() {
