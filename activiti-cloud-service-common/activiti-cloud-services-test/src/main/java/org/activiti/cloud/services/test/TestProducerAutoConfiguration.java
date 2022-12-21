@@ -22,6 +22,7 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Flux;
 public class TestProducerAutoConfiguration {
 
     @Configuration
+    @ConditionalOnClass({ Flux.class, MessageChannels.class })
     static class MyProducerConfiguration implements StreamProducer {
 
         private static final String INTERNAL_PRODUCER = INTERNAL_CHANNEL_PREFIX + PRODUCER;
