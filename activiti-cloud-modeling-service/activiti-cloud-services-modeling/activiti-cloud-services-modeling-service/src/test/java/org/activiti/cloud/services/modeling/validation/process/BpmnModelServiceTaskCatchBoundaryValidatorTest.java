@@ -59,7 +59,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
     }
 
     @Test
-    public void should_returnWarning_when_taskIsScriptWithNoErrorBoundaryEvent() {
+    public void should_returnError_when_taskIsScriptWithNoErrorBoundaryEvent() {
         //given
         ServiceTask serviceTask = buildServiceTask("script.EXECUTE", Arrays.asList(buildSignalBoundaryEvent()));
         BpmnModel model = new BpmnModel();
@@ -81,7 +81,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
 
 
     @Test
-    public void should_returnWarning_when_scriptHasNoBoundaryEvent() {
+    public void should_returnError_when_scriptHasNoBoundaryEvent() {
         //given
         ServiceTask serviceTask = buildServiceTask("script.EXECUTE", Collections.emptyList());
         BpmnModel model = new BpmnModel();
@@ -93,7 +93,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
 
         //then
-        assertThat(validationResult)
+        assertThat(validator.validate(model, validationContext))
             .extracting(ModelValidationError::getProblem,
                 ModelValidationError::getDescription,
                 ModelValidationError::getValidatorSetName,
