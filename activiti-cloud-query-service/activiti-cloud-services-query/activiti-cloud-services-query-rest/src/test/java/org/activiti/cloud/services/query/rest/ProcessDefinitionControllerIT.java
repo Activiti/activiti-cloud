@@ -16,12 +16,14 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -68,6 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser
 public class ProcessDefinitionControllerIT {
 
+    private static final String EVERYONE_GROUP = "*";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -113,9 +117,7 @@ public class ProcessDefinitionControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitions() throws Exception {
         //given
-        Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
+        Predicate predicate = createPredicate();
         PageRequest pageRequest = PageRequest.of(0,
                                                  10);
         given(processDefinitionRepository.findAll(predicate,
@@ -134,9 +136,7 @@ public class ProcessDefinitionControllerIT {
     @Test
     public void shouldReturnAvailableProcessDefinitionsUsingAlfrescoFormat() throws Exception {
         //given
-        Predicate predicate = mock(Predicate.class);
-        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
-                .willReturn(predicate);
+        Predicate predicate = createPredicate();
         given(processDefinitionRepository.findAll(eq(predicate), any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessDefinition()),
                                            PageRequest.of(1,10),
@@ -147,6 +147,23 @@ public class ProcessDefinitionControllerIT {
                                 .accept(MediaType.APPLICATION_JSON))
                 //then
                 .andExpect(status().isOk());
+    }
+
+    private Predicate createPredicate() {
+        Predicate predicate = mock(Predicate.class);
+        given(processDefinitionRestrictionService.restrictProcessDefinitionQuery(any(), eq(SecurityPolicyAccess.READ)))
+                .willReturn(predicate);
+
+        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity
+            .processDefinitionEntity
+            .candidateStarterUsers.any()
+            .userId.eq("user")
+            .or(QProcessDefinitionEntity
+                .processDefinitionEntity
+                .candidateStarterGroups.any()
+                .groupId.in(List.of(EVERYONE_GROUP)));
+
+        return candidateStarterExpression.and(predicate);
     }
 
 }

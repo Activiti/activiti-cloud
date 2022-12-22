@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,6 @@ import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
@@ -53,8 +53,7 @@ import com.querydsl.core.types.Predicate;
         })
 public class ProcessDefinitionController {
 
-    @Value("${activiti.candidateStarters.enabled:false}")
-    private boolean candidateStartersEnabled;
+    private static final String EVERYONE_GROUP = "*";
 
     private ProcessDefinitionRepository repository;
 
@@ -92,17 +91,13 @@ public class ProcessDefinitionController {
                                                                                                                  .orElseGet(BooleanBuilder::new),
                                                                                                          SecurityPolicyAccess.READ);
 
-        if (!candidateStartersEnabled) {
-            return extendedPredicate;
-        }
-
         String userId = securityManager.getAuthenticatedUserId();
         BooleanExpression candidateStarterExpression = QProcessDefinitionEntity
                                                         .processDefinitionEntity
                                                         .candidateStarterUsers.any()
                                                         .userId.eq(userId);
 
-        List<String> groupIds = securityManager.getAuthenticatedUserGroups();
+        List<String> groupIds = getCurrentUserGroupsIncludingEveryOneGroup();
         if (!groupIds.isEmpty()) {
             candidateStarterExpression = candidateStarterExpression.or(QProcessDefinitionEntity
                                                                        .processDefinitionEntity
@@ -111,5 +106,11 @@ public class ProcessDefinitionController {
         }
 
         return candidateStarterExpression.and(extendedPredicate);
+    }
+
+    private List<String> getCurrentUserGroupsIncludingEveryOneGroup() {
+        List<String> groups = new ArrayList<>(securityManager.getAuthenticatedUserGroups());
+        groups.add(EVERYONE_GROUP);
+        return groups;
     }
 }
