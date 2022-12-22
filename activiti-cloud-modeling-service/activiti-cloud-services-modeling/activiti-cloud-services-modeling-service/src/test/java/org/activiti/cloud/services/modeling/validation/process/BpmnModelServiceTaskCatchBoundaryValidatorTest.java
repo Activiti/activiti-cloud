@@ -94,7 +94,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
 
         //then
-        assertThat(validator.validate(model, validationContext))
+        assertThat(validationResult)
             .extracting(ModelValidationError::getProblem,
                 ModelValidationError::getDescription,
                 ModelValidationError::getValidatorSetName,
