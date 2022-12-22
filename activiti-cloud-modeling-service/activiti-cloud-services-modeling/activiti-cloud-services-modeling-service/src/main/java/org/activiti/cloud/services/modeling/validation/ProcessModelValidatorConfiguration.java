@@ -17,35 +17,36 @@ package org.activiti.cloud.services.modeling.validation;
 
 import java.util.List;
 import java.util.Set;
-
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsProcessVariablesValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsTaskMappingsValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionsValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.extensions.TaskMappingsValidator;
-import org.activiti.cloud.services.modeling.validation.extensions.ProcessExtensionMessageMappingValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnCommonModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelCallActivityValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelEngineValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelNameValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequenceFlowValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskCatchBoundaryValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUniqueIdValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
-import org.activiti.cloud.services.modeling.validation.process.BpmnCommonModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelValidator;
 import org.activiti.cloud.services.modeling.validation.process.EndEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.FlowElementsExtractor;
 import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
 import org.activiti.cloud.services.modeling.validation.process.IntermediateFlowNodeIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.ProcessModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.ServiceTaskImplementationType;
 import org.activiti.cloud.services.modeling.validation.process.StartEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectConsistencyValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
@@ -164,6 +165,18 @@ public class ProcessModelValidatorConfiguration {
         ConnectorModelContentConverter connectorModelContentConverter, FlowElementsExtractor flowElementsExtractor) {
         return new BpmnModelServiceTaskImplementationValidator(connectorModelType,
                                                                connectorModelContentConverter, flowElementsExtractor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BpmnModelServiceTaskCatchBoundaryValidator bpmnModelServiceTaskBoundaryValidator(ConnectorModelType connectorModelType,
+        ConnectorModelContentConverter connectorModelContentConverter, FlowElementsExtractor flowElementsExtractor) {
+
+        ServiceTaskImplementationType[] serviceTaskImplementationTypes = new ServiceTaskImplementationType[] {
+            ServiceTaskImplementationType.SCRIPT_TASK
+        };
+        return new BpmnModelServiceTaskCatchBoundaryValidator(connectorModelType, connectorModelContentConverter, flowElementsExtractor,
+            serviceTaskImplementationTypes);
     }
 
     @Bean
