@@ -742,7 +742,7 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToScriptActionWithCatchBoundary()
+    public void should_throwSemanticModelValidationException_when_validatingProcessWithServiceTaskImplementationSetToScriptActionWithCatchBoundary()
         throws Exception {
         byte[] validContent = resourceAsByteArray("process/script-implementation-service-task-with-catch-boundary.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
