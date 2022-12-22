@@ -2460,4 +2460,22 @@ public class QueryTasksIT {
         });
     }
 
+    @Test
+    public void shouldGetRestrictedTasksWithUserPermissionOnDuplicateCandidateEvents() {
+        //given
+        identityTokenProducer.withTestUser(TESTUSER);
+        Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate("task with duplicate candidate event",
+                                                                                   TESTUSER,
+                                                                                   runningProcessInstance);
+
+        //sending same task candidate again, shouldn't cause a problem with the query
+        eventsAggregator.addEvents(new CloudTaskCandidateUserAddedEventImpl(new TaskCandidateUserImpl(TESTUSER,
+                                                                            taskWithCandidate.getId())));
+        //when
+        eventsAggregator.sendAll();
+
+        //then
+        assertCanRetrieveTask(taskWithCandidate);
+    }
+
 }

@@ -19,6 +19,7 @@ import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +31,9 @@ import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCandidateUserAddedEventHandlerTest {
@@ -54,6 +57,26 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
         //then
         ArgumentCaptor<TaskCandidateUserEntity> captor = ArgumentCaptor.forClass(TaskCandidateUserEntity.class);
         verify(entityManager).persist(captor.capture());
+        assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
+        assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
+    }
+
+    @Test
+    public void handleShouldNotStoreTaskCandidateUserIfExists() {
+        //given
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl(UUID.randomUUID().toString(),
+                                                                        UUID.randomUUID().toString());
+        CloudTaskCandidateUserAddedEventImpl event = new CloudTaskCandidateUserAddedEventImpl(candidateUser);
+
+        //when
+        handler.handle(event);
+        when(entityManager.find(TaskCandidateUserEntity.class, new TaskCandidateUserId(candidateUser.getTaskId(), candidateUser.getUserId())))
+            .thenReturn(new TaskCandidateUserEntity());
+        handler.handle(event);
+
+        //then
+        ArgumentCaptor<TaskCandidateUserEntity> captor = ArgumentCaptor.forClass(TaskCandidateUserEntity.class);
+        verify(entityManager, times(1)).persist(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
     }
