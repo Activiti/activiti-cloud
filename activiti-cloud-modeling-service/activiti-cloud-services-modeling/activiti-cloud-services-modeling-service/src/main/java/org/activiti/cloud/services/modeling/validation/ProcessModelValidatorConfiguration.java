@@ -169,14 +169,11 @@ public class ProcessModelValidatorConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BpmnModelServiceTaskCatchBoundaryValidator bpmnModelServiceTaskBoundaryValidator(ConnectorModelType connectorModelType,
-        ConnectorModelContentConverter connectorModelContentConverter, FlowElementsExtractor flowElementsExtractor) {
-
+    public BpmnModelServiceTaskCatchBoundaryValidator bpmnModelServiceTaskBoundaryValidator(FlowElementsExtractor flowElementsExtractor) {
         ServiceTaskImplementationType[] serviceTaskImplementationTypes = new ServiceTaskImplementationType[] {
             ServiceTaskImplementationType.SCRIPT_TASK
         };
-        return new BpmnModelServiceTaskCatchBoundaryValidator(connectorModelType, connectorModelContentConverter, flowElementsExtractor,
-            serviceTaskImplementationTypes);
+        return new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, serviceTaskImplementationTypes);
     }
 
     @Bean
