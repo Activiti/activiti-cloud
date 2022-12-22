@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
-import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,12 +25,8 @@ import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ErrorEventDefinition;
 import org.activiti.bpmn.model.ServiceTask;
-import org.activiti.cloud.modeling.api.ConnectorModelType;
-import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConverter;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
  * Implementation of {@link BpmnCommonModelValidator} for validating service task boundaries
@@ -41,21 +36,13 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     public static final String MISSING_BOUNDARY_WARNING = "Missing Catch Error boundary event";
     public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "The service implementation on service '%s' might fail silently";
     public static final String SERVICE_TASK_VALIDATOR_NAME = "BPMN service task catch boundary validator";
-
-    private final ConnectorModelType connectorModelType;
-
-    private final ConnectorModelContentConverter connectorModelContentConverter;
-
+    
     private final FlowElementsExtractor flowElementsExtractor;
 
     private final ServiceTaskImplementationType[] serviceTaskImplementationTypes;
 
-    public BpmnModelServiceTaskCatchBoundaryValidator(ConnectorModelType connectorModelType,
-        ConnectorModelContentConverter connectorModelContentConverter,
-        FlowElementsExtractor flowElementsExtractor,
+    public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
         ServiceTaskImplementationType[] serviceTaskImplementationTypes) {
-        this.connectorModelType = connectorModelType;
-        this.connectorModelContentConverter = connectorModelContentConverter;
         this.flowElementsExtractor = flowElementsExtractor;
         this.serviceTaskImplementationTypes = Optional.ofNullable(serviceTaskImplementationTypes)
             .orElse(new ServiceTaskImplementationType[0]);
@@ -70,13 +57,6 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
             .map(serviceTask -> validateServiceTaskBoundary(serviceTask))
             .filter(Optional::isPresent)
             .map(Optional::get);
-    }
-
-    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature,
-        Model model) {
-        return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName()) ?
-            model.getName() :
-            model.getName() + "." + connectorModelFeature.getName();
     }
 
     private Optional<ModelValidationError> validateServiceTaskBoundary(ServiceTask serviceTask) {
