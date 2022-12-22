@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
-import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +23,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
-import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 
 /**
  * Implementation of {@link BpmnCommonModelValidator} for validating service task boundaries
@@ -37,9 +34,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     public static final String MISSING_BOUNDARY_WARNING = "Missing Catch Error boundary event";
     public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "The service implementation on service '%s' might fail silently";
     public static final String SERVICE_TASK_VALIDATOR_NAME = "BPMN service task catch boundary validator";
-
     private final FlowElementsExtractor flowElementsExtractor;
-
     private final List<ServiceTaskImplementationType> serviceTaskImplementationTypes;
 
     public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
@@ -59,13 +54,6 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
             .map(serviceTask -> validateServiceTaskBoundary(serviceTask))
             .filter(Optional::isPresent)
             .map(Optional::get);
-    }
-
-    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature,
-        Model model) {
-        return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName()) ?
-            model.getName() :
-            model.getName() + "." + connectorModelFeature.getName();
     }
 
     private Optional<ModelValidationError> validateServiceTaskBoundary(ServiceTask serviceTask) {
