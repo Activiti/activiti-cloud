@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,16 +75,12 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         TaskCandidateGroup entity = event.getEntity();
 
         //when
-        handler.handle(event);
         when(entityManager.find(TaskCandidateGroupEntity.class, new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())))
             .thenReturn(new TaskCandidateGroupEntity());
         handler.handle(event);
 
         //then
-        ArgumentCaptor<TaskCandidateGroupEntity> captor = ArgumentCaptor.forClass(TaskCandidateGroupEntity.class);
-        verify(entityManager, times(1)).persist(captor.capture());
-        assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
-        assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
+        verify(entityManager, never()).persist(any());
     }
 
     @Test

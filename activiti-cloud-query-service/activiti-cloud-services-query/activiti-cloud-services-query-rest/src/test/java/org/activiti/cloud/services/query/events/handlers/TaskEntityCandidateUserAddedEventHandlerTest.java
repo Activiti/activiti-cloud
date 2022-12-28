@@ -31,7 +31,8 @@ import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,16 +70,12 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
         CloudTaskCandidateUserAddedEventImpl event = new CloudTaskCandidateUserAddedEventImpl(candidateUser);
 
         //when
-        handler.handle(event);
         when(entityManager.find(TaskCandidateUserEntity.class, new TaskCandidateUserId(candidateUser.getTaskId(), candidateUser.getUserId())))
             .thenReturn(new TaskCandidateUserEntity());
         handler.handle(event);
 
         //then
-        ArgumentCaptor<TaskCandidateUserEntity> captor = ArgumentCaptor.forClass(TaskCandidateUserEntity.class);
-        verify(entityManager, times(1)).persist(captor.capture());
-        assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
-        assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
+        verify(entityManager, never()).persist(any());
     }
 
     @Test

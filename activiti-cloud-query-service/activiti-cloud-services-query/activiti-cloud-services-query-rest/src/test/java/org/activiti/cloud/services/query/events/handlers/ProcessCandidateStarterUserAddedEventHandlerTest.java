@@ -31,7 +31,8 @@ import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,16 +70,12 @@ public class ProcessCandidateStarterUserAddedEventHandlerTest {
         CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(candidateUser);
 
         //when
-        handler.handle(event);
         when(entityManager.find(ProcessCandidateStarterUserEntity.class,
              new ProcessCandidateStarterUserId(candidateUser.getProcessDefinitionId(), candidateUser.getUserId()))).thenReturn(new ProcessCandidateStarterUserEntity());
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessCandidateStarterUserEntity> captor = ArgumentCaptor.forClass(ProcessCandidateStarterUserEntity.class);
-        verify(entityManager, times(1)).persist(captor.capture());
-        assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
-        assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
+        verify(entityManager, never()).persist(any());
     }
 
     @Test
