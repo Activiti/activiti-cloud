@@ -21,6 +21,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupId;
 
 import javax.persistence.EntityManager;
 
@@ -39,10 +40,11 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupAddedEvent.getEntity();
         TaskCandidateGroupEntity taskCandidateGroupEntity = new TaskCandidateGroupEntity(taskCandidateGroup.getTaskId(),
                                                                                          taskCandidateGroup.getGroupId());
-        // not going to look up task as candidate can be created before task
-        // Persist into database
+
         try {
-            entityManager.persist(taskCandidateGroupEntity);
+            if (!taskCandidateEntityAlreadyExists(taskCandidateGroupEntity)) {
+                entityManager.persist(taskCandidateGroupEntity);
+            }
         } catch (Exception cause) {
             throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
                                      cause);
@@ -52,5 +54,10 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
     @Override
     public String getHandledEvent() {
         return TaskCandidateGroupEvent.TaskCandidateGroupEvents.TASK_CANDIDATE_GROUP_ADDED.name();
+    }
+
+    private boolean taskCandidateEntityAlreadyExists(TaskCandidateGroupEntity entity) {
+        return entityManager.find(TaskCandidateGroupEntity.class,
+                                  new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())) != null;
     }
 }

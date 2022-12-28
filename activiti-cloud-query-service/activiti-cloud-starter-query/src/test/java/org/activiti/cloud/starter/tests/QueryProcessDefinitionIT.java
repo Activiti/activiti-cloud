@@ -212,7 +212,8 @@ public class QueryProcessDefinitionIT {
         duplicatedProcessDefinition.setDescription("Updated description");
         producer.send(new CloudProcessDeployedEventImpl(initialProcessDefinition),
                       new CloudProcessDeployedEventImpl(duplicatedProcessDefinition),
-                      createCandidateStarterEventForProcess(processDefinitionId));
+                      createCandidateStarterEventForProcess(processDefinitionId),
+                      createCandidateStarterEventForProcess(processDefinitionId)); // should be ok to duplicate candidate events
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
