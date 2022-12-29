@@ -21,7 +21,6 @@ import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
-import org.activiti.cloud.services.identity.keycloak.KeycloakInstanceWrapper;
 import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
@@ -50,11 +49,6 @@ public class ActivitiKeycloakAutoConfiguration {
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
 
-    @Bean
-    @ConditionalOnMissingBean(KeycloakInstanceWrapper.class)
-    public KeycloakInstanceWrapper keycloakInstanceWrapper() {
-        return new KeycloakInstanceWrapper();
-    }
 
     @Bean(name = "userGroupManager")
     @ConditionalOnMissingBean(KeycloakUserGroupManager.class)
