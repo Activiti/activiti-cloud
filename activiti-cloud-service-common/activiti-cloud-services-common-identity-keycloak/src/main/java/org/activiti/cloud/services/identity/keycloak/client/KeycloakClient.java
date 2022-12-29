@@ -103,4 +103,17 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{groupId}/members")
     @Headers("Content-Type: application/json")
     List<KeycloakUser> getUsersByGroupId(@PathVariable("groupId") String groupId);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/groups")
+    @Headers("Content-Type: application/json")
+    List<KeycloakGroup> getAllGroups();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users")
+    @Headers("Content-Type: application/json")
+    List<KeycloakUser> getAllUsers();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}")
+    @Headers("Content-Type: application/json")
+    KeycloakUser getUserById(@PathVariable("id") String id);
+
 }
