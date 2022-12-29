@@ -15,52 +15,44 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.GroupRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
+import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 
 public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsProvider, PrincipalRolesProvider {
 
-    private final KeycloakInstanceWrapper keycloakInstanceWrapper;
+    private final KeycloakClient keycloakClient;
 
-    public KeycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
-        this.keycloakInstanceWrapper = keycloakInstanceWrapper;
+    public KeycloakClientPrincipalDetailsProvider(KeycloakClient keycloakClient) {
+        this.keycloakClient = keycloakClient;
     }
 
 
     @Override
     public List<String> getGroups(Principal principal) {
-        return userResource(principal).groups()
+        return keycloakClient.getUserGroups(subjectId(principal))
                                       .stream()
-                                      .map(GroupRepresentation::getName)
+                                      .map(KeycloakGroup::getName)
                                       .collect(Collectors.collectingAndThen(Collectors.toList(),
                                                                             Collections::unmodifiableList));
     }
 
     @Override
     public List<String> getRoles(Principal principal) {
-        return userResource(principal).roles()
-                                      .realmLevel()
-                                      .listEffective()
+        return keycloakClient.getUserRoleMapping(subjectId(principal))
                                       .stream()
-                                      .map(RoleRepresentation::getName)
+                                      .map(KeycloakRoleMapping::getName)
                                       .collect(Collectors.collectingAndThen(Collectors.toList(),
                                                                             Collections::unmodifiableList));
     }
 
-    protected UserResource userResource(Principal principal) {
-        return keycloakInstanceWrapper.getRealm()
-                                      .users()
-                                      .get(subjectId(principal));
-    }
 
     protected String subjectId(Principal principal) {
         return Optional.of(principal)

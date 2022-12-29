@@ -65,8 +65,8 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakInstanceWrapper keycloakInstanceWrapper) {
-        return new KeycloakClientPrincipalDetailsProvider(keycloakInstanceWrapper);
+    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakClient keycloakClient) {
+        return new KeycloakClientPrincipalDetailsProvider(keycloakClient);
     }
 
     @Bean
