@@ -39,7 +39,6 @@
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>18.0.0</keycloak.version>
     <resteasy.version>4.7.5.Final</resteasy.version>
     <logstash.version>7.0.1</logstash.version>
     <springdoc.version>1.6.9</springdoc.version>
@@ -68,13 +67,6 @@
         <groupId>org.activiti</groupId>
         <artifactId>activiti-core-common-dependencies</artifactId>
         <version>${activiti.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.keycloak.bom</groupId>
-        <artifactId>keycloak-adapter-bom</artifactId>
-        <version>${keycloak.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -124,12 +116,6 @@
         <groupId>io.swagger.core.v3</groupId>
         <artifactId>swagger-annotations</artifactId>
         <version>${swagger.version}</version>
-      </dependency>
-      <!-- Keycloak dependencies -->
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-admin-client</artifactId>
-        <version>${keycloak.version}</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
