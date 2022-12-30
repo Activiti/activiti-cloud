@@ -22,17 +22,25 @@ import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent
 
 public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents> implements CloudApplicationDeployedEvent {
 
+    private final ApplicationEvents eventType;
+
     public CloudApplicationDeployedEventImpl() {
+        this.eventType = ApplicationEvents.APPLICATION_DEPLOYED;
     }
 
     public CloudApplicationDeployedEventImpl(Deployment entity) {
+        this(entity, ApplicationEvents.APPLICATION_DEPLOYED);
+    }
+
+    public CloudApplicationDeployedEventImpl(Deployment entity, ApplicationEvents eventType) {
         super(entity);
+        this.eventType = eventType;
         setEntityId(entity.getId());
     }
 
     @Override
     public ApplicationEvents getEventType() {
-        return ApplicationEvents.APPLICATION_DEPLOYED;
+        return eventType;
     }
 
 }
