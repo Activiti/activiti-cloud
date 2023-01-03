@@ -30,6 +30,8 @@ import org.activiti.cloud.services.events.listeners.CloudMessageSentProducer;
 import org.activiti.cloud.services.events.listeners.CloudMessageSubscriptionCancelledProducer;
 import org.activiti.cloud.services.events.listeners.CloudMessageWaitingProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCancelledProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessCandidateStarterGroupAddedProducer;
+import org.activiti.cloud.services.events.listeners.CloudProcessCandidateStarterUserAddedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCompletedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessCreatedProducer;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -398,6 +400,26 @@ public class CloudEventsAutoConfiguration {
                                                 processEngineChannels,
                                                 runtimeBundleMessageBuilderFactory,
                                                 properties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudProcessCandidateStarterUserAddedProducer cloudProcessCandidateStarterUserProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                                                  ProcessEngineChannels processEngineChannels,
+                                                                                                  RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+        return new CloudProcessCandidateStarterUserAddedProducer(processEngineChannels,
+                                                                 runtimeBundleMessageBuilderFactory,
+                                                                 runtimeBundleInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CloudProcessCandidateStarterGroupAddedProducer cloudProcessCandidateStarterGroupAddedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+                                                                                                         ProcessEngineChannels processEngineChannels,
+                                                                                                         RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+        return new CloudProcessCandidateStarterGroupAddedProducer(processEngineChannels,
+                                                                  runtimeBundleMessageBuilderFactory,
+                                                                  runtimeBundleInfoAppender);
     }
 
     @Bean
