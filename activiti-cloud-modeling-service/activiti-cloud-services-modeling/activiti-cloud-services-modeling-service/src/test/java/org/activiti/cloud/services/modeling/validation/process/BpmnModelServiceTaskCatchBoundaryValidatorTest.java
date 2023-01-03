@@ -54,9 +54,8 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
     private FlowElementsExtractor flowElementsExtractor;
 
     @BeforeEach
-    public void setUp(){
-        validator = new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor,
-            Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
+    public void setUp() {
+        validator = new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
     }
 
     @Test
