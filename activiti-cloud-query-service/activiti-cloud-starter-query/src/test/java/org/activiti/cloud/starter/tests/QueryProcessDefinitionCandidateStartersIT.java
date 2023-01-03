@@ -46,7 +46,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource({"classpath:application-test.properties", "classpath:application-with-candidate-starters-enabled.properties"})
+@TestPropertySource("classpath:application-test.properties")
 
 @DirtiesContext
 @Import({
@@ -79,6 +79,24 @@ public class QueryProcessDefinitionCandidateStartersIT {
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
+    }
+
+    @Test
+    public void shouldNotGetProcessDefinitionsWhereCurrentUserIsNotACandidate() {
+        //given
+        ProcessDefinitionImpl firstProcessDefinition = new ProcessDefinitionImpl();
+        firstProcessDefinition.setId(UUID.randomUUID().toString());
+
+        ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
+        secondProcessDefinition.setId(UUID.randomUUID().toString());
+
+        //when
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
+
+        //then
+        assertThat(responseEntity.getBody())
+            .isNotNull()
+            .isEmpty();
     }
 
     @Test

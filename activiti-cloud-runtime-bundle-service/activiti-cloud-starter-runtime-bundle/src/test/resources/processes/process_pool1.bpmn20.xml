@@ -6,7 +6,7 @@
     <messageFlow id="messageflow2" sourceRef="servicetask2" targetRef="usertask3"></messageFlow>
     <messageFlow id="messageflow3" sourceRef="usertask2" targetRef="servicetask2"></messageFlow>
   </collaboration>
-  <process id="process_pool1" name="process_pool1" isExecutable="true" activiti:candidateStarterUsers="user1,user2" activiti:candidateStarterGroups="group1,group2">
+  <process id="process_pool1" name="process_pool1" isExecutable="true">
     <extensionElements>
       <modeler:executionvariables xmlns:modeler="http://activiti.com/modeler" modeler:variableName="firstName" modeler:variableType="string"></modeler:executionvariables>
       <modeler:executionvariables xmlns:modeler="http://activiti.com/modeler" modeler:variableName="lastName" modeler:variableType="string"></modeler:executionvariables>

@@ -20,6 +20,7 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserId;
 
 import javax.persistence.EntityManager;
 
@@ -35,11 +36,13 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskCandidateUserAddedEvent taskCandidateUserAddedEvent = (CloudTaskCandidateUserAddedEvent) event;
         org.activiti.api.task.model.TaskCandidateUser taskCandidateUser = taskCandidateUserAddedEvent.getEntity();
+        TaskCandidateUserEntity entity = new TaskCandidateUserEntity(taskCandidateUser.getTaskId(),
+                                                                     taskCandidateUser.getUserId());
 
         try {
-            TaskCandidateUserEntity entity = new TaskCandidateUserEntity(taskCandidateUser.getTaskId(),
-                                                                         taskCandidateUser.getUserId());
-            entityManager.persist(entity);
+            if (!taskCandidateEntityAlreadyExists(entity)) {
+                entityManager.persist(entity);
+            }
         } catch (Exception cause) {
             throw new QueryException("Error handling TaskCandidateUserAddedEvent[" + event + "]",
                                      cause);
@@ -49,5 +52,10 @@ public class TaskCandidateUserAddedEventHandler implements QueryEventHandler {
     @Override
     public String getHandledEvent() {
         return TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name();
+    }
+
+    private boolean taskCandidateEntityAlreadyExists(TaskCandidateUserEntity entity) {
+        return entityManager.find(TaskCandidateUserEntity.class,
+                                  new TaskCandidateUserId(entity.getTaskId(), entity.getUserId())) != null;
     }
 }

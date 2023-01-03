@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
@@ -22,6 +23,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateGroupAdde
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCandidateGroupAddedEventHandlerTest {
@@ -62,6 +66,21 @@ public class TaskEntityCandidateGroupAddedEventHandlerTest {
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getTaskId()).isEqualTo(event.getEntity().getTaskId());
         assertThat(captor.getValue().getGroupId()).isEqualTo(event.getEntity().getGroupId());
+    }
+
+    @Test
+    public void handleShouldNotStoreTaskCandidateGroupIfExists() {
+        //given
+        CloudTaskCandidateGroupAddedEvent event = buildTaskCandidateGroupAddedEvent();
+        TaskCandidateGroup entity = event.getEntity();
+
+        //when
+        when(entityManager.find(TaskCandidateGroupEntity.class, new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())))
+            .thenReturn(new TaskCandidateGroupEntity());
+        handler.handle(event);
+
+        //then
+        verify(entityManager, never()).persist(any());
     }
 
     @Test

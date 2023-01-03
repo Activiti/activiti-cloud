@@ -19,6 +19,7 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserEntity;
+import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserId;
 import org.activiti.cloud.services.query.model.QueryException;
 
 import javax.persistence.EntityManager;
@@ -35,11 +36,13 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCandidateStarterUserAddedEvent processCandidateStarterUserAddedEvent = (CloudProcessCandidateStarterUserAddedEvent) event;
         org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserAddedEvent.getEntity();
+        ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(processCandidateStarterUser.getProcessDefinitionId(),
+                                                                                         processCandidateStarterUser.getUserId());
 
         try {
-            ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(processCandidateStarterUser.getProcessDefinitionId(),
-                                                                                             processCandidateStarterUser.getUserId());
-            entityManager.persist(entity);
+            if (!candidateStarterEntityAlreadyExists(entity)) {
+                entityManager.persist(entity);
+            }
         } catch (Exception cause) {
             throw new QueryException("Error handling ProcessCandidateStarterUserAddedEvent[" + event + "]",
                                      cause);
@@ -49,5 +52,11 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
     @Override
     public String getHandledEvent() {
         return ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name();
+    }
+
+    private boolean candidateStarterEntityAlreadyExists(ProcessCandidateStarterUserEntity entity) {
+        return entityManager.find(ProcessCandidateStarterUserEntity.class,
+                                  new ProcessCandidateStarterUserId(entity.getProcessDefinitionId(), entity.getUserId())) != null;
+
     }
 }
