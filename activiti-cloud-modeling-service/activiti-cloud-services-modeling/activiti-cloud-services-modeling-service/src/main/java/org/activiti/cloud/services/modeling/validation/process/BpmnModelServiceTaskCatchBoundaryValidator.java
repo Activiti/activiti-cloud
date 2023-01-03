@@ -17,13 +17,11 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import org.activiti.bpmn.model.BoundaryEvent;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.ErrorEventDefinition;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -39,13 +37,13 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
 
     private final FlowElementsExtractor flowElementsExtractor;
 
-    private final ServiceTaskImplementationType[] serviceTaskImplementationTypes;
+    private final List<ServiceTaskImplementationType> serviceTaskImplementationTypes;
 
     public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
-        ServiceTaskImplementationType[] serviceTaskImplementationTypes) {
+        List<ServiceTaskImplementationType> serviceTaskImplementationTypes) {
         this.flowElementsExtractor = flowElementsExtractor;
         this.serviceTaskImplementationTypes = Optional.ofNullable(serviceTaskImplementationTypes)
-            .orElse(new ServiceTaskImplementationType[0]);
+            .orElse(Collections.emptyList());
     }
 
     @Override
@@ -60,7 +58,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     }
 
     private Optional<ModelValidationError> validateServiceTaskBoundary(ServiceTask serviceTask) {
-        if (requiresBoundary(serviceTask)) {
+        if (requiredBoundaryIsMissing(serviceTask)) {
             return Optional.of(
                 new ModelValidationError(MISSING_BOUNDARY_WARNING,
                     format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
@@ -70,22 +68,11 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
         return Optional.<ModelValidationError>empty();
     }
 
-    private boolean requiresBoundary(ServiceTask serviceTask) {
-        return Arrays.stream(serviceTaskImplementationTypes)
+    private boolean requiredBoundaryIsMissing(ServiceTask serviceTask) {
+        return serviceTaskImplementationTypes.stream()
             .anyMatch(serviceImplementation ->
                 serviceTask.getImplementation().startsWith(serviceImplementation.getPrefix()) &&
-                    (
-                        serviceTask.getBoundaryEvents() == null ||
-                            !hasBoundaryErrorEvent(serviceTask.getBoundaryEvents())
-                    )
+                    !serviceTask.hasBoundaryErrorEvents()
             );
-    }
-
-    private boolean hasBoundaryErrorEvent(List<BoundaryEvent> boundaryEvents) {
-        return boundaryEvents.stream().anyMatch(boundaryEvent ->
-            boundaryEvent.getEventDefinitions().stream().anyMatch(eventDefinition ->
-                ErrorEventDefinition.class.isInstance(eventDefinition)
-            )
-        );
     }
 }

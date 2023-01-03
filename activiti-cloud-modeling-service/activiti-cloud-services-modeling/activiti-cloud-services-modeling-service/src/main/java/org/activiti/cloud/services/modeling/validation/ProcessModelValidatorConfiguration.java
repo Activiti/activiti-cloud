@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
@@ -170,10 +171,7 @@ public class ProcessModelValidatorConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public BpmnModelServiceTaskCatchBoundaryValidator bpmnModelServiceTaskBoundaryValidator(FlowElementsExtractor flowElementsExtractor) {
-        ServiceTaskImplementationType[] serviceTaskImplementationTypes = new ServiceTaskImplementationType[] {
-            ServiceTaskImplementationType.SCRIPT_TASK
-        };
-        return new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, serviceTaskImplementationTypes);
+        return new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
     }
 
     @Bean
