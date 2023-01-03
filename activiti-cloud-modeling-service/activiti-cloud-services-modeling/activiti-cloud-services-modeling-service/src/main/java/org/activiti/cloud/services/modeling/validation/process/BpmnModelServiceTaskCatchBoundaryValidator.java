@@ -17,7 +17,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -39,13 +39,13 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
 
     private final FlowElementsExtractor flowElementsExtractor;
 
-    private final ServiceTaskImplementationType[] serviceTaskImplementationTypes;
+    private final List<ServiceTaskImplementationType> serviceTaskImplementationTypes;
 
     public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
-        ServiceTaskImplementationType[] serviceTaskImplementationTypes) {
+        List<ServiceTaskImplementationType> serviceTaskImplementationTypes) {
         this.flowElementsExtractor = flowElementsExtractor;
         this.serviceTaskImplementationTypes = Optional.ofNullable(serviceTaskImplementationTypes)
-            .orElse(new ServiceTaskImplementationType[0]);
+            .orElse(Collections.emptyList());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     }
 
     private Optional<ModelValidationError> validateServiceTaskBoundary(ServiceTask serviceTask) {
-        if (requiresBoundary(serviceTask)) {
+        if (requiredBoundaryIsMissing(serviceTask)) {
             return Optional.of(
                 new ModelValidationError(MISSING_BOUNDARY_WARNING,
                     format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
@@ -70,8 +70,8 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
         return Optional.<ModelValidationError>empty();
     }
 
-    private boolean requiresBoundary(ServiceTask serviceTask) {
-        return Arrays.stream(serviceTaskImplementationTypes)
+    private boolean requiredBoundaryIsMissing(ServiceTask serviceTask) {
+        return serviceTaskImplementationTypes.stream()
             .anyMatch(serviceImplementation ->
                 serviceTask.getImplementation().startsWith(serviceImplementation.getPrefix()) &&
                     (

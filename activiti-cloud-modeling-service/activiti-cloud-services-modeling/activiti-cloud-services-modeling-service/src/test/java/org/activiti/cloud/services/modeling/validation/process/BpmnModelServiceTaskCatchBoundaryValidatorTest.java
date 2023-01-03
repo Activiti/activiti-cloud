@@ -55,8 +55,8 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
 
     @BeforeEach
     public void setUp(){
-        ServiceTaskImplementationType[] serviceTaskImplementationTypes = new ServiceTaskImplementationType[]{ServiceTaskImplementationType.SCRIPT_TASK};
-        validator = new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, serviceTaskImplementationTypes);
+        validator = new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor,
+            Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
     }
 
     @Test
