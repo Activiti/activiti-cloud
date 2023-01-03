@@ -46,7 +46,7 @@ public class CloudApplicationDeployedProducer {
                                         .stream()
                                         .map(applicationDeployedEvent -> {
                                             CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
-                                                    applicationDeployedEvent.getEntity());
+                                                    applicationDeployedEvent.getEntity(), applicationDeployedEvent.getEventType());
                                             runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudApplicationDeployedEvent);
                                             return cloudApplicationDeployedEvent;
                                         })
