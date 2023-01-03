@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.listeners;
 
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationDeployedEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.event.impl.ApplicationDeployedEventImpl;
 import org.activiti.api.runtime.event.impl.ApplicationDeployedEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -104,5 +105,37 @@ public class CloudApplicationDeployedProducerTest {
         assertThat(cloudApplicationDeployedEvents)
                 .extracting(CloudApplicationDeployedEvent::getEntity)
                 .containsOnly(deployment1, deployment2);
+
+        assertThat(cloudApplicationDeployedEvents)
+            .extracting(CloudApplicationDeployedEvent::getEventType)
+            .containsOnly(ApplicationEvents.APPLICATION_DEPLOYED, ApplicationEvents.APPLICATION_DEPLOYED);
+    }
+
+    @Test
+    public void shouldSendMessageWithRollbackApplication() {
+        //given
+        Deployment deployment = mock(Deployment.class);
+        List<ApplicationDeployedEvent> applicationDeployedEventList = List.of(new ApplicationDeployedEventImpl(deployment, ApplicationEvents.APPLICATION_ROLLBACK));
+        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
+
+        //when
+        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(new ApplicationDeployedEvents(applicationDeployedEventList));
+
+        //then
+        verify(runtimeBundleInfoAppender,
+               times(1)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(auditProducer).send(any());
+
+        verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
+            .map(CloudApplicationDeployedEvent.class::cast)
+            .collect(Collectors.toList());
+        assertThat(cloudApplicationDeployedEvents)
+            .extracting(CloudApplicationDeployedEvent::getEntity)
+            .containsOnly(deployment);
+
+        assertThat(cloudApplicationDeployedEvents)
+            .extracting(CloudApplicationDeployedEvent::getEventType)
+            .containsOnly(ApplicationEvents.APPLICATION_ROLLBACK);
     }
 }

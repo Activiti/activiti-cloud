@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.activiti.api.model.shared.event.RuntimeEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
@@ -120,6 +121,7 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableUpdatedEventImpl());
         eventImplementations.add(new CloudVariableDeletedEventImpl());
         eventImplementations.add(new CloudApplicationDeployedEventImpl());
+        eventImplementations.add(new CloudApplicationDeployedEventImpl(ApplicationEvents.APPLICATION_ROLLBACK));
         eventImplementations.add(new CloudProcessCandidateStarterUserAddedEventImpl());
         eventImplementations.add(new CloudProcessCandidateStarterUserRemovedEventImpl());
         eventImplementations.add(new CloudProcessCandidateStarterGroupAddedEventImpl());
