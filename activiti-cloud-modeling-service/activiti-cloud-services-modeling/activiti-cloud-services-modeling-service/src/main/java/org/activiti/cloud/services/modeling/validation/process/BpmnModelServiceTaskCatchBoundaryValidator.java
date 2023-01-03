@@ -36,11 +36,11 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     public static final String SERVICE_TASK_VALIDATOR_NAME = "BPMN service task catch boundary validator";
 
     private final FlowElementsExtractor flowElementsExtractor;
+
     private final List<ServiceTaskImplementationType> serviceTaskImplementationTypes;
 
     public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
         List<ServiceTaskImplementationType> serviceTaskImplementationTypes) {
-
         this.flowElementsExtractor = flowElementsExtractor;
         this.serviceTaskImplementationTypes = Optional.ofNullable(serviceTaskImplementationTypes)
             .orElse(Collections.emptyList());
