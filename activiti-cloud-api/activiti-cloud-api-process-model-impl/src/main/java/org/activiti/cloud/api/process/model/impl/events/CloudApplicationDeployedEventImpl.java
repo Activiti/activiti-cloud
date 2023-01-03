@@ -28,6 +28,10 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
         this.eventType = ApplicationEvents.APPLICATION_DEPLOYED;
     }
 
+    public CloudApplicationDeployedEventImpl(ApplicationEvents eventType) {
+        this.eventType = eventType;
+    }
+
     public CloudApplicationDeployedEventImpl(Deployment entity) {
         this(entity, ApplicationEvents.APPLICATION_DEPLOYED);
     }
