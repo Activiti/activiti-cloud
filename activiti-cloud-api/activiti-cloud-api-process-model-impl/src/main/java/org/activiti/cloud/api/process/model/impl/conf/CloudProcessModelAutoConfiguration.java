@@ -17,6 +17,7 @@ package org.activiti.cloud.api.process.model.impl.conf;
 
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
@@ -170,6 +171,8 @@ public class CloudProcessModelAutoConfiguration {
                                               MessageSubscriptionEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()));
         module.registerSubtypes(new NamedType(CloudApplicationDeployedEventImpl.class,
                                               ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name()));
+        module.registerSubtypes(new NamedType(CloudApplicationDeployedEventImpl.class,
+                                              ApplicationEvents.APPLICATION_ROLLBACK.name()));
 
         module.registerSubtypes(new NamedType(CloudProcessCandidateStarterUserAddedEventImpl.class,
                                               ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name()));
