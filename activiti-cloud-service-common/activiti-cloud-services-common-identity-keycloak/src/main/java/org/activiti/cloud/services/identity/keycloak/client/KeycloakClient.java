@@ -52,7 +52,7 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/users/{id}/role-mappings/realm")
     @Headers("Content-Type: application/json")
-    void addUserRoleMapping(@PathVariable("id") String id, List<KeycloakRoleMapping> roles);
+    void addRealmLevelUserRoleMapping(@PathVariable("id") String id, List<KeycloakRoleMapping> roles);
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/groups")
     @Headers("Content-Type: application/json")
@@ -76,8 +76,7 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings")
     @Headers("Content-Type: application/json")
-    @Cacheable("groupRoleMapping")
-    KeycloakMappingsRepresentation getRoleMapping(@PathVariable("id") String id);
+    KeycloakMappingsRepresentation getAllGroupRoleMapping(@PathVariable("id") String id);
 
     @RequestMapping(method = RequestMethod.GET, value = "/clients")
     @Headers("Content-Type: application/json")
@@ -107,7 +106,9 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.POST, value = "/groups/{id}/role-mappings/clients/{client}")
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> addGroupClientRoleMapping(@PathVariable("id") String id,
-                                                        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+                                                        @PathVariable("client") String client,
+                                                        @RequestBody List<KeycloakRoleMapping> roles);
+
     @RequestMapping(method = RequestMethod.DELETE, value = "/users/{id}/role-mappings/clients/{client}")
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> removeUserClientRoleMapping(@PathVariable("id") String id,
