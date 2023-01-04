@@ -25,7 +25,6 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepre
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

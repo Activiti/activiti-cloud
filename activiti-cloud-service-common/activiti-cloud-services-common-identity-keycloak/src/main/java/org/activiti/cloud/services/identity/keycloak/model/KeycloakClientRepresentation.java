@@ -35,10 +35,6 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
     private Boolean implicitFlowEnabled;
     private Boolean serviceAccountsEnabled;
 
-
-    public KeycloakClientRepresentation() {
-    }
-
     public String getClientId() {
         return clientId;
     }
