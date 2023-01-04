@@ -378,11 +378,11 @@ public class KeycloakClientIT {
         assertThat(roleMappings.getClientMappings()).isNullOrEmpty();
     }
 
-
+    @Test
     public void should_getServiceAccountUserOfClient_by_clientId() {
-        String idOfClient = getIdOfClient(ACTIVITI_CLIENT_ID);
+        String idOfClient = getIdOfClient("activiti-keycloak");
         KeycloakUser userOfClient = keycloakClient.getServiceAccountUserOfClient(idOfClient);
-        //TODO
+        assertThat(userOfClient).isNotNull();
     }
 
     @Test
