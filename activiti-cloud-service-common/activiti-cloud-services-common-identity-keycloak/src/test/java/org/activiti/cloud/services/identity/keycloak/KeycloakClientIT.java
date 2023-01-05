@@ -70,6 +70,14 @@ public class KeycloakClientIT {
     }
 
     @Test
+    public void should_searchUsers_by_username() {
+        List<KeycloakUser> users = keycloakClient.searchUsersByUsername("activiti-keycloak");
+
+        assertThat(users).hasSize(1);
+        assertThat(users).extracting("username").contains("service-account-activiti-keycloak");
+    }
+
+    @Test
     public void should_searchUsers_when_paginated() {
         List<KeycloakUser> usersPage1 = keycloakClient.searchUsers("hr", 0, 1);
 

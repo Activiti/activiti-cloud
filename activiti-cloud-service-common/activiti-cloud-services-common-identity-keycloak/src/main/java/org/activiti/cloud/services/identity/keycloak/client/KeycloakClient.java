@@ -42,6 +42,10 @@ public interface KeycloakClient {
     List<KeycloakUser> searchUsers(@RequestParam(value = "search") String search,
                                    @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
 
+    @RequestMapping(method = RequestMethod.GET, value = "/users")
+    @Headers("Content-Type: application/json")
+    List<KeycloakUser> searchUsersByUsername(@RequestParam(value = "username") String username);
+
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
     @Cacheable("userRoleMapping")
