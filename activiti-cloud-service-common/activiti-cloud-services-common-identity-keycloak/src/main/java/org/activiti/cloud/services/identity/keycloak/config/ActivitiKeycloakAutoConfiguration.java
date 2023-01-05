@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
@@ -25,6 +26,8 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
+import org.activiti.cloud.services.identity.keycloak.validator.PublicKeyValidationCheck;
+import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -100,6 +103,19 @@ public class ActivitiKeycloakAutoConfiguration {
     @ConditionalOnMissingBean(KeycloakHealthService.class)
     public KeycloakHealthService keycloakHealthService(KeycloakUserGroupManager keycloakUserGroupManager) {
         return new KeycloakHealthService(keycloakUserGroupManager);
+    }
+
+    @Bean
+    public PublicKeyValidationCheck publicKeyValidationCheck(@Value("${keycloak.auth-server-url}") String authServerUrl,
+                                                    @Value("${keycloak.realm}") String realm,
+                                                    ObjectMapper objectMapper) {
+        return new PublicKeyValidationCheck(authServerUrl, realm, objectMapper);
+    }
+
+    @Bean
+    public RealmValidationCheck realmValidationCheck(@Value("${keycloak.realm") String authServerUrl,
+                                                @Value("${keycloak.realm") String realm) {
+        return new RealmValidationCheck(authServerUrl, realm);
     }
 
 }

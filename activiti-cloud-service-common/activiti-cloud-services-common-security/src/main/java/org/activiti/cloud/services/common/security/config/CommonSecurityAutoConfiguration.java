@@ -39,6 +39,9 @@ import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvi
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.validator.ExpiredValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.IsNotBeforeValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -95,8 +98,20 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtAccessTokenValidator jwtAccessTokenValidator() {
-        return new JwtAccessTokenValidator(offset);
+    public JwtAccessTokenValidator jwtAccessTokenValidator(List<ValidationCheck> validationChecks) {
+        return new JwtAccessTokenValidator(validationChecks);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ExpiredValidationCheck expiredValidationCheck() {
+        return new ExpiredValidationCheck(offset);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IsNotBeforeValidationCheck isNotBeforeValidationCheck() {
+        return new IsNotBeforeValidationCheck(offset);
     }
 
     @Bean
