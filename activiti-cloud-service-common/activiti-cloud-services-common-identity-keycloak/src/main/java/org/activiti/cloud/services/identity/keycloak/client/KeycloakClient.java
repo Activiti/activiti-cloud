@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.identity.keycloak.client;
 
 import feign.Headers;
+import feign.Response;
 import java.util.List;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
@@ -182,7 +183,7 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/clients")
     @Headers("Content-Type: application/json")
-    void createClient(@RequestBody KeycloakClientRepresentation keycloakClientRepresentation);
+    Response createClient(@RequestBody KeycloakClientRepresentation keycloakClientRepresentation);
 
     @RequestMapping(method = RequestMethod.PUT, value = "/clients/{id}")
     @Headers("Content-Type: application/json")

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import feign.FeignException;
+import feign.Response;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
@@ -27,6 +28,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(
@@ -56,10 +58,10 @@ public class KeycloakClientCrudIT {
             .publicClient(true)
             .implicitFlowEnabled(true)
             .build();
-        keycloakClient.createClient(client);
+        Response response = keycloakClient.createClient(client);
+        assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
 
         String idOfClient = getIdOfClient(client.getClientId());
-
         KeycloakClientRepresentation clientCreated = keycloakClient.getClientById(idOfClient);
         assertThat(clientCreated).isNotNull();
         assertThat(clientCreated.getClientId()).isEqualTo(clientId);
