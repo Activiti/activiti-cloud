@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.core.commands;
 
 import java.util.Map;
@@ -22,11 +23,8 @@ import java.util.stream.Collectors;
 
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.model.shared.Payload;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class CommandEndpoint<T extends Payload> {
@@ -40,9 +38,6 @@ public class CommandEndpoint<T extends Payload> {
                                                                       Function.identity()));
     }
 
-    // TODO: pay attenction to migrate since generic
-//    @StreamListener(ProcessEngineChannels.COMMAND_CONSUMER)
-//    @SendTo(ProcessEngineChannels.COMMAND_RESULTS)
     public <R> R execute(T payload) {
 
         SecurityContextHolder.getContext()
