@@ -29,7 +29,6 @@ import java.util.function.Function;
 
 public class CommandConsumerMessageChannelResolver implements DestinationResolver<MessageChannel> {
 
-    // TODO: take care -> we have to remove binderAwareChannelResolver returning a MessageChannel
     private final DestinationResolver<MessageChannel> channelResolver;
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
