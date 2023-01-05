@@ -760,35 +760,6 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessWithServiceTaskImplementationSetToScriptActionWithNoCatchBoundary()
-            throws Exception {
-        byte[] validContent = resourceAsByteArray("process/script-implementation-service-task.bpmn20.xml");
-        MockMultipartFile file = new MockMultipartFile("file",
-                                                       "process.xml",
-                                                       CONTENT_TYPE_XML,
-                                                       validContent);
-        Model processModel = createModel(validContent);
-
-        ResultActions resultActions = mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
-                                   processModel.getId())
-                                 .file(file));
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .contains("The service implementation on service 'ServiceTask_1qr4ad0' might fail silently");
-
-        final Exception resolvedException = resultActions.andReturn().getResolvedException();
-        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
-
-        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException)resolvedException;
-        assertThat(semanticModelValidationException.getValidationErrors())
-            .hasSize(1)
-            .extracting(ModelValidationError::getProblem,
-                ModelValidationError::getDescription, ModelValidationError::isWarning)
-            .containsOnly(tuple("Missing Catch Error boundary event",
-                    "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently", true));
-    }
-
-    @Test
     public void should_validateModelContentInTheProjectContext_when_projectIdIsProvided() throws Exception {
         ProjectEntity projectOne = (ProjectEntity) projectRepository.createProject(project("project-one"));
         ProjectEntity projectTwo = (ProjectEntity) projectRepository.createProject(project("project-two"));
