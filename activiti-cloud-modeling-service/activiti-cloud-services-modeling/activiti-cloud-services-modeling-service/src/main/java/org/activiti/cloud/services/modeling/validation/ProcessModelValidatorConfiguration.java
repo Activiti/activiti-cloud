@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
