@@ -113,8 +113,8 @@ public class ActivitiKeycloakAutoConfiguration {
     }
 
     @Bean
-    public RealmValidationCheck realmValidationCheck(@Value("${keycloak.realm") String authServerUrl,
-                                                @Value("${keycloak.realm") String realm) {
+    public RealmValidationCheck realmValidationCheck(@Value("${keycloak.auth-server-url}") String authServerUrl,
+                                                @Value("${keycloak.realm}") String realm) {
         return new RealmValidationCheck(authServerUrl, realm);
     }
 

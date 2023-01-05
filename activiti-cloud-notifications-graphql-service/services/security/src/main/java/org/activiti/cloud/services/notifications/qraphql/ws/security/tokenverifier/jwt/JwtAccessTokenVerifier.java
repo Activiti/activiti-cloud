@@ -30,13 +30,16 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
     private final JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter;
     private final JwtDecoder jwtDecoder;
+    private final String roleAttribute;
 
     public JwtAccessTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                   JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                  JwtDecoder jwtDecoder) {
+                                  JwtDecoder jwtDecoder,
+                                  String roleAttribute) {
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
         this.jwtDecoder = jwtDecoder;
+        this.roleAttribute = roleAttribute;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
             JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(jwt);
             return new GraphQLAccessToken(
                 accessToken.getName(),
-                Set.copyOf(jwt.getClaimAsStringList("role")),
+                Set.copyOf(jwt.getClaimAsStringList(roleAttribute)),
                 accessToken
             );
         } else {
