@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
@@ -41,12 +46,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class ProcessInstanceRestTemplate {
@@ -79,20 +78,6 @@ public class ProcessInstanceRestTemplate {
         return startProcess(startProcess);
     }
 
-    private ResponseEntity<CloudProcessInstance> createProcess(String processDefinitionKey,
-                                                              String processDefinitionId,
-                                                              Map<String, Object> variables,
-                                                              String businessKey) {
-
-        CreateProcessInstancePayload startProcess = ProcessPayloadBuilder.create()
-            .withProcessDefinitionId(processDefinitionId)
-            .withProcessDefinitionKey(processDefinitionKey)
-            .withBusinessKey(businessKey)
-            .build();
-
-        return createProcess(startProcess);
-    }
-
     public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId) {
 
         return startProcess(processDefinitionId,
@@ -118,22 +103,8 @@ public class ProcessInstanceRestTemplate {
                             businessKey);
     }
 
-    public ResponseEntity<CloudProcessInstance> createProcess(String processDefinitionId,
-                                                             Map<String, Object> variables,
-                                                             String businessKey) {
-
-        return createProcess(null,
-            processDefinitionId,
-            variables,
-            businessKey);
-    }
-
     public ResponseEntity<CloudProcessInstance> startProcess(StartProcessPayload startProcess) {
         return startProcess(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
-    }
-
-    public ResponseEntity<CloudProcessInstance> createProcess(CreateProcessInstancePayload startPayload) {
-        return createProcess(PROCESS_INSTANCES_RELATIVE_URL + "create", startPayload);
     }
 
     public ResponseEntity<CloudProcessInstance> adminStartProcess(StartProcessPayload startProcess) {
@@ -148,22 +119,6 @@ public class ProcessInstanceRestTemplate {
                                           });
     }
 
-    private ResponseEntity<CloudProcessInstance> startCreatedProcessCall(String baseURL) {
-        return testRestTemplate.exchange(baseURL,
-            HttpMethod.POST,
-            new HttpEntity<>(CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<CloudProcessInstance>() {
-            });
-    }
-
-    private ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessCallFail(String baseURL) {
-        return testRestTemplate.exchange(baseURL,
-            HttpMethod.POST,
-            new HttpEntity<>(CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
-            });
-    }
-
     private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, CreateProcessInstancePayload payload) {
         return  testRestTemplate.exchange(baseURL,
             HttpMethod.POST,
@@ -174,31 +129,6 @@ public class ProcessInstanceRestTemplate {
 
     private ResponseEntity<CloudProcessInstance> startProcess(String baseURL, StartProcessPayload startProcess) {
         ResponseEntity<CloudProcessInstance> responseEntity = startProcessWithoutCheck(baseURL, startProcess);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().getId()).isNotNull();
-        return responseEntity;
-    }
-
-    public ResponseEntity<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
-        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
-        ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessCall(baseURL);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().getId()).isNotNull();
-        return responseEntity;
-    }
-
-    public ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessFailing(String processInstanceId) {
-        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = startCreatedProcessCallFail(baseURL);
-        return responseEntity;
-    }
-
-    private ResponseEntity<CloudProcessInstance> createProcess(String baseURL, CreateProcessInstancePayload startProcess) {
-        ResponseEntity<CloudProcessInstance> responseEntity = createProcessWithoutCheck(baseURL, startProcess);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
