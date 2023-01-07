@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.events.tests.util;
+package org.activiti.cloud.services.core;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
+import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 
-public class MockMessageChannel implements MessageChannel {
-
-    public static Message<?> messageResult;
-
-    @Override
-    public boolean send(Message<?> message) {
-        return send(message, INDEFINITE_TIMEOUT);
-    }
-
-    @Override
-    public boolean send(Message<?> message, long timeout) {
-        messageResult = message;
-        return false;
-    }
+@SpringBootApplication(exclude = {ProcessEngineChannelsConfiguration.class})
+@Import(TestProcessEngineConfiguration.class)
+public class TestApplication {
 
 }

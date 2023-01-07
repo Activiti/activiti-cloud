@@ -25,14 +25,11 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -50,13 +47,6 @@ import org.springframework.util.StringUtils;
 @ConditionalOnClass(FunctionBindingConfiguration.class)
 @AutoConfigureAfter(FunctionBindingConfiguration.class)
 public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
-
-    @Bean
-    @Primary
-    @ConditionalOnMissingBean
-    public MessageRoutingCallback defaultMessageRoutingCallback() {
-        return null;
-    }
 
     @Bean(name = "conditionalFunctionBindingPostProcessor")
     public BeanPostProcessor conditionalFunctionBindingPostProcessor(DefaultListableBeanFactory beanFactory,
