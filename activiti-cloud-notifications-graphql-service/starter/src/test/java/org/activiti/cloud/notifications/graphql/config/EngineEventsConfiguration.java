@@ -20,8 +20,8 @@ import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelpe
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
@@ -29,7 +29,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import reactor.core.publisher.Flux;
 
-@Configuration
+@TestConfiguration
 public class EngineEventsConfiguration implements EngineEvents {
 
     public static final String INTERNAL_ENGINE_EVENTS_PRODUCER = INTERNAL_CHANNEL_PREFIX + ENGINE_EVENTS_PRODUCER;
