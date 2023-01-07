@@ -60,6 +60,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEven
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
+import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
@@ -92,7 +93,8 @@ import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {GrapqhQLApplication.class})
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(classes = EngineEventsConfiguration.class,
+        initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ActivitiGraphQLStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
