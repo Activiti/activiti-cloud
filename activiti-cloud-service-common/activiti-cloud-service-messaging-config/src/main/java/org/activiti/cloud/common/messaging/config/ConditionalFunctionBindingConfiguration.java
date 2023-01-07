@@ -93,16 +93,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                                 .bridge()
                                 .get();
 
-                            String inputChannel = streamFunctionProperties.getInputBindings(gatewayName)
-                                .stream()
-                                .findFirst()
-                                .orElse(gatewayName);
-
-                            IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
-                                .get();
-
-                            integrationFlowContext.registration(inputChannelFlow)
+                            integrationFlowContext.registration(connectorFlow)
                                 .register();
                         });
                 }

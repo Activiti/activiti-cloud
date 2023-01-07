@@ -15,9 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
@@ -43,6 +40,10 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
+
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 @Configuration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
@@ -119,16 +120,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .bridge()
                         .get();
 
-                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-                        .stream()
-                        .findFirst()
-                        .orElse(functionName);
-
-                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-                        .get();
-
-                    integrationFlowContext.registration(inputChannelFlow)
+                    integrationFlowContext.registration(connectorFlow)
                         .register();
                 }
                 return bean;
