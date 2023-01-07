@@ -24,12 +24,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
@@ -56,6 +56,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         ServicesRestWebMvcAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         RuntimeBundleProperties.class,
         ProcessExtensionsAutoConfiguration.class,
         StreamConfig.class})

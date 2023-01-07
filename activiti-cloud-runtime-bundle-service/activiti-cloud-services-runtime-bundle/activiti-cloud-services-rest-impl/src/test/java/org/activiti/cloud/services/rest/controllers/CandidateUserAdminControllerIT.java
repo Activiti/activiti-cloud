@@ -15,14 +15,20 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Arrays;
 import java.util.List;
-
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
@@ -44,17 +50,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(CandidateUserAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         TaskSamples.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
