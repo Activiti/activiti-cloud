@@ -17,9 +17,11 @@ package org.activiti.cloud.services.identity.keycloak.validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.crypto.impl.RSASSAProvider;
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -61,19 +63,28 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         JWSObject jwsObject = getJwsObject(accessToken);
 
         PublicKey publicKey = getPublicKey(jwsObject.getHeader());
+        JWSAlgorithm algorithm = jwsObject.getHeader().getAlgorithm();
 
-        if(publicKey != null) {
+        if(isAlgorithmsSupported(algorithm)) {
             try {
-                result = jwsObject.verify(new RSASSAVerifier((RSAPublicKey) publicKey));
+                RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
+                result = jwsObject.verify(verifier);
             } catch (JOSEException e) {
                 LOGGER.error("Cannot verify RSA public key", e);
             }
+        } else {
+            result = true;
+            LOGGER.error("Unsupported JWS algorithm " + algorithm + ", must be " + RSASSAProvider.SUPPORTED_ALGORITHMS);
         }
 
         return result;
     }
 
-    private static JWSObject getJwsObject(Jwt accessToken) {
+    private boolean isAlgorithmsSupported(JWSAlgorithm algorithm) {
+        return RSASSAProvider.SUPPORTED_ALGORITHMS.contains(algorithm);
+    }
+
+    private JWSObject getJwsObject(Jwt accessToken) {
         JWSObject jwsObject = null;
         try {
             jwsObject = JWSObject.parse(accessToken.getTokenValue());
@@ -83,13 +94,12 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         return jwsObject;
     }
 
-    protected PublicKey getPublicKey(JWSHeader jwsHeader) {
+    private PublicKey getPublicKey(JWSHeader jwsHeader) {
         return publicKeys.computeIfAbsent(getRealmCertsUrl(),
                                           (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
     }
 
-    @SuppressWarnings("unchecked")
-    protected PublicKey retrievePublicKeyFromCertsEndpoint(String realmCertsUrl, JWSHeader jwsHeader) {
+    private PublicKey retrievePublicKeyFromCertsEndpoint(String realmCertsUrl, JWSHeader jwsHeader) {
         try {
             Map<String, Object> certInfos = objectMapper.readValue(new URL(realmCertsUrl).openStream(), Map.class);
             List<Map<String, Object>> keys = (List<Map<String, Object>>) certInfos.get("keys");
@@ -122,11 +132,11 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         return null;
     }
 
-    public String getRealmCertsUrl() {
+    private String getRealmCertsUrl() {
         return getRealmUrl() + "/protocol/openid-connect/certs";
     }
 
-    public String getRealmUrl() {
+    private String getRealmUrl() {
         return String.format("%s/realms/%s", authServerUrl, realm);
     }
 
