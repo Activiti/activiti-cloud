@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-connectors-parent</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>7.8.0-alpha.13</version>
   </parent>
   <artifactId>activiti-cloud-connectors-dependencies</artifactId>
   <packaging>pom</packaging>
