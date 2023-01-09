@@ -119,16 +119,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .bridge()
                         .get();
 
-                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-                        .stream()
-                        .findFirst()
-                        .orElse(functionName);
-
-                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
-                        .get();
-
-                    integrationFlowContext.registration(inputChannelFlow)
+                    integrationFlowContext.registration(connectorFlow)
                         .register();
                 }
                 return bean;
