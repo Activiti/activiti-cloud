@@ -45,7 +45,7 @@
     <springdoc.version>1.6.9</springdoc.version>
     <swagger.version>2.2.1</swagger.version>
     <xstream.version>1.4.20</xstream.version>
-    <json-unit.version>2.32.0</json-unit.version>
+    <json-unit.version>2.36.0</json-unit.version>
     <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
   </properties>
   <dependencyManagement>
