@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.audit.tests.it;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -35,6 +36,7 @@ import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventCo
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ApplicationRollbackEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
@@ -198,6 +200,9 @@ public class APIEventToEntityConvertersIT {
 
         converter = eventConverters.getConverterByEventTypeName(ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name());
         assertThat(converter).isNotNull().isInstanceOf(ProcessCandidateStarterGroupRemovedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ApplicationEvents.APPLICATION_ROLLBACK.name());
+        assertThat(converter).isNotNull().isInstanceOf(ApplicationRollbackEventConverter.class);
 
     }
 
