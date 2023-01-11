@@ -2,19 +2,16 @@
   "type" : "object",
   "id" : "urn:jsonschema:org:activiti:cloud:api:process:model:events:CloudApplicationDeployedEvent",
   "properties" : {
+    "sequenceNumber" : {
+      "type" : "integer"
+    },
     "messageId" : {
       "type" : "string"
     },
     "entityId" : {
       "type" : "string"
     },
-    "sequenceNumber" : {
-      "type" : "integer"
-    },
     "appName" : {
-      "type" : "string"
-    },
-    "appVersion" : {
       "type" : "string"
     },
     "serviceName" : {
@@ -29,26 +26,54 @@
     "serviceVersion" : {
       "type" : "string"
     },
-    "id" : {
+    "appVersion" : {
+      "type" : "string"
+    },
+    "processDefinitionVersion" : {
+      "type" : "integer"
+    },
+    "eventType" : {
+      "type" : "string",
+      "enum" : [ "APPLICATION_DEPLOYED", "APPLICATION_ROLLBACK" ]
+    },
+    "timestamp" : {
+      "type" : "integer"
+    },
+    "processInstanceId" : {
+      "type" : "string"
+    },
+    "parentProcessInstanceId" : {
+      "type" : "string"
+    },
+    "processDefinitionId" : {
+      "type" : "string"
+    },
+    "processDefinitionKey" : {
+      "type" : "string"
+    },
+    "businessKey" : {
       "type" : "string"
     },
     "entity" : {
       "type" : "object",
       "id" : "urn:jsonschema:org:activiti:api:process:model:Deployment",
       "properties" : {
-        "name" : {
+        "projectReleaseVersion" : {
           "type" : "string"
         },
-        "version" : {
-          "type" : "integer"
+        "name" : {
+          "type" : "string"
         },
         "id" : {
           "type" : "string"
         },
-        "projectReleaseVersion" : {
-          "type" : "string"
+        "version" : {
+          "type" : "integer"
         }
       }
+    },
+    "id" : {
+      "type" : "string"
     }
   }
 }

@@ -28,18 +28,17 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
         this.eventType = ApplicationEvents.APPLICATION_DEPLOYED;
     }
 
-    public CloudApplicationDeployedEventImpl(ApplicationEvents eventType) {
-        this.eventType = eventType;
-    }
-
-    public CloudApplicationDeployedEventImpl(Deployment entity) {
-        this(entity, ApplicationEvents.APPLICATION_DEPLOYED);
-    }
-
-    public CloudApplicationDeployedEventImpl(Deployment entity, ApplicationEvents eventType) {
-        super(entity);
+    public CloudApplicationDeployedEventImpl(String id,
+                                             Long timestamp,
+                                             Deployment entity,
+                                             ApplicationEvents eventType) {
+        super(id, timestamp, entity);
         this.eventType = eventType;
         setEntityId(entity.getId());
+    }
+
+    public CloudApplicationDeployedEventImpl(ApplicationEvents eventType) {
+        this.eventType = eventType;
     }
 
     @Override
