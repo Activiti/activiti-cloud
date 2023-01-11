@@ -36,6 +36,7 @@ import org.activiti.cloud.services.modeling.validation.process.BpmnModelEngineVa
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelNameValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelSequenceFlowValidator;
+import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskCatchBoundaryValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelServiceTaskImplementationValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUniqueIdValidator;
 import org.activiti.cloud.services.modeling.validation.process.BpmnModelUserTaskAssigneeValidator;
@@ -45,6 +46,7 @@ import org.activiti.cloud.services.modeling.validation.process.FlowElementsExtra
 import org.activiti.cloud.services.modeling.validation.process.FlowNodeFlowsValidator;
 import org.activiti.cloud.services.modeling.validation.process.IntermediateFlowNodeIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.process.ProcessModelValidator;
+import org.activiti.cloud.services.modeling.validation.process.ServiceTaskImplementationType;
 import org.activiti.cloud.services.modeling.validation.process.StartEventIncomingOutgoingFlowValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectConsistencyValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
@@ -163,6 +165,12 @@ public class ProcessModelValidatorConfiguration {
         ConnectorModelContentConverter connectorModelContentConverter, FlowElementsExtractor flowElementsExtractor) {
         return new BpmnModelServiceTaskImplementationValidator(connectorModelType,
                                                                connectorModelContentConverter, flowElementsExtractor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public BpmnModelServiceTaskCatchBoundaryValidator bpmnModelServiceTaskBoundaryValidator(FlowElementsExtractor flowElementsExtractor) {
+        return new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
     }
 
     @Bean

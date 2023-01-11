@@ -15,6 +15,27 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.transaction.Transactional;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -45,28 +66,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 
 /**
  * Business logic related to {@link Project} entities
@@ -437,19 +436,33 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void validateProject(Project project) {
-        List<Model> availableModels = modelService.getAllModels(project);
-        ValidationContext validationContext = new ProjectValidationContext(availableModels);
+        validateProject(project, false);
+    }
 
-        List<ModelValidationError> validationErrors = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
-                validationContext)),
-                availableModels.stream().flatMap(model -> getModelValidationErrors(model,
-                        validationContext)))
-                .collect(Collectors.toList());
+    @Override
+    public void validateProject(Project project, boolean ignoreWarning) {
+        List<ModelValidationError> validationErrors = getProjectValidationErrors(project, ignoreWarning);
 
         if (!validationErrors.isEmpty()) {
             throw new SemanticModelValidationException("Validation errors found in project's models",
-                    validationErrors);
+                validationErrors);
         }
+    }
+
+    private List<ModelValidationError> getProjectValidationErrors(Project project, boolean ignoreWarning) {
+        List<Model> availableModels = modelService.getAllModels(project);
+        ValidationContext validationContext = new ProjectValidationContext(availableModels);
+
+        Stream<ModelValidationError> validationErrorStream = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
+                    validationContext)),
+                availableModels.stream().flatMap(model -> getModelValidationErrors(model,
+                    validationContext)));
+
+        if(ignoreWarning){
+            validationErrorStream = validationErrorStream.filter(validationError -> !validationError.isWarning());
+        }
+
+        return validationErrorStream.collect(Collectors.toList());
     }
 
     private Stream<ModelValidationError> getModelValidationErrors(Model model,
