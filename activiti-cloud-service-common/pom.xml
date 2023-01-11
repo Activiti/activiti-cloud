@@ -47,6 +47,8 @@
     <xstream.version>1.4.20</xstream.version>
     <json-unit.version>2.32.0</json-unit.version>
     <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
+    <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
+    <james.apache-mime4j.version>0.8.9</james.apache-mime4j.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -138,6 +140,18 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-mime4j-dom</artifactId>
+        <version>${james.apache-mime4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.james</groupId>
+        <artifactId>apache-mime4j-storage</artifactId>
+        <version>${james.apache-mime4j.version}</version>
+      </dependency>
+
       <dependency>
         <groupId>com.github.zafarkhaja</groupId>
         <artifactId>java-semver</artifactId>
