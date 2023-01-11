@@ -42,12 +42,9 @@ class ApplicationRollbackEventConverterTest {
         entity.setId("entityId");
         CloudApplicationDeployedEventImpl event =new CloudApplicationDeployedEventImpl("eventId",
             System.currentTimeMillis(),
-            new DeploymentImpl(),
+            entity,
             ApplicationEvents.APPLICATION_ROLLBACK);
-
-        //Set explicitly to be sure
         event.setSequenceNumber(0);
-
         return event;
     }
 }
