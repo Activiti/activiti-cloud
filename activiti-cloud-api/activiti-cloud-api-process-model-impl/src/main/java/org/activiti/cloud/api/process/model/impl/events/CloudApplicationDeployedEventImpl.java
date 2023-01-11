@@ -37,6 +37,10 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
         setEntityId(entity.getId());
     }
 
+    public CloudApplicationDeployedEventImpl(ApplicationEvents eventType) {
+        this.eventType = eventType;
+    }
+
     @Override
     public ApplicationEvents getEventType() {
         return eventType;
