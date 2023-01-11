@@ -121,7 +121,6 @@ public class CloudRuntimeEventRegistry {
         eventImplementations.add(new CloudVariableUpdatedEventImpl());
         eventImplementations.add(new CloudVariableDeletedEventImpl());
         eventImplementations.add(new CloudApplicationDeployedEventImpl());
-        eventImplementations.add(new CloudApplicationDeployedEventImpl(ApplicationEvents.APPLICATION_ROLLBACK));
         eventImplementations.add(new CloudProcessCandidateStarterUserAddedEventImpl());
         eventImplementations.add(new CloudProcessCandidateStarterUserRemovedEventImpl());
         eventImplementations.add(new CloudProcessCandidateStarterGroupAddedEventImpl());

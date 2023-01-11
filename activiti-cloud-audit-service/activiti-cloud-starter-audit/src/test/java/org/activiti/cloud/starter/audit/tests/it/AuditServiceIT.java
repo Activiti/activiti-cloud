@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -1068,7 +1069,12 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent =
+            new CloudApplicationDeployedEventImpl(
+                UUID.randomUUID().toString(),
+                System.currentTimeMillis(),
+                deployment,
+                ApplicationEvents.APPLICATION_DEPLOYED);
         testEvents.add(cloudApplicationDeployedEvent);
 
         return testEvents;
@@ -1159,7 +1165,12 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent =
+            new CloudApplicationDeployedEventImpl(
+                UUID.randomUUID().toString(),
+                System.currentTimeMillis(),
+                deployment,
+                ApplicationEvents.APPLICATION_DEPLOYED);
         cloudApplicationDeployedEvent.setAppName("EventApplicationName");
         coveredEvents.add(cloudApplicationDeployedEvent);
 
