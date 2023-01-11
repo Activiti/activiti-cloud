@@ -29,7 +29,7 @@ public interface ProcessVariablesRuntimeService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CollectionModel<CloudVariableInstance> getVariables(@Param("id") String id);
 
-    @RequestLine("POST /v1/process-instances/{id}/variables")
+    @RequestLine("PUT /v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
     ResponseEntity<Void> setVariables(@Param("id") String id,
                                       SetProcessVariablesPayload setProcessVariablesPayload);
