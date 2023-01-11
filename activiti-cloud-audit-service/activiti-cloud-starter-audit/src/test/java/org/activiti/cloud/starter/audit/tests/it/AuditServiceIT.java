@@ -44,6 +44,8 @@ import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
+import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
+import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -78,6 +80,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -901,6 +907,18 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
 
         testEvents.add(new CloudProcessDeployedEventImpl(buildDefaultProcessDefinition()));
+
+        testEvents.add(new CloudProcessCandidateStarterUserAddedEventImpl("CloudProcessCandidateStarterUserAddedEventImpl",
+            System.currentTimeMillis(), new ProcessCandidateStarterUserImpl("pid", "uid")));
+
+        testEvents.add(new CloudProcessCandidateStarterUserRemovedEventImpl("CloudProcessCandidateStarterUserRemovedEventImpl",
+            System.currentTimeMillis(), new ProcessCandidateStarterUserImpl("pid", "uid")));
+
+        testEvents.add(new CloudProcessCandidateStarterGroupAddedEventImpl("CloudProcessCandidateStarterGroupAddedEventId",
+            System.currentTimeMillis(), new ProcessCandidateStarterGroupImpl("pid", "gid")));
+
+        testEvents.add(new CloudProcessCandidateStarterGroupRemovedEventImpl("CloudProcessCandidateStarterGroupRemovedEventImpl",
+            System.currentTimeMillis(), new ProcessCandidateStarterGroupImpl("pid", "gid")));
 
         BPMNActivityImpl bpmnActivityCancelled = new BPMNActivityImpl();
         bpmnActivityCancelled.setElementId("elementId");
