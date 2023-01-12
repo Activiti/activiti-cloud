@@ -331,8 +331,6 @@ public class ModelServiceImplTest {
 
     @Test
     public void should_returnErrors_when_validatingAnInvalidModelExtensionsFileInProjectContext() throws Exception {
-        ModelImpl extensionModelImpl = createModelImpl();
-
         ConnectorModelType modelType = new ConnectorModelType();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
