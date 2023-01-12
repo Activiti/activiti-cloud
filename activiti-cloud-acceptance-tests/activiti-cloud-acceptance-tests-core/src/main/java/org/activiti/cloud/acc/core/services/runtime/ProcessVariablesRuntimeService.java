@@ -31,7 +31,7 @@ public interface ProcessVariablesRuntimeService {
 
     @RequestLine("PUT /v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<Void> setVariables(@Param("id") String id,
+    ResponseEntity<Void> updateVariables(@Param("id") String id,
                                       SetProcessVariablesPayload setProcessVariablesPayload);
 
 }
