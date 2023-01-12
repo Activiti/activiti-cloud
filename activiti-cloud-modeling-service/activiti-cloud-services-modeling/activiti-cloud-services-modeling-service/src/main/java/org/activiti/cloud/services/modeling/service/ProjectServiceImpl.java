@@ -24,7 +24,6 @@ import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -456,7 +455,8 @@ public class ProjectServiceImpl implements ProjectService {
         Stream<ModelValidationError> validationErrorStream = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
                     validationContext)),
                 availableModels.stream().flatMap(model -> getModelValidationErrors(model,
-                    validationContext)));
+                    validationContext))
+            );
 
         if(ignoreWarning){
             validationErrorStream = validationErrorStream.filter(validationError -> !validationError.isWarning());
@@ -467,22 +467,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private Stream<ModelValidationError> getModelValidationErrors(Model model,
                                                                   ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = new ArrayList<>();
-        try {
-            modelService.validateModelContent(model,
-                    validationContext);
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
-        try {
-            modelService.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> modelService.validateModelExtensions(model,
-                    extensionsFileContent,
-                    validationContext));
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
+        List<ModelValidationError> validationErrors = modelService.getModelValidationErrors(model, validationContext);
+        validationErrors.addAll(modelService.getModelExtensionValidationErrors(model, validationContext));
         return validationErrors.stream();
     }
 

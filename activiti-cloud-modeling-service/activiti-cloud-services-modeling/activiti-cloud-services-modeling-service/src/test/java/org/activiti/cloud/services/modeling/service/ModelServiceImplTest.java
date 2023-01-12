@@ -15,7 +15,27 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.xml.stream.XMLStreamException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
@@ -28,6 +48,7 @@ import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.process.ModelScope;
@@ -51,27 +72,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -306,6 +306,18 @@ public class ModelServiceImplTest {
     }
 
     @Test
+    public void should_returnErrors_when_gettingValidationErrorOfAnInvalidModel() throws Exception {
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
+        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+            .when(modelContentValidator)
+            .validateModelContent(any(), any());
+
+        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT)).isNotEmpty();
+    }
+
+    @Test
     public void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() throws Exception {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
@@ -315,6 +327,24 @@ public class ModelServiceImplTest {
             .validateModelExtensions(any(), any());
 
         assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+    }
+
+    @Test
+    public void should_returnErrors_when_validatingAnInvalidModelExtensionsFileInProjectContext() throws Exception {
+        ModelImpl extensionModelImpl = createModelImpl();
+
+        ConnectorModelType modelType = new ConnectorModelType();
+        when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelOne.getType()).thenReturn(modelType.getName());
+        when(modelOne.getId()).thenReturn("modelOneId");
+
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
+        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+            .when(modelExtensionsValidator)
+            .validateModelExtensions(any(), any());
+
+        assertThat(modelService.getModelExtensionValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT)).isNotEmpty();
     }
 
     @Test

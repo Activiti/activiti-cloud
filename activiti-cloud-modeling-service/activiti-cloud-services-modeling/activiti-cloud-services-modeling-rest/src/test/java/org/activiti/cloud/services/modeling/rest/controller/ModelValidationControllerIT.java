@@ -785,7 +785,8 @@ public class ModelValidationControllerIT {
             .extracting(ModelValidationError::getProblem,
                 ModelValidationError::getDescription, ModelValidationError::isWarning)
             .containsOnly(tuple("Missing Catch Error boundary event",
-                "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently", true));
+                "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently. Consider adding an Error boundary event to handle failures.",
+                true));
     }
 
     @Test
