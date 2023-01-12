@@ -439,8 +439,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void validateProject(Project project, boolean ignoreWarning) {
-        List<ModelValidationError> validationErrors = getProjectValidationErrors(project, ignoreWarning);
+    public void validateProject(Project project, boolean ignoreWarnings) {
+        List<ModelValidationError> validationErrors = getProjectValidationErrors(project, ignoreWarnings);
 
         if (!validationErrors.isEmpty()) {
             throw new SemanticModelValidationException("Validation errors found in project's models",
@@ -448,7 +448,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private List<ModelValidationError> getProjectValidationErrors(Project project, boolean ignoreWarning) {
+    private List<ModelValidationError> getProjectValidationErrors(Project project, boolean ignoreWarnings) {
         List<Model> availableModels = modelService.getAllModels(project);
         ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
@@ -458,7 +458,7 @@ public class ProjectServiceImpl implements ProjectService {
                     validationContext))
             );
 
-        if(ignoreWarning){
+        if(ignoreWarnings){
             validationErrorStream = validationErrorStream.filter(validationError -> !validationError.isWarning());
         }
 
