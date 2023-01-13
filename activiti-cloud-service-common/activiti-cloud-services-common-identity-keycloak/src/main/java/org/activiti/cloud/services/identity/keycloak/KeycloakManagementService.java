@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.identity.keycloak;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -90,13 +89,11 @@ public class KeycloakManagementService implements IdentityManagementService {
             ? StringUtils.contains(user.getUsername(), searchKey) || StringUtils.contains(user.getEmail(), searchKey)
             : true;
         try {
-            return groups.stream()
-                .map(this::findUsersByGroupName)
-                .flatMap(Collection::stream)
-                .distinct()
-                .filter(maybeMatchSearchKey)
-                .collect(Collectors.toList());
-
+            List<User> users = new ArrayList<>();
+            String firstGroup = groups.iterator().next();
+            users.addAll(findUsersByGroupName((firstGroup)));
+            groups.forEach(group -> users.retainAll(findUsersByGroupName(group)));
+            return users.stream().filter(maybeMatchSearchKey).collect(Collectors.toList());
         } catch (IdentityInvalidGroupException exception) {
             return Collections.emptyList();
         }
