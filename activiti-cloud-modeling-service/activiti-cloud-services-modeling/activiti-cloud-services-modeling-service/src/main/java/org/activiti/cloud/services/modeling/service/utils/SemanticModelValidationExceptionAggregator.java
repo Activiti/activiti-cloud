@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.service;
+package org.activiti.cloud.services.modeling.service.utils;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -61,8 +61,10 @@ public class SemanticModelValidationExceptionAggregator<V extends ModelValidator
     }
 
     protected List<ModelValidationError> getValidationErrors(@NonNull List<SemanticModelValidationException> semanticModelValidationExceptionList) {
-        return semanticModelValidationExceptionList.stream().filter(validationException -> validationException.getValidationErrors() != null)
-            .flatMap(validationException -> validationException.getValidationErrors().stream()).collect(Collectors.toList());
+        return semanticModelValidationExceptionList.stream()
+            .filter(validationException -> validationException.getValidationErrors() != null)
+            .flatMap(validationException -> validationException.getValidationErrors().stream())
+            .collect(Collectors.toList());
     }
 
     public void validate() throws ModelingException {
@@ -73,13 +75,15 @@ public class SemanticModelValidationExceptionAggregator<V extends ModelValidator
     private void throwExceptionIfNeeded(@NonNull List<SemanticModelValidationException> validationExceptions) {
         if(!validationExceptions.isEmpty()){
             if (validationExceptions.size() == 1) {
-                throw validationExceptions.get(0);
+                throw validationExceptions.stream().findFirst().get();
             } else {
                 final List<ModelValidationError> modelValidationErrors = getValidationErrors(validationExceptions);
 
-                final long errorCount = modelValidationErrors.stream().filter(modelValidationError -> !modelValidationError.isWarning()).count();
-                if(errorCount > 0) {
-                    throw new SemanticModelValidationException(String.format(ERROR_MESSAGE, errorCount), modelValidationErrors);
+                if(modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())) {
+                    throw new SemanticModelValidationException(
+                        String.format(ERROR_MESSAGE, modelValidationErrors.stream().filter(modelValidationError -> !modelValidationError.isWarning()).count()),
+                        modelValidationErrors
+                    );
                 }
 
                 throw new SemanticModelValidationException(String.format(WARNING_MESSAGE, modelValidationErrors.size()), modelValidationErrors);

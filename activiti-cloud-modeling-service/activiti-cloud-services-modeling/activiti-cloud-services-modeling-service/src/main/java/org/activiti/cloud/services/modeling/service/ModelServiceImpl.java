@@ -65,6 +65,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.activiti.cloud.services.modeling.service.utils.SemanticModelValidationExceptionAggregator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.slf4j.Logger;
