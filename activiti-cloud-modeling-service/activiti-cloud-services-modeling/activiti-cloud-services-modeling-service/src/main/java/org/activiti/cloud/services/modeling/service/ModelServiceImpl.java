@@ -30,10 +30,10 @@ import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +46,8 @@ import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
+import org.activiti.cloud.modeling.api.ModelContentValidator;
+import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -80,7 +82,7 @@ import org.springframework.util.Assert;
  */
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
 @Transactional
-public class ModelServiceImpl implements ModelService{
+public class ModelServiceImpl implements ModelService {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelServiceImpl.class);
 
@@ -591,15 +593,22 @@ public class ModelServiceImpl implements ModelService{
     private void validateModelContentAndUsage(Model model,
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(model.getType())).stream().forEach(modelValidator -> modelValidator.validateModelContent(model, modelContent,
-            validationContext, true));
+        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelContentValidator>(
+            emptyIfNull(modelContentService.findModelValidators(model.getType())),
+            modelValidator -> modelValidator.validateModelContent(model, modelContent,
+                validationContext, true));
+
+        exceptionAggregator.validate();
     }
 
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
                                       ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelContent(modelContent,
-                                                                                                                                               validationContext));
+        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelContentValidator>(
+            emptyIfNull(modelContentService.findModelValidators(modelType)),
+            modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
+
+        exceptionAggregator.validate();
     }
 
     @Override
@@ -658,8 +667,12 @@ public class ModelServiceImpl implements ModelService{
     private void validateModelExtensions(String modelType,
                                          byte[] modelContent,
                                          ValidationContext validationContext) {
-        emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelExtensions(modelContent,
-                                                                                                                                                          validationContext));
+        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelExtensionsValidator>(
+            emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+
+        exceptionAggregator.validate();
+
     }
 
     private ModelType findModelType(Model model) {
@@ -676,7 +689,7 @@ public class ModelServiceImpl implements ModelService{
     public List<ModelValidationError> getModelValidationErrors(Model model,
         ValidationContext validationContext) {
 
-        List<ModelValidationError> validationErrors = new ArrayList<>();
+        final List<ModelValidationError> validationErrors = new LinkedList<>();
         try {
             this.validateModelContent(model,
                 validationContext);
@@ -691,7 +704,7 @@ public class ModelServiceImpl implements ModelService{
     public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
             ValidationContext validationContext){
 
-        List<ModelValidationError> validationErrors = new ArrayList<>();
+        final List<ModelValidationError> validationErrors = new LinkedList<>();
         try {
             this.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> this.validateModelExtensions(model,
                 extensionsFileContent,

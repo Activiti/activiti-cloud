@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -44,12 +43,12 @@ public abstract class ExtensionsJsonSchemaValidator extends JsonSchemaModelValid
                        validationContext);
 
         if (!validationContext.isEmpty()) {
-            validateExtensionstInContext(bytes,
+            validateExtensionsInContext(bytes,
                                          validationContext);
         }
     }
 
-    private void validateExtensionstInContext(byte[] bytes,
+    private void validateExtensionsInContext(byte[] bytes,
                                               ValidationContext validationContext) {
         List<ModelValidationError> validationExceptions = getValidationErrors(convertBytesToModel(bytes),
                                                                               validationContext);
