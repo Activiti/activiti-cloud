@@ -195,6 +195,18 @@ class KeycloakManagementServiceTest {
         defineSearchUsersByGroupsFromKeycloak();
 
         UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setGroups(Set.of("groupOne", "groupTwo"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
+    }
+
+    @Test
+    void shouldReturnGroupsWhenSearchingUsingMultipleGroups() {
+        defineSearchUsersFromKeycloak();
+        defineSearchUsersByGroupsFromKeycloak();
+
+        UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("userTwo");
         userSearchParams.setGroups(Set.of("groupOne", "groupTwo"));
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
