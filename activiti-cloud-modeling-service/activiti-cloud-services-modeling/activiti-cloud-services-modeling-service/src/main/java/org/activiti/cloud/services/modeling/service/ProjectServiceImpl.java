@@ -456,7 +456,7 @@ public class ProjectServiceImpl implements ProjectService {
                     validationContext)),
                 availableModels.stream().flatMap(model -> getModelValidationErrors(model,
                     validationContext))
-            );
+            ).distinct();
 
         if(ignoreWarnings){
             validationErrorStream = validationErrorStream.filter(validationError -> !validationError.isWarning());

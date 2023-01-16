@@ -32,10 +32,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,14 +59,13 @@ import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.activiti.cloud.services.modeling.service.utils.SemanticModelValidationExceptionAggregator;
+import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.slf4j.Logger;
@@ -101,6 +101,9 @@ public class ModelServiceImpl implements ModelService {
 
     private final FileMagicNumberValidator fileContentValidator;
 
+    private final ValidationStrategy<ModelContentValidator> modelContentValidationStrategy;
+    private final ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy;
+
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
@@ -115,7 +118,9 @@ public class ModelServiceImpl implements ModelService {
                             JsonConverter<Model> jsonConverter,
                             ProcessModelContentConverter processModelContentConverter,
                             Set<ModelUpdateListener> modelUpdateListeners,
-                            FileMagicNumberValidator fileContentValidator) {
+                            FileMagicNumberValidator fileContentValidator,
+                            ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
+                            ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -123,6 +128,8 @@ public class ModelServiceImpl implements ModelService {
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
         this.fileContentValidator = fileContentValidator;
+        this.modelContentValidationStrategy = modelContentValidationStrategy;
+        this.modelExtensionsValidationStrategy = modelExtensionsValidationStrategy;
         modelUpdateListenersMapByModelType = modelUpdateListeners
             .stream()
             .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
@@ -594,22 +601,35 @@ public class ModelServiceImpl implements ModelService {
     private void validateModelContentAndUsage(Model model,
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
-        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelContentValidator>(
+        modelContentValidationStrategy.validate(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
             modelValidator -> modelValidator.validateModelContent(model, modelContent,
                 validationContext, true));
+    }
 
-        exceptionAggregator.validate();
+    private List<ModelValidationError> getModelContentAndUsageValidationErrors(Model model,
+        byte[] modelContent,
+        ValidationContext validationContext) {
+        return modelContentValidationStrategy.getValidationErrors(
+            emptyIfNull(modelContentService.findModelValidators(model.getType())),
+            modelValidator -> modelValidator.validateModelContent(model, modelContent,
+                validationContext, true));
     }
 
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
                                       ValidationContext validationContext) {
-        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelContentValidator>(
+        modelContentValidationStrategy.validate(
             emptyIfNull(modelContentService.findModelValidators(modelType)),
             modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
+    }
 
-        exceptionAggregator.validate();
+    private List<ModelValidationError> getModelContentValidationErrors(String modelType,
+        byte[] modelContent,
+        ValidationContext validationContext) {
+        return modelContentValidationStrategy.getValidationErrors(
+            emptyIfNull(modelContentService.findModelValidators(modelType)),
+            modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
     }
 
     @Override
@@ -668,12 +688,17 @@ public class ModelServiceImpl implements ModelService {
     private void validateModelExtensions(String modelType,
                                          byte[] modelContent,
                                          ValidationContext validationContext) {
-        SemanticModelValidationExceptionAggregator exceptionAggregator = new SemanticModelValidationExceptionAggregator<ModelExtensionsValidator>(
+        modelExtensionsValidationStrategy.validate(
             emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
             modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+    }
 
-        exceptionAggregator.validate();
-
+    private List<ModelValidationError> getModelExtensionsValidationErrors(String modelType,
+        byte[] modelContent,
+        ValidationContext validationContext) {
+        return modelExtensionsValidationStrategy.getValidationErrors(
+            emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
     }
 
     private ModelType findModelType(Model model) {
@@ -690,31 +715,19 @@ public class ModelServiceImpl implements ModelService {
     public List<ModelValidationError> getModelValidationErrors(Model model,
         ValidationContext validationContext) {
 
-        final List<ModelValidationError> validationErrors = new LinkedList<>();
-        try {
-            this.validateModelContent(model,
-                validationContext);
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
-        return validationErrors;
+        return getModelContentValidationErrors(model.getType(),
+            modelRepository.getModelContent(model),
+            validationContext);
     }
 
     @Override
     public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
             ValidationContext validationContext){
 
-        final List<ModelValidationError> validationErrors = new LinkedList<>();
-        try {
-            this.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> this.validateModelExtensions(model,
-                extensionsFileContent,
-                validationContext));
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
-        return validationErrors;
+        return getModelExtensionsFileContent(model).filter(Objects::nonNull)
+            .map(extensionsFileContent ->
+                getModelExtensionsValidationErrors(model.getType(),
+                    extensionsFileContent.getFileContent(),
+                    validationContext)).orElse(Collections.emptyList());
     }
-
 }

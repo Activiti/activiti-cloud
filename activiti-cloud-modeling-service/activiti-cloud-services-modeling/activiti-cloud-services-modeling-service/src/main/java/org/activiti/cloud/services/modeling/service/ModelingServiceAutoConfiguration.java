@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
@@ -24,6 +27,7 @@ import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -35,18 +39,16 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
-import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
+import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Configuration
 public class ModelingServiceAutoConfiguration {
@@ -76,6 +78,11 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
+    public <V extends ModelValidator> ValidationStrategy<V> modelContentValidationStrategy() {
+        return new AggregateErrorValidationStrategy<V>();
+    }
+
+    @Bean
     public ModelService modelService(ModelRepository modelRepository,
                                      ModelTypeService modelTypeService,
                                      ModelContentService modelContentService,
@@ -83,7 +90,9 @@ public class ModelingServiceAutoConfiguration {
                                      JsonConverter<Model> jsonConverter,
                                      ProcessModelContentConverter processModelContentConverter,
                                      Set<ModelUpdateListener> modelUpdateListeners,
-                                     FileMagicNumberValidator fileContentValidator) {
+                                     FileMagicNumberValidator fileContentValidator,
+                                     ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
+                                     ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
                                     modelContentService,
@@ -91,7 +100,9 @@ public class ModelingServiceAutoConfiguration {
                                     jsonConverter,
                                     processModelContentConverter,
                                     modelUpdateListeners,
-                                    fileContentValidator);
+                                    fileContentValidator,
+                                    modelContentValidationStrategy,
+                                    modelExtensionsValidationStrategy);
 
     }
 

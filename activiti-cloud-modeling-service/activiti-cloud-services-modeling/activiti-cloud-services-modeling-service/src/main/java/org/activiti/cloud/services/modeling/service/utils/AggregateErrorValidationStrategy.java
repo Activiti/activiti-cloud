@@ -26,24 +26,17 @@ import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.springframework.lang.NonNull;
 
-public class SemanticModelValidationExceptionAggregator<V extends ModelValidator> {
+public class AggregateErrorValidationStrategy<V extends ModelValidator> implements ValidationStrategy<V> {
 
     private final static String ERROR_MESSAGE = "Semantic model validation errors encountered: %d schema violations found";
 
     private final static String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
 
-    private final Collection<V> validators;
-    private final ValidationCallback callback;
 
-    public SemanticModelValidationExceptionAggregator(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
-        this.validators = validators;
-        this.callback = callback;
-    }
-
-    private List<SemanticModelValidationException> getSemanticModelValidationExceptions() {
+    private List<SemanticModelValidationException> getSemanticModelValidationExceptions(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
         final List<SemanticModelValidationException> semanticModelValidationExceptionList = new LinkedList<>();
 
-        this.validators.stream().forEach(modelValidator -> {
+        validators.stream().forEach(modelValidator -> {
             try {
                 callback.accept(modelValidator);
             } catch(SemanticModelValidationException e) {
@@ -54,22 +47,27 @@ public class SemanticModelValidationExceptionAggregator<V extends ModelValidator
         return semanticModelValidationExceptionList;
     }
 
-    public List<ModelValidationError> getValidationErrors() {
-        final List<SemanticModelValidationException> semanticModelValidationExceptionList = getSemanticModelValidationExceptions();
+    @Override
+    public List<ModelValidationError> getValidationErrors(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
+        final List<SemanticModelValidationException> semanticModelValidationExceptionList = getSemanticModelValidationExceptions(validators, callback);
 
         return getValidationErrors(semanticModelValidationExceptionList);
     }
 
+    @Override
+    public void validate(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) throws ModelingException {
+        final List<SemanticModelValidationException> validationExceptions = getSemanticModelValidationExceptions(validators, callback);
+        throwExceptionIfNeeded(validationExceptions);
+    }
+
     protected List<ModelValidationError> getValidationErrors(@NonNull List<SemanticModelValidationException> semanticModelValidationExceptionList) {
+        // collecting as set allows removing duplicates
         return semanticModelValidationExceptionList.stream()
             .filter(validationException -> validationException.getValidationErrors() != null)
             .flatMap(validationException -> validationException.getValidationErrors().stream())
+            .distinct()
+            .sorted((a, b) -> a.isWarning() ? -1 : 1)
             .collect(Collectors.toList());
-    }
-
-    public void validate() throws ModelingException {
-        final List<SemanticModelValidationException> validationExceptions = getSemanticModelValidationExceptions();
-        throwExceptionIfNeeded(validationExceptions);
     }
 
     private void throwExceptionIfNeeded(@NonNull List<SemanticModelValidationException> validationExceptions) {
@@ -86,7 +84,10 @@ public class SemanticModelValidationExceptionAggregator<V extends ModelValidator
                     );
                 }
 
-                throw new SemanticModelValidationException(String.format(WARNING_MESSAGE, modelValidationErrors.size()), modelValidationErrors);
+                throw new SemanticModelValidationException(
+                    String.format(WARNING_MESSAGE, modelValidationErrors.size()),
+                    modelValidationErrors
+                );
             }
         }
     }

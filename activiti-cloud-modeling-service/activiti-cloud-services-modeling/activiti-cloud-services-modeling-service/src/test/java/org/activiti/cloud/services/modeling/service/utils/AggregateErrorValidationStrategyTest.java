@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.service;
+package org.activiti.cloud.services.modeling.service.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,7 +30,6 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
-import org.activiti.cloud.services.modeling.service.utils.SemanticModelValidationExceptionAggregator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -40,7 +39,7 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class SemanticModelValidationExceptionAggregatorTest {
+public class AggregateErrorValidationStrategyTest {
 
     @Mock
     private Model model;
@@ -51,21 +50,17 @@ public class SemanticModelValidationExceptionAggregatorTest {
     @Mock
     private ModelContentValidator otherModelContentValidator;
 
+    private final AggregateErrorValidationStrategy<ModelContentValidator> validationStrategy = new AggregateErrorValidationStrategy<>();
+
     @Test
     public void should_returnEmpty_whenValidatorsDoNotThrowAnyException() {
-
-        SemanticModelValidationExceptionAggregator<ModelContentValidator> exceptionAggregator =
-            new SemanticModelValidationExceptionAggregator<>(
-                List.of(modelContentValidator),
-                validator -> {}
-            );
-
-        assertDoesNotThrow(() -> exceptionAggregator.validate());
+        // when
+        assertDoesNotThrow(() -> validationStrategy.validate(List.of(modelContentValidator), validator -> {}));
     }
 
     @Test
     public void should_returnAggregatedException_whenValidatorsThrowSemanticException() {
-
+        // given
         final List<ModelValidationError> validatorErrors = List.of(
             new ModelValidationError("Problem 1", "Description 1"),
             new ModelValidationError("Problem 2", "Description 2")
@@ -83,13 +78,14 @@ public class SemanticModelValidationExceptionAggregatorTest {
             .when(otherModelContentValidator)
             .validateModelContent(any(), any());
 
-        SemanticModelValidationExceptionAggregator<ModelContentValidator> exceptionAggregator =
-            new SemanticModelValidationExceptionAggregator<>(
+        // when
+        SemanticModelValidationException exception = assertThrows(SemanticModelValidationException.class,
+            () -> validationStrategy.validate(
                 List.of(modelContentValidator, otherModelContentValidator),
                 validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
-            );
+            ));
 
-        SemanticModelValidationException exception = assertThrows(SemanticModelValidationException.class, () -> exceptionAggregator.validate());
+        // then
         assertThat(exception).hasMessage("Semantic model validation errors encountered: 3 schema violations found");
         assertThat(exception.getValidationErrors()).isNotNull().hasSize(3).containsExactly(Stream.concat(validatorErrors.stream(),
                 otherValidatorErrors.stream()).collect(Collectors.toList()).toArray(ModelValidationError[]::new));
@@ -97,7 +93,7 @@ public class SemanticModelValidationExceptionAggregatorTest {
 
     @Test
     public void should_returnException_whenAValidatorDoesNotThrowSemanticException() {
-
+        // given
         doThrow(new SyntacticModelValidationException("Test Syntactic Exception"))
             .when(modelContentValidator)
             .validateModelContent(any(), any());
@@ -110,12 +106,10 @@ public class SemanticModelValidationExceptionAggregatorTest {
             .when(otherModelContentValidator)
             .validateModelContent(any(), any());
 
-        SemanticModelValidationExceptionAggregator<ModelContentValidator> exceptionAggregator =
-            new SemanticModelValidationExceptionAggregator<>(
-                List.of(modelContentValidator, otherModelContentValidator),
-                validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
-                );
-
-        assertThrows(SyntacticModelValidationException.class, () -> exceptionAggregator.validate());
+        // then
+        assertThrows(SyntacticModelValidationException.class, () -> validationStrategy.validate(
+            List.of(modelContentValidator, otherModelContentValidator),
+            validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
+        ));
     }
 }

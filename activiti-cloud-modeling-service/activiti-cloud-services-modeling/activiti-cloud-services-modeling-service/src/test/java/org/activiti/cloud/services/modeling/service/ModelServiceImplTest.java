@@ -59,11 +59,12 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
+import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -77,7 +78,6 @@ import org.springframework.data.domain.Pageable;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ModelServiceImplTest {
 
-    @InjectMocks
     private ModelServiceImpl modelService;
 
     @Mock
@@ -119,6 +119,12 @@ public class ModelServiceImplTest {
     @Mock
     public Set<ModelUpdateListener> modelUpdateListeners;
 
+
+    public ValidationStrategy<ModelContentValidator> modelContentValidationStrategy;
+
+
+    public ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy;
+
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
 
@@ -147,6 +153,10 @@ public class ModelServiceImplTest {
         modelTwo.setCategory(PROCESS_MODEL_DEFAULT_CATEGORY);
         modelTwo.setContent("mockContent".getBytes(StandardCharsets.UTF_8));
         modelTwo.addProject(projectOne);
+
+        modelService = new ModelServiceImpl(modelRepository, modelTypeService, modelContentService, modelExtensionsService, jsonConverter,
+            processModelContentConverter, modelUpdateListeners, fileMagicNumberValidator, new AggregateErrorValidationStrategy<ModelContentValidator>(),
+            new AggregateErrorValidationStrategy<ModelExtensionsValidator>());
     }
 
     @Test
