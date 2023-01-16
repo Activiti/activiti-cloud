@@ -111,7 +111,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                     IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
                             (gateway) -> gateway.beanName(functionName)
-                                .replyTimeout(0L))
+                                .replyTimeout(0L).errorChannel("errorChannel"))
                         .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
                         .filter(selector)
                         .handle(Message.class, handler)
