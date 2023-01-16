@@ -585,7 +585,7 @@ public class ModelServiceImpl implements ModelService {
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
-            this.validateModelContent(model, fileContent, project);
+            validateModelContent(model, fileContent, project);
         }
     }
 
@@ -594,7 +594,7 @@ public class ModelServiceImpl implements ModelService {
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
-            this.validateModelContent(model, fileContent);
+            validateModelContent(model, fileContent);
         }
     }
 
@@ -602,15 +602,6 @@ public class ModelServiceImpl implements ModelService {
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
         modelContentValidationStrategy.validate(
-            emptyIfNull(modelContentService.findModelValidators(model.getType())),
-            modelValidator -> modelValidator.validateModelContent(model, modelContent,
-                validationContext, true));
-    }
-
-    private List<ModelValidationError> getModelContentAndUsageValidationErrors(Model model,
-        byte[] modelContent,
-        ValidationContext validationContext) {
-        return modelContentValidationStrategy.getValidationErrors(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
             modelValidator -> modelValidator.validateModelContent(model, modelContent,
                 validationContext, true));
