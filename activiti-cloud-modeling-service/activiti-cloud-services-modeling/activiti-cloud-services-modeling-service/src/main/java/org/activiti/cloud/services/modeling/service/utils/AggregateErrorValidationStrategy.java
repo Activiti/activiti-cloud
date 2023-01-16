@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.service.utils;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
@@ -33,7 +32,7 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
     private final static String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
 
 
-    private List<SemanticModelValidationException> getSemanticModelValidationExceptions(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
+    protected List<SemanticModelValidationException> getSemanticModelValidationExceptions(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
         final List<SemanticModelValidationException> semanticModelValidationExceptionList = new LinkedList<>();
 
         validators.stream().forEach(modelValidator -> {
@@ -89,10 +88,5 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
                 );
             }
         }
-    }
-
-    public static interface ValidationCallback<T extends ModelValidator> extends Consumer<T> {
-        @Override
-        void accept(T validator) throws ModelingException;
     }
 }

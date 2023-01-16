@@ -17,10 +17,10 @@ package org.activiti.cloud.services.modeling.service.utils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.core.error.ModelingException;
-import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy.ValidationCallback;
 import org.springframework.lang.NonNull;
 
 public interface ValidationStrategy<V extends ModelValidator> {
@@ -29,4 +29,8 @@ public interface ValidationStrategy<V extends ModelValidator> {
 
     void validate(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) throws ModelingException;
 
+    public static interface ValidationCallback<T extends ModelValidator> extends Consumer<T> {
+        @Override
+        void accept(T validator) throws ModelingException;
+    }
 }
