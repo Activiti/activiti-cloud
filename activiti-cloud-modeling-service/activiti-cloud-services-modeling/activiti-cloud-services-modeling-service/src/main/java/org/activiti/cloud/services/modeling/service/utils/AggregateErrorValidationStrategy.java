@@ -61,7 +61,6 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
     }
 
     protected List<ModelValidationError> getValidationErrors(@NonNull List<SemanticModelValidationException> semanticModelValidationExceptionList) {
-        // collecting as set allows removing duplicates
         return semanticModelValidationExceptionList.stream()
             .filter(validationException -> validationException.getValidationErrors() != null)
             .flatMap(validationException -> validationException.getValidationErrors().stream())
