@@ -17,8 +17,11 @@ package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
+import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt.JwtAccessTokenVerifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -28,6 +31,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import com.alfresco.process.security.hxpidp.HxpIdpJwtAdapter;
 
 @Configuration
 @ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
@@ -59,7 +63,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         public GraphQLAccessTokenVerifier jwtTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                                            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
                                                            JwtDecoder jwtDecoder) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, "role");
+            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new HxpIdpJwtAdapter(jwt));
         }
 
         @Bean
@@ -67,8 +71,14 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak")
         public GraphQLAccessTokenVerifier keycloakTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                                                 JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                                                JwtDecoder jwtDecoder) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, "roles");
+                                                                JwtDecoder jwtDecoder,
+                                                                @Value("${keycloak.use-resource-role-mappings}") boolean resourceRoleMapping,
+                                                                @Value("${keycloak.resource}" ) String resource) {
+            if(resourceRoleMapping) {
+                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakResourceJwtAdapter(resource, jwt));
+            } else {
+                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakJwtAdapter(jwt));
+            }
         }
 
 

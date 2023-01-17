@@ -16,7 +16,9 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt;
 
 import java.util.Set;
+import java.util.function.Function;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
@@ -30,16 +32,16 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
     private final JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter;
     private final JwtDecoder jwtDecoder;
-    private final String roleAttribute;
+    private final Function<Jwt, JwtAdapter> rolesSupplier;
 
     public JwtAccessTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                   JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
                                   JwtDecoder jwtDecoder,
-                                  String roleAttribute) {
+                                  Function<Jwt, JwtAdapter> rolesSupplier) {
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
         this.jwtDecoder = jwtDecoder;
-        this.roleAttribute = roleAttribute;
+        this.rolesSupplier = rolesSupplier;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
             JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(jwt);
             return new GraphQLAccessToken(
                 accessToken.getName(),
-                Set.copyOf(jwt.getClaimAsStringList(roleAttribute)),
+                Set.copyOf(rolesSupplier.apply(jwt).getRoles()),
                 accessToken
             );
         } else {
