@@ -128,7 +128,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
                         .get();
 
-                    integrationFlowContext.registration(inputChannelFlow);
+                    integrationFlowContext.registration(inputChannelFlow).register();
                 }
                 return bean;
             }
