@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
+import java.util.function.Function;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
+import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
@@ -30,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @Configuration
@@ -71,13 +74,8 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         public GraphQLAccessTokenVerifier keycloakTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                                                 JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
                                                                 JwtDecoder jwtDecoder,
-                                                                @Value("${keycloak.use-resource-role-mappings:false}") boolean resourceRoleMapping,
-                                                                @Value("${keycloak.resource}" ) String resource) {
-            if(resourceRoleMapping) {
-                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakResourceJwtAdapter(resource, jwt).getRoles());
-            } else {
-                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakJwtAdapter(jwt).getRoles());
-            }
+                                                                Function<Jwt, JwtAdapter> jwtAdapterSupplier) {
+            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> jwtAdapterSupplier.apply(jwt).getRoles());
         }
 
 
