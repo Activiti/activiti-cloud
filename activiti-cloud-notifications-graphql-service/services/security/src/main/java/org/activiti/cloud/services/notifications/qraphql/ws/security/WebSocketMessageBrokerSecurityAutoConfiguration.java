@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import com.alfresco.process.security.hxpidp.HxpIdpJwtAdapter;
 
 @Configuration
 @ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
@@ -63,7 +62,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         public GraphQLAccessTokenVerifier jwtTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                                            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
                                                            JwtDecoder jwtDecoder) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new HxpIdpJwtAdapter(jwt));
+            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> jwt.getClaimAsStringList("role"));
         }
 
         @Bean
@@ -72,12 +71,12 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         public GraphQLAccessTokenVerifier keycloakTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
                                                                 JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
                                                                 JwtDecoder jwtDecoder,
-                                                                @Value("${keycloak.use-resource-role-mappings}") boolean resourceRoleMapping,
+                                                                @Value("${keycloak.use-resource-role-mappings:false}") boolean resourceRoleMapping,
                                                                 @Value("${keycloak.resource}" ) String resource) {
             if(resourceRoleMapping) {
-                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakResourceJwtAdapter(resource, jwt));
+                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakResourceJwtAdapter(resource, jwt).getRoles());
             } else {
-                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakJwtAdapter(jwt));
+                return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> new KeycloakJwtAdapter(jwt).getRoles());
             }
         }
 
