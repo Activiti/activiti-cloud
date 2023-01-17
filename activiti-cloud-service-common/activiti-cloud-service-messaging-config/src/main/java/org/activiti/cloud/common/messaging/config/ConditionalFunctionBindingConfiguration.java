@@ -93,8 +93,16 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                                 .bridge()
                                 .get();
 
-                            integrationFlowContext.registration(connectorFlow)
-                                .register();
+                            String inputChannel = streamFunctionProperties.getInputBindings(gatewayName)
+                                .stream()
+                                .findFirst()
+                                .orElse(gatewayName);
+
+                            IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
+                                .get();
+
+                            integrationFlowContext.registration(inputChannelFlow);
                         });
                 }
                 return bean;
@@ -104,7 +112,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
 
     protected IntegrationFlowBuilder createFlowBuilder(String functionName){
         return IntegrationFlows.from(ConnectorGateway.class, (gateway) -> gateway.beanName(functionName)
-            .replyTimeout(0L).errorChannel("errorChannel"));
+            .replyTimeout(0L));
     }
 
     protected GenericHandler<Message> createHandler(String beanName, Optional<String> output) {

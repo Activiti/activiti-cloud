@@ -111,7 +111,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                     IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
                             (gateway) -> gateway.beanName(functionName)
-                                .replyTimeout(0L).errorChannel("errorChannel"))
+                                .replyTimeout(0L))
                         .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
                         .filter(selector)
                         .handle(Message.class, handler)
@@ -119,8 +119,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .bridge()
                         .get();
 
-                    integrationFlowContext.registration(connectorFlow)
-                        .register();
+                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
+                        .stream()
+                        .findFirst()
+                        .orElse(functionName);
+
+                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
+                        .get();
+
+                    integrationFlowContext.registration(inputChannelFlow);
                 }
                 return bean;
             }
