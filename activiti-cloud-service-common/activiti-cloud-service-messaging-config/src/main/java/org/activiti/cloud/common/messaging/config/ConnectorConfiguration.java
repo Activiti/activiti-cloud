@@ -125,7 +125,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                         .orElse(functionName);
 
                     IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
+                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
                         .get();
 
                     integrationFlowContext.registration(inputChannelFlow)
