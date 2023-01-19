@@ -10,6 +10,7 @@
 
 FROM adoptopenjdk/openjdk11:jdk-11.0.2.9-slim
 RUN  apt update
+RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 RUN apt -y install ttf-mscorefonts-installer fontconfig
 RUN fc-cache -f -v
 ENV PORT 8080
