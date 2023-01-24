@@ -72,8 +72,8 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         Optional.of(outputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(output -> {
-                setOutProperties(streamFunctionProperties, beanOutName,
-                    output, bindingServiceProperties);
+                streamFunctionProperties.getBindings().put(beanOutName, output);
+                setOutProperties(streamFunctionProperties, beanOutName, output, bindingServiceProperties);
             });
     }
 
@@ -93,7 +93,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         String beanOutName,
         String binding,
         BindingServiceProperties bindingServiceProperties) {
-        streamFunctionProperties.getBindings().put(beanOutName, binding);
+
         Optional.ofNullable(bindingServiceProperties.getProducerProperties(binding))
             .ifPresent(producerProperties -> {
                 bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);

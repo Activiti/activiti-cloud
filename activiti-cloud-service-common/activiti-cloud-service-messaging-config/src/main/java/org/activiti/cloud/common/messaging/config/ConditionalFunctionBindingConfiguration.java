@@ -68,7 +68,6 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                         .ifPresent(functionDefinition -> {
                             final String gatewayName = beanName + "Gateway";
 
-                            functionBindingPropertySource.register(beanName);
                             functionBindingPropertySource.register(gatewayName);
 
                             final String gatewayInName = getInBinding(gatewayName);

@@ -70,7 +70,6 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(functionDefinition -> {
 
-                            functionBindingPropertySource.register(beanName);
                             functionBindingPropertySource.register(functionName);
 
                             responseDestination.set(functionDefinition.outputHeader());
@@ -81,55 +80,54 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
                             setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
 
+                            GenericHandler<Message> handler = (message, headers) -> {
+                                FunctionInvocationWrapper function = functionFromDefinition(beanName);
+                                Object result = function.apply(message);
+
+                                Message<?> response = null;
+                                if(result != null) {
+                                    response = MessageBuilder.withPayload(result)
+                                        .build();
+                                    String destination = headers.get(responseDestination.get(), String.class);
+
+                                    if (StringUtils.hasText(destination)) {
+                                        getStreamBridge().send(destination, response);
+                                        return null;
+                                    }
+                                }
+
+                                return response;
+                            };
+
+                            GenericSelector<Message<?>> selector = Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                                .map(ConnectorBinding::condition)
+                                .filter(StringUtils::hasText)
+                                .map(resolveExpression)
+                                .map(ExpressionEvaluatingSelector::new)
+                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+
+                            IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
+                                    (gateway) -> gateway.beanName(functionName)
+                                        .replyTimeout(0L))
+                                .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
+                                .filter(selector)
+                                .handle(Message.class, handler)
+                                .log(LoggingHandler.Level.INFO, functionName + ".integrationResult")
+                                .bridge()
+                                .get();
+
+                            String inputChannel = streamFunctionProperties.getInputBindings(functionName)
+                                .stream()
+                                .findFirst()
+                                .orElse(functionName);
+
+                            IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
+                                .get();
+
+                            integrationFlowContext.registration(inputChannelFlow)
+                                .register();
                         });
-
-                    GenericHandler<Message> handler = (message, headers) -> {
-                        FunctionInvocationWrapper function = functionFromDefinition(beanName);
-                        Object result = function.apply(message);
-
-                        Message<?> response = null;
-                        if(result != null) {
-                            response = MessageBuilder.withPayload(result)
-                                .build();
-                            String destination = headers.get(responseDestination.get(), String.class);
-
-                            if (StringUtils.hasText(destination)) {
-                                getStreamBridge().send(destination, response);
-                                return null;
-                            }
-                        }
-
-                        return response;
-                    };
-
-                    GenericSelector<Message<?>> selector = Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
-                        .map(ConnectorBinding::condition)
-                        .filter(StringUtils::hasText)
-                        .map(resolveExpression)
-                        .map(ExpressionEvaluatingSelector::new)
-                        .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
-
-                    IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
-                            (gateway) -> gateway.beanName(functionName)
-                                .replyTimeout(0L))
-                        .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
-                        .filter(selector)
-                        .handle(Message.class, handler)
-                        .log(LoggingHandler.Level.INFO, functionName + ".integrationResult")
-                        .bridge()
-                        .get();
-
-                    String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-                        .stream()
-                        .findFirst()
-                        .orElse(functionName);
-
-                    IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
-                        .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
-                        .get();
-
-                    integrationFlowContext.registration(inputChannelFlow)
-                        .register();
                 }
                 return bean;
             }
