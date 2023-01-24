@@ -16,7 +16,10 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -66,27 +69,32 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         return String.format("%s-in-%d", bindingName, arity);
     }
 
-    protected void setOutput(String beanOutName, String outputAnnotation, BindingServiceProperties bindingServiceProperties,
+    protected boolean setOutput(String beanOutName, String outputAnnotation, BindingServiceProperties bindingServiceProperties,
         StreamFunctionProperties streamFunctionProperties, ConfigurableEnvironment environment) {
 
+        final AtomicBoolean wasOutputSet = new AtomicBoolean(false);
         Optional.of(outputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(output -> {
                 streamFunctionProperties.getBindings().put(beanOutName, output);
                 setOutProperties(streamFunctionProperties, beanOutName, output, bindingServiceProperties);
+                wasOutputSet.set(true);
             });
+        return wasOutputSet.get();
     }
 
-    protected void setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
+    protected boolean setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
         BindingServiceProperties bindingServiceProperties) {
 
+        final AtomicBoolean wasInputSet = new AtomicBoolean(false);
         Optional.of(inputAnnotation)
             .filter(StringUtils::hasText)
             .ifPresent(input -> {
-                streamFunctionProperties.getBindings()
-                    .put(beanInName, input);
+                streamFunctionProperties.getBindings().put(beanInName, input);
                 setInProperties(streamFunctionProperties, beanInName, input, bindingServiceProperties);
+                wasInputSet.set(true);
             });
+        return wasInputSet.get();
     }
 
     protected void setOutProperties(StreamFunctionProperties streamFunctionProperties,
@@ -111,6 +119,14 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
                 bindingServiceProperties.getBindingProperties(beanInName).setDestination(binding);
                 bindingServiceProperties.getBindingProperties(beanInName).setContentType(bindingProperties.getContentType());
             });
+    }
+
+    protected Class<?> getGatewayInterface(boolean hasOutput) {
+        if(hasOutput) {
+            return ConnectorGateway.class;
+        } else {
+            return Consumer.class;
+        }
     }
 
     @Bean("resolveExpression")
