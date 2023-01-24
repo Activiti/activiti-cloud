@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
-import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -73,7 +72,8 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                             final String gatewayInName = getInBinding(gatewayName);
                             final String gatewayOutName = getOutBinding(gatewayName);
 
-                            setOutput(gatewayOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
+                            final boolean outputSet = setOutput(gatewayOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties,
+                                environment);
                             setInput(gatewayInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
 
                             GenericSelector<Message<?>> selector = Optional.ofNullable(
@@ -84,7 +84,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            IntegrationFlow connectorFlow = createFlowBuilder(gatewayName)
+                            IntegrationFlow connectorFlow = createFlowBuilder(gatewayName, outputSet)
                                 .log(Level.INFO, gatewayName + ".request")
                                 .filter(selector)
                                 .handle(Message.class, createHandler(beanName, Optional.of(functionDefinition.output())))
@@ -110,8 +110,8 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
         };
     }
 
-    protected IntegrationFlowBuilder createFlowBuilder(String functionName){
-        return IntegrationFlows.from(ConnectorGateway.class, (gateway) -> gateway.beanName(functionName)
+    protected IntegrationFlowBuilder createFlowBuilder(String functionName, boolean hasOutput) {
+        return IntegrationFlows.from(getGatewayInterface(hasOutput), (gateway) -> gateway.beanName(functionName)
             .replyTimeout(0L));
     }
 
@@ -119,7 +119,7 @@ public class ConditionalFunctionBindingConfiguration extends AbstractFunctionalB
         return (message, headers) -> {
             FunctionInvocationWrapper function = this.functionFromDefinition(beanName);
             final Object response = function.apply(message);
-            if(response != null) {
+            if (response != null) {
                 output.ifPresent(outputDestination -> getStreamBridge().send(outputDestination, response));
             }
             return null;

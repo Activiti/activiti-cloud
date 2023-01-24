@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
-import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -77,7 +76,8 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             final String beanInName = getInBinding(functionName);
                             final String beanOutName = getOutBinding(functionName);
 
-                            setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties, environment);
+                            boolean hasOutput = setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties,
+                                environment);
                             setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
 
                             GenericHandler<Message> handler = (message, headers) -> {
@@ -85,7 +85,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 Object result = function.apply(message);
 
                                 Message<?> response = null;
-                                if(result != null) {
+                                if (result != null) {
                                     response = MessageBuilder.withPayload(result)
                                         .build();
                                     String destination = headers.get(responseDestination.get(), String.class);
@@ -106,7 +106,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            IntegrationFlow connectorFlow = IntegrationFlows.from(ConnectorGateway.class,
+                            IntegrationFlow connectorFlow = IntegrationFlows.from(getGatewayInterface(hasOutput),
                                     (gateway) -> gateway.beanName(functionName)
                                         .replyTimeout(0L))
                                 .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
