@@ -17,9 +17,9 @@ package org.activiti.cloud.common.messaging.config;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
+import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -125,7 +125,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         if(hasOutput) {
             return ConnectorGateway.class;
         } else {
-            return Consumer.class;
+            return ConsumerGateway.class;
         }
     }
 
