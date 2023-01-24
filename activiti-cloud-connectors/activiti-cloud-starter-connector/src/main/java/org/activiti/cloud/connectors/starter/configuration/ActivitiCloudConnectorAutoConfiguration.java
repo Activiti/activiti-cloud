@@ -16,8 +16,21 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.activiti.cloud.connectors.starter.channels.*;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolver;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilder;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandler;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandlerImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSenderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolver;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilder;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -48,7 +61,6 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @FunctionBinding(input = IntegrationRequestErrorChannelListener.ERROR_CHANNEL)
     public IntegrationRequestErrorChannelListener integrationRequestErrorChannelListener(IntegrationErrorHandler integrationErrorHandler) {
         return new IntegrationRequestErrorChannelListener(integrationErrorHandler);
     }
