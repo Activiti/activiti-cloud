@@ -18,25 +18,18 @@ package org.activiti.cloud.services.test;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
-public class TestProducerAutoConfiguration {
+public class TestProducerAutoConfiguration implements StreamProducer {
 
-    @Configuration
-    @ConditionalOnClass({ Flux.class, MessageChannels.class })
-    static class MyProducerConfiguration implements StreamProducer {
-        @Bean
-        @ConditionalOnMissingBean
-        public MyProducer myProducer(@Qualifier(PRODUCER) MessageChannel producer) {
-            return new MyProducer(producer);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public MyProducer myProducer(@Qualifier(PRODUCER) MessageChannel producer) {
+        return new MyProducer(producer);
     }
 
 }
