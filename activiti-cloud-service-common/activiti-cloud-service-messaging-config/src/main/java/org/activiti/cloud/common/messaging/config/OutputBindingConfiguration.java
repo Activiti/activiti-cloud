@@ -28,7 +28,10 @@ import org.springframework.cloud.function.context.config.SmartCompositeMessageCo
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
 import org.springframework.cloud.stream.binder.JavaClassMimeTypeUtils;
+import org.springframework.cloud.stream.binder.ProducerProperties;
+import org.springframework.cloud.stream.binding.DefaultPartitioningInterceptor;
 import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.converter.MessageConverterUtils;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -91,6 +94,16 @@ public class OutputBindingConfiguration {
                                             }
 
                                             CompositeMessageConverter messageConverter = getMessageConverter(beanFactory);
+
+                                            BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
+
+                                            Optional.ofNullable(bindingProperties.getProducer())
+                                                .filter(ProducerProperties::isPartitioned)
+                                                .ifPresent(isPartitioned -> {
+                                                    InterceptableChannel.class.cast(bean)
+                                                                              .addInterceptor(new DefaultPartitioningInterceptor(bindingProperties,
+                                                                                                                                 beanFactory));
+                                                });
 
                                             InterceptableChannel.class.cast(bean)
                                                                       .addInterceptor(new OutboundContentTypeConvertingInterceptor("application/json",
@@ -187,4 +200,5 @@ public class OutputBindingConfiguration {
         }
 
     }
+
 }
