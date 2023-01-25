@@ -320,7 +320,7 @@ public class ProcessInstanceRestTemplate {
                 setProcessVariablesPayload,
                 null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables/",
-                                                                        HttpMethod.POST,
+                                                                        HttpMethod.PUT,
                                                                         requestEntity,
                                                                         new ParameterizedTypeReference<Void>() {
                                                                         });

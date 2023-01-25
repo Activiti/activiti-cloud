@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,7 +161,7 @@ public class ProcessInstanceVariableControllerImplIT {
         given(processRuntime.processInstance(any()))
         .willReturn(processInstance);
 
-        this.mockMvc.perform(post("/v1/process-instances/{processInstanceId}/variables",
+        this.mockMvc.perform(put("/v1/process-instances/{processInstanceId}/variables",
                                   1).contentType(MediaType.APPLICATION_JSON).content(
                 mapper.writeValueAsString(ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build())))
                 .andExpect(status().isOk());
