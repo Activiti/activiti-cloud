@@ -18,25 +18,14 @@ package org.activiti.cloud.starter.tests.runtime;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 
 @TestConfiguration
 @Import(CanFailConnector.class)
 public class CanFailConnectorChannelsConfiguration implements CanFailConnectorChannels {
-
-    @Bean(CAN_FAIL_CONNECTOR)
-    @ConditionalOnMissingBean(name = CAN_FAIL_CONNECTOR)
-    @Override
-    public SubscribableChannel canFailConnector() {
-        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR)
-            .get();
-    }
 
     @FunctionBinding(input = CAN_FAIL_CONNECTOR)
     @Bean("canFailConnectorConsumer")

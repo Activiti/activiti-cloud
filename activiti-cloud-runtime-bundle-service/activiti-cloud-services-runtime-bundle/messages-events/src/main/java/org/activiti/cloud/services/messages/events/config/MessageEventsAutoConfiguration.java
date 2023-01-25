@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.messages.events.config;
 
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.messages.events.channels.MessageEventsSource;
 import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
@@ -32,19 +31,10 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
 
 @Configuration
 @PropertySource("classpath:config/messages-events-channels.properties")
 public class MessageEventsAutoConfiguration implements MessageEventsSource {
-
-    @OutputBinding(MESSAGE_EVENTS_OUTPUT)
-    @ConditionalOnMissingBean(name = MESSAGE_EVENTS_OUTPUT)
-    @Override
-    public MessageChannel messageEventsOutput() {
-        return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).get();
-    }
 
     @Bean
     @ConditionalOnMissingBean

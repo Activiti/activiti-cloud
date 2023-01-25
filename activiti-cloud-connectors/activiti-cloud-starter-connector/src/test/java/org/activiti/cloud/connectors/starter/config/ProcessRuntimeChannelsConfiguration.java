@@ -15,29 +15,10 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
 
-    @OutputBinding(RUNTIME_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = RUNTIME_CMD_PRODUCER)
-    @Override
-    public MessageChannel runtimeCmdProducer() {
-        return MessageChannels.direct(RUNTIME_CMD_PRODUCER).get();
-    }
-
-    @InputBinding(RUNTIME_CMD_RESULTS)
-    @ConditionalOnMissingBean(name = RUNTIME_CMD_RESULTS)
-    @Override
-    public SubscribableChannel runtimeCmdResults() {
-        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).get();
-    }
 }

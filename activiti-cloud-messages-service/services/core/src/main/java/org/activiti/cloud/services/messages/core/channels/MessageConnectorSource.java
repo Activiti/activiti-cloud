@@ -15,12 +15,17 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSource {
 
     String OUTPUT = "messageConnectorOutput";
 
-    MessageChannel output();
+    @OutputBinding(OUTPUT)
+    default MessageChannel output() {
+        return MessageChannels.direct(OUTPUT).get();
+    }
 
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
 import java.util.Arrays;
 import java.util.List;
-import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -34,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
@@ -70,12 +68,6 @@ public class EngineEventsConsumerAutoConfiguration {
         @ConditionalOnMissingBean
         public RoutingKeyResolver routingKeyResolver() {
             return new SpELTemplateRoutingKeyResolver();
-        }
-
-        @InputBinding(SOURCE)
-        @Override
-        public SubscribableChannel input() {
-            return MessageChannels.publishSubscribe(SOURCE).get();
         }
 
         @Bean

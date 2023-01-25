@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.test;
 
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,20 +32,11 @@ public class TestProducerAutoConfiguration {
     @Configuration
     @ConditionalOnClass({ Flux.class, MessageChannels.class })
     static class MyProducerConfiguration implements StreamProducer {
-
-        @OutputBinding(PRODUCER)
-        @Override
-        @ConditionalOnMissingBean(name = PRODUCER)
-        public MessageChannel producer() {
-            return MessageChannels.direct(PRODUCER).get();
-        }
-
         @Bean
         @ConditionalOnMissingBean
         public MyProducer myProducer(@Qualifier(PRODUCER) MessageChannel producer) {
             return new MyProducer(producer);
         }
-
     }
 
 }

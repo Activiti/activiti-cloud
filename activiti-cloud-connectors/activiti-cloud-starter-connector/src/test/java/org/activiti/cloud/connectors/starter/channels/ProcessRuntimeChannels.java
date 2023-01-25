@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.channels;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -24,8 +25,14 @@ public interface ProcessRuntimeChannels {
     String RUNTIME_CMD_PRODUCER = "runtimeCmdProducer";
     String RUNTIME_CMD_RESULTS = "runtimeCmdResults";
 
-    MessageChannel runtimeCmdProducer();
+    @OutputBinding(RUNTIME_CMD_PRODUCER)
+    default MessageChannel runtimeCmdProducer() {
+        return MessageChannels.direct(RUNTIME_CMD_PRODUCER).get();
+    }
 
-    SubscribableChannel runtimeCmdResults();
+    @InputBinding(RUNTIME_CMD_RESULTS)
+    default SubscribableChannel runtimeCmdResults() {
+        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).get();
+    }
 
 }

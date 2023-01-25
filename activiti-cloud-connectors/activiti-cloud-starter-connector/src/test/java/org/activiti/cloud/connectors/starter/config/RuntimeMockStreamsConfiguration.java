@@ -15,36 +15,11 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
 
-    @InputBinding(INTEGRATION_RESULT_CONSUMER)
-    @ConditionalOnMissingBean(name = INTEGRATION_RESULT_CONSUMER)
-    @Override
-    public SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER).get();
-    }
 
-    @OutputBinding(INTEGRATION_EVENT_PRODUCER)
-    @ConditionalOnMissingBean(name = INTEGRATION_EVENT_PRODUCER)
-    @Override
-    public MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(INTEGRATION_EVENT_PRODUCER).get();
-    }
-
-    @InputBinding(INTEGRATION_ERROR_CONSUMER)
-    @ConditionalOnMissingBean(name = INTEGRATION_ERROR_CONSUMER)
-    @Override
-    public SubscribableChannel integrationErrorConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).get();
-    }
 }
