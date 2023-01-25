@@ -15,43 +15,11 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.cloud.stream.function.FunctionConfiguration;
 
 @TestConfiguration
 public class TestBindingsChannelsConfiguration implements TestBindingsChannels {
 
-    @InputBinding(COMMAND_CONSUMER)
-    @Override
-    public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
-    }
-
-    @InputBinding(QUERY_CONSUMER)
-    @Override
-    public SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
-    }
-
-    @InputBinding(AUDIT_CONSUMER)
-    @Override
-    public SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AUDIT_CONSUMER).get();
-    }
-
-    @OutputBinding(TestBindingsChannels.COMMAND_RESULTS)
-    @Override
-    public MessageChannel commandResults() {
-        return MessageChannels.direct(COMMAND_RESULTS).get();
-    }
-
-    @OutputBinding(TestBindingsChannels.AUDIT_PRODUCER)
-    @Override
-    public MessageChannel auditProducer() {
-        return MessageChannels.direct(AUDIT_PRODUCER).get();
-    }
+    FunctionConfiguration d;
 }
