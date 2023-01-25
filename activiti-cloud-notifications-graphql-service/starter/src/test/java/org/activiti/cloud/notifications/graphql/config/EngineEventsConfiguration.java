@@ -15,39 +15,19 @@
  */
 package org.activiti.cloud.notifications.graphql.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import reactor.core.publisher.Flux;
 
 @TestConfiguration
 public class EngineEventsConfiguration implements EngineEvents {
 
-    public static final String INTERNAL_ENGINE_EVENTS_PRODUCER = INTERNAL_CHANNEL_PREFIX + ENGINE_EVENTS_PRODUCER;
-
-    @Bean(INTERNAL_ENGINE_EVENTS_PRODUCER)
+    @OutputBinding(ENGINE_EVENTS_PRODUCER)
     @Override
     public MessageChannel output() {
-        return MessageChannels.direct(INTERNAL_ENGINE_EVENTS_PRODUCER)
+        return MessageChannels.direct(ENGINE_EVENTS_PRODUCER)
             .get();
-    }
-
-    @FunctionBinding(output = EngineEvents.ENGINE_EVENTS_PRODUCER)
-    @ConditionalOnMissingBean(name = "engineEventsOutputSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> engineEventsOutputSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(output())
-            .log(LoggingHandler.Level.INFO,"engineEventsOutputSupplier")
-            .toReactivePublisher());
     }
 
 }

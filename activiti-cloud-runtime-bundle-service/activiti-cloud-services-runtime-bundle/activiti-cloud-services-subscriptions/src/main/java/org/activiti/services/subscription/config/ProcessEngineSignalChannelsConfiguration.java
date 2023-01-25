@@ -15,47 +15,27 @@
  */
 package org.activiti.services.subscription.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSignalChannels {
 
-    private static final String INTERNAL_SIGNAL_PRODUCER = INTERNAL_CHANNEL_PREFIX + SIGNAL_PRODUCER;
-
-    @Bean(SIGNAL_CONSUMER)
+    @InputBinding(SIGNAL_CONSUMER)
     @Override
     public SubscribableChannel signalConsumer() {
-        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER)
-            .get();
+        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER).get();
     }
 
-    @Bean(INTERNAL_SIGNAL_PRODUCER)
+    @OutputBinding(SIGNAL_PRODUCER)
     @Override
     public MessageChannel signalProducer() {
-        return MessageChannels.direct(INTERNAL_SIGNAL_PRODUCER).get();
-    }
-
-    @FunctionBinding(output = SIGNAL_PRODUCER)
-    @ConditionalOnMissingBean(name = "signalProducerSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> signalProducerSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(signalProducer())
-            .log(LoggingHandler.Level.INFO,"signalProducerSupplier")
-            .toReactivePublisher());
+        return MessageChannels.direct(SIGNAL_PRODUCER).get();
     }
 
 }

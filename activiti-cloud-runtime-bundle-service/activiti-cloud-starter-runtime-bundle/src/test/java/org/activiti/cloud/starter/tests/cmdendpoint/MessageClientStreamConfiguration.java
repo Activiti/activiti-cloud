@@ -15,44 +15,26 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {
 
-    private static final String INTERNAL_MY_CMD_PRODUCER = INTERNAL_CHANNEL_PREFIX + MY_CMD_PRODUCER;
-
-    @Bean(INTERNAL_MY_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = INTERNAL_MY_CMD_PRODUCER)
+    @OutputBinding(MY_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = MY_CMD_PRODUCER)
     @Override
     public MessageChannel myCmdProducer() {
-        return MessageChannels.direct(INTERNAL_MY_CMD_PRODUCER)
+        return MessageChannels.direct(MY_CMD_PRODUCER)
             .get();
     }
 
-    @FunctionBinding(output = MY_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = "messageConnectorOutput")
-    @Bean
-    public Supplier<Flux<Message<Object>>> messageConnectorOutput() {
-        return () -> Flux.from(IntegrationFlows.from(myCmdProducer())
-            .log(LoggingHandler.Level.INFO,"myCmdProducer")
-            .toReactivePublisher());
-    }
-
-    @Bean(MY_CMD_RESULTS)
+    @InputBinding(MY_CMD_RESULTS)
     @ConditionalOnMissingBean(name = MY_CMD_RESULTS)
     @Override
     public SubscribableChannel myCmdResults() {

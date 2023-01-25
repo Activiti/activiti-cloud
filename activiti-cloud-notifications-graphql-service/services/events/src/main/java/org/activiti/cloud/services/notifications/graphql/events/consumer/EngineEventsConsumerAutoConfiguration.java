@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
+import java.util.Arrays;
+import java.util.List;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.SpELTemplateRoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
@@ -26,7 +29,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -39,10 +41,6 @@ import org.springframework.messaging.SubscribableChannel;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Notification Gateway configuration that enables messaging channel bindings
@@ -74,11 +72,10 @@ public class EngineEventsConsumerAutoConfiguration {
             return new SpELTemplateRoutingKeyResolver();
         }
 
-        @Bean(SOURCE)
+        @InputBinding(SOURCE)
         @Override
         public SubscribableChannel input() {
-            return MessageChannels.publishSubscribe(SOURCE)
-                .get();
+            return MessageChannels.publishSubscribe(SOURCE).get();
         }
 
         @Bean
@@ -100,8 +97,7 @@ public class EngineEventsConsumerAutoConfiguration {
         public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler,
                 @Qualifier(SOURCE) SubscribableChannel source) {
 
-            return IntegrationFlows.from(EngineEventsGateway.class,
-                                        gateway -> gateway.beanName("engineEventsGateway").replyTimeout(0L))
+            return IntegrationFlows.from(source)
                                    .log(LoggingHandler.Level.DEBUG)
                                    .transform(engineEventsMessageHandler)
                                    .toReactivePublisher();

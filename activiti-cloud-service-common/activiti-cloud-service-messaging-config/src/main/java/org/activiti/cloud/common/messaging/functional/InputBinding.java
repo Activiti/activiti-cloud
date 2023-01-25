@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.utilities;
+package org.activiti.cloud.common.messaging.functional;
 
-public class InternalChannelHelper {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.AliasFor;
 
-    public static final String INTERNAL_CHANNEL_PREFIX = "internal_";
-
-    public static String toInternalChannel(String channelName) {
-        return String.format("%s%s", INTERNAL_CHANNEL_PREFIX, channelName);
-    }
+@Retention( RetentionPolicy.RUNTIME )
+@Target( ElementType.METHOD )
+@Qualifier
+@Bean
+public @interface InputBinding {
+    @AliasFor(annotation = Bean.class, attribute = "name")
+    String[] value();
 }

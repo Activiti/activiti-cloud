@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,19 @@ import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
@@ -79,6 +87,12 @@ public class FunctionBindingConfigurationIT {
     private BindingResolver bindingResolver;
 
     @Autowired
+    private BindingServiceProperties bindingServiceProperties;
+
+    @Autowired
+    private ConfigurableApplicationContext context;
+
+    @Autowired
     private InputDestination input;
 
     @Autowired
@@ -88,7 +102,7 @@ public class FunctionBindingConfigurationIT {
     static class ApplicationConfig {
 
         @Bean(FUNCTION_HANDLER_NAME)
-        @FunctionBinding(input = TestBindingsChannels.QUERY_CONSUMER)
+        @FunctionBinding(input = QUERY_CONSUMER)
         public Consumer<Message<?>> queryConsumerHandler() {
             return message -> {
                 consumerMessage = message;
@@ -96,7 +110,7 @@ public class FunctionBindingConfigurationIT {
         }
 
         @Bean(FUNCTION_PROCESSOR_NAME)
-        @FunctionBinding(input = TestBindingsChannels.COMMAND_CONSUMER, output = TestBindingsChannels.COMMAND_RESULTS)
+        @FunctionBinding(input = COMMAND_CONSUMER, output = TestBindingsChannels.COMMAND_RESULTS)
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
                 assertThat(message).isNotNull();
@@ -126,26 +140,57 @@ public class FunctionBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).contains(FUNCTION_HANDLER_NAME, FUNCTION_PROCESSOR_NAME, FUNCTION_AUDIT_SUPPLIER_NAME, FUNCTION_COMMAND_SUPPLIER_NAME);
+        assertThat(functions).contains(FUNCTION_HANDLER_NAME, FUNCTION_PROCESSOR_NAME);
+        assertThat(functions).doesNotContain(FUNCTION_AUDIT_SUPPLIER_NAME, FUNCTION_COMMAND_SUPPLIER_NAME);
+    }
+
+    @Test
+    public void testOutputBindingsDefinitions() {
+        // then
+        assertThat(context.getBean(TestBindingsChannels.AUDIT_PRODUCER, MessageChannel.class)).isNotNull();
+        assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_AUDIT_SUPPLIER_NAME);
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
+            .isEqualTo(Arrays.asList(TestBindingsChannels.AUDIT_PRODUCER));
+
+        assertThat(context.getBean(TestBindingsChannels.COMMAND_RESULTS, MessageChannel.class)).isNotNull();
+        assertThat(bindingServiceProperties.getOutputBindings()).contains(FUNCTION_COMMAND_SUPPLIER_NAME);
+        assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_COMMAND_SUPPLIER_NAME))
+            .isEqualTo(Arrays.asList(TestBindingsChannels.COMMAND_RESULTS));
+    }
+
+    @Test
+    void testInputBindingsDefinitions() {
+        Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains("commandConsumerBinding");
+        Assertions.assertThat(streamFunctionProperties.getBindings().get("commandConsumerBinding-in-0")).isEqualTo(COMMAND_CONSUMER);
+
+        Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains("auditConsumerBinding");
+        Assertions.assertThat(streamFunctionProperties.getBindings().get("auditConsumerBinding-in-0")).isEqualTo(AUDIT_CONSUMER);
+
+        Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
+        Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains("queryConsumerBinding");
+        Assertions.assertThat(streamFunctionProperties.getBindings().get("queryConsumerBinding-in-0")).isEqualTo(QUERY_CONSUMER);
+
     }
 
     @Test
     public void testFunctionRegistry() {
         assertThat(functionRegistry.<Object>lookup(FUNCTION_HANDLER_NAME)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_PROCESSOR_NAME)).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_AUDIT_SUPPLIER_NAME)).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_COMMAND_SUPPLIER_NAME)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_AUDIT_SUPPLIER_NAME)).isNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_COMMAND_SUPPLIER_NAME)).isNull();
     }
 
     @Test
     public void testStreamBindings() {
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.QUERY_CONSUMER));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(QUERY_CONSUMER));
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_CONSUMER));
+            .matches(bindings -> bindings.size() == 1 && bindings.contains(COMMAND_CONSUMER));
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME))
             .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
 
