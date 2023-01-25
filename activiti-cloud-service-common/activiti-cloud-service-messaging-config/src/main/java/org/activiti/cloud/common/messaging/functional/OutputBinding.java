@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.notifications.graphql.events.consumer;
+package org.activiti.cloud.common.messaging.functional;
 
-import java.util.function.Consumer;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessagingException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.AliasFor;
 
-@FunctionBinding(input = EngineEventsConsumerChannels.SOURCE)
-public interface EngineEventsGateway extends Consumer<Message<?>> {
-
-    @Override
-    void accept(Message<?> message) throws MessagingException;
-
+@Retention( RetentionPolicy.RUNTIME )
+@Target( ElementType.METHOD )
+@Qualifier
+@Bean
+public @interface OutputBinding {
+    @AliasFor(annotation = Bean.class, attribute = "name")
+    String[] value();
 }

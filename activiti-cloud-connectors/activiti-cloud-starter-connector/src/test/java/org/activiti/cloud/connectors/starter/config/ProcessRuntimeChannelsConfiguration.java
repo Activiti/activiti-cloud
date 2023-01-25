@@ -15,49 +15,29 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
 
-    private static final String INTERNAL_RUNTIME_CMD_PRODUCER = INTERNAL_CHANNEL_PREFIX + RUNTIME_CMD_PRODUCER;
-
-    @Bean(INTERNAL_RUNTIME_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = INTERNAL_RUNTIME_CMD_PRODUCER)
+    @OutputBinding(RUNTIME_CMD_PRODUCER)
+    @ConditionalOnMissingBean(name = RUNTIME_CMD_PRODUCER)
     @Override
     public MessageChannel runtimeCmdProducer() {
-        return MessageChannels.direct(INTERNAL_RUNTIME_CMD_PRODUCER)
-            .get();
+        return MessageChannels.direct(RUNTIME_CMD_PRODUCER).get();
     }
 
-    @FunctionBinding(output = RUNTIME_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = "runtimeCmdSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> runtimeCmdSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(runtimeCmdProducer())
-            .log(LoggingHandler.Level.INFO,"runtimeCmdSupplier")
-            .toReactivePublisher());
-    }
-
-    @Bean(RUNTIME_CMD_RESULTS)
+    @InputBinding(RUNTIME_CMD_RESULTS)
     @ConditionalOnMissingBean(name = RUNTIME_CMD_RESULTS)
     @Override
     public SubscribableChannel runtimeCmdResults() {
-        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS)
-            .get();
+        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).get();
     }
 }

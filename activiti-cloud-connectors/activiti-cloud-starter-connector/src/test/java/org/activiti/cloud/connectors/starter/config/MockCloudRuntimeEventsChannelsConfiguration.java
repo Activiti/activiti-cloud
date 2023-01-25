@@ -15,56 +15,37 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
 
-    private static final String INTERNAL_COMMAND_RESULTS = INTERNAL_CHANNEL_PREFIX + COMMAND_RESULTS;
-    private static final String INTERNAL_AUDIT_PRODUCER = INTERNAL_CHANNEL_PREFIX + AUDIT_PRODUCER;
-
-    @Bean(COMMAND_CONSUMER)
+    @InputBinding(COMMAND_CONSUMER)
     @ConditionalOnMissingBean(name = COMMAND_CONSUMER)
     @Override
     public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(COMMAND_CONSUMER)
-            .get();
+        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
     }
 
-    @Bean(INTERNAL_COMMAND_RESULTS)
-    @ConditionalOnMissingBean(name = INTERNAL_COMMAND_RESULTS)
+    @OutputBinding(COMMAND_RESULTS)
+    @ConditionalOnMissingBean(name = COMMAND_RESULTS)
     @Override
     public MessageChannel commandResults() {
-        return MessageChannels.direct(INTERNAL_COMMAND_RESULTS).get();
+        return MessageChannels.direct(COMMAND_RESULTS).get();
     }
 
-    @Bean(INTERNAL_AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = INTERNAL_AUDIT_PRODUCER)
+    @OutputBinding(AUDIT_PRODUCER)
+    @ConditionalOnMissingBean(name = AUDIT_PRODUCER)
     @Override
     public MessageChannel auditProducer() {
-        return MessageChannels.direct(INTERNAL_AUDIT_PRODUCER).get();
+        return MessageChannels.direct(AUDIT_PRODUCER).get();
     }
 
-    @FunctionBinding(output = MockCloudRuntimeEventsChannels.AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = "auditProducerSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> auditProducerSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(auditProducer())
-            .log(LoggingHandler.Level.INFO,"auditProducerSupplier")
-            .toReactivePublisher());
-    }
 }

@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
-
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
@@ -43,7 +41,6 @@ import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
@@ -67,7 +64,6 @@ import org.springframework.integration.handler.MessageProcessor;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.metadata.ConcurrentMetadataStore;
 import org.springframework.integration.metadata.SimpleMetadataStore;
-import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.integration.selector.MetadataStoreSelector;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.store.SimpleMessageStore;
@@ -77,6 +73,8 @@ import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 /**
  * A Processor app that performs aggregation.
@@ -114,7 +112,7 @@ public class MessagesCoreAutoConfiguration {
                                                            MessageConnectorAggregator aggregator,
                                                            IdempotentReceiverInterceptor interceptor,
                                                            List<MessageConnectorHandlerAdvice> adviceChain,
-                                                           @Qualifier("commandConsumerMessageRouter") AbstractMessageRouter router) {
+                                                           CommandConsumerMessageRouter router) {
         return new MessageConnectorIntegrationFlow(processor,
                                                    aggregator,
                                                    interceptor,
@@ -132,14 +130,14 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
-        BindingService bindingService,
-        BinderAwareChannelResolver binderAwareChannelResolver) {
+                                                                                       BindingService bindingService,
+                                                                                       BinderAwareChannelResolver channelResolver) {
         return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
-            binderAwareChannelResolver,
-            bindingService);
+                                                         channelResolver,
+                                                         bindingService);
     }
 
-    @Bean("commandConsumerMessageRouter")
+    @Bean
     @ConditionalOnMissingBean
     public CommandConsumerMessageRouter commandConsumerMessageRouter(CommandConsumerMessageChannelResolver destinationResolver) {
         return new CommandConsumerMessageRouter(destinationResolver);
@@ -148,7 +146,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
-        return MessageChannels.direct()
+        return MessageChannels.direct(DISCARD_CHANNEL)
                               .get();
     }
 

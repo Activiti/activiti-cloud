@@ -24,7 +24,8 @@ public class RabbitMQContainerApplicationInitializer implements
         ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private static final RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.8.9-management-alpine")
-            .withReuse(true);
+            .withReuse(true)
+            .withExposedPorts(5672, 5671, 15672, 15671);
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
