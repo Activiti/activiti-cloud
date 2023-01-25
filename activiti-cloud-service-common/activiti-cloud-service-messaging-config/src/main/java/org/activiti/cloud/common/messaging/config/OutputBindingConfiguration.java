@@ -22,13 +22,18 @@ import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.cloud.function.context.config.JsonMessageConverter;
 import org.springframework.cloud.function.context.config.SmartCompositeMessageConverter;
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
+import org.springframework.cloud.stream.binder.BinderHeaders;
 import org.springframework.cloud.stream.binder.JavaClassMimeTypeUtils;
+import org.springframework.cloud.stream.binder.PartitionHandler;
+import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
+import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.converter.MessageConverterUtils;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -36,6 +41,7 @@ import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.integration.expression.ExpressionUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -91,6 +97,16 @@ public class OutputBindingConfiguration {
                                             }
 
                                             CompositeMessageConverter messageConverter = getMessageConverter(beanFactory);
+
+                                            BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
+
+                                            Optional.ofNullable(bindingProperties.getProducer())
+                                                .filter(ProducerProperties::isPartitioned)
+                                                .ifPresent(isPartitioned -> {
+                                                    InterceptableChannel.class.cast(bean)
+                                                                              .addInterceptor(new PartitioningInterceptor(bindingProperties,
+                                                                                                                          beanFactory));
+                                                });
 
                                             InterceptableChannel.class.cast(bean)
                                                                       .addInterceptor(new OutboundContentTypeConvertingInterceptor("application/json",
@@ -184,6 +200,42 @@ public class OutputBindingConfiguration {
             return MessageBuilder.fromMessage(outboundMessage)
                                  .copyHeaders(outboundMessageHeaders)
                                  .build();
+        }
+
+    }
+
+    final class PartitioningInterceptor implements ChannelInterceptor {
+
+        private final BindingProperties bindingProperties;
+
+        private final PartitionHandler partitionHandler;
+
+        public PartitioningInterceptor(BindingProperties bindingProperties,
+                                       ConfigurableListableBeanFactory beanFactory) {
+            this.bindingProperties = bindingProperties;
+            this.partitionHandler = new PartitionHandler(
+                ExpressionUtils.createStandardEvaluationContext(beanFactory),
+                this.bindingProperties.getProducer(), beanFactory);
+        }
+
+        public void setPartitionCount(int partitionCount) {
+            this.partitionHandler.setPartitionCount(partitionCount);
+        }
+
+        @Override
+        public Message<?> preSend(Message<?> message, MessageChannel channel) {
+            if (!message.getHeaders().containsKey(BinderHeaders.PARTITION_OVERRIDE)) {
+                int partition = this.partitionHandler.determinePartition(message);
+                return MessageBuilder.fromMessage(message)
+                                     .setHeader(BinderHeaders.PARTITION_HEADER, partition)
+                                     .build();
+            }
+            else {
+                return MessageBuilder.fromMessage(message)
+                                        .setHeader(BinderHeaders.PARTITION_HEADER, message.getHeaders()
+                                                                                          .get(BinderHeaders.PARTITION_OVERRIDE))
+                    .removeHeader(BinderHeaders.PARTITION_OVERRIDE).build();
+            }
         }
 
     }

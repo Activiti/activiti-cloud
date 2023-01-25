@@ -26,7 +26,6 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -115,9 +114,10 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
         Optional.ofNullable(bindingServiceProperties.getBindingProperties(binding))
             .ifPresent(bindingProperties -> {
-                bindingServiceProperties.getBindings().putIfAbsent(beanInName, new BindingProperties());
-                bindingServiceProperties.getBindingProperties(beanInName).setDestination(binding);
-                bindingServiceProperties.getBindingProperties(beanInName).setContentType(bindingProperties.getContentType());
+                //bindingServiceProperties.getBindingProperties(beanInName).setConsumer(consumerProperties);
+//                bindingServiceProperties.getBindings().putIfAbsent(beanInName, new BindingProperties());
+//                bindingServiceProperties.getBindingProperties(beanInName).setDestination(binding);
+//                bindingServiceProperties.getBindingProperties(beanInName).setContentType(bindingProperties.getContentType());
             });
     }
 
