@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import java.util.Optional;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -38,6 +39,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @RestController
 @RequestMapping(
@@ -65,8 +69,9 @@ public class ProcessInstanceVariableAdminController {
 
     @RequestMapping(method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId,
-                                                                        @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
-                                                                        Pageable pageable) {
+                                                                       @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                       @QuerydslPredicate(root = ProcessVariableEntity.class) Predicate predicate,
+                                                                       Pageable pageable) {
         predicate = Optional.ofNullable(predicate)
                             .orElseGet(BooleanBuilder::new);
 

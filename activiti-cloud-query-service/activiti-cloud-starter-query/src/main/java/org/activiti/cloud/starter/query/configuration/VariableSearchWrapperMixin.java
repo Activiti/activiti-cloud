@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.query.configuration;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springdoc.api.annotations.ParameterObject;
 
 @ParameterObject
@@ -28,8 +29,19 @@ public class VariableSearchWrapperMixin {
 
     private static class VariableSearchMixin {
 
+        public static final String PARAM_DESCRIPTION_PREFIX = "Filters the task search results by task variable ";
+
+        public static final String NAME_PARAM_DESCRIPTION = PARAM_DESCRIPTION_PREFIX + "name, required with value.";
+
+        public static final String VALUE_PARAM_DESCRIPTION = PARAM_DESCRIPTION_PREFIX + "value, required with name.";
+
+        @Parameter(description = NAME_PARAM_DESCRIPTION)
         private String name;
+
+        @Parameter(description = VALUE_PARAM_DESCRIPTION)
         private String value;
+
+        @Parameter(hidden = true)
         private String type;
 
         public String getName() {

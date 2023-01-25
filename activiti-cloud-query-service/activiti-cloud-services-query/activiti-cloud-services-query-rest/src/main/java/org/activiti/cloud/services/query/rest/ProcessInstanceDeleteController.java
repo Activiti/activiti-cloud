@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import java.util.Optional;
 import javax.transaction.Transactional;
+
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -42,6 +44,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
@@ -87,7 +92,8 @@ public class ProcessInstanceDeleteController {
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
     @Transactional
-    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
+    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                                      @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
 
         Collection<EntityModel<CloudProcessInstance>> result = new ArrayList<>();
         Iterable <ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);

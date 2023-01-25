@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
@@ -34,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @RestController
 @ExposesResourceFor(ApplicationEntity.class)
@@ -58,7 +62,8 @@ public class ApplicationAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudApplication>> findAll(@QuerydslPredicate(root = ApplicationEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudApplication>> findAll(@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                             @QuerydslPredicate(root = ApplicationEntity.class) Predicate predicate,
                                                              Pageable pageable) {
 
         predicate = Optional.ofNullable(predicate)
