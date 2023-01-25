@@ -26,7 +26,6 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -77,7 +76,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             .filter(StringUtils::hasText)
             .ifPresent(output -> {
                 streamFunctionProperties.getBindings().put(beanOutName, output);
-                setOutProperties(streamFunctionProperties, beanOutName, output, bindingServiceProperties);
                 wasOutputSet.set(true);
             });
         return wasOutputSet.get();
@@ -91,34 +89,9 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
             .filter(StringUtils::hasText)
             .ifPresent(input -> {
                 streamFunctionProperties.getBindings().put(beanInName, input);
-                setInProperties(streamFunctionProperties, beanInName, input, bindingServiceProperties);
                 wasInputSet.set(true);
             });
         return wasInputSet.get();
-    }
-
-    protected void setOutProperties(StreamFunctionProperties streamFunctionProperties,
-        String beanOutName,
-        String binding,
-        BindingServiceProperties bindingServiceProperties) {
-
-        Optional.ofNullable(bindingServiceProperties.getProducerProperties(binding))
-            .ifPresent(producerProperties -> {
-                bindingServiceProperties.getBindingProperties(beanOutName).setProducer(producerProperties);
-            });
-    }
-
-    protected void setInProperties(StreamFunctionProperties streamFunctionProperties,
-        String beanInName,
-        String binding,
-        BindingServiceProperties bindingServiceProperties) {
-
-        Optional.ofNullable(bindingServiceProperties.getBindingProperties(binding))
-            .ifPresent(bindingProperties -> {
-                bindingServiceProperties.getBindings().putIfAbsent(beanInName, new BindingProperties());
-                bindingServiceProperties.getBindingProperties(beanInName).setDestination(binding);
-                bindingServiceProperties.getBindingProperties(beanInName).setContentType(bindingProperties.getContentType());
-            });
     }
 
     protected Class<?> getGatewayInterface(boolean hasOutput) {
