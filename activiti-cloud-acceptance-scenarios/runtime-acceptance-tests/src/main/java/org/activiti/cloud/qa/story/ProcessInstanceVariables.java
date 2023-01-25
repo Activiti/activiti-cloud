@@ -112,7 +112,7 @@ public class ProcessInstanceVariables {
             .setVariables()
             .withVariable(variableName1, value1)
             .build();
-        processVariablesRuntimeBundleSteps.setVariables(processInstanceId, setProcessVariablesPayload);
+        processVariablesRuntimeBundleSteps.updateVariables(processInstanceId, setProcessVariablesPayload);
     }
 
     public CollectionModel<CloudVariableInstance> getProcessVariables(String processInstanceId) {
