@@ -15,24 +15,25 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.annotation.Headers;
 
-import java.util.*;
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
 
 @Profile(AUDIT_PRODUCER_IT)
 @TestConfiguration
+@Import(AuditConsumerConfiguration.class)
 public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();
