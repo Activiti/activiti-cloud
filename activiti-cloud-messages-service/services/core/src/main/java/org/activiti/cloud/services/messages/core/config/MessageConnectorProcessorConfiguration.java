@@ -15,25 +15,10 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
 
 @Configuration
 public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
-    @InputBinding(INPUT)
-    @Override
-    public MessageChannel input() {
-        return MessageChannels.publishSubscribe(INPUT).get();
-    }
-
-    @OutputBinding(OUTPUT)
-    @Override
-    public MessageChannel output() {
-        return MessageChannels.direct(OUTPUT).get();
-    }
 }

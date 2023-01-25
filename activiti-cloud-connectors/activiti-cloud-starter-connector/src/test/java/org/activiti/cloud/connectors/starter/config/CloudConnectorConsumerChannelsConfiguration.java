@@ -16,18 +16,9 @@
 package org.activiti.cloud.connectors.starter.config;
 
 import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class CloudConnectorConsumerChannelsConfiguration implements CloudConnectorConsumerChannels {
 
-    @Bean
-    @Override
-    public SubscribableChannel integrationEventConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_EVENT_CONSUMER)
-            .get();
-    }
 }

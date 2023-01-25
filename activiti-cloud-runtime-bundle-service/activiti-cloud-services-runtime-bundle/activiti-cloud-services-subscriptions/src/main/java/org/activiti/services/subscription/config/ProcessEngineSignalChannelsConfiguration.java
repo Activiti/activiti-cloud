@@ -15,27 +15,10 @@
  */
 package org.activiti.services.subscription.config;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class ProcessEngineSignalChannelsConfiguration implements ProcessEngineSignalChannels {
-
-    @InputBinding(SIGNAL_CONSUMER)
-    @Override
-    public SubscribableChannel signalConsumer() {
-        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER).get();
-    }
-
-    @OutputBinding(SIGNAL_PRODUCER)
-    @Override
-    public MessageChannel signalProducer() {
-        return MessageChannels.direct(SIGNAL_PRODUCER).get();
-    }
 
 }

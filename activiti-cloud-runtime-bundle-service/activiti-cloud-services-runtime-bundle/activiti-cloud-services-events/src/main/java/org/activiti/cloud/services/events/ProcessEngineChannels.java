@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.events;
 
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -26,9 +29,18 @@ public interface ProcessEngineChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
-    SubscribableChannel commandConsumer();
+    @InputBinding
+    default SubscribableChannel commandConsumer() {
+        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
+    }
 
-    MessageChannel commandResults();
+    @OutputBinding
+    default MessageChannel commandResults() {
+        return MessageChannels.direct(COMMAND_RESULTS).get();
+    }
 
-    MessageChannel auditProducer();
+    @OutputBinding
+    default MessageChannel auditProducer() {
+        return MessageChannels.direct(AUDIT_PRODUCER).get();
+    }
 }

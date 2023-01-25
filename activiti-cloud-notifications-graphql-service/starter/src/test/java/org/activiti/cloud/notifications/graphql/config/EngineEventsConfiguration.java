@@ -15,19 +15,9 @@
  */
 package org.activiti.cloud.notifications.graphql.config;
 
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
 
 @TestConfiguration
 public class EngineEventsConfiguration implements EngineEvents {
-
-    @OutputBinding(ENGINE_EVENTS_PRODUCER)
-    @Override
-    public MessageChannel output() {
-        return MessageChannels.direct(ENGINE_EVENTS_PRODUCER)
-            .get();
-    }
 
 }

@@ -15,30 +15,9 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class MessageClientStreamConfiguration implements MessageClientStream {
 
-    @OutputBinding(MY_CMD_PRODUCER)
-    @ConditionalOnMissingBean(name = MY_CMD_PRODUCER)
-    @Override
-    public MessageChannel myCmdProducer() {
-        return MessageChannels.direct(MY_CMD_PRODUCER)
-            .get();
-    }
-
-    @InputBinding(MY_CMD_RESULTS)
-    @ConditionalOnMissingBean(name = MY_CMD_RESULTS)
-    @Override
-    public SubscribableChannel myCmdResults() {
-        return MessageChannels.publishSubscribe(MY_CMD_RESULTS)
-            .get();
-    }
 }

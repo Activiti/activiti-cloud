@@ -16,18 +16,9 @@
 package org.activiti.cloud.services.audit.api.config;
 
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class AuditConsumerChannelsConfiguration implements AuditConsumerChannels {
 
-    @Bean(AUDIT_CONSUMER)
-    @Override
-    public SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AUDIT_CONSUMER)
-            .get();
-    }
 }

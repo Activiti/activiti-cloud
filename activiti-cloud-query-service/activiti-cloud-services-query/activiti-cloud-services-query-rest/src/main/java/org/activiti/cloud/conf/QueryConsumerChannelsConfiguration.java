@@ -16,17 +16,10 @@
 package org.activiti.cloud.conf;
 
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
 
-    @Bean(QUERY_CONSUMER)
-    @Override
-    public SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
-    }
+
 }

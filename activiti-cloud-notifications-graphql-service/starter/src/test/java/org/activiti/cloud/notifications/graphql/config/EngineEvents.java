@@ -15,11 +15,17 @@
  */
 package org.activiti.cloud.notifications.graphql.config;
 
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface EngineEvents {
 
     String ENGINE_EVENTS_PRODUCER = "engineEventsOutput";
 
-    MessageChannel output();
+    @OutputBinding(ENGINE_EVENTS_PRODUCER)
+    default MessageChannel output() {
+        return MessageChannels.direct(ENGINE_EVENTS_PRODUCER)
+                              .get();
+    }
 }

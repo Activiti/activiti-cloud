@@ -16,28 +16,9 @@
 package org.activiti.services.connectors.conf;
 
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEngineIntegrationChannels {
 
-    @Bean(INTEGRATION_RESULTS_CONSUMER)
-    @ConditionalOnMissingBean(name = INTEGRATION_RESULTS_CONSUMER)
-    @Override
-    public SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER)
-            .get();
-    }
-
-    @Bean(INTEGRATION_ERRORS_CONSUMER)
-    @ConditionalOnMissingBean(name = INTEGRATION_ERRORS_CONSUMER)
-    @Override
-    public SubscribableChannel integrationErrorsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER)
-            .get();
-    }
 }

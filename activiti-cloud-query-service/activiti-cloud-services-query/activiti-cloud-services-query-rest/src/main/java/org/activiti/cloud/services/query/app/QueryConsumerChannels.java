@@ -15,11 +15,16 @@
  */
 package org.activiti.cloud.services.query.app;
 
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface QueryConsumerChannels {
 
     String QUERY_CONSUMER = "queryConsumer";
 
-    SubscribableChannel queryConsumer();
+    @InputBinding
+    default SubscribableChannel queryConsumer() {
+        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
+    }
 }

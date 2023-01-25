@@ -15,37 +15,10 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChannels;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 
 @Configuration
 public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
-
-    @InputBinding(COMMAND_CONSUMER)
-    @ConditionalOnMissingBean(name = COMMAND_CONSUMER)
-    @Override
-    public SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
-    }
-
-    @OutputBinding(COMMAND_RESULTS)
-    @ConditionalOnMissingBean(name = COMMAND_RESULTS)
-    @Override
-    public MessageChannel commandResults() {
-        return MessageChannels.direct(COMMAND_RESULTS).get();
-    }
-
-    @OutputBinding(AUDIT_PRODUCER)
-    @ConditionalOnMissingBean(name = AUDIT_PRODUCER)
-    @Override
-    public MessageChannel auditProducer() {
-        return MessageChannels.direct(AUDIT_PRODUCER).get();
-    }
 
 }

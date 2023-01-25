@@ -15,12 +15,17 @@
  */
 package org.activiti.cloud.services.messages.core.channels;
 
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSink {
 
     String INPUT = "messageConnectorInput";
 
-    MessageChannel input();
+    @InputBinding(INPUT)
+    default MessageChannel input() {
+        return MessageChannels.publishSubscribe(INPUT).get();
+    }
 
 }

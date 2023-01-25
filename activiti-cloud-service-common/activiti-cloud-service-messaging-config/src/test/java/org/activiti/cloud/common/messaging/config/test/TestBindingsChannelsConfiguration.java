@@ -16,10 +16,8 @@
 package org.activiti.cloud.common.messaging.config.test;
 
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cloud.stream.function.FunctionConfiguration;
 
 @TestConfiguration
 public class TestBindingsChannelsConfiguration implements TestBindingsChannels {
 
-    FunctionConfiguration d;
 }

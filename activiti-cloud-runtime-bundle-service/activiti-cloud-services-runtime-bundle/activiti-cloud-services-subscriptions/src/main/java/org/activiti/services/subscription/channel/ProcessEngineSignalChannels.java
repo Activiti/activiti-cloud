@@ -15,8 +15,9 @@
  */
 package org.activiti.services.subscription.channel;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -26,7 +27,13 @@ public interface ProcessEngineSignalChannels {
 
     String SIGNAL_PRODUCER = "signalProducer";
 
-    SubscribableChannel signalConsumer();
+    @InputBinding
+    default SubscribableChannel signalConsumer() {
+        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER).get();
+    }
 
-    MessageChannel signalProducer();
+    @OutputBinding
+    default MessageChannel signalProducer() {
+        return MessageChannels.direct(SIGNAL_PRODUCER).get();
+    }
 }

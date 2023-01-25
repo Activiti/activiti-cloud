@@ -15,8 +15,9 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
@@ -26,10 +27,19 @@ public interface RuntimeMockStreams {
     String INTEGRATION_EVENT_PRODUCER = "integrationEventsProducer";
     String INTEGRATION_ERROR_CONSUMER = "integrationErrorConsumer";
 
-    SubscribableChannel integrationResultsConsumer();
+    @InputBinding(INTEGRATION_RESULT_CONSUMER)
+    default SubscribableChannel integrationResultsConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER).get();
+    }
 
-    MessageChannel integrationEventsProducer();
+    @OutputBinding(INTEGRATION_EVENT_PRODUCER)
+    default MessageChannel integrationEventsProducer() {
+        return MessageChannels.direct(INTEGRATION_EVENT_PRODUCER).get();
+    }
 
-    SubscribableChannel integrationErrorConsumer();
+    @InputBinding(INTEGRATION_ERROR_CONSUMER)
+    default SubscribableChannel integrationErrorConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).get();
+    }
 
 }
