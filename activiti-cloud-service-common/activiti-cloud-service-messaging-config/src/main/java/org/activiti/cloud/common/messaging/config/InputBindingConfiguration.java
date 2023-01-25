@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
+import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+
 @Configuration
 public class InputBindingConfiguration {
 
@@ -44,27 +46,26 @@ public class InputBindingConfiguration {
 
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, InputBinding.class))
                             .ifPresent(functionBinding -> {
-                                Optional.of(beanName)
-                                        .ifPresent(input -> {
-                                            String inputBinding = input + "Binding";
-                                            String inputBindings = bindingServiceProperties.getInputBindings();
+                                final String inputBinding = beanName + "Function";
+                                final String beanInName = getInBinding(inputBinding);
 
-                                            if (!StringUtils.hasText(inputBindings)) {
-                                                inputBindings = inputBinding;
-                                            } else {
-                                                inputBindings += ";" + inputBinding;
-                                            }
+                                String inputBindings = bindingServiceProperties.getInputBindings();
 
-                                            streamFunctionProperties.getBindings()
-                                                                    .put(inputBinding + "-in-0", beanName);
+                                if (!StringUtils.hasText(inputBindings)) {
+                                    inputBindings = inputBinding;
+                                } else {
+                                    inputBindings += ";" + inputBinding;
+                                }
 
-                                            bindingServiceProperties.setInputBindings(inputBindings);
+                                bindingServiceProperties.setInputBindings(inputBindings);
 
-                                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                                messageConverterConfigurer.configureInputChannel(MessageChannel.class.cast(bean),
-                                                                                                 beanName);
-                                            }
-                                        });
+                                streamFunctionProperties.getBindings()
+                                                        .put(beanInName, beanName);
+
+                                if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                                    messageConverterConfigurer.configureInputChannel(MessageChannel.class.cast(bean),
+                                                                                     beanName);
+                                }
                             });
                 }
 

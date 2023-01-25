@@ -56,6 +56,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getOutBinding;
+
 @Configuration
 public class OutputBindingConfiguration {
 
@@ -68,48 +70,45 @@ public class OutputBindingConfiguration {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
-
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
                             .ifPresent(functionBinding -> {
+                                String outputBinding = beanName + "Function";
+                                final String beanOutName = getOutBinding(outputBinding);
 
-                                Optional.of(beanName)
-                                        .ifPresent(output -> {
-                                            String outputBinding = output + "Supplier";
-                                            String outputBindings = bindingServiceProperties.getOutputBindings();
+                                String outputBindings = bindingServiceProperties.getOutputBindings();
 
-                                            if (!StringUtils.hasText(outputBindings)) {
-                                                outputBindings = outputBinding;
-                                            } else {
-                                                outputBindings += ";" + outputBinding;
-                                            }
+                                if (!StringUtils.hasText(outputBindings)) {
+                                    outputBindings = outputBinding;
+                                } else {
+                                    outputBindings += ";" + outputBinding;
+                                }
 
-                                            streamFunctionProperties.getBindings()
-                                                                    .put(outputBinding + "-out-0", beanName);
+                                bindingServiceProperties.setOutputBindings(outputBindings);
 
-                                            bindingServiceProperties.setOutputBindings(outputBindings);
+                                streamFunctionProperties.getBindings()
+                                                        .put(beanOutName, beanName);
 
-                                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                                messageConverterConfigurer.configureOutputChannel(MessageChannel.class.cast(bean),
-                                                                                                  beanName);
-                                            }
+                                if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                                    messageConverterConfigurer.configureOutputChannel(MessageChannel.class.cast(bean),
+                                                                                      beanName);
+                                }
 
-                                            CompositeMessageConverter messageConverter = getMessageConverter(beanFactory);
+                                CompositeMessageConverter messageConverter = getMessageConverter(beanFactory);
 
-                                            BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
+                                BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
 
-                                            Optional.ofNullable(bindingProperties.getProducer())
-                                                .filter(ProducerProperties::isPartitioned)
-                                                .ifPresent(isPartitioned -> {
-                                                    InterceptableChannel.class.cast(bean)
-                                                                              .addInterceptor(new DefaultPartitioningInterceptor(bindingProperties,
-                                                                                                                                 beanFactory));
-                                                });
+                                Optional.ofNullable(bindingProperties.getProducer())
+                                    .filter(ProducerProperties::isPartitioned)
+                                    .ifPresent(isPartitioned -> {
+                                        InterceptableChannel.class.cast(bean)
+                                                                  .addInterceptor(new DefaultPartitioningInterceptor(bindingProperties,
+                                                                                                                     beanFactory));
+                                    });
 
-                                            InterceptableChannel.class.cast(bean)
-                                                                      .addInterceptor(new OutboundContentTypeConvertingInterceptor("application/json",
-                                                                                                                                   messageConverter));
+                                InterceptableChannel.class.cast(bean)
+                                                          .addInterceptor(new OutboundContentTypeConvertingInterceptor("application/json",
+                                                                                                                       messageConverter));
 
-                                        });
                             });
                 }
 
