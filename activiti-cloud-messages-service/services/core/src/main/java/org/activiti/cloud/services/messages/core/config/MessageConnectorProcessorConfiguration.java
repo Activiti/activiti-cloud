@@ -15,48 +15,25 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
-    public final String INTERNAL_OUTPUT = INTERNAL_CHANNEL_PREFIX + MessageConnectorProcessor.OUTPUT;
-
-    @Bean(INPUT)
-    @ConditionalOnMissingBean(name = INPUT)
+    @InputBinding(INPUT)
     @Override
     public MessageChannel input() {
-        return MessageChannels.direct(INPUT).get();
+        return MessageChannels.publishSubscribe(INPUT).get();
     }
 
-    @Bean(INTERNAL_OUTPUT)
-    @ConditionalOnMissingBean(name = INTERNAL_OUTPUT)
+    @OutputBinding(OUTPUT)
     @Override
     public MessageChannel output() {
-        return MessageChannels.direct(INTERNAL_OUTPUT)
-            .get();
+        return MessageChannels.direct(OUTPUT).get();
     }
-
-    @FunctionBinding(output = MessageConnectorProcessor.OUTPUT)
-    @ConditionalOnMissingBean(name = "messageConnectorOutputSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> messageConnectorOutputSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(output())
-            .log(LoggingHandler.Level.INFO,"messageConnectorOutput")
-            .toReactivePublisher());
-    }
-
 }

@@ -15,58 +15,36 @@
  */
 package org.activiti.cloud.connectors.starter.config;
 
-import static org.activiti.cloud.common.messaging.utilities.InternalChannelHelper.INTERNAL_CHANNEL_PREFIX;
-
-import java.util.function.Supplier;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
-import reactor.core.publisher.Flux;
 
 @Configuration
 public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
 
-    private static final String INTERNAL_INTEGRATION_EVENT_PRODUCER = INTERNAL_CHANNEL_PREFIX + INTEGRATION_EVENT_PRODUCER;
-
-    @Bean(INTEGRATION_RESULT_CONSUMER)
+    @InputBinding(INTEGRATION_RESULT_CONSUMER)
     @ConditionalOnMissingBean(name = INTEGRATION_RESULT_CONSUMER)
     @Override
     public SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER)
-            .get();
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER).get();
     }
 
-
-    @Bean(INTERNAL_INTEGRATION_EVENT_PRODUCER)
-    @ConditionalOnMissingBean(name = INTERNAL_INTEGRATION_EVENT_PRODUCER)
+    @OutputBinding(INTEGRATION_EVENT_PRODUCER)
+    @ConditionalOnMissingBean(name = INTEGRATION_EVENT_PRODUCER)
     @Override
     public MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(INTERNAL_INTEGRATION_EVENT_PRODUCER).get();
+        return MessageChannels.direct(INTEGRATION_EVENT_PRODUCER).get();
     }
 
-
-    @FunctionBinding(output = INTEGRATION_EVENT_PRODUCER)
-    @ConditionalOnMissingBean(name = "integrationEventsSupplier")
-    @Bean
-    public Supplier<Flux<Message<?>>> integrationEventsSupplier() {
-        return () -> Flux.from(IntegrationFlows.from(integrationEventsProducer())
-            .log(LoggingHandler.Level.INFO,"integrationEventsSupplier")
-            .toReactivePublisher());
-    }
-
-    @Bean(INTEGRATION_ERROR_CONSUMER)
+    @InputBinding(INTEGRATION_ERROR_CONSUMER)
     @ConditionalOnMissingBean(name = INTEGRATION_ERROR_CONSUMER)
     @Override
     public SubscribableChannel integrationErrorConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER)
-            .get();
+        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).get();
     }
 }
