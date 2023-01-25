@@ -150,12 +150,7 @@ public class OutputBindingConfiguration {
 
         @Override
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
-            if (message instanceof ErrorMessage) {
-                return message;
-            }
-
-            if (message.getPayload() instanceof byte[]
-                && message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)) {
+            if (message instanceof ErrorMessage || isByteArrayWithContentType(message)) {
                 return message;
             }
 
@@ -167,6 +162,24 @@ public class OutputBindingConfiguration {
                                                             ObjectUtils.nullSafeToString(oct)).toString()
                 : oct;
 
+            MessageHeaders messageHeaders = getMessageHeaders(message);
+
+            @SuppressWarnings("unchecked")
+            Message<byte[]> outboundMessage = getOutboundMessage(message, messageHeaders);
+
+            MessageHeaders outboundMessageHeaders = getOutboundMessageHeaders(outboundMessage, ct, oct);
+
+            return MessageBuilder.fromMessage(outboundMessage)
+                                 .copyHeaders(outboundMessageHeaders)
+                                 .build();
+        }
+
+        private boolean isByteArrayWithContentType(Message<?> message) {
+            return message.getPayload() instanceof byte[]
+                    && message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE);
+        }
+
+        private MessageHeaders getMessageHeaders(Message<?> message) {
             MessageHeaders messageHeaders = message.getHeaders();
 
             if (!message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)) {
@@ -175,16 +188,10 @@ public class OutputBindingConfiguration {
                 accessor.setContentType(this.mimeType);
                 messageHeaders = accessor.toMessageHeaders();
             }
+            return messageHeaders;
+        }
 
-            @SuppressWarnings("unchecked")
-            Message<byte[]> outboundMessage = message.getPayload() instanceof byte[]
-                ? (Message<byte[]>) message : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
-
-            if (outboundMessage == null) {
-                throw new IllegalStateException("Failed to convert message: '" + message
-                                                    + "' to outbound message.");
-            }
-
+        private MessageHeaders getOutboundMessageHeaders(Message<?> outboundMessage, String ct, String oct) {
             MessageHeaders outboundMessageHeaders = outboundMessage.getHeaders();
 
             if (ct != null && !ct.equals(oct) && oct != null) {
@@ -193,11 +200,20 @@ public class OutputBindingConfiguration {
                 accessor.setContentType(MimeType.valueOf(ct));
                 outboundMessageHeaders = accessor.toMessageHeaders();
             }
-            return MessageBuilder.fromMessage(outboundMessage)
-                                 .copyHeaders(outboundMessageHeaders)
-                                 .build();
+            return outboundMessageHeaders;
         }
 
+        private Message<byte[]> getOutboundMessage(Message<?> message, MessageHeaders messageHeaders) {
+            Message<byte[]> outboundMessage = message.getPayload() instanceof byte[]
+                    ? (Message<byte[]>) message
+                    : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
+
+            if (outboundMessage == null) {
+                throw new IllegalStateException("Failed to convert message: '" + message
+                        + "' to outbound message.");
+            }
+            return outboundMessage;
+        }
     }
 
 }
