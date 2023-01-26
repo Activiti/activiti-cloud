@@ -17,8 +17,12 @@ package org.activiti.cloud.services.identity.keycloak.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import feign.Feign;
 import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
+import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
+import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
@@ -28,17 +32,25 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.validator.PublicKeyValidationCheck;
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
+import org.springframework.cloud.openfeign.support.SpringDecoder;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 @Configuration
 @PropertySource("classpath:keycloak-client.properties")
@@ -116,6 +128,21 @@ public class ActivitiKeycloakAutoConfiguration {
     public RealmValidationCheck realmValidationCheck(@Value("${keycloak.auth-server-url}") String authServerUrl,
                                                 @Value("${keycloak.realm}") String realm) {
         return new RealmValidationCheck(authServerUrl, realm);
+    }
+
+    @Bean
+    public KeycloakClient keycloakClient(
+        @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
+        ObjectFactory<HttpMessageConverters> messageConverters,
+        ObjectProvider<HttpMessageConverterCustomizer> customizers,
+        ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor) {
+        KeycloakClient keycloakClient = Feign.builder()
+            .contract(new SpringMvcContract())
+            .encoder(new SpringEncoder(messageConverters))
+            .decoder(new SpringDecoder(messageConverters, customizers))
+            .requestInterceptor(clientCredentialsAuthRequestInterceptor)
+            .target(KeycloakClient.class, url + "/idp/account-clients");
+        return keycloakClient;
     }
 
 }

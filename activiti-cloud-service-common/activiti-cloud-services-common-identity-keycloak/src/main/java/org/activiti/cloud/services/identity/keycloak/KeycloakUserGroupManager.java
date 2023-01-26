@@ -24,7 +24,7 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 
-public class KeycloakUserGroupManager implements UserGroupManager {
+public class  KeycloakUserGroupManager implements UserGroupManager {
 
 
     private final KeycloakClient keycloakClient;
