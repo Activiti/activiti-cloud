@@ -16,44 +16,35 @@
 package org.activiti.cloud.services.identity.keycloak.model;
 
 import java.util.List;
-import java.util.Map;
 
-public class KeycloakGroup {
+public class KeycloakClientMappingsRepresentation {
 
-  private String id;
-  private String name;
-  private String path;
-  private Map<String, List<String>> clientRoles;
+    private String id;
+    private String client;
+    private List<KeycloakRoleMapping> mappings;
 
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-    public String getPath() {
-        return path;
+    public String getId() {
+        return id;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public Map<String, List<String>> getClientRoles() {
-        return this.clientRoles;
+    public String getClient() {
+        return client;
     }
 
-    public void setClientRoles(Map<String, List<String>> clientRoles) {
-        this.clientRoles = clientRoles;
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public List<KeycloakRoleMapping> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(
+        List<KeycloakRoleMapping> mappings) {
+        this.mappings = mappings;
     }
 }

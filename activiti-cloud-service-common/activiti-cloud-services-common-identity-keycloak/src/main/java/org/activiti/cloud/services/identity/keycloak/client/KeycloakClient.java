@@ -16,10 +16,12 @@
 package org.activiti.cloud.services.identity.keycloak.client;
 
 import feign.Headers;
+import feign.Response;
 import java.util.List;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,15 +42,32 @@ public interface KeycloakClient {
     List<KeycloakUser> searchUsers(@RequestParam(value = "search") String search,
                                    @RequestParam(value = "first") Integer first, @RequestParam(value = "max") Integer max);
 
+    @RequestMapping(method = RequestMethod.GET, value = "/users")
+    @Headers("Content-Type: application/json")
+    List<KeycloakUser> searchUsersByUsername(@RequestParam(value = "username") String username);
+
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/composite")
     @Headers("Content-Type: application/json")
     @Cacheable("userRoleMapping")
     List<KeycloakRoleMapping> getUserRoleMapping(@PathVariable("id") String id);
 
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/realm/available")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> getUserRoleMappingAvailable(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/users/{id}/role-mappings/realm")
+    @Headers("Content-Type: application/json")
+    void addRealmLevelUserRoleMapping(@PathVariable("id") String id, List<KeycloakRoleMapping> roles);
+
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/groups")
     @Headers("Content-Type: application/json")
     @Cacheable("userGroups")
     List<KeycloakGroup> getUserGroups(@PathVariable("id") String userId);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings")
+    @Headers("Content-Type: application/json")
+    @Cacheable("userGroups")
+    KeycloakMappingsRepresentation getUserRoles(@PathVariable("id") String userId);
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
@@ -59,6 +78,10 @@ public interface KeycloakClient {
     @Headers("Content-Type: application/json")
     @Cacheable("groupRoleMapping")
     List<KeycloakRoleMapping> getGroupRoleMapping(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}/role-mappings")
+    @Headers("Content-Type: application/json")
+    KeycloakMappingsRepresentation getAllGroupRoleMapping(@PathVariable("id") String id);
 
     @RequestMapping(method = RequestMethod.GET, value = "/clients")
     @Headers("Content-Type: application/json")
@@ -88,19 +111,86 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.POST, value = "/groups/{id}/role-mappings/clients/{client}")
     @Headers("Content-Type: application/json")
     List<KeycloakRoleMapping> addGroupClientRoleMapping(@PathVariable("id") String id,
-                                                        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+                                                        @PathVariable("client") String client,
+                                                        @RequestBody List<KeycloakRoleMapping> roles);
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/users/{id}/role-mappings/clients/{client}")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> removeUserClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/groups/{id}/role-mappings/clients/{client}")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> removeGroupClientRoleMapping(@PathVariable("id") String id,
+        @PathVariable("client") String client, @RequestBody List<KeycloakRoleMapping> roles);
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/users")
     @Headers("Content-Type: application/json")
     List<KeycloakUser> getUsersClientRoleMapping(@PathVariable("id") String id,
                                                  @PathVariable("role-name") String roleName);
 
+    @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/service-account-user")
+    @Headers("Content-Type: application/json")
+    KeycloakUser getServiceAccountUserOfClient(@PathVariable("id") String id);
+
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/groups")
     @Headers("Content-Type: application/json")
     List<KeycloakGroup> getGroupsClientRoleMapping(@PathVariable("id") String id,
                                                    @PathVariable("role-name") String roleName);
 
+    @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}")
+    @Headers("Content-Type: application/json")
+    KeycloakRoleMapping getRoleRepresentationForClient(@PathVariable("id") String id,
+        @PathVariable("role-name") String roleName);
+
+    @RequestMapping(method = RequestMethod.POST, value = "clients/{id}/roles")
+    @Headers("Content-Type: application/json")
+    KeycloakRoleMapping createRoleRepresentationForClient(@PathVariable("id") String id,
+        @RequestBody KeycloakRoleMapping keycloakRoleMapping);
+
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{groupId}/members")
     @Headers("Content-Type: application/json")
     List<KeycloakUser> getUsersByGroupId(@PathVariable("groupId") String groupId);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}")
+    @Headers("Content-Type: application/json")
+    KeycloakGroup getGroupById(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/groups")
+    @Headers("Content-Type: application/json")
+    List<KeycloakGroup> getAllGroups();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users")
+    @Headers("Content-Type: application/json")
+    List<KeycloakUser> getAllUsers();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}")
+    @Headers("Content-Type: application/json")
+    KeycloakUser getUserById(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/group-by-path/{path}")
+    @Headers("Content-Type: application/json")
+    KeycloakGroup getGroupByPath(@PathVariable("path") String path);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/clients")
+    @Headers("Content-Type: application/json")
+    List<KeycloakClientRepresentation> findByClientId(
+        @RequestParam(value = "clientId", required = false) String clientId);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/clients/{id}")
+    @Headers("Content-Type: application/json")
+    KeycloakClientRepresentation getClientById(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/clients/{id}")
+    @Headers("Content-Type: application/json")
+    void deleteClient(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/clients")
+    @Headers("Content-Type: application/json")
+    Response createClient(@RequestBody KeycloakClientRepresentation keycloakClientRepresentation);
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/clients/{id}")
+    @Headers("Content-Type: application/json")
+    void updateClient(@PathVariable("id") String id, @RequestBody KeycloakClientRepresentation keycloakClientRepresentation);
+
 }
