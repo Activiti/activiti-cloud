@@ -18,6 +18,7 @@ package org.activiti.cloud.services.identity.keycloak;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.cloud.identity.config.IdentitySearchCacheConfiguration;
+import org.activiti.cloud.services.identity.keycloak.config.ActivitiKeycloakAutoConfiguration;
 import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -26,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import(IdentitySearchCacheConfiguration.class)
+@Import({IdentitySearchCacheConfiguration.class, ActivitiKeycloakAutoConfiguration.class})
 public class KeycloakClientApplication {
 
     @Bean
