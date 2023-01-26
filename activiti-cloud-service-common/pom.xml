@@ -163,11 +163,6 @@
         <artifactId>jjwt</artifactId>
         <version>${jsonwebtoken.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-core</artifactId>
-        <version>${keycloak.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
   <!-- Activiti build parent marker dependency for dependency convergence tests -->
