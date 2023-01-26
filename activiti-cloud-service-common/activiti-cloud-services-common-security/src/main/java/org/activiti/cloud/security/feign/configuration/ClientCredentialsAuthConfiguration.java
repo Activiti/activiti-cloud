@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 @Configuration
-@ConditionalOnBean(OAuth2AuthorizedClientService.class)
+//@ConditionalOnBean(OAuth2AuthorizedClientService.class)
 public class ClientCredentialsAuthConfiguration {
 
     @Bean

@@ -56,7 +56,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
-@EnableFeignClients(clients = KeycloakClient.class)
+@EnableFeignClients
 public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
@@ -129,6 +129,7 @@ public class ActivitiKeycloakAutoConfiguration {
                                                 @Value("${keycloak.realm}") String realm) {
         return new RealmValidationCheck(authServerUrl, realm);
     }
+
 
     @Bean
     public KeycloakClient keycloakClient(
