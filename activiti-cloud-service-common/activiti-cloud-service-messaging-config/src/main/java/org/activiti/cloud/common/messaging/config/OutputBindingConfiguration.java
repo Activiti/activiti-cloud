@@ -154,20 +154,20 @@ public class OutputBindingConfiguration {
                 return message;
             }
 
-            String oct = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)
-                ? message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
+            String contentTypeFromHeader = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE) ?
+                message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
                 : null;
-            String ct = message.getPayload() instanceof String
-                ? JavaClassMimeTypeUtils.mimeTypeFromObject(message.getPayload(),
-                                                            ObjectUtils.nullSafeToString(oct)).toString()
-                : oct;
+            String contentTypeFromPayload = message.getPayload() instanceof String ?
+                JavaClassMimeTypeUtils.mimeTypeFromObject(message.getPayload(),
+                                                            ObjectUtils.nullSafeToString(contentTypeFromHeader)).toString()
+                : contentTypeFromHeader;
 
             MessageHeaders messageHeaders = getMessageHeaders(message);
 
             @SuppressWarnings("unchecked")
             Message<byte[]> outboundMessage = getOutboundMessage(message, messageHeaders);
 
-            MessageHeaders outboundMessageHeaders = getOutboundMessageHeaders(outboundMessage, ct, oct);
+            MessageHeaders outboundMessageHeaders = getOutboundMessageHeaders(outboundMessage, contentTypeFromPayload, contentTypeFromHeader);
 
             return MessageBuilder.fromMessage(outboundMessage)
                                  .copyHeaders(outboundMessageHeaders)
@@ -191,13 +191,13 @@ public class OutputBindingConfiguration {
             return messageHeaders;
         }
 
-        private MessageHeaders getOutboundMessageHeaders(Message<?> outboundMessage, String ct, String oct) {
+        private MessageHeaders getOutboundMessageHeaders(Message<?> outboundMessage, String contentTypeFromPayload, String contentTypeFromHeader) {
             MessageHeaders outboundMessageHeaders = outboundMessage.getHeaders();
 
-            if (ct != null && !ct.equals(oct) && oct != null) {
+            if (contentTypeFromPayload != null && !contentTypeFromPayload.equals(contentTypeFromHeader) && contentTypeFromHeader != null) {
                 @SuppressWarnings("unchecked")
                 MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(outboundMessage);
-                accessor.setContentType(MimeType.valueOf(ct));
+                accessor.setContentType(MimeType.valueOf(contentTypeFromPayload));
                 outboundMessageHeaders = accessor.toMessageHeaders();
             }
             return outboundMessageHeaders;
