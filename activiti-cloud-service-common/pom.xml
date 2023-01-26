@@ -39,7 +39,7 @@
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
     <java-semver.version>0.9.0</java-semver.version>
-    <keycloak.version>20.0.2</keycloak.version>
+    <keycloak.version>20.0.3</keycloak.version>
     <resteasy.version>4.7.5.Final</resteasy.version>
     <logstash.version>7.0.1</logstash.version>
     <springdoc.version>1.6.9</springdoc.version>
