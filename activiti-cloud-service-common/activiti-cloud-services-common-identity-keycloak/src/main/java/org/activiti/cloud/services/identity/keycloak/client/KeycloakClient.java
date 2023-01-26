@@ -19,6 +19,7 @@ import feign.Headers;
 import feign.Response;
 import java.util.List;
 
+import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepresentation;
@@ -31,7 +32,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
+@FeignClient(value = "keycloak",
+    url = "${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/",
+    configuration = ClientCredentialsAuthConfiguration.class)
 public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")
