@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.model.QServiceTaskEntity.serviceTaskEntity;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
@@ -63,6 +66,7 @@ public class ProcessInstanceServiceTasksAdminController {
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
     public PagedModel<EntityModel<CloudServiceTask>> getTasks(@PathVariable String processInstanceId,
+                                                              @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
                                                               @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
                                                               Pageable pageable) {
 

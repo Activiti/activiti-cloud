@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -46,6 +49,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.ROOT_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.STANDALONE_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
 
 @RestController
 @RequestMapping(
@@ -75,11 +85,15 @@ public class TaskAdminController {
         this.taskControllerHelper = taskControllerHelper;
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
+        @Parameter(description = ROOT_TASKS_DESC)
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC)
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
         VariableSearch variableSearch,
         Pageable pageable) {
@@ -88,12 +102,17 @@ public class TaskAdminController {
                 new StandAloneTaskFilter(standalone)));
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+        @Parameter(description = ROOT_TASKS_DESC)
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC)
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+        @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE)
         @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
         VariableSearch variableSearch,
         Pageable pageable) {
@@ -104,6 +123,7 @@ public class TaskAdminController {
 
     @RequestMapping(method = RequestMethod.POST)
     public MappingJacksonValue findAllFromBody(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
         @RequestBody(required = false) TasksQueryBody payload,
         VariableSearch variableSearch,

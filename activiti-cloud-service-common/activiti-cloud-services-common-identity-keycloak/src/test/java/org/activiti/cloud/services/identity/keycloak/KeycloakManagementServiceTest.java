@@ -115,8 +115,11 @@ class KeycloakManagementServiceTest {
         groupOne.setId("one");
         groupOne.setName("groupOne");
         groupTwo.setId("two");
+        groupTwo.setName("groupTwo");
         groupThree.setId("three");
+        groupThree.setName("groupThree");
         groupFour.setId("four");
+        groupFour.setName("groupFour");
 
         clientOne.setId("one");
         clientOne.setClientId("client-one");
@@ -133,7 +136,9 @@ class KeycloakManagementServiceTest {
         kGroupTwo.setId("two");
         kGroupTwo.setName("groupTwo");
         kGroupThree.setId("three");
+        kGroupThree.setName("groupThree");
         kGroupFour.setId("four");
+        kGroupFour.setName("groupFour");
     }
 
     @Test
@@ -185,14 +190,24 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    void shouldReturnUsersWhenSearchingUsingMultipleGroups() {
+    void shouldReturnOnlyUsersMembersOfAllTheGroupsWhenSearchingUsingMultipleGroups() {
         defineSearchUsersFromKeycloak();
         defineSearchUsersByGroupsFromKeycloak();
-        when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
-        when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupOne, kGroupTwo));
 
         UserSearchParams userSearchParams = new UserSearchParams();
-        userSearchParams.setSearch("o");
+        userSearchParams.setGroups(Set.of("groupOne", "groupTwo"));
+        List<User> users = keycloakManagementService.findUsers(userSearchParams);
+        assertThat(users.size()).isEqualTo(1);
+        assertThat(users).containsExactly(userTwo);
+    }
+
+    @Test
+    void shouldReturnGroupsWhenSearchingUsingMultipleGroups() {
+        defineSearchUsersFromKeycloak();
+        defineSearchUsersByGroupsFromKeycloak();
+
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setSearch("userTwo");
         userSearchParams.setGroups(Set.of("groupOne", "groupTwo"));
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
         assertThat(users.size()).isEqualTo(1);
@@ -260,8 +275,6 @@ class KeycloakManagementServiceTest {
         defineSearchUsersFromKeycloak();
         setUpUsersApplicationRoles();
         defineSearchUsersByGroupsFromKeycloak();
-        when(keycloakClient.getUserGroups(userOne.getId())).thenReturn(List.of(kGroupOne));
-        when(keycloakClient.getUserGroups(userTwo.getId())).thenReturn(List.of(kGroupTwo));
 
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch("userOne");
@@ -696,8 +709,8 @@ class KeycloakManagementServiceTest {
         when(keycloakClient.searchGroups(eq(groupOne.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getUsersByGroupId(kGroupOne.getId())).thenReturn(List.of(kUserOne, kUserTwo));
 
-        when(keycloakClient.searchGroups(eq(kGroupTwo.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupTwo));
-        when(keycloakClient.getUsersByGroupId(kGroupTwo.getId())).thenReturn(List.of(kUserThree));
+        when(keycloakClient.searchGroups(eq(groupTwo.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupTwo));
+        when(keycloakClient.getUsersByGroupId(kGroupTwo.getId())).thenReturn(List.of(kUserTwo, kUserThree));
     }
 
     private void setUpUsersApplicationRoles() {

@@ -1,7 +1,7 @@
 create sequence audit_sequence start with 1 increment by 50;
 create table audit_event
 (
-    type                       varchar(31) not null,
+    type                       varchar(63) not null,
     id                         bigint      not null,
     app_name                   varchar(255),
     app_version                varchar(255),

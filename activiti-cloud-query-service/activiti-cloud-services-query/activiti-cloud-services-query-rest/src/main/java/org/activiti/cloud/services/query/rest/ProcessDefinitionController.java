@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -42,6 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
@@ -77,7 +81,8 @@ public class ProcessDefinitionController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                   @QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
                                                                     Pageable pageable) {
         Predicate predicateRestricted = applyRestrictions(predicate);
         return pagedCollectionModelAssembler.toModel(pageable,

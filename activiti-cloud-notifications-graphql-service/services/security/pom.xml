@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>7.9.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-security</artifactId>
   <name>Activiti Cloud Notifications :: Services :: GraphQL Security</name>
@@ -49,6 +49,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-core</artifactId>
     </dependency>
   </dependencies>
 </project>
