@@ -15,51 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
-import org.activiti.bpmn.exceptions.XMLException;
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.Process;
-import org.activiti.bpmn.model.Task;
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.ModelContent;
-import org.activiti.cloud.modeling.api.ModelType;
-import org.activiti.cloud.modeling.api.ModelUpdateListener;
-import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.api.process.ModelScope;
-import org.activiti.cloud.modeling.converter.JsonConverter;
-import org.activiti.cloud.modeling.core.error.ImportModelException;
-import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
-import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
-import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
-import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.common.util.ContentTypeUtils;
-import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-import org.activiti.cloud.services.modeling.service.api.ModelService;
-import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
-import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.Assert;
-
-import javax.transaction.Transactional;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static java.util.Objects.nonNull;
 import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
@@ -73,12 +28,62 @@ import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removeEnd;
 
+import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.transaction.Transactional;
+import org.activiti.bpmn.exceptions.XMLException;
+import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.bpmn.model.Process;
+import org.activiti.bpmn.model.Task;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelContent;
+import org.activiti.cloud.modeling.api.ModelContentValidator;
+import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
+import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ModelValidationError;
+import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.modeling.core.error.ImportModelException;
+import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
+import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
+import org.activiti.cloud.modeling.repository.ModelRepository;
+import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.common.util.ContentTypeUtils;
+import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
+import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.Assert;
+
 /**
  * Business logic related to {@link Model} entities including process models, form models, connectors, data models and decision table models.
  */
 @PreAuthorize("hasRole('ACTIVITI_MODELER')")
 @Transactional
-public class ModelServiceImpl implements ModelService{
+public class ModelServiceImpl implements ModelService {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelServiceImpl.class);
 
@@ -96,6 +101,9 @@ public class ModelServiceImpl implements ModelService{
 
     private final FileMagicNumberValidator fileContentValidator;
 
+    private final ValidationStrategy<ModelContentValidator> modelContentValidationStrategy;
+    private final ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy;
+
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
@@ -110,7 +118,9 @@ public class ModelServiceImpl implements ModelService{
                             JsonConverter<Model> jsonConverter,
                             ProcessModelContentConverter processModelContentConverter,
                             Set<ModelUpdateListener> modelUpdateListeners,
-                            FileMagicNumberValidator fileContentValidator) {
+                            FileMagicNumberValidator fileContentValidator,
+                            ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
+                            ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -118,6 +128,8 @@ public class ModelServiceImpl implements ModelService{
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
         this.fileContentValidator = fileContentValidator;
+        this.modelContentValidationStrategy = modelContentValidationStrategy;
+        this.modelExtensionsValidationStrategy = modelExtensionsValidationStrategy;
         modelUpdateListenersMapByModelType = modelUpdateListeners
             .stream()
             .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
@@ -573,7 +585,7 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
         } else {
-            this.validateModelContent(model, fileContent, project);
+            validateModelContent(model, fileContent, project);
         }
     }
 
@@ -582,22 +594,33 @@ public class ModelServiceImpl implements ModelService{
         if(validateUsage) {
             validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
         } else {
-            this.validateModelContent(model, fileContent);
+            validateModelContent(model, fileContent);
         }
     }
 
     private void validateModelContentAndUsage(Model model,
                                               byte[] modelContent,
                                               ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(model.getType())).stream().forEach(modelValidator -> modelValidator.validateModelContent(model, modelContent,
-            validationContext, true));
+        modelContentValidationStrategy.validate(
+            emptyIfNull(modelContentService.findModelValidators(model.getType())),
+            modelValidator -> modelValidator.validateModelContent(model, modelContent,
+                validationContext, true));
     }
 
     private void validateModelContent(String modelType,
                                       byte[] modelContent,
                                       ValidationContext validationContext) {
-        emptyIfNull(modelContentService.findModelValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelContent(modelContent,
-                                                                                                                                               validationContext));
+        modelContentValidationStrategy.validate(
+            emptyIfNull(modelContentService.findModelValidators(modelType)),
+            modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
+    }
+
+    private List<ModelValidationError> getModelContentValidationErrors(String modelType,
+        byte[] modelContent,
+        ValidationContext validationContext) {
+        return modelContentValidationStrategy.getValidationErrors(
+            emptyIfNull(modelContentService.findModelValidators(modelType)),
+            modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
     }
 
     @Override
@@ -656,8 +679,17 @@ public class ModelServiceImpl implements ModelService{
     private void validateModelExtensions(String modelType,
                                          byte[] modelContent,
                                          ValidationContext validationContext) {
-        emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)).stream().forEach(modelValidator -> modelValidator.validateModelExtensions(modelContent,
-                                                                                                                                                          validationContext));
+        modelExtensionsValidationStrategy.validate(
+            emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+    }
+
+    private List<ModelValidationError> getModelExtensionsValidationErrors(String modelType,
+        byte[] modelContent,
+        ValidationContext validationContext) {
+        return modelExtensionsValidationStrategy.getValidationErrors(
+            emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
     }
 
     private ModelType findModelType(Model model) {
@@ -670,5 +702,23 @@ public class ModelServiceImpl implements ModelService{
         return (List<ModelUpdateListener>) emptyIfNull(modelUpdateListenersMapByModelType.get(modelType));
     }
 
+    @Override
+    public List<ModelValidationError> getModelValidationErrors(Model model,
+        ValidationContext validationContext) {
 
+        return getModelContentValidationErrors(model.getType(),
+            modelRepository.getModelContent(model),
+            validationContext);
+    }
+
+    @Override
+    public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
+            ValidationContext validationContext){
+
+        return getModelExtensionsFileContent(model).filter(Objects::nonNull)
+            .map(extensionsFileContent ->
+                getModelExtensionsValidationErrors(model.getType(),
+                    extensionsFileContent.getFileContent(),
+                    validationContext)).orElse(Collections.emptyList());
+    }
 }

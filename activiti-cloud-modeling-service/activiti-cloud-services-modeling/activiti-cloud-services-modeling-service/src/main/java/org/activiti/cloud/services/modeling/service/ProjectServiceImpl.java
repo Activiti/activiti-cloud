@@ -15,6 +15,26 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
+import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
+import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.transaction.Transactional;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -45,28 +65,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.getContentTypeByPath;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExtension;
-import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
-import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 
 /**
  * Business logic related to {@link Project} entities
@@ -437,39 +435,36 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void validateProject(Project project) {
+        handleErrors(getProjectValidationErrors(project));
+    }
+
+    @Override
+    public void validateProjectIgnoreWarnings(Project project) {
+        List<ModelValidationError> validationErrors = getProjectValidationErrors(project)
+            .stream()
+            .filter(validationError -> !validationError.isWarning())
+            .collect(Collectors.toList());
+
+        handleErrors(validationErrors);
+    }
+
+    private List<ModelValidationError> getProjectValidationErrors(Project project) {
         List<Model> availableModels = modelService.getAllModels(project);
         ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
-        List<ModelValidationError> validationErrors = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
-                validationContext)),
+        Stream<ModelValidationError> validationErrorStream = Stream.concat(projectValidators.stream().flatMap(validator -> validator.validate(project,
+                    validationContext)),
                 availableModels.stream().flatMap(model -> getModelValidationErrors(model,
-                        validationContext)))
-                .collect(Collectors.toList());
+                    validationContext))
+            ).distinct();
 
-        if (!validationErrors.isEmpty()) {
-            throw new SemanticModelValidationException("Validation errors found in project's models",
-                    validationErrors);
-        }
+        return validationErrorStream.collect(Collectors.toList());
     }
 
     private Stream<ModelValidationError> getModelValidationErrors(Model model,
                                                                   ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = new ArrayList<>();
-        try {
-            modelService.validateModelContent(model,
-                    validationContext);
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
-        try {
-            modelService.getModelExtensionsFileContent(model).ifPresent(extensionsFileContent -> modelService.validateModelExtensions(model,
-                    extensionsFileContent,
-                    validationContext));
-        } catch (SemanticModelValidationException validationException) {
-            validationErrors.addAll(validationException.getValidationErrors());
-        }
-
+        List<ModelValidationError> validationErrors = modelService.getModelValidationErrors(model, validationContext);
+        validationErrors.addAll(modelService.getModelExtensionValidationErrors(model, validationContext));
         return validationErrors.stream();
     }
 
@@ -544,6 +539,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean anyNotBlank(List<String> filters) {
         return filters != null && filters.stream().anyMatch(StringUtils::isNotBlank);
+    }
+
+    private static void handleErrors(List<ModelValidationError> validationErrors) {
+        if (!validationErrors.isEmpty()) {
+            throw new SemanticModelValidationException("Validation errors found in project's models",
+                validationErrors);
+        }
     }
 
 }

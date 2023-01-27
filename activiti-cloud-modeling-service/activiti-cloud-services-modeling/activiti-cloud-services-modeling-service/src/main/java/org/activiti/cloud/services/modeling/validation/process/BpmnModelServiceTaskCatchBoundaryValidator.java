@@ -32,7 +32,8 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonModelValidator {
 
     public static final String MISSING_BOUNDARY_WARNING = "Missing Catch Error boundary event";
-    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "The service implementation on service '%s' might fail silently";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "The service implementation on service '%s' might fail silently. "
+        + "Consider adding an Error boundary event to handle failures.";
     public static final String SERVICE_TASK_VALIDATOR_NAME = "BPMN service task catch boundary validator";
 
     private final FlowElementsExtractor flowElementsExtractor;
