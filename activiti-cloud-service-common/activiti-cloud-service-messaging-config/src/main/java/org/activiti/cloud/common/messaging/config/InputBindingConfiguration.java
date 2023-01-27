@@ -20,7 +20,6 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
@@ -29,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
+@AutoConfiguration(before = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class, ConnectorConfiguration.class })
 public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String INPUT_BINDING = "_sink";
@@ -37,8 +36,7 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
     @Bean
     public BeanPostProcessor inputBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                            BindingServiceProperties bindingServiceProperties,
-                                                           StreamFunctionProperties streamFunctionProperties,
-                                                           MessageConverterConfigurer messageConverterConfigurer) {
+                                                           StreamFunctionProperties streamFunctionProperties) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -63,8 +61,8 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                                                         .put(beanInName, beanName);
 
                                 if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                    messageConverterConfigurer.configureInputChannel(MessageChannel.class.cast(bean),
-                                                                                     beanName);
+                                    getMessageConverterConfigurer().configureInputChannel(MessageChannel.class.cast(bean),
+                                                                                          beanName);
                                 }
                             });
                 }

@@ -24,7 +24,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.stream.binder.JavaClassMimeTypeUtils;
 import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.binding.DefaultPartitioningInterceptor;
-import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -47,7 +46,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
+@AutoConfiguration(before = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class, ConnectorConfiguration.class })
 public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String OUTPUT_BINDING = "_source";
@@ -56,7 +55,6 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
     public BeanPostProcessor outputBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                             BindingServiceProperties bindingServiceProperties,
                                                             StreamFunctionProperties streamFunctionProperties,
-                                                            MessageConverterConfigurer messageConverterConfigurer,
                                                             DefaultListableBeanFactory beanFactory) {
         return new BeanPostProcessor() {
             @Override
@@ -81,8 +79,8 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                                                         .put(beanOutName, beanName);
 
                                 if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                    messageConverterConfigurer.configureOutputChannel(MessageChannel.class.cast(bean),
-                                                                                      beanName);
+                                    getMessageConverterConfigurer().configureOutputChannel(MessageChannel.class.cast(bean),
+                                                                                           beanName);
                                 }
 
                                 CompositeMessageConverter messageConverter = getMessageConverter();

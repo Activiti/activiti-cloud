@@ -43,8 +43,7 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = BinderFactoryAutoConfiguration.class,
-                   after = {InputBindingConfiguration.class,OutputBindingConfiguration.class})
+@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 

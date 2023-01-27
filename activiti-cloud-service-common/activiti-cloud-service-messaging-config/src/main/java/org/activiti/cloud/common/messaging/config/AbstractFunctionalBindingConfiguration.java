@@ -34,6 +34,7 @@ import org.springframework.cloud.function.context.config.JsonMessageConverter;
 import org.springframework.cloud.function.context.config.SmartCompositeMessageConverter;
 import org.springframework.cloud.function.json.JsonMapper;
 import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
+import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -149,6 +150,11 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         }
 
         return this.smartCompositeMessageConverter;
+    }
+
+    protected MessageConverterConfigurer getMessageConverterConfigurer() {
+        return applicationContext.getBean("messageConverterConfigurer",
+                                          MessageConverterConfigurer.class);
     }
 
 }
