@@ -20,9 +20,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.Feign;
 import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
-import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
-import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
@@ -40,21 +38,23 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.caffeine.CaffeineCache;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.support.HttpMessageConverterCustomizer;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 @Configuration
-@Import(ClientCredentialsAuthConfiguration.class)
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
@@ -145,6 +145,34 @@ public class ActivitiKeycloakAutoConfiguration {
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(KeycloakClient.class, url);
         return keycloakClient;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
+                                                                                           ClientRegistrationRepository clientRegistrationRepository,
+                                                                                           ClientRegistration clientRegistration) {
+
+        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
+            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
+
+
+        OAuth2AuthorizedClientProvider authorizedClientProvider =
+            OAuth2AuthorizedClientProviderBuilder.builder()
+                .refreshToken()
+                .clientCredentials()
+                .build();
+
+        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+
+        return new ClientCredentialsAuthRequestInterceptor(authorizedClientManager, clientRegistration);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ClientRegistration clientRegistration(ClientRegistrationRepository clientRegistrationRepository,
+                                                 @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName) {
+        return clientRegistrationRepository.findByRegistrationId(clientName);
     }
 
 }
