@@ -20,7 +20,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.Feign;
 import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
-import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
+import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
+import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
@@ -32,6 +33,7 @@ import org.activiti.cloud.services.identity.keycloak.validator.PublicKeyValidati
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -64,6 +66,10 @@ public class ActivitiKeycloakAutoConfiguration {
     private String cacheExpireAfterWrite;
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
+    @Autowired
+    private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
 
 
     @Bean(name = "userGroupManager")
@@ -136,8 +142,10 @@ public class ActivitiKeycloakAutoConfiguration {
     public KeycloakClient keycloakClient(
         @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
         ObjectFactory<HttpMessageConverters> messageConverters,
-        ObjectProvider<HttpMessageConverterCustomizer> customizers,
-        ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor) {
+        ObjectProvider<HttpMessageConverterCustomizer> customizers) {
+        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
+        ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(clientRegistrationRepository, "keycloak");
+        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(oAuth2AuthorizedClientService, clientRegistrationRepository, clientRegistration);
         KeycloakClient keycloakClient = Feign.builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
@@ -145,34 +153,6 @@ public class ActivitiKeycloakAutoConfiguration {
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(KeycloakClient.class, url);
         return keycloakClient;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
-                                                                                           ClientRegistrationRepository clientRegistrationRepository,
-                                                                                           ClientRegistration clientRegistration) {
-
-        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
-            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
-
-
-        OAuth2AuthorizedClientProvider authorizedClientProvider =
-            OAuth2AuthorizedClientProviderBuilder.builder()
-                .refreshToken()
-                .clientCredentials()
-                .build();
-
-        authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
-
-        return new ClientCredentialsAuthRequestInterceptor(authorizedClientManager, clientRegistration);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ClientRegistration clientRegistration(ClientRegistrationRepository clientRegistrationRepository,
-                                                 @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName) {
-        return clientRegistrationRepository.findByRegistrationId(clientName);
     }
 
 }
