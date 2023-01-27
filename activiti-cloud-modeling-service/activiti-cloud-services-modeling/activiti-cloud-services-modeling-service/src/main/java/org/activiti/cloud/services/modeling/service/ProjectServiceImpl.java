@@ -435,20 +435,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void validateProject(Project project) {
-        validateProject(project, false);
+        handleErrors(getProjectValidationErrors(project));
     }
 
     @Override
-    public void validateProject(Project project, boolean ignoreWarnings) {
-        List<ModelValidationError> validationErrors = getProjectValidationErrors(project, ignoreWarnings);
+    public void validateProjectIgnoreWarnings(Project project) {
+        List<ModelValidationError> validationErrors = getProjectValidationErrors(project)
+            .stream()
+            .filter(validationError -> !validationError.isWarning())
+            .collect(Collectors.toList());
 
-        if (!validationErrors.isEmpty()) {
-            throw new SemanticModelValidationException("Validation errors found in project's models",
-                validationErrors);
-        }
+        handleErrors(validationErrors);
     }
 
-    private List<ModelValidationError> getProjectValidationErrors(Project project, boolean ignoreWarnings) {
+    private List<ModelValidationError> getProjectValidationErrors(Project project) {
         List<Model> availableModels = modelService.getAllModels(project);
         ValidationContext validationContext = new ProjectValidationContext(availableModels);
 
@@ -457,10 +457,6 @@ public class ProjectServiceImpl implements ProjectService {
                 availableModels.stream().flatMap(model -> getModelValidationErrors(model,
                     validationContext))
             ).distinct();
-
-        if(ignoreWarnings){
-            validationErrorStream = validationErrorStream.filter(validationError -> !validationError.isWarning());
-        }
 
         return validationErrorStream.collect(Collectors.toList());
     }
@@ -543,6 +539,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean anyNotBlank(List<String> filters) {
         return filters != null && filters.stream().anyMatch(StringUtils::isNotBlank);
+    }
+
+    private static void handleErrors(List<ModelValidationError> validationErrors) {
+        if (!validationErrors.isEmpty()) {
+            throw new SemanticModelValidationException("Validation errors found in project's models",
+                validationErrors);
+        }
     }
 
 }

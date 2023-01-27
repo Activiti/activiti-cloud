@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.service.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -33,7 +33,7 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
 
 
     protected List<SemanticModelValidationException> getSemanticModelValidationExceptions(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
-        final List<SemanticModelValidationException> semanticModelValidationExceptionList = new LinkedList<>();
+        final List<SemanticModelValidationException> semanticModelValidationExceptionList = new ArrayList<>();
 
         validators.stream().forEach(modelValidator -> {
             try {

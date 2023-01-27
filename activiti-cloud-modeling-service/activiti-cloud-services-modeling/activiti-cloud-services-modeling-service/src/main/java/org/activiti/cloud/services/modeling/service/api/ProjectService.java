@@ -59,7 +59,7 @@ public interface ProjectService {
 
     void validateProject(Project project);
 
-    void validateProject(Project project, boolean ignoreWarnings);
+    void validateProjectIgnoreWarnings(Project project);
 
     Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
 

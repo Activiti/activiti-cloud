@@ -92,7 +92,7 @@ public class AggregateErrorValidationStrategyTest {
     }
 
     @Test
-    public void should_returnException_whenAValidatorDoesNotThrowSemanticException() {
+    public void should_returnException_whenAValidatorThrowsSyntacticException() {
         // given
         doThrow(new SyntacticModelValidationException("Test Syntactic Exception"))
             .when(modelContentValidator)

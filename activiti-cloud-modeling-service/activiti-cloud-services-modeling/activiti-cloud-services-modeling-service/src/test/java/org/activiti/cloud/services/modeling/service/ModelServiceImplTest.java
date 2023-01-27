@@ -60,7 +60,6 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
-import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -118,12 +117,6 @@ public class ModelServiceImplTest {
 
     @Mock
     public Set<ModelUpdateListener> modelUpdateListeners;
-
-
-    public ValidationStrategy<ModelContentValidator> modelContentValidationStrategy;
-
-
-    public ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy;
 
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
@@ -319,12 +312,19 @@ public class ModelServiceImplTest {
     public void should_returnErrors_when_gettingValidationErrorOfAnInvalidModel() throws Exception {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doThrow(new SemanticModelValidationException(validationErrors))
             .when(modelContentValidator)
             .validateModelContent(any(), any());
 
-        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT)).isNotEmpty();
+        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
     }
 
     @Test
@@ -347,12 +347,19 @@ public class ModelServiceImplTest {
         when(modelOne.getType()).thenReturn(modelType.getName());
         when(modelOne.getId()).thenReturn("modelOneId");
 
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
         when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doThrow(new SemanticModelValidationException(validationErrors))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
-        assertThat(modelService.getModelExtensionValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT)).isNotEmpty();
+        assertThat(modelService.getModelExtensionValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
     }
 
     @Test
