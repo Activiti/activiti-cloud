@@ -22,8 +22,8 @@ import org.springframework.messaging.SubscribableChannel;
 public interface CloudConnectorConsumerChannels {
     String INTEGRATION_EVENT_CONSUMER = "integrationEventsConsumer";
 
-    @InputBinding
-    default SubscribableChannel integrationEventConsumer() {
+    @InputBinding(INTEGRATION_EVENT_CONSUMER)
+    default SubscribableChannel integrationEventsConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_EVENT_CONSUMER)
                               .get();
     }
