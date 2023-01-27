@@ -36,8 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
     properties = {
         "keycloak.realm=activiti",
         "keycloak.use-resource-role-mappings=false",
-        "identity.client.cache.cacheExpireAfterWrite=PT5s",
-        "keycloak.user=admin"}
+        "identity.client.cache.cacheExpireAfterWrite=PT5s"}
 )
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientCrudIT {
