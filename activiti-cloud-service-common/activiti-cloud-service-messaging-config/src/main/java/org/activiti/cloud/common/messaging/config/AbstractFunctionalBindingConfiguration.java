@@ -127,9 +127,8 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
                                                 FunctionRegistration functionRegistration) {
         GenericApplicationContext.class.cast(applicationContext)
                                        .registerBean(functionName + REGISTRATION_NAME_SUFFIX,
-                                                      FunctionRegistration .class,
-                                                      () -> functionRegistration);
-
+                                                     FunctionRegistration.class,
+                                                     () -> functionRegistration);
     }
 
     protected CompositeMessageConverter getMessageConverter() {

@@ -53,15 +53,16 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
     public static final String OUTPUT_BINDING = "_source";
 
     @Bean
-    public BeanPostProcessor outputBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
+    public BeanPostProcessor outputBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                             BindingServiceProperties bindingServiceProperties,
                                                             StreamFunctionProperties streamFunctionProperties,
-                                                            MessageConverterConfigurer messageConverterConfigurer) {
+                                                            MessageConverterConfigurer messageConverterConfigurer,
+                                                            DefaultListableBeanFactory beanFactory) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
+                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
                             .ifPresent(functionBinding -> {
                                 String outputBinding = beanName + OUTPUT_BINDING;
                                 final String beanOutName = getOutBinding(outputBinding);
