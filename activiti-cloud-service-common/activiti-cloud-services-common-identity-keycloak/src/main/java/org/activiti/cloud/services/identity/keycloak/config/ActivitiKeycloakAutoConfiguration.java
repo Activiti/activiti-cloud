@@ -47,12 +47,14 @@ import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 @Configuration
+@Import(ClientCredentialsAuthConfiguration.class)
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
 @EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
