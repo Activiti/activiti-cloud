@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 import org.activiti.api.process.model.IntegrationContext;
+import org.activiti.api.task.model.builders.CompleteTaskPayloadBuilder;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -24,16 +25,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.config.BindingProperties;
-
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.CONTENT_TYPE_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +74,10 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
     @Test
     public void shouldRecoverFromFailure() {
+        canFailConnector.reset();
+
         //given
+        canFailConnector.setShouldSendError(true);
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName", "John");
         ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskErrorRecoverProcess",
@@ -92,6 +96,9 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         canFailConnector.setShouldSendError(false);
         replayServiceTask(integrationContext);
 
+        await("the service task should send the result the second try")
+            .untilTrue(canFailConnector.resultSent());
+
         //then
         await("the execution should arrive in the human tasks which follows the service task")
             .untilAsserted(() -> {
@@ -100,6 +107,55 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
                     assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
                 }
             );
+    }
+
+    @Test
+    public void shouldReplayRunningServiceTask() {
+        canFailConnector.reset();
+
+        //given
+        canFailConnector.setShouldSendResult(false);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("firstName", "John");
+        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskErrorRecoverProcess",
+                                                                            "businessKey",
+                                                                            variables);
+        assertThat(procInst).isNotNull();
+        await("the service task should not send the result on the first try")
+            .untilTrue(canFailConnector.resultNotSent());
+
+        assertThat(taskService.createTaskQuery()
+                              .processInstanceId(procInst.getProcessInstanceId())
+                              .list()).isEmpty();
+        //when
+        IntegrationContext integrationContext = canFailConnector.getLatestReceivedIntegrationRequest()
+                                                                .getIntegrationContext();
+        canFailConnector.setShouldSendResult(true);
+        replayServiceTask(integrationContext);
+
+        await("the service task should send the result the second try")
+            .untilTrue(canFailConnector.resultSent());
+
+        //then
+        await("the execution should arrive in the human tasks which follows the service task")
+            .untilAsserted(() -> {
+                               List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
+                               assertThat(tasks).isNotNull();
+                               assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
+                           }
+            );
+
+        // and given
+        Task task = taskService.createTaskQuery()
+                               .processInstanceId(procInst.getProcessInstanceId())
+                               .singleResult();
+        // when
+        complete(task);
+
+        // then
+        assertThat(runtimeService.createProcessInstanceQuery()
+                                 .processInstanceId(procInst.getProcessInstanceId())
+                                 .list()).isEmpty();
     }
 
     private void replayServiceTask(IntegrationContext integrationContext) {
@@ -113,4 +169,15 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    private void complete(Task task) {
+        identityTokenProducer.withTestUser(keycloakTestUser);
+        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/v1/tasks/{taskId}/complete",
+            HttpMethod.POST,
+            new HttpEntity<>(new CompleteTaskPayloadBuilder()
+                               .withTaskId(task.getId())
+                               .build(), CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<>() {
+            }, task.getId());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
 }
