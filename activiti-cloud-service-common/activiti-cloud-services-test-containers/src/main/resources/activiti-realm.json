@@ -92,9 +92,14 @@
       "serviceAccountClientId": "activiti-keycloak",
       "clientRoles": {
         "realm-management": [
+          "manage-authorization",
+          "manage-users",
+          "manage-clients",
           "query-realms",
+          "create-client",
+          "query-clients",
           "view-users",
-          "view-clients"
+          "manage-realm"
         ]
       }
     },
