@@ -99,7 +99,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlows.fromSupplier(supplier)
                                                                                              .filter(selector,  filter -> filter.discardChannel("nullChannel")
                                                                                                                                 .throwExceptionOnRejection(true))
-                                                                                             .log(LoggingHandler.Level.INFO, beanName + "." + functionBinding.output())
+                                                                                             .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
                                                                                              .channel(functionBinding.output());
                                 integrationFlowContext.registration(supplierFlowBuilder.get())
                                                       .register();
@@ -113,12 +113,13 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlows.from(getGatewayInterface(Function.class.isInstance(bean)),
                                                                                                    gateway -> gateway.replyTimeout(0L)
                                                                                                                      .errorChannel("errorChannel"))
-                                                                                             .log(LoggingHandler.Level.INFO, beanName + "." + functionBinding.input())
-                                                                                             .filter(selector)
+                                                                                             .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.input())
+                                                                                             .filter(selector, filter -> filter.discardChannel("nullChannel")
+                                                                                                                               .throwExceptionOnRejection(true))
                                                                                              .handle(Message.class, handler);
                                 if (Function.class.isInstance(bean)) {
                                     functionFlowBuilder.bridge()
-                                                       .log(LoggingHandler.Level.INFO, beanName + "." + functionBinding.output())
+                                                       .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
                                                        .channel(functionBinding.output());
                                 }
 
