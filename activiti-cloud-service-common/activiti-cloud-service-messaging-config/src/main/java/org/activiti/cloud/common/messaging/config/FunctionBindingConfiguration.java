@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,6 +32,7 @@ import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.core.GenericSelector;
@@ -43,7 +46,8 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
+                   before = FunctionConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
@@ -62,6 +66,24 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     @Bean
     public FunctionAnnotationService functionAnnotationService(DefaultListableBeanFactory beanFactory) {
         return new FunctionAnnotationService(beanFactory);
+    }
+
+    @Bean("resolveExpression")
+    public Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
+        return value -> {
+            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
+                                                                .getBeanExpressionResolver();
+            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
+                                                                                null);
+
+            String resolvedValue = applicationContext.getBeanFactory()
+                                                     .resolveEmbeddedValue(value);
+            if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
+                resolvedValue = (String) resolver.evaluate(resolvedValue,
+                                                           expressionContext);
+            }
+            return resolvedValue;
+        };
     }
 
     @Bean(name = "functionBindingBeanPostProcessor")

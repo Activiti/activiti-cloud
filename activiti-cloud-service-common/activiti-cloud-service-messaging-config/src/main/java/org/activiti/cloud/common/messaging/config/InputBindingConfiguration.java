@@ -22,13 +22,15 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class, ConnectorConfiguration.class })
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
+                   before = FunctionConfiguration.class)
 public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String INPUT_BINDING = "_sink";

@@ -28,6 +28,7 @@ import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.converter.MessageConverterUtils;
+import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +47,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class, ConnectorConfiguration.class })
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
+                   before = FunctionConfiguration.class)
 public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String OUTPUT_BINDING = "_source";

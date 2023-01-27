@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
+import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -39,8 +40,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(before = BinderFactoryAutoConfiguration.class,
-                   after = { FunctionBindingConfiguration.class })
+@AutoConfiguration(after = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class},
+                   before = FunctionConfiguration.class)
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean(name = "connectorBindingPostProcessor")

@@ -18,14 +18,10 @@ package org.activiti.cloud.common.messaging.config;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.config.BeanExpressionContext;
-import org.springframework.beans.factory.config.BeanExpressionResolver;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
@@ -38,8 +34,6 @@ import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
@@ -89,25 +83,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
         } else {
             return ConsumerGateway.class;
         }
-    }
-
-    @Bean("resolveExpression")
-    @ConditionalOnMissingBean(name = "resolveExpression")
-    public Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
-        return value -> {
-            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
-                .getBeanExpressionResolver();
-            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
-                null);
-
-            String resolvedValue = applicationContext.getBeanFactory()
-                .resolveEmbeddedValue(value);
-            if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
-                resolvedValue = (String) resolver.evaluate(resolvedValue,
-                    expressionContext);
-            }
-            return resolvedValue;
-        };
     }
 
     protected FunctionInvocationWrapper functionFromDefinition(String definition) {
