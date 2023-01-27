@@ -42,10 +42,13 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
+import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
@@ -67,11 +70,11 @@ public class FunctionBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
     private static final String FUNCTION_PROCESSOR_NAME = "commandProcessorHandler";
-    private static final String FUNCTION_AUDIT_SUPPLIER_NAME = "auditProducerFunction";
-    private static final String FUNCTION_COMMAND_SUPPLIER_NAME = "commandResultsFunction";
-    private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumerFunction";
-    private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumerFunction";
-    private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumerFunction";
+    private static final String FUNCTION_AUDIT_SUPPLIER_NAME = "auditProducer" + OUTPUT_BINDING;
+    private static final String FUNCTION_COMMAND_SUPPLIER_NAME = "commandResults" + OUTPUT_BINDING;
+    private static final String FUNCTION_COMMAND_CONSUMER_NAME = "commandConsumer" + INPUT_BINDING;
+    private static final String FUNCTION_AUDIT_CONSUMER_NAME = "auditConsumer" + INPUT_BINDING;
+    private static final String FUNCTION_QUERY_CONSUMER_NAME = "queryConsumer" + INPUT_BINDING;
 
     private static Message<?> consumerMessage = null;
 
@@ -144,8 +147,7 @@ public class FunctionBindingConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).contains(FUNCTION_HANDLER_NAME, FUNCTION_PROCESSOR_NAME);
-        assertThat(functions).doesNotContain(FUNCTION_AUDIT_SUPPLIER_NAME, FUNCTION_COMMAND_SUPPLIER_NAME);
+        assertThat(functions).doesNotContain(FUNCTION_AUDIT_SUPPLIER_NAME, FUNCTION_COMMAND_SUPPLIER_NAME, FUNCTION_HANDLER_NAME, FUNCTION_PROCESSOR_NAME);
     }
 
     @Test
@@ -180,8 +182,8 @@ public class FunctionBindingConfigurationIT {
 
     @Test
     public void testFunctionRegistry() {
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_HANDLER_NAME)).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_PROCESSOR_NAME)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_HANDLER_NAME + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_PROCESSOR_NAME + REGISTRATION_NAME_SUFFIX)).isNotNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_AUDIT_SUPPLIER_NAME)).isNull();
         assertThat(functionRegistry.<Object>lookup(FUNCTION_COMMAND_SUPPLIER_NAME)).isNull();
     }
@@ -189,14 +191,14 @@ public class FunctionBindingConfigurationIT {
     @Test
     public void testStreamBindings() {
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_HANDLER_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(QUERY_CONSUMER));
+            .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_HANDLER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(COMMAND_CONSUMER));
+            .matches(bindings -> bindings == null || bindings.isEmpty());
         assertThat(streamFunctionProperties.getOutputBindings(FUNCTION_PROCESSOR_NAME))
-            .matches(bindings -> bindings.size() == 1 && bindings.contains(TestBindingsChannels.COMMAND_RESULTS));
+            .matches(bindings -> bindings == null || bindings.isEmpty());
 
         assertThat(streamFunctionProperties.getInputBindings(FUNCTION_AUDIT_SUPPLIER_NAME))
             .matches(bindings -> bindings == null || bindings.isEmpty());

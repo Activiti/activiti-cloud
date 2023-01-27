@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
+import static org.springframework.messaging.MessageHeaders.CONTENT_TYPE;
 
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
@@ -120,19 +123,18 @@ public class ConditionalFunctionBindingConfigurationIT {
         String functionDefinitions = (String) functionBindingPropertySource
             .getProperty(FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION);
 
-        assertThat(functionDefinitions).isNotNull();
-
+        // when
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).contains(FUNCTION_NAME_A + "Gateway", FUNCTION_NAME_B + "Gateway", FUNCTION_NAME_C + "Gateway");
+        assertThat(functions).isEqualTo(new String[] {""});
     }
 
     @Test
     public void testFunctionRegistry() {
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A + "Gateway")).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + "Gateway")).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + "Gateway")).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + REGISTRATION_NAME_SUFFIX)).isNotNull();
     }
 
     @Test
@@ -161,9 +163,16 @@ public class ConditionalFunctionBindingConfigurationIT {
 
         // then
         Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+
+        assertThat(reply).isNotNull()
+                         .extracting(Message::getHeaders)
+                         .asInstanceOf(InstanceOfAssertFactories.map(String.class, Object.class))
+                         .containsEntry("type", "TestAuditConsumerReply")
+                         .containsEntry(CONTENT_TYPE, "application/json");
+
         assertThat(reply).isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
-            .isEqualTo("TestReply".getBytes(StandardCharsets.UTF_8));
+            .isEqualTo("\"TestReply\"".getBytes(StandardCharsets.UTF_8));
     }
 }

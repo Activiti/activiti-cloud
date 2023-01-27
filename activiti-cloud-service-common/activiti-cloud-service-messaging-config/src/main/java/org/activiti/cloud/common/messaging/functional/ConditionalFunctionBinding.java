@@ -15,21 +15,25 @@
  */
 package org.activiti.cloud.common.messaging.functional;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.AliasFor;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( {ElementType.METHOD, ElementType.TYPE} )
 @Qualifier
+@FunctionBinding
 public @interface ConditionalFunctionBinding {
+    @AliasFor(annotation = FunctionBinding.class, attribute = "output")
     String output() default "";
 
+    @AliasFor(annotation = FunctionBinding.class, attribute = "input")
     String input() default "";
 
-    String condition() default "";
+    @AliasFor(annotation = FunctionBinding.class, attribute = "condition")
+    String condition();
 
 }
