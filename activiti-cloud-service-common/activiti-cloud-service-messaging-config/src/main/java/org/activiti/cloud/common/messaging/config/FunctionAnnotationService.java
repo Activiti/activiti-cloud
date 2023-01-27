@@ -18,14 +18,10 @@ package org.activiti.cloud.common.messaging.config;
 
 import java.lang.annotation.Annotation;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 public class FunctionAnnotationService {
-
-    private static final Logger log = LoggerFactory.getLogger(FunctionBindingConfiguration.class);
 
     private DefaultListableBeanFactory beanFactory;
 
@@ -38,7 +34,6 @@ public class FunctionAnnotationService {
         try {
             return beanFactory.findAnnotationOnBean(beanName, annotationType);
         } catch (NoSuchBeanDefinitionException e) {
-            log.warn("Bean with name {} not found.", beanName);
             return null;
         }
     }

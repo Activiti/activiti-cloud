@@ -15,37 +15,28 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.cloud.function.context.config.JsonMessageConverter;
-import org.springframework.cloud.function.context.config.SmartCompositeMessageConverter;
-import org.springframework.cloud.function.json.JsonMapper;
-import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.stream.binder.JavaClassMimeTypeUtils;
 import org.springframework.cloud.stream.binder.ProducerProperties;
 import org.springframework.cloud.stream.binding.DefaultPartitioningInterceptor;
 import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
+import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.converter.MessageConverterUtils;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ErrorMessage;
@@ -56,10 +47,10 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getOutBinding;
+@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
+public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
-@Configuration
-public class OutputBindingConfiguration {
+    public static final String OUTPUT_BINDING = "_source";
 
     @Bean
     public BeanPostProcessor outputBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
@@ -72,7 +63,7 @@ public class OutputBindingConfiguration {
                 if (MessageChannel.class.isInstance(bean)) {
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, OutputBinding.class))
                             .ifPresent(functionBinding -> {
-                                String outputBinding = beanName + "Function";
+                                String outputBinding = beanName + OUTPUT_BINDING;
                                 final String beanOutName = getOutBinding(outputBinding);
 
                                 String outputBindings = bindingServiceProperties.getOutputBindings();
@@ -93,7 +84,7 @@ public class OutputBindingConfiguration {
                                                                                       beanName);
                                 }
 
-                                CompositeMessageConverter messageConverter = getMessageConverter(beanFactory);
+                                CompositeMessageConverter messageConverter = getMessageConverter();
 
                                 BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
 
@@ -115,18 +106,6 @@ public class OutputBindingConfiguration {
                 return bean;
             }
         };
-    }
-
-    private static CompositeMessageConverter getMessageConverter(BeanFactory beanFactory) {
-        List<MessageConverter> messageConverters = new ArrayList<>();
-        JsonMapper jsonMapper = beanFactory.getBean(JsonMapper.class);
-
-        messageConverters.add(new JsonMessageConverter(jsonMapper));
-        messageConverters.add(new ByteArrayMessageConverter());
-        messageConverters.add(new StringMessageConverter());
-        messageConverters.add(new PrimitiveTypesFromStringMessageConverter(new DefaultConversionService()));
-
-        return new SmartCompositeMessageConverter(messageConverters);
     }
 
     /**

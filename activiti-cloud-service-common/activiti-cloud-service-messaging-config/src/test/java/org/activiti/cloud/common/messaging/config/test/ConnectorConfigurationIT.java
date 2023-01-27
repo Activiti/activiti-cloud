@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
@@ -45,6 +43,11 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
@@ -112,7 +115,7 @@ public class ConnectorConfigurationIT {
     static class ApplicationConfig {
 
         @Bean(FUNCTION_NAME_A)
-        @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerA'")
+        @ConnectorBinding(input = AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerA'")
         public Connector<?, Void> auditConsumerHandlerA() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestA");
@@ -121,7 +124,7 @@ public class ConnectorConfigurationIT {
         }
 
         @Bean(FUNCTION_NAME_B)
-        @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerB'")
+        @ConnectorBinding(input = AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerB'")
         public Connector<?, Void> auditConsumerHandlerB() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestB");
@@ -130,7 +133,7 @@ public class ConnectorConfigurationIT {
         }
 
         @Bean(FUNCTION_NAME_C)
-        @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, output=TestBindingsChannels.COMMAND_RESULTS, condition = "headers['type']=='TestAuditConsumerC'")
+        @ConnectorBinding(input = AUDIT_CONSUMER, output= COMMAND_RESULTS, condition = "headers['type']=='TestAuditConsumerC'")
         public Connector<?, ?> auditProcessorHandler() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestC");
@@ -139,7 +142,7 @@ public class ConnectorConfigurationIT {
         }
 
         @Bean(FUNCTION_NAME_D)
-        @ConnectorBinding(input = TestBindingsChannels.AUDIT_CONSUMER, output=TestBindingsChannels.COMMAND_RESULTS)
+        @ConnectorBinding(input = AUDIT_CONSUMER, output = COMMAND_RESULTS)
         public Connector<?, ?> auditProcessorVersionHandler() {
             return payload -> {
                 return "TestVersion";
@@ -155,7 +158,6 @@ public class ConnectorConfigurationIT {
 
     @Test
     public void testFunctionDefinitions() {
-
         // given
         String functionDefinitions = (String) functionBindingPropertySource
             .getProperty(FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION);
@@ -165,15 +167,15 @@ public class ConnectorConfigurationIT {
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).contains(FUNCTION_NAME_A + "Connector", FUNCTION_NAME_B + "Connector", FUNCTION_NAME_C + "Connector", FUNCTION_NAME_D + "Connector");
+        assertThat(functions).isEqualTo(new String[] {""});
     }
 
     @Test
     public void testFunctionRegistry() {
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A + "Connector")).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + "Connector")).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + "Connector")).isNotNull();
-        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_D + "Connector")).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_A + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_B + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_C + REGISTRATION_NAME_SUFFIX)).isNotNull();
+        assertThat(functionRegistry.<Object>lookup(FUNCTION_NAME_D + REGISTRATION_NAME_SUFFIX)).isNotNull();
     }
 
     @Test
@@ -249,10 +251,10 @@ public class ConnectorConfigurationIT {
             .build();
 
         // when
-        input.send(message);
+        input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
         assertThat(reply).isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
@@ -267,26 +269,26 @@ public class ConnectorConfigurationIT {
             .setHeader("resultDestination", "commandResults")
             .build();
         // when
-        input.send(message);
+        input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(2000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(2000, bindingResolver.apply(COMMAND_RESULTS));
         assertThat(reply).isNull();
     }
-
-
 
     @Test
     public void testConnectorsResolvesFunctionAndReplies() {
         // given
-        Message<String> message = MessageBuilder.withPayload("TestC").setHeader("type", "TestAuditConsumerC")
-            .setHeader("resultDestination", "commandResults").build();
-
+        Message<String> message = MessageBuilder.withPayload("TestC")
+                                                .setHeader("type", "TestAuditConsumerC")
+                                                .setHeader("appVersion", "1")
+                                                .setHeader("resultDestination", "commandResults")
+                                                .build();
         // when
         input.send(message, "engineEvents");
 
         // then
-        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
+        Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
         assertThat(reply).isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()

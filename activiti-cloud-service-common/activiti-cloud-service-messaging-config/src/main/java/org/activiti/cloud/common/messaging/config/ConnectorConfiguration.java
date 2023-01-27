@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -22,16 +23,11 @@ import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -43,42 +39,31 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
-@Configuration
-@AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
-@AutoConfigureAfter(FunctionBindingConfiguration.class)
+@AutoConfiguration(before = BinderFactoryAutoConfiguration.class,
+                   after = {InputBindingConfiguration.class,OutputBindingConfiguration.class, FunctionBindingConfiguration.class})
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean(name = "connectorBindingPostProcessor")
-    public BeanPostProcessor connectorBindingPostProcessor(DefaultListableBeanFactory beanFactory,
-        IntegrationFlowContext integrationFlowContext,
-        StreamFunctionProperties streamFunctionProperties,
-        BindingServiceProperties bindingServiceProperties,
-        FunctionBindingPropertySource functionBindingPropertySource,
-        Function<String, String> resolveExpression,
-        ConfigurableEnvironment environment) {
-
+    public BeanPostProcessor connectorBindingPostProcessor(FunctionAnnotationService functionAnnotationService,
+                                                           IntegrationFlowContext integrationFlowContext,
+                                                           Function<String, String> resolveExpression) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (Connector.class.isInstance(bean)) {
-                    String connectorName = beanName;
-                    String functionName = connectorName + "Connector";
 
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
-                    Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
-                        .ifPresent(functionDefinition -> {
+                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                        .ifPresent(connectorBinding -> {
+                            Type functionType = discoverFunctionType(bean, beanName);
 
-                            functionBindingPropertySource.register(functionName);
+                            FunctionRegistration functionRegistration = new FunctionRegistration(bean).type(functionType);
 
-                            responseDestination.set(functionDefinition.outputHeader());
+                            registerFunctionRegistration(beanName,
+                                                         functionRegistration);
 
-                            final String beanInName = getInBinding(functionName);
-                            final String beanOutName = getOutBinding(functionName);
-
-                            boolean hasOutput = setOutput(beanOutName, functionDefinition.output(), bindingServiceProperties, streamFunctionProperties,
-                                environment);
-                            setInput(beanInName, functionDefinition.input(), streamFunctionProperties, bindingServiceProperties);
+                            responseDestination.set(connectorBinding.outputHeader());
 
                             GenericHandler<Message> handler = (message, headers) -> {
                                 FunctionInvocationWrapper function = functionFromDefinition(beanName);
@@ -99,27 +84,25 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 return response;
                             };
 
-                            GenericSelector<Message<?>> selector = Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                            GenericSelector<Message<?>> selector = Optional.ofNullable(connectorBinding)
                                 .map(ConnectorBinding::condition)
                                 .filter(StringUtils::hasText)
                                 .map(resolveExpression)
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            IntegrationFlow connectorFlow = IntegrationFlows.from(getGatewayInterface(hasOutput),
-                                    (gateway) -> gateway.beanName(functionName)
-                                        .replyTimeout(0L))
-                                .log(LoggingHandler.Level.INFO, functionName + ".integrationRequest")
-                                .filter(selector)
+                            IntegrationFlow connectorFlow = IntegrationFlows.from(getGatewayInterface(Function.class.isInstance(bean)),
+                                                                                                      (gateway) -> gateway.replyTimeout(0L)
+                                                                                                                          .errorChannel("errorChannel"))
+                                .log(LoggingHandler.Level.INFO, beanName + ".integrationRequest")
+                                .filter(selector, filter -> filter.discardChannel("nullChannel")
+                                                                  .throwExceptionOnRejection(true))
                                 .handle(Message.class, handler)
-                                .log(LoggingHandler.Level.INFO, functionName + ".integrationResult")
+                                .log(LoggingHandler.Level.INFO, beanName + ".integrationResult")
                                 .bridge()
                                 .get();
 
-                            String inputChannel = streamFunctionProperties.getInputBindings(functionName)
-                                .stream()
-                                .findFirst()
-                                .orElse(functionName);
+                            String inputChannel = connectorBinding.input();
 
                             IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))

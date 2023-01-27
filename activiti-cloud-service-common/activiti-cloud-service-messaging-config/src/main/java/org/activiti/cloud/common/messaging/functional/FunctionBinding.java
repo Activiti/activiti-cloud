@@ -29,4 +29,5 @@ public @interface FunctionBinding {
 
     String input() default "";
 
+    String condition() default "";
 }

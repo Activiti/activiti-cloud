@@ -20,19 +20,20 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.cloud.stream.binding.MessageConverterConfigurer;
+import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
-import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+@AutoConfiguration(before = BinderFactoryAutoConfiguration.class)
+public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
-@Configuration
-public class InputBindingConfiguration {
+    public static final String INPUT_BINDING = "_sink";
 
     @Bean
     public BeanPostProcessor inputBindingBeanPostProcessor(DefaultListableBeanFactory beanFactory,
@@ -46,7 +47,7 @@ public class InputBindingConfiguration {
 
                     Optional.ofNullable(beanFactory.findAnnotationOnBean(beanName, InputBinding.class))
                             .ifPresent(functionBinding -> {
-                                final String inputBinding = beanName + "Function";
+                                final String inputBinding = beanName + INPUT_BINDING;
                                 final String beanInName = getInBinding(inputBinding);
 
                                 String inputBindings = bindingServiceProperties.getInputBindings();

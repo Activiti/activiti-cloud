@@ -15,31 +15,45 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.ConnectorGateway;
 import org.activiti.cloud.common.messaging.functional.ConsumerGateway;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.cloud.function.context.catalog.FunctionTypeUtils;
 import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry.FunctionInvocationWrapper;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.function.context.config.JsonMessageConverter;
+import org.springframework.cloud.function.context.config.SmartCompositeMessageConverter;
+import org.springframework.cloud.function.json.JsonMapper;
+import org.springframework.cloud.function.utils.PrimitiveTypesFromStringMessageConverter;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 public abstract class AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
+
+    private SmartCompositeMessageConverter smartCompositeMessageConverter;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -66,32 +80,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     public static String getInBinding(String bindingName, int arity) {
         return String.format("%s-in-%d", bindingName, arity);
-    }
-
-    protected boolean setOutput(String beanOutName, String outputAnnotation, BindingServiceProperties bindingServiceProperties,
-        StreamFunctionProperties streamFunctionProperties, ConfigurableEnvironment environment) {
-
-        final AtomicBoolean wasOutputSet = new AtomicBoolean(false);
-        Optional.of(outputAnnotation)
-            .filter(StringUtils::hasText)
-            .ifPresent(output -> {
-                streamFunctionProperties.getBindings().put(beanOutName, output);
-                wasOutputSet.set(true);
-            });
-        return wasOutputSet.get();
-    }
-
-    protected boolean setInput(String beanInName, String inputAnnotation, StreamFunctionProperties streamFunctionProperties,
-        BindingServiceProperties bindingServiceProperties) {
-
-        final AtomicBoolean wasInputSet = new AtomicBoolean(false);
-        Optional.of(inputAnnotation)
-            .filter(StringUtils::hasText)
-            .ifPresent(input -> {
-                streamFunctionProperties.getBindings().put(beanInName, input);
-                wasInputSet.set(true);
-            });
-        return wasInputSet.get();
     }
 
     protected Class<?> getGatewayInterface(boolean hasOutput) {
@@ -123,8 +111,45 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     protected FunctionInvocationWrapper functionFromDefinition(String definition) {
         FunctionRegistry functionRegistry = applicationContext.getBean(FunctionRegistry.class);
-        FunctionInvocationWrapper function = functionRegistry.lookup(definition);
+        FunctionInvocationWrapper function = functionRegistry.lookup(definition + REGISTRATION_NAME_SUFFIX);
         Assert.notNull(function, "Failed to lookup function '" + definition + "'");
         return function;
     }
+
+    protected Type discoverFunctionType(Object bean, String beanName) {
+        return FunctionTypeUtils.discoverFunctionType(bean,
+                                                      beanName,
+                                                      GenericApplicationContext.class.cast(applicationContext));
+
+    }
+
+    protected void registerFunctionRegistration(String functionName,
+                                                FunctionRegistration functionRegistration) {
+        GenericApplicationContext.class.cast(applicationContext)
+                                       .registerBean(functionName + REGISTRATION_NAME_SUFFIX,
+                                                      FunctionRegistration .class,
+                                                      () -> functionRegistration);
+
+    }
+
+    protected CompositeMessageConverter getMessageConverter() {
+        synchronized (this) {
+            if (smartCompositeMessageConverter == null) {
+                BeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+
+                List<MessageConverter> messageConverters = new ArrayList<>();
+                JsonMapper jsonMapper = beanFactory.getBean(JsonMapper.class);
+
+                messageConverters.add(new JsonMessageConverter(jsonMapper));
+                messageConverters.add(new ByteArrayMessageConverter());
+                messageConverters.add(new StringMessageConverter());
+                messageConverters.add(new PrimitiveTypesFromStringMessageConverter(new DefaultConversionService()));
+
+                this.smartCompositeMessageConverter = new SmartCompositeMessageConverter(messageConverters);
+            }
+        }
+
+        return this.smartCompositeMessageConverter;
+    }
+
 }
