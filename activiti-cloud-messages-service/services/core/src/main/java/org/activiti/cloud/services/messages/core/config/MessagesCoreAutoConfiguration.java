@@ -43,8 +43,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -131,10 +131,10 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
                                                                                        BindingService bindingService,
-                                                                                       BinderAwareChannelResolver channelResolver) {
+                                                                                       StreamBridge streamBridge) {
         return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
-                                                         channelResolver,
-                                                         bindingService);
+                                                         bindingService,
+                                                         streamBridge);
     }
 
     @Bean
