@@ -427,12 +427,14 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getUsers() {
-        List<KeycloakUser> allUsers = keycloakClient.getAllUsers();
+        Integer countAllUsers = keycloakClient.countAllUsers();
+        List<KeycloakUser> allUsers = keycloakClient.getAllUsers(countAllUsers);
 
         assertThat(allUsers).hasSizeGreaterThan(0);
 
         KeycloakUser userById = keycloakClient.getUserById(allUsers.get(0).getId());
         assertThat(userById).isNotNull();
+        assertThat(countAllUsers).isEqualTo(allUsers.size());
     }
 
 
@@ -441,10 +443,13 @@ public class KeycloakClientIT {
         return clients.get(0).getId();
     }
 
-    /*
+    @Test
+    public void should_countAllUser() {
+        Integer countAllUsers = keycloakClient.countAllUsers();
+        List<KeycloakUser> users = keycloakClient.searchUsers(null, 0, countAllUsers);
 
-    createRoleRepresentationForClient
-
-     */
+        assertThat(countAllUsers).isGreaterThan(0);
+        assertThat(countAllUsers).isEqualTo(users.size());
+    }
 
 }
