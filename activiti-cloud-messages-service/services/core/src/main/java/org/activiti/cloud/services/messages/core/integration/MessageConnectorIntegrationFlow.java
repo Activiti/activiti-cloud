@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.messages.core.integration;
 
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
-import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
+import java.util.List;
+import java.util.Objects;
 import org.activiti.api.process.model.payloads.MessageEventPayload;
 import org.activiti.cloud.services.messages.core.aggregator.MessageConnectorAggregator;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
@@ -35,8 +35,8 @@ import org.springframework.integration.handler.advice.IdempotentReceiverIntercep
 import org.springframework.integration.router.AbstractMessageRouter;
 import org.springframework.messaging.Message;
 
-import java.util.List;
-import java.util.Objects;
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.MESSAGE_EVENT_TYPE;
+import static org.springframework.integration.IntegrationMessageHeaderAccessor.CORRELATION_ID;
 
 public class MessageConnectorIntegrationFlow extends IntegrationFlowAdapter {
 

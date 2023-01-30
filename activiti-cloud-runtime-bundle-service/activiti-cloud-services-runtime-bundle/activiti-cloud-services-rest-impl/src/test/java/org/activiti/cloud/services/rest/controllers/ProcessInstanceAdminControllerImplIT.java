@@ -15,7 +15,20 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.List;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
@@ -31,10 +44,12 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.query.impl.PageImpl;
@@ -55,30 +70,18 @@ import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class})
 @EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessInstanceAdminControllerImplIT {
 
@@ -88,7 +91,7 @@ public class ProcessInstanceAdminControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -100,7 +103,7 @@ public class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean

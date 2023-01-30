@@ -16,6 +16,10 @@
 
 package org.activiti.services.connectors.conf;
 
+import java.util.function.Consumer;
+import org.activiti.cloud.api.process.model.IntegrationError;
+import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -38,19 +42,18 @@ import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEven
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.messaging.Message;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
-@EnableBinding(ProcessEngineIntegrationChannels.class)
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
@@ -68,6 +71,12 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties, managementService, processEngineEventsAggregator, variablesPropagator);
     }
 
+    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
+    @Bean
+    public Consumer<Message<IntegrationResult>> serviceTaskIntegrationResultEventConsumer(ServiceTaskIntegrationResultEventHandler handler) {
+        return message -> handler.receive(message.getPayload());
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public ServiceTaskIntegrationErrorEventHandler serviceTaskIntegrationErrorEventHandler(RuntimeService runtimeService,
@@ -82,11 +91,17 @@ public class CloudConnectorsAutoConfiguration {
                                                            processEngineEventsAggregator);
     }
 
+    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
+    @Bean
+    public Consumer<Message<IntegrationError>> serviceTaskIntegrationErrorEventConsumer(ServiceTaskIntegrationErrorEventHandler handler) {
+        return message -> handler.receive(message.getPayload());
+    }
+
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestSender integrationRequestSender(BinderAwareChannelResolver resolver,
+    public IntegrationRequestSender integrationRequestSender(StreamBridge streamBridge,
                                                              IntegrationContextMessageBuilderFactory messageBuilderFactory) {
-        return new IntegrationRequestSender(resolver,
+        return new IntegrationRequestSender(streamBridge,
                                             messageBuilderFactory);
     }
 

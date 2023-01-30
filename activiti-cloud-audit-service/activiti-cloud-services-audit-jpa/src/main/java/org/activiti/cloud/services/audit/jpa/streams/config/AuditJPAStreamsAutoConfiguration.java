@@ -15,18 +15,23 @@
  */
 package org.activiti.cloud.services.audit.jpa.streams.config;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannelHandler;
 import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.audit.jpa.streams.AuditConsumerChannelHandlerImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
 
 @Configuration
-@EnableBinding(AuditConsumerChannels.class)
 public class AuditJPAStreamsAutoConfiguration {
 
     @Bean
@@ -35,6 +40,17 @@ public class AuditJPAStreamsAutoConfiguration {
                                                                    APIEventToEntityConverters eventConverters) {
         return new AuditConsumerChannelHandlerImpl(eventsRepository,
                                                    eventConverters);
+    }
+
+    @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)
+    @Bean
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerChannelHandlerConsumer(AuditConsumerChannelHandler handler) {
+        return message -> {
+            handler.receiveCloudRuntimeEvent(message.getHeaders(),
+                Optional.ofNullable(message.getPayload())
+                    .orElse(Collections.emptyList())
+                    .toArray(new CloudRuntimeEvent[0]));
+        };
     }
 
 }

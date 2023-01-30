@@ -30,7 +30,6 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
 
 public class ServiceTaskIntegrationResultEventHandler {
 
@@ -57,7 +56,6 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.variablesPropagator = variablesPropagator;
     }
 
-    @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());

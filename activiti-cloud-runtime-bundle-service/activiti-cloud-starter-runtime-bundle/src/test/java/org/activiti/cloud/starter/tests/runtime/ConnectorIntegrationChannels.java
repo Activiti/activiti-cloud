@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.mockito.InjectMocks;
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ConnectorIntegrationChannels {
@@ -28,22 +28,41 @@ public interface ConnectorIntegrationChannels {
     String MEALS_CONNECTOR_CONSUMER  = "mealsConnectorConsumer";
     String VALUE_PROCESSOR_CONSUMER = "valueProcessorConsumer";
 
-    @Input(INTEGRATION_EVENTS_CONSUMER)
-    SubscribableChannel integrationEventsConsumer();
+    @InputBinding(INTEGRATION_EVENTS_CONSUMER)
+    default SubscribableChannel integrationEventsConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_EVENTS_CONSUMER)
+                              .get();
+    }
 
-    @Input(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
-    SubscribableChannel varMappingIntegrationEventsConsumer();
+    @InputBinding(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
+    default SubscribableChannel varMappingIntegrationEventsConsumer() {
+        return MessageChannels.publishSubscribe(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
+                              .get();
+    }
 
-    @Input(CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
-    SubscribableChannel constantsIntegrationEventsConsumer();
+    @InputBinding(CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
+    default SubscribableChannel constantsIntegrationEventsConsumer() {
+        return MessageChannels.publishSubscribe(CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
+                              .get();
+    }
 
-    @Input(REST_CONNECTOR_CONSUMER)
-    SubscribableChannel restConnectorConsumer();
+    @InputBinding(REST_CONNECTOR_CONSUMER)
+    default SubscribableChannel restConnectorConsumer() {
+        return MessageChannels.publishSubscribe(REST_CONNECTOR_CONSUMER)
+                              .get();
+    }
 
-    @Input(MEALS_CONNECTOR_CONSUMER)
-    SubscribableChannel mealsConnectorConsumer();
+    @InputBinding(MEALS_CONNECTOR_CONSUMER)
+    default SubscribableChannel mealsConnectorConsumer() {
+        return MessageChannels.publishSubscribe(MEALS_CONNECTOR_CONSUMER)
+                              .get();
+    }
 
-    @Input(VALUE_PROCESSOR_CONSUMER)
-    SubscribableChannel valueProcessorConsumer();
+    @InputBinding(VALUE_PROCESSOR_CONSUMER)
+    default SubscribableChannel valueProcessorConsumer() {
+        return MessageChannels.publishSubscribe(VALUE_PROCESSOR_CONSUMER)
+                              .get();
+    }
+
 
 }

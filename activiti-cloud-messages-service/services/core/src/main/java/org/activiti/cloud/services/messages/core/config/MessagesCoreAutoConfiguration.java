@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.messages.core.config;
 
+import java.util.List;
+import java.util.Optional;
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.activiti.cloud.services.messages.core.advice.MessageConnectorHandlerAdvice;
 import org.activiti.cloud.services.messages.core.advice.MessageReceivedHandlerAdvice;
@@ -41,12 +43,12 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import org.springframework.integration.aggregator.CorrelationStrategy;
@@ -72,9 +74,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.activiti.cloud.services.messages.core.integration.MessageConnectorIntegrationFlow.DISCARD_CHANNEL;
 
 /**
@@ -83,10 +82,10 @@ import static org.activiti.cloud.services.messages.core.integration.MessageConne
  */
 @Configuration
 @EnableIntegration
-@EnableBinding(MessageConnectorProcessor.class)
 @EnableIntegrationManagement
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
 @EnableTransactionManagement
+@Import(MessageConnectorProcessorConfiguration.class)
 @PropertySource("classpath:config/activiti-cloud-services-messages-core.properties")
 public class MessagesCoreAutoConfiguration {
 
@@ -132,10 +131,10 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnMissingBean
     public CommandConsumerMessageChannelResolver commandConsumerMessageChannelResolver(CommandConsumerDestinationMapper commandConsumerDestinationMapper,
                                                                                        BindingService bindingService,
-                                                                                       BinderAwareChannelResolver binderAwareChannelResolver) {
+                                                                                       StreamBridge streamBridge) {
         return new CommandConsumerMessageChannelResolver(commandConsumerDestinationMapper,
-                                                         binderAwareChannelResolver,
-                                                         bindingService);
+                                                         bindingService,
+                                                         streamBridge);
     }
 
     @Bean
@@ -147,7 +146,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
-        return MessageChannels.direct()
+        return MessageChannels.direct(DISCARD_CHANNEL)
                               .get();
     }
 

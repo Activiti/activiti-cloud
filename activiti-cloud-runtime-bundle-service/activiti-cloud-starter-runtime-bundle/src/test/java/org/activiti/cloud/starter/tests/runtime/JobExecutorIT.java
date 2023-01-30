@@ -15,12 +15,41 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageHeaders;
-import org.activiti.cloud.services.job.executor.*;
+import org.activiti.cloud.services.job.executor.JobMessageFailedEvent;
+import org.activiti.cloud.services.job.executor.JobMessageHandler;
+import org.activiti.cloud.services.job.executor.JobMessageHandlerFactory;
+import org.activiti.cloud.services.job.executor.JobMessageHeaders;
+import org.activiti.cloud.services.job.executor.JobMessageProducer;
+import org.activiti.cloud.services.job.executor.JobMessageSentEvent;
+import org.activiti.cloud.services.job.executor.MessageBasedJobManager;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
-import org.activiti.engine.*;
+import org.activiti.engine.ActivitiException;
+import org.activiti.engine.ManagementService;
+import org.activiti.engine.ProcessEngineConfiguration;
+import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.delegate.event.ActivitiEvent;
@@ -62,18 +91,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @TestPropertySource("classpath:application-test.properties")
@@ -127,7 +144,7 @@ public class JobExecutorIT {
     private RuntimeBundleProperties properties;
 
     @Captor
-    private ArgumentCaptor<Message<String>> messageArgumentCaptor;
+    private ArgumentCaptor<Message<byte[]>> messageArgumentCaptor;
 
     @Autowired
     private ConfigurableApplicationContext applicationContext;
@@ -629,9 +646,10 @@ public class JobExecutorIT {
         // then
         verify(spyJobMessageChannel).send(messageArgumentCaptor.capture());
 
-        Message<String> message = messageArgumentCaptor.getValue();
+        Message<byte[]> message = messageArgumentCaptor.getValue();
 
-        assertThat(message.getPayload()).as("should build job id as payload")
+        assertThat(new String(message.getPayload(), StandardCharsets.UTF_8))
+            .as("should build job id as payload")
             .isEqualTo(jobId);
 
         assertThat(message.getHeaders()).as("should build common headers")

@@ -17,10 +17,12 @@ package org.activiti.cloud.services.core.conf;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.function.Function;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.core.ProcessDefinitionAdminService;
 import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
@@ -51,10 +53,12 @@ import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.core.pageable.sort.ProcessDefinitionSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.ProcessInstanceSortApplier;
 import org.activiti.cloud.services.core.pageable.sort.TaskSortApplier;
+import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.spring.process.CachingProcessExtensionService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +71,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import org.springframework.messaging.Message;
 
 @Configuration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
@@ -161,10 +166,16 @@ public class ServicesCoreAutoConfiguration {
         return new DeleteProcessInstanceCmdExecutor(processAdminRuntime);
     }
 
-    @Bean
+    @Bean("commandEndpoint")
     @ConditionalOnMissingBean
     public <T extends Payload> CommandEndpoint<T> commandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
         return new CommandEndpoint<T>(cmdExecutors);
+    }
+
+    @FunctionBinding(input = ProcessEngineChannels.COMMAND_CONSUMER, output = ProcessEngineChannels.COMMAND_RESULTS)
+    @Bean("commandConnectorConsumer")
+    public <T extends Payload, R> Function<Message<T>, R> commandEndpointConnector(@Qualifier("commandEndpoint") CommandEndpoint<T> commandEndpoint){
+        return message -> commandEndpoint.execute(message.getPayload());
     }
 
     @Bean

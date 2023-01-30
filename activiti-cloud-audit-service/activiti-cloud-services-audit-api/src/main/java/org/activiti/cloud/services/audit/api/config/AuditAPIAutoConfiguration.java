@@ -18,8 +18,10 @@ package org.activiti.cloud.services.audit.api.config;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(AuditConsumerChannelsConfiguration.class)
 public class AuditAPIAutoConfiguration {
 
     @Bean

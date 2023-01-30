@@ -41,13 +41,13 @@ public class CommandConsumerMessageRouter extends AbstractMessageRouter {
         Optional<String> destination = getHeader(message, MESSAGE_EVENT_OUTPUT_DESTINATION);
 
         MessageChannel messageChannel = destination.map(destinationResolver::resolveDestination)
-                                                   .orElseThrow(() -> new MessageMappingException(message,
-                                                                                                  "Unable to determine target channel for message"));
+            .orElseThrow(() -> new MessageMappingException(message,
+                "Unable to determine target channel for message"));
         return Arrays.asList(messageChannel);
     }
 
     private Optional<String> getHeader(Message<?> message, String key) {
         return Optional.ofNullable(message.getHeaders()
-                                          .get(key, String.class));
+            .get(key, String.class));
     }
 }

@@ -24,13 +24,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration;
@@ -40,6 +41,7 @@ import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -54,8 +56,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         ServicesRestWebMvcAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         RuntimeBundleProperties.class,
-        ProcessExtensionsAutoConfiguration.class})
+        ProcessExtensionsAutoConfiguration.class,
+        StreamConfig.class})
 public class ConnectorDefinitionControllerImplIT {
 
     private MockMvc mockMvc;
@@ -66,7 +70,7 @@ public class ConnectorDefinitionControllerImplIT {
     @MockBean
     private ProcessExtensionService processExtensionService;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean

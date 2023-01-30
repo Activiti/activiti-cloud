@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.notifications.graphql.test;
+package org.activiti.cloud.services.messages.core.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.activiti.cloud.services.messages.core.channels.MessageConnectorProcessor;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication
-public class GrapqhQLApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(GrapqhQLApplication.class, args);
-    }
+@Configuration
+public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
 
 }

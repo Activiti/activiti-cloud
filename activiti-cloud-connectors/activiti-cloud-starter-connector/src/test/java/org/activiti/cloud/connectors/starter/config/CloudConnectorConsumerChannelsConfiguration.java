@@ -13,27 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.events.tests.util;
+package org.activiti.cloud.connectors.starter.config;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
+import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChannels;
+import org.springframework.context.annotation.Configuration;
 
-public class MockProcessEngineChannels implements ProcessEngineChannels {
-
-    @Override
-    public SubscribableChannel commandConsumer() {
-        return null;
-    }
-
-    @Override
-    public MessageChannel commandResults() {
-        return null;
-    }
-
-    @Override
-    public MessageChannel auditProducer() {
-        return new MockMessageChannel();
-    }
+@Configuration
+public class CloudConnectorConsumerChannelsConfiguration implements CloudConnectorConsumerChannels {
 
 }

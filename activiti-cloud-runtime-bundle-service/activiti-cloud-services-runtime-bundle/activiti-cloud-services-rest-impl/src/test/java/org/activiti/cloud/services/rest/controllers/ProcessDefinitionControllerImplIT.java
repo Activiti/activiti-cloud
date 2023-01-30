@@ -28,13 +28,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -49,9 +50,11 @@ import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
@@ -85,11 +88,13 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 @Import({RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class})
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
 public class ProcessDefinitionControllerImplIT {
 
@@ -102,7 +107,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -114,7 +119,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean

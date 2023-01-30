@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.StartMessageDeploymentDefinition;
 import org.activiti.api.process.model.StartMessageSubscription;
@@ -32,7 +35,11 @@ import org.activiti.cloud.services.core.commands.ReceiveMessageCmdExecutor;
 import org.activiti.cloud.services.core.commands.StartMessageCmdExecutor;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.messages.events.MessageEventHeaders;
-import org.activiti.cloud.services.messages.events.producer.*;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageReceivedEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageSentEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
+import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -46,34 +53,35 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.binder.test.OutputDestination;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.integration.annotation.BridgeFrom;
-import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 @ContextConfiguration(classes = {RuntimeITConfiguration.class, MessageEventsIT.TestConfigurationContext.class},
     initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import(TestChannelBinderConfiguration.class)
 public class MessageEventsIT {
 
     private static final String BUSINESS_KEY = "businessKey";
@@ -113,25 +121,18 @@ public class MessageEventsIT {
     private ProcessInstanceRestTemplate processInstanceRestTemplate;
 
     @Autowired
-    private QueueChannel messageEventsQueue;
+    private BindingServiceProperties bindingServiceProperties;
 
     @Autowired
-    private BindingServiceProperties bindingServiceProperties;
+    private OutputDestination targetDestination;
 
     @TestConfiguration
     static class TestConfigurationContext {
-
-        @Bean
-        @BridgeFrom("messageEventsOutput")
-        QueueChannel messageEventsQueue() {
-            return MessageChannels.queue()
-                                  .get();
-        }
     }
 
     @BeforeEach
     public void setUp() {
-        messageEventsQueue.clear();
+        targetDestination.clear();
     }
 
     @Test
@@ -716,7 +717,7 @@ public class MessageEventsIT {
     }
 
     private void assertOutputDestination() {
-        Message<?> message = messageEventsQueue.receive();
+        Message<?> message = targetDestination.receive(10000, "messageEvents_activiti-app");
 
         assertThat(message)
             .extracting(Message::getHeaders)

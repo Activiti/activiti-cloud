@@ -62,9 +62,11 @@ import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.engine.RepositoryService;
@@ -89,11 +91,13 @@ import org.springframework.test.web.servlet.MockMvc;
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class})
 public class ProcessInstanceControllerImplIT {
 
     @Autowired
@@ -108,7 +112,7 @@ public class ProcessInstanceControllerImplIT {
     @Autowired
     private ObjectMapper mapper;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -120,7 +124,7 @@ public class ProcessInstanceControllerImplIT {
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean

@@ -15,31 +15,25 @@
  */
 package org.activiti.cloud.services.test;
 
+import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binding.BindingService;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
+import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 
 @Configuration
-@AutoConfigureAfter(value = BindingServiceConfiguration.class)
-public class TestProducerAutoConfiguration {
+@ConditionalOnClass({ OutputBindingConfiguration.class, BinderFactoryAutoConfiguration.class })
+public class TestProducerAutoConfiguration implements StreamProducer {
 
-    @ConditionalOnBean(BindingService.class)
-    @EnableBinding(StreamProducer.class)
-    static class MyProducerConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public MyProducer myProducer(MessageChannel producer) {
-            return new MyProducer(producer);
-        }
+    @Bean
+    @ConditionalOnMissingBean
+    public MyProducer myProducer(@Qualifier(PRODUCER) MessageChannel producer) {
+        return new MyProducer(producer);
     }
 
 }

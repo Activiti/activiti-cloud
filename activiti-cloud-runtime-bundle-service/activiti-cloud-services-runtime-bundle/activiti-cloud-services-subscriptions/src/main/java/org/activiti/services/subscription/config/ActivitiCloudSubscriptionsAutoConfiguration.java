@@ -17,6 +17,7 @@ package org.activiti.services.subscription.config;
 
 import org.activiti.bpmn.model.Signal;
 import org.activiti.bpmn.model.SignalEventDefinition;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
 import org.activiti.runtime.api.conf.ProcessRuntimeAutoConfiguration;
@@ -28,10 +29,10 @@ import org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivity
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
@@ -39,10 +40,11 @@ import static org.activiti.services.subscriptions.behavior.BroadcastSignalEventA
 
 @Configuration
 @PropertySource("classpath:config/signal-events-channels.properties")
-@EnableBinding(ProcessEngineSignalChannels.class)
 @AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
+@Import(ProcessEngineSignalChannelsConfiguration.class)
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 
+    @FunctionBinding(input = ProcessEngineSignalChannels.SIGNAL_CONSUMER)
     @Bean
     @ConditionalOnMissingBean
     public BroadcastSignalEventHandler broadcastSignalEventHandler(RuntimeService runtimeService) {

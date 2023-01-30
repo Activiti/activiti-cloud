@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.model.ApplicationElement;
 import org.activiti.api.process.model.ProcessCandidateStarterGroup;
@@ -185,6 +184,7 @@ public class AuditProducerIT {
             processDefinitionIds.put(pd.getName(),
                 pd.getId());
         }
+
     }
 
     @Test

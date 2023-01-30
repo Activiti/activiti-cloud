@@ -16,10 +16,24 @@
 package org.activiti.cloud.connectors.starter.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.activiti.cloud.connectors.starter.channels.*;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolver;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilder;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorDestinationBuilderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandler;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorHandlerImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
+import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSenderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolver;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultChannelResolverImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilder;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilderImpl;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
+import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -59,15 +73,14 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultChannelResolver integrationResultChannelResolver(BinderAwareChannelResolver resolver,
-                                                                             IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
-        return new IntegrationResultChannelResolverImpl(resolver, integrationResultDestinationBuilder);
+    public IntegrationResultChannelResolver integrationResultChannelResolver(IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
+        return new IntegrationResultChannelResolverImpl(integrationResultDestinationBuilder);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultSender integrationResultSender(IntegrationResultChannelResolver integrationChannelResolver) {
-        return new IntegrationResultSenderImpl(integrationChannelResolver);
+    public IntegrationResultSender integrationResultSender(StreamBridge streamBridge, IntegrationResultChannelResolver integrationChannelResolver) {
+        return new IntegrationResultSenderImpl(streamBridge, integrationChannelResolver);
     }
 
     @Bean
@@ -78,16 +91,15 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorChannelResolver integrationErrorChannelResolver(BinderAwareChannelResolver resolver,
-                                                                           IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
-        return new IntegrationErrorChannelResolverImpl(resolver, integrationErrorDestinationBuilder);
+    public IntegrationErrorChannelResolver integrationErrorChannelResolver(IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
+        return new IntegrationErrorChannelResolverImpl(integrationErrorDestinationBuilder);
     }
 
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorSender integrationErrorSender(IntegrationErrorChannelResolver integrationChannelResolver) {
-        return new IntegrationErrorSenderImpl(integrationChannelResolver);
+    public IntegrationErrorSender integrationErrorSender(StreamBridge streamBridge, IntegrationErrorChannelResolver integrationChannelResolver) {
+        return new IntegrationErrorSenderImpl(streamBridge, integrationChannelResolver);
     }
 
 }

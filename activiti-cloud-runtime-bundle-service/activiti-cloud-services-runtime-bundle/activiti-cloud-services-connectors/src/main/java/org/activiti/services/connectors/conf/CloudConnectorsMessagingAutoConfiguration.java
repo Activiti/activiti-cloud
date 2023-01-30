@@ -23,8 +23,10 @@ import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(ProcessEngineIntegrationChannelsConfiguration.class)
 @AutoConfigureAfter(BinderFactoryAutoConfiguration.class)
 public class CloudConnectorsMessagingAutoConfiguration {
 
