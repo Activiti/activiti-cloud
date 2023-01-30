@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.examples.connectors;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.context.annotation.Configuration;
 
-public interface ExampleConnectorChannels {
-    String EXAMPLE_CONNECTOR_CONSUMER = "exampleConnectorConsumer";
-
-    @InputBinding(EXAMPLE_CONNECTOR_CONSUMER)
-    default SubscribableChannel exampleConnectorConsumer() {
-        return MessageChannels.publishSubscribe(EXAMPLE_CONNECTOR_CONSUMER).get();
-    }
-}
+@Configuration
+public class ConnectorConfiguration
+    implements
+        ExampleConnectorChannels,
+        HeadersConnectorChannels,
+        MoviesDescriptionConnectorChannels,
+        MultiInstanceConnector.Channels,
+        TestBpmnErrorConnector.Channels,
+        RestConnector.Channels,
+        TestErrorConnector.Channels {}

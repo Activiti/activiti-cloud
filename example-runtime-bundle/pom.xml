@@ -147,7 +147,10 @@
       <dependencies>
         <dependency>
           <groupId>org.springframework.cloud</groupId>
-          <artifactId>spring-cloud-stream-test-support</artifactId>
+          <artifactId>spring-cloud-stream</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+          <classifier>test-binder</classifier>
         </dependency>
       </dependencies>
     </profile>

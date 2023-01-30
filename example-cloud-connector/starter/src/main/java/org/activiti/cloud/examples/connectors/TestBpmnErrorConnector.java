@@ -18,18 +18,20 @@ package org.activiti.cloud.examples.connectors;
 
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.common.messaging.functional.Connector;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationErrorBuilder;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.activiti.cloud.examples.connectors.TestBpmnErrorConnector.Channels;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@Component
-@EnableBinding(TestBpmnErrorConnector.Channels.class)
-public class TestBpmnErrorConnector {
+@ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
+@Component(Channels.CHANNEL + "Connector")
+public class TestBpmnErrorConnector implements Connector<IntegrationRequest, Void> {
 
     private IntegrationErrorSender integrationErrorSender;
     private ConnectorProperties connectorProperties;
@@ -45,15 +47,18 @@ public class TestBpmnErrorConnector {
     public interface Channels {
         String CHANNEL = "testBpmnErrorConnectorInput";
 
-        @Input(CHANNEL)
-        SubscribableChannel testBpmnErrorConnectorInput();
+        @InputBinding(CHANNEL)
+        default SubscribableChannel testBpmnErrorConnectorInput() {
+            return MessageChannels.publishSubscribe(CHANNEL).get();
+        }
     }
 
-    @StreamListener(value = Channels.CHANNEL)
-    public void handle(IntegrationRequest integrationRequest) {
+    @Override
+    public Void apply(IntegrationRequest integrationRequest) {
         CloudBpmnError bpmnError = new CloudBpmnError("CLOUD_BPMN_ERROR");
         integrationErrorSender.send(
             IntegrationErrorBuilder.errorFor(integrationRequest, connectorProperties, bpmnError).buildMessage()
         );
+        return null;
     }
 }

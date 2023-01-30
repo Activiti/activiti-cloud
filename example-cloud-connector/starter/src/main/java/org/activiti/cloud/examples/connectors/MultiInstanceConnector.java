@@ -21,20 +21,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.functional.Connector;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
+import org.activiti.cloud.examples.connectors.MultiInstanceConnector.Channels;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-@Component
-@EnableBinding(MultiInstanceConnector.Channels.class)
-public class MultiInstanceConnector {
+@ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
+@Component(Channels.CHANNEL + "Connector")
+public class MultiInstanceConnector implements Connector<IntegrationRequest, Void> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
@@ -43,8 +45,10 @@ public class MultiInstanceConnector {
     public interface Channels {
         String CHANNEL = "miCloudConnectorInput";
 
-        @Input(CHANNEL)
-        SubscribableChannel miCloudConnectorInput();
+        @InputBinding(CHANNEL)
+        default SubscribableChannel miCloudConnectorInput() {
+            return MessageChannels.publishSubscribe(CHANNEL).get();
+        }
     }
 
     @Autowired
@@ -56,8 +60,8 @@ public class MultiInstanceConnector {
         this.connectorProperties = connectorProperties;
     }
 
-    @StreamListener(value = Channels.CHANNEL)
-    public void handle(IntegrationRequest integrationRequest) {
+    @Override
+    public Void apply(IntegrationRequest integrationRequest) {
         Integer instanceCount = getVariableValue(integrationRequest.getIntegrationContext(), "instanceCount");
         if (instanceCount == counter.get()) {
             counter.set(0);
@@ -71,6 +75,7 @@ public class MultiInstanceConnector {
             .buildMessage();
 
         integrationResultSender.send(message);
+        return null;
     }
 
     @SuppressWarnings("unchecked")

@@ -19,28 +19,31 @@ import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
+import org.activiti.cloud.common.messaging.functional.Connector;
+import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
+@ConnectorBinding(input = RestConnector.Channels.POST, condition = "", outputHeader = "")
 @Component
-@EnableBinding(RestConnector.Channels.class)
-public class RestConnector {
+public class RestConnector implements Connector<IntegrationRequest, Void> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
 
     interface Channels {
-        public final String POST = "restConnectorPost";
+        String POST = "restConnectorPost";
 
-        @Input(POST)
-        SubscribableChannel restConnectorPost();
+        @InputBinding(POST)
+        default SubscribableChannel restConnectorPost() {
+            return MessageChannels.publishSubscribe(POST).get();
+        }
     }
 
     public RestConnector(IntegrationResultSender integrationResultSender, ConnectorProperties connectorProperties) {
@@ -48,8 +51,8 @@ public class RestConnector {
         this.connectorProperties = connectorProperties;
     }
 
-    @StreamListener(Channels.POST)
-    public void handlePost(IntegrationRequest integrationRequest) {
+    @Override
+    public Void apply(IntegrationRequest integrationRequest) {
         Map<String, Object> result = new HashMap<>();
 
         result.put("restStatus", 201);
@@ -60,5 +63,6 @@ public class RestConnector {
             .buildMessage();
 
         integrationResultSender.send(message);
+        return null;
     }
 }

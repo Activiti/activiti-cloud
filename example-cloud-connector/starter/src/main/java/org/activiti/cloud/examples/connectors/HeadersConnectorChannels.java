@@ -15,12 +15,15 @@
  */
 package org.activiti.cloud.examples.connectors;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface HeadersConnectorChannels {
     String HEADERS_CONNECTOR_CONSUMER = "headersConnectorConsumer";
 
-    @Input(HEADERS_CONNECTOR_CONSUMER)
-    SubscribableChannel headersConnectorConsumer();
+    @InputBinding(HEADERS_CONNECTOR_CONSUMER)
+    default SubscribableChannel headersConnectorConsumer() {
+        return MessageChannels.publishSubscribe(HEADERS_CONNECTOR_CONSUMER).get();
+    }
 }

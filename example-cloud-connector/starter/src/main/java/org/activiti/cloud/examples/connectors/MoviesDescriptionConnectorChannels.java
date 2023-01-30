@@ -15,12 +15,15 @@
  */
 package org.activiti.cloud.examples.connectors;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface MoviesDescriptionConnectorChannels {
     String MOVIES_DESCRIPTION_CONSUMER = "moviesDescriptionConsumer";
 
-    @Input(MOVIES_DESCRIPTION_CONSUMER)
-    SubscribableChannel moviesDescriptionConsumer();
+    @InputBinding(MOVIES_DESCRIPTION_CONSUMER)
+    default SubscribableChannel moviesDescriptionConsumer() {
+        return MessageChannels.publishSubscribe(MOVIES_DESCRIPTION_CONSUMER).get();
+    }
 }
