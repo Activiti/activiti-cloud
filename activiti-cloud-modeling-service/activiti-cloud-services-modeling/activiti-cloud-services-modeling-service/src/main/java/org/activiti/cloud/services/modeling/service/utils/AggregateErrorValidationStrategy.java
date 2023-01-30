@@ -64,7 +64,6 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
             .filter(validationException -> validationException.getValidationErrors() != null)
             .flatMap(validationException -> validationException.getValidationErrors().stream())
             .distinct()
-            .sorted((a, b) -> a.isWarning() ? -1 : 1)
             .collect(Collectors.toList());
     }
 
