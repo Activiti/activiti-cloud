@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class KeycloakClientCrudIT {
 
+    public static final String ADMIN_USER_ID = "5f682999-d11d-4a42-bc42-86b7e6752223";
     @Autowired
     private KeycloakClient keycloakClient;
 
@@ -74,6 +76,33 @@ public class KeycloakClientCrudIT {
         Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));
         assertThat(exception)
             .isInstanceOf(FeignException.NotFound.class);
+    }
+
+
+    @Test
+    public void should_createRoleRepresentationForClient() {
+        String clientId = "crudClientId2";
+        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+            .withClientId(clientId)
+            .withClientName(clientId)
+            .enabled(true)
+            .directAccessGrantsEnabled(true)
+            .withRedirectUris(Collections.emptyList())
+            .withWebOrigins(Collections.emptyList())
+            .publicClient(true)
+            .implicitFlowEnabled(true)
+            .build();
+        Response response = keycloakClient.createClient(client);
+        String idOfClient = getIdOfClient(client.getClientId());
+        assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
+
+        List<KeycloakRoleMapping> roleMappings = keycloakClient.getUserRoleMappingAvailable(ADMIN_USER_ID);
+        KeycloakRoleMapping keycloakRoleMapping = roleMappings.get(0);
+        keycloakClient.createRoleRepresentationForClient(idOfClient, keycloakRoleMapping);
+
+        KeycloakRoleMapping roleRepresentationForClient = keycloakClient.getRoleRepresentationForClient(
+            idOfClient, keycloakRoleMapping.getName());
+        assertThat(roleRepresentationForClient).isNotNull();
     }
 
 
