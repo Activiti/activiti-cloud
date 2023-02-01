@@ -21,10 +21,10 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,10 +57,10 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageProducer jobMessageProducer(BinderAwareChannelResolver resolver,
+    public JobMessageProducer jobMessageProducer(StreamBridge streamBridge,
                                                  ApplicationEventPublisher eventPublisher,
                                                  JobMessageBuilderFactory jobMessageBuilderFactory) {
-        return new DefaultJobMessageProducer(resolver,
+        return new DefaultJobMessageProducer(streamBridge,
                                              eventPublisher,
                                              jobMessageBuilderFactory);
     }

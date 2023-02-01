@@ -17,6 +17,8 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
@@ -49,6 +51,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.ROOT_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.STANDALONE_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
 
 @RestController
 @RequestMapping(
@@ -91,27 +100,37 @@ public class TaskController {
         this.taskPermissionsHelper = taskPermissionsHelper;
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAll(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
-                                                       @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-                                                       @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                       VariableSearch variableSearch,
-                                                       Pageable pageable) {
+    public PagedModel<EntityModel<QueryCloudTask>> findAll(@Parameter(description = ROOT_TASKS_DESC)
+                                                           @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                           @Parameter(description = STANDALONE_TASKS_DESC)
+                                                           @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                           @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                           @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                           VariableSearch variableSearch,
+                                                           Pageable pageable) {
         return taskControllerHelper.findAll(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
             new StandAloneTaskFilter(standalone), taskLookupRestrictionService));
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(@RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
-                                                                                             @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-                                                                                             @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-                                                                                             @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
-                                                                                             VariableSearch variableSearch,
-                                                                                             Pageable pageable) {
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(@Parameter(description = ROOT_TASKS_DESC)
+                                                                               @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+                                                                               @Parameter(description = STANDALONE_TASKS_DESC)
+                                                                               @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+                                                                               @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                               @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+                                                                               @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE)
+                                                                               @RequestParam(value = "variableKeys", required = false, defaultValue = "")
+                                                                               List<String> processVariableKeys,
+                                                                               VariableSearch variableSearch,
+                                                                               Pageable pageable) {
         return taskControllerHelper.findAllWithProcessVariables(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
-            new StandAloneTaskFilter(standalone), taskLookupRestrictionService), processVariableKeys);
+                new StandAloneTaskFilter(standalone), taskLookupRestrictionService), processVariableKeys);
     }
 
     @JsonView(JsonViews.General.class)

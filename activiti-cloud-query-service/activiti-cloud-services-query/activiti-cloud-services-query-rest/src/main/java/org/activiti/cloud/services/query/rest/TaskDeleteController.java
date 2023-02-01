@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -35,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
@@ -59,7 +63,8 @@ public class TaskDeleteController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
-    public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks (@QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
+    public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks (@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                     @QuerydslPredicate(root = TaskEntity.class) Predicate predicate) {
 
         Collection <EntityModel<QueryCloudTask>> result = new ArrayList<>();
         Iterable <TaskEntity> iterable = taskRepository.findAll(predicate);

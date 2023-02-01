@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import java.util.UUID;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
@@ -158,7 +160,12 @@ public class QueryApplicationEntityIT {
         deployment.setName(name);
         deployment.setVersion(version);
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEventImpl = new CloudApplicationDeployedEventImpl(deployment);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEventImpl =
+            new CloudApplicationDeployedEventImpl(
+                        UUID.randomUUID().toString(),
+                        System.currentTimeMillis(),
+                        deployment,
+                        ApplicationEvents.APPLICATION_DEPLOYED);
         cloudApplicationDeployedEventImpl.setAppName(name);
         return cloudApplicationDeployedEventImpl;
     }

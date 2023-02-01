@@ -25,6 +25,8 @@ import javax.transaction.Transactional;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
+import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
@@ -39,13 +41,16 @@ public class ProcessInstanceAdminService {
 
     private final EntityFinder entityFinder;
 
+    private final QueryDslPredicateAggregator predicateAggregator;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     public ProcessInstanceAdminService(ProcessInstanceRepository processInstanceRepository,
-        EntityFinder entityFinder){
+        EntityFinder entityFinder, QueryDslPredicateAggregator queryDslPredicateAggregator) {
         this.processInstanceRepository = processInstanceRepository;
         this.entityFinder = entityFinder;
+        this.predicateAggregator = queryDslPredicateAggregator;
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
@@ -53,11 +58,23 @@ public class ProcessInstanceAdminService {
         return processInstanceRepository.findAll(Optional.ofNullable(predicate)
                 .orElseGet(BooleanBuilder::new),
             pageable);
+    }
 
+
+
+    public Page<ProcessInstanceEntity> findAllFromBody(Predicate predicate, List<String> variableKeys, List<QueryDslPredicateFilter> filters,
+                                                       Pageable pageable){
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+        if(variableKeys == null || variableKeys.isEmpty()){
+            return this.findAll(extendedPredicate, pageable);
+        } else {
+            return this.findAllWithVariables(extendedPredicate, variableKeys, pageable);
+        }
     }
 
     @Transactional
-    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, Pageable pageable) {
+    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys,
+        Pageable pageable) {
 
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
@@ -70,13 +87,11 @@ public class ProcessInstanceAdminService {
 
     }
 
-    public  ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
+    public ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
 
         return entityFinder.findById(processInstanceRepository,
             processInstanceId,
             "Unable to find task for the given id:'" + processInstanceId + "'");
-
     }
-
 
 }

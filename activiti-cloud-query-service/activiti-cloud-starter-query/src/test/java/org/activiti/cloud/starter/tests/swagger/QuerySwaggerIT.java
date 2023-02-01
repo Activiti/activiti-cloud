@@ -84,8 +84,7 @@ public class QuerySwaggerIT {
             .isArray()
             .contains(
                 "{name: \"variables.name\", required: false}",
-                "{name: \"variables.value\", required: false}",
-                "{name: \"variables.type\", required: false}");
+                "{name: \"variables.value\", required: false}");
     }
 
 }

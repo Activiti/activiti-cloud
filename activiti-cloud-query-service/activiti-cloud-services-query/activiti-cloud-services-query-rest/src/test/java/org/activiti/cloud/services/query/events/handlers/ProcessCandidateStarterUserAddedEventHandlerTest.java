@@ -19,6 +19,7 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserEntity;
+import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +31,10 @@ import javax.persistence.EntityManager;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCandidateStarterUserAddedEventHandlerTest {
@@ -56,6 +60,22 @@ public class ProcessCandidateStarterUserAddedEventHandlerTest {
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
         assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
+    }
+
+    @Test
+    public void handleShouldNotStoreProcessCandidateStarterUserIfExists() {
+        //given
+        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(UUID.randomUUID().toString(),
+                                                                                            UUID.randomUUID().toString());
+        CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(candidateUser);
+
+        //when
+        when(entityManager.find(ProcessCandidateStarterUserEntity.class,
+             new ProcessCandidateStarterUserId(candidateUser.getProcessDefinitionId(), candidateUser.getUserId()))).thenReturn(new ProcessCandidateStarterUserEntity());
+        handler.handle(event);
+
+        //then
+        verify(entityManager, never()).persist(any());
     }
 
     @Test

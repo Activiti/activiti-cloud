@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.starter.messages.test.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
 import org.springframework.test.context.ContextConfiguration;
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ContextConfiguration(initializers = PostgresApplicationInitializer.class)
 public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 

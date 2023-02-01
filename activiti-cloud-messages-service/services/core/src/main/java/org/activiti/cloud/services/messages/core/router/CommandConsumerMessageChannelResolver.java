@@ -16,29 +16,29 @@
 
 package org.activiti.cloud.services.messages.core.router;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import org.activiti.cloud.services.messages.core.channels.MessageConnectorSource;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.DestinationResolver;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-
 public class CommandConsumerMessageChannelResolver implements DestinationResolver<MessageChannel> {
-
-    private final BinderAwareChannelResolver binderAwareChannelResolver;
+    private final Map<String, MessageChannel> bindingChannelCache = new ConcurrentHashMap<>();
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
+    private final StreamBridge streamBridge;
 
     public CommandConsumerMessageChannelResolver(Function<String, String> destinationMapper,
-                                                 BinderAwareChannelResolver binderAwareChannelResolver,
-                                                 BindingService bindingService) {
+                                                 BindingService bindingService,
+                                                 StreamBridge streamBridge) {
         this.destinationMapper = destinationMapper;
-        this.binderAwareChannelResolver = binderAwareChannelResolver;
+        this.streamBridge = streamBridge;
         this.bindingService = bindingService;
     }
 
@@ -46,7 +46,8 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
     public MessageChannel resolveDestination(String destination) throws DestinationResolutionException {
         String channelName = getChannelName(destination).orElse(MessageConnectorSource.OUTPUT);
 
-        return binderAwareChannelResolver.resolveDestination(channelName);
+        return this.bindingChannelCache.computeIfAbsent(channelName,
+                                                        this::createMessageChannelProxyForBinding);
     }
 
     protected Optional<String> getChannelName(String destination) {
@@ -62,4 +63,7 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
                                 .findFirst();
     }
 
+    private MessageChannel createMessageChannelProxyForBinding(String bindingName) {
+        return (message, timeout) -> this.streamBridge.send(bindingName, message);
+    }
 }

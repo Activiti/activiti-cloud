@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
@@ -34,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.querydsl.core.types.Predicate;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @RestController
 @RequestMapping(
@@ -64,7 +68,8 @@ public class ServiceTaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudServiceTask>> findAll(@QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudServiceTask>> findAll(@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                             @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
                                                              Pageable pageable) {
 
         return pagedCollectionModelAssembler.toModel(pageable,

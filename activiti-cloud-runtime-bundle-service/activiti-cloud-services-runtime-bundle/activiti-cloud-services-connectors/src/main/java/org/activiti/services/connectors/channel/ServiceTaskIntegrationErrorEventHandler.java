@@ -29,7 +29,6 @@ import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.annotation.StreamListener;
 
 import java.util.List;
 
@@ -55,7 +54,6 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
-    @StreamListener(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());

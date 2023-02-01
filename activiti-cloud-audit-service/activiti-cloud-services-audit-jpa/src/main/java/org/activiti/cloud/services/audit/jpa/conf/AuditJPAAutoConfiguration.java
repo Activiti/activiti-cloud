@@ -22,6 +22,7 @@ import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventCo
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ApplicationRollbackEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.EventContextInfoAppender;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
@@ -32,6 +33,10 @@ import org.activiti.cloud.services.audit.jpa.converters.MessageSentEventConverte
 import org.activiti.cloud.services.audit.jpa.converters.MessageSubscriptionCancelledEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.MessageWaitingEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterGroupAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterGroupRemovedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterUserAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterUserRemovedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessDeletedEventConverter;
@@ -223,6 +228,30 @@ public class AuditJPAAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessCandidateStarterUserAddedEventConverter processCandidateStarterUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessCandidateStarterUserAddedEventConverter(eventContextInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterUserRemovedEventConverter processCandidateStarterUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessCandidateStarterUserRemovedEventConverter(eventContextInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterGroupAddedEventConverter processCandidateStarterGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessCandidateStarterGroupAddedEventConverter(eventContextInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessCandidateStarterGroupRemovedEventConverter processCandidateStarterGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ProcessCandidateStarterGroupRemovedEventConverter(eventContextInfoAppender);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public APIEventToEntityConverters apiEventToEntityConverters(Set<EventToEntityConverter> eventToEntityConverters){
         return new APIEventToEntityConverters(eventToEntityConverters);
     }
@@ -339,6 +368,12 @@ public class AuditJPAAutoConfiguration {
     @Bean
     public ApplicationDeployedEventConverter applicationDeployedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         return new ApplicationDeployedEventConverter(eventContextInfoAppender);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public ApplicationRollbackEventConverter applicationRollbackEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+        return new ApplicationRollbackEventConverter(eventContextInfoAppender);
     }
 
 }

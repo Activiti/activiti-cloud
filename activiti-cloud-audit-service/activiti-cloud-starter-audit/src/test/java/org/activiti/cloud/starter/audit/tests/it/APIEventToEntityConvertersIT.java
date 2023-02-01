@@ -17,10 +17,13 @@ package org.activiti.cloud.starter.audit.tests.it;
 
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
+import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents;
+import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
@@ -33,10 +36,15 @@ import org.activiti.cloud.services.audit.jpa.converters.ActivityCancelledEventCo
 import org.activiti.cloud.services.audit.jpa.converters.ActivityCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ActivityStartedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ApplicationDeployedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ApplicationRollbackEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationErrorReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationRequestedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.IntegrationResultReceivedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCancelledEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterGroupAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterGroupRemovedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterUserAddedEventConverter;
+import org.activiti.cloud.services.audit.jpa.converters.ProcessCandidateStarterUserRemovedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCompletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessCreatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.ProcessDeployedEventConverter;
@@ -180,6 +188,21 @@ public class APIEventToEntityConvertersIT {
 
         converter = eventConverters.getConverterByEventTypeName(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
         assertThat(converter).isNotNull().isInstanceOf(ApplicationDeployedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name());
+        assertThat(converter).isNotNull().isInstanceOf(ProcessCandidateStarterUserAddedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(ProcessCandidateStarterUserRemovedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name());
+        assertThat(converter).isNotNull().isInstanceOf(ProcessCandidateStarterGroupAddedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name());
+        assertThat(converter).isNotNull().isInstanceOf(ProcessCandidateStarterGroupRemovedEventConverter.class);
+
+        converter = eventConverters.getConverterByEventTypeName(ApplicationEvents.APPLICATION_ROLLBACK.name());
+        assertThat(converter).isNotNull().isInstanceOf(ApplicationRollbackEventConverter.class);
 
     }
 

@@ -15,11 +15,22 @@
  */
 package org.activiti.cloud.notifications.graphql.starter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -47,8 +58,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudBPMNTimerScheduledE
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
-import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer;
-import org.activiti.cloud.notifications.graphql.test.EngineEventsMessageProducer.EngineEvents;
+import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
+import org.activiti.cloud.notifications.graphql.config.EngineEvents;
+import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
@@ -61,12 +73,10 @@ import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -82,20 +92,9 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {GrapqhQLApplication.class})
+@ContextConfiguration(classes = EngineEventsConfiguration.class,
+        initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class ActivitiGraphQLStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
@@ -126,12 +125,6 @@ public class ActivitiGraphQLStarterIT {
     private ObjectMapper objectMapper;
 
     private HttpHeaders authHeaders;
-
-    @SpringBootApplication
-    @EnableBinding(EngineEventsMessageProducer.EngineEvents.class)
-    static class Application {
-        // Nothing
-    }
 
     @BeforeEach
     public void setUp() {

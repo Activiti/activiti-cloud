@@ -80,5 +80,6 @@ public enum CloudRuntimeEventType {
     /**
      * The runtime bundle has deployed an application
      */
-    APPLICATION_DEPLOYED;
+    APPLICATION_DEPLOYED,
+    APPLICATION_ROLLBACK;
 }

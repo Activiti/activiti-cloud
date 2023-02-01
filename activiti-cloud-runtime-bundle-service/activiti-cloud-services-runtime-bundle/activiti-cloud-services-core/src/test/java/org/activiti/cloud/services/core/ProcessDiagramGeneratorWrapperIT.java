@@ -15,9 +15,12 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.when;
+
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
-import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.image.exception.ActivitiImageException;
@@ -28,14 +31,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.when;
-
 /**
  * Integration tests for ProcessDiagramGeneratorWrapper
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test-process-diagram.properties")
 public class ProcessDiagramGeneratorWrapperIT {
 

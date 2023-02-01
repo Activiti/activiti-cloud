@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -28,7 +30,6 @@ import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.MediaTypes;
@@ -43,6 +44,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
@@ -53,8 +57,7 @@ import com.querydsl.core.types.Predicate;
         })
 public class ProcessDefinitionController {
 
-    @Value("${activiti.candidateStarters.enabled:false}")
-    private boolean candidateStartersEnabled;
+    private static final String EVERYONE_GROUP = "*";
 
     private ProcessDefinitionRepository repository;
 
@@ -78,7 +81,8 @@ public class ProcessDefinitionController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+                                                                   @QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
                                                                     Pageable pageable) {
         Predicate predicateRestricted = applyRestrictions(predicate);
         return pagedCollectionModelAssembler.toModel(pageable,
@@ -92,17 +96,13 @@ public class ProcessDefinitionController {
                                                                                                                  .orElseGet(BooleanBuilder::new),
                                                                                                          SecurityPolicyAccess.READ);
 
-        if (!candidateStartersEnabled) {
-            return extendedPredicate;
-        }
-
         String userId = securityManager.getAuthenticatedUserId();
         BooleanExpression candidateStarterExpression = QProcessDefinitionEntity
                                                         .processDefinitionEntity
                                                         .candidateStarterUsers.any()
                                                         .userId.eq(userId);
 
-        List<String> groupIds = securityManager.getAuthenticatedUserGroups();
+        List<String> groupIds = getCurrentUserGroupsIncludingEveryOneGroup();
         if (!groupIds.isEmpty()) {
             candidateStarterExpression = candidateStarterExpression.or(QProcessDefinitionEntity
                                                                        .processDefinitionEntity
@@ -111,5 +111,11 @@ public class ProcessDefinitionController {
         }
 
         return candidateStarterExpression.and(extendedPredicate);
+    }
+
+    private List<String> getCurrentUserGroupsIncludingEveryOneGroup() {
+        List<String> groups = new ArrayList<>(securityManager.getAuthenticatedUserGroups());
+        groups.add(EVERYONE_GROUP);
+        return groups;
     }
 }

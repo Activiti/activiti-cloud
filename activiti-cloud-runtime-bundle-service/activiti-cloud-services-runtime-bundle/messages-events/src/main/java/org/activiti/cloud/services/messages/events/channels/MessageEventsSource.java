@@ -15,12 +15,17 @@
  */
 package org.activiti.cloud.services.messages.events.channels;
 
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageEventsSource {
 
-    @Output
-    MessageChannel messageEventsOutput();
+    String MESSAGE_EVENTS_OUTPUT = "messageEventsOutput";
+
+    @OutputBinding
+    default MessageChannel messageEventsOutput() {
+        return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).get();
+    }
 
 }

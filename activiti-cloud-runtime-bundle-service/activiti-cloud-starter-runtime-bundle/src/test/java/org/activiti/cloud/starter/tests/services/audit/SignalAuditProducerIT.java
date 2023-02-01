@@ -41,6 +41,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,7 +62,8 @@ import java.util.stream.Collectors;
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 @ContextConfiguration(classes = ServicesAuditITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+    initializers = {RabbitMQContainerApplicationInitializer.class,
+        KeycloakContainerApplicationInitializer.class})
 public class SignalAuditProducerIT {
 
     private static final String SIGNAL_PROCESS = "broadcastSignalCatchEventProcess";
@@ -80,6 +82,15 @@ public class SignalAuditProducerIT {
 
     @Autowired
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
+
+    @AfterEach
+    public void cleanUp() {
+        String processInstanceId = runtimeService.createProcessInstanceQuery()
+            .singleResult()
+            .getProcessInstanceId();
+
+       runtimeService.deleteProcessInstance(processInstanceId, "clean up");
+    }
 
     @Test
     public void shouldProduceEventsWhenIntermediateSignalIsReceived() {
@@ -186,8 +197,6 @@ public class SignalAuditProducerIT {
                         Collections.singletonMap("signalVar", "timeToGo")
                     )
                 );
-            runtimeService.deleteProcessInstance(startedBySignalProcessInstanceId, "clean up");
-
         });
 
     }
@@ -206,15 +215,13 @@ public class SignalAuditProducerIT {
 
         //then
         await("Broadcast Signals").untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-
-            String startedBySignalProcessInstanceId = receivedEvents.stream()
-                .filter(it -> PROCESS_CREATED.equals(it.getEventType())
-                    && "processWithSignalStart1".equals(it.getProcessDefinitionKey()))
-                .map(CloudRuntimeEvent::getProcessInstanceId)
-                .findFirst()
+            String startedBySignalProcessInstanceId = Optional
+                .ofNullable(runtimeService.createProcessInstanceQuery()
+                    .processDefinitionKey("processWithSignalStart1")
+                    .singleResult()
+                    .getId())
                 .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
             assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
             assertThat(receivedEvents)
@@ -253,7 +260,6 @@ public class SignalAuditProducerIT {
                     tuple(SEQUENCE_FLOW_TAKEN, "processWithSignalStart1", null, "flow1"),
                     tuple(ACTIVITY_STARTED, "processWithSignalStart1", null, "theTask")
                 );
-            runtimeService.deleteProcessInstance(startedBySignalProcessInstanceId, "clean up");
         });
 
 

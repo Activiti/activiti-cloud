@@ -15,10 +15,15 @@
  */
 package org.activiti.cloud.services.identity.keycloak.model;
 
+import java.util.List;
+import java.util.Map;
+
 public class KeycloakGroup {
 
   private String id;
   private String name;
+  private String path;
+  private Map<String, List<String>> clientRoles;
 
   public String getId() {
     return id;
@@ -36,4 +41,19 @@ public class KeycloakGroup {
     this.name = name;
   }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Map<String, List<String>> getClientRoles() {
+        return this.clientRoles;
+    }
+
+    public void setClientRoles(Map<String, List<String>> clientRoles) {
+        this.clientRoles = clientRoles;
+    }
 }

@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -741,20 +742,51 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToScriptAction() throws Exception {
-        byte[] validContent = resourceAsByteArray("process/script-implementation-service-task.bpmn20.xml");
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToScriptActionWithCatchBoundary()
+        throws Exception {
+        byte[] validContent = resourceAsByteArray("process/script-implementation-service-task-with-catch-boundary.bpmn20.xml");
         MockMultipartFile file = new MockMultipartFile("file",
-                                                       "process.xml",
-                                                       CONTENT_TYPE_XML,
-                                                       validContent);
+            "process.xml",
+            CONTENT_TYPE_XML,
+            validContent);
         Model processModel = createModel(validContent);
 
         ResultActions resultActions = mockMvc
-                .perform(multipart("/v1/models/{model_id}/validate",
-                                   processModel.getId())
-                                 .file(file));
+            .perform(multipart("/v1/models/{model_id}/validate",
+                processModel.getId())
+                .file(file));
 
         resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessWithServiceTaskImplementationSetToScriptActionWithNoCatchBoundary()
+        throws Exception {
+        byte[] validContent = resourceAsByteArray("process/script-implementation-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+            "process.xml",
+            CONTENT_TYPE_XML,
+            validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+            .perform(multipart("/v1/models/{model_id}/validate",
+                processModel.getId())
+                .file(file));
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .contains("The service implementation on service 'ServiceTask_1qr4ad0' might fail silently");
+
+        final Exception resolvedException = resultActions.andReturn().getResolvedException();
+        assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
+
+        SemanticModelValidationException semanticModelValidationException = (SemanticModelValidationException)resolvedException;
+        assertThat(semanticModelValidationException.getValidationErrors())
+            .hasSize(1)
+            .extracting(ModelValidationError::getProblem,
+                ModelValidationError::getDescription, ModelValidationError::isWarning)
+            .containsOnly(tuple("Missing Catch Error boundary event",
+                "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently. Consider adding an Error boundary event to handle failures.",
+                true));
     }
 
     @Test
@@ -985,6 +1017,23 @@ public class ModelValidationControllerIT {
                 .perform(multipart("/v1/models/{model_id}/validate",
                         processModel.getId())
                         .file(file));
+
+        resultActions.andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void should_returnStatusNoContent_when_validatingProcessWithServiceTaskImplementationSetToHxPContentService() throws Exception {
+        byte[] validContent = resourceAsByteArray("process/hxp-content-service-task.bpmn20.xml");
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "process.xml",
+                                                       CONTENT_TYPE_XML,
+                                                       validContent);
+        Model processModel = createModel(validContent);
+
+        ResultActions resultActions = mockMvc
+            .perform(multipart("/v1/models/{model_id}/validate",
+                               processModel.getId())
+                         .file(file));
 
         resultActions.andExpect(status().isNoContent());
     }

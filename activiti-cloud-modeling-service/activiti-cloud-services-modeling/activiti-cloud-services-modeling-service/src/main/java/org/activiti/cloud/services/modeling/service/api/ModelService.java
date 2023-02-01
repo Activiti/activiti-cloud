@@ -15,22 +15,22 @@
  */
 package org.activiti.cloud.services.modeling.service.api;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Business logic related to {@link Model} entities
@@ -156,6 +156,12 @@ public interface ModelService {
     Page<Model> getGlobalModels(ModelType modelType,
                                 boolean includeOrphans,
                                 Pageable pageable);
+
+    public List<ModelValidationError> getModelValidationErrors(Model model,
+        ValidationContext validationContext);
+
+    public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
+        ValidationContext validationContext);
 
     public List<ModelUpdateListener> findModelUpdateListeners(String modelType);
 

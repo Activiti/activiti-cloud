@@ -15,11 +15,15 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Optional;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import com.introproventures.graphql.jpa.query.schema.JavaScalarsWiringPostProcessor;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.DataFetcher;
-import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
@@ -28,12 +32,7 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
 import org.springframework.core.io.DefaultResourceLoader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Optional;
-
+import static graphql.schema.GraphQLScalarType.newScalar;
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 public class GraphQLSubscriptionSchemaBuilder {
@@ -56,11 +55,10 @@ public class GraphQLSubscriptionSchemaBuilder {
         this.typeRegistry = new SchemaParser().parse(streamReader);
 
         this.wiring = RuntimeWiring.newRuntimeWiring()
-                                   .scalar(GraphQLScalarType.newScalar()
-                                                            .name("ObjectScalar")
-                                                            .description("An object scalar")
-                                                            .coercing(new JavaScalars.GraphQLObjectCoercing())
-                                                            .build())
+                                   .scalar(newScalar().name("ObjectScalar")
+                                                      .description("An object scalar")
+                                                      .coercing(new JavaScalars.GraphQLObjectCoercing())
+                                                      .build())
                                    .scalar(ExtendedScalars.GraphQLLong)
                                    .transformer(new JavaScalarsWiringPostProcessor());
     }

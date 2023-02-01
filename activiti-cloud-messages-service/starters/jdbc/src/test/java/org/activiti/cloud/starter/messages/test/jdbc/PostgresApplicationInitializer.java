@@ -18,7 +18,6 @@ package org.activiti.cloud.starter.messages.test.jdbc;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 public class PostgresApplicationInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

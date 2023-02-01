@@ -23,6 +23,8 @@ import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEv
 import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
 import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
+import static org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED;
+import static org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED;
 import static org.activiti.api.process.model.events.ProcessDefinitionEvent.ProcessDefinitionEvents.PROCESS_DEPLOYED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED;
 import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
@@ -65,9 +67,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 import org.activiti.api.model.shared.model.ApplicationElement;
+import org.activiti.api.process.model.ProcessCandidateStarterGroup;
+import org.activiti.api.process.model.ProcessCandidateStarterUser;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -84,6 +87,8 @@ import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
@@ -95,6 +100,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -126,7 +132,9 @@ public class AuditProducerIT {
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
     private static final String CALL_TWO_SUB_PROCESSES = "callTwoSubProcesses";
+    private static final String PROCESS_WITH_POOLS_CANDIDATE_STARTERS = "process_pool2";
 
+    private static final String EVERYONE_GROUP = "*";
     public static final String ROUTING_KEY_HEADER = "routingKey";
     public static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
     public static final String[] REQUIRED_EXECUTION_CONTEXT_HEADERS = {"rootProcessInstanceId", "rootProcessDefinitionId", "rootProcessDefinitionKey", "rootProcessDefinitionVersion", "deploymentId", "deploymentName", "deploymentVersion"};
@@ -162,6 +170,9 @@ public class AuditProducerIT {
     @Autowired
     private RuntimeService runtimeService;
 
+    @Autowired
+    private RepositoryService repositoryService;
+
     @BeforeEach
     public void setUp() {
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
@@ -173,6 +184,7 @@ public class AuditProducerIT {
             processDefinitionIds.put(pd.getName(),
                 pd.getId());
         }
+
     }
 
     @Test
@@ -201,6 +213,45 @@ public class AuditProducerIT {
         assertThat(processDeployedEvent.getProcessModelContent())
             .isXmlEqualToContentOf(new File("src/test/resources/processes/SimpleProcess.bpmn20.xml"));
         assertThat(processDeployedEvent.getEntity().getCategory()).isEqualTo(SIMPLE_PROCESS_CATEGORY);
+    }
+
+    @Test
+    public void shouldProduceCandidateUserStarterEvents() {
+        //when
+        List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+        //then
+        List<CloudProcessCandidateStarterUserAddedEvent> candidateStarterGroupAddedEvents = receivedEvents
+            .stream()
+            .filter(event -> PROCESS_CANDIDATE_STARTER_USER_ADDED.name().equals(event.getEventType().name()))
+            .map(CloudProcessCandidateStarterUserAddedEvent.class::cast)
+            .collect(Collectors.toList());
+
+        assertThat(candidateStarterGroupAddedEvents)
+            .extracting(event -> event.getEntity())
+            .extracting(ProcessCandidateStarterUser::getProcessDefinitionId, ProcessCandidateStarterUser::getUserId)
+            .contains(tuple(getProcessDefinitionId(PROCESS_WITH_POOLS_CANDIDATE_STARTERS), "user1"));
+    }
+
+    @Test
+    public void shouldProduceCandidateGroupStarterEvents() {
+        //when
+        List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+
+        //then
+        List<CloudProcessCandidateStarterGroupAddedEvent> candidateStarterGroupAddedEvents = receivedEvents
+            .stream()
+            .filter(event -> PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name().equals(event.getEventType().name()))
+            .map(CloudProcessCandidateStarterGroupAddedEvent.class::cast)
+            .collect(Collectors.toList());
+
+        assertThat(candidateStarterGroupAddedEvents)
+            .extracting(event -> event.getEntity())
+            .extracting(ProcessCandidateStarterGroup::getProcessDefinitionId, ProcessCandidateStarterGroup::getGroupId)
+            .contains(
+                tuple(getProcessDefinitionId(SIMPLE_PROCESS), EVERYONE_GROUP),
+                tuple(getProcessDefinitionId(PROCESS_WITH_POOLS_CANDIDATE_STARTERS), "group1")
+            );
     }
 
     @Test
@@ -1176,6 +1227,14 @@ public class AuditProducerIT {
         assertThat(cloudApplicationDeployedEvents)
                 .extracting(event -> event.getEntity().getName())
                 .containsOnly("SpringAutoDeployment");
+    }
+
+    private String getProcessDefinitionId(String processDefinitionKey) {
+        return repositoryService.createProcessDefinitionQuery()
+                                .latestVersion()
+                                .processDefinitionKey(processDefinitionKey)
+                                .singleResult()
+                                .getId();
     }
 
 }

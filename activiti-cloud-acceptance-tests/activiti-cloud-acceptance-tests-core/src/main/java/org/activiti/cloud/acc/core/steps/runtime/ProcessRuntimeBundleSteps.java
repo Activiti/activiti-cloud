@@ -237,6 +237,11 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
+    public String getProcessDiagramByKey(String key){
+        return processRuntimeDiagramService.getProcessDefinitionModel(key);
+    }
+
+    @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
         return processInstanceTasksApiClient.getTasks(processInstanceId, DEFAULT_PAGEABLE)
             .getContent()

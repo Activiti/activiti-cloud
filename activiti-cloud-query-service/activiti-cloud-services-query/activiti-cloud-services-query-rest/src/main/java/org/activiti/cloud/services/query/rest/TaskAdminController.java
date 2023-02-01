@@ -17,6 +17,13 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -25,6 +32,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +42,20 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.ROOT_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.STANDALONE_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
 
 @RestController
 @RequestMapping(
@@ -72,11 +85,15 @@ public class TaskAdminController {
         this.taskControllerHelper = taskControllerHelper;
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
+        @Parameter(description = ROOT_TASKS_DESC)
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC)
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
         VariableSearch variableSearch,
         Pageable pageable) {
@@ -85,18 +102,47 @@ public class TaskAdminController {
                 new StandAloneTaskFilter(standalone)));
     }
 
+    @Operation(summary = "Find tasks")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+        @Parameter(description = ROOT_TASKS_DESC)
         @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC)
         @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+        @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE)
         @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
         VariableSearch variableSearch,
         Pageable pageable) {
 
         return taskControllerHelper.findAllWithProcessVariables(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
             new StandAloneTaskFilter(standalone)), processVariableKeys);
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
+    public MappingJacksonValue findAllFromBody(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+        @RequestBody(required = false) TasksQueryBody payload,
+        VariableSearch variableSearch,
+        Pageable pageable) {
+
+        TasksQueryBody queryBody = Optional.ofNullable(payload).orElse(new TasksQueryBody());
+
+        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(predicate, variableSearch, pageable,
+            Arrays.asList(new RootTasksFilter(queryBody.isRootTasksOnly()), new StandAloneTaskFilter(queryBody.isStandalone())),
+            queryBody.getVariableKeys());
+
+        MappingJacksonValue result = new MappingJacksonValue(pagedModel);
+        if(queryBody.hasVariableKeys()) {
+            result.setSerializationView(JsonViews.ProcessVariables.class);
+        } else {
+            result.setSerializationView(JsonViews.General.class);
+        }
+
+        return result;
     }
 
     @JsonView(JsonViews.General.class)

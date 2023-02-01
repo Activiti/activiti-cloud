@@ -19,6 +19,7 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterGroupEntity;
+import org.activiti.cloud.services.query.model.ProcessCandidateStarterGroupId;
 import org.activiti.cloud.services.query.model.QueryException;
 
 import javax.persistence.EntityManager;
@@ -35,11 +36,13 @@ public class ProcessCandidateStarterGroupAddedEventHandler implements QueryEvent
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCandidateStarterGroupAddedEvent processCandidateStarterGroupAddedEvent = (CloudProcessCandidateStarterGroupAddedEvent) event;
         org.activiti.api.process.model.ProcessCandidateStarterGroup processCandidateStarterGroup = processCandidateStarterGroupAddedEvent.getEntity();
+        ProcessCandidateStarterGroupEntity entity = new ProcessCandidateStarterGroupEntity(processCandidateStarterGroup.getProcessDefinitionId(),
+                                                                                           processCandidateStarterGroup.getGroupId());
 
         try {
-            ProcessCandidateStarterGroupEntity entity = new ProcessCandidateStarterGroupEntity(processCandidateStarterGroup.getProcessDefinitionId(),
-                                                                                             processCandidateStarterGroup.getGroupId());
-            entityManager.persist(entity);
+            if (!candidateStarterEntityAlreadyExists(entity)) {
+                entityManager.persist(entity);
+            }
         } catch (Exception cause) {
             throw new QueryException("Error handling ProcessCandidateStarterGroupAddedEvent[" + event + "]",
                                      cause);
@@ -49,5 +52,10 @@ public class ProcessCandidateStarterGroupAddedEventHandler implements QueryEvent
     @Override
     public String getHandledEvent() {
         return ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_ADDED.name();
+    }
+
+    private boolean candidateStarterEntityAlreadyExists(ProcessCandidateStarterGroupEntity entity) {
+        return entityManager.find(ProcessCandidateStarterGroupEntity.class,
+                                  new ProcessCandidateStarterGroupId(entity.getProcessDefinitionId(), entity.getGroupId())) != null;
     }
 }
