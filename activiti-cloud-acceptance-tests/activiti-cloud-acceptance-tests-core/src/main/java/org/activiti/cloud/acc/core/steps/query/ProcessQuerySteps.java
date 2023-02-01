@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.query;
 
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
