@@ -15,12 +15,18 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,11 +49,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 @SpringBootTest(properties = {
     "activiti.cloud.application.name=foo",
@@ -116,19 +117,17 @@ public class ConnectorConfigurationIT {
 
         @Bean(FUNCTION_NAME_A)
         @ConnectorBinding(input = AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerA'")
-        public Connector<?, Void> auditConsumerHandlerA() {
+        public ConsumerConnector<?> auditConsumerHandlerA() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestA");
-                return null;
             };
         }
 
         @Bean(FUNCTION_NAME_B)
         @ConnectorBinding(input = AUDIT_CONSUMER, condition = "headers['type']=='TestAuditConsumerB'")
-        public Connector<?, Void> auditConsumerHandlerB() {
+        public ConsumerConnector<?> auditConsumerHandlerB() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestB");
-                return null;
             };
         }
 
