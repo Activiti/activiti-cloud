@@ -71,6 +71,7 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -982,7 +983,7 @@ public class ActivitiGraphQLStarterIT {
     }
 
 
-    @Test
+    @RepeatedTest(40)
     public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized()
             throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
