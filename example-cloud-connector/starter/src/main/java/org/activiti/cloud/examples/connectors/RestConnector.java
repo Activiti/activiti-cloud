@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 
 @ConnectorBinding(input = RestConnector.Channels.POST, condition = "", outputHeader = "")
 @Component
-public class RestConnector implements Connector<IntegrationRequest, Void> {
+public class RestConnector implements ConsumerConnector<IntegrationRequest> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
@@ -52,7 +52,7 @@ public class RestConnector implements Connector<IntegrationRequest, Void> {
     }
 
     @Override
-    public Void apply(IntegrationRequest integrationRequest) {
+    public void accept(IntegrationRequest integrationRequest) {
         Map<String, Object> result = new HashMap<>();
 
         result.put("restStatus", 201);
@@ -63,6 +63,5 @@ public class RestConnector implements Connector<IntegrationRequest, Void> {
             .buildMessage();
 
         integrationResultSender.send(message);
-        return null;
     }
 }

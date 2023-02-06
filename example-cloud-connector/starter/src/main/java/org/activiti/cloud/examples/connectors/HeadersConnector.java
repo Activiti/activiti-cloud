@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
     outputHeader = ""
 )
 @Component(HeadersConnectorChannels.HEADERS_CONNECTOR_CONSUMER + "Connector")
-public class HeadersConnector implements Connector<Message<IntegrationRequest>, Void> {
+public class HeadersConnector implements ConsumerConnector<Message<IntegrationRequest>> {
 
     private final IntegrationResultSender integrationResultSender;
     private final ConnectorProperties connectorProperties;
@@ -47,7 +47,7 @@ public class HeadersConnector implements Connector<Message<IntegrationRequest>, 
     }
 
     @Override
-    public Void apply(Message<IntegrationRequest> integrationRequestMessage) {
+    public void accept(Message<IntegrationRequest> integrationRequestMessage) {
         MessageHeaders headers = integrationRequestMessage.getHeaders();
         IntegrationRequest integrationRequest = integrationRequestMessage.getPayload();
 
@@ -63,6 +63,5 @@ public class HeadersConnector implements Connector<Message<IntegrationRequest>, 
             .buildMessage();
 
         integrationResultSender.send(message);
-        return null;
     }
 }

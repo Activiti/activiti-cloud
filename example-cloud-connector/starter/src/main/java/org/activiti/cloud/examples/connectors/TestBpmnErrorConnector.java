@@ -18,8 +18,8 @@ package org.activiti.cloud.examples.connectors;
 
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationErrorSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 @ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
 @Component(Channels.CHANNEL + "Connector")
-public class TestBpmnErrorConnector implements Connector<IntegrationRequest, Void> {
+public class TestBpmnErrorConnector implements ConsumerConnector<IntegrationRequest> {
 
     private IntegrationErrorSender integrationErrorSender;
     private ConnectorProperties connectorProperties;
@@ -54,11 +54,10 @@ public class TestBpmnErrorConnector implements Connector<IntegrationRequest, Voi
     }
 
     @Override
-    public Void apply(IntegrationRequest integrationRequest) {
+    public void accept(IntegrationRequest integrationRequest) {
         CloudBpmnError bpmnError = new CloudBpmnError("CLOUD_BPMN_ERROR");
         integrationErrorSender.send(
             IntegrationErrorBuilder.errorFor(integrationRequest, connectorProperties, bpmnError).buildMessage()
         );
-        return null;
     }
 }

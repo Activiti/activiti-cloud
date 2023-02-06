@@ -25,8 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
 import org.activiti.cloud.connectors.starter.model.IntegrationResultBuilder;
@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 @ConnectorBinding(input = ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER, condition = "")
 @Component(ExampleConnectorChannels.EXAMPLE_CONNECTOR_CONSUMER + "Connector")
-public class ExampleConnector implements Connector<IntegrationRequest, Void> {
+public class ExampleConnector implements ConsumerConnector<IntegrationRequest> {
 
     private final Logger logger = LoggerFactory.getLogger(ExampleConnector.class);
 
@@ -67,7 +67,7 @@ public class ExampleConnector implements Connector<IntegrationRequest, Void> {
     }
 
     @Override
-    public Void apply(IntegrationRequest event) {
+    public void accept(IntegrationRequest event) {
         logger.info(append("service-name", appName), ">>> In example-cloud-connector");
 
         String var1 =
@@ -108,7 +108,6 @@ public class ExampleConnector implements Connector<IntegrationRequest, Void> {
             .buildMessage();
 
         integrationResultSender.send(message);
-        return null;
     }
 
     private void processJsonVar(Object jsonVar, Map<String, Object> results) {

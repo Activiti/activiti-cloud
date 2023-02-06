@@ -19,8 +19,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.configuration.ConnectorProperties;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 
 @ConnectorBinding(input = Channels.CHANNEL, condition = "", outputHeader = "")
 @Component(Channels.CHANNEL + "Connector")
-public class TestErrorConnector implements Connector<IntegrationRequest, Void> {
+public class TestErrorConnector implements ConsumerConnector<IntegrationRequest> {
 
     private static final Logger logger = LoggerFactory.getLogger(TestErrorConnector.class);
     private final IntegrationResultSender integrationResultSender;
@@ -61,7 +61,7 @@ public class TestErrorConnector implements Connector<IntegrationRequest, Void> {
     }
 
     @Override
-    public Void apply(IntegrationRequest integrationRequest) {
+    public void accept(IntegrationRequest integrationRequest) {
         String var = integrationRequest.getIntegrationContext().getInBoundVariable("var");
         if (!"replay".equals(var)) {
             throw new RuntimeException("TestErrorConnector");
@@ -83,6 +83,5 @@ public class TestErrorConnector implements Connector<IntegrationRequest, Void> {
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
-        return null;
     }
 }
