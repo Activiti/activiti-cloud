@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -52,9 +55,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
@@ -128,7 +128,6 @@ public class ProcessInstanceIT {
     public void shouldCreateProcessInstanceWithoutStartingIt() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.createProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            null,
             "business_key");
 
         //then
@@ -152,7 +151,6 @@ public class ProcessInstanceIT {
     public void shouldStartAnAlreadyCreatedProcess() {
         //when
         ResponseEntity<CloudProcessInstance> createdEntity = processInstanceRestTemplate.createProcess(processDefinitionIds.get(SIMPLE_PROCESS),
-            null,
             "business_key");
         CloudProcessInstance createdProcInst = createdEntity.getBody();
         assertThat(createdProcInst).isNotNull();

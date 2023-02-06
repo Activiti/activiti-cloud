@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.starter.tests.helper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
@@ -41,12 +46,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @TestComponent
 public class ProcessInstanceRestTemplate {
@@ -81,7 +80,6 @@ public class ProcessInstanceRestTemplate {
 
     private ResponseEntity<CloudProcessInstance> createProcess(String processDefinitionKey,
                                                               String processDefinitionId,
-                                                              Map<String, Object> variables,
                                                               String businessKey) {
 
         CreateProcessInstancePayload startProcess = ProcessPayloadBuilder.create()
@@ -119,12 +117,10 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<CloudProcessInstance> createProcess(String processDefinitionId,
-                                                             Map<String, Object> variables,
                                                              String businessKey) {
 
         return createProcess(null,
             processDefinitionId,
-            variables,
             businessKey);
     }
 
