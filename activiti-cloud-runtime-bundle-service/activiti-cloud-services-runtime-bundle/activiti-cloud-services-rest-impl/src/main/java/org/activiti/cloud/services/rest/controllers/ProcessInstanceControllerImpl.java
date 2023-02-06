@@ -30,11 +30,9 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
-import static java.util.Collections.emptyList;
-
-import java.nio.charset.StandardCharsets;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -63,6 +61,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.nio.charset.StandardCharsets;
+
+import static java.util.Collections.emptyList;
 
 @RestController
 @RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -112,6 +114,21 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
         return representationModelAssembler.toModel(processRuntime.start(startProcessPayload));
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
+                                                                 @RequestBody(required = false) StartProcessPayload startProcessPayload) {
+        if (startProcessPayload == null) {
+            startProcessPayload = ProcessPayloadBuilder.start().build();
+        }
+        startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        return representationModelAssembler.toModel(processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
+        return representationModelAssembler.toModel(processRuntime.create(createProcessInstancePayload));
     }
 
     @Override

@@ -15,8 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -36,6 +35,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 public interface ProcessInstanceController {
 
     @GetMapping("/v1/process-instances")
@@ -44,6 +45,13 @@ public interface ProcessInstanceController {
 
     @PostMapping(path = "/v1/process-instances", consumes = APPLICATION_JSON_VALUE)
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
+
+    @PostMapping(value = "/v1/process-instances/{processInstanceId}/start", consumes = APPLICATION_JSON_VALUE)
+    EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable(value = "processInstanceId") String processInstanceId,
+        @RequestBody(required = false) StartProcessPayload payload);
+
+    @PostMapping(value = "/v1/process-instances/create", consumes = APPLICATION_JSON_VALUE)
+    EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload cmd);
 
     @GetMapping(value = "/v1/process-instances/{processInstanceId}")
     EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable(value = "processInstanceId") String processInstanceId);

@@ -15,33 +15,12 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstanceMeta;
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -83,6 +62,30 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSamples.defaultProcessInstance;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProcessInstanceControllerImpl.class)
 @EnableSpringDataWebSupport
@@ -167,6 +170,28 @@ public class ProcessInstanceControllerImplIT {
                                      .contentType(APPLICATION_JSON)
                                      .content(mapper.writeValueAsString(cmd)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void createProcess() throws Exception {
+        CreateProcessInstancePayload cmd = ProcessPayloadBuilder.create().withProcessDefinitionId("1").build();
+        when(processRuntime.create(any(CreateProcessInstancePayload.class))).thenReturn(defaultProcessInstance());
+
+        mockMvc.perform(post("/v1/process-instances/create")
+            .contentType(APPLICATION_JSON)
+            .content(mapper.writeValueAsString(cmd)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void startCreatedProcess() throws Exception {
+        StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
+        when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
+
+        mockMvc.perform(post("/v1/process-instances/{processInstanceId}/start", 1)
+            .contentType(APPLICATION_JSON)
+            .content(mapper.writeValueAsString(payload)))
+            .andExpect(status().isOk());
     }
 
     @Test
