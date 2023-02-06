@@ -121,7 +121,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
                                                                  @RequestBody(required = false) StartProcessPayload startProcessPayload) {
         StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(
             Optional.ofNullable(startProcessPayload).orElse(ProcessPayloadBuilder.start().build()));
-        return representationModelAssembler.toModel(processRuntime.startCreatedProcess(processInstanceId, startProcessPayload));
+        return representationModelAssembler.toModel(processRuntime.startCreatedProcess(processInstanceId, convertedStartProcessPayload));
     }
 
     @Override
