@@ -107,6 +107,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - name: Set VERSION env variable
+        id: set-version
+        run: |
+          VERSION=$(cat VERSION)
+          echo set VERSION=$VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
 
@@ -184,6 +192,16 @@ jobs:
           echo set PREVIEW_NAME=$PREVIEW_NAME
           echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
           echo "preview-name=$PREVIEW_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set BRANCH_NAME env variable
+        id: set-branch-name
+        run: |
+          BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF}
+          BRANCH_NAME=${BRANCH_NAME#refs/heads/}
+          BRANCH_NAME=$(echo ${BRANCH_NAME/\//-} | tr '[:upper:]' '[:lower:]')
+          echo set BRANCH_NAME=$BRANCH_NAME
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Checkout repository
         uses: actions/checkout@v3
