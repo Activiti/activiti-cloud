@@ -31,7 +31,7 @@ import java.util.Set;
  * <p>For general purpose you should use {@link org.activiti.cloud.identity.IdentityService}
  *
  */
-public interface IdentityManagementService {
+public interface IdentityManagementService extends IdentityService {
 
   List<User> findUsers(UserSearchParams userSearchParams);
 

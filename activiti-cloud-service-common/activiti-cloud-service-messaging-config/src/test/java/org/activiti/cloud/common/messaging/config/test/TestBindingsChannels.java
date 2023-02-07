@@ -33,27 +33,27 @@ public interface TestBindingsChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
-    @InputBinding
+    @InputBinding(COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer()  {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
     };
 
-    @InputBinding
+    @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
         return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
     }
 
-    @InputBinding
+    @InputBinding(AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER).get();
     }
 
-    @OutputBinding
+    @OutputBinding(COMMAND_RESULTS)
     default MessageChannel commandResults() {
         return MessageChannels.direct(COMMAND_RESULTS).get();
     }
 
-    @OutputBinding
+    @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).get();
     }

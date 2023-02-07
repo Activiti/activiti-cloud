@@ -23,7 +23,7 @@ public interface AuditConsumer {
 
     String AUDIT_CONSUMER = "auditConsumer";
 
-    @InputBinding
+    @InputBinding(AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
         return MessageChannels.publishSubscribe(AUDIT_CONSUMER)
                               .get();

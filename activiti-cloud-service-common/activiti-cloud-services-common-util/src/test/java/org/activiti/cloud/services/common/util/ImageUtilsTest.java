@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
+package org.activiti.cloud.services.common.util;
 
-public interface QueryConsumerChannels {
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-    String QUERY_CONSUMER = "queryConsumer";
+class ImageUtilsTest {
 
-    @InputBinding(QUERY_CONSUMER)
-    default SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
+    @Test
+    void should_convertSvgToPng() throws Exception {
+        byte[] svg = this.getClass().getClassLoader().getResourceAsStream("images/save.svg").readAllBytes();
+        byte[] png = ImageUtils.svgToPng(svg);
+        byte[] expectedPng = this.getClass().getClassLoader().getResourceAsStream("images/save.png").readAllBytes();
+        Assertions.assertThat(png).isEqualTo(expectedPng);
     }
 }

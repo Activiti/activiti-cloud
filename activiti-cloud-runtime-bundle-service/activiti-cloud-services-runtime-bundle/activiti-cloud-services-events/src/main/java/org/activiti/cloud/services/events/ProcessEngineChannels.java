@@ -29,17 +29,17 @@ public interface ProcessEngineChannels {
 
     String AUDIT_PRODUCER = "auditProducer";
 
-    @InputBinding
+    @InputBinding(COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
     }
 
-    @OutputBinding
+    @OutputBinding(COMMAND_RESULTS)
     default MessageChannel commandResults() {
         return MessageChannels.direct(COMMAND_RESULTS).get();
     }
 
-    @OutputBinding
+    @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).get();
     }

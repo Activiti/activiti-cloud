@@ -33,8 +33,10 @@ package org.activiti.cloud.services.rest.controllers;
 import static java.util.Collections.emptyList;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -112,6 +114,19 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         startProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
 
         return representationModelAssembler.toModel(processRuntime.start(startProcessPayload));
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> startCreatedProcess(@PathVariable String processInstanceId,
+                                                                 @RequestBody(required = false) StartProcessPayload startProcessPayload) {
+        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(
+            Optional.ofNullable(startProcessPayload).orElse(ProcessPayloadBuilder.start().build()));
+        return representationModelAssembler.toModel(processRuntime.startCreatedProcess(processInstanceId, convertedStartProcessPayload));
+    }
+
+    @Override
+    public EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload createProcessInstancePayload) {
+        return representationModelAssembler.toModel(processRuntime.create(createProcessInstancePayload));
     }
 
     @Override

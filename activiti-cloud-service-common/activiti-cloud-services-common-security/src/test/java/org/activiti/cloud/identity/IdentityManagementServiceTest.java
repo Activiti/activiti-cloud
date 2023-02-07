@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
+package org.activiti.cloud.identity;
 
-public interface QueryConsumerChannels {
+import org.junit.jupiter.api.Test;
 
-    String QUERY_CONSUMER = "queryConsumer";
+import static org.assertj.core.api.Assertions.assertThat;
 
-    @InputBinding(QUERY_CONSUMER)
-    default SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
+class IdentityManagementServiceTest {
+
+    @Test
+    public void should_IdentityServiceCanBeAssignedFromIdentityManagementService() {
+        assertThat(IdentityService.class.isAssignableFrom(IdentityManagementService.class)).isTrue();
     }
 }

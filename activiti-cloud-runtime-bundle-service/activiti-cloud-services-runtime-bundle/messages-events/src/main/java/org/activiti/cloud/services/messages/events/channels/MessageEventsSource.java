@@ -23,7 +23,7 @@ public interface MessageEventsSource {
 
     String MESSAGE_EVENTS_OUTPUT = "messageEventsOutput";
 
-    @OutputBinding
+    @OutputBinding(MESSAGE_EVENTS_OUTPUT)
     default MessageChannel messageEventsOutput() {
         return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).get();
     }
