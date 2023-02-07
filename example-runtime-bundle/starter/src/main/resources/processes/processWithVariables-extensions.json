@@ -1,0 +1,15 @@
+{
+  "id": "ProcessWithVariables",
+  "name": "myProcess.bpmn",
+  "extensions": {
+    "ProcessWithVariables": {
+      "properties": {},
+      "mappings": {
+        "sid-0D7E3266-5452-4890-8326-E18EA5DD4A96": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}

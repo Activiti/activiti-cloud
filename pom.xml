@@ -166,6 +166,14 @@
     <module>activiti-cloud-modeling-service</module>
     <module>activiti-cloud-notifications-graphql-service</module>
     <module>activiti-cloud-connectors</module>
+    <module>example-runtime-bundle</module>
+    <module>activiti-cloud-query</module>
+    <module>example-cloud-connector</module>
+    <module>activiti-cloud-modeling/liquibase</module>
+    <module>activiti-cloud-modeling</module>
+    <module>activiti-cloud-identity-adapter</module>
+    <module>activiti-cloud-acceptance-scenarios</module>
+    <module>activiti-cloud-dependencies</module>
   </modules>
   <scm>
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>

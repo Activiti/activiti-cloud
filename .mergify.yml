@@ -2,13 +2,22 @@ queue_rules:
   - name: default
     conditions:
       - status-success=build
+      - status-success=test (rabbitmq, partitioned, default-destinations)
+      - status-success=test (rabbitmq, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, default-destinations)
+      - status-success=test (kafka, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, override-destinations)
       - label!=do-not-merge
-
 pull_request_rules:
   - name: queue when bot user
     conditions:
       - author=alfresco-build
       - status-success=build
+      - status-success=test (rabbitmq, partitioned, default-destinations)
+      - status-success=test (rabbitmq, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, default-destinations)
+      - status-success=test (kafka, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, override-destinations)
       - label!=do-not-merge
     actions:
       queue:
@@ -20,6 +29,11 @@ pull_request_rules:
       - "#review-requested=0"
       - "#changes-requested-reviews-by=0"
       - status-success=build
+      - status-success=test (rabbitmq, partitioned, default-destinations)
+      - status-success=test (rabbitmq, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, default-destinations)
+      - status-success=test (kafka, non-partitioned, default-destinations)
+      - status-success=test (kafka, partitioned, override-destinations)
       - status-success=license/cla
       - label!=do-not-merge
     actions:

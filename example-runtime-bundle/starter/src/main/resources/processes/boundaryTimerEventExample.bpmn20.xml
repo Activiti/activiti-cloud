@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0vbkjz6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta.3">
+  <bpmn:process id="boundaryTimerEventExample" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_13swgk5</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_13swgk5" sourceRef="StartEvent_1" targetRef="performTask" />
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>SequenceFlow_1t9k8l4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_10rhjpe" sourceRef="performTask" targetRef="ExclusiveGateway_0gay9np" />
+    <bpmn:userTask id="performTask" name="Perfrom Task">
+      <bpmn:incoming>SequenceFlow_13swgk5</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_10rhjpe</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="timer" attachedToRef="performTask">
+      <bpmn:outgoing>SequenceFlow_144zjoz</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0gay9np">
+      <bpmn:incoming>SequenceFlow_10rhjpe</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_144zjoz</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1t9k8l4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1t9k8l4" sourceRef="ExclusiveGateway_0gay9np" targetRef="EndEvent_1" />
+    <bpmn:sequenceFlow id="SequenceFlow_144zjoz" sourceRef="timer" targetRef="ExclusiveGateway_0gay9np" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="boundaryTimerEventExample">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_13swgk5_di" bpmnElement="SequenceFlow_13swgk5">
+        <di:waypoint x="215" y="121" />
+        <di:waypoint x="305" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_15svpyc_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="596" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_10rhjpe_di" bpmnElement="SequenceFlow_10rhjpe">
+        <di:waypoint x="405" y="121" />
+        <di:waypoint x="476" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0p7mxsb_di" bpmnElement="performTask">
+        <dc:Bounds x="305" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_0w7lbhu_di" bpmnElement="timer">
+        <dc:Bounds x="337" y="143" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="311" y="186" width="29" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0gay9np_di" bpmnElement="ExclusiveGateway_0gay9np" isMarkerVisible="true">
+        <dc:Bounds x="476" y="96" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1t9k8l4_di" bpmnElement="SequenceFlow_1t9k8l4">
+        <di:waypoint x="526" y="121" />
+        <di:waypoint x="596" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_144zjoz_di" bpmnElement="SequenceFlow_144zjoz">
+        <di:waypoint x="355" y="179" />
+        <di:waypoint x="355" y="223" />
+        <di:waypoint x="501" y="223" />
+        <di:waypoint x="501" y="146" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

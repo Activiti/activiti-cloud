@@ -1,7 +1,7 @@
 github:
   organisations:
-    - name: activiti
+    - name: alfresco
       repositories:
-        - name: activiti-cloud-application
+        - name: alfresco-process
           branch: develop
           useSinglePullRequest: true
