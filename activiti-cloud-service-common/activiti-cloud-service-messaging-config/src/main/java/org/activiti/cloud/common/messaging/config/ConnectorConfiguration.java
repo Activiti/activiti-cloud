@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
+import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -51,7 +52,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (Connector.class.isInstance(bean)) {
+                if (Connector.class.isInstance(bean) || ConsumerConnector.class.isInstance(bean)) {
 
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
