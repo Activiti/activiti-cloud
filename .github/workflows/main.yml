@@ -30,6 +30,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: pre-commit
+    # Map a step output to a job output
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+      branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
+      preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
     steps:
 
       - name: Checkout repository
