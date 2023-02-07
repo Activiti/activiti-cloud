@@ -35,6 +35,7 @@ jobs:
       version: ${{ steps.set-version.outputs.version }}
       branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
       preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
+
     steps:
 
       - name: Checkout repository
@@ -59,13 +60,8 @@ jobs:
         id: update-pom-to-next-version
         if: github.event_name == 'push'
 
-      - name: Update VERSION file
-        if: github.event_name == 'push'
-        run: |
-          echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
-
-      - name: Set preview version
-        if: ${{ contains(github.head_ref, 'preview') }}
+      - name: Set VERSION
+        if: ${{ github.event_name == 'pull_request' }}
         run: |
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo 0.0.1-${GITHUB_PR_NUMBER}-${GITHUB_RUN_NUMBER}-SNAPSHOT > VERSION
@@ -80,6 +76,11 @@ jobs:
       - name: Update pom files to the new version
         if: ${{ contains(github.head_ref, 'preview') }}
         run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+
+      - name: Update VERSION file
+        if: github.event_name == 'push'
+        run: |
+          echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
 
       - name: Define Maven Command
         id: define_maven_command
