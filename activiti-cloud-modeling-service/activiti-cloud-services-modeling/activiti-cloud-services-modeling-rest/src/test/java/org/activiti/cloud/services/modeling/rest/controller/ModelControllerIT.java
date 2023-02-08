@@ -22,6 +22,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ModelScope;
+import org.activiti.cloud.modeling.api.process.ProcessVariable;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
@@ -30,6 +31,7 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
+import org.activiti.cloud.services.modeling.mock.MockFactory;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,6 +83,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -1424,4 +1427,36 @@ public class ModelControllerIT {
             Arguments.of(null, 0, null, null)
         );
     }
+
+    @Test
+    public void should_returnSanitizedProcessModelExtensions_when_creatingProcessModelWithSvgExtensions()
+            throws Exception {
+        final String svg = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI" +
+                "yNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNhdmUtMjR" +
+                "weCAoMSkiIG9wYWNpdHk9IjEiPjxwYXRoIGlkPSJQYXRoXzE3OTY1IiBkYXRhLW5hbWU9IlBhdGggMTc5NjUiIGQ9Ik0wLDBIMjR" +
+                "WMjRIMFoiIGZpbGw9Im5vbmUiLz48cGF0aCBpZD0iUGF0aF8xNzk2NiIgZGF0YS1uYW1lPSJQYXRoIDE3OTY2IiBkPSJNMTcsM0g" +
+                "1QTIsMiwwLDAsMCwzLDVWMTlhMiwyLDAsMCwwLDIsMkgxOWEyLjAwNiwyLjAwNiwwLDAsMCwyLTJWN1ptMiwxNkg1VjVIMTYuMTd" +
+                "MMTksNy44M1ptLTctN2EzLDMsMCwxLDAsMywzQTMsMywwLDAsMCwxMiwxMlpNNiw2aDl2NEg2WiIvPjwvZz48L3N2Zz4K";
+
+        Project project = projectRepository.createProject(project("parent-project"));
+
+        ProcessVariable processVariable = MockFactory.processVariable("image");
+        processVariable.setValue(svg);
+        Map<String, ProcessVariable> processVariables = Map.of("image", processVariable);
+        Extensions extensions = new Extensions();
+        extensions.setProcessVariables(processVariables);
+        Map<String, Extensions> processExtension = new HashMap<>();
+        processExtension.put("process-model-extensions", extensions);
+        ModelEntity processModel = processModelWithExtensions("process-model-extensions", processExtension);
+
+        ResultActions resultActions = mockMvc.perform(post("/v1/projects/{projectId}/models",
+                project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(processModel)));
+        resultActions
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.extensions.process-model-extensions.properties.image.value",
+                        startsWith("data:image/png;base64,")));
+    }
+
 }
