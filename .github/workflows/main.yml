@@ -131,7 +131,7 @@ jobs:
         run: make docker/example-cloud-connector
 
       - name: Build Activiti Cloud Modeling
-        run: make mvn/activiti-cloud-modeling/liquibase docker/activiti-cloud-modeling
+        run: make docker/activiti-cloud-modeling
 
       - name: Build Activiti Cloud Identity Adapter
         run: make docker/activiti-cloud-identity-adapter
