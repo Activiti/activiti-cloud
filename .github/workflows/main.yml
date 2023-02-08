@@ -403,6 +403,10 @@ jobs:
           # Showing the deployment result
           kubectl get all -n $PREVIEW_NAME
 
+          # Rebuild maven modules before running tests
+          echo "Rebuilding modules"
+          make rebuild
+
           # Launching the tests
           make test/modeling-acceptance-tests
           make test/runtime-acceptance-tests
