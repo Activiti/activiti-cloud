@@ -404,7 +404,7 @@ jobs:
           kubectl get all -n $PREVIEW_NAME
 
           # Rebuild maven modules before running tests
-          echo "Rebuilding modules"
+          echo "Run mvn install"
           make rebuild
 
           # Launching the tests
