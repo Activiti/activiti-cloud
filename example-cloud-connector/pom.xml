@@ -19,7 +19,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.9.0-alpha.12</activiti-cloud.version>
+    <activiti-cloud.version>${project.version}</activiti-cloud.version>
     <start-class>org.activiti.cloud.examples.CloudConnectorApp</start-class>
   </properties>
   <dependencyManagement>
@@ -93,6 +93,7 @@
           <execution>
             <goals>
               <goal>build-info</goal>
+              <goal>repackage</goal>
             </goals>
           </execution>
         </executions>
