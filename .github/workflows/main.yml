@@ -90,14 +90,14 @@ jobs:
           then
             echo "command=deploy" >> $GITHUB_OUTPUT
           else
-            echo "command=verify" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
           fi
         env:
           DO_PUSH: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
 
       - name: Build and Test with Maven (and maybe Deploy)
         shell: bash
-        run: mvn -DskipTests -DnoAcceptanceTests=true ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipTests -DnoAcceptanceTests=true -Dmaven.source.skip=true ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -190,6 +190,7 @@ jobs:
           - messaging-broker: kafka
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
+
     steps:
       - name: Set PREVIEW_NAME env variable
         id: set-preview-name
@@ -402,10 +403,6 @@ jobs:
 
           # Showing the deployment result
           kubectl get all -n $PREVIEW_NAME
-
-          # Rebuild maven modules before running tests
-          echo "Run mvn install"
-          make rebuild
 
           # Launching the tests
           make test/modeling-acceptance-tests

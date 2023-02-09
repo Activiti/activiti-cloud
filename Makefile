@@ -139,9 +139,6 @@ tag:
 	git tag -fa $(RELEASE_VERSION) -m "Release version $(RELEASE_VERSION)"
 	git push -f -q origin $(RELEASE_VERSION)
 
-rebuild:
-	mvn ${MAVEN_CLI_OPTS} -DskipTests -Droot.log.level=off install
-
 test/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
 
