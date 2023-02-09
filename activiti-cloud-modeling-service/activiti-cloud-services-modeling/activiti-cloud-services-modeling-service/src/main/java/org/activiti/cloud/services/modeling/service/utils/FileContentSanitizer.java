@@ -26,7 +26,6 @@ import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.common.util.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class FileContentSanitizer {
@@ -35,7 +34,6 @@ public class FileContentSanitizer {
 
     private final ObjectMapper objectMapper;
 
-    @Autowired
     public FileContentSanitizer() {
         this.objectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule("jsonStringSanitizingModelingModule", Version.unknownVersion());
