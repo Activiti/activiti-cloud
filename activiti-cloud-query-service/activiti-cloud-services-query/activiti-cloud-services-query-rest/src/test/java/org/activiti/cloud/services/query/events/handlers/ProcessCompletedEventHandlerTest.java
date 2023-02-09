@@ -124,6 +124,9 @@ class ProcessCompletedEventHandlerTest {
         verify(createdTask).setStatus(TaskStatus.CANCELLED);
         verify(assignedTask).setStatus(TaskStatus.CANCELLED);
         verify(suspendedTask, never()).setStatus(TaskStatus.CANCELLED);
+        verify(entityManager).persist(createdTask);
+        verify(entityManager).persist(assignedTask);
+        verify(entityManager, never()).persist(suspendedTask);
         verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     }
 
