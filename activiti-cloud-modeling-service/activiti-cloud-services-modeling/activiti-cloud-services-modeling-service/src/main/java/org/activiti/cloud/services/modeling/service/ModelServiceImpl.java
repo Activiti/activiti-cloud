@@ -371,8 +371,11 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Optional<ModelContent> createModelContentFromModel(Model model,
                                                               FileContent fileContent) {
+        final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fileContent);
         return (Optional<ModelContent>) modelContentService.findModelContentConverter(model.getType())
-                .map(modelContentConverter -> modelContentConverter.convertToModelContent(fileContent.getFileContent())).orElse(Optional.empty());
+                .map(modelContentConverter ->
+                        modelContentConverter.convertToModelContent(sanitizedFileContent.getFileContent()))
+                .orElse(Optional.empty());
     }
 
     @Override
