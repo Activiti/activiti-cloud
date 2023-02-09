@@ -90,14 +90,14 @@ jobs:
           then
             echo "command=deploy" >> $GITHUB_OUTPUT
           else
-            echo "command=install" >> $GITHUB_OUTPUT
+            echo "command=verify" >> $GITHUB_OUTPUT
           fi
         env:
           DO_PUSH: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
 
       - name: Build and Test with Maven (and maybe Deploy)
         shell: bash
-        run: mvn -DskipTests -DnoAcceptanceTests=true -Dmaven.source.skip=true ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipTests -DnoAcceptanceTests=true ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -234,6 +234,10 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Build maven
+        shell: bash
+        run: mvn ${MAVEN_CLI_OPTS} -DskipTests -Droot.log.level=off install
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
