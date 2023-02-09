@@ -65,6 +65,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
@@ -102,7 +103,10 @@ public class ModelServiceImpl implements ModelService {
     private final FileMagicNumberValidator fileContentValidator;
 
     private final ValidationStrategy<ModelContentValidator> modelContentValidationStrategy;
+
     private final ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy;
+
+    private final FileContentSanitizer fileContentSanitizer;
 
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
@@ -120,7 +124,8 @@ public class ModelServiceImpl implements ModelService {
                             Set<ModelUpdateListener> modelUpdateListeners,
                             FileMagicNumberValidator fileContentValidator,
                             ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
-                            ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy) {
+                            ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
+                            FileContentSanitizer fileContentSanitizer) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -130,6 +135,7 @@ public class ModelServiceImpl implements ModelService {
         this.fileContentValidator = fileContentValidator;
         this.modelContentValidationStrategy = modelContentValidationStrategy;
         this.modelExtensionsValidationStrategy = modelExtensionsValidationStrategy;
+        this.fileContentSanitizer = fileContentSanitizer;
         modelUpdateListenersMapByModelType = modelUpdateListeners
             .stream()
             .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
@@ -325,21 +331,22 @@ public class ModelServiceImpl implements ModelService {
             ? fileContent
             : overrideModelContentId(modelToBeUpdated,
                 fileContent);
+        final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fixedFileContent);
 
-        modelToBeUpdated.setContentType(fixedFileContent.getContentType());
-        modelToBeUpdated.setContent(fixedFileContent.getFileContent());
+        modelToBeUpdated.setContentType(sanitizedFileContent.getContentType());
+        modelToBeUpdated.setContent(sanitizedFileContent.getFileContent());
 
         if (modelToBeUpdated.getType().equals(PROCESS) &&
-            fixedFileContent.getFileContent() != null &&
-            isBpmnModelContent(fixedFileContent.getFileContent())) {
-            modelToBeUpdated.setCategory(
-                processModelContentConverter.convertToBpmnModel(fixedFileContent.getFileContent()).getTargetNamespace());
+            sanitizedFileContent.getFileContent() != null &&
+            isBpmnModelContent(sanitizedFileContent.getFileContent())) {
+            modelToBeUpdated.setCategory(processModelContentConverter.convertToBpmnModel(
+                    sanitizedFileContent.getFileContent()).getTargetNamespace());
         }
 
         try {
             Optional.ofNullable(modelToBeUpdated.getType())
                 .flatMap(modelContentService::findModelContentConverter)
-                .flatMap(validator -> validator.convertToModelContent(fixedFileContent.getFileContent()))
+                .flatMap(validator -> validator.convertToModelContent(sanitizedFileContent.getFileContent()))
                 .ifPresent(modelContent -> modelToBeUpdated.setTemplate(modelContent.getTemplate()));
         } catch (XMLException e) {
             throw new ImportModelException("Error importing model : " + e.getMessage());
@@ -347,10 +354,9 @@ public class ModelServiceImpl implements ModelService {
 
         emptyIfNull(modelContentService.findContentUploadListeners(modelToBeUpdated.getType()))
             .stream()
-            .forEach(listener -> listener.execute(modelToBeUpdated, fixedFileContent));
+            .forEach(listener -> listener.execute(modelToBeUpdated, sanitizedFileContent));
 
-        return modelRepository.updateModelContent(modelToBeUpdated,
-            fixedFileContent);
+        return modelRepository.updateModelContent(modelToBeUpdated, sanitizedFileContent);
     }
 
     @Override

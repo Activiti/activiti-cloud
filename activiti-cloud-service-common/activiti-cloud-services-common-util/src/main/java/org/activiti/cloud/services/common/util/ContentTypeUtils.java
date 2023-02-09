@@ -38,6 +38,8 @@ public final class ContentTypeUtils {
 
     public static final String CONTENT_TYPE_SVG = "image/svg+xml";
 
+    public static final String CONTENT_TYPE_PNG = "image/png";
+
     public static final String CONTENT_TYPE_ZIP = "application/zip";
 
     private static final String EMPTY_STRING = "";
@@ -78,10 +80,20 @@ public final class ContentTypeUtils {
      * Check if a content type is json
      *
      * @param contentType the content type to check
-     * @return true if the the given content type is json
+     * @return true if the given content type is json
      */
     public static boolean isJsonContentType(String contentType) {
         return CONTENT_TYPE_JSON.equals(contentType);
+    }
+
+    /**
+     * Check if a content type is svg image
+     *
+     * @param contentType the content type to check
+     * @return true if the given content type is svg
+     */
+    public static boolean isSvgContentType(String contentType) {
+        return CONTENT_TYPE_SVG.equals(contentType);
     }
 
     public static String toJsonFilename(String filename) {

@@ -60,6 +60,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
+import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -121,6 +122,9 @@ public class ModelServiceImplTest {
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
 
+    @Mock
+    private FileContentSanitizer fileContentSanitizer;
+
     private Model modelTwo;
 
     private Project projectOne;
@@ -149,7 +153,7 @@ public class ModelServiceImplTest {
 
         modelService = new ModelServiceImpl(modelRepository, modelTypeService, modelContentService, modelExtensionsService, jsonConverter,
             processModelContentConverter, modelUpdateListeners, fileMagicNumberValidator, new AggregateErrorValidationStrategy<ModelContentValidator>(),
-            new AggregateErrorValidationStrategy<ModelExtensionsValidator>());
+            new AggregateErrorValidationStrategy<ModelExtensionsValidator>(), fileContentSanitizer);
     }
 
     @Test
@@ -444,6 +448,7 @@ public class ModelServiceImplTest {
         when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
 
         when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(false);
+        when(fileContentSanitizer.sanitizeContent(any())).thenReturn(fileContent);
 
         assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
 

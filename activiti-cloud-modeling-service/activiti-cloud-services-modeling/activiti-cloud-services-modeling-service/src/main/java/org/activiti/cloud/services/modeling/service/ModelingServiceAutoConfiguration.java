@@ -40,6 +40,7 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorS
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
+import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
@@ -92,7 +93,8 @@ public class ModelingServiceAutoConfiguration {
                                      Set<ModelUpdateListener> modelUpdateListeners,
                                      FileMagicNumberValidator fileContentValidator,
                                      ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
-                                     ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy) {
+                                     ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
+                                     FileContentSanitizer fileContentSanitizer) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
                                     modelContentService,
@@ -102,7 +104,8 @@ public class ModelingServiceAutoConfiguration {
                                     modelUpdateListeners,
                                     fileContentValidator,
                                     modelContentValidationStrategy,
-                                    modelExtensionsValidationStrategy);
+                                    modelExtensionsValidationStrategy,
+                                    fileContentSanitizer);
 
     }
 
@@ -162,5 +165,11 @@ public class ModelingServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public ProjectDecoratorService projectDecoratorService(List<ProjectDecorator> projectDecorators) {
         return new ProjectDecoratorService(projectDecorators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FileContentSanitizer fileContentSanitizer() {
+        return new FileContentSanitizer();
     }
 }
