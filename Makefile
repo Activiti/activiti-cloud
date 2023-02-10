@@ -87,7 +87,7 @@ docker/%:
 	$(eval MODULE=$(word 1, $(subst docker/, ,$@)))
 
 	@echo "Building docker image for $(MODULE):$(RELEASE_VERSION)..."
-	docker build -f $(MODULE)/Dockerfile -q -t docker.io/activiti/$(MODULE):$(RELEASE_VERSION) $(MODULE)
+	cd activiti-cloud-examples && docker build -f $(MODULE)/Dockerfile -q -t docker.io/activiti/$(MODULE):$(RELEASE_VERSION) $(MODULE)
 	docker push docker.io/activiti/$(MODULE):$(RELEASE_VERSION)
 
 # follow instructions at https://github.com/docker/hub-feedback/issues/496#issuecomment-277562292
