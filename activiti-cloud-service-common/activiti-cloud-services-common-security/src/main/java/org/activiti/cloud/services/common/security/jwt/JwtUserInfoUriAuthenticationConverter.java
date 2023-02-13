@@ -32,8 +32,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-    private final Logger log = LoggerFactory.getLogger(JwtUserInfoUriAuthenticationConverter.class);
-
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
