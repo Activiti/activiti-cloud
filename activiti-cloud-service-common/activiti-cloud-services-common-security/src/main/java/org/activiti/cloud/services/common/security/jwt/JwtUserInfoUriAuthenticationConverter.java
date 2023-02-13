@@ -22,7 +22,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -33,15 +32,15 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
 
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
-    private OAuth2UserService oAuth2UserService;
+    private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
     private String usernameClaim = "preferred_username";
 
     public JwtUserInfoUriAuthenticationConverter(Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
                                                  ClientRegistration clientRegistration,
-                                                 OAuth2UserService oAuth2UserService) {
+                                                 OAuth2UserServiceCacheable oAuth2UserServiceCacheable) {
         this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
         this.clientRegistration = clientRegistration;
-        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2UserServiceCacheable = oAuth2UserServiceCacheable;
     }
 
     @Override
@@ -62,7 +61,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             Instant expiresAt = jwt.getExpiresAt();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
+            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest);
             username = oAuth2User.getName();
         }
         return username;
