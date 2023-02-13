@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - develop
+      - balsarori-merge-activiti-cloud-application
   pull_request:
     branches:
-      - develop
+      - balsarori-merge-activiti-cloud-application
 
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -65,6 +65,11 @@ jobs:
         run: |
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo 0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT > VERSION
+
+      - name: Update VERSION file
+        if: github.event_name == 'push'
+        run: |
+          echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
 
       - name: Set VERSION env variable
         if: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}

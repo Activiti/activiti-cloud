@@ -3,5 +3,5 @@ github:
     - name: alfresco
       repositories:
         - name: alfresco-process
-          branch: develop
+          branch: cloud-merge-test
           useSinglePullRequest: true
