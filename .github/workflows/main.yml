@@ -434,6 +434,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Update pom files to the new version
+        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+
+      - name: Maven Deploy
+        shell: bash
+        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}}
+
       - name: Configure git user
         run: |
           git config --global user.name $GITHUB_USERNAME
@@ -446,10 +453,6 @@ jobs:
           git commit -am "Release $VERSION" --allow-empty
           git tag -fa $VERSION -m "Release version $VERSION"
           git push -f -q origin $VERSION
-
-      - name: Maven Deploy
-        shell: bash
-        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}}
 
       - name: Install updatebot
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.21.0
@@ -474,6 +477,7 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
 
   notify:
     runs-on: ubuntu-latest
