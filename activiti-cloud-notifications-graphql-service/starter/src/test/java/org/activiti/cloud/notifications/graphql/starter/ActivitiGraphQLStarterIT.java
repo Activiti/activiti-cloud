@@ -17,12 +17,9 @@ package org.activiti.cloud.notifications.graphql.starter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -151,6 +148,7 @@ public class ActivitiGraphQLStarterIT {
 
         String initMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                      .type(GraphQLMessageType.CONNECTION_INIT)
+                                                                     .id("initx-authorization-supported")
                                                                      .payload(payload)
                                                                      .build());
 
@@ -180,6 +178,7 @@ public class ActivitiGraphQLStarterIT {
 
         String ackMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                     .type(GraphQLMessageType.CONNECTION_ACK)
+                                                                    .id("initx-authorization-supported")
                                                                     .build());
 
         String kaMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
@@ -997,6 +996,7 @@ public class ActivitiGraphQLStarterIT {
 
         String initMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                      .type(GraphQLMessageType.CONNECTION_INIT)
+                                                                     .id("user-role-authorized-connection")
                                                                      .payload(payload)
                                                                      .build());
         HttpClient.create()
@@ -1026,6 +1026,7 @@ public class ActivitiGraphQLStarterIT {
 
         String ackMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                     .type(GraphQLMessageType.CONNECTION_ACK)
+                                                                    .id("user-role-authorized-connection")
                                                                     .build());
 
         String kaMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
@@ -1045,6 +1046,7 @@ public class ActivitiGraphQLStarterIT {
 
         String initMessage = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                      .type(GraphQLMessageType.CONNECTION_INIT)
+                                                                     .id("unauthorized-connection")
                                                                      .build());
         HttpClient.create()
                 .baseUrl("ws://localhost:" + port)
@@ -1074,6 +1076,7 @@ public class ActivitiGraphQLStarterIT {
 
         String expected = objectMapper.writeValueAsString(GraphQLMessage.builder()
                                                                   .type(GraphQLMessageType.CONNECTION_ERROR)
+                                                                  .id("unauthorized-connection")
                                                                   .build());
         StepVerifier.create(output)
                 .expectNext(expected)
@@ -1339,8 +1342,7 @@ public class ActivitiGraphQLStarterIT {
     }
 
     @Test
-    public void testGraphqlArguments()
-            throws JsonParseException, JsonMappingException, IOException {
+    public void testGraphqlArguments() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
                 "query TasksQuery($name: String!) {Tasks(where:{name:{EQ: $name}}) {select{id assignee priority}}}");
 
