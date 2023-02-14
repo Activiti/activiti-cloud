@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.activiti.cloud.acc.core.helper.SvgToPng.svgToPng;
+import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext

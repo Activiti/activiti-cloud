@@ -29,5 +29,5 @@ import org.springframework.core.annotation.AliasFor;
 @Bean
 public @interface OutputBinding {
     @AliasFor(annotation = Bean.class, attribute = "name")
-    String[] value() default {};
+    String[] value();
 }

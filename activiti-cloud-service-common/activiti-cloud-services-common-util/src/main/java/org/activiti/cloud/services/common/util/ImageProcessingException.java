@@ -13,18 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.app;
 
-import org.activiti.cloud.common.messaging.functional.InputBinding;
-import org.springframework.integration.dsl.MessageChannels;
-import org.springframework.messaging.SubscribableChannel;
+package org.activiti.cloud.services.common.util;
 
-public interface QueryConsumerChannels {
-
-    String QUERY_CONSUMER = "queryConsumer";
-
-    @InputBinding(QUERY_CONSUMER)
-    default SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
+public class ImageProcessingException extends Exception {
+    public ImageProcessingException(Throwable cause) {
+        super(cause);
     }
 }

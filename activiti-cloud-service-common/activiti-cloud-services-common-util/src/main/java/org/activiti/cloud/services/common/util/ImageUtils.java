@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.acc.core.helper;
+package org.activiti.cloud.services.common.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+public class ImageUtils {
 
-public class SvgToPng {
+    private ImageUtils() {
+    }
 
-    public static byte[] svgToPng(byte[] streamBytes)
-            throws TranscoderException, IOException {
+    public static byte[] svgToPng(byte[] streamBytes) throws IOException, ImageProcessingException {
         try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             new PNGTranscoder().transcode(new TranscoderInput(input),
                     new TranscoderOutput(output));
             output.flush();
             return output.toByteArray();
+        } catch (TranscoderException e) {
+            throw new ImageProcessingException(e);
         }
     }
 }

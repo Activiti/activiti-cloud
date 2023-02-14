@@ -25,13 +25,13 @@ public interface ProcessEngineIntegrationChannels {
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
-    @InputBinding
+    @InputBinding(INTEGRATION_RESULTS_CONSUMER)
     default SubscribableChannel integrationResultsConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER)
                               .get();
     }
 
-    @InputBinding
+    @InputBinding(INTEGRATION_ERRORS_CONSUMER)
     default SubscribableChannel integrationErrorsConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER)
                               .get();

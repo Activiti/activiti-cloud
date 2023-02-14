@@ -29,6 +29,7 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
@@ -121,6 +122,78 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
         assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
         assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
+    }
+
+    @Test
+    public void shouldCreateProcessInstanceWithoutStartingIt() {
+        //when
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.createProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            "business_key");
+
+        //then
+        assertThat(entity).isNotNull();
+        CloudProcessInstance returnedProcInst = entity.getBody();
+        assertThat(returnedProcInst).isNotNull();
+        assertThat(returnedProcInst.getId()).isNotNull();
+        assertThat(returnedProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.CREATED);
+        assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(returnedProcInst.getInitiator()).isNotNull();
+        assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
+        assertThat(returnedProcInst.getBusinessKey()).isEqualTo("business_key");
+        assertThat(returnedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
+        assertThat(returnedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
+        assertThat(returnedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
+        assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
+        assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
+    }
+
+    @Test
+    public void shouldStartAnAlreadyCreatedProcess() {
+        //when
+        ResponseEntity<CloudProcessInstance> createdEntity = processInstanceRestTemplate.createProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            "business_key");
+        CloudProcessInstance createdProcInst = createdEntity.getBody();
+        assertThat(createdProcInst).isNotNull();
+        assertThat(createdProcInst.getId()).isNotNull();
+        assertThat(createdProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.CREATED);
+
+        ResponseEntity<CloudProcessInstance> startedEntity =
+            processInstanceRestTemplate.startCreatedProcess(createdEntity.getBody().getId());
+
+        //then
+        assertThat(startedEntity).isNotNull();
+        assertThat(startedEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        CloudProcessInstance startedProcInst = startedEntity.getBody();
+        assertThat(startedProcInst).isNotNull();
+        assertThat(startedProcInst.getId()).isNotNull();
+        assertThat(startedProcInst.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        assertThat(startedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
+        assertThat(startedProcInst.getInitiator()).isNotNull();
+        assertThat(startedProcInst.getInitiator()).isEqualTo(keycloakTestUser);//will only match if using username not id
+        assertThat(startedProcInst.getBusinessKey()).isEqualTo("business_key");
+        assertThat(startedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
+        assertThat(startedProcInst.getAppVersion()).isEqualTo("1");
+        assertThat(startedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
+        assertThat(startedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
+        assertThat(startedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
+        assertThat(startedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
+    }
+
+    @Test
+    public void shouldThrowAnError_when_StartingAnAlreadyStartedProcess() {
+        //when
+        ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key");
+
+        //then
+        assertThat(entity).isNotNull();
+
+        CloudProcessInstance startedProcessInstance = entity.getBody();
+        ResponseEntity<ActivitiErrorMessageImpl> failEntity =
+            processInstanceRestTemplate.startCreatedProcessFailing(startedProcessInstance.getId());
+        assertThat(failEntity.getBody().getMessage()).isEqualTo("Process instance " + startedProcessInstance.getId() + " has already been started");
+        assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
