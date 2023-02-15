@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.activiti.bpmn.exceptions.XMLException;
@@ -58,6 +59,7 @@ import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -69,6 +71,7 @@ import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +114,8 @@ public class ModelServiceImpl implements ModelService {
     private final HashMap<String, String> modelIdentifiers = new HashMap();
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
+
+    private final Pattern MODEL_NAME_REGEX = Pattern.compile("^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$");
 
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
@@ -184,6 +189,7 @@ public class ModelServiceImpl implements ModelService {
     public Model createModel(Project project,
         Model model) {
 
+        checkInvalidModelName(model.getName());
         checkIfModelNameExistsInProject(project,model);
         checkModelScopeIntegrity(model);
         model.setId(null);
@@ -205,6 +211,11 @@ public class ModelServiceImpl implements ModelService {
         }
 
         return modelRepository.createModel(model);
+    }
+
+    private void checkInvalidModelName(String modelName) {
+        if(StringUtils.isEmpty(modelName) || !MODEL_NAME_REGEX.matcher(modelName).matches())
+            throw new ModelNameInvalidException("Invalid model name");
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
