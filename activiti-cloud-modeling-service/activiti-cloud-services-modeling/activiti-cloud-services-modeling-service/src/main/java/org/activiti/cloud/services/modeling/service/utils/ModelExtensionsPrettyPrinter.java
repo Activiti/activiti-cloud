@@ -18,14 +18,28 @@ package org.activiti.cloud.services.modeling.service.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.util.Separators;
 import java.io.IOException;
 
 public class ModelExtensionsPrettyPrinter extends DefaultPrettyPrinter {
 
-    private char emptyObjectSeparator = ' ';
+    private boolean useEmptyObjectSeparator = true;
 
-    public ModelExtensionsPrettyPrinter withEmptyObjectSeparator(char separator) {
-        this.emptyObjectSeparator = separator;
+    @Override
+    public ModelExtensionsPrettyPrinter createInstance() {
+        return new ModelExtensionsPrettyPrinter()
+            .withEmptyObjectSeparator(useEmptyObjectSeparator);
+    }
+
+    public ModelExtensionsPrettyPrinter withEmptyObjectSeparator(boolean useEmptyObjectSeparator) {
+        this.useEmptyObjectSeparator = useEmptyObjectSeparator;
+        return this;
+    }
+
+    @Override
+    public DefaultPrettyPrinter withSeparators(Separators separators) {
+        _separators = separators;
+        _objectFieldValueSeparatorWithSpaces = separators.getObjectFieldValueSeparator() + " ";
         return this;
     }
 
@@ -38,7 +52,9 @@ public class ModelExtensionsPrettyPrinter extends DefaultPrettyPrinter {
         if (nrOfEntries > 0) {
             _objectIndenter.writeIndentation(g, _nesting);
         } else {
-            g.writeRaw(emptyObjectSeparator);
+            if(useEmptyObjectSeparator) {
+                g.writeRaw(' ');
+            }
         }
         g.writeRaw('}');
     }

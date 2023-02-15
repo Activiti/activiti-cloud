@@ -42,10 +42,11 @@ public class FileContentSanitizer {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        this.prettyPrinter = new ModelExtensionsPrettyPrinter().withEmptyObjectSeparator('\0');
+        this.prettyPrinter = new ModelExtensionsPrettyPrinter().withEmptyObjectSeparator(false);
 
         SimpleModule module = new SimpleModule("jsonStringSanitizingModelingModule", Version.unknownVersion());
         module.addDeserializer(String.class, new StringSanitizingDeserializer());
+
         this.objectMapper.registerModule(module);
     }
 

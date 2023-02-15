@@ -60,7 +60,7 @@ class FileContentSanitizerTest {
 
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("img.json");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
-        Assertions.assertThat(sanitizedContent.toString()).contains("{\"image\":\"data:image/png;base64,");
+        Assertions.assertThat(sanitizedContent.toString()).contains("\"image\": \"data:image/png;base64,");
     }
 
     @Test
@@ -74,6 +74,6 @@ class FileContentSanitizerTest {
 
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("basic-process.json");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
-        Assertions.assertThat(sanitizedContent.toString()).isEqualTo(new String(json, StandardCharsets.UTF_8));
+        Assertions.assertThat(sanitizedContent.toString().trim()).isEqualTo(new String(json, StandardCharsets.UTF_8).trim());
     }
 }
