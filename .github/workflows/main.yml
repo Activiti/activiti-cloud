@@ -132,7 +132,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ false }}
     strategy:
       fail-fast: false
       matrix:
