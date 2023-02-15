@@ -31,6 +31,8 @@ class FileContentSanitizerTest {
 
     private static final String SVG_IMAGE_PREFIX = "data:image/svg+xml;base64,";
 
+    private static final String JSON_FILE_LOCATION = "extensions/basic-process.json";
+
     private final FileContentSanitizer fileContentSanitizer = new FileContentSanitizer();
 
     @Test
@@ -59,5 +61,19 @@ class FileContentSanitizerTest {
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("img.json");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
         Assertions.assertThat(sanitizedContent.toString()).contains("{\"image\":\"data:image/png;base64,");
+    }
+
+    @Test
+    void should_deserializeJsonWithoutChangingFormat() throws IOException {
+        byte[] json = FileUtils.resourceAsStream(JSON_FILE_LOCATION)
+            .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
+            .readAllBytes();
+
+        FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(new FileContent("basic-process.json",
+            ContentTypeUtils.CONTENT_TYPE_JSON, json));
+
+        Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("basic-process.json");
+        Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
+        Assertions.assertThat(sanitizedContent.toString()).isEqualTo(new String(json, StandardCharsets.UTF_8));
     }
 }
