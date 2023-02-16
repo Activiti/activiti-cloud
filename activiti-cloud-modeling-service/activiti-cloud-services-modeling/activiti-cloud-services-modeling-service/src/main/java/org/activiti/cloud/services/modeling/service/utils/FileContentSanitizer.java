@@ -16,10 +16,12 @@
 
 package org.activiti.cloud.services.modeling.service.utils;
 
-import java.util.Map;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.Map;
 import org.activiti.cloud.modeling.converter.StringSanitizingDeserializer;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.common.util.ContentTypeUtils;
@@ -34,10 +36,17 @@ public class FileContentSanitizer {
 
     private final ObjectMapper objectMapper;
 
+    private final PrettyPrinter prettyPrinter;
+
     public FileContentSanitizer() {
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        this.prettyPrinter = new ModelExtensionsPrettyPrinter().withEmptyObjectSeparator(false);
+
         SimpleModule module = new SimpleModule("jsonStringSanitizingModelingModule", Version.unknownVersion());
         module.addDeserializer(String.class, new StringSanitizingDeserializer());
+
         this.objectMapper.registerModule(module);
     }
 
@@ -53,7 +62,7 @@ public class FileContentSanitizer {
             } else if (ContentTypeUtils.isJsonContentType(fileContent.getContentType())) {
                 // ObjectMapper sanitizes String values
                 Map deserializedMap = objectMapper.readValue(fileContent.getFileContent(), Map.class);
-                updatedFileContent = objectMapper.writer().writeValueAsBytes(deserializedMap);
+                updatedFileContent = objectMapper.writer(prettyPrinter).writeValueAsBytes(deserializedMap);
             }
             return new FileContent(updatedFileName, updatedContentType, updatedFileContent);
         } catch (Exception e) {

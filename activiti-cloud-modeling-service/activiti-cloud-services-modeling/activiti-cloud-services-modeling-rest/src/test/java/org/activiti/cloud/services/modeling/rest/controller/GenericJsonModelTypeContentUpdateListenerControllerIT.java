@@ -24,6 +24,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
@@ -32,6 +33,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.activiti.cloud.services.modeling.service.utils.ModelExtensionsPrettyPrinter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,8 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final PrettyPrinter jsonPrettyPrinter = new ModelExtensionsPrettyPrinter().withEmptyObjectSeparator(false);
+
     @Autowired
     private ModelRepository modelRepository;
 
@@ -85,7 +89,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
                                                                              genericJsonModelType.getName()));
 
-        String stringModel = objectMapper.writeValueAsString(genericJsonModel);
+        String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
         mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericJsonModel.getId()).file("file",
@@ -105,7 +109,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
                                                                              genericJsonModelType.getName()));
 
-        String stringModel = objectMapper.writeValueAsString(genericJsonModel);
+        String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
         mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
                                      genericJsonModel.getId()).file("file",
