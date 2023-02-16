@@ -71,7 +71,6 @@ import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,7 +213,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkInvalidModelName(String modelName) {
-        if(StringUtils.isEmpty(modelName) || !MODEL_NAME_REGEX.matcher(modelName).matches())
+        if(isEmpty(modelName) || !MODEL_NAME_REGEX.matcher(modelName).matches())
             throw new ModelNameInvalidException("Invalid model name");
     }
 

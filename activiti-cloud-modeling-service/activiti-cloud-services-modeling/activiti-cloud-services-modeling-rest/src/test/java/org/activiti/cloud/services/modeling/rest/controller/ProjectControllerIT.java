@@ -321,7 +321,7 @@ public class ProjectControllerIT {
 
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("Process_RankMovieId",
+                                                      processFileContent("process-rank-movie-id",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
 
 
@@ -432,7 +432,7 @@ public class ProjectControllerIT {
 
         Model processModel = modelService.importSingleModel(project,
                 processModelType,
-                processFileContent("Process_RankMovieId",
+                processFileContent("process-rank-movie-id",
                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
 
         Map<String, Extensions> extensionsMap = Collections.singletonMap("Process_RankMovieId",
@@ -583,7 +583,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -609,7 +609,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -635,7 +635,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -663,7 +663,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("message-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("Process_hg2itgWRj",
+                                                      processFileContent("process-hg2itgwrj",
                                                                          resourceAsByteArray("process/message-payload.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_hg2itgWRj",
@@ -687,7 +687,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -715,7 +715,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -741,7 +741,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-call-activiti"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("Process_RankMovieId",
+                                                      processFileContent("process-rank-movie-id",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("Process_RankMovieId",
@@ -752,7 +752,7 @@ public class ProjectControllerIT {
 
         Model mainProcessModel = modelService.importSingleModel(project,
                                                           processModelType,
-                                                          processFileContentWithCallActivity("Process_TwoCall",
+                                                          processFileContentWithCallActivity("process-two-call",
                                                                                              processModel,
                                                                                              resourceAsByteArray("process/two-call-activities.bpmn20.xml")));
 
@@ -773,7 +773,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-call-activity"));
         Model processModel = modelService.importSingleModel(project,
                                                       processModelType,
-                                                      processFileContent("RankMovie",
+                                                      processFileContent("rank-movie",
                                                                          resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("process-model",
@@ -885,7 +885,7 @@ public class ProjectControllerIT {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
         Model processModel = modelService.importSingleModel(project,
                                                             processModelType,
-                                                            processFileContent("RankMovie",
+                                                            processFileContent("rank-movie",
                                                                                resourceAsByteArray("process/RankMovie.bpmn20.xml")));
         modelRepository.updateModel(processModel,
                                     processModelWithExtensions("process-model",

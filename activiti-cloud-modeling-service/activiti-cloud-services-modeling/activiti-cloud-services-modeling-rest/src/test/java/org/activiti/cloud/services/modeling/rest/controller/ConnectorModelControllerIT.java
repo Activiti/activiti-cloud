@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.rest.controller;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -128,25 +129,30 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void should_create_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
+    public void should_throwModelInvalidException_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
+        String name = "name_with_underscore";
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
+                .content(objectMapper.writeValueAsString(connectorModel(name))))
+            .andExpect(status().isConflict());
 
-        resultActions.andExpect(status().isCreated());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("Invalid model name");
     }
 
     @Test
-    public void should_create_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
+    public void should_throwModelNameInvalidException_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
+                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))))
+            .andExpect(status().isConflict());
 
-        resultActions.andExpect(status().isCreated());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("Invalid model name");
     }
 
 
