@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  CLUSTER_NAME: activiti-test
+  CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
