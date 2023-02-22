@@ -15,35 +15,41 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.task.model.Task.TaskStatus;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProcessCompletedEventHandlerTest {
@@ -52,7 +58,13 @@ class ProcessCompletedEventHandlerTest {
   private ProcessCompletedEventHandler handler;
 
   @Mock
+  private TaskCancelledEventHandler taskCancelledEventHandler;
+
+  @Mock
   private EntityManager entityManager;
+
+  @Captor
+  private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cancelledEventArgumentCaptor;
 
   @Test
   void handleShouldUpdateCurrentProcessInstanceStateToCompleted() {
@@ -119,21 +131,25 @@ class ProcessCompletedEventHandlerTest {
     handler.handle(event);
 
     //then
+    verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
     verify(entityManager).persist(currentProcessInstanceEntity);
     verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
-    verify(createdTask).setStatus(TaskStatus.CANCELLED);
-    verify(assignedTask).setStatus(TaskStatus.CANCELLED);
-    verify(suspendedTask, never()).setStatus(TaskStatus.CANCELLED);
-    verify(entityManager).persist(createdTask);
-    verify(entityManager).persist(assignedTask);
-    verify(entityManager, never()).persist(suspendedTask);
-    verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
+
+    verify(taskCancelledEventHandler, times(2)).handle(cancelledEventArgumentCaptor.capture());
+
+    List<String> cancelledEntityIDs = cancelledEventArgumentCaptor.getAllValues()
+        .stream()
+        .map(CloudRuntimeEvent::getEntityId)
+        .collect(Collectors.toList());
+
+    assertThat(cancelledEntityIDs).containsExactlyInAnyOrder(createdTask.getId(), assignedTask.getId());
   }
 
   @NotNull
   private static TaskEntity getTaskMock(TaskStatus status) {
-    TaskEntity suspendedTask = mock(TaskEntity.class);
-    when(suspendedTask.getStatus()).thenReturn(status);
-    return suspendedTask;
+    TaskEntity mockTask = mock(TaskEntity.class);
+    when(mockTask.getStatus()).thenReturn(status);
+    lenient().when(mockTask.getId()).thenReturn(RandomStringUtils.random(1));
+    return mockTask;
   }
 }

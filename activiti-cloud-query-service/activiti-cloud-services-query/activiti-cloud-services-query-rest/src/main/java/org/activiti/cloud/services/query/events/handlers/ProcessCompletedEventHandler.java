@@ -26,6 +26,8 @@ import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
+import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
+import org.activiti.cloud.api.task.model.impl.events.CloudTaskCancelledEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -33,9 +35,12 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 public class ProcessCompletedEventHandler implements QueryEventHandler {
 
   private final EntityManager entityManager;
+  private final TaskCancelledEventHandler taskCancelledEventHandler;
 
-  public ProcessCompletedEventHandler(EntityManager entityManager) {
+  public ProcessCompletedEventHandler(EntityManager entityManager,
+                                      TaskCancelledEventHandler taskCancelledEventHandler) {
     this.entityManager = entityManager;
+    this.taskCancelledEventHandler = taskCancelledEventHandler;
   }
 
   @Override
@@ -49,23 +54,27 @@ public class ProcessCompletedEventHandler implements QueryEventHandler {
       processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
       processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
       processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
-      markAllChildTasksAsCancelledWhenTheyAreAssignedOrCreated(processInstanceEntity);
       entityManager.persist(processInstanceEntity);
+      callCancelledEventHandlerToCancelRemainingTasks(processInstanceEntity);
 
     } else {
       throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
     }
   }
 
-  private void markAllChildTasksAsCancelledWhenTheyAreAssignedOrCreated(ProcessInstanceEntity processInstanceEntity) {
+  private void callCancelledEventHandlerToCancelRemainingTasks(ProcessInstanceEntity processInstanceEntity) {
     Predicate<TaskEntity> cancellableTasks = task -> TaskStatus.ASSIGNED.equals(task.getStatus())
         || TaskStatus.CREATED.equals(task.getStatus());
 
     Stream.ofNullable(processInstanceEntity.getTasks())
         .flatMap(Set::stream)
         .filter(cancellableTasks)
-        .peek(task -> task.setStatus(TaskStatus.CANCELLED))
-        .forEach(entityManager::persist);
+        .map(task -> {
+          CloudTaskImpl cloudTask = new CloudTaskImpl();
+          cloudTask.setId(task.getId());
+          return new CloudTaskCancelledEventImpl(cloudTask);
+        })
+        .forEach(taskCancelledEventHandler::handle);
   }
 
 
