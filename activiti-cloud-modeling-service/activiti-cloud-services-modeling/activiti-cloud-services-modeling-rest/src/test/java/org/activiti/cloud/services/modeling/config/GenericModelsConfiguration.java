@@ -18,6 +18,8 @@ package org.activiti.cloud.services.modeling.config;
 import static org.springframework.http.MediaType.ALL_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.Collection;
+import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -80,12 +82,16 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public void validate(
-            Model model,
-            byte[] modelContent,
-            ValidationContext validationContext,
-            boolean validateUsage
-        ) {
+        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
+            return null;
+        }
+
+        @Override
+        public void validate(Model model,
+                             byte[] modelContent,
+                             ValidationContext validationContext,
+                             boolean validateUsage) {
             LOGGER.info("usage of json");
         }
 
@@ -107,6 +113,12 @@ public class GenericModelsConfiguration {
         }
 
         @Override
+        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
+            return null;
+        }
+
+        @Override
         public ModelType getHandledModelType() {
             return genericJsonModelType;
         }
@@ -116,6 +128,12 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json content");
+        }
+
+        @Override
+        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
+            return null;
         }
 
         @Override
@@ -133,6 +151,12 @@ public class GenericModelsConfiguration {
         @Override
         public void validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
+        }
+
+        @Override
+        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
+            return null;
         }
 
         @Override
