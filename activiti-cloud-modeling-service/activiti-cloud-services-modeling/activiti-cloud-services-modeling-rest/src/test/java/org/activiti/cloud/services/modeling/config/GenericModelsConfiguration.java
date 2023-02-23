@@ -27,6 +27,7 @@ import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.slf4j.Logger;
@@ -82,10 +83,8 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                        ValidationContext validationContext) {
             return null;
         }
 
@@ -117,10 +116,8 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
             return null;
         }
 
@@ -137,10 +134,8 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
             return null;
         }
 
@@ -162,10 +157,8 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                     ValidationContext validationContext) {
             return null;
         }
 

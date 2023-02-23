@@ -22,6 +22,7 @@ import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -41,10 +42,8 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator implements
     }
 
     @Override
-    public Collection<ModelingException> validateAndReturnErrors(
-        byte[] modelContent,
-        ValidationContext validationContext
-    ) {
+    public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                    ValidationContext validationContext) {
         return null;
     }
 

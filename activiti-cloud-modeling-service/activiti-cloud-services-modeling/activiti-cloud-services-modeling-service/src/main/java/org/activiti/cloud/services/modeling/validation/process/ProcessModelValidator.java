@@ -74,10 +74,8 @@ public class ProcessModelValidator implements ModelContentValidator {
     }
 
     @Override
-    public Collection<ModelingException> validateAndReturnErrors(
-        byte[] modelContent,
-        ValidationContext validationContext
-    ) {
+    public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                 ValidationContext validationContext) {
         return null;
     }
 
