@@ -16,6 +16,8 @@
 package org.activiti.cloud.modeling.core.error;
 
 import java.util.List;
+
+import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 
 /**

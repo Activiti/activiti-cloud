@@ -17,12 +17,12 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.converter.JsonConverter;
-import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.validation.JsonSchemaModelValidator;

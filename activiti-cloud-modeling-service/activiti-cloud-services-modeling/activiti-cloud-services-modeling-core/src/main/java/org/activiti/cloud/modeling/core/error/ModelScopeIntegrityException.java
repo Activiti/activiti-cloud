@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
+import org.activiti.cloud.api.error.ModelingException;
+
 /**
  * Exception thrown when a model cannot be created because there is another model with the same type within the project
  */

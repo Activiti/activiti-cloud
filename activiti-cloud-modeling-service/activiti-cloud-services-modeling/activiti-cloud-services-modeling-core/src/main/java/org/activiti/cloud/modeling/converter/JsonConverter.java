@@ -19,10 +19,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import org.activiti.cloud.modeling.core.error.ModelingException;
+import org.activiti.cloud.api.error.ModelingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;

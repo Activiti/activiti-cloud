@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
+import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.ModelContent;
-import org.activiti.cloud.modeling.core.error.ModelingException;
 
 /**
  * Implementation of {@link ModelContent} corresponding to process model type based on a {@link BpmnModel}
