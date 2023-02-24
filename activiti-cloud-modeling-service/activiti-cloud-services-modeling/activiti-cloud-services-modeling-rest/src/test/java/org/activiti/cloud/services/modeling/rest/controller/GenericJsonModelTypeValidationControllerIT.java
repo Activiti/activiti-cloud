@@ -22,7 +22,9 @@ import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assert
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -102,7 +104,7 @@ public class GenericJsonModelTypeValidationControllerIT {
                 .singletonList(
                     new ModelValidationError("Content invalid", "The content is invalid!!")));
 
-        doThrow(exception).when(genericJsonContentValidator).validateModelContent(any(byte[].class),
+        doThrow(exception).when(genericJsonContentValidator).validateModelContent(anyString(), any(byte[].class),
                                                                                   any(ValidationContext.class));
     }
 
@@ -134,7 +136,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         verify(genericJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                .validateModelContent(eq(GENERIC_MODEL_NAME), argThat(content -> new String(content).equals(new String(fileContent))),
                                       argThat(context -> !context.isEmpty()));
     }
 
@@ -157,7 +159,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         verify(genericJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                .validateModelContent(anyString(), argThat(content -> new String(content).equals(new String(fileContent))),
                                       argThat(context -> !context.isEmpty()));
     }
 
@@ -182,7 +184,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         verify(genericJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
+                .validateModelContent(anyString(), argThat(content -> new String(content).equals(new String(fileContent))),
                                       argThat(context -> !context.isEmpty()));
     }
 

@@ -43,6 +43,17 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      };
 
     /**
+     * Validate the given model.
+     * @param modelName name of the model to validate
+     * @param modelContent content of the model to validate
+     * @param validationContext the validation context
+     */
+    default void validate(String modelName, byte[] modelContent,
+        ValidationContext validationContext) {
+        validate(modelContent, validationContext);
+    }
+
+    /**
      * Get handled model type by this validator.
      * @return handled model type
      */

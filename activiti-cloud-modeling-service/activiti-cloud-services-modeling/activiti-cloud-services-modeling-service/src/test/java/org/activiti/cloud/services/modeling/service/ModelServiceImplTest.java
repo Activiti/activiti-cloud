@@ -313,7 +313,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -328,7 +328,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -343,7 +343,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -360,7 +360,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(validationErrors))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any());
 
         assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
             .isNotEmpty()
