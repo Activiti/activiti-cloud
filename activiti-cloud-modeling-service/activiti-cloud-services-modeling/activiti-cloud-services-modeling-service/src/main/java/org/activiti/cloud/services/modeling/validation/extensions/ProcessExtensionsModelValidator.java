@@ -21,7 +21,8 @@ import static org.apache.commons.lang3.StringUtils.removeStart;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.activiti.cloud.api.error.ModelingException;
+
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -135,14 +136,6 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
         } catch (ModelingException ex) {
             throw new SyntacticModelValidationException("Cannot convert to BPMN model", ex);
         }
-    }
-
-    @Override
-    public Collection<ModelValidationError> validateAndReturnErrors(
-        byte[] modelContent,
-        ValidationContext validationContext
-    ) {
-        return null;
     }
 
     @Override

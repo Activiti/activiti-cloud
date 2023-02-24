@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.rest.assembler;
 
-import org.activiti.cloud.api.error.ModelingException;
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
 import org.activiti.cloud.services.modeling.rest.controller.ProjectController;

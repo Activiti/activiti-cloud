@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.activiti.cloud.api.error.ModelingException;
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;

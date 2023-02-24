@@ -17,14 +17,10 @@ package org.activiti.cloud.services.modeling.validation;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 
-import java.util.Collection;
-import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelType;
-import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
-import org.activiti.cloud.modeling.api.ValidationContext;
 import org.everit.json.schema.loader.SchemaLoader;
 
 /**
@@ -39,14 +35,6 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator implements
     public ConnectorModelValidator(SchemaLoader connectorSchemaLoader, ConnectorModelType connectorModelType) {
         this.connectorSchemaLoader = connectorSchemaLoader;
         this.connectorModelType = connectorModelType;
-    }
-
-    @Override
-    public Collection<ModelValidationError> validateAndReturnErrors(
-        byte[] modelContent,
-        ValidationContext validationContext
-    ) {
-        return null;
     }
 
     @Override

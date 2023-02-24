@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-import org.activiti.cloud.api.error.ModelingException;
-
 /**
  * Exception thrown when a project cannot be imported from a given zip file
  */

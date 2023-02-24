@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
-import org.activiti.cloud.api.error.ModelingException;
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.ModelContent;
 
 /**

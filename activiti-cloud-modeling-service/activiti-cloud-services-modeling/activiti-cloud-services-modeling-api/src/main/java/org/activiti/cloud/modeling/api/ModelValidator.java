@@ -16,7 +16,6 @@
 package org.activiti.cloud.modeling.api;
 
 import java.util.Collection;
-import org.activiti.cloud.api.error.ModelingException;
 
 /**
  * Business logic related with validation of a model
@@ -38,13 +37,14 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      */
     Collection<ModelingException> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
 
-    /**
-     * Validate the given model and return exceptions
-     *
-     * @param modelContent      content of the model to validate
-     * @param validationContext the validation context
-     */
-    Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
+  /**
+   * Validate the given model and return errors
+   *
+   * @param modelContent      content of the model to validate
+   * @param validationContext the validation context
+   */
+  Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                           ValidationContext validationContext);
 
     /**
      * Get handled model type by this validator.
@@ -53,10 +53,32 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      */
     ModelType getHandledModelType();
 
-    /**
-     * Get handled content type by this validator.
-     *
-     * @return handled content type
-     */
-    String getHandledContentType();
+  /**
+   * Validate the given model and its usage and return errors
+   *
+   * @param model             the model to validate
+   * @param modelContent      content of the model to validate
+   * @param validationContext the validation context
+   * @param validateUsage     validate the usage of a model
+   */
+  default Collection<ModelValidationError> validateAndReturnErrors(Model model,
+                                                                   byte[] modelContent,
+                                                                   ValidationContext validationContext,
+                                                                   boolean validateUsage) {
+    return validateAndReturnErrors(modelContent, validationContext);
+  }
+
+  /**
+   * Get handled model type by this validator.
+   *
+   * @return handled model type
+   */
+  ModelType getHandledModelType();
+
+  /**
+   * Get handled content type by this validator.
+   *
+   * @return handled content type
+   */
+  String getHandledContentType();
 }

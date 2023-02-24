@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-import org.activiti.cloud.api.error.ModelingException;
-
 public class ModelConversionException extends ModelingException {
 
     public ModelConversionException(String message, Throwable cause) {

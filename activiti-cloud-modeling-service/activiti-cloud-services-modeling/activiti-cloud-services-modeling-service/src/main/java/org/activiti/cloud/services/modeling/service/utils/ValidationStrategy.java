@@ -18,7 +18,7 @@ package org.activiti.cloud.services.modeling.service.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-import org.activiti.cloud.api.error.ModelingException;
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.springframework.lang.NonNull;
