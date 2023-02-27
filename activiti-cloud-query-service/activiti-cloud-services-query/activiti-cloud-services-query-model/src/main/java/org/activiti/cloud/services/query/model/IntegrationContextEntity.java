@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.activiti.cloud.api.process.model.DetailedIntegrationError;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -81,7 +82,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
     @Column(columnDefinition="text")
-    private List<StackTraceElement> stackTraceElements;
+    private DetailedIntegrationError stackTraceElements;
 
     @JsonFormat(shape = Shape.STRING)
     @Enumerated(EnumType.STRING)
@@ -291,11 +292,11 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public List<StackTraceElement> getStackTraceElements() {
+    public DetailedIntegrationError getStackTraceElements() {
         return stackTraceElements;
     }
 
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+    public void setStackTraceWithErrorMessage(DetailedIntegrationError stackTraceElements) {
         this.stackTraceElements = stackTraceElements;
     }
 

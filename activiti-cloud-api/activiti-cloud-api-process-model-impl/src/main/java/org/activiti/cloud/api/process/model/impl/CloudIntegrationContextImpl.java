@@ -19,12 +19,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
+import org.activiti.cloud.api.process.model.DetailedIntegrationError;
+import org.activiti.cloud.api.process.model.IntegrationError;
 
 public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implements CloudIntegrationContext {
 
@@ -47,7 +48,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private String errorCode;
     private String errorMessage;
     private String errorClassName;
-    private List<StackTraceElement> stackTraceElements;
+    private DetailedIntegrationError stackTraceElements;
     private IntegrationContextStatus status;
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
@@ -235,11 +236,11 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public List<StackTraceElement> getStackTraceElements() {
+    public DetailedIntegrationError getStackTraceElements() {
         return stackTraceElements;
     }
 
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
+    public void setStackTraceElements(DetailedIntegrationError stackTraceElements) {
         this.stackTraceElements = stackTraceElements;
     }
 
@@ -413,7 +414,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                .append(", errorClassName=")
                .append(errorClassName)
                .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
+               .append(stackTraceElements)
                .append(", status=")
                .append(status)
                .append(", inBoundVariables=")
