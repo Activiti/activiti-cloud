@@ -1,0 +1,32 @@
+{
+  "gateway_concurrency": {
+    "constants": {},
+    "mappings": {
+      "serviceTask1": {
+        "inputs": {
+          "signal": {
+            "type": "variable",
+            "value": "signal"
+          }
+        }
+      }
+    },
+    "properties": {
+      "variable1": {
+        "id": "variable1",
+        "name": "signal",
+        "type": "string",
+        "analytics": false,
+        "required": false,
+        "model": {
+          "$ref": "#/$defs/primitive/string"
+        }
+      }
+    },
+    "assignments": {},
+    "templates": {
+      "tasks": {},
+      "default": {}
+    }
+  }
+}
