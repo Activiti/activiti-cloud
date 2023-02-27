@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
+import org.activiti.cloud.modeling.api.SemanticModelError;
 import org.activiti.cloud.modeling.api.SyntacticModelError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
@@ -51,26 +52,16 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
   @Override
   public void validate(byte[] modelContent,
                        ValidationContext validationContext) {
-    JSONObject processExtensionJson = null;
-    try {
-      log.debug("Validating json model content: " + new String(modelContent));
-      processExtensionJson = extractJsonObject(modelContent);
-      validateJson(processExtensionJson);
-    } catch (JSONException jsonException) {
-      log.debug("Syntactic model JSON validation errors encountered",
-                jsonException);
-      throw new SyntacticModelValidationException(jsonException);
-    } catch (ValidationException validationException) {
-      log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
-                validationException);
-      throw new SemanticModelValidationException(validationException.getMessage(),
-                                                 getValidationErrors(validationException, processExtensionJson));
-    }
+    internalValidation(modelContent, true);
   }
 
   @Override
   public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
                                                                   ValidationContext validationContext) {
+    return internalValidation(modelContent, false);
+  }
+
+  private Collection<ModelValidationError> internalValidation(byte[] modelContent, boolean shouldThrowError) {
     JSONObject processExtensionJson = null;
     String jsonContent = new String(modelContent);
     try {
@@ -80,13 +71,22 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     } catch (JSONException jsonException) {
       log.debug("Syntactic model JSON validation errors encountered",
                 jsonException);
-      String problem = "Could not parse:" + jsonContent;
-      return List.of(new SyntacticModelError(problem, jsonException.getMessage()));
+      if (shouldThrowError) {
+        throw new SyntacticModelValidationException(jsonException);
+      } else {
+        String problem = "Could not parse:" + jsonContent;
+        return List.of(new SyntacticModelError(problem, jsonException.getMessage()));
+      }
     } catch (ValidationException validationException) {
-      //SemanticModelError
       log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
                 validationException);
-      return getValidationErrors(validationException, processExtensionJson);
+      if (shouldThrowError) {
+        throw new SemanticModelValidationException(validationException.getMessage(),
+                                                   getSemanticValidationErrors(validationException,
+                                                                               processExtensionJson));
+      } else {
+        return getSemanticValidationErrors(validationException, processExtensionJson);
+      }
     }
     return Collections.emptyList();
   }
@@ -102,8 +102,8 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
         .validate(processExtensionJson);
   }
 
-  private List<ModelValidationError> getValidationErrors(ValidationException validationException,
-                                                         JSONObject processExtensionJson) {
+  private List<ModelValidationError> getSemanticValidationErrors(ValidationException validationException,
+                                                                 JSONObject processExtensionJson) {
     return getValidationExceptions(validationException)
         .map(exception -> toModelValidationError(exception, processExtensionJson))
         .distinct()
@@ -161,8 +161,22 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
         return Collections.emptyList();
     }
 
-    private static JSONObject extractJsonObject(byte[] bytes) {
-        return new JSONObject(new JSONTokener(new String(bytes)));
+    String schema = Optional.ofNullable(validationException.getViolatedSchema())
+        .map(Schema::getSchemaLocation)
+        .orElse(null);
+    return new SemanticModelError(validationException.getErrorMessage(), description, schema);
+  }
+
+  private String resolveExpression(String message, String pointerToViolation, JSONObject prcessExtenstionJson) {
+    final String path[] = pointerToViolation.replace("#/", "").split("/");
+    final int lastIndex = path.length - 1;
+
+    if (message.contains("{{name}}")) {
+      path[lastIndex] = "name";
+      message = message.replace("{{name}}", getValueFromJson(path, prcessExtenstionJson));
+    } else if (message.contains("{{id}}")) {
+      path[lastIndex] = "id";
+      message = message.replace("{{id}}", getValueFromJson(path, prcessExtenstionJson));
     }
 
     private void validateJson(JSONObject processExtensionJson) {

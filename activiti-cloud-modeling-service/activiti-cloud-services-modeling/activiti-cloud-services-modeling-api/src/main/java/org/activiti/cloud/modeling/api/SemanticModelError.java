@@ -15,4 +15,9 @@
  */
 package org.activiti.cloud.modeling.api;
 
-public class SemanticModelError extends ModelValidationError {}
+public class SemanticModelError extends ModelValidationError {
+
+  public SemanticModelError(String errorMessage, String description, String schema) {
+    super(errorMessage, description, schema);
+  }
+}
