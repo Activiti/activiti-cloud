@@ -15,19 +15,22 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -35,12 +38,10 @@ import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
-import org.activiti.cloud.starter.tests.helper.HelperConfiguration;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.cloud.starter.tests.runtime.IntegrationResultSender;
-import org.activiti.cloud.starter.tests.runtime.ServiceTaskConsumerHandler;
 import org.activiti.engine.RuntimeService;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,11 +61,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({HelperConfiguration.class,
-    ServiceTaskConsumerHandler.class,
-    IntegrationResultSender.class,
-    TestChannelBinderConfiguration.class})
-@ContextConfiguration(
+@Import({TestChannelBinderConfiguration.class})
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
     initializers = {KeycloakContainerApplicationInitializer.class})
 public class GatewayConcurrencyIT {
 
@@ -90,13 +88,16 @@ public class GatewayConcurrencyIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private ExecutorService executorService;
+    @Autowired
+    private AuditConsumerStreamHandler streamHandler;
 
+    private ExecutorService executorService;
 
     @BeforeEach
     public void setUp() {
         identityTokenProducer.withTestUser("testuser");
         executorService = Executors.newFixedThreadPool(2);
+        streamHandler.clear();
     }
 
     @AfterEach
@@ -129,10 +130,22 @@ public class GatewayConcurrencyIT {
         executorService.invokeAll(tasks);
 
 
-        await().atMost(Duration.ofMinutes(10)).untilAsserted(() -> {
-            ResponseEntity<CloudProcessInstance> completedProcessInstance = processInstanceRestTemplate.getProcessInstance(processInstanceId);
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-            assertThat(completedProcessInstance.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.COMPLETED);
+            Assertions.assertThat(receivedEvents)
+                .extracting(CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId)
+                .contains(tuple(PROCESS_CREATED,
+                        processInstanceId,
+                        processInstanceId),
+                    tuple(PROCESS_STARTED,
+                        processInstanceId,
+                        processInstanceId),
+                    tuple(PROCESS_COMPLETED,
+                        processInstanceId,
+                        processInstanceId));
         });
 
     }
