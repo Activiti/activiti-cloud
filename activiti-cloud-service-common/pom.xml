@@ -49,6 +49,7 @@
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.9</james.apache-mime4j.version>
     <batik.version>1.16</batik.version>
+    <micrometer.version>1.9.6</micrometer.version>
   </properties>
   <dependencyManagement>
     <dependencies>
