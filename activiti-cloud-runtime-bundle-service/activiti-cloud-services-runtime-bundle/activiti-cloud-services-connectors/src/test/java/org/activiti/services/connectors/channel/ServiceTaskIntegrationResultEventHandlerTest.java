@@ -15,14 +15,6 @@
  */
 package org.activiti.services.connectors.channel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +25,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.TriggerCmd;
+import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -44,6 +37,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationResultEventHandlerTest {
@@ -83,14 +84,14 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
         final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(
             CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
-        assertThat(command.getCommands()).hasSize(2);
-        assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        assertThat(command.getCommands()).hasSize(3);
+        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
     private ExecutionEntity buildExecutionEntity() {
@@ -118,7 +119,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
-        verify(integrationContextService, never()).deleteIntegrationContext(any());
+        verify(managementService, never()).executeCommand(any());
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {

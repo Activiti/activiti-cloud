@@ -85,6 +85,13 @@ public class ServiceTaskIntegrationErrorEventHandler {
                     if (execution.getActivityId().equals(clientId)) {
                         try {
                             commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
+                            commands.add(new AggregateIntegrationErrorReceivedClosingEventCmd(
+                                    new AggregateIntegrationErrorReceivedEventCmd(integrationError,
+                                                                                  runtimeBundleProperties,
+                                                                                  processEngineEventsAggregator)));
+
+                            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+                            return;
                         } catch (Throwable cause) {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
                         }
@@ -103,8 +110,9 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 LOGGER.warn(message);
             }
 
-            commands.add(new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError, runtimeBundleProperties, processEngineEventsAggregator));
+            commands.add(new AggregateIntegrationErrorReceivedEventCmd(integrationError,
+                                                                       runtimeBundleProperties,
+                                                                       processEngineEventsAggregator));
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }
