@@ -58,7 +58,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
-    @Retryable(backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:10}"))
+    @Retryable(maxAttemptsExpression = "${activiti.cloud.integration.error.retry.max-attempts:3}",
+            backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:0}"))
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());

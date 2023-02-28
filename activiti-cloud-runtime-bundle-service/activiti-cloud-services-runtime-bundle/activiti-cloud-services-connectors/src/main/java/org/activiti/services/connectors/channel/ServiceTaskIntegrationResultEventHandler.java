@@ -61,7 +61,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.variablesPropagator = variablesPropagator;
     }
 
-    @Retryable(backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:10}"))
+    @Retryable(maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
+            backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}"))
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
