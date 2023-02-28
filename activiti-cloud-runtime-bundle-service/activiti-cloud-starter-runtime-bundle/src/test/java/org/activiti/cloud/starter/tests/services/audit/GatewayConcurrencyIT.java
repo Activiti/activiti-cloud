@@ -16,10 +16,11 @@
 package org.activiti.cloud.starter.tests.services.audit;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,7 +35,6 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,8 +104,6 @@ public class GatewayConcurrencyIT {
         streamHandler.clear();
     }
 
-    InclusiveGatewayActivityBehavior s;
-
     @AfterEach
     public void cleanUp(){
         executorService.shutdown();
@@ -121,7 +119,7 @@ public class GatewayConcurrencyIT {
 
         final IntegrationResult integrationResult = createIntegrationResult(integrationRequest);
 
-        List<Callable<Void>> tasks = new ArrayList<>();
+        Set<Callable<Void>> tasks = new LinkedHashSet<>();
 
         tasks.add(() -> {
             Message message = MessageBuilder.withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap())).build();
@@ -140,7 +138,6 @@ public class GatewayConcurrencyIT {
                                   destination);
             return null;
         });
-
         executorService.invokeAll(tasks);
 
         await().untilAsserted(() -> {
