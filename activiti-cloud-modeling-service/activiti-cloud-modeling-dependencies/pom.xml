@@ -94,6 +94,11 @@
         <type>json</type>
       </dependency>
       <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${json-java.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.github.erosb</groupId>
         <artifactId>everit-json-schema</artifactId>
         <version>${everit-json-schema.version}</version>
