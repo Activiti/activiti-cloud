@@ -81,7 +81,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String errorClassName;
 
     @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
-    @Column(columnDefinition="text")
+    @Column(columnDefinition="text", name = "detailed_integration_error")
     private DetailedIntegrationError detailedIntegrationError;
 
     @JsonFormat(shape = Shape.STRING)
