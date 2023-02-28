@@ -37,7 +37,9 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
   @Override
   public String convertToDatabaseColumn(DetailedIntegrationError detailedIntegrationError) {
     try {
-      return objectMapper.writeValueAsString(detailedIntegrationError.getStackTraceElementList());
+
+      return detailedIntegrationError.getError() + System.lineSeparator() + objectMapper.writeValueAsString(
+          detailedIntegrationError.getStackTraceElementList());
     } catch (JsonProcessingException e) {
       throw new QueryException("Unable to serialize list of StackTraceElements", e);
     }
