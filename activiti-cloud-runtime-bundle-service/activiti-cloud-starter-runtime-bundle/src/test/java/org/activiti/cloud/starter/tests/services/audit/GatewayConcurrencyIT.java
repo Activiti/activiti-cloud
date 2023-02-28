@@ -15,23 +15,16 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.awaitility.Awaitility.await;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -42,6 +35,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
+import org.activiti.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +54,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -106,6 +107,8 @@ public class GatewayConcurrencyIT {
         streamHandler.clear();
     }
 
+    InclusiveGatewayActivityBehavior s;
+
     @AfterEach
     public void cleanUp() {
         executorService.shutdown();
@@ -127,12 +130,11 @@ public class GatewayConcurrencyIT {
         Set<Callable<Void>> tasks = new LinkedHashSet<>();
 
         tasks.add(() -> {
-            Message message = MessageBuilder
-                .withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap()))
-                .build();
+            Message message = MessageBuilder.withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap())).build();
             String destination = bindingServiceProperties.getBindingDestination("signalConsumer");
 
-            inputDestination.send(message, destination);
+            inputDestination.send(message,
+                                  destination);
             return null;
         });
 
@@ -140,28 +142,30 @@ public class GatewayConcurrencyIT {
             Message message = MessageBuilder.withPayload(integrationResult).build();
             String destination = bindingServiceProperties.getBindingDestination("integrationResultsConsumer");
 
-            inputDestination.send(message, destination);
+            inputDestination.send(message,
+                                  destination);
             return null;
         });
         executorService.invokeAll(tasks);
 
-        await()
-            .untilAsserted(() -> {
-                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+        await().untilAsserted(() -> {
+            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-                Assertions
-                    .assertThat(receivedEvents)
-                    .extracting(
-                        CloudRuntimeEvent::getEventType,
-                        CloudRuntimeEvent::getProcessInstanceId,
-                        CloudRuntimeEvent::getEntityId
-                    )
-                    .contains(
-                        tuple(PROCESS_CREATED, processInstanceId, processInstanceId),
-                        tuple(PROCESS_STARTED, processInstanceId, processInstanceId),
-                        tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
-                    );
-            });
+            Assertions.assertThat(receivedEvents)
+                .extracting(CloudRuntimeEvent::getEventType,
+                    CloudRuntimeEvent::getProcessInstanceId,
+                    CloudRuntimeEvent::getEntityId)
+                .contains(tuple(PROCESS_CREATED,
+                        processInstanceId,
+                        processInstanceId),
+                    tuple(PROCESS_STARTED,
+                        processInstanceId,
+                        processInstanceId),
+                    tuple(PROCESS_COMPLETED,
+                        processInstanceId,
+                        processInstanceId));
+        });
+
     }
 
     private IntegrationRequest getIntegrationRequest() throws IOException {

@@ -16,6 +16,7 @@
 
 package org.activiti.services.connectors.channel;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.IntegrationResult;
@@ -25,11 +26,15 @@ import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.cmd.TriggerCmd;
+import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
+import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 public class ServiceTaskIntegrationResultEventHandler {
 
@@ -58,6 +63,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.variablesPropagator = variablesPropagator;
     }
 
+    @Retryable(backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:10}"))
     public void receive(IntegrationResult integrationResult) {
         IntegrationContext integrationContext = integrationResult.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
@@ -65,16 +71,23 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         String executionId = integrationContext.getExecutionId();
-        List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
+        List<Execution> executions = runtimeService.createExecutionQuery()
+                                                   .executionId(executionId)
+                                                   .list();
+
         if (integrationContextEntity != null) {
-            integrationContextService.deleteIntegrationContext(integrationContextEntity);
+            List<Command<?>> commands = new ArrayList<>();
+
+            commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
             if (executions.size() > 0) {
                 Execution execution = executions.get(0);
 
-                if (execution.getActivityId().equals(integrationContext.getClientId())) {
-                    triggerIntegrationContextExecution(integrationContext);
-                    return;
+                if (execution.getActivityId()
+                             .equals(integrationContext.getClientId())) {
+                    commands.add(new TriggerCmd(integrationContext.getExecutionId(),
+                                                integrationContext.getOutBoundVariables(),
+                                                variablesPropagator));
                 } else {
                     LOGGER.warn(
                         "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
@@ -94,30 +107,11 @@ public class ServiceTaskIntegrationResultEventHandler {
                     "` will be ignored.";
                 LOGGER.warn(message);
             }
-            managementService.executeCommand(
-                new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator
-                )
-            );
-        }
-    }
 
-    private void triggerIntegrationContextExecution(IntegrationContext integrationContext) {
-        managementService.executeCommand(
-            CompositeCommand.of(
-                new TriggerCmd(
-                    integrationContext.getExecutionId(),
-                    integrationContext.getOutBoundVariables(),
-                    variablesPropagator
-                ),
-                new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext,
-                    runtimeBundleProperties,
-                    processEngineEventsAggregator
-                )
-            )
-        );
+            commands.add(new AggregateIntegrationResultReceivedEventCmd(
+                    integrationContext, runtimeBundleProperties, processEngineEventsAggregator));
+
+            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
+        }
     }
 }

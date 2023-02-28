@@ -50,10 +50,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
+import org.springframework.retry.annotation.EnableRetry;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
+@EnableRetry
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
