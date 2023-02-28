@@ -16,7 +16,6 @@
 package org.activiti.cloud.api.process.model;
 
 import java.util.Date;
-import java.util.List;
 
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
@@ -41,6 +40,6 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
 
     String getErrorClassName();
 
-    List<StackTraceElement> getStackTraceElements();
+    String getStackTrace();
 
 }

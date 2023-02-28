@@ -431,7 +431,7 @@ public class QueryAdminProcessServiceTasksIT {
                         ERROR_MESSAGE_LENGTH),
                     error.getClass().getName());
 
-            assertThat(cloudIntegrationContext.getStackTraceElements()).isNotEmpty();
+            assertThat(cloudIntegrationContext.getStackTrace()).isNotEmpty();
 
         });
     }

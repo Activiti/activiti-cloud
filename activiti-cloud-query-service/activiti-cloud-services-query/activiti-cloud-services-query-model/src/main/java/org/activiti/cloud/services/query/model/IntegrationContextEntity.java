@@ -79,9 +79,8 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     private String errorClassName;
 
-    @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
-    @Column(columnDefinition="text")
-    private List<StackTraceElement> stackTraceElements;
+    @Column(name = "stack_trace_elements")
+    private String stackTrace;
 
     @JsonFormat(shape = Shape.STRING)
     @Enumerated(EnumType.STRING)
@@ -291,12 +290,12 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public List<StackTraceElement> getStackTraceElements() {
-        return stackTraceElements;
+    public String getStackTrace() {
+        return stackTrace;
     }
 
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
-        this.stackTraceElements = stackTraceElements;
+    public void setStackTrace(String stackTrace) {
+        this.stackTrace = stackTrace;
     }
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {

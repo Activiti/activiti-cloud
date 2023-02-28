@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +46,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private String errorCode;
     private String errorMessage;
     private String errorClassName;
-    private List<StackTraceElement> stackTraceElements;
+    private String stackTrace;
     private IntegrationContextStatus status;
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
@@ -235,12 +234,12 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public List<StackTraceElement> getStackTraceElements() {
-        return stackTraceElements;
+    public String getStackTrace() {
+        return stackTrace;
     }
 
-    public void setStackTraceElements(List<StackTraceElement> stackTraceElements) {
-        this.stackTraceElements = stackTraceElements;
+    public void setStackTrace(String stackTrace) {
+        this.stackTrace = stackTrace;
     }
 
     @Override
@@ -328,7 +327,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                                                processInstanceId,
                                                requestDate,
                                                resultDate,
-                                               stackTraceElements,
+                                               stackTrace,
                                                status);
         return result;
     }
@@ -366,7 +365,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                Objects.equals(processInstanceId, other.processInstanceId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements) &&
+               Objects.equals(stackTrace, other.stackTrace) &&
                status == other.status;
     }
 
@@ -412,8 +411,8 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                .append(errorMessage)
                .append(", errorClassName=")
                .append(errorClassName)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? toString(stackTraceElements, maxLen) : null)
+               .append(", stackTrace=")
+               .append(stackTrace)
                .append(", status=")
                .append(status)
                .append(", inBoundVariables=")
