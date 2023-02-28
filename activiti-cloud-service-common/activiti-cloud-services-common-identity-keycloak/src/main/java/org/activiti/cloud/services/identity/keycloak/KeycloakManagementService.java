@@ -242,6 +242,13 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     @Override
+    public User findUserById(String userId) {
+        return Optional.of(keycloakClient.getUserById(userId))
+            .map(KeycloakUserToUser::toUser)
+            .orElseThrow(() -> new IdentityInvalidUserException(userId));
+    }
+
+    @Override
     public List<User> findUsersByGroupName(String groupName) {
         Group groupFound = findGroupStrictlyEqualToGroupName(groupName);
         return getUsersByGroupId(groupFound.getId());
