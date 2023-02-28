@@ -64,7 +64,6 @@ import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.builder.ProcessInstanceEventContainedBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -139,6 +138,7 @@ public class QueryAdminProcessServiceTasksIT {
 
     @BeforeEach
     public void setUp() throws IOException {
+        tearDown();
         identityTokenProducer.withTestUser("hradmin");
 
         eventsAggregator = new EventsAggregator(producer);
@@ -357,7 +357,6 @@ public class QueryAdminProcessServiceTasksIT {
     }
 
     @Test
-    @Disabled
     public void shouldGetServiceTaskIntegrationContextErrorById() throws InterruptedException {
         //given
         ProcessInstanceImpl process = sendEventsForStartSimpleProcessInstance();
@@ -415,7 +414,7 @@ public class QueryAdminProcessServiceTasksIT {
                                                                                                  .getStackTrace())));
         eventsAggregator.sendAll();
 
-        await().untilAsserted(() -> {
+
 
             CloudIntegrationContext cloudIntegrationContext = retrieveIntegrationContext(
                 serviceTask.getId());
@@ -433,9 +432,9 @@ public class QueryAdminProcessServiceTasksIT {
                         ERROR_MESSAGE_LENGTH),
                     error.getClass().getName());
 
-            assertThat(cloudIntegrationContext.getStackTraceElements().getStackTraceElementList()).isNotEmpty();
+            assertThat(cloudIntegrationContext.getDetailedIntegrationError().getStackTraceElementList()).isNotEmpty();
 
-        });
+
     }
 
     private IntegrationContextImpl buildIntegrationContext(ProcessInstance process,

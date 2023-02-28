@@ -82,7 +82,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
     @Column(columnDefinition="text")
-    private DetailedIntegrationError stackTraceElements;
+    private DetailedIntegrationError detailedIntegrationError;
 
     @JsonFormat(shape = Shape.STRING)
     @Enumerated(EnumType.STRING)
@@ -292,12 +292,12 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     }
 
     @Override
-    public DetailedIntegrationError getStackTraceElements() {
-        return stackTraceElements;
+    public DetailedIntegrationError getDetailedIntegrationError() {
+        return detailedIntegrationError;
     }
 
-    public void setStackTraceWithErrorMessage(DetailedIntegrationError stackTraceElements) {
-        this.stackTraceElements = stackTraceElements;
+    public void setDetailedIntegrationError(DetailedIntegrationError detailedIntegrationError) {
+        this.detailedIntegrationError = detailedIntegrationError;
     }
 
     public void setOutBoundVariables(Map<String, Object> outBoundVariables) {

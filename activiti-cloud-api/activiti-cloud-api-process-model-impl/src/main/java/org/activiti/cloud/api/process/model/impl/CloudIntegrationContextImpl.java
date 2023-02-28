@@ -25,7 +25,6 @@ import java.util.Optional;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.DetailedIntegrationError;
-import org.activiti.cloud.api.process.model.IntegrationError;
 
 public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implements CloudIntegrationContext {
 
@@ -48,7 +47,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     private String errorCode;
     private String errorMessage;
     private String errorClassName;
-    private DetailedIntegrationError stackTraceElements;
+    private DetailedIntegrationError detailedIntegrationError;
     private IntegrationContextStatus status;
     private Map<String, Object> inBoundVariables = new HashMap<>();
     private Map<String, Object> outBoundVariables = new HashMap<>();
@@ -236,12 +235,12 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
     }
 
     @Override
-    public DetailedIntegrationError getStackTraceElements() {
-        return stackTraceElements;
+    public DetailedIntegrationError getDetailedIntegrationError() {
+        return detailedIntegrationError;
     }
 
-    public void setStackTraceElements(DetailedIntegrationError stackTraceElements) {
-        this.stackTraceElements = stackTraceElements;
+    public void setDetailedIntegrationError(DetailedIntegrationError detailedIntegrationError) {
+        this.detailedIntegrationError = detailedIntegrationError;
     }
 
     @Override
@@ -329,7 +328,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                                                processInstanceId,
                                                requestDate,
                                                resultDate,
-                                               stackTraceElements,
+                                               detailedIntegrationError,
                                                status);
         return result;
     }
@@ -367,7 +366,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                Objects.equals(processInstanceId, other.processInstanceId) &&
                Objects.equals(requestDate, other.requestDate) &&
                Objects.equals(resultDate, other.resultDate) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements) &&
+               Objects.equals(detailedIntegrationError, other.detailedIntegrationError) &&
                status == other.status;
     }
 
@@ -414,7 +413,7 @@ public class CloudIntegrationContextImpl extends CloudRuntimeEntityImpl implemen
                .append(", errorClassName=")
                .append(errorClassName)
                .append(", stackTraceElements=")
-               .append(stackTraceElements)
+               .append(detailedIntegrationError)
                .append(", status=")
                .append(status)
                .append(", inBoundVariables=")

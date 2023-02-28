@@ -46,8 +46,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
       entity.setErrorCode(integrationEvent.getErrorCode());
       entity.setErrorMessage(integrationEvent.getErrorMessage());
       entity.setErrorClassName(integrationEvent.getErrorClassName());
-      entity.setStackTraceWithErrorMessage(new DetailedIntegrationError(integrationEvent.getErrorMessage(),
-                                                                        integrationEvent.getStackTraceElements()));
+      entity.setDetailedIntegrationError(new DetailedIntegrationError(integrationEvent.getErrorMessage(),
+                                                                      integrationEvent.getStackTraceElements()));
       entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
       entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 

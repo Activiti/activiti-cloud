@@ -39,6 +39,6 @@ public interface CloudIntegrationContext extends IntegrationContext, CloudRuntim
 
     String getErrorClassName();
 
-    DetailedIntegrationError getStackTraceElements();
+    DetailedIntegrationError getDetailedIntegrationError();
 
 }
