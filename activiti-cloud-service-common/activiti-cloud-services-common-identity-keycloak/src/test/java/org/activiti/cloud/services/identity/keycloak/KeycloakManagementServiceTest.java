@@ -597,7 +597,7 @@ class KeycloakManagementServiceTest {
 
     @Test
     void should_returnUsers_when_searchingByUserId() {
-        when(keycloakClient.getUserById(eq(kUserOne.getId())))
+        when(keycloakClient.getUserById(kUserOne.getId()))
             .thenReturn(kUserOne);
 
         User user = keycloakManagementService.findUserById(kUserOne.getId());
