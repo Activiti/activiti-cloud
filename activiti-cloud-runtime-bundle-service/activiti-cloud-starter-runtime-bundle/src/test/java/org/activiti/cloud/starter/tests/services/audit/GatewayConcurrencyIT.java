@@ -15,21 +15,16 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.awaitility.Awaitility.await;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -39,23 +34,32 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.engine.RuntimeService;
-import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
+import org.activiti.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_CREATED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_STARTED;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -77,13 +81,13 @@ public class GatewayConcurrencyIT {
     private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
-    private ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler;
+    private BindingServiceProperties bindingServiceProperties;
 
     @Autowired
     private OutputDestination outputDestination;
 
     @Autowired
-    private RuntimeService runtimeService;
+    private InputDestination inputDestination;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -99,6 +103,8 @@ public class GatewayConcurrencyIT {
         executorService = Executors.newFixedThreadPool(2);
         streamHandler.clear();
     }
+
+    InclusiveGatewayActivityBehavior s;
 
     @AfterEach
     public void cleanUp(){
@@ -118,17 +124,24 @@ public class GatewayConcurrencyIT {
         List<Callable<Void>> tasks = new ArrayList<>();
 
         tasks.add(() -> {
-            serviceTaskIntegrationResultEventHandler.receive(integrationResult);
+            Message message = MessageBuilder.withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap())).build();
+            String destination = bindingServiceProperties.getBindingDestination("signalConsumer");
+
+            inputDestination.send(message,
+                                  destination);
             return null;
         });
 
         tasks.add(() -> {
-            runtimeService.signalEventReceived(SIGNAL_NAME);
+            Message message = MessageBuilder.withPayload(integrationResult).build();
+            String destination = bindingServiceProperties.getBindingDestination("integrationResultsConsumer");
+
+            inputDestination.send(message,
+                                  destination);
             return null;
         });
 
         executorService.invokeAll(tasks);
-
 
         await().untilAsserted(() -> {
             List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();

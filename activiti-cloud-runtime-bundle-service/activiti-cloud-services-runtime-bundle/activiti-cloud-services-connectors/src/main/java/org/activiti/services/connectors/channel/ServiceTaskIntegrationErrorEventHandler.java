@@ -16,6 +16,8 @@
 
 package org.activiti.services.connectors.channel;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -23,14 +25,16 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
+import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.integration.IntegrationContextService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -54,12 +58,15 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
+    @Retryable(backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:10}"))
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(integrationContext.getId());
 
         if (integrationContextEntity != null) {
-            integrationContextService.deleteIntegrationContext(integrationContextEntity);
+            List<Command<?>> commands = new ArrayList<>();
+
+            commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
             List<Execution> executions = runtimeService.createExecutionQuery().executionId(integrationContextEntity.getExecutionId()).list();
             if (executions.size() > 0) {
@@ -77,8 +84,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 if (CloudBpmnError.class.getName().equals(errorClassName)) {
                     if (execution.getActivityId().equals(clientId)) {
                         try {
-                            triggerIntegrationContextError(integrationError, execution);
-                            return;
+                            commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
                         } catch (Throwable cause) {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
                         }
@@ -97,17 +103,10 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 LOGGER.warn(message);
             }
 
-            managementService.executeCommand(new AggregateIntegrationErrorReceivedEventCmd(
-                integrationError, runtimeBundleProperties, processEngineEventsAggregator));
+            commands.add(new AggregateIntegrationErrorReceivedEventCmd(
+                    integrationError, runtimeBundleProperties, processEngineEventsAggregator));
+
+            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }
     }
-
-    private void triggerIntegrationContextError(IntegrationError integrationError, ExecutionEntity execution) {
-        managementService.executeCommand(
-            CompositeCommand.of(
-                new PropagateCloudBpmnErrorCmd(integrationError, execution),
-                new AggregateIntegrationErrorReceivedClosingEventCmd(new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError, runtimeBundleProperties, processEngineEventsAggregator))));
-    }
-
 }
