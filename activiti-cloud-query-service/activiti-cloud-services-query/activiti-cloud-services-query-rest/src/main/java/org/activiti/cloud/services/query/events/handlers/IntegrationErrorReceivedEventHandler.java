@@ -27,6 +27,7 @@ import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
@@ -46,10 +47,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setErrorCode(integrationEvent.getErrorCode());
             entity.setErrorMessage(integrationEvent.getErrorMessage());
             entity.setErrorClassName(integrationEvent.getErrorClassName());
-            StackTraceElement stackTraceElement = new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
-            List<StackTraceElement> stackTraceElements = new java.util.ArrayList<>(List.of(stackTraceElement));
-            stackTraceElements.addAll(integrationEvent.getStackTraceElements());
-            entity.setStackTraceElements(stackTraceElements);
+            entity.setStackTraceElements(addFullErrorMessageAsFirstStackTraceElement(integrationEvent));
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
@@ -60,6 +58,14 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
             entityManager.persist(serviceTaskEntity);
         });
+    }
+
+    @NotNull
+    private static List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
+        StackTraceElement stackTraceElement = new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
+        List<StackTraceElement> stackTraceElements = new java.util.ArrayList<>(List.of(stackTraceElement));
+        stackTraceElements.addAll(integrationEvent.getStackTraceElements());
+        return stackTraceElements;
     }
 
     @Override
