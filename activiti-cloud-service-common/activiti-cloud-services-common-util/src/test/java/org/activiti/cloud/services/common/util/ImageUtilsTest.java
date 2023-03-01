@@ -16,16 +16,33 @@
 
 package org.activiti.cloud.services.common.util;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class ImageUtilsTest {
 
+    private static final String SVG_FILE_LOCATION = "images/save.svg";
+
+    private static final String PNG_FILE_LOCATION = "images/save.png";
+
     @Test
     void should_convertSvgToPng() throws Exception {
-        byte[] svg = this.getClass().getClassLoader().getResourceAsStream("images/save.svg").readAllBytes();
+        byte[] svg = FileUtils.resourceAsStream(SVG_FILE_LOCATION)
+                .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
+                .readAllBytes();
         byte[] png = ImageUtils.svgToPng(svg);
-        byte[] expectedPng = this.getClass().getClassLoader().getResourceAsStream("images/save.png").readAllBytes();
-        Assertions.assertThat(png).isEqualTo(expectedPng);
+        byte[] expectedPng = FileUtils.resourceAsStream(PNG_FILE_LOCATION)
+                .orElseThrow(() -> new IllegalArgumentException(PNG_FILE_LOCATION + " file not found"))
+                .readAllBytes();
+        assertThat(png).isEqualTo(expectedPng);
+    }
+
+    @Test
+    void should_throwImageProcessingException_when_TranscoderExceptionThrown() {
+        byte[] svg = "wrong svg".getBytes(StandardCharsets.UTF_8);
+        assertThatExceptionOfType(ImageProcessingException.class).isThrownBy(() -> ImageUtils.svgToPng(svg));
     }
 }

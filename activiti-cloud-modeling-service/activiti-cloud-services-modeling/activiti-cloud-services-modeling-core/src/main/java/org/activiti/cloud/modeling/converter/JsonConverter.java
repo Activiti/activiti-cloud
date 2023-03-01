@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -102,7 +103,7 @@ public class JsonConverter<T> {
 
     public T convertToEntity(byte[] json,
                              Class<?> view) {
-        if (StringUtils.isEmpty(json)) {
+        if (ObjectUtils.isEmpty(json)) {
             return null;
         }
         return convertToEntity(new String(json,
@@ -118,7 +119,7 @@ public class JsonConverter<T> {
     public T convertToEntity(String json,
                              Class<?> view) {
         try {
-            if (StringUtils.isEmpty(json)) {
+            if (!StringUtils.hasLength(json)) {
                 return null;
             }
 
