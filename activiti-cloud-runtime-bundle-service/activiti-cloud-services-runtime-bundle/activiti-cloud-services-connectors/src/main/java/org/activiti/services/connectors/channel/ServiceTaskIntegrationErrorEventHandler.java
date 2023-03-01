@@ -23,6 +23,7 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
@@ -60,7 +61,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
-    @Retryable(
+    @Retryable(value = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.error.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:0}")
     )
