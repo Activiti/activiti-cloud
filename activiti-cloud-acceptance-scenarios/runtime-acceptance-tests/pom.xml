@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
-    <version>7.9.0-SNAPSHOT</version>
+    <version>7.10.0-SNAPSHOT</version>
   </parent>
   <artifactId>runtime-acceptance-tests</artifactId>
   <name>Activiti Cloud :: Application Acceptance Tests</name>
