@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.List;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -45,7 +46,10 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setErrorCode(integrationEvent.getErrorCode());
             entity.setErrorMessage(integrationEvent.getErrorMessage());
             entity.setErrorClassName(integrationEvent.getErrorClassName());
-            entity.setStackTraceElements(integrationEvent.getStackTraceElements());
+            StackTraceElement stackTraceElement = new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
+            List<StackTraceElement> stackTraceElements = List.of(stackTraceElement);
+            stackTraceElements.addAll(integrationEvent.getStackTraceElements());
+            entity.setStackTraceElements(stackTraceElements);
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
