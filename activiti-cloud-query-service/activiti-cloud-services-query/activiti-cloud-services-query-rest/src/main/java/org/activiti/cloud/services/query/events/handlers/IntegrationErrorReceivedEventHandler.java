@@ -47,7 +47,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setErrorMessage(integrationEvent.getErrorMessage());
             entity.setErrorClassName(integrationEvent.getErrorClassName());
             StackTraceElement stackTraceElement = new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
-            List<StackTraceElement> stackTraceElements = List.of(stackTraceElement);
+            List<StackTraceElement> stackTraceElements = new java.util.ArrayList<>(List.of(stackTraceElement));
             stackTraceElements.addAll(integrationEvent.getStackTraceElements());
             entity.setStackTraceElements(stackTraceElements);
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
