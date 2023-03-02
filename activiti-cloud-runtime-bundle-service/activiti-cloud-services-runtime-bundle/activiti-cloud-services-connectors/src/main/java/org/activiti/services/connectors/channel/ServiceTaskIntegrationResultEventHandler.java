@@ -75,14 +75,15 @@ public class ServiceTaskIntegrationResultEventHandler {
             integrationContext.getId()
         );
 
-        String executionId = integrationContext.getExecutionId();
-        List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
-
         if (integrationContextEntity != null) {
             List<Command<?>> commands = new ArrayList<>();
 
             commands.add(new DeleteIntegrationContextCmd(integrationContextEntity));
 
+            String executionId = integrationContext.getExecutionId();
+            List<Execution> executions = runtimeService.createExecutionQuery()
+                                                       .executionId(executionId)
+                                                       .list();
             if (executions.size() > 0) {
                 Execution execution = executions.get(0);
 
