@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationContextStatus;
@@ -39,47 +40,60 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IntegrationErrorReceivedEventHandlerTest {
 
-  @Captor
-  private ArgumentCaptor<Object> entityManagerPersistCaptor;
+    @Captor
+    private ArgumentCaptor<Object> entityManagerPersistCaptor;
 
-  @Mock
-  private CloudIntegrationErrorReceivedEvent cloudIntegrationEvent;
+    @Mock
+    private CloudIntegrationErrorReceivedEvent cloudIntegrationEvent;
 
-  @Mock
-  private ServiceTaskEntity serviceTaskEntity;
+    @Mock
+    private ServiceTaskEntity serviceTaskEntity;
 
-  @Mock
-  private EntityManager entityManager;
+    @Mock
+    private EntityManager entityManager;
 
-  @Test
-  void handle() {
-    //given
-    String errorMessage = "error message";
-    IntegrationContextEntity integrationContext = new IntegrationContextEntity();
-    when(cloudIntegrationEvent.getErrorMessage()).thenReturn(errorMessage);
-    when(cloudIntegrationEvent.getEntity()).thenReturn(integrationContext);
-    IntegrationErrorReceivedEventHandler handlerInTest = new IntegrationErrorReceivedEventHandler(entityManager);
-    when(entityManager.find(IntegrationContextEntity.class, "null:null:null")).thenReturn(integrationContext);
-    when(entityManager.find(eq(ServiceTaskEntity.class), anyString())).thenReturn(serviceTaskEntity);
+    @Test
+    void handle() {
+        //given
+        String errorMessage = "error message";
+        int lineNumber = 2137;
+        String fileName = "exampleFileName";
+        String sourceDeclaringClass = "java.lang.Example";
+        String sourceMethodName = "doSomething";
+        StackTraceElement originalError = new StackTraceElement(sourceDeclaringClass,
+                                                                sourceMethodName,
+                                                                fileName,
+                                                                lineNumber);
 
-    //when
-    handlerInTest.handle(cloudIntegrationEvent);
+        IntegrationContextEntity integrationContext = new IntegrationContextEntity();
+        when(cloudIntegrationEvent.getErrorMessage()).thenReturn(errorMessage);
+        when(cloudIntegrationEvent.getEntity()).thenReturn(integrationContext);
+        when(cloudIntegrationEvent.getStackTraceElements()).thenReturn(new ArrayList<>(List.of(originalError)));
+        IntegrationErrorReceivedEventHandler handlerInTest = new IntegrationErrorReceivedEventHandler(entityManager);
+        when(entityManager.find(IntegrationContextEntity.class, "null:null:null")).thenReturn(integrationContext);
+        when(entityManager.find(eq(ServiceTaskEntity.class), anyString())).thenReturn(serviceTaskEntity);
 
-    //then
-    verify(entityManager, times(2)).persist(entityManagerPersistCaptor.capture());
-    List<Object> allCapturedValues = entityManagerPersistCaptor.getAllValues();
-    assertThat(allCapturedValues)
-        .hasSize(2);
+        //when
+        handlerInTest.handle(cloudIntegrationEvent);
 
-    IntegrationContextEntity savedEntity = (IntegrationContextEntity) allCapturedValues.get(0);
-    assertThat(savedEntity.getStackTraceElements())
-        .first()
-        .extracting("declaringClass")
-        .asInstanceOf(InstanceOfAssertFactories.STRING)
-        .isEqualTo(errorMessage);
-    assertThat(savedEntity.getStatus()).isEqualTo(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+        //then
+        verify(entityManager, times(2)).persist(entityManagerPersistCaptor.capture());
+        List<Object> allCapturedValues = entityManagerPersistCaptor.getAllValues();
+        assertThat(allCapturedValues)
+            .hasSize(2);
 
-    ServiceTaskEntity savedServiceTask = (ServiceTaskEntity) allCapturedValues.get(1);
-    assertThat(savedServiceTask).isEqualTo(serviceTaskEntity);
-  }
+        IntegrationContextEntity integrationContextEntity = (IntegrationContextEntity) allCapturedValues.get(0);
+        List<StackTraceElement> stackTraceElements = integrationContextEntity.getStackTraceElements();
+        assertThat(stackTraceElements).hasSize(2);
+        StackTraceElement newStackTraceElement = stackTraceElements.get(0);
+        assertThat(newStackTraceElement.getLineNumber()).isEqualTo(lineNumber);
+        assertThat(newStackTraceElement.getFileName()).isEqualTo(fileName);
+        StackTraceElement sourceStackTraceElement = stackTraceElements.get(1);
+        assertThat(sourceStackTraceElement.getLineNumber()).isEqualTo(lineNumber);
+        assertThat(sourceStackTraceElement.getFileName()).isEqualTo(fileName);
+        assertThat(integrationContextEntity.getStatus()).isEqualTo(IntegrationContextStatus.INTEGRATION_ERROR_RECEIVED);
+
+        ServiceTaskEntity savedServiceTask = (ServiceTaskEntity) allCapturedValues.get(1);
+        assertThat(savedServiceTask).isEqualTo(serviceTaskEntity);
+    }
 }

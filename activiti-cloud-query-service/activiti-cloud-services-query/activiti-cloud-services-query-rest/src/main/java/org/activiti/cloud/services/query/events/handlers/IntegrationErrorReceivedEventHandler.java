@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
 import java.util.List;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -61,11 +63,25 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
     }
 
     @NotNull
-    private static List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
-        StackTraceElement stackTraceElement = new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
-        List<StackTraceElement> stackTraceElements = new java.util.ArrayList<>(List.of(stackTraceElement));
+    private static List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(
+        CloudIntegrationErrorReceivedEvent integrationEvent) {
+        StackTraceElement newTopStackTraceElement = getNewTopStackTraceElement(integrationEvent);
+        List<StackTraceElement> stackTraceElements = new java.util.ArrayList<>(List.of(newTopStackTraceElement));
         stackTraceElements.addAll(integrationEvent.getStackTraceElements());
         return stackTraceElements;
+    }
+
+    @NotNull
+    private static StackTraceElement getNewTopStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
+        if (isNotEmpty(integrationEvent.getStackTraceElements())) {
+            StackTraceElement firstElement = integrationEvent.getStackTraceElements().get(0);
+            return new StackTraceElement(integrationEvent.getErrorMessage(),
+                                         "",
+                                         firstElement.getFileName(),
+                                         firstElement.getLineNumber());
+        } else {
+            return new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
+        }
     }
 
     @Override
