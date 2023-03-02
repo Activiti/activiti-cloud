@@ -30,6 +30,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    public static final String SESSION_ID = "sid";
+
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
@@ -61,7 +63,7 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             Instant expiresAt = jwt.getExpiresAt();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest);
+            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, jwt.getClaimAsString(SESSION_ID));
             username = oAuth2User.getName();
         }
         return username;

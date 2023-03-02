@@ -18,8 +18,8 @@ package org.activiti.cloud.services.common.security.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.JwtGrantedAuthorityConverter;
+import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @EnableCaching
 public class CommonJwtAuthenticationConverterConfiguration {
 
-    @Value("${jwt.userinfo.cache.cacheExpireAfterWrite:PT1m}")
+    @Value("${jwt.userinfo.cache.cacheExpireAfterWrite:PT5m}")
     private String cacheExpireAfterWrite;
     @Value("${jwt.userinfo.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;

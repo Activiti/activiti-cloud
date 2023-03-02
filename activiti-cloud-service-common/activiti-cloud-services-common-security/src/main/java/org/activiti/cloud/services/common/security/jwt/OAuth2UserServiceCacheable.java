@@ -29,8 +29,8 @@ public class OAuth2UserServiceCacheable {
         this.oAuth2UserService = oAuth2UserService;
     }
 
-    @Cacheable(value = "userInfoApiCall", key = "#userRequest.accessToken.tokenValue", sync = true)
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    @Cacheable(value = "userInfoApiCall", key = "#sid", sync = true)
+    public OAuth2User loadUser(OAuth2UserRequest userRequest, String sid) throws OAuth2AuthenticationException {
         return  oAuth2UserService.loadUser(userRequest);
     }
 }
