@@ -41,7 +41,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @EnableCaching
 public class CommonJwtAuthenticationConverterConfiguration {
 
-    @Value("${jwt.userinfo.cache.cacheExpireAfterWrite:PT5m}")
+    @Value("${jwt.userinfo.cache.cacheExpireAfterWrite:PT10m}")
     private String cacheExpireAfterWrite;
     @Value("${jwt.userinfo.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
