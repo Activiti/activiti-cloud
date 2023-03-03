@@ -43,6 +43,7 @@ public class GenericModelsConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(GenericModelsConfiguration.class);
 
     JsonModelType genericJsonModelType = new JsonModelType() {
+
         @Override
         public String getName() {
             return "GENERIC_JSON_MODEL";
@@ -55,6 +56,7 @@ public class GenericModelsConfiguration {
     };
 
     ModelType genericNonJsonModelType = new ModelType() {
+
         @Override
         public String getName() {
             return "GENERIC_NON_JSON_MODEL";
@@ -72,32 +74,30 @@ public class GenericModelsConfiguration {
 
         @Override
         public String[] getAllowedContentFileExtension() {
-            return new String[] { ".a", ".b" };
+            return new String[]{".a", ".b"};
         }
     };
 
     ModelContentValidator genericJsonContentValidator = new ModelContentValidator() {
+
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
+        public void validate(byte[] modelFile,
+                             ValidationContext validationContext) {
             LOGGER.info("validate generic json content");
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                        ValidationContext validationContext) {
             LOGGER.info("validate generic json content");
             return Collections.emptyList();
         }
 
         @Override
-        public void validate(
-            Model model,
-            byte[] modelContent,
-            ValidationContext validationContext,
-            boolean validateUsage
-        ) {
+        public void validate(Model model,
+                             byte[] modelContent,
+                             ValidationContext validationContext,
+                             boolean validateUsage) {
             LOGGER.info("usage of json");
         }
 
@@ -113,16 +113,16 @@ public class GenericModelsConfiguration {
     };
 
     private ModelExtensionsValidator genericJsonExtensionsValidator = new ModelExtensionsValidator() {
+
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
+        public void validate(byte[] modelFile,
+                             ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                        ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
             return Collections.emptyList();
         }
@@ -134,16 +134,17 @@ public class GenericModelsConfiguration {
     };
 
     ModelContentValidator genericNonJsonContentValidator = new ModelContentValidator() {
+
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
+        public void validate(byte[] modelFile,
+                             ValidationContext validationContext) {
             LOGGER.info("validate generic non json content");
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+
+                                                                        ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
             return Collections.emptyList();
         }
@@ -160,16 +161,16 @@ public class GenericModelsConfiguration {
     };
 
     private ModelExtensionsValidator genericNonJsonExtensionsValidator = new ModelExtensionsValidator() {
+
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
+        public void validate(byte[] modelFile,
+                             ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
+                                                                        ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
             return Collections.emptyList();
         }
@@ -181,18 +182,21 @@ public class GenericModelsConfiguration {
     };
 
     private ContentUpdateListener genericJsonContentUpdateListener = new ContentUpdateListener() {
+
         @Override
         public ModelType getHandledModelType() {
             return genericJsonModelType;
         }
 
         @Override
-        public void execute(Model model, FileContent fileContent) {
+        public void execute(Model model,
+                            FileContent fileContent) {
             LOGGER.info("generic json content update listener");
         }
     };
 
     private ModelUpdateListener genericJsonModelUpdateListener = new ModelUpdateListener() {
+
         @Override
         public ModelType getHandledModelType() {
             return genericJsonModelType;
@@ -205,18 +209,21 @@ public class GenericModelsConfiguration {
     };
 
     private ContentUpdateListener genericNonJsonContentUpdateListener = new ContentUpdateListener() {
+
         @Override
         public ModelType getHandledModelType() {
             return genericNonJsonModelType;
         }
 
         @Override
-        public void execute(Model model, FileContent fileContent) {
+        public void execute(Model model,
+                            FileContent fileContent) {
             LOGGER.info("generic non json content update listener");
         }
     };
 
     private ModelUpdateListener genericNonJsonModelUpdateListener = new ModelUpdateListener() {
+
         @Override
         public ModelType getHandledModelType() {
             return genericNonJsonModelType;

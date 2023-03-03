@@ -109,17 +109,15 @@ public class ModelServiceImpl implements ModelService {
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
     @Autowired
-    public ModelServiceImpl(
-        ModelRepository modelRepository,
-        ModelTypeService modelTypeService,
-        ModelContentService modelContentService,
-        ModelExtensionsService modelExtensionsService,
-        JsonConverter<Model> jsonConverter,
-        ProcessModelContentConverter processModelContentConverter,
-        Set<ModelUpdateListener> modelUpdateListeners,
-        FileMagicNumberValidator fileContentValidator,
-        FileContentSanitizer fileContentSanitizer
-    ) {
+    public ModelServiceImpl(ModelRepository modelRepository,
+                            ModelTypeService modelTypeService,
+                            ModelContentService modelContentService,
+                            ModelExtensionsService modelExtensionsService,
+                            JsonConverter<Model> jsonConverter,
+                            ProcessModelContentConverter processModelContentConverter,
+                            Set<ModelUpdateListener> modelUpdateListeners,
+                            FileMagicNumberValidator fileContentValidator,
+                             FileContentSanitizer fileContentSanitizer) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;

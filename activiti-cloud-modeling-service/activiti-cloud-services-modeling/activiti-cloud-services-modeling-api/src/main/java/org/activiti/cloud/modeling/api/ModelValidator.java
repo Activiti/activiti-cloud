@@ -29,52 +29,36 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      */
     void validate(byte[] modelContent, ValidationContext validationContext);
 
-    /**
-     * Validate the given model and return exceptions
-     *
-     * @param modelContent      content of the model to validate
-     * @param validationContext the validation context
-     */
-    Collection<ModelingException> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
+  /**
+   * Validate the given model.
+   *
+   * @param modelContent      content of the model to validate
+   * @param validationContext the validation context
+   */
+    Collection<ModelValidationError> validate(byte[] modelContent,
+                ValidationContext validationContext);
 
-    /**
-     * Validate the given model and return errors
-     *
-     * @param modelContent      content of the model to validate
-     * @param validationContext the validation context
-     */
-    Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
+  /**
+   * Validate the given model and its usage
+   *
+   * @param model             the model to validate
+   * @param modelContent      content of the model to validate
+   * @param validationContext the validation context
+   * @param validateUsage     validate the usage of a model
+   */
+  default void validate(Model model,
+                        byte[] modelContent,
+                        ValidationContext validationContext,
+                        boolean validateUsage) {
+    validate(modelContent, validationContext);
+  }
 
-    /**
-     * Get handled model type by this validator.
-     *
-     * @return handled model type
-     */
-    ModelType getHandledModelType();
-
-    /**
-     * Validate the given model and its usage and return errors
-     *
-     * @param model             the model to validate
-     * @param modelContent      content of the model to validate
-     * @param validationContext the validation context
-     * @param validateUsage     validate the usage of a model
-     */
-    default Collection<ModelValidationError> validateAndReturnErrors(
-        Model model,
-        byte[] modelContent,
-        ValidationContext validationContext,
-        boolean validateUsage
-    ) {
-        return validateAndReturnErrors(modelContent, validationContext);
-    }
-
-    /**
-     * Get handled model type by this validator.
-     *
-     * @return handled model type
-     */
-    ModelType getHandledModelType();
+  /**
+   * Get handled model type by this validator.
+   *
+   * @return handled model type
+   */
+  ModelType getHandledModelType();
 
     /**
      * Get handled content type by this validator.
