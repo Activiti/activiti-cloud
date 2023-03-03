@@ -15,6 +15,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name || github.run_id }}
   cancel-in-progress: true
 
+env:
+  CLUSTER_NAME: activiti
+  CLUSTER_DOMAIN: envalfresco.com
+  GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+
 jobs:
 
   pre-commit:
@@ -25,6 +30,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: pre-commit
+    # Map a step output to a job output
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+      branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
+      preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
+
     steps:
 
       - name: Checkout repository
@@ -49,16 +60,16 @@ jobs:
         id: update-pom-to-next-version
         if: github.event_name == 'push'
 
+      - name: Set VERSION
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
+          echo 0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT > VERSION
+
       - name: Update VERSION file
         if: github.event_name == 'push'
         run: |
           echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
-
-      - name: Set preview version
-        if: ${{ contains(github.head_ref, 'preview') }}
-        run: |
-          GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
-          echo 0.0.1-${GITHUB_PR_NUMBER}-${GITHUB_RUN_NUMBER}-SNAPSHOT > VERSION
 
       - name: Set VERSION env variable
         if: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
@@ -68,25 +79,17 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Update pom files to the new version
-        if: ${{ contains(github.head_ref, 'preview') }}
+        if: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
         run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
 
-      - name: Define Maven Command
-        id: define_maven_command
-        shell: bash
+      - name: Update VERSION file
+        if: github.event_name == 'push'
         run: |
-          if [ $DO_PUSH == 'true' ]
-          then
-            echo "command=deploy" >> $GITHUB_OUTPUT
-          else
-            echo "command=verify" >> $GITHUB_OUTPUT
-          fi
-        env:
-          DO_PUSH: ${{ github.event_name == 'push' || contains(github.head_ref, 'preview') }}
+          echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
 
-      - name: Build and Test with Maven (and maybe Deploy)
+      - name: Maven Build and Test
         shell: bash
-        run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DnoAcceptanceTests=true verify ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -96,8 +99,351 @@ jobs:
         shell: bash
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Set VERSION env variable
+        id: set-version
+        run: |
+          VERSION=$(cat VERSION)
+          echo set VERSION=$VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build Example Runtime Bundle
+        run: make docker/example-runtime-bundle
+
+      - name: Build Activiti Cloud Query
+        run: make docker/activiti-cloud-query
+
+      - name: Build Example Cloud Connector
+        run: make docker/example-cloud-connector
+
+      - name: Build Activiti Cloud Modeling
+        run: make docker/activiti-cloud-modeling
+
+      - name: Build Activiti Cloud Identity Adapter
+        run: make docker/activiti-cloud-identity-adapter
+
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations]
+        include:
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
+
+    steps:
+      - name: Set PREVIEW_NAME env variable
+        id: set-preview-name
+        run: |
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          echo set PREVIEW_NAME=$PREVIEW_NAME
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+          echo "preview-name=$PREVIEW_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set BRANCH_NAME env variable
+        id: set-branch-name
+        run: |
+          BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF}
+          BRANCH_NAME=${BRANCH_NAME#refs/heads/}
+          BRANCH_NAME=$(echo ${BRANCH_NAME/\//-} | tr '[:upper:]' '[:lower:]')
+          echo set BRANCH_NAME=$BRANCH_NAME
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure Maven
+        run: |
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Build maven
+        shell: bash
+        run: mvn ${MAVEN_CLI_OPTS} -DskipTests -Droot.log.level=off install
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: v1.19.6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.5.2
+
+      - name: Set up rancher
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.27.0
+        with:
+          url: ${{ secrets.RANCHER2_URL }}
+          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          context: ${{ env.CLUSTER_NAME }}
+
+      - name: Setup environment for ${{ matrix.messaging-broker }}
+        env:
+          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
+          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
+          BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
+          echo "MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED" >> $GITHUB_ENV
+          echo "MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS" >> $GITHUB_ENV
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo $VERSION > VERSION
+
+          source $GITHUB_ENV
+
+          echo MESSAGING_BROKER=$MESSAGING_BROKER
+          echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
+          echo MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS
+          echo PREVIEW_NAME=$PREVIEW_NAME
+          echo BRANCH_NAME=$BRANCH_NAME
+          echo VERSION=$VERSION
+
+      - name: Delete preview for ${{ matrix.messaging-broker }}
+        if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        run: |
+          kubectl delete ns $PREVIEW_NAME || true
+
+      - name: Install release for ${{ matrix.messaging-broker }}
+        run: |
+          ### Variables ###
+          export SSO_PROTOCOL=https
+          export GATEWAY_PROTOCOL=https
+          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+
+          ### Main ###
+
+          echo "Installing release with make install"
+          make install
+
+      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
+        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+        run: |
+          ### Variables ###
+          export SSO_PROTOCOL=https
+          export GATEWAY_PROTOCOL=https
+          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export QUERY_CONSUMER_NUMBER=2
+
+          ### Functions ###
+
+          # It checks that the RESULT env var is equals to the first
+          # argument passed to the function
+          #
+          check_result_is () {
+            if [ "$RESULT" == "$1" ]; then
+              echo "correct"
+            else
+              echo "number expected is $1 but result is $RESULT"
+              exit 1
+            fi
+          }
+
+          # It counts the number of query consumer pods in the
+          # cluster and set it in RESULT env var
+          #
+          count_query_consumer_pods () {
+            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
+              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
+              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
+          }
+
+          # It counts the number of query partition of engineEvents topic
+          # created in Kafka and set it in RESULT env var
+          #
+          count_query_topic_partitions () {
+            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
+              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
+              --bootstrap-server=localhost:9092 --describe \
+              --topic engineEvents | grep PartitionCount |\
+              awk \'{ printf "%s",$6 }\'')
+          }
+
+          ### Main ###
+
+          echo "It checks the deployment has 1 query pod consumer"
+          count_query_consumer_pods
+          check_result_is 1
+
+          echo "It checks the deployment has 4 query topic patitions"
+          count_query_topic_partitions
+          check_result_is 4
+
+      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+        run: |
+          ### Variables ###
+          export SSO_PROTOCOL=https
+          export GATEWAY_PROTOCOL=https
+          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+
+          ### Functions ####
+
+          # It evaluates the function passed as a parameter
+          # if the result is different than 0 it waits
+          # for 5 seconds and re-evaluates it again.
+          #
+          wait_until_true () {
+            local attempt_counter=0
+            local max_attempts=50
+
+            until "$@"
+            do
+              if [ ${attempt_counter} -eq ${max_attempts} ]
+              then
+                echo "Max attempts reached"
+                break
+              fi
+
+              printf '.'
+              attempt_counter=$((attempt_counter+1))
+              sleep 5
+            done
+          }
+
+          # It makes an HTTP request to the health check of the
+          # modeling, query and runtime-bundles API returning 0
+          # in case their pods are ready and a value different
+          # than 0 otherwise.
+          #
+          check_services_up () {
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/modeling-service/actuator/health > /dev/null 2>&1 && \
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/rb/actuator/health > /dev/null 2>&1 && \
+            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/query/actuator/health > /dev/null 2>&1
+          }
+
+          ### Main ###
+
+          echo "Waiting for services to be up..."
+          wait_until_true check_services_up
+
+          # Showing the deployment result
+          kubectl get all -n $PREVIEW_NAME
+
+          # Launching the tests
+          make test/modeling-acceptance-tests
+          make test/runtime-acceptance-tests
+          make test/identity-adapter-acceptance-tests
+
+      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+        if: ${{ always() }}
+        env:
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        run: |
+          if [ $IS_PREVIEW = true ]
+          then
+              echo "Skipping delete Helm release for preview"
+          else
+              echo "Delete Helm release"
+              make delete
+          fi
+
+  delete-test-images:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      # dependency needed for build.outputs env variables resolution
+      - build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Delete Docker images
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+          then
+              echo "Skipping delete Docker images"
+          else
+              echo $VERSION > VERSION
+              echo "Delete Docker images"
+              make docker-delete-all
+          fi
+
+  publish:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
+      - delete-test-images
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'preview')) }}
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Update pom files to the new version
+        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+
+      - name: Maven Deploy
+        shell: bash
+        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}}
+        env:
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
       - name: Configure git user
-        if: github.event_name == 'push'
         run: |
           git config --global user.name $GITHUB_USERNAME
           git config --global user.email $GITHUB_USERNAME@users.noreply.github.com
@@ -105,45 +451,89 @@ jobs:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
 
       - name: Create release tag
-        if: github.event_name == 'push'
         run: |
           git commit -am "Release $VERSION" --allow-empty
           git tag -fa $VERSION -m "Release version $VERSION"
           git push -f -q origin $VERSION
 
-      - name: Install updatebot
-        if: github.event_name == 'push'
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.21.0
-
-      - name: Run updatebot
-        if: github.event_name == 'push'
-        run: |
-          echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
-          updatebot push-version --kind maven \
-            org.activiti.cloud:activiti-cloud-audit-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-api-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-parent $VERSION \
-            org.activiti.cloud:activiti-cloud-build-parent $VERSION \
-            org.activiti.cloud:activiti-cloud-build-dependencies-parent $VERSION\
-            org.activiti.cloud:activiti-cloud-connectors-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-messages-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-modeling-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-query-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-acceptance-tests-dependencies $VERSION \
-            org.activiti.cloud:activiti-cloud-service-common-dependencies $VERSION
+  propagate-maven:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - publish
+    if: github.event_name == 'push'
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      UPDATEBOT_FULL_CHART_REPO_PATH: .updatebot-repos/github/activiti/activiti-cloud-full-chart
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v1.27.0
+      - name: Run updatebot for Maven
         env:
           GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
+          updatebot push-version --kind maven \
+            org.activiti.cloud:activiti-cloud-dependencies $VERSION
+
+  propagate-helm:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - publish
+    if: github.event_name == 'push' && github.ref_name == 'develop'
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      FULL_CHART_DIR: full-chart
+      FULL_CHART_BASE_BRANCH: develop
+      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ${{ env.FULL_CHART_DIR }}
+          repository: Activiti/activiti-cloud-full-chart
+          ref: ${{ env.FULL_CHART_BASE_BRANCH }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+      - name: Update image tags in Helm chart
+        working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
+        run: |
+          git checkout -b $FULL_CHART_PR_BRANCH
+          yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.27.0
+      - name: Update helm docs
+        working-directory: ${{ env.FULL_CHART_DIR}}
+        run: helm-docs
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.27.0
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          add-options: -u
+          repository-directory: ${{ env.FULL_CHART_DIR}}
+          commit-message: "Update docker image tags to $VERSION"
+
+      - name: Create propagation PR
+        working-directory: ${{ env.FULL_CHART_DIR}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+        run: |
+          git push origin $FULL_CHART_PR_BRANCH
+          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
 
   notify:
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - propagate-helm
+      - propagate-maven
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.21.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.27.0
         with:
           channel-id: 'eng-hxp-studio-activiti-gh-notifs'
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}

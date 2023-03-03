@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema"
+                   expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://bpmn.io/schema/bpmn"
+                   id="model-2f8b6f46-6c87-4f4d-9902-f446dc01493c" name="multiinstance-servicetask"
+                   xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_B-f96qb1" name="multiinstance-servicetask" isExecutable="true">
+    <bpmn2:startEvent id="StartEvent_1">
+      <bpmn2:outgoing>SequenceFlow_0wbhks6</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:serviceTask id="ServiceTask_0qp1237" name="multiinstance-servicetask" implementation="restconnector.POST">
+      <bpmn2:incoming>SequenceFlow_0wbhks6</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_0w5fqmo</bpmn2:outgoing>
+      <multiInstanceLoopCharacteristics isSequential="false">
+        <loopCardinality>3</loopCardinality>
+      </multiInstanceLoopCharacteristics>
+    </bpmn2:serviceTask>
+    <bpmn2:endEvent id="EndEvent_12fe6l7">
+      <bpmn2:incoming>SequenceFlow_0w5fqmo</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="SequenceFlow_0w5fqmo" sourceRef="ServiceTask_0qp1237" targetRef="EndEvent_12fe6l7"></bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="SequenceFlow_0wbhks6" sourceRef="StartEvent_1" targetRef="ServiceTask_0qp1237"></bpmn2:sequenceFlow>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Process_B-f96qb1">
+    <bpmndi:BPMNPlane bpmnElement="Process_B-f96qb1" id="BPMNPlane_Process_B-f96qb1">
+      <bpmndi:BPMNShape bpmnElement="StartEvent_1" id="BPMNShape_StartEvent_1">
+        <omgdc:Bounds height="36.0" width="36.0" x="212.0" y="202.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="ServiceTask_0qp1237" id="BPMNShape_ServiceTask_0qp1237">
+        <omgdc:Bounds height="80.0" width="100.0" x="320.0" y="180.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="EndEvent_12fe6l7" id="BPMNShape_EndEvent_12fe6l7">
+        <omgdc:Bounds height="36.0" width="36.0" x="472.0" y="202.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_0w5fqmo" id="BPMNEdge_SequenceFlow_0w5fqmo">
+        <omgdi:waypoint x="420.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="472.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="SequenceFlow_0wbhks6" id="BPMNEdge_SequenceFlow_0wbhks6">
+        <omgdi:waypoint x="248.0" y="220.0"></omgdi:waypoint>
+        <omgdi:waypoint x="320.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

@@ -166,6 +166,8 @@
     <module>activiti-cloud-modeling-service</module>
     <module>activiti-cloud-notifications-graphql-service</module>
     <module>activiti-cloud-connectors</module>
+    <module>activiti-cloud-acceptance-scenarios</module>
+    <module>activiti-cloud-dependencies</module>
   </modules>
   <scm>
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
@@ -324,6 +326,14 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
           <version>${maven-jar-plugin.version}</version>
+          <configuration>
+            <archive>
+              <manifest>
+                <mainClass>${start-class}</mainClass>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              </manifest>
+            </archive>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
