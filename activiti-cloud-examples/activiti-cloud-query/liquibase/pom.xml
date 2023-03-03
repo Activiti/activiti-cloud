@@ -2,9 +2,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.activiti.cloud</groupId>
-    <artifactId>activiti-cloud-application</artifactId>
+    <artifactId>activiti-cloud-build-parent</artifactId>
     <version>7.10.0-SNAPSHOT</version>
-    <relativePath>../..</relativePath>
+    <relativePath>../../../activiti-cloud-build/pom.xml</relativePath>
   </parent>
   <artifactId>activiti-cloud-query-liquibase</artifactId>
   <name>Activiti Cloud :: Query Liquibase</name>
@@ -14,7 +14,7 @@
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
-    <activiti-cloud.version>7.9.0-alpha.29</activiti-cloud.version>
+    <activiti-cloud.version>${project.version}</activiti-cloud.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -88,6 +88,7 @@
           <execution>
             <goals>
               <goal>build-info</goal>
+              <goal>repackage</goal>
             </goals>
           </execution>
         </executions>
@@ -95,6 +96,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+        </configuration>
       </plugin>
     </plugins>
   </build>

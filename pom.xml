@@ -167,6 +167,7 @@
     <module>activiti-cloud-notifications-graphql-service</module>
     <module>activiti-cloud-connectors</module>
     <module>activiti-cloud-acceptance-scenarios</module>
+    <module>activiti-cloud-examples</module>
     <module>activiti-cloud-dependencies</module>
   </modules>
   <scm>
