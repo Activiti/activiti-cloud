@@ -160,7 +160,9 @@ public class GenericNonJsonModelTypeControllerIT {
             .andExpect(status().isConflict());
 
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("Invalid model name");
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'name_with_underscore'");
     }
 
     @Test
@@ -175,7 +177,9 @@ public class GenericNonJsonModelTypeControllerIT {
             .andExpect(status().isConflict());
 
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("Invalid model name");
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'NameWithUppercase'");
     }
 
     @Test
