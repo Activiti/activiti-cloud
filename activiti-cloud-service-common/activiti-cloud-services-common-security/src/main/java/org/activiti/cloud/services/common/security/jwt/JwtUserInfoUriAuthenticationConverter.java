@@ -63,10 +63,16 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             Instant expiresAt = jwt.getExpiresAt();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, jwt.getClaimAsString(SESSION_ID));
+            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, getCacheKey(jwt));
             username = oAuth2User.getName();
         }
         return username;
+    }
+
+    private String getCacheKey(Jwt jwt) {
+        return jwt.hasClaim(SESSION_ID)
+            ? jwt.getClaimAsString(SESSION_ID)
+            : jwt.getTokenValue();
     }
 
 }
