@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.common.messaging.functional;
+
+package org.activiti.services.connectors.channel;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.activiti.engine.ActivitiOptimisticLockingException;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( {ElementType.METHOD, ElementType.TYPE} )
-@Qualifier
-public @interface FunctionBinding {
-    String output() default "";
-
-    String input() default "";
-
-    String condition() default "";
-
-    Retryable retryable() default @Retryable(maxAttemptsExpression = "${activiti.cloud.messaging.function.retryable.max-attempts:1}",
-                                             backoff = @Backoff(delayExpression = "${activiti.cloud.messaging.function.retryable.backoff.delay:0}"));
+@FunctionBinding(retryable = @Retryable(value = ActivitiOptimisticLockingException.class,
+                                        maxAttemptsExpression = "${activiti.cloud.runtime.integration.retryable.max-attempts:3}",
+                                        backoff = @Backoff(delayExpression = "${activiti.cloud.runtime.integration.retryable.backoff.delay:0}")))
+public @interface RuntimeIntegrationEventFunctionBinding {
+    @AliasFor(annotation = FunctionBinding.class, attribute = "input")
+    String value();
 }
