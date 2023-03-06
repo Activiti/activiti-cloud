@@ -19,7 +19,6 @@ package org.activiti.services.connectors.conf;
 import java.util.function.Consumer;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
@@ -37,6 +36,7 @@ import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
+import org.activiti.services.connectors.channel.RuntimeIntegrationEventInputBinding;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -50,12 +50,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
-import org.springframework.retry.annotation.EnableRetry;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
-@EnableRetry
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
@@ -73,8 +71,8 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties, managementService, processEngineEventsAggregator, variablesPropagator);
     }
 
-    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     @Bean
+    @RuntimeIntegrationEventInputBinding(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public Consumer<Message<IntegrationResult>> serviceTaskIntegrationResultEventConsumer(ServiceTaskIntegrationResultEventHandler handler) {
         return message -> handler.receive(message.getPayload());
     }
@@ -93,8 +91,8 @@ public class CloudConnectorsAutoConfiguration {
                                                            processEngineEventsAggregator);
     }
 
-    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     @Bean
+    @RuntimeIntegrationEventInputBinding(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     public Consumer<Message<IntegrationError>> serviceTaskIntegrationErrorEventConsumer(ServiceTaskIntegrationErrorEventHandler handler) {
         return message -> handler.receive(message.getPayload());
     }

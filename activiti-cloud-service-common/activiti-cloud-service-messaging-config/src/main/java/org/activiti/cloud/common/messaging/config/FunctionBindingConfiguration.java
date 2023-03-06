@@ -16,6 +16,8 @@
 package org.activiti.cloud.common.messaging.config;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -43,13 +45,20 @@ import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.integration.handler.advice.RequestHandlerRetryAdvice;
 import org.springframework.messaging.Message;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
                    before = FunctionConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
+
+    @Bean
+    public RetryableFunctionBindingTemplate retryableFunctionBindingTemplate() {
+        return new RetryableFunctionBindingTemplate();
+    }
 
     @Bean
     public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties){
@@ -89,7 +98,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     @Bean(name = "functionBindingBeanPostProcessor")
     public BeanPostProcessor functionBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
                                                               IntegrationFlowContext integrationFlowContext,
-                                                              Function<String, String> resolveExpression) {
+                                                              Function<String, String> resolveExpression,
+                                                              RetryableFunctionBindingTemplate retryableFunctionBindingTemplate) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
@@ -126,6 +136,11 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                                       .register();
                            }
                             else {
+                                List<RequestHandlerRetryAdvice> advices = new ArrayList<>();
+
+                                RetryTemplate template = retryableFunctionBindingTemplate.apply(functionBinding.retryable());
+                                advices.add(new FunctionBindingRequestHandlerRetryAdvice(template));
+
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
                                     return function.apply(message);
@@ -137,7 +152,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                                                                              .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.input())
                                                                                              .filter(selector, filter -> filter.discardChannel("nullChannel")
                                                                                                                                .throwExceptionOnRejection(true))
-                                                                                             .handle(Message.class, handler);
+                                                                                             .handle(Message.class, handler,
+                                                                                                     spec -> spec.advice(advices.toArray(RequestHandlerRetryAdvice[]::new)));
                                 if (Function.class.isInstance(bean)) {
                                     functionFlowBuilder.bridge()
                                                        .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
