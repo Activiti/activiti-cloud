@@ -1,0 +1,74 @@
+name: Close PR
+
+# only trigger on pull request closed events
+on:
+  pull_request_target:
+    types: [ closed ]
+
+env:
+  CLUSTER_NAME: activiti
+  CLUSTER_DOMAIN: envalfresco.com
+  GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations, override-destinations]
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: v1.19.6
+
+      - name: Set up rancher
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.27.0
+        with:
+          url: ${{ secrets.RANCHER2_URL }}
+          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          context: ${{ env.CLUSTER_NAME }}
+
+      - name: Set PREVIEW_NAME env variable
+        id: set-preview-name
+        env:
+          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
+          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
+        run: |
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
+
+      - name: Delete preview for ${{ matrix.messaging-broker }}
+        run: |
+          echo PR #${{ github.event.pull_request.number }} has been closed
+          kubectl delete ns $PREVIEW_NAME || true
+
+  cleanup-test-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set PREVIEW_NAME env variable
+        id: set-preview-name
+        run: |
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          echo set PREVIEW_NAME=$PREVIEW_NAME
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+
+      - name: Set preview version
+        run: |
+          echo 0.0.1-$PREVIEW_NAME-SNAPSHOT > VERSION
+
+      - name: Delete Docker images
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: |
+          echo "Delete Docker images"
+          make docker-delete-all

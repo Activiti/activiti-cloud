@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0ovyq91" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta">
+  <bpmn:process id="testBpmnErrorConnectorProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1jlub9t</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1jlub9t" sourceRef="StartEvent_1" targetRef="testErrorConnectorTask" />
+    <bpmn:endEvent id="EndEvent_08r4wtq">
+      <bpmn:incoming>SequenceFlow_1udqjel</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1udqjel" sourceRef="testErrorConnectorTask" targetRef="EndEvent_08r4wtq" />
+    <bpmn:sequenceFlow id="SequenceFlow_1soj8mv" sourceRef="BoundaryEvent_0okevku" targetRef="EndEvent_184ekcd" />
+    <bpmn:boundaryEvent id="BoundaryEvent_0okevku" attachedToRef="testErrorConnectorTask">
+      <bpmn:outgoing>SequenceFlow_1soj8mv</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_0y8atbe" />
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="EndEvent_184ekcd">
+      <bpmn:incoming>SequenceFlow_1soj8mv</bpmn:incoming>
+      <bpmn:terminateEventDefinition />
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="testErrorConnectorTask" name="testBpmnErrorConnector Task" implementation="test-bpmn-error-connector.throwError">
+      <bpmn:incoming>SequenceFlow_1jlub9t</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1udqjel</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:error id="Error_0y8atbe" name="Cloud Bpmn Error" errorCode="CLOUD_BPMN_ERROR" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="testBpmnErrorConnectorProcess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="156" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1jlub9t_di" bpmnElement="SequenceFlow_1jlub9t">
+        <di:waypoint x="192" y="121" />
+        <di:waypoint x="242" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_08r4wtq_di" bpmnElement="EndEvent_08r4wtq">
+        <dc:Bounds x="392" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1udqjel_di" bpmnElement="SequenceFlow_1udqjel">
+        <di:waypoint x="342" y="121" />
+        <di:waypoint x="392" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1soj8mv_di" bpmnElement="SequenceFlow_1soj8mv">
+        <di:waypoint x="292" y="179" />
+        <di:waypoint x="292" y="241" />
+        <di:waypoint x="392" y="241" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_18l70pq_di" bpmnElement="BoundaryEvent_0okevku">
+        <dc:Bounds x="274" y="143" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_03igd92_di" bpmnElement="EndEvent_184ekcd">
+        <dc:Bounds x="392" y="223" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gshjd5_di" bpmnElement="testErrorConnectorTask">
+        <dc:Bounds x="242" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

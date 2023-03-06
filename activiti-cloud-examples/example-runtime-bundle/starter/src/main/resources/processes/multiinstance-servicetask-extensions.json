@@ -1,0 +1,25 @@
+{
+  "id": "process-3de93c0a-abd3-413b-98d2-bfb830bec152",
+  "type": "PROCESS",
+  "name": "multiinstance-servicetask",
+  "extensions": {
+    "Process_B-f96qb1": {
+      "constants": {},
+      "mappings": {
+        "ServiceTask_0qp1237": {
+          "inputs": {
+            "restUrl": {
+              "type": "value",
+              "value": "https://jsonplaceholder.typicode.com/posts"
+            },
+            "requestPayload": {
+              "type": "value",
+              "value": "{     \"userId\": 1,     \"id\": 1,     \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",     \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"   }"
+            }
+          }
+        }
+      },
+      "properties": {}
+    }
+  }
+}
