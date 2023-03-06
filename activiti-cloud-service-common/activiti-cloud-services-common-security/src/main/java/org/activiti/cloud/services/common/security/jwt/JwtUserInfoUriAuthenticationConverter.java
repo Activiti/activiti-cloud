@@ -30,7 +30,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-    public static final String SESSION_ID = "sid";
+    public static final String SESSION_ID_CLAIM = "sid";
+
+    private static final String SUBJECT_CLAIM = "sub";
 
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
@@ -70,9 +72,9 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     }
 
     private String getCacheKey(Jwt jwt) {
-        return jwt.hasClaim(SESSION_ID)
-            ? jwt.getClaimAsString(SESSION_ID)
-            : jwt.getTokenValue();
+        return jwt.hasClaim(SESSION_ID_CLAIM)
+            ? jwt.getClaimAsString(SESSION_ID_CLAIM)
+            : jwt.getClaimAsString(SUBJECT_CLAIM);
     }
 
 }
