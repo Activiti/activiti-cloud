@@ -31,4 +31,12 @@ public interface AuthenticationService {
                            @Param("grant_type") String grantType,
                            @Param("username") String username,
                            @Param("password") String password);
+
+    @RequestLine("POST")
+    @Headers("Content-Type: application/x-www-form-urlencoded")
+    AuthToken authenticate(@Param("client_id") String clientId,
+                           @Param("client_secret") String clientSecret,
+                           @Param("grant_type") String grantType,
+                           @Param("username") String username,
+                           @Param("password") String password);
 }
