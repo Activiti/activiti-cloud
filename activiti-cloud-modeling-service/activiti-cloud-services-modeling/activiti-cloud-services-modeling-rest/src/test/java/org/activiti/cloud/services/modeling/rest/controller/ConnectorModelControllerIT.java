@@ -174,11 +174,13 @@ public class ConnectorModelControllerIT {
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModelWithNameNull() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
-        mockMvc
+        ResultActions updateResult = mockMvc
             .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel(null))))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", equalTo("connector-name")));
+                         .content(objectMapper.writeValueAsString(connectorModel(null))))
+            .andExpect(status().isConflict());
+
+        assertThat(updateResult.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name is required");
     }
 
     @Test
@@ -211,24 +213,34 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
-    public void should_update_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
+    public void should_throwModelInvalidException_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'name_with_underscore'");
     }
 
     @Test
-    public void should_update_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
+    public void should_throwModelInvalidException_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'NameWithUppercase'");
     }
 }

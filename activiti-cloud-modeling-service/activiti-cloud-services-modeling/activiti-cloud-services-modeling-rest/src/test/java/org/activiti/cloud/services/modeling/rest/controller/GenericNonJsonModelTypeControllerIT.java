@@ -196,16 +196,19 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_returnStatusOKAndModelName_when_updatingGenericNonJsonModelWithNameNull() throws Exception {
+    public void should_throwModelNameInvalidException_when_updatingGenericNonJsonModelWithNameNull() throws Exception {
         String name = null;
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
 
-        mockMvc
+        ResultActions updateResult = mockMvc
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
+                         .content(objectMapper.writeValueAsString(new ModelEntity(name,
+                                                                                  genericNonJsonModelType.getName()))))
+            .andExpect(status().isConflict());
+
+        assertThat(updateResult.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name is required");
     }
 
     @Test
@@ -240,7 +243,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_update_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_throwModelInvalidException_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
@@ -249,11 +252,16 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'name_with_underscore'");
     }
 
     @Test
-    public void should_update_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
+    public void should_throwModelNameInvalidException_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
         Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
@@ -262,7 +270,12 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(put("/v1/models/{modelId}", genericNonJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isConflict());
+
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo("The model name should follow DNS-1035 conventions:"
+                           + " it must consist of lower case alphanumeric characters or '-',"
+                           + " and must start and end with an alphanumeric character: 'NameWithUppercase'");
     }
 
     @Test
