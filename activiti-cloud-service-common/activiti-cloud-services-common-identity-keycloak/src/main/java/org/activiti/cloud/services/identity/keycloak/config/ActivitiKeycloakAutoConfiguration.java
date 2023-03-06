@@ -144,11 +144,11 @@ public class ActivitiKeycloakAutoConfiguration {
         ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(clientRegistrationRepository, "keycloak");
         AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(oAuth2AuthorizedClientService, clientRegistrationRepository, clientRegistration);
         KeycloakClient keycloakClient = Feign.builder()
-            .contract(new SpringMvcContract())
-            .encoder(new SpringEncoder(messageConverters))
-            .decoder(new SpringDecoder(messageConverters, customizers))
-            .requestInterceptor(clientCredentialsAuthRequestInterceptor)
-            .target(KeycloakClient.class, url);
+                .contract(new SpringMvcContract())
+                .encoder(new SpringEncoder(messageConverters))
+                .decoder(new SpringDecoder(messageConverters, customizers))
+                .requestInterceptor(clientCredentialsAuthRequestInterceptor)
+                .target(KeycloakClient.class, url);
         return keycloakClient;
     }
 
