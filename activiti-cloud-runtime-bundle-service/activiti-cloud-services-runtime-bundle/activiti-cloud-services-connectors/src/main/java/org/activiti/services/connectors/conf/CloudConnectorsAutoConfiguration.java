@@ -23,6 +23,7 @@ import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
@@ -50,12 +51,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 @Configuration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
-@EnableRetry
 public class CloudConnectorsAutoConfiguration {
 
     private static final String LOCAL_SERVICE_TASK_BEHAVIOUR_BEAN_NAME = "localServiceTaskBehaviour";
@@ -73,7 +74,10 @@ public class CloudConnectorsAutoConfiguration {
             runtimeBundleProperties, managementService, processEngineEventsAggregator, variablesPropagator);
     }
 
-    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
+    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER,
+                     retryable = @Retryable(value = ActivitiOptimisticLockingException.class,
+                                            maxAttemptsExpression = "${activiti.cloud.integration.retryable.max-attempts:3}",
+                                            backoff = @Backoff(delayExpression = "${activiti.cloud.integration.retryable.backoff.delay:0}")))
     @Bean
     public Consumer<Message<IntegrationResult>> serviceTaskIntegrationResultEventConsumer(ServiceTaskIntegrationResultEventHandler handler) {
         return message -> handler.receive(message.getPayload());
@@ -93,7 +97,10 @@ public class CloudConnectorsAutoConfiguration {
                                                            processEngineEventsAggregator);
     }
 
-    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
+    @FunctionBinding(input = ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER,
+                     retryable = @Retryable(value = ActivitiOptimisticLockingException.class,
+                                            maxAttemptsExpression = "${activiti.cloud.integration.retryable.max-attempts:3}",
+                                            backoff = @Backoff(delayExpression = "${activiti.cloud.integration.retryable.backoff.delay:0}")))
     @Bean
     public Consumer<Message<IntegrationError>> serviceTaskIntegrationErrorEventConsumer(ServiceTaskIntegrationErrorEventHandler handler) {
         return message -> handler.receive(message.getPayload());

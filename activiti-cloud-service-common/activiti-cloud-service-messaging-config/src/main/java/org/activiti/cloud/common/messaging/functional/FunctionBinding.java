@@ -20,6 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( {ElementType.METHOD, ElementType.TYPE} )
@@ -30,4 +32,7 @@ public @interface FunctionBinding {
     String input() default "";
 
     String condition() default "";
+
+    Retryable retryable() default @Retryable(maxAttemptsExpression = "${activiti.cloud.messaging.retryable.max-attempts:1}",
+                                             backoff = @Backoff(delayExpression = "${activiti.cloud.messaging.retryable.backoff.delay:0}"));
 }
