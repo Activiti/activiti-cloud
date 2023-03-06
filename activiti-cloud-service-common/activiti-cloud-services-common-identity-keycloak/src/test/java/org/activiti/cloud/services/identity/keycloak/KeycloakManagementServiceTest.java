@@ -596,6 +596,17 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
+    void should_returnUsers_when_searchingByUserId() {
+        when(keycloakClient.getUserById(kUserOne.getId()))
+            .thenReturn(kUserOne);
+
+        User user = keycloakManagementService.findUserById(kUserOne.getId());
+        assertThat(user).isNotNull();
+        assertThat(user).isEqualTo(userOne);
+        assertThat(user.getUsername()).isEqualTo(kUserOne.getUsername());
+    }
+
+    @Test
     void should_throwException_when_groupNameNotFound() {
         Throwable thrown = catchThrowable(() -> keycloakManagementService.findUsersByGroupName(NON_EXISTENT_GROUP));
         assertThat(thrown)
