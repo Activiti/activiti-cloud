@@ -27,6 +27,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.SemanticModelError;
 import org.activiti.cloud.modeling.api.ValidationContext;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.everit.json.schema.Schema;
@@ -48,42 +49,33 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public Collection<ModelValidationError> validate(byte[] modelContent, ValidationContext validationContext) {
+    public Collection<ModelValidationError> validate(byte[] bytes,
+                                                     ValidationContext validationContext) {
         JSONObject processExtensionJson = null;
-        String jsonContent = new String(modelContent);
         try {
-            log.debug("Validating json model content: " + jsonContent);
-            processExtensionJson = extractJsonObject(modelContent);
-            validateJson(processExtensionJson);
+            log.debug("Validating json model content: " + new String(bytes));
+            processExtensionJson = new JSONObject(new JSONTokener(new String(bytes)));
+            schemaLoader()
+                .load()
+                .build()
+                .validate(processExtensionJson);
         } catch (JSONException jsonException) {
-            log.debug("Syntactic model JSON validation errors encountered", jsonException);
-
+            log.debug("Syntactic model JSON validation errors encountered",
+                      jsonException);
             throw new SyntacticModelValidationException(jsonException);
         } catch (ValidationException validationException) {
-            log.debug(
-                "Semantic model validation errors encountered: " + validationException.toJSON(),
-                validationException
-            );
-
-            return getSemanticValidationErrors(validationException, processExtensionJson);
+            log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
+                      validationException);
+            throw new SemanticModelValidationException(validationException.getMessage(),
+                                                       getValidationErrors(validationException, processExtensionJson));
         }
         return Collections.emptyList();
     }
 
-    private static JSONObject extractJsonObject(byte[] bytes) {
-        return new JSONObject(new JSONTokener(new String(bytes)));
-    }
-
-    private void validateJson(JSONObject processExtensionJson) {
-        schemaLoader().load().build().validate(processExtensionJson);
-    }
-
-    private List<ModelValidationError> getSemanticValidationErrors(
-        ValidationException validationException,
-        JSONObject processExtensionJson
-    ) {
+    private List<ModelValidationError> getValidationErrors(ValidationException validationException,
+                                                           JSONObject prcessExtenstionJson) {
         return getValidationExceptions(validationException)
-            .map(exception -> toModelValidationError(exception, processExtensionJson))
+            .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
             .distinct()
             .collect(Collectors.toList());
     }
