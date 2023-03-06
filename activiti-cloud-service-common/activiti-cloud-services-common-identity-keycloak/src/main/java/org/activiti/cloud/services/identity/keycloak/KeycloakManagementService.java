@@ -244,8 +244,8 @@ public class KeycloakManagementService implements IdentityManagementService {
     @Override
     public User findUserById(String userId) {
         return Optional.of(keycloakClient.getUserById(userId))
-            .map(KeycloakUserToUser::toUser)
-            .orElseThrow(() -> new IdentityInvalidUserException(userId));
+             .map(KeycloakUserToUser::toUser)
+             .orElseThrow(() -> new IdentityInvalidUserException(userId));
     }
 
     @Override
