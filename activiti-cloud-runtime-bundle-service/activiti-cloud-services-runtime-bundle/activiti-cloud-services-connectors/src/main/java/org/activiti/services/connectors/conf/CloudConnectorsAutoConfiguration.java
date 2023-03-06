@@ -36,7 +36,7 @@ import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.activiti.services.connectors.channel.IntegrationRequestReplayer;
 import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels;
-import org.activiti.services.connectors.channel.RuntimeIntegrationEventFunctionBinding;
+import org.activiti.services.connectors.channel.RuntimeIntegrationEventInputBinding;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
@@ -72,7 +72,7 @@ public class CloudConnectorsAutoConfiguration {
     }
 
     @Bean
-    @RuntimeIntegrationEventFunctionBinding(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
+    @RuntimeIntegrationEventInputBinding(ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER)
     public Consumer<Message<IntegrationResult>> serviceTaskIntegrationResultEventConsumer(ServiceTaskIntegrationResultEventHandler handler) {
         return message -> handler.receive(message.getPayload());
     }
@@ -92,7 +92,7 @@ public class CloudConnectorsAutoConfiguration {
     }
 
     @Bean
-    @RuntimeIntegrationEventFunctionBinding(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
+    @RuntimeIntegrationEventInputBinding(ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER)
     public Consumer<Message<IntegrationError>> serviceTaskIntegrationErrorEventConsumer(ServiceTaskIntegrationErrorEventHandler handler) {
         return message -> handler.receive(message.getPayload());
     }

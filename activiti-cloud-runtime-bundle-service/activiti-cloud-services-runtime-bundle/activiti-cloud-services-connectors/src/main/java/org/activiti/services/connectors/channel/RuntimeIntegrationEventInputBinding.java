@@ -31,7 +31,7 @@ import org.springframework.retry.annotation.Retryable;
 @FunctionBinding(retryable = @Retryable(value = ActivitiOptimisticLockingException.class,
                                         maxAttemptsExpression = "${activiti.cloud.runtime.integration.retryable.max-attempts:3}",
                                         backoff = @Backoff(delayExpression = "${activiti.cloud.runtime.integration.retryable.backoff.delay:0}")))
-public @interface RuntimeIntegrationEventFunctionBinding {
+public @interface RuntimeIntegrationEventInputBinding {
     @AliasFor(annotation = FunctionBinding.class, attribute = "input")
     String value();
 }
