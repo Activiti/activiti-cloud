@@ -57,6 +57,7 @@ import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
+import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -597,10 +598,20 @@ public class ModelServiceImpl implements ModelService {
             .forEach(validator -> validator.validateModelContent(model, modelContent, validationContext, true));
     }
 
-    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
-        modelContentService
-            .findModelValidators(model.getType())
-            .forEach(modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
+    private void validateModelContent(Model model,
+                                      byte[] modelContent,
+                                      ValidationContext validationContext) {
+        List<ModelValidationError> validationErrors = modelContentService.findModelValidators(model.getType())
+            .stream()
+            .map(modelValidator -> modelValidator.validateModelContent(modelContent, validationContext))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        if (!validationErrors.isEmpty()) {
+            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
+            throw new SemanticModelValidationException(messageError,
+                                                       validationErrors);
+        }
     }
 
     private List<ModelValidationError> getModelContentValidationErrors(
