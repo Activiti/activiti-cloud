@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.activiti.bpmn.exceptions.XMLException;
@@ -47,6 +48,7 @@ import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
+import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -592,12 +594,24 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    private void validateModelContentAndUsage(Model model, byte[] modelContent, ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = modelContentService
-            .findModelValidators(model.getType())
+    private void validateModelContentAndUsage(Model model,
+                                              byte[] modelContent,
+                                              ValidationContext validationContext) {
+        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction =
+            validator -> validator.validateModelContent(
+                model,
+                modelContent,
+                validationContext,
+                true);
+
+        validate(model.getType(), validationFunction);
+    }
+
+    private void validate(String model,
+                          Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction) {
+        List<ModelValidationError> validationErrors = modelContentService.findModelValidators(model)
             .stream()
-            .map(validator -> validator.validateModelContent(model, modelContent, validationContext, true))
-            .flatMap(Collection::stream)
+            .map(validationFunction).flatMap(Collection::stream)
             .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
@@ -606,18 +620,15 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = modelContentService
-            .findModelValidators(model.getType())
-            .stream()
-            .map(modelValidator -> modelValidator.validateModelContent(modelContent, validationContext))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+    private void validateModelContent(Model model,
+                                      byte[] modelContent,
+                                      ValidationContext validationContext) {
+        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction =
+            modelValidator -> modelValidator.validateModelContent(
+                modelContent,
+                validationContext);
 
-        if (!validationErrors.isEmpty()) {
-            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-            throw new SemanticModelValidationException(messageError, validationErrors);
-        }
+        validate(model.getType(), validationFunction);
     }
 
     private List<ModelValidationError> getModelContentValidationErrors(
