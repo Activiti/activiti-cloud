@@ -89,7 +89,7 @@ jobs:
 
       - name: Check Nexus
         run: |
-          curl -i https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/
+          curl -i https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/org/activiti/cloud/activiti-cloud-services-notifications-graphql-api/maven-metadata.xml
 
       - name: Maven Build and Test
         shell: bash
