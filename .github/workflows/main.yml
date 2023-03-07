@@ -86,7 +86,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           echo ${{steps.update-pom-to-next-version.outputs.next-prerelease}} > VERSION
-          
+
       - name: Check Nexus
         run: |
           curl -i https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/
