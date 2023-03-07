@@ -35,7 +35,8 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      * @param modelContent      content of the model to validate
      * @param validationContext the validation context
      */
-    Collection<ModelValidationError> validate(byte[] modelContent, ValidationContext validationContext);
+    Collection<ModelValidationError> validate(byte[] modelContent,
+                                              ValidationContext validationContext);
 
     /**
      * Validate the given model and its usage
@@ -45,13 +46,11 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      * @param validationContext the validation context
      * @param validateUsage     validate the usage of a model
      */
-    default void validate(
-        Model model,
-        byte[] modelContent,
-        ValidationContext validationContext,
-        boolean validateUsage
-    ) {
-        validate(modelContent, validationContext);
+    default Collection<ModelValidationError> validate(Model model,
+                                                      byte[] modelContent,
+                                                      ValidationContext validationContext,
+                                                      boolean validateUsage) {
+        return validate(modelContent, validationContext);
     }
 
     /**
