@@ -63,7 +63,6 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
-import org.activiti.cloud.services.common.util.ContentTypeUtils;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
@@ -405,18 +404,18 @@ public class ModelServiceImpl implements ModelService {
     public Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = null;
-        if (modelTypeService.isJson(modelType) || ContentTypeUtils.isJsonContentType(fileContent.getContentType())) {
-            model = convertContentToModel(modelType, fileContent);
+        if (modelTypeService.isJson(modelType) || isJsonContentType(fileContent.getContentType())) {
+            model = convertContentToModel(modelType,
+                                          fileContent);
         } else {
             model = createModelFromContent(modelType, fileContent);
         }
         String convertedId = model.getId();
 
-        if (
-            model.getId() == null &&
-            (modelTypeService.isJson(modelType) == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))
-        ) {
-            convertedId = retrieveModelIdFromModelContent(model, fileContent);
+        if (model.getId() == null && (modelTypeService.isJson(modelType)
+            == isJsonContentType(fileContent.getContentType()))) {
+            convertedId = retrieveModelIdFromModelContent(model,
+                                            fileContent);
         }
 
         model.setScope(ModelScope.PROJECT);
