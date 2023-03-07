@@ -265,7 +265,7 @@ public class ModelServiceImplTest {
             .isInstanceOf(ModelNameInvalidException.class)
             .hasMessage("The model name should follow DNS-1035 conventions:"
                             + " it must consist of lower case alphanumeric characters or '-',"
-                            + " and must start and end with an alphanumeric character: '-wrong-name'");;
+                            + " and must start and end with an alphanumeric character: '-wrong-name'");
     }
 
     @Test
@@ -297,6 +297,7 @@ public class ModelServiceImplTest {
     @Test
     public void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
         ModelImpl model = new ModelImpl();
+        model.setName("model-test");
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
         model.addProject(new ProjectImpl());
