@@ -40,20 +40,13 @@ public class ClientCredentialsAuthRequestInterceptor implements AuthTokenRequest
 
     @Override
     public Optional<String> getToken() {
-        Optional<String> result;
-        if (AuthorizationGrantType.CLIENT_CREDENTIALS.equals(clientRegistration.getAuthorizationGrantType())) {
-            OAuth2AuthorizeRequest oAuth2AuthorizeRequest = OAuth2AuthorizeRequest
-                .withClientRegistrationId(clientRegistration.getRegistrationId())
-                .principal("activiti")
-                .build();
+        OAuth2AuthorizeRequest oAuth2AuthorizeRequest = OAuth2AuthorizeRequest
+            .withClientRegistrationId(clientRegistration.getRegistrationId())
+            .principal("activiti")
+            .build();
 
-            OAuth2AuthorizedClient client = authorizedClientManager.authorize(oAuth2AuthorizeRequest);
-            OAuth2AccessToken accessToken = client.getAccessToken();
-            result = Optional.of(accessToken.getTokenValue());
-        } else {
-            result = Optional.empty();
-        }
-
-        return result;
+        OAuth2AuthorizedClient client = authorizedClientManager.authorize(oAuth2AuthorizeRequest);
+        OAuth2AccessToken accessToken = client.getAccessToken();
+        return Optional.of(accessToken.getTokenValue());
     }
 }
