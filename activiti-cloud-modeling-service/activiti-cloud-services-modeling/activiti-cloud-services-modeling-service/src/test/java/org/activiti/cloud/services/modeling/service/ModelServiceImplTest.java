@@ -54,6 +54,7 @@ import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -62,10 +63,12 @@ import org.activiti.cloud.services.modeling.converter.ProcessModelContentConvert
 import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -122,6 +125,9 @@ public class ModelServiceImplTest {
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
 
+    @Spy
+    private ModelNameValidator modelNameValidator;
+
     @Mock
     private FileContentSanitizer fileContentSanitizer;
 
@@ -151,9 +157,13 @@ public class ModelServiceImplTest {
         modelTwo.setContent("mockContent".getBytes(StandardCharsets.UTF_8));
         modelTwo.addProject(projectOne);
 
-        modelService = new ModelServiceImpl(modelRepository, modelTypeService, modelContentService, modelExtensionsService, jsonConverter,
-            processModelContentConverter, modelUpdateListeners, fileMagicNumberValidator, new AggregateErrorValidationStrategy<ModelContentValidator>(),
-            new AggregateErrorValidationStrategy<ModelExtensionsValidator>(), fileContentSanitizer);
+        modelService = new ModelServiceImpl(modelRepository, modelTypeService, modelContentService,
+                                            modelExtensionsService, jsonConverter, processModelContentConverter,
+                                            modelUpdateListeners, fileMagicNumberValidator,
+                                            new AggregateErrorValidationStrategy<ModelContentValidator>(),
+                                            new AggregateErrorValidationStrategy<ModelExtensionsValidator>(),
+                                            this.modelNameValidator,
+                                            fileContentSanitizer);
     }
 
     @Test
@@ -184,8 +194,8 @@ public class ModelServiceImplTest {
     @Test
     public void should_returnException_when_classTypeIsNotSpecified() {
         assertThatThrownBy(() -> modelService.getTasksBy(projectOne, modelType, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Class task type it must not be null");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Class task type it must not be null");
     }
 
     @Test
@@ -235,6 +245,30 @@ public class ModelServiceImplTest {
     }
 
     @Test
+    public void should_throwModelNameInvalidException_when_creatingAModelWithInvalidCharAtEnd() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("wrong-name-");
+        assertThatThrownBy(() -> modelService.createModel(
+            projectOne,
+            wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage("The model name should follow DNS-1035 conventions:"
+                            + " it must consist of lower case alphanumeric characters or '-',"
+                            + " and must start and end with an alphanumeric character: 'wrong-name-'");
+    }
+
+    @Test
+    public void should_throwModelNameInvalidException_when_creatingAModelWithInvalidCharAtBeginning() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("-wrong-name");
+        assertThatThrownBy(() -> modelService.createModel(projectOne, wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage("The model name should follow DNS-1035 conventions:"
+                            + " it must consist of lower case alphanumeric characters or '-',"
+                            + " and must start and end with an alphanumeric character: '-wrong-name'");
+    }
+
+    @Test
     public void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
@@ -252,6 +286,7 @@ public class ModelServiceImplTest {
     public void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
         ModelImpl model = new ModelImpl();
         model.setScope(ModelScope.PROJECT);
+        model.setName("name");
         model.addProject(new ProjectImpl());
         model.addProject(new ProjectImpl());
 
@@ -262,6 +297,7 @@ public class ModelServiceImplTest {
     @Test
     public void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
         ModelImpl model = new ModelImpl();
+        model.setName("model-test");
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
         model.addProject(new ProjectImpl());
@@ -534,7 +570,7 @@ public class ModelServiceImplTest {
     private Process initProcess(FlowElement... elements) {
         Process process = spy(new Process());
         Arrays.asList(elements)
-                .forEach(process::addFlowElement);
+            .forEach(process::addFlowElement);
         return process;
     }
 
