@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
-import org.activiti.cloud.modeling.api.SemanticModelError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
@@ -122,7 +121,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
             .ofNullable(validationException.getViolatedSchema())
             .map(Schema::getSchemaLocation)
             .orElse(null);
-        return new SemanticModelError(validationException.getErrorMessage(), description, schema);
+        return new ModelValidationError(validationException.getErrorMessage(), description, schema);
     }
 
     private String resolveExpression(String message, String pointerToViolation, JSONObject prcessExtenstionJson) {
