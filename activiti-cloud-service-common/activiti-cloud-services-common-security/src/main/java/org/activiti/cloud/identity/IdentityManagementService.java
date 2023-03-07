@@ -43,4 +43,6 @@ public interface IdentityManagementService extends IdentityService {
 
   List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
 
+  User findUserById(String userId);
+
 }

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.9.0-SNAPSHOT</version>
+    <version>7.10.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-service-common-parent</artifactId>
@@ -34,7 +34,7 @@
     <module>activiti-cloud-service-messaging-starter</module>
   </modules>
   <properties>
-    <activiti.version>7.9.0-alpha.2</activiti.version>
+    <activiti.version>7.10.0-alpha.1</activiti.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -48,7 +48,7 @@
     <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.9</james.apache-mime4j.version>
-    <batik.version>1.14</batik.version>
+    <batik.version>1.16</batik.version>
   </properties>
   <dependencyManagement>
     <dependencies>

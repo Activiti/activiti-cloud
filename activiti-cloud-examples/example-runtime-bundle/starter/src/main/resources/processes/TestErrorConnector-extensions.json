@@ -1,0 +1,15 @@
+{
+  "id": "testErrorConnectorProcess",
+  "name": "testErrorConnectorProcess.bpmn",
+  "extensions": {
+    "testErrorConnectorProcess": {
+      "properties": {},
+      "mappings": {
+        "testErrorConnector": {
+          "mappingType": "MAP_ALL"
+        }
+      },
+      "constants": {}
+    }
+  }
+}

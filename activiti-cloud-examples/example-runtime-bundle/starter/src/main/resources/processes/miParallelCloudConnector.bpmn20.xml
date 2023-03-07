@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0dtyail" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Activiti Modeler" exporterVersion="3.0.0-beta">
+  <bpmn:process id="miParallelCloudConnector" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0j28z0s</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0j28z0s" sourceRef="StartEvent_1" targetRef="miCloudConnectorId" />
+    <bpmn:endEvent id="EndEvent_1cvobxs">
+      <bpmn:incoming>SequenceFlow_1plg9em</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1plg9em" sourceRef="miCloudConnectorId" targetRef="EndEvent_1cvobxs" />
+    <bpmn:serviceTask id="miCloudConnectorId" name="miCloudConnectorName" implementation="miCloudConnector">
+      <bpmn:incoming>SequenceFlow_0j28z0s</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1plg9em</bpmn:outgoing>
+      <bpmn:multiInstanceLoopCharacteristics>
+        <bpmn:loopCardinality>${instanceCount}</bpmn:loopCardinality>
+        <bpmn:loopDataOutputRef>miResult</bpmn:loopDataOutputRef>
+      </bpmn:multiInstanceLoopCharacteristics>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="miParallelCloudConnector">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="156" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0j28z0s_di" bpmnElement="SequenceFlow_0j28z0s">
+        <di:waypoint x="192" y="121" />
+        <di:waypoint x="246" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1cvobxs_di" bpmnElement="EndEvent_1cvobxs">
+        <dc:Bounds x="400" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1plg9em_di" bpmnElement="SequenceFlow_1plg9em">
+        <di:waypoint x="346" y="121" />
+        <di:waypoint x="400" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_15lfprw_di" bpmnElement="miCloudConnectorId">
+        <dc:Bounds x="246" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

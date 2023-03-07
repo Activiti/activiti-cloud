@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-modeling-service-parent</artifactId>
-    <version>7.9.0-SNAPSHOT</version>
+    <version>7.10.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-modeling-dependencies</artifactId>
   <packaging>pom</packaging>
@@ -92,6 +92,11 @@
         <version>${project.version}</version>
         <classifier>api-docs-hal</classifier>
         <type>json</type>
+      </dependency>
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${json-java.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.erosb</groupId>

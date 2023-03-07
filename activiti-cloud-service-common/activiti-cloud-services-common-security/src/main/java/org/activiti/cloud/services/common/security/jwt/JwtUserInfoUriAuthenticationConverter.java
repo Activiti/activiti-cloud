@@ -30,6 +30,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    public static final String SESSION_ID_CLAIM = "sid";
+
+    private static final String SUBJECT_CLAIM = "sub";
+
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
@@ -61,10 +65,16 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             Instant expiresAt = jwt.getExpiresAt();
             OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest);
+            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, getCacheKey(jwt));
             username = oAuth2User.getName();
         }
         return username;
+    }
+
+    private String getCacheKey(Jwt jwt) {
+        return jwt.hasClaim(SESSION_ID_CLAIM)
+            ? jwt.getClaimAsString(SESSION_ID_CLAIM)
+            : jwt.getClaimAsString(SUBJECT_CLAIM);
     }
 
 }

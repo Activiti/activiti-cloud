@@ -21,3 +21,22 @@ Running on [GitHub Actions](https://github.com/features/actions), requires the f
 | NEXUS_PASSWORD | Internal Maven repository password |
 | BOT_GITHUB_USERNAME | GitHub username for other repositories |
 | BOT_GITHUB_TOKEN | GitHub token for other repositories |
+
+## Formatting
+
+The local `.editorconfig` file is leveraged for automated formatting.
+
+Pre-commit hooks run on CI include:
+
+- local hooks
+- shared hooks leveraging prettier
+
+See documentation at [pre-commit](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit) and [pre-commit-default](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit-default)
+
+To run all hooks locally:
+
+```sh
+pre-commit run -a
+pre-commit run -a --config /path/to/config/format-config.yaml
+pre-commit run -a --config /path/to/config/github-config.yaml
+```

@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.9.0-SNAPSHOT</version>
+    <version>7.10.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
@@ -20,7 +20,7 @@
     <serenity.version>2.3.31</serenity.version>
     <serenity-jbehave.version>1.46.0</serenity-jbehave.version>
     <feign-form.version>3.8.0</feign-form.version>
-    <batik.version>1.14</batik.version>
+    <batik.version>1.16</batik.version>
     <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencyManagement>

@@ -93,4 +93,9 @@ public class IdentityManagementController {
         @RequestParam(value = "role", required = false)  Set<String> roles) {
         return identityManagementService.getApplicationPermissions(application, roles);
     }
+
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+    public User getUsersById(@PathVariable String id) {
+        return identityManagementService.findUserById(id);
+    }
 }
