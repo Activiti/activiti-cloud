@@ -437,9 +437,10 @@ jobs:
 
       - name: Maven Deploy
         shell: bash
-        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
