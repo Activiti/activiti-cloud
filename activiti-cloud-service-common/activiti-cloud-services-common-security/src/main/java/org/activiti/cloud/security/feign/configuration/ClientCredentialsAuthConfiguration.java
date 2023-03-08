@@ -30,15 +30,29 @@ public class ClientCredentialsAuthConfiguration {
                                                                                            ClientRegistrationRepository clientRegistrationRepository,
                                                                                            ClientRegistration clientRegistration) {
 
+        return clientCredentialsAuthRequestInterceptor(
+            oAuth2AuthorizedClientService,
+            clientRegistrationRepository,
+            clientRegistration,
+            null);
+    }
+
+    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(
+            OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
+            ClientRegistrationRepository clientRegistrationRepository,
+            ClientRegistration clientRegistration,
+            OAuth2AuthorizedClientProvider provider) {
+
         AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
             new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
 
-
+        OAuth2AuthorizedClientProviderBuilder oAuth2AuthorizedClientProviderBuilder = OAuth2AuthorizedClientProviderBuilder.builder()
+            .refreshToken()
+            .clientCredentials();
         OAuth2AuthorizedClientProvider authorizedClientProvider =
-            OAuth2AuthorizedClientProviderBuilder.builder()
-                .refreshToken()
-                .clientCredentials()
-                .build();
+            provider == null
+                ? oAuth2AuthorizedClientProviderBuilder.build()
+                : oAuth2AuthorizedClientProviderBuilder.provider(provider).build();
 
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
