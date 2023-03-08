@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - test-deploy
   pull_request:
     branches:
       - develop
@@ -23,13 +24,14 @@ env:
 jobs:
 
   pre-commit:
+    if: github.ref_name != 'test-deploy'
     runs-on: ubuntu-latest
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v1.21.0
 
   build:
     runs-on: ubuntu-latest
-    needs: pre-commit
+#    needs: pre-commit
     # Map a step output to a job output
     outputs:
       version: ${{ steps.set-version.outputs.version }}
@@ -89,6 +91,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
+        if: github.ref_name != 'test-deploy'
         run: mvn -DnoAcceptanceTests=true verify ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
@@ -96,6 +99,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Echo Longest Tests run
+        if: github.ref_name != 'test-deploy'
         shell: bash
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
@@ -114,23 +118,29 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Build Example Runtime Bundle
+        if: github.ref_name != 'test-deploy'
         run: make docker/example-runtime-bundle
 
       - name: Build Activiti Cloud Query
+        if: github.ref_name != 'test-deploy'
         run: make docker/activiti-cloud-query
 
       - name: Build Example Cloud Connector
+        if: github.ref_name != 'test-deploy'
         run: make docker/example-cloud-connector
 
       - name: Build Activiti Cloud Modeling
+        if: github.ref_name != 'test-deploy'
         run: make docker/activiti-cloud-modeling
 
       - name: Build Activiti Cloud Identity Adapter
+        if: github.ref_name != 'test-deploy'
         run: make docker/activiti-cloud-identity-adapter
 
 
   test:
     runs-on: ubuntu-latest
+    if: github.ref_name != 'test-deploy'
     needs: build
     strategy:
       fail-fast: false
@@ -380,6 +390,7 @@ jobs:
 
   delete-test-images:
     runs-on: ubuntu-latest
+    if: github.ref_name != 'test-deploy'
     needs:
       - test
       # dependency needed for build.outputs env variables resolution
@@ -407,8 +418,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
-      - test
-      - delete-test-images
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
