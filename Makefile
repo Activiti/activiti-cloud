@@ -41,6 +41,7 @@ install: release
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \
+			--wait \
 			--timeout 8m
 
 delete:
