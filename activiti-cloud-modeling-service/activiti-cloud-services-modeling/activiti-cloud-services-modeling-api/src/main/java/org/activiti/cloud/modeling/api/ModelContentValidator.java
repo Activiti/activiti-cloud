@@ -45,16 +45,4 @@ public interface ModelContentValidator extends ModelValidator {
                                       boolean validateUsage) {
         validate(model, modelContent, validationContext, validateUsage);
     }
-
-    /**
-     * Validate the given model content.
-     * @param modelName         the name of the model to validate
-     * @param modelContent      the model content to validate
-     * @param validationContext the validation context
-     */
-    default void validateModelContent(String modelName,
-        byte[] modelContent,
-        ValidationContext validationContext) {
-        validate(modelContent,validationContext);
-    }
 }

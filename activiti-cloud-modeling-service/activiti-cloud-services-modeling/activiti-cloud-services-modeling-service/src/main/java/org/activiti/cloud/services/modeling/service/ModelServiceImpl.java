@@ -546,7 +546,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public void validateModelContent(Model model,
                                      ValidationContext validationContext) {
-        validateModelContent(model.getName(), model.getType(),
+        validateModelContent(model,
                              modelRepository.getModelContent(model),
                              validationContext);
     }
@@ -554,7 +554,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public void validateModelContent(Model model,
                                      Project project) {
-        validateModelContent(model.getName(), model.getType(),
+        validateModelContent(model,
                              modelRepository.getModelContent(model),
                              createValidationContext(project));
     }
@@ -563,7 +563,7 @@ public class ModelServiceImpl implements ModelService {
     public void validateModelContent(Model model,
                                      FileContent fileContent) {
         ValidationContext validationContext = getValidationContext(model, fileContent, null);
-        validateModelContent(model.getName(), model.getType(),
+        validateModelContent(model,
                              fileContent.getFileContent(),
                              validationContext);
     }
@@ -594,7 +594,7 @@ public class ModelServiceImpl implements ModelService {
     public void validateModelContent(Model model,
                                      FileContent fileContent,
                                      ValidationContext validationContext) {
-        validateModelContent(model.getName(), model.getType(),
+        validateModelContent(model,
                              fileContent.getFileContent(),
                              validationContext);
     }
@@ -605,7 +605,7 @@ public class ModelServiceImpl implements ModelService {
                                      Project project) {
         ValidationContext validationContext = getValidationContext(model, fileContent, project);
 
-        validateModelContent(model.getName(), model.getType(),
+        validateModelContent(model,
             fileContent.getFileContent(),
             validationContext);
     }
@@ -640,12 +640,12 @@ public class ModelServiceImpl implements ModelService {
                                                                   validationContext, true));
     }
 
-    private void validateModelContent(String modelName, String modelType,
+    private void validateModelContent(Model model,
                                       byte[] modelContent,
                                       ValidationContext validationContext) {
         modelContentValidationStrategy.validate(
-            emptyIfNull(modelContentService.findModelValidators(modelType)),
-            modelValidator -> modelValidator.validateModelContent(modelName, modelContent, validationContext));
+            emptyIfNull(modelContentService.findModelValidators(model.getType())),
+            modelValidator -> modelValidator.validateModelContent(model, modelContent, validationContext, false));
     }
 
     private List<ModelValidationError> getModelContentValidationErrors(Model model,
@@ -654,7 +654,7 @@ public class ModelServiceImpl implements ModelService {
         return modelContentValidationStrategy.getValidationErrors(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
             modelValidator -> modelValidator
-                .validateModelContent(model.getName(), modelContent, validationContext));
+                .validateModelContent(model, modelContent, validationContext, false));
     }
 
     @Override

@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -313,7 +314,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -328,7 +329,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -343,7 +344,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
             .when(modelContentValidator)
-            .validateModelContent(any(), any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
         assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
     }
@@ -360,7 +361,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doThrow(new SemanticModelValidationException(validationErrors))
             .when(modelContentValidator)
-            .validateModelContent(any(), any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
         assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
             .isNotEmpty()
