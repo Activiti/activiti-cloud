@@ -1,0 +1,47 @@
+name: "check-service-health"
+description: "Check Services Health"
+inputs:
+  health-url:
+    description: the health URL to be checked
+    required: true
+  max-attempts:
+    description: The maximum number of attempts while calling health checks
+    required: false
+    default: "50"
+  poll-interval:
+    description: The poll interval in seconds between two attempts
+    required: false
+    default: "5"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check Service Health
+      env:
+        HEALTH_URL: ${{ inputs.health-url }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        POLL_INTERVAL: ${{ inputs.poll-interval }}
+      shell: bash
+      run: |
+        wait_until_true () {
+          local attempt_counter=0
+          until "$@"
+          do
+            if [ ${attempt_counter} -eq ${MAX_ATTEMPTS} ]
+            then
+              echo "Max attempts reached, cannot connect to environment"
+              exit 1
+            fi
+            printf '.'
+            attempt_counter=$((attempt_counter+1))
+            sleep $POLL_INTERVAL
+          done
+        }
+        check_services_up () {
+          local readonly GATEWAY_URL=https://$GATEWAY_HOST
+          curl --silent --head --fail $HEALTH_URL > /dev/null 2>&1
+        }
+        ### Main ###
+        echo "Waiting for service to be up..."
+        wait_until_true check_services_up
+        echo "Service is up and running!"

@@ -33,8 +33,6 @@ jobs:
     # Map a step output to a job output
     outputs:
       version: ${{ steps.set-version.outputs.version }}
-      branch-name: ${{ steps.set-branch-name.outputs.branch-name }}
-      preview-name: ${{ steps.set-preview-name.outputs.preview-name }}
 
     steps:
 
@@ -129,67 +127,22 @@ jobs:
         run: make docker/activiti-cloud-identity-adapter
 
 
-  test:
+  deploy:
     runs-on: ubuntu-latest
     needs: build
     strategy:
       fail-fast: false
       matrix:
-        messaging-broker: [rabbitmq, kafka]
-        messaging-partitioned: [partitioned, non-partitioned]
-        messaging-destinations: [default-destinations]
+        messaging-broker: [ rabbitmq, kafka ]
+        messaging-partitioned: [ partitioned, non-partitioned ]
+        messaging-destinations: [ default-destinations ]
         include:
           - messaging-broker: kafka
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
-
     steps:
-      - name: Set PREVIEW_NAME env variable
-        id: set-preview-name
-        run: |
-          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
-          echo set PREVIEW_NAME=$PREVIEW_NAME
-          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
-          echo "preview-name=$PREVIEW_NAME" >> $GITHUB_OUTPUT
-
-      - name: Set BRANCH_NAME env variable
-        id: set-branch-name
-        run: |
-          BRANCH_NAME=${GITHUB_HEAD_REF:-$GITHUB_REF}
-          BRANCH_NAME=${BRANCH_NAME#refs/heads/}
-          BRANCH_NAME=$(echo ${BRANCH_NAME/\//-} | tr '[:upper:]' '[:lower:]')
-          echo set BRANCH_NAME=$BRANCH_NAME
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "branch-name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Setup Java JDK 11
-        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
-        with:
-          java-version: 11
-          distribution: 'temurin'
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Configure Maven
-        run: |
-          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
-          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
-          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - name: Build maven
-        shell: bash
-        run: mvn ${MAVEN_CLI_OPTS} -DskipTests -Droot.log.level=off install
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
@@ -209,30 +162,12 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - name: Setup environment for ${{ matrix.messaging-broker }}
-        env:
-          MESSAGING_BROKER: ${{ matrix.messaging-broker }}
-          MESSAGING_PARTITIONED: ${{ matrix.messaging-partitioned }}
-          MESSAGING_DESTINATIONS: ${{ matrix.messaging-destinations }}
-          BRANCH_NAME: ${{ needs.build.outputs.branch-name }}
-          VERSION: ${{ needs.build.outputs.version }}
-        run: |
-          echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
-          echo "MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED" >> $GITHUB_ENV
-          echo "MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS" >> $GITHUB_ENV
-          echo "PREVIEW_NAME=$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo $VERSION > VERSION
-
-          source $GITHUB_ENV
-
-          echo MESSAGING_BROKER=$MESSAGING_BROKER
-          echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
-          echo MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS
-          echo PREVIEW_NAME=$PREVIEW_NAME
-          echo BRANCH_NAME=$BRANCH_NAME
-          echo VERSION=$VERSION
+      - uses: ./.github/action/setup-env-for-broker
+        with:
+          messaging-broker: ${{ matrix.messaging-broker }}
+          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
+          messaging-destinations-option: ${{ matrix.messaging-destinations }}
+          version: ${{ needs.build.outputs.version }}
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
@@ -308,63 +243,178 @@ jobs:
           count_query_topic_partitions
           check_result_is 4
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+  modeling-acceptance-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - deploy
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure Maven
         run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-          ### Functions ####
+      - uses: ./.github/action/setup-env-for-broker
+        with:
+          messaging-broker: rabbitmq
+          messaging-partitioning-option: non-partitioned
+          messaging-destinations-option: default-destinations
+          version: ${{ needs.build.outputs.version }}
 
-          # It evaluates the function passed as a parameter
-          # if the result is different than 0 it waits
-          # for 5 seconds and re-evaluates it again.
-          #
-          wait_until_true () {
-            local attempt_counter=0
-            local max_attempts=50
+      - uses: ./.github/actions/check-service-health
+        with:
+          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
 
-            until "$@"
-            do
-              if [ ${attempt_counter} -eq ${max_attempts} ]
-              then
-                echo "Max attempts reached"
-                break
-              fi
-
-              printf '.'
-              attempt_counter=$((attempt_counter+1))
-              sleep 5
-            done
-          }
-
-          # It makes an HTTP request to the health check of the
-          # modeling, query and runtime-bundles API returning 0
-          # in case their pods are ready and a value different
-          # than 0 otherwise.
-          #
-          check_services_up () {
-            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/modeling-service/actuator/health > /dev/null 2>&1 && \
-            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/rb/actuator/health > /dev/null 2>&1 && \
-            curl --silent --head --fail $GATEWAY_PROTOCOL://$GATEWAY_HOST/query/actuator/health > /dev/null 2>&1
-          }
-
-          ### Main ###
-
-          echo "Waiting for services to be up..."
-          wait_until_true check_services_up
-
-          # Showing the deployment result
-          kubectl get all -n $PREVIEW_NAME
-
-          # Launching the tests
+      - name: Run Modeling Acceptance Tests
+        run: |
           make test/modeling-acceptance-tests
-          make test/runtime-acceptance-tests
+
+  identity-adapter-acceptance-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - deploy
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure Maven
+        run: |
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: ./.github/action/setup-env-for-broker
+        with:
+          messaging-broker: rabbitmq
+          messaging-partitioning-option: non-partitioned
+          messaging-destinations-option: default-destinations
+          version: ${{ needs.build.outputs.version }}
+
+      - uses: ./.github/actions/check-service-health
+        with:
+          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
+
+      - name: Run Identity Adapter Acceptance Tests
+        run: |
           make test/identity-adapter-acceptance-tests
 
+  runtime-acceptance-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - deploy
+    strategy:
+      fail-fast: false
+      matrix:
+        messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations]
+        include:
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java JDK 11
+        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+        with:
+          java-version: 11
+          distribution: 'temurin'
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Configure Maven
+        run: |
+          echo "MAVEN_USERNAME=$MAVEN_USERNAME" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=$MAVEN_PASSWORD" >> $GITHUB_ENV
+          echo "MAVEN_CLI_OPTS=-s $GITHUB_WORKSPACE/settings.xml -B -ntp" >> $GITHUB_ENV
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - uses: ./.github/action/setup-env-for-broker
+        with:
+          messaging-broker: ${{ matrix.messaging-broker }}
+          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
+          messaging-destinations-option: ${{ matrix.messaging-destinations }}
+          version: ${{ needs.build.outputs.version }}
+
+      - uses: ./.github/actions/check-service-health
+        with:
+          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
+
+      - uses: ./.github/actions/check-service-health
+        with:
+          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
+
+      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+        run: |
+          make test/runtime-acceptance-tests
+
+  undeploy:
+    runs-on: ubuntu-latest
+    needs:
+      - modeling-acceptance-tests
+      - identity-adapter-acceptance-tests
+      - runtime-acceptance-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        messaging-broker: [ rabbitmq, kafka ]
+        messaging-partitioned: [ partitioned, non-partitioned ]
+        messaging-destinations: [ default-destinations ]
+        include:
+          - messaging-broker: kafka
+            messaging-partitioned: partitioned
+            messaging-destinations: override-destinations
+    steps:
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: ${{ always() }}
         env:
@@ -381,7 +431,7 @@ jobs:
   delete-test-images:
     runs-on: ubuntu-latest
     needs:
-      - test
+      - undeploy
       # dependency needed for build.outputs env variables resolution
       - build
     steps:
@@ -407,7 +457,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
-      - test
       - delete-test-images
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'preview')) }}
     env:
