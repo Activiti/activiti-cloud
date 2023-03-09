@@ -416,6 +416,13 @@ jobs:
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
     steps:
+      - uses: ./.github/actions/setup-env-for-broker
+        with:
+          messaging-broker: ${{ matrix.messaging-broker }}
+          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
+          messaging-destinations-option: ${{ matrix.messaging-destinations }}
+          version: ${{ needs.build.outputs.version }}
+          
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         env:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
