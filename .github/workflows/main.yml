@@ -399,6 +399,7 @@ jobs:
           make test/runtime-acceptance-tests
 
   undeploy:
+    if: always()
     runs-on: ubuntu-latest
     needs:
       - modeling-acceptance-tests
@@ -416,7 +417,6 @@ jobs:
             messaging-destinations: override-destinations
     steps:
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: ${{ always() }}
         env:
           IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
         run: |
