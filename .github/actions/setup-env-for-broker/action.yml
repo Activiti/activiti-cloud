@@ -22,7 +22,7 @@
           MESSAGING_BROKER: ${{ inputs.messaging-broker }}
           MESSAGING_PARTITIONED: ${{ inputs.messaging-partitioning-option }}
           MESSAGING_DESTINATIONS: ${{ inputs.messaging-destinations-option }}
-          VERSION: ${{ needs.build.outputs.version }}
+          VERSION: ${{ inputs.version }}
         shell: bash
         run: |
           test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
