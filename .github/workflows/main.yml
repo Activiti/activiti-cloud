@@ -162,7 +162,7 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
 
-      - uses: ./.github/action/setup-env-for-broker
+      - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
           messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
@@ -275,7 +275,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: ./.github/action/setup-env-for-broker
+      - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: rabbitmq
           messaging-partitioning-option: non-partitioned
@@ -322,7 +322,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: ./.github/action/setup-env-for-broker
+      - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: rabbitmq
           messaging-partitioning-option: non-partitioned
@@ -379,7 +379,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: ./.github/action/setup-env-for-broker
+      - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
           messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
