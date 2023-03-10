@@ -420,6 +420,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: v1.19.6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.5.2
+
+      - name: Set up rancher
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.27.0
+        with:
+          url: ${{ secrets.RANCHER2_URL }}
+          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          context: ${{ env.CLUSTER_NAME }}
+
       - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
