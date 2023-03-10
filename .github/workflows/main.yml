@@ -402,6 +402,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     needs:
+      - build
       - modeling-acceptance-tests
       - identity-adapter-acceptance-tests
       - runtime-acceptance-tests
@@ -416,6 +417,9 @@ jobs:
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
       - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
