@@ -21,7 +21,9 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +32,8 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Collections;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
@@ -51,9 +55,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.io.IOException;
-import java.util.Collections;
 
 /**
  * Integration tests for models rest api dealing with JSON models
@@ -102,8 +103,8 @@ public class GenericNonJsonModelTypeValidationControllerIT {
                 .singletonList(
                     new ModelValidationError("Content invalid", "The content is invalid!!")));
 
-        doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(any(byte[].class),
-                                                                                     any(ValidationContext.class));
+        doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(any(), any(byte[].class),
+            any(ValidationContext.class), anyBoolean());
     }
 
     private void validateInvalidExtensions() {
@@ -134,8 +135,9 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         verify(genericNonJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
-                                      argThat(context -> !context.isEmpty()));
+            .validateModelContent(any(),
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()), eq(false));
     }
 
     @Test
@@ -157,8 +159,9 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         verify(genericNonJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
-                                      argThat(context -> !context.isEmpty()));
+            .validateModelContent(any(),
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()), eq(false));
     }
 
     @Test
@@ -180,8 +183,9 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         verify(genericNonJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
-                                      argThat(context -> context.isEmpty()));
+            .validateModelContent(any(),
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty()), eq(false));
     }
 
     @Test
@@ -205,8 +209,9 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         verify(genericNonJsonContentValidator,
                        times(1))
-                .validateModelContent(argThat(content -> new String(content).equals(new String(fileContent))),
-                                      argThat(context -> !context.isEmpty()));
+            .validateModelContent(any(),
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty()), eq(false));
     }
 
     @Test
