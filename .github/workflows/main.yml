@@ -355,18 +355,17 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Configure git user
-        run: |
-          git config --global user.name $GITHUB_USERNAME
-          git config --global user.email $GITHUB_USERNAME@users.noreply.github.com
-        env:
-          GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.36.0
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          add-options: -u
+          commit-message: "Release $VERSION"
 
       - name: Create release tag
+        if: github.event_name == 'push'
         run: |
-          git commit -am "Release $VERSION" --allow-empty
           git tag -fa $VERSION -m "Release version $VERSION"
-          git push -f -q origin $VERSION
+          git push origin $VERSION
 
   propagate-maven:
     runs-on: ubuntu-latest
