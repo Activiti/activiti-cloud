@@ -38,8 +38,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -56,7 +54,6 @@ import org.springframework.test.context.TestPropertySource;
     classes = { ServicesAuditITConfiguration.class },
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
-@Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
 public class MessageProducerCommandContextCloseListenerIT {
 

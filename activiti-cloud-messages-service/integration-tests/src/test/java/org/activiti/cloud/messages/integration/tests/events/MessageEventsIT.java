@@ -45,6 +45,7 @@ import org.activiti.cloud.services.messages.events.producer.BpmnMessageWaitingEv
 import org.activiti.cloud.services.messages.events.producer.MessageSubscriptionCancelledEventMessageProducer;
 import org.activiti.cloud.services.messages.events.producer.StartMessageDeployedEventMessageProducer;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
 import org.activiti.engine.RuntimeService;
 import org.awaitility.Durations;
@@ -57,8 +58,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -77,8 +76,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @DirtiesContext
 @Testcontainers
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@Import(TestChannelBinderConfiguration.class)
+@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class,
+                                      KeycloakContainerApplicationInitializer.class})
 class MessageEventsIT {
 
     @Container
