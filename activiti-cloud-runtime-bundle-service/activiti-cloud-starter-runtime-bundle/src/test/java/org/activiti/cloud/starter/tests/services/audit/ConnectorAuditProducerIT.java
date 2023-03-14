@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
@@ -72,10 +73,9 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(
-    classes = { ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(TestChannelBinderConfiguration.class)
 public class ConnectorAuditProducerIT {
 
     private static final String ROUTING_KEY_HEADER = "routingKey";

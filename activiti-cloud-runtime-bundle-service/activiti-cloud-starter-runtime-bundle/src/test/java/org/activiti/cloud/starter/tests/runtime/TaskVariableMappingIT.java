@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -50,10 +51,9 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@ContextConfiguration(
-    classes = { RuntimeITConfiguration.class, TestChannelBinderConfiguration.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = {RuntimeITConfiguration.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(TestChannelBinderConfiguration.class)
 public class TaskVariableMappingIT {
 
     @Autowired

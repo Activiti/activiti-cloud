@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -50,10 +51,10 @@ import org.springframework.test.context.TestPropertySource;
     properties = { "spring.activiti.asyncExecutorActivate=true" }
 )
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(
-    classes = { ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
+@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
+                      initializers = {KeycloakContainerApplicationInitializer.class}
 )
+@Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
 public class MessageProducerCommandContextCloseListenerIT {
 
