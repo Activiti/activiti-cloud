@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
@@ -25,11 +24,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -107,7 +105,7 @@ public class GenericJsonModelTypeControllerIT {
 
         mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
     }
@@ -120,7 +118,7 @@ public class GenericJsonModelTypeControllerIT {
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.required")
@@ -135,7 +133,7 @@ public class GenericJsonModelTypeControllerIT {
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
@@ -150,7 +148,7 @@ public class GenericJsonModelTypeControllerIT {
 
         ResultActions resultActions = mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("length.greater")
@@ -158,40 +156,29 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_throwModelNameInvalidException_when_creatingGenericJsonModelWithNameWithUppercase() throws Exception {
-        String name = "NameWithUppercase";
-
-        Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
-
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models",
-                          project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name,
-                                                                                  genericJsonModelType.getName()))))
-            .andExpect(status().isConflict());
-
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("The model name should follow DNS-1035 conventions:"
-                           + " it must consist of lower case alphanumeric characters or '-',"
-                           + " and must start and end with an alphanumeric character: 'NameWithUppercase'");
-    }
-
-    @Test
-    public void should_throwModelNameInvalidException_when_creatingGenericJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_create_when_creatingGenericJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models",
-                          project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
-            .andExpect(status().isConflict());
+            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("The model name should follow DNS-1035 conventions:"
-                           + " it must consist of lower case alphanumeric characters or '-',"
-                           + " and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isCreated());
+    }
+
+    @Test
+    public void should_create_when_creatingGenericJsonModelWithNameWithUppercase() throws Exception {
+        String name = "NameWithUppercase";
+
+        Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
+
+        ResultActions resultActions = mockMvc
+            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
@@ -199,30 +186,27 @@ public class GenericJsonModelTypeControllerIT {
         String name = "updated-connector-name";
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
         mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
     }
 
     @Test
-    public void should_throwModelNameInvalidException_when_updatingGenericJsonModelWithNameNull() throws Exception {
+    public void should_returnStatusOKAndModelName_when_updatingGenericJsonModelWithNameNull() throws Exception {
         String name = null;
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
-        ResultActions updateResult = mockMvc
+        mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name,
-                                                                                  genericJsonModelType.getName()))))
-            .andExpect(status().isConflict());
-
-        assertThat(updateResult.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("The model name is required");
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
     }
 
     @Test
@@ -230,11 +214,11 @@ public class GenericJsonModelTypeControllerIT {
         String name = "";
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
@@ -246,11 +230,11 @@ public class GenericJsonModelTypeControllerIT {
         String name = "123456789_123456789_1234567";
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("length.greater").hasValidationErrorMessages(
@@ -258,41 +242,31 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_throwModelNameInvalidException_when_updatingGenericJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_update_when_updatingGenericJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isConflict());
-
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("The model name should follow DNS-1035 conventions:"
-                           + " it must consist of lower case alphanumeric characters or '-',"
-                           + " and must start and end with an alphanumeric character: 'name_with_underscore'");
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
-    public void should_throwModelNameInvalidException_when_updatingGenericJsonModelWithNameWithUppercase() throws Exception {
+    public void should_update_when_updatingGenericJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc
             .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName()))));
 
-        resultActions.andExpect(status().isConflict());
-
-        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("The model name should follow DNS-1035 conventions:"
-                           + " it must consist of lower case alphanumeric characters or '-',"
-                           + " and must start and end with an alphanumeric character: 'NameWithUppercase'");
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
@@ -300,14 +274,14 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
         Map<String, Object> extensions = null;
 
         genericJsonModel.setExtensions(extensions);
 
         mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(genericJsonModel)))
+                .content(objectMapper.writeValueAsString(genericJsonModel)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.extensions").doesNotExist());
     }
@@ -317,14 +291,14 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
 
         genericJsonModel.setExtensions(extensions);
 
         mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(genericJsonModel)))
+                .content(objectMapper.writeValueAsString(genericJsonModel)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.extensions", Matchers.notNullValue()));
     }
@@ -334,25 +308,25 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+            genericJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
         extensions.put("string",
-                       "value");
+            "value");
         extensions.put("number",
-                       2);
+            2);
         extensions.put("array",
-                       new String[]{"a", "b", "c"});
+            new String[]{"a", "b", "c"});
         extensions.put("list",
-                       Arrays.asList("a",
-                                     "b",
-                                     "c",
-                                     "d"));
+            Arrays.asList("a",
+                "b",
+                "c",
+                "d"));
 
         genericJsonModel.setExtensions(extensions);
 
         mockMvc
             .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                         .content(objectMapper.writeValueAsString(genericJsonModel)))
+                .content(objectMapper.writeValueAsString(genericJsonModel)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.extensions.string", equalTo("value")))
             .andExpect(jsonPath("$.extensions.number", equalTo(2)))

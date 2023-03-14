@@ -44,7 +44,6 @@ import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
-import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,7 +94,6 @@ public class ModelingServiceAutoConfiguration {
                                      FileMagicNumberValidator fileContentValidator,
                                      ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
                                      ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
-                                     ModelNameValidator modelNameValidator,
                                      FileContentSanitizer fileContentSanitizer) {
         return new ModelServiceImpl(modelRepository,
                                     modelTypeService,
@@ -107,7 +105,6 @@ public class ModelingServiceAutoConfiguration {
                                     fileContentValidator,
                                     modelContentValidationStrategy,
                                     modelExtensionsValidationStrategy,
-                                    modelNameValidator,
                                     fileContentSanitizer);
 
     }
