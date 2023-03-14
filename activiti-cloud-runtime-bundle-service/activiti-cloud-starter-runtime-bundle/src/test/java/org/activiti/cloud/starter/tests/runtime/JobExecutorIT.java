@@ -43,7 +43,6 @@ import org.activiti.cloud.services.job.executor.JobMessageProducer;
 import org.activiti.cloud.services.job.executor.JobMessageSentEvent;
 import org.activiti.cloud.services.job.executor.MessageBasedJobManager;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -73,6 +72,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ApplicationEvent;
@@ -102,10 +102,10 @@ import org.springframework.transaction.support.TransactionTemplate;
     }
 )
 @DirtiesContext
-@ContextConfiguration(
-    classes = { RuntimeITConfiguration.class, JobExecutorIT.JobExecutorITProcessEngineConfigurer.class },
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = {RuntimeITConfiguration.class,
+    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class,
+    TestChannelBinderConfiguration.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);

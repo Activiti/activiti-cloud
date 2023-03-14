@@ -17,20 +17,17 @@ package org.activiti.cloud.identity.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.identity.adapter.IdentityAdapterApplication;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Test for modeling rest services
  */
 @SpringBootTest(classes = { IdentityAdapterApplication.class })
-@DirtiesContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class IdentityAdapterApplicationIT {
 

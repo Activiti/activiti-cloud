@@ -15,13 +15,10 @@
  */
 package org.activiti.cloud.identity.adapter;
 
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
-
 import org.activiti.cloud.identity.web.controller.AbstractIdentityManagementControllerIT;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -29,7 +26,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @ActiveProfiles("test")
 @SpringBootTest(classes = { IdentityAdapterApplication.class, IdentityAdapterAuthenticationTestConfiguration.class })
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @WithMockUser
 class KeycloakManagementControllerIT extends AbstractIdentityManagementControllerIT {}

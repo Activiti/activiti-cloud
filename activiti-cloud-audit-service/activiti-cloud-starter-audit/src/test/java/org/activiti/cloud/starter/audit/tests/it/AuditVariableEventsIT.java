@@ -31,24 +31,20 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(EventsRestTemplate.class)
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
-@DirtiesContext
+@Import({ EventsRestTemplate.class, TestChannelBinderConfiguration.class })
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 class AuditVariableEventsIT {
 
     @Autowired
@@ -60,8 +56,13 @@ class AuditVariableEventsIT {
     @Autowired
     private MyProducer producer;
 
-    @BeforeEach
-    public void setUp() {
+//    @BeforeEach
+//    public void setUp() {
+//        repository.deleteAll();
+//    }
+
+    @AfterEach
+    public void cleanUp() {
         repository.deleteAll();
     }
 
