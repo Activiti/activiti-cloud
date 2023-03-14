@@ -65,6 +65,7 @@
             <include>**/*TestSuite.java</include>
           </includes>
           <forkCount>0</forkCount>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>
       <plugin>

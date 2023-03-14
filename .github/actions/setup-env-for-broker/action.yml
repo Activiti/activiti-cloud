@@ -1,0 +1,65 @@
+  name: Setup environment
+  description: Setup environment to execute tests using specific message broker
+  inputs:
+    messaging-broker:
+      description: the name of the messaging broker
+      required: true
+    messaging-partitioning-option:
+      description: the partitioning option to be used, i.e. `partitioned` or `non-partitioned`
+      required: true
+    messaging-destinations-option:
+      description: the destinations option to be used, i.e. `default-destination` or `override-destinations`
+      required: true
+    version:
+      description: the version being tested
+      required: true
+
+  runs:
+    using: composite
+    steps:
+      - name: Setup environment for ${{ inputs.messaging-broker }}
+        env:
+          MESSAGING_BROKER: ${{ inputs.messaging-broker }}
+          MESSAGING_PARTITIONED: ${{ inputs.messaging-partitioning-option }}
+          MESSAGING_DESTINATIONS: ${{ inputs.messaging-destinations-option }}
+          VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+
+          echo "MESSAGING_BROKER=$MESSAGING_BROKER" >> $GITHUB_ENV
+          echo "MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED" >> $GITHUB_ENV
+          echo "MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo $VERSION > VERSION
+
+          test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+          PREVIEW_NAME="$PREVIEW_NAME-${MESSAGING_BROKER:0:6}-${MESSAGING_PARTITIONED:0:1}-${MESSAGING_DESTINATIONS:0:1}"
+          echo "PREVIEW_NAME=$PREVIEW_NAME" >> $GITHUB_ENV
+
+          SSO_PROTOCOL=https
+          echo "SSO_PROTOCOL=$SSO_PROTOCOL" >> $GITHUB_ENV
+
+          GATEWAY_PROTOCOL=https
+          echo "GATEWAY_PROTOCOL=$GATEWAY_PROTOCOL" >> $GITHUB_ENV
+
+          GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          echo "GLOBAL_GATEWAY_DOMAIN=$GLOBAL_GATEWAY_DOMAIN" >> $GITHUB_ENV
+
+          GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          echo "GATEWAY_HOST=$GATEWAY_HOST" >> $GITHUB_ENV
+
+          SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          echo "SSO_HOST=$SSO_HOST" >> $GITHUB_ENV
+
+          source $GITHUB_ENV
+
+          echo MESSAGING_BROKER=$MESSAGING_BROKER
+          echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
+          echo MESSAGING_DESTINATIONS=$MESSAGING_DESTINATIONS
+          echo PREVIEW_NAME=$PREVIEW_NAME
+          echo VERSION=$VERSION
+          echo SSO_PROTOCOL=$SSO_PROTOCOL
+          echo GATEWAY_PROTOCOL=$GATEWAY_PROTOCOL
+          echo GLOBAL_GATEWAY_DOMAIN=$GLOBAL_GATEWAY_DOMAIN
+          echo GATEWAY_HOST=$GATEWAY_HOST
+          echo SSO_HOST=$SSO_HOST

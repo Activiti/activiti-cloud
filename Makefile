@@ -41,6 +41,7 @@ install: release
 			--namespace ${PREVIEW_NAME} \
 			--create-namespace \
 			--atomic \
+			--wait \
 			--timeout 8m
 
 delete:
@@ -142,7 +143,6 @@ tag:
 test/%:
 	$(eval MODULE=$(word 2, $(subst /, ,$@)))
 
-	cd activiti-cloud-acceptance-scenarios && \
-		mvn ${MAVEN_CLI_OPTS} -pl $(MODULE) -Droot.log.level=off verify
+	mvn ${MAVEN_CLI_OPTS} -pl activiti-cloud-acceptance-scenarios/$(MODULE) -Droot.log.level=off verify -am
 
 promote: version tag deploy updatebot/push-version
