@@ -79,6 +79,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -102,14 +103,10 @@ import org.springframework.transaction.support.TransactionTemplate;
     }
 )
 @DirtiesContext
-@ContextConfiguration(
-    classes = {
-        RuntimeITConfiguration.class,
-        JobExecutorIT.JobExecutorITProcessEngineConfigurer.class,
-        TestChannelBinderConfiguration.class,
-    },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = {RuntimeITConfiguration.class,
+    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(TestChannelBinderConfiguration.class)
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
