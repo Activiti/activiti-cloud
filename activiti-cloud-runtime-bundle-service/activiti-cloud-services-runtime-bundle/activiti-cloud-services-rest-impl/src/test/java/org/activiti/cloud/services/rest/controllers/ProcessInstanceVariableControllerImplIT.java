@@ -23,11 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -66,7 +66,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
+@Import(
+    {
+        CommonModelAutoConfiguration.class,
         ProcessModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
@@ -74,7 +76,9 @@ import org.springframework.test.web.servlet.MockMvc;
         VariableValidationService.class,
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class})
+        StreamConfig.class,
+    }
+)
 public class ProcessInstanceVariableControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
@@ -129,44 +133,54 @@ public class ProcessInstanceVariableControllerImplIT {
 
     @Test
     public void getVariables() throws Exception {
-        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
-                                                                       String.class.getName(),
-                                                                       "Paul",
-                                                                       PROCESS_INSTANCE_ID, null);
-        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
-                                                                       Integer.class.getName(),
-                                                                       12,
-                                                                       PROCESS_INSTANCE_ID, null);
-        given(processRuntime.variables(any()))
-                .willReturn(Arrays.asList(name,
-                                          age));
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
+            "name",
+            String.class.getName(),
+            "Paul",
+            PROCESS_INSTANCE_ID,
+            null
+        );
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>(
+            "age",
+            Integer.class.getName(),
+            12,
+            PROCESS_INSTANCE_ID,
+            null
+        );
+        given(processRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables",
-                                 1,
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
     public void setVariables() throws Exception {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("var1",
-                      "varObj1");
-        variables.put("var2",
-                      "varObj2");
+        variables.put("var1", "varObj1");
+        variables.put("var2", "varObj2");
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
 
-        given(processRuntime.processInstance(any()))
-        .willReturn(processInstance);
+        given(processRuntime.processInstance(any())).willReturn(processInstance);
 
-        this.mockMvc.perform(put("/v1/process-instances/{processInstanceId}/variables",
-                                  1).contentType(MediaType.APPLICATION_JSON).content(
-                mapper.writeValueAsString(ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").withVariables(variables).build())))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                put("/v1/process-instances/{processInstanceId}/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder
+                                .setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
 
         verify(processRuntime).setVariables(any());
     }
-
 }

@@ -16,16 +16,15 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.activiti.cloud.api.process.model.CloudServiceTask;
-import org.hibernate.annotations.*;
-
+import java.util.Objects;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Objects;
+import org.activiti.cloud.api.process.model.CloudServiceTask;
+import org.hibernate.annotations.*;
 
-@Entity(name="ServiceTask")
-@Table(name="BPMN_ACTIVITY")
+@Entity(name = "ServiceTask")
+@Table(name = "BPMN_ACTIVITY")
 @Where(clause = "activity_type='serviceTask'")
 @DynamicInsert
 @DynamicUpdate
@@ -37,16 +36,14 @@ public class ServiceTaskEntity extends BaseBPMNActivityEntity implements CloudSe
 
     protected ServiceTaskEntity() {}
 
-    public ServiceTaskEntity(String serviceName,
-                              String serviceFullName,
-                              String serviceVersion,
-                              String appName,
-                              String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public ServiceTaskEntity(
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion
+    ) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     public IntegrationContextEntity getIntegrationContext() {

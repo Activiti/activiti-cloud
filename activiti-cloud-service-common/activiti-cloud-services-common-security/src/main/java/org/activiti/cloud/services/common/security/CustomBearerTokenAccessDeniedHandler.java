@@ -27,21 +27,24 @@ public class CustomBearerTokenAccessDeniedHandler implements AccessDeniedHandler
 
     private final AccessDeniedHandler accessDeniedHandler;
 
-    public CustomBearerTokenAccessDeniedHandler(AccessDeniedHandler accessDeniedHandler){
+    public CustomBearerTokenAccessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        AccessDeniedException accessDeniedException
+    ) throws IOException, ServletException {
         accessDeniedHandler.handle(request, response, accessDeniedException);
         setStatusWithReasonIfErrorIs403(response);
     }
 
     private void setStatusWithReasonIfErrorIs403(HttpServletResponse response) throws IOException {
         // After using Spring Security Oauth2 the reason is not more set in the error, so we need to set it manually
-        if(response.getStatus() == 403) {
+        if (response.getStatus() == 403) {
             response.sendError(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.getReasonPhrase());
         }
     }
-
 }

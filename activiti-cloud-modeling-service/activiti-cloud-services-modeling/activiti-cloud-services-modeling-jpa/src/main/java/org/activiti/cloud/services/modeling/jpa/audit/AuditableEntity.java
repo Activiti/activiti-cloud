@@ -20,7 +20,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.activiti.cloud.services.auditable.Auditable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -80,4 +79,4 @@ public abstract class AuditableEntity<U> implements Auditable<U> {
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
-    }
+}

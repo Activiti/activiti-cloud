@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCompletedEventEntity.TASK_COMPLETED_EVENT)
 @DiscriminatorValue(value = TaskCompletedEventEntity.TASK_COMPLETED_EVENT)
@@ -28,8 +27,7 @@ public class TaskCompletedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_COMPLETED_EVENT = "TaskCompletedEvent";
 
-    public TaskCompletedEventEntity() {
-    }
+    public TaskCompletedEventEntity() {}
 
     public TaskCompletedEventEntity(CloudTaskCompletedEvent cloudEvent) {
         super(cloudEvent);

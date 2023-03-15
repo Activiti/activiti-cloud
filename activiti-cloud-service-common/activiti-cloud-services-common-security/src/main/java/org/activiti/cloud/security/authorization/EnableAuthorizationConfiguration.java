@@ -23,11 +23,10 @@ import java.lang.annotation.Target;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Import(AuthorizationConfigurer.class)
 @EnableConfigurationProperties(AuthorizationProperties.class)
 public @interface EnableAuthorizationConfiguration {
-
 }

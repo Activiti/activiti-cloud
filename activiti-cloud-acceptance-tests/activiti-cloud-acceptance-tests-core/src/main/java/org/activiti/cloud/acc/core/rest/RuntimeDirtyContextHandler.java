@@ -16,10 +16,9 @@
 package org.activiti.cloud.acc.core.rest;
 
 import org.activiti.cloud.acc.core.config.RuntimeTestsConfigurationProperties;
+import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
-
-import org.activiti.cloud.acc.shared.rest.DirtyContextHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -42,7 +41,9 @@ public class RuntimeDirtyContextHandler {
      * @return the dirty process instance
      */
     public CloudProcessInstance dirty(final CloudProcessInstance processInstance) {
-        dirtyContextHandler.dirty(configurationProperties.getRuntimeBundleUrl() + PROCESS_INSTANCES_PATH + processInstance.getId());
+        dirtyContextHandler.dirty(
+            configurationProperties.getRuntimeBundleUrl() + PROCESS_INSTANCES_PATH + processInstance.getId()
+        );
         return processInstance;
     }
 

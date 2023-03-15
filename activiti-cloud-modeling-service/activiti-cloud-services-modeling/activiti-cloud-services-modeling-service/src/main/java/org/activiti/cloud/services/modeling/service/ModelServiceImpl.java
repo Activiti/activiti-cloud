@@ -115,17 +115,19 @@ public class ModelServiceImpl implements ModelService {
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
     @Autowired
-    public ModelServiceImpl(ModelRepository modelRepository,
-                            ModelTypeService modelTypeService,
-                            ModelContentService modelContentService,
-                            ModelExtensionsService modelExtensionsService,
-                            JsonConverter<Model> jsonConverter,
-                            ProcessModelContentConverter processModelContentConverter,
-                            Set<ModelUpdateListener> modelUpdateListeners,
-                            FileMagicNumberValidator fileContentValidator,
-                            ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
-                            ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
-                            FileContentSanitizer fileContentSanitizer) {
+    public ModelServiceImpl(
+        ModelRepository modelRepository,
+        ModelTypeService modelTypeService,
+        ModelContentService modelContentService,
+        ModelExtensionsService modelExtensionsService,
+        JsonConverter<Model> jsonConverter,
+        ProcessModelContentConverter processModelContentConverter,
+        Set<ModelUpdateListener> modelUpdateListeners,
+        FileMagicNumberValidator fileContentValidator,
+        ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
+        ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
+        FileContentSanitizer fileContentSanitizer
+    ) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -136,27 +138,28 @@ public class ModelServiceImpl implements ModelService {
         this.modelContentValidationStrategy = modelContentValidationStrategy;
         this.modelExtensionsValidationStrategy = modelExtensionsValidationStrategy;
         this.fileContentSanitizer = fileContentSanitizer;
-        modelUpdateListenersMapByModelType = modelUpdateListeners
-            .stream()
-            .collect(Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName()));
+        modelUpdateListenersMapByModelType =
+            modelUpdateListeners
+                .stream()
+                .collect(
+                    Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName())
+                );
     }
-
 
     @Override
     public List<Model> getAllModels(Project project) {
-        return modelTypeService.getAvailableModelTypes().stream().map(modelType -> getModels(project,
-                                                                                             modelType,
-                                                                                             Pageable.unpaged()))
-                .map(Page::getContent).flatMap(List::stream).collect(Collectors.toList());
+        return modelTypeService
+            .getAvailableModelTypes()
+            .stream()
+            .map(modelType -> getModels(project, modelType, Pageable.unpaged()))
+            .map(Page::getContent)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public Page<Model> getModels(Project project,
-                                 ModelType modelType,
-                                 Pageable pageable) {
-        return modelRepository.getModels(project,
-                                         modelType,
-                                         pageable);
+    public Page<Model> getModels(Project project, ModelType modelType, Pageable pageable) {
+        return modelRepository.getModels(project, modelType, pageable);
     }
 
     @Override
@@ -168,28 +171,27 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Model buildModel(String type,
-        String name) {
+    public Model buildModel(String type, String name) {
         try {
             Model model = (Model) modelRepository.getModelType().getConstructor().newInstance();
             model.setType(type);
             model.setName(name);
             return model;
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (
+            InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e
+        ) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Model createModel(Project project,
-        Model model) {
-
-        checkIfModelNameExistsInProject(project,model);
+    public Model createModel(Project project, Model model) {
+        checkIfModelNameExistsInProject(project, model);
         checkModelScopeIntegrity(model);
         model.setId(null);
         ModelType modelType = findModelType(model);
 
-        if(project != null) {
+        if (project != null) {
             model.addProject(project);
         }
 
@@ -199,7 +201,7 @@ public class ModelServiceImpl implements ModelService {
             }
         }
 
-        if(PROCESS.equals(modelType.getName()) && model.getContent() != null) {
+        if (PROCESS.equals(modelType.getName()) && model.getContent() != null) {
             // We leverage targetNamespace of bpmn models as a category field
             model.setCategory(processModelContentConverter.convertToBpmnModel(model.getContent()).getTargetNamespace());
         }
@@ -208,28 +210,34 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        Optional<Model> existingModel = modelRepository.findModelByNameInProject(project, model.getName(), model.getType());
+        Optional<Model> existingModel = modelRepository.findModelByNameInProject(
+            project,
+            model.getName(),
+            model.getType()
+        );
         if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
-                "A model with the same type already exists within the project with id: " + (project != null ? project.getId() : "null"));
+                "A model with the same type already exists within the project with id: " +
+                (project != null ? project.getId() : "null")
+            );
         }
     }
 
-    private void checkModelScopeIntegrity(Model model){
-        if(model.getScope() == null){
+    private void checkModelScopeIntegrity(Model model) {
+        if (model.getScope() == null) {
             model.setScope(ModelScope.PROJECT);
         }
 
-        if(ModelScope.PROJECT.equals(model.getScope()) && model.hasMultipleProjects()){
+        if (ModelScope.PROJECT.equals(model.getScope()) && model.hasMultipleProjects()) {
             throw new ModelScopeIntegrityException("A model at PROJECT scope can only be associated to one project");
         }
     }
 
     @Override
-    public Model updateModel(Model modelToBeUpdated,
-                             Model newModel) {
+    public Model updateModel(Model modelToBeUpdated, Model newModel) {
         if (newModel.hasProjects()) {
-            newModel.getProjects()
+            newModel
+                .getProjects()
                 .stream()
                 .forEach(project -> checkIfModelNameExistsInProject((Project) project, newModel));
         }
@@ -240,19 +248,16 @@ public class ModelServiceImpl implements ModelService {
             .stream()
             .forEach(listener -> listener.execute(modelToBeUpdated, newModel));
 
-        return modelRepository.updateModel(modelToBeUpdated,
-                                           newModel);
+        return modelRepository.updateModel(modelToBeUpdated, newModel);
     }
 
     @Override
     public Model copyModel(Model modelToBeCopied, Project project) {
         Model copiedModel = modelRepository.copyModel(modelToBeCopied, project);
-        modelIdentifiers.put(String.join(MODEL_IDENTIFIER_SEPARATOR,
-                        modelToBeCopied.getType().toLowerCase(),
-                        modelToBeCopied.getId()),
-                String.join(MODEL_IDENTIFIER_SEPARATOR,
-                        copiedModel.getType().toLowerCase(),
-                        copiedModel.getId()));
+        modelIdentifiers.put(
+            String.join(MODEL_IDENTIFIER_SEPARATOR, modelToBeCopied.getType().toLowerCase(), modelToBeCopied.getId()),
+            String.join(MODEL_IDENTIFIER_SEPARATOR, copiedModel.getType().toLowerCase(), copiedModel.getId())
+        );
         updateModelContent(copiedModel, getModelContentFile(copiedModel));
         return copiedModel;
     }
@@ -274,15 +279,16 @@ public class ModelServiceImpl implements ModelService {
         }
 
         Model fullModel = findModelById(model.getId()).orElse(model);
-        Model modelToFile = buildModel(fullModel.getType(),
-                                       fullModel.getName());
+        Model modelToFile = buildModel(fullModel.getType(), fullModel.getName());
         modelToFile.setId(fullModel.getType().toLowerCase().concat(MODEL_IDENTIFIER_SEPARATOR).concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
         modelToFile.setScope(null);
 
-        FileContent extensionsFileContent = new FileContent(getExtensionsFilename(model),
-                                                            CONTENT_TYPE_JSON,
-                                                            jsonConverter.convertToJsonBytes(modelToFile));
+        FileContent extensionsFileContent = new FileContent(
+            getExtensionsFilename(model),
+            CONTENT_TYPE_JSON,
+            jsonConverter.convertToJsonBytes(modelToFile)
+        );
         return Optional.of(extensionsFileContent);
     }
 
@@ -304,47 +310,48 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public FileContent getModelContentFile(Model model) {
-        return getModelFileContent(model,
-                                   modelRepository.getModelContent(model));
+        return getModelFileContent(model, modelRepository.getModelContent(model));
     }
 
     @Override
     public FileContent exportModel(Model model) {
-        return getModelFileContent(model,
-                                   modelRepository.getModelExport(model));
+        return getModelFileContent(model, modelRepository.getModelExport(model));
     }
 
-    private FileContent getModelFileContent(Model model,
-                                            byte[] modelBytes) {
-        return new FileContent(setExtension(model.getName(),
-                                            findModelType(model).getContentFileExtension()),
-                               model.getContentType(),
-                               modelBytes);
+    private FileContent getModelFileContent(Model model, byte[] modelBytes) {
+        return new FileContent(
+            setExtension(model.getName(), findModelType(model).getContentFileExtension()),
+            model.getContentType(),
+            modelBytes
+        );
     }
 
     @Override
-    public Model updateModelContent(Model modelToBeUpdated,
-        FileContent fileContent) {
-
+    public Model updateModelContent(Model modelToBeUpdated, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelToBeUpdated.getType(), fileContent);
         FileContent fixedFileContent = modelIdentifiers.isEmpty()
             ? fileContent
-            : overrideModelContentId(modelToBeUpdated,
-                fileContent);
+            : overrideModelContentId(modelToBeUpdated, fileContent);
         final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fixedFileContent);
 
         modelToBeUpdated.setContentType(sanitizedFileContent.getContentType());
         modelToBeUpdated.setContent(sanitizedFileContent.getFileContent());
 
-        if (modelToBeUpdated.getType().equals(PROCESS) &&
+        if (
+            modelToBeUpdated.getType().equals(PROCESS) &&
             sanitizedFileContent.getFileContent() != null &&
-            isBpmnModelContent(sanitizedFileContent.getFileContent())) {
-            modelToBeUpdated.setCategory(processModelContentConverter.convertToBpmnModel(
-                    sanitizedFileContent.getFileContent()).getTargetNamespace());
+            isBpmnModelContent(sanitizedFileContent.getFileContent())
+        ) {
+            modelToBeUpdated.setCategory(
+                processModelContentConverter
+                    .convertToBpmnModel(sanitizedFileContent.getFileContent())
+                    .getTargetNamespace()
+            );
         }
 
         try {
-            Optional.ofNullable(modelToBeUpdated.getType())
+            Optional
+                .ofNullable(modelToBeUpdated.getType())
                 .flatMap(modelContentService::findModelContentConverter)
                 .flatMap(validator -> validator.convertToModelContent(sanitizedFileContent.getFileContent()))
                 .ifPresent(modelContent -> modelToBeUpdated.setTemplate(modelContent.getTemplate()));
@@ -360,90 +367,86 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public FileContent overrideModelContentId(Model model,
-        FileContent fileContent) {
-        return modelContentService.findModelContentConverter(model.getType())
-            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent,
-                modelIdentifiers))
+    public FileContent overrideModelContentId(Model model, FileContent fileContent) {
+        return modelContentService
+            .findModelContentConverter(model.getType())
+            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, modelIdentifiers))
             .orElse(fileContent);
     }
 
     @Override
-    public Optional<ModelContent> createModelContentFromModel(Model model,
-                                                              FileContent fileContent) {
+    public Optional<ModelContent> createModelContentFromModel(Model model, FileContent fileContent) {
         final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fileContent);
-        return (Optional<ModelContent>) modelContentService.findModelContentConverter(model.getType())
-                .map(modelContentConverter ->
-                        modelContentConverter.convertToModelContent(sanitizedFileContent.getFileContent()))
-                .orElse(Optional.empty());
+        return (Optional<ModelContent>) modelContentService
+            .findModelContentConverter(model.getType())
+            .map(modelContentConverter ->
+                modelContentConverter.convertToModelContent(sanitizedFileContent.getFileContent())
+            )
+            .orElse(Optional.empty());
     }
 
     @Override
-    public Model importSingleModel(Project project,
-                                   ModelType modelType,
-                                   FileContent fileContent) {
-        Model model = importModel(project,
-                                       modelType,
-                                       fileContent);
-        model = updateModelContent(model,
-                                       fileContent);
+    public Model importSingleModel(Project project, ModelType modelType, FileContent fileContent) {
+        Model model = importModel(project, modelType, fileContent);
+        model = updateModelContent(model, fileContent);
         cleanModelIdList();
         return model;
     }
 
     @Override
-    public Model importModel(Project project,
-                             ModelType modelType,
-                             FileContent fileContent) {
-        logger.debug(MessageFormat.format("Importing model type {0} from file {1}: {2}",
-                                          modelType,
-                                          fileContent.getFilename(),
-                                          fileContent));
+    public Model importModel(Project project, ModelType modelType, FileContent fileContent) {
+        logger.debug(
+            MessageFormat.format(
+                "Importing model type {0} from file {1}: {2}",
+                modelType,
+                fileContent.getFilename(),
+                fileContent
+            )
+        );
 
-        Model model = importModelFromContent(project,
-                                             modelType,
-                                             fileContent);
+        Model model = importModelFromContent(project, modelType, fileContent);
         return model;
     }
 
     @Override
-    public Model importModelFromContent(Project project,
-                                        ModelType modelType,
-                                        FileContent fileContent) {
+    public Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = null;
         if (modelTypeService.isJson(modelType) || ContentTypeUtils.isJsonContentType(fileContent.getContentType())) {
-            model = convertContentToModel(modelType,
-                                          fileContent);
+            model = convertContentToModel(modelType, fileContent);
         } else {
-            model = createModelFromContent(modelType,
-                                           fileContent);
+            model = createModelFromContent(modelType, fileContent);
         }
         String convertedId = model.getId();
 
-        if (model.getId() == null && (modelTypeService.isJson(modelType) == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))) {
-            convertedId = retrieveModelIdFromModelContent(model,
-                                            fileContent);
+        if (
+            model.getId() == null &&
+            (modelTypeService.isJson(modelType) == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))
+        ) {
+            convertedId = retrieveModelIdFromModelContent(model, fileContent);
         }
 
         model.setScope(ModelScope.PROJECT);
         createModel(project, model);
 
         if (convertedId != null) {
-            modelIdentifiers.put(convertedId,
-                    String.join(MODEL_IDENTIFIER_SEPARATOR,
-                            model.getType().toLowerCase(),
-                            model.getId()));
+            modelIdentifiers.put(
+                convertedId,
+                String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId())
+            );
         }
         return model;
     }
 
     private void throwExceptionIfFileIsExecutable(String modelTypeName, FileContent fileContent) {
         if (fileContentValidator.checkFileIsExecutable(fileContent.getFileContent())) {
-            throw new ImportModelException(MessageFormat
-                .format("Import the executable file {0} for type {1} is forbidden.",
-                        fileContent.getFilename(),
-                        modelTypeName));
+            throw new ImportModelException(
+                MessageFormat.format(
+                    "Import the executable file {0} for type {1} is forbidden.",
+                    fileContent.getFilename(),
+                    modelTypeName
+                )
+            );
         }
     }
 
@@ -451,27 +454,27 @@ public class ModelServiceImpl implements ModelService {
     public <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz) {
         Assert.notNull(clazz, "Class task type it must not be null");
         return getProcessesBy(project, processModelType)
-                .stream()
-                .map(Process::getFlowElements)
-                .flatMap(Collection::stream)
-                .filter(clazz::isInstance)
-                .map(clazz::cast)
-                .collect(Collectors.toList());
+            .stream()
+            .map(Process::getFlowElements)
+            .flatMap(Collection::stream)
+            .filter(clazz::isInstance)
+            .map(clazz::cast)
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<Process> getProcessesBy(Project project, ModelType type) {
         return getModels(project, type, Pageable.unpaged())
-                .stream()
-                .map(Model::getContent)
-                .filter(content -> nonNull(content))
-                .map(processModelContentConverter::convertToBpmnModel)
-                .map(BpmnModel::getProcesses)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+            .stream()
+            .map(Model::getContent)
+            .filter(content -> nonNull(content))
+            .map(processModelContentConverter::convertToBpmnModel)
+            .map(BpmnModel::getProcesses)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
-    private boolean isBpmnModelContent (byte[] modelContent) {
+    private boolean isBpmnModelContent(byte[] modelContent) {
         boolean isBpmn = true;
         try {
             processModelContentConverter.convertToBpmnModel(modelContent);
@@ -481,78 +484,72 @@ public class ModelServiceImpl implements ModelService {
         return isBpmn;
     }
 
-    private String retrieveModelIdFromModelContent(Model model,
-                                                   FileContent fileContent) {
-        Optional<ModelContent> modelContent = createModelContentFromModel(model,
-                                                                               fileContent);
+    private String retrieveModelIdFromModelContent(Model model, FileContent fileContent) {
+        Optional<ModelContent> modelContent = createModelContentFromModel(model, fileContent);
         return modelContent.isPresent() ? modelContent.get().getId() : null;
     }
 
     @Override
-    public Model convertContentToModel(ModelType modelType,
-                                       FileContent fileContent) {
-        Model model = jsonConverter.tryConvertToEntity(fileContent.getFileContent())
-                .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
-        model.setName(removeEnd(removeExtension(fileContent.getFilename(),
-                                                JSON),
-                                modelType.getExtensionsFileSuffix()));
+    public Model convertContentToModel(ModelType modelType, FileContent fileContent) {
+        Model model = jsonConverter
+            .tryConvertToEntity(fileContent.getFileContent())
+            .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
+        model.setName(removeEnd(removeExtension(fileContent.getFilename(), JSON), modelType.getExtensionsFileSuffix()));
         model.setType(modelType.getName());
 
         return model;
     }
 
     @Override
-    public Model createModelFromContent(ModelType modelType,
-        FileContent fileContent) {
+    public Model createModelFromContent(ModelType modelType, FileContent fileContent) {
         return contentFilenameToModelName(fileContent.getFilename(), modelType)
             .map(modelName -> buildModel(modelType.getName(), modelName))
-            .orElseThrow(() -> new ImportModelException(MessageFormat
-                .format("Unexpected extension was found for file to import model of type {0}: {1}",
-                    modelType.getName(),
-                    fileContent.getFilename())));
+            .orElseThrow(() ->
+                new ImportModelException(
+                    MessageFormat.format(
+                        "Unexpected extension was found for file to import model of type {0}: {1}",
+                        modelType.getName(),
+                        fileContent.getFilename()
+                    )
+                )
+            );
     }
 
     @Override
-    public Optional<String> contentFilenameToModelName(String filename,
-                                                       ModelType modelType) {
-        return Arrays.stream(modelType.getAllowedContentFileExtension()).filter(filename::endsWith).findFirst().map(extension -> removeExtension(filename,
-                                                                                                                                                 extension));
+    public Optional<String> contentFilenameToModelName(String filename, ModelType modelType) {
+        return Arrays
+            .stream(modelType.getAllowedContentFileExtension())
+            .filter(filename::endsWith)
+            .findFirst()
+            .map(extension -> removeExtension(filename, extension));
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     ValidationContext validationContext) {
-        validateModelContent(model,
-                             modelRepository.getModelContent(model),
-                             validationContext);
+    public void validateModelContent(Model model, ValidationContext validationContext) {
+        validateModelContent(model, modelRepository.getModelContent(model), validationContext);
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     Project project) {
-        validateModelContent(model,
-                             modelRepository.getModelContent(model),
-                             createValidationContext(project));
+    public void validateModelContent(Model model, Project project) {
+        validateModelContent(model, modelRepository.getModelContent(model), createValidationContext(project));
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     FileContent fileContent) {
+    public void validateModelContent(Model model, FileContent fileContent) {
         ValidationContext validationContext = getValidationContext(model, fileContent, null);
-        validateModelContent(model,
-                             fileContent.getFileContent(),
-                             validationContext);
+        validateModelContent(model, fileContent.getFileContent(), validationContext);
     }
-
-
 
     private ValidationContext getValidationContext(Model model, FileContent fileContent, @Nullable Project project) {
         if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)) {
             return EMPTY_CONTEXT;
         }
 
-        if(project != null) {
-            return Optional.ofNullable(project).map(this::createValidationContext).orElseGet(() -> createValidationContext(model));
+        if (project != null) {
+            return Optional
+                .ofNullable(project)
+                .map(this::createValidationContext)
+                .orElseGet(() -> createValidationContext(model));
         }
 
         return createValidationContext(model);
@@ -567,32 +564,25 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     FileContent fileContent,
-                                     ValidationContext validationContext) {
-        validateModelContent(model,
-                             fileContent.getFileContent(),
-                             validationContext);
+    public void validateModelContent(Model model, FileContent fileContent, ValidationContext validationContext) {
+        validateModelContent(model, fileContent.getFileContent(), validationContext);
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     FileContent fileContent,
-                                     Project project) {
+    public void validateModelContent(Model model, FileContent fileContent, Project project) {
         ValidationContext validationContext = getValidationContext(model, fileContent, project);
 
-        validateModelContent(model,
-            fileContent.getFileContent(),
-            validationContext);
+        validateModelContent(model, fileContent.getFileContent(), validationContext);
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     FileContent fileContent,
-                                     Project project,
-                                     boolean validateUsage) {
-        if(validateUsage) {
-            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, project));
+    public void validateModelContent(Model model, FileContent fileContent, Project project, boolean validateUsage) {
+        if (validateUsage) {
+            validateModelContentAndUsage(
+                model,
+                fileContent.getFileContent(),
+                getValidationContext(model, fileContent, project)
+            );
         } else {
             validateModelContent(model, fileContent, project);
         }
@@ -600,111 +590,102 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public void validateModelContent(Model model, FileContent fileContent, boolean validateUsage) {
-        if(validateUsage) {
-            validateModelContentAndUsage(model, fileContent.getFileContent(), getValidationContext(model, fileContent, null));
+        if (validateUsage) {
+            validateModelContentAndUsage(
+                model,
+                fileContent.getFileContent(),
+                getValidationContext(model, fileContent, null)
+            );
         } else {
             validateModelContent(model, fileContent);
         }
     }
 
-    private void validateModelContentAndUsage(Model model,
-                                              byte[] modelContent,
-                                              ValidationContext validationContext) {
+    private void validateModelContentAndUsage(Model model, byte[] modelContent, ValidationContext validationContext) {
         modelContentValidationStrategy.validate(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
-            modelValidator -> modelValidator.validateModelContent(model, modelContent,
-                validationContext, true));
+            modelValidator -> modelValidator.validateModelContent(model, modelContent, validationContext, true)
+        );
     }
 
-    private void validateModelContent(Model model,
-                                      byte[] modelContent,
-                                      ValidationContext validationContext) {
+    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
         modelContentValidationStrategy.validate(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
-            modelValidator -> modelValidator.validateModelContent(model, modelContent, validationContext, false));
+            modelValidator -> modelValidator.validateModelContent(model, modelContent, validationContext, false)
+        );
     }
 
-    private List<ModelValidationError> getModelContentValidationErrors(Model model,
+    private List<ModelValidationError> getModelContentValidationErrors(
+        Model model,
         byte[] modelContent,
-        ValidationContext validationContext) {
+        ValidationContext validationContext
+    ) {
         return modelContentValidationStrategy.getValidationErrors(
             emptyIfNull(modelContentService.findModelValidators(model.getType())),
-            modelValidator -> modelValidator
-                .validateModelContent(model, modelContent, validationContext, false));
+            modelValidator -> modelValidator.validateModelContent(model, modelContent, validationContext, false)
+        );
     }
 
     @Override
-    public void validateModelExtensions(Model model,
-                                        ValidationContext validationContext) {
-        validateModelExtensions(model.getType(),
-                                modelRepository.getModelContent(model),
-                                validationContext);
+    public void validateModelExtensions(Model model, ValidationContext validationContext) {
+        validateModelExtensions(model.getType(), modelRepository.getModelContent(model), validationContext);
     }
 
     @Override
-    public void validateModelExtensions(Model model,
-                                        Project project) {
-        validateModelExtensions(model.getType(),
-                                modelRepository.getModelContent(model),
-                                createValidationContext(project));
+    public void validateModelExtensions(Model model, Project project) {
+        validateModelExtensions(
+            model.getType(),
+            modelRepository.getModelContent(model),
+            createValidationContext(project)
+        );
     }
 
     @Override
-    public void validateModelExtensions(Model model,
-                                        FileContent fileContent) {
+    public void validateModelExtensions(Model model, FileContent fileContent) {
         ValidationContext validationContext = !modelTypeService.isJson(findModelType(model))
-                ? EMPTY_CONTEXT
-                : createValidationContext(model);
-        validateModelExtensions(model.getType(),
-                                fileContent.getFileContent(),
-                                validationContext);
+            ? EMPTY_CONTEXT
+            : createValidationContext(model);
+        validateModelExtensions(model.getType(), fileContent.getFileContent(), validationContext);
     }
 
     @Override
-    public void validateModelExtensions(Model model,
-                                        FileContent fileContent,
-                                        ValidationContext validationContext) {
-        validateModelExtensions(model.getType(),
-                                fileContent.getFileContent(),
-                                validationContext);
+    public void validateModelExtensions(Model model, FileContent fileContent, ValidationContext validationContext) {
+        validateModelExtensions(model.getType(), fileContent.getFileContent(), validationContext);
     }
 
     @Override
-    public void validateModelExtensions(Model model,
-                                        FileContent fileContent,
-                                        Project project) {
-        validateModelExtensions(model.getType(),
-                                fileContent.getFileContent(),
-                                createValidationContext(project));
+    public void validateModelExtensions(Model model, FileContent fileContent, Project project) {
+        validateModelExtensions(model.getType(), fileContent.getFileContent(), createValidationContext(project));
     }
 
     @Override
-    public Page<Model> getGlobalModels(
-        ModelType modelType,
-        boolean includeOrphans,
-        Pageable pageable) {
+    public Page<Model> getGlobalModels(ModelType modelType, boolean includeOrphans, Pageable pageable) {
         return modelRepository.getGlobalModels(modelType, includeOrphans, pageable);
     }
 
-    private void validateModelExtensions(String modelType,
-                                         byte[] modelContent,
-                                         ValidationContext validationContext) {
+    private void validateModelExtensions(String modelType, byte[] modelContent, ValidationContext validationContext) {
         modelExtensionsValidationStrategy.validate(
             emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
-            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext)
+        );
     }
 
-    private List<ModelValidationError> getModelExtensionsValidationErrors(String modelType,
+    private List<ModelValidationError> getModelExtensionsValidationErrors(
+        String modelType,
         byte[] modelContent,
-        ValidationContext validationContext) {
+        ValidationContext validationContext
+    ) {
         return modelExtensionsValidationStrategy.getValidationErrors(
             emptyIfNull(modelExtensionsService.findExtensionsValidators(modelType)),
-            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+            modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext)
+        );
     }
 
     private ModelType findModelType(Model model) {
-        return Optional.ofNullable(model.getType()).flatMap(modelTypeService::findModelTypeByName)
-                .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
+        return Optional
+            .ofNullable(model.getType())
+            .flatMap(modelTypeService::findModelTypeByName)
+            .orElseThrow(() -> new UnknownModelTypeException("Unknown model type: " + model.getType()));
     }
 
     @Override
@@ -713,21 +694,24 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelValidationError> getModelValidationErrors(Model model,
-        ValidationContext validationContext) {
-
-        return getModelContentValidationErrors(model, modelRepository.getModelContent(model),
-            validationContext);
+    public List<ModelValidationError> getModelValidationErrors(Model model, ValidationContext validationContext) {
+        return getModelContentValidationErrors(model, modelRepository.getModelContent(model), validationContext);
     }
 
     @Override
-    public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
-            ValidationContext validationContext){
-
-        return getModelExtensionsFileContent(model).filter(Objects::nonNull)
+    public List<ModelValidationError> getModelExtensionValidationErrors(
+        Model model,
+        ValidationContext validationContext
+    ) {
+        return getModelExtensionsFileContent(model)
+            .filter(Objects::nonNull)
             .map(extensionsFileContent ->
-                getModelExtensionsValidationErrors(model.getType(),
+                getModelExtensionsValidationErrors(
+                    model.getType(),
                     extensionsFileContent.getFileContent(),
-                    validationContext)).orElse(Collections.emptyList());
+                    validationContext
+                )
+            )
+            .orElse(Collections.emptyList());
     }
 }

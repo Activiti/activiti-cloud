@@ -43,8 +43,10 @@ public class ProcessSuspendedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessSuspendedAuditEventEntity processSuspendedAuditEventEntity = (ProcessSuspendedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessSuspendedEventImpl(processSuspendedAuditEventEntity.getEventId(),
-                                                  processSuspendedAuditEventEntity.getTimestamp(),
-                                                  processSuspendedAuditEventEntity.getProcessInstance());
+        return new CloudProcessSuspendedEventImpl(
+            processSuspendedAuditEventEntity.getEventId(),
+            processSuspendedAuditEventEntity.getTimestamp(),
+            processSuspendedAuditEventEntity.getProcessInstance()
+        );
     }
 }

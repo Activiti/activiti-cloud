@@ -31,6 +31,6 @@ public class OAuth2UserServiceCacheable {
 
     @Cacheable(value = "userInfoApiCall", key = "#cacheKey", sync = true)
     public OAuth2User loadUser(OAuth2UserRequest userRequest, String cacheKey) throws OAuth2AuthenticationException {
-        return  oAuth2UserService.loadUser(userRequest);
+        return oAuth2UserService.loadUser(userRequest);
     }
 }

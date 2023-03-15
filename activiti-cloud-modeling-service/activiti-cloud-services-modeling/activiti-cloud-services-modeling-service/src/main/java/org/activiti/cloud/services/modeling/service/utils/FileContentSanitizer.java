@@ -29,7 +29,6 @@ import org.activiti.cloud.services.common.util.ImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class FileContentSanitizer {
 
     private final Logger log = LoggerFactory.getLogger(FileContentSanitizer.class);

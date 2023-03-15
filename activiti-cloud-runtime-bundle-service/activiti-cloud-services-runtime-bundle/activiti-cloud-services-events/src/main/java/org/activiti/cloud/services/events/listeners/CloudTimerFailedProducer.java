@@ -24,8 +24,10 @@ public class CloudTimerFailedProducer implements BPMNElementEventListener<BPMNTi
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTimerFailedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                    ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTimerFailedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

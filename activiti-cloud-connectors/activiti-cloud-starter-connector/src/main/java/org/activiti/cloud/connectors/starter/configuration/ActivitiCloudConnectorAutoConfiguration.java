@@ -51,55 +51,69 @@ public class ActivitiCloudConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorHandler integrationErrorHandler(IntegrationErrorSender integrationErrorSender,
-                                                           ConnectorProperties connectorProperties,
-                                                           ObjectMapper objectMapper) {
-        return new IntegrationErrorHandlerImpl(integrationErrorSender,
-                                               connectorProperties,
-                                               objectMapper);
+    public IntegrationErrorHandler integrationErrorHandler(
+        IntegrationErrorSender integrationErrorSender,
+        ConnectorProperties connectorProperties,
+        ObjectMapper objectMapper
+    ) {
+        return new IntegrationErrorHandlerImpl(integrationErrorSender, connectorProperties, objectMapper);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationRequestErrorChannelListener integrationRequestErrorChannelListener(IntegrationErrorHandler integrationErrorHandler) {
+    public IntegrationRequestErrorChannelListener integrationRequestErrorChannelListener(
+        IntegrationErrorHandler integrationErrorHandler
+    ) {
         return new IntegrationRequestErrorChannelListener(integrationErrorHandler);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultDestinationBuilder integrationResultDestinationBuilder(ConnectorProperties connectorProperties) {
+    public IntegrationResultDestinationBuilder integrationResultDestinationBuilder(
+        ConnectorProperties connectorProperties
+    ) {
         return new IntegrationResultDestinationBuilderImpl(connectorProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultChannelResolver integrationResultChannelResolver(IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
+    public IntegrationResultChannelResolver integrationResultChannelResolver(
+        IntegrationResultDestinationBuilder integrationResultDestinationBuilder
+    ) {
         return new IntegrationResultChannelResolverImpl(integrationResultDestinationBuilder);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationResultSender integrationResultSender(StreamBridge streamBridge, IntegrationResultChannelResolver integrationChannelResolver) {
+    public IntegrationResultSender integrationResultSender(
+        StreamBridge streamBridge,
+        IntegrationResultChannelResolver integrationChannelResolver
+    ) {
         return new IntegrationResultSenderImpl(streamBridge, integrationChannelResolver);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder(ConnectorProperties connectorProperties) {
+    public IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder(
+        ConnectorProperties connectorProperties
+    ) {
         return new IntegrationErrorDestinationBuilderImpl(connectorProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorChannelResolver integrationErrorChannelResolver(IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder) {
+    public IntegrationErrorChannelResolver integrationErrorChannelResolver(
+        IntegrationErrorDestinationBuilder integrationErrorDestinationBuilder
+    ) {
         return new IntegrationErrorChannelResolverImpl(integrationErrorDestinationBuilder);
     }
 
-
     @Bean
     @ConditionalOnMissingBean
-    public IntegrationErrorSender integrationErrorSender(StreamBridge streamBridge, IntegrationErrorChannelResolver integrationChannelResolver) {
+    public IntegrationErrorSender integrationErrorSender(
+        StreamBridge streamBridge,
+        IntegrationErrorChannelResolver integrationChannelResolver
+    ) {
         return new IntegrationErrorSenderImpl(streamBridge, integrationChannelResolver);
     }
-
 }

@@ -20,23 +20,19 @@ import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEvent;
 
-public class CloudTaskCandidateGroupAddedEventImpl extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
-        implements CloudTaskCandidateGroupAddedEvent {
+public class CloudTaskCandidateGroupAddedEventImpl
+    extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
+    implements CloudTaskCandidateGroupAddedEvent {
 
-    public CloudTaskCandidateGroupAddedEventImpl() {
-    }
+    public CloudTaskCandidateGroupAddedEventImpl() {}
 
     public CloudTaskCandidateGroupAddedEventImpl(TaskCandidateGroup taskCandidateGroup) {
         super(taskCandidateGroup);
         setEntityId(taskCandidateGroup.getGroupId());
     }
 
-    public CloudTaskCandidateGroupAddedEventImpl(String id,
-                                                 Long timestamp,
-                                                 TaskCandidateGroup taskCandidateGroup) {
-        super(id,
-              timestamp,
-              taskCandidateGroup);
+    public CloudTaskCandidateGroupAddedEventImpl(String id, Long timestamp, TaskCandidateGroup taskCandidateGroup) {
+        super(id, timestamp, taskCandidateGroup);
         setEntityId(taskCandidateGroup.getGroupId());
     }
 

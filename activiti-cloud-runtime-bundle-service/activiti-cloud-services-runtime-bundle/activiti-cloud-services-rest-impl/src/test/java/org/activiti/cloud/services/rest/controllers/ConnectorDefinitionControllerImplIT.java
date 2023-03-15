@@ -51,7 +51,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebMvcTest(ConnectorDefinitionControllerImpl.class)
-@Import({ConnectorsAutoConfiguration.class,
+@Import(
+    {
+        ConnectorsAutoConfiguration.class,
         ConnectorAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
@@ -59,7 +61,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         ProcessEngineChannelsConfiguration.class,
         RuntimeBundleProperties.class,
         ProcessExtensionsAutoConfiguration.class,
-        StreamConfig.class})
+        StreamConfig.class,
+    }
+)
 public class ConnectorDefinitionControllerImplIT {
 
     private MockMvc mockMvc;
@@ -88,37 +92,40 @@ public class ConnectorDefinitionControllerImplIT {
         connectorDefinitions.add(connectorDefinition1);
         connectorDefinitions.add(connectorDefinition2);
 
-        this.mockMvc = MockMvcBuilders
-                .standaloneSetup(new ConnectorDefinitionControllerImpl(connectorDefinitions, new ConnectorDefinitionRepresentationModelAssembler(), representationModelAssembler))
+        this.mockMvc =
+            MockMvcBuilders
+                .standaloneSetup(
+                    new ConnectorDefinitionControllerImpl(
+                        connectorDefinitions,
+                        new ConnectorDefinitionRepresentationModelAssembler(),
+                        representationModelAssembler
+                    )
+                )
                 .setControllerAdvice(new RuntimeBundleExceptionHandler())
                 .build();
     }
 
     @Test
     public void getAllConnectorDefinitions() throws Exception {
-
         this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("content[0].links[0].rel", is("self")))
-                .andExpect(jsonPath("content[0].id", is("id1")))
-                .andExpect(jsonPath("content[1].id", is("id2")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("content[0].links[0].rel", is("self")))
+            .andExpect(jsonPath("content[0].id", is("id1")))
+            .andExpect(jsonPath("content[1].id", is("id2")));
     }
 
     @Test
     public void getOneSpecificConnectorDefinition() throws Exception {
-
         this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("links[0].rel", is("self")))
-                .andExpect(jsonPath("links[0].href", containsString("v1/connector-definitions/id1")))
-                .andExpect(jsonPath("id", is("id1")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("links[0].rel", is("self")))
+            .andExpect(jsonPath("links[0].href", containsString("v1/connector-definitions/id1")))
+            .andExpect(jsonPath("id", is("id1")));
     }
 
     @Test
     public void getConnectorDefinitionNotFound() throws Exception {
-
         this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
-
 }

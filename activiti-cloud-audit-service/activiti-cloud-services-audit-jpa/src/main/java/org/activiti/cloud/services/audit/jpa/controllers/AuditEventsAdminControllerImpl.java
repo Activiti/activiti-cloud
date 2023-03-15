@@ -16,6 +16,10 @@
 package org.activiti.cloud.services.audit.jpa.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
@@ -39,13 +43,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 @RestController
-@RequestMapping(value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL, produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(
+    value = "/admin/v1/" + EventsLinkRelationProvider.COLLECTION_RESOURCE_REL,
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class AuditEventsAdminControllerImpl implements AuditEventsAdminController {
 
     private final EventsRepository eventsRepository;
@@ -59,11 +61,13 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
     private final AuditEventsExporter auditEventsExporter;
 
     @Autowired
-    public AuditEventsAdminControllerImpl(EventsRepository eventsRepository,
-                                          EventRepresentationModelAssembler eventRepresentationModelAssembler,
-                                          APIEventToEntityConverters eventConverters,
-                                          AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler,
-                                          ObjectMapper objectMapper) {
+    public AuditEventsAdminControllerImpl(
+        EventsRepository eventsRepository,
+        EventRepresentationModelAssembler eventRepresentationModelAssembler,
+        APIEventToEntityConverters eventConverters,
+        AlfrescoPagedModelAssembler<CloudRuntimeEvent<?, CloudRuntimeEventType>> pagedCollectionModelAssembler,
+        ObjectMapper objectMapper
+    ) {
         this.eventsRepository = eventsRepository;
         this.eventRepresentationModelAssembler = eventRepresentationModelAssembler;
         this.eventConverters = eventConverters;
@@ -77,15 +81,16 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage.getContent());
 
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  new PageImpl<>(events,
-                                                                 pageable,
-                                                                 allAuditInPage.getTotalElements()),
-                                                  eventRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            new PageImpl<>(events, pageable, allAuditInPage.getTotalElements()),
+            eventRepresentationModelAssembler
+        );
     }
 
     @GetMapping(path = "/export/{fileName}")
-    public void export(@PathVariable(value = "fileName") String fileName, HttpServletResponse response) throws Exception {
+    public void export(@PathVariable(value = "fileName") String fileName, HttpServletResponse response)
+        throws Exception {
         Collection<AuditEventEntity> allAuditInPage = eventsRepository.findAllByOrderByTimestampDesc();
 
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = toCloudRuntimeEvents(allAuditInPage);
@@ -93,7 +98,9 @@ public class AuditEventsAdminControllerImpl implements AuditEventsAdminControlle
         auditEventsExporter.exportCsv(events, fileName, response);
     }
 
-    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(Iterable<AuditEventEntity> allAuditInPage) {
+    private List<CloudRuntimeEvent<?, CloudRuntimeEventType>> toCloudRuntimeEvents(
+        Iterable<AuditEventEntity> allAuditInPage
+    ) {
         List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events = new ArrayList<>();
 
         for (AuditEventEntity aee : allAuditInPage) {

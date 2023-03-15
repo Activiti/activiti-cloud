@@ -35,8 +35,6 @@ public class JWSAuthenticationManagerTest {
 
     @Test
     public void shouldReturnNullWhenIsNotJWSAuthentication() {
-        assertThat(authenticationManager.authenticate(bearerTokenAuthentication))
-        .isNull();
+        assertThat(authenticationManager.authenticate(bearerTokenAuthentication)).isNull();
     }
-
 }

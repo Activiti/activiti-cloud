@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.impl.TaskCandidateGroupImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateGroupJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 
 @Entity(name = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
@@ -37,8 +36,7 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private TaskCandidateGroupImpl candidateGroup;
 
-    public TaskCandidateGroupRemovedEventEntity() {
-    }
+    public TaskCandidateGroupRemovedEventEntity() {}
 
     public TaskCandidateGroupRemovedEventEntity(CloudTaskCandidateGroupRemovedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,17 +48,18 @@ public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
     }
 
     public void setCandidateGroup(TaskCandidateGroup candidateGroup) {
-        this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(),candidateGroup.getTaskId());
+        this.candidateGroup = new TaskCandidateGroupImpl(candidateGroup.getGroupId(), candidateGroup.getTaskId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskCandidateGroupRemovedEventEntity [candidateGroup=")
-               .append(candidateGroup)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("TaskCandidateGroupRemovedEventEntity [candidateGroup=")
+            .append(candidateGroup)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

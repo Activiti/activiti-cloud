@@ -24,8 +24,10 @@ public class CloudProcessCompletedProducer implements ProcessEventListener<Proce
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessCompletedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                         ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessCompletedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +36,4 @@ public class CloudProcessCompletedProducer implements ProcessEventListener<Proce
     public void onEvent(ProcessCompletedEvent event) {
         eventsAggregator.add(eventConverter.from(event));
     }
-
 }

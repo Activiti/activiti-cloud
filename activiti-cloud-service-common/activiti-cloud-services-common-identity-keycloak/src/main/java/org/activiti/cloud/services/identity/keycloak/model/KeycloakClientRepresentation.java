@@ -154,7 +154,6 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
         private Boolean implicitFlowEnabled;
         private Boolean serviceAccountsEnabled;
 
-
         public static Builder newKeycloakClientRepresentationBuilder() {
             return new Builder();
         }

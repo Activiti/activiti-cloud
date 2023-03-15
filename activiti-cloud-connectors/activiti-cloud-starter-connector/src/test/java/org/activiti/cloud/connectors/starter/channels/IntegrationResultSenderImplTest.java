@@ -50,7 +50,7 @@ public class IntegrationResultSenderImplTest {
     private IntegrationResultSender sender;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         sender = new IntegrationResultSenderImpl(streamBridge, resolver);
     }
 
@@ -64,8 +64,10 @@ public class IntegrationResultSenderImplTest {
         integrationRequest.setAppVersion("1.0");
         integrationRequest.setServiceType("RUNTIME_BUNDLE");
         integrationRequest.setServiceVersion("1.0");
-        IntegrationResult integrationResultEvent = new IntegrationResultImpl(integrationRequest,
-            integrationRequest.getIntegrationContext());
+        IntegrationResult integrationResultEvent = new IntegrationResultImpl(
+            integrationRequest,
+            integrationRequest.getIntegrationContext()
+        );
 
         Message<IntegrationResult> message = MessageBuilder.withPayload(integrationResultEvent).build();
         given(resolver.resolveDestination(integrationRequest)).willReturn("test-destination");
@@ -77,5 +79,4 @@ public class IntegrationResultSenderImplTest {
         Message<?> outputMessage = target.receive(0, "test-destination");
         assertThat(outputMessage).isNotNull();
     }
-
 }

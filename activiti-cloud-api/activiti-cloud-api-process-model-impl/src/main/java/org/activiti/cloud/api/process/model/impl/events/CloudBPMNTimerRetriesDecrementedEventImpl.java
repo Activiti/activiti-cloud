@@ -19,29 +19,28 @@ import org.activiti.api.process.model.BPMNTimer;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
 
-public class CloudBPMNTimerRetriesDecrementedEventImpl extends CloudBPMNTimerEventImpl implements CloudBPMNTimerRetriesDecrementedEvent {
+public class CloudBPMNTimerRetriesDecrementedEventImpl
+    extends CloudBPMNTimerEventImpl
+    implements CloudBPMNTimerRetriesDecrementedEvent {
 
-    public CloudBPMNTimerRetriesDecrementedEventImpl() {
+    public CloudBPMNTimerRetriesDecrementedEventImpl() {}
+
+    public CloudBPMNTimerRetriesDecrementedEventImpl(
+        BPMNTimer entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNTimerRetriesDecrementedEventImpl(BPMNTimer entity,
-                                                     String processDefinitionId,
-                                                     String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNTimerRetriesDecrementedEventImpl(String id,
-                                                     Long timestamp,
-                                                     BPMNTimer entity,
-                                                     String processDefinitionId,
-                                                     String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNTimerRetriesDecrementedEventImpl(
+        String id,
+        Long timestamp,
+        BPMNTimer entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override

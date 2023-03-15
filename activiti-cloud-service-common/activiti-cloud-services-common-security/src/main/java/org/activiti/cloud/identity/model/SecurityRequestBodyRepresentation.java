@@ -59,14 +59,13 @@ public class SecurityRequestBodyRepresentation {
             return false;
         }
         SecurityRequestBodyRepresentation that = (SecurityRequestBodyRepresentation) o;
-        return Objects.equals(role, that.role) &&
-            Objects.equals(groups, that.groups) &&
-            Objects.equals(users, that.users);
+        return (
+            Objects.equals(role, that.role) && Objects.equals(groups, that.groups) && Objects.equals(users, that.users)
+        );
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(role, groups, users);
     }
-
 }

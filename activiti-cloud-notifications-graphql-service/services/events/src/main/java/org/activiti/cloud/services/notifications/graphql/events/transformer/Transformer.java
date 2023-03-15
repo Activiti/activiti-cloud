@@ -17,9 +17,8 @@ package org.activiti.cloud.services.notifications.graphql.events.transformer;
 
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 
 public interface Transformer {
-    List<EngineEvent> transform(List<Map<String,Object>> events);
+    List<EngineEvent> transform(List<Map<String, Object>> events);
 }

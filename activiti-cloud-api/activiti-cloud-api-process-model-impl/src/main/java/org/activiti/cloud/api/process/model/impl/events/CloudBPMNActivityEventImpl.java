@@ -19,31 +19,28 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public abstract class CloudBPMNActivityEventImpl extends CloudRuntimeEventImpl<BPMNActivity, BPMNActivityEvent.ActivityEvents> {
+public abstract class CloudBPMNActivityEventImpl
+    extends CloudRuntimeEventImpl<BPMNActivity, BPMNActivityEvent.ActivityEvents> {
 
-    public CloudBPMNActivityEventImpl() {
-    }
+    public CloudBPMNActivityEventImpl() {}
 
-    public CloudBPMNActivityEventImpl(BPMNActivity entity,
-                                      String processDefinitionId,
-                                      String processInstanceId) {
+    public CloudBPMNActivityEventImpl(BPMNActivity entity, String processDefinitionId, String processInstanceId) {
         super(entity);
         this.setProcessDefinitionId(processDefinitionId);
         this.setProcessInstanceId(processInstanceId);
         setEntityId(entity.getElementId());
     }
 
-    public CloudBPMNActivityEventImpl(String id,
-                                      Long timestamp,
-                                      BPMNActivity entity,
-                                      String processDefinitionId,
-                                      String processInstanceId) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudBPMNActivityEventImpl(
+        String id,
+        Long timestamp,
+        BPMNActivity entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity);
         this.setProcessDefinitionId(processDefinitionId);
         this.setProcessInstanceId(processInstanceId);
         setEntityId(entity.getElementId());
     }
-
 }

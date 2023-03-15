@@ -21,27 +21,20 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
 
 public class CloudBPMNTimerExecutedEventImpl extends CloudBPMNTimerEventImpl implements CloudBPMNTimerExecutedEvent {
 
-    public CloudBPMNTimerExecutedEventImpl() {
+    public CloudBPMNTimerExecutedEventImpl() {}
+
+    public CloudBPMNTimerExecutedEventImpl(BPMNTimer entity, String processDefinitionId, String processInstanceId) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNTimerExecutedEventImpl(BPMNTimer entity,
-                                           String processDefinitionId,
-                                           String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNTimerExecutedEventImpl(String id,
-                                           Long timestamp,
-                                           BPMNTimer entity,
-                                           String processDefinitionId,
-                                           String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNTimerExecutedEventImpl(
+        String id,
+        Long timestamp,
+        BPMNTimer entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override

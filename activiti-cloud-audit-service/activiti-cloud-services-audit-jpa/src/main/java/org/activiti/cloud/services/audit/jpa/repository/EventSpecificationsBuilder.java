@@ -17,7 +17,6 @@ package org.activiti.cloud.services.audit.jpa.repository;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -29,26 +28,24 @@ public class EventSpecificationsBuilder {
         params = new ArrayList<>();
     }
 
-
-    public final EventSpecificationsBuilder with(final String key,
-                                                 final String operation,
-                                                 final Object value,
-                                                 final String prefix,
-                                                 final String suffix) {
-        return with(null,
-                    key,
-                    operation,
-                    value,
-                    prefix,
-                    suffix);
+    public final EventSpecificationsBuilder with(
+        final String key,
+        final String operation,
+        final Object value,
+        final String prefix,
+        final String suffix
+    ) {
+        return with(null, key, operation, value, prefix, suffix);
     }
 
-    public final EventSpecificationsBuilder with(final String orPredicate,
-                                                 final String key,
-                                                 final String operation,
-                                                 final Object value,
-                                                 final String prefix,
-                                                 final String suffix) {
+    public final EventSpecificationsBuilder with(
+        final String orPredicate,
+        final String key,
+        final String operation,
+        final Object value,
+        final String prefix,
+        final String suffix
+    ) {
         SearchOperation op = SearchOperation.getSimpleOperation(operation.charAt(0));
         if (op != null) {
             if (op == SearchOperation.EQUALITY) { // the operation may be complex operation
@@ -63,16 +60,12 @@ public class EventSpecificationsBuilder {
                     op = SearchOperation.STARTS_WITH;
                 }
             }
-            params.add(new SpecSearchCriteria(orPredicate,
-                                              key,
-                                              op,
-                                              value));
+            params.add(new SpecSearchCriteria(orPredicate, key, op, value));
         }
         return this;
     }
 
     public Specification<AuditEventEntity> build() {
-
         if (params.size() == 0) {
             return null;
         }
@@ -80,12 +73,10 @@ public class EventSpecificationsBuilder {
         Specification<AuditEventEntity> result = new EventSpecification(params.get(0));
 
         for (int i = 1; i < params.size(); i++) {
-            result = params.get(i)
-                    .isOrPredicate()
-                    ? Specification.where(result)
-                    .or(new EventSpecification(params.get(i)))
-                    : Specification.where(result)
-                    .and(new EventSpecification(params.get(i)));
+            result =
+                params.get(i).isOrPredicate()
+                    ? Specification.where(result).or(new EventSpecification(params.get(i)))
+                    : Specification.where(result).and(new EventSpecification(params.get(i)));
         }
 
         return result;

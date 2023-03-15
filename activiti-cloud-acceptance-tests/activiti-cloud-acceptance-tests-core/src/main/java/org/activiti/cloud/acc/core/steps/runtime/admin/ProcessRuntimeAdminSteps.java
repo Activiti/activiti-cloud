@@ -17,6 +17,7 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -27,8 +28,6 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
-
-import java.io.IOException;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeAdminSteps {
@@ -46,7 +45,7 @@ public class ProcessRuntimeAdminSteps {
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getProcessInstances(){
+    public PagedModel<CloudProcessInstance> getProcessInstances() {
         return processRuntimeAdminService.getProcessInstances();
     }
 
@@ -64,5 +63,4 @@ public class ProcessRuntimeAdminSteps {
     public void message(ReceiveMessagePayload payload) throws IOException {
         processRuntimeAdminService.message(payload);
     }
-
 }

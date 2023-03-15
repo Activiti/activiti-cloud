@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.services.query.rest.payload;
 
-public class ProcessInstanceQueryBody extends VariableKeysQueryBody {
-
-}
+public class ProcessInstanceQueryBody extends VariableKeysQueryBody {}

@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.api.task.model.impl;
 
+import java.util.List;
+import java.util.Set;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
-
-import java.util.List;
-import java.util.Set;
 
 public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask {
 
@@ -28,8 +27,7 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public List<TaskPermissions> permissions;
     public Set<? extends CloudVariableInstance> processVariables;
 
-    public QueryCloudTaskImpl() {
-    }
+    public QueryCloudTaskImpl() {}
 
     public QueryCloudTaskImpl(CloudTask task) {
         super(task);
@@ -54,5 +52,4 @@ public class QueryCloudTaskImpl extends CloudTaskImpl implements QueryCloudTask 
     public Set<? extends CloudVariableInstance> getProcessVariables() {
         return processVariables;
     }
-
 }

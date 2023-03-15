@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.jpa.version;
 
 import java.util.List;
 import java.util.function.Supplier;
-
 import org.springframework.data.repository.core.support.DefaultRepositoryMetadata;
 import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
@@ -35,23 +34,32 @@ public class VersionedRepositoryMetadata extends DefaultRepositoryMetadata {
      */
     public VersionedRepositoryMetadata(Class<?> repositoryInterface) {
         super(repositoryInterface);
-
         Class<?> type = resolveTypeParameter(
-                repositoryInterface,
-                2,
-                () -> String.format("Could not resolve version entity type of %s",
-                                    repositoryInterface));
+            repositoryInterface,
+            2,
+            () -> String.format("Could not resolve version entity type of %s", repositoryInterface)
+        );
 
-        checkTypeParameter(getDomainType(),
-                           VersionedEntity.class,
-                           () -> String.format("The specified version entity type %s is not subtype of VersionedEntity for repository %s",
-                                               getDomainType(),
-                                               repositoryInterface));
-        checkTypeParameter(type,
-                           VersionEntity.class,
-                           () -> String.format("The specified version entity type %s is not subtype of VersionEntity for repository %s",
-                                               type,
-                                               repositoryInterface));
+        checkTypeParameter(
+            getDomainType(),
+            VersionedEntity.class,
+            () ->
+                String.format(
+                    "The specified version entity type %s is not subtype of VersionedEntity for repository %s",
+                    getDomainType(),
+                    repositoryInterface
+                )
+        );
+        checkTypeParameter(
+            type,
+            VersionEntity.class,
+            () ->
+                String.format(
+                    "The specified version entity type %s is not subtype of VersionEntity for repository %s",
+                    type,
+                    repositoryInterface
+                )
+        );
 
         this.versionEntityType = (Class<? extends VersionEntity>) type;
     }
@@ -72,14 +80,15 @@ public class VersionedRepositoryMetadata extends DefaultRepositoryMetadata {
      * @param exceptionMessage the exception message to throw if there is no type a given index
      * @return the type
      */
-    private static Class<?> resolveTypeParameter(Class<?> repositoryInterface,
-                                                 int index,
-                                                 Supplier<String> exceptionMessage) {
-
+    private static Class<?> resolveTypeParameter(
+        Class<?> repositoryInterface,
+        int index,
+        Supplier<String> exceptionMessage
+    ) {
         List<TypeInformation<?>> arguments = ClassTypeInformation
-                .from(repositoryInterface)
-                .getRequiredSuperTypeInformation(VersionedJpaRepository.class)
-                .getTypeArguments();
+            .from(repositoryInterface)
+            .getRequiredSuperTypeInformation(VersionedJpaRepository.class)
+            .getTypeArguments();
 
         if (arguments.size() <= index || arguments.get(index) == null) {
             throw new IllegalArgumentException(exceptionMessage.get());
@@ -95,13 +104,9 @@ public class VersionedRepositoryMetadata extends DefaultRepositoryMetadata {
      * @param expectedType the expected type
      * @param exceptionMessage the exception message to throw if the type is not the expected one
      */
-    private void checkTypeParameter(Class<?> typeToCheck,
-                                    Class<?> expectedType,
-                                    Supplier<String> exceptionMessage) {
-
+    private void checkTypeParameter(Class<?> typeToCheck, Class<?> expectedType, Supplier<String> exceptionMessage) {
         if (!(expectedType.isAssignableFrom(typeToCheck))) {
             throw new IllegalArgumentException(exceptionMessage.get());
         }
     }
-
 }

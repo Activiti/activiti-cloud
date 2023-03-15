@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.starter.modeling.swagger;
 
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +31,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.core.StringRegularExpression.matchesRegex;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class ModelingSwaggerIT {
 
     @Autowired
@@ -42,7 +42,8 @@ public class ModelingSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs/Modeling").accept(MediaType.APPLICATION_JSON))
+        mockMvc
+            .perform(get("/v3/api-docs/Modeling").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.servers").isNotEmpty())
@@ -53,11 +54,14 @@ public class ModelingSwaggerIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntriesResponseContent"))))
             .andExpect(jsonPath("$.components.schemas").value(hasKey(startsWith("EntryResponseContent"))))
             .andExpect(jsonPath("$.info.title").value("Modeling ReST API"))
-            .andExpect(jsonPath("$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
-                containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")))
+            .andExpect(
+                jsonPath(
+                    "$['paths']['/v1/projects/{projectId}/models']['get']['parameters'][*]['name']",
+                    containsInAnyOrder("projectId", "type", "skipCount", "maxItems", "sort")
+                )
+            )
             .andExpect(jsonPath("$.x-service-url-prefix").value(""))
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))));
     }
-
 }

@@ -19,12 +19,12 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.integration.handler.advice.AbstractHandleMessageAdvice;
 import org.springframework.messaging.Message;
 
-public abstract class AbstractMessageConnectorHandlerAdvice extends AbstractHandleMessageAdvice
-                                                            implements MessageConnectorHandlerAdvice {
-    @Override
-    protected Object doInvoke(MethodInvocation invocation,
-                              Message<?> message) throws Throwable {
+public abstract class AbstractMessageConnectorHandlerAdvice
+    extends AbstractHandleMessageAdvice
+    implements MessageConnectorHandlerAdvice {
 
+    @Override
+    protected Object doInvoke(MethodInvocation invocation, Message<?> message) throws Throwable {
         if (canHandle(message)) {
             return doHandle(message);
         }
@@ -40,5 +40,4 @@ public abstract class AbstractMessageConnectorHandlerAdvice extends AbstractHand
     public String getComponentType() {
         return this.getClass().getSimpleName();
     }
-
 }

@@ -24,15 +24,17 @@ import org.springframework.lang.NonNull;
 
 public class SecurityManagerImpl extends AbstractSecurityManager {
 
-    public SecurityManagerImpl(@NonNull SecurityContextPrincipalProvider securityContextPrincipalProvider,
-                                       @NonNull PrincipalIdentityProvider principalIdentityProvider,
-                                       @NonNull PrincipalGroupsProvider principalGroupsProvider,
-                                       @NonNull PrincipalRolesProvider principalRolesProvider) {
-        super(securityContextPrincipalProvider,
-              principalIdentityProvider,
-              principalGroupsProvider,
-              principalRolesProvider);
+    public SecurityManagerImpl(
+        @NonNull SecurityContextPrincipalProvider securityContextPrincipalProvider,
+        @NonNull PrincipalIdentityProvider principalIdentityProvider,
+        @NonNull PrincipalGroupsProvider principalGroupsProvider,
+        @NonNull PrincipalRolesProvider principalRolesProvider
+    ) {
+        super(
+            securityContextPrincipalProvider,
+            principalIdentityProvider,
+            principalGroupsProvider,
+            principalRolesProvider
+        );
     }
-
-
 }

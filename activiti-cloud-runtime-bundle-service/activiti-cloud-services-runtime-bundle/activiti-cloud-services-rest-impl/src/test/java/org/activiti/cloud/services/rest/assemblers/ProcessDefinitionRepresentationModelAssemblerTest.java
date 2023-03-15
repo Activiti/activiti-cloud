@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.hateoas.IanaLinkRelations.SELF;
+
 import java.util.Optional;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -24,12 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.hateoas.IanaLinkRelations.SELF;
+import org.springframework.hateoas.Link;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessDefinitionRepresentationModelAssemblerTest {
@@ -46,12 +46,13 @@ public class ProcessDefinitionRepresentationModelAssemblerTest {
         processDefinition.setId("my-identifier");
         given(converter.from(processDefinition)).willReturn(new CloudProcessDefinitionImpl(processDefinition));
 
-        EntityModel<CloudProcessDefinition> processDefinitionResource = representationModelAssembler.toModel(processDefinition);
+        EntityModel<CloudProcessDefinition> processDefinitionResource = representationModelAssembler.toModel(
+            processDefinition
+        );
 
         Optional<Link> selfResourceLink = processDefinitionResource.getLink(SELF);
 
         assertThat(selfResourceLink).isPresent();
         assertThat(selfResourceLink.get().getHref()).contains("my-identifier");
     }
-
 }

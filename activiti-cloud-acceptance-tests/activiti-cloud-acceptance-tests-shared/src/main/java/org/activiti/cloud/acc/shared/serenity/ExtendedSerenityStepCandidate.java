@@ -16,7 +16,6 @@
 package org.activiti.cloud.acc.shared.serenity;
 
 import java.util.Map;
-
 import net.serenitybdd.jbehave.SerenityStepCandidate;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
@@ -36,36 +35,33 @@ public class ExtendedSerenityStepCandidate extends SerenityStepCandidate {
 
     private Keywords keywords;
 
-    public ExtendedSerenityStepCandidate(StepCandidate stepCandidate,
-                                         Configuration configuration,
-                                         InjectableStepsFactory stepsFactory) {
+    public ExtendedSerenityStepCandidate(
+        StepCandidate stepCandidate,
+        Configuration configuration,
+        InjectableStepsFactory stepsFactory
+    ) {
         super(stepCandidate);
-
         keywords = configuration.keywords();
 
         StepMatcher stepMatcher = new RegexPrefixCapturingPatternParser()
-                .parseStep(getStepType(),
-                           stepCandidate.getPatternAsString());
-        this.stepCreator = new ExtendedStepCreator(getStepsType(),
-                                                   stepsFactory,
-                                                   configuration.stepsContext(),
-                                                   configuration.parameterConverters(),
-                                                   configuration.parameterControls(),
-                                                   stepMatcher,
-                                                   configuration.stepMonitor(),
-                                                   keywords);
+            .parseStep(getStepType(), stepCandidate.getPatternAsString());
+        this.stepCreator =
+            new ExtendedStepCreator(
+                getStepsType(),
+                stepsFactory,
+                configuration.stepsContext(),
+                configuration.parameterConverters(),
+                configuration.parameterControls(),
+                stepMatcher,
+                configuration.stepMonitor(),
+                keywords
+            );
     }
 
     @Override
-    public Step createMatchedStep(String stepAsString,
-                                  Map<String, String> namedParameters) {
-
-        String stepWithoutStartingWord = keywords.stepWithoutStartingWord(stepAsString,
-                                                                          getStepType());
-        return stepCreator.createParametrisedStep(getMethod(),
-                                                  stepAsString,
-                                                  stepWithoutStartingWord,
-                                                  namedParameters);
+    public Step createMatchedStep(String stepAsString, Map<String, String> namedParameters) {
+        String stepWithoutStartingWord = keywords.stepWithoutStartingWord(stepAsString, getStepType());
+        return stepCreator.createParametrisedStep(getMethod(), stepAsString, stepWithoutStartingWord, namedParameters);
     }
 
     protected StepCreator getStepCreator() {

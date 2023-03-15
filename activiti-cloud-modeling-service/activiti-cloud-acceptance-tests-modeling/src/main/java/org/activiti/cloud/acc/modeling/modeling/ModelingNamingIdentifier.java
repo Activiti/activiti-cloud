@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.acc.modeling.modeling;
 
-import org.activiti.cloud.modeling.api.Model;
-import org.activiti.cloud.modeling.api.Project;
-
 import java.util.Arrays;
 import java.util.List;
+import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.Project;
 
 /**
  * Identifier by name
@@ -73,5 +72,4 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
             }
         };
     }
-
 }

@@ -37,11 +37,14 @@ public class PropagateCloudBpmnErrorCmdTest {
     public void should_propagateErrorCode() {
         //given
         IntegrationContext integrationContext = mock(IntegrationContext.class);
-        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(new IntegrationRequestImpl(integrationContext),
-            new CloudBpmnError("Error 51", "An error occurred"));
+        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
+            new IntegrationRequestImpl(integrationContext),
+            new CloudBpmnError("Error 51", "An error occurred")
+        );
 
-        PropagateCloudBpmnErrorCmd command = spy(new PropagateCloudBpmnErrorCmd(integrationErrorEvent, mock(
-            DelegateExecution.class)));
+        PropagateCloudBpmnErrorCmd command = spy(
+            new PropagateCloudBpmnErrorCmd(integrationErrorEvent, mock(DelegateExecution.class))
+        );
 
         doNothing().when(command).propagateError(any());
 
@@ -51,5 +54,4 @@ public class PropagateCloudBpmnErrorCmdTest {
         //then
         verify(command).propagateError("Error 51");
     }
-
 }

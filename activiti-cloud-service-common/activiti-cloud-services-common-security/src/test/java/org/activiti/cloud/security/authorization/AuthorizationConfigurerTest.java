@@ -53,9 +53,12 @@ class AuthorizationConfigurerTest {
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        authorizationProperties.setSecurityConstraints(asList(
-            createSecurityConstraint(new String[]{"ROLE_1", "ROLE_2"}, new String[]{"/a", "/b"}),
-            createSecurityConstraint(new String[]{"ROLE_3"}, new String[]{"/c"})));
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraint(new String[] { "ROLE_1", "ROLE_2" }, new String[] { "/a", "/b" }),
+                createSecurityConstraint(new String[] { "ROLE_3" }, new String[] { "/c" })
+            )
+        );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
@@ -75,9 +78,12 @@ class AuthorizationConfigurerTest {
     @Test
     public void should_configureAuth_when_aURLiSPublic() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        authorizationProperties.setSecurityConstraints(asList(
-            createSecurityConstraint(new String[]{"ROLE_3"}, new String[]{"/c"}),
-            createSecurityConstraint(new String[]{}, new String[]{"/d"})));
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraint(new String[] { "ROLE_3" }, new String[] { "/c" }),
+                createSecurityConstraint(new String[] {}, new String[] { "/d" })
+            )
+        );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
@@ -98,8 +104,15 @@ class AuthorizationConfigurerTest {
     @Test
     public void should_configureAuth_when_everythingIsAuthenticatedMethods() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        authorizationProperties.setSecurityConstraints(asList(
-            createSecurityConstraint(new String[]{"ROLE_1"}, new String[]{"/c"}, new String[]{"POST", "DELETE", "PUT"})));
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraint(
+                    new String[] { "ROLE_1" },
+                    new String[] { "/c" },
+                    new String[] { "POST", "DELETE", "PUT" }
+                )
+            )
+        );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeRequests()).thenReturn(authorizeRequests);
@@ -122,7 +135,7 @@ class AuthorizationConfigurerTest {
     }
 
     private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns) {
-        return createSecurityConstraint(roles, patterns, new String[]{});
+        return createSecurityConstraint(roles, patterns, new String[] {});
     }
 
     private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns, String[] omittedMethods) {
@@ -131,8 +144,7 @@ class AuthorizationConfigurerTest {
         SecurityCollection securityCollection = new SecurityCollection();
         securityCollection.setPatterns(patterns);
         securityCollection.setOmittedMethods(omittedMethods);
-        securityConstraint.setSecurityCollections(new SecurityCollection[]{securityCollection});
+        securityConstraint.setSecurityCollections(new SecurityCollection[] { securityCollection });
         return securityConstraint;
     }
-
 }

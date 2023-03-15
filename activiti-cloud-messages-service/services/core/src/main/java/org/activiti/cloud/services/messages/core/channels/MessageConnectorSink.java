@@ -20,12 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSink {
-
     String INPUT = "messageConnectorInput";
 
     @InputBinding(INPUT)
     default MessageChannel input() {
         return MessageChannels.publishSubscribe(INPUT).get();
     }
-
 }

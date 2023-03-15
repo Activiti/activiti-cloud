@@ -15,30 +15,31 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.ProcessCandidateStarterGroup;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterGroupJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = ProcessCandidateStarterGroupRemovedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT)
-@DiscriminatorValue(value = ProcessCandidateStarterGroupRemovedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT)
+@DiscriminatorValue(
+    value = ProcessCandidateStarterGroupRemovedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT
+)
 @DynamicInsert
 public class ProcessCandidateStarterGroupRemovedEventEntity extends AuditEventEntity {
 
-    protected static final String PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT = "ProcessCandidateStarterGroupRemovedEvent";
+    protected static final String PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT =
+        "ProcessCandidateStarterGroupRemovedEvent";
 
     @Convert(converter = ProcessCandidateStarterGroupJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private ProcessCandidateStarterGroupImpl candidateStarterGroup;
 
-    public ProcessCandidateStarterGroupRemovedEventEntity() {
-    }
+    public ProcessCandidateStarterGroupRemovedEventEntity() {}
 
     public ProcessCandidateStarterGroupRemovedEventEntity(CloudProcessCandidateStarterGroupRemovedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +51,19 @@ public class ProcessCandidateStarterGroupRemovedEventEntity extends AuditEventEn
     }
 
     public void setCandidateStarterGroup(ProcessCandidateStarterGroup candidateGroup) {
-        this.candidateStarterGroup = new ProcessCandidateStarterGroupImpl(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId());
+        this.candidateStarterGroup =
+            new ProcessCandidateStarterGroupImpl(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessCandidateStarterGroupRemovedEventEntity [candidateStarterGroup=")
-               .append(candidateStarterGroup)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessCandidateStarterGroupRemovedEventEntity [candidateStarterGroup=")
+            .append(candidateStarterGroup)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

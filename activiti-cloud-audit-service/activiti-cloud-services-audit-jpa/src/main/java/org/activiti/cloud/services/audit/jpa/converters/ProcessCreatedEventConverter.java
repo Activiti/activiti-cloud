@@ -23,7 +23,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEvent
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCreatedAuditEventEntity;
 
-public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
+public class ProcessCreatedEventConverter extends BaseEventToEntityConverter {
 
     public ProcessCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
         super(eventContextInfoAppender);
@@ -43,8 +43,10 @@ public class ProcessCreatedEventConverter  extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessCreatedAuditEventEntity processCreatedAuditEventEntity = (ProcessCreatedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessCreatedEventImpl(processCreatedAuditEventEntity.getEventId(),
-                                                processCreatedAuditEventEntity.getTimestamp(),
-                                                processCreatedAuditEventEntity.getProcessInstance());
+        return new CloudProcessCreatedEventImpl(
+            processCreatedAuditEventEntity.getEventId(),
+            processCreatedAuditEventEntity.getTimestamp(),
+            processCreatedAuditEventEntity.getProcessInstance()
+        );
     }
 }

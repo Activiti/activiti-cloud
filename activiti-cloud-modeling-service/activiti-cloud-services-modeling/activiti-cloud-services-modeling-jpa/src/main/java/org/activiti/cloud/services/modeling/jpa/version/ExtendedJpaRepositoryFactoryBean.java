@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.jpa.version;
 
 import java.io.Serializable;
 import javax.persistence.EntityManager;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
@@ -33,7 +32,7 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * @param <V> the entity version type
  */
 public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, K extends Serializable, V extends VersionEntity>
-        extends JpaRepositoryFactoryBean<R, T, K> {
+    extends JpaRepositoryFactoryBean<R, T, K> {
 
     /**
      * Creates a new {@link JpaRepositoryFactoryBean} for the given repository interface.
@@ -60,7 +59,7 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
      * @param <V> the entity version type
      */
     private static class ExtendedJpaRepositoryFactory<T extends VersionedEntity, ID extends Serializable, V extends VersionEntity>
-            extends JpaRepositoryFactory {
+        extends JpaRepositoryFactory {
 
         public ExtendedJpaRepositoryFactory(EntityManager em) {
             super(em);
@@ -72,15 +71,15 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
          * @return the repository implementation
          */
         @Override
-        protected JpaRepositoryImplementation getTargetRepository(final RepositoryInformation information,
-                                                                  final EntityManager entityManager) {
+        protected JpaRepositoryImplementation getTargetRepository(
+            final RepositoryInformation information,
+            final EntityManager entityManager
+        ) {
             if (isVersionedJpaRepository(information.getRepositoryInterface())) {
-                return getTargetVersionedJpaRepository(information.getRepositoryInterface(),
-                                                       entityManager);
+                return getTargetVersionedJpaRepository(information.getRepositoryInterface(), entityManager);
             }
 
-            return super.getTargetRepository(information,
-                                             entityManager);
+            return super.getTargetRepository(information, entityManager);
         }
 
         /**
@@ -98,15 +97,15 @@ public class ExtendedJpaRepositoryFactoryBean<R extends JpaRepository<T, K>, T, 
          * @param entityManager the entity manager
          * @return the repository implementation
          */
-        protected VersionedJpaRepositoryImpl getTargetVersionedJpaRepository(Class<?> repositoryInterface,
-                                                                             EntityManager entityManager) {
+        protected VersionedJpaRepositoryImpl getTargetVersionedJpaRepository(
+            Class<?> repositoryInterface,
+            EntityManager entityManager
+        ) {
             VersionedRepositoryMetadata metadata = new VersionedRepositoryMetadata(repositoryInterface);
 
             Class<T> versionedEntityType = (Class<T>) metadata.getDomainType();
             Class<V> versionEntityType = (Class<V>) metadata.getVersionEntityType();
-            return new VersionedJpaRepositoryImpl<T, ID, V>(versionedEntityType,
-                                                            versionEntityType,
-                                                            entityManager);
+            return new VersionedJpaRepositoryImpl<T, ID, V>(versionedEntityType, versionEntityType, entityManager);
         }
     }
 }

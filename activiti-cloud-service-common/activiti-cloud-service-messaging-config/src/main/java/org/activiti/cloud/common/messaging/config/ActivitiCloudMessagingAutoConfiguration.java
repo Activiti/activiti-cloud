@@ -25,5 +25,4 @@ import org.springframework.context.annotation.PropertySource;
 @EnableConfigurationProperties(ActivitiCloudMessagingProperties.class)
 @PropertySource("classpath:config/activiti-cloud-messaging.properties")
 @PropertySource(value = "file:config/activiti-cloud-messaging.properties", ignoreResourceNotFound = true)
-public class ActivitiCloudMessagingAutoConfiguration {
-}
+public class ActivitiCloudMessagingAutoConfiguration {}

@@ -15,7 +15,17 @@
  */
 package org.activiti.cloud.alfresco.converter.json;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.lang.reflect.Type;
+import java.util.List;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.junit.jupiter.api.Test;
@@ -32,17 +42,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
-
-import java.lang.reflect.Type;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoJackson2HttpMessageConverterTest {
@@ -79,62 +78,49 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModel() throws Exception {
         //given
         given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
-                .willReturn(alfrescoPageContentListWrapper);
+            .willReturn(alfrescoPageContentListWrapper);
 
-        doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                                                                    type,
-                                                                    outputMessage);
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage);
 
         //when
-        httpMessageConverter.writeInternal(basePagedModel,
-                                           type,
-                                           outputMessage);
+        httpMessageConverter.writeInternal(basePagedModel, type, outputMessage);
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                                                          type,
-                                                          outputMessage);
+        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage);
     }
 
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel() throws Exception {
-
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsAGroupOfCollectionModel()
+        throws Exception {
         //given
         given(pagedCollectionModelConverter.resourcesToListResponseContent(baseCollectionModel))
-                .willReturn(alfrescoPageContentListWrapper);
+            .willReturn(alfrescoPageContentListWrapper);
 
-        doNothing().when(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                type,
-                outputMessage);
+        doNothing()
+            .when(httpMessageConverter)
+            .defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage);
 
         //when
-        httpMessageConverter.writeInternal(baseCollectionModel,
-                type,
-                outputMessage);
+        httpMessageConverter.writeInternal(baseCollectionModel, type, outputMessage);
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper,
-                type,
-                outputMessage);
+        verify(httpMessageConverter).defaultWriteInternal(alfrescoPageContentListWrapper, type, outputMessage);
     }
 
-
     @Test
-    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource() throws Exception {
+    public void writeInternalShouldConvertWrapContentInsideAlfrescoContentEntryWhenObjectIsASingleResource()
+        throws Exception {
         //given
-        doNothing().when(httpMessageConverter).defaultWriteInternal(any(),
-                                                                    eq(type),
-                                                                    eq(outputMessage));
+        doNothing().when(httpMessageConverter).defaultWriteInternal(any(), eq(type), eq(outputMessage));
 
         //when
-        httpMessageConverter.writeInternal(EntityModel.of("content"),
-                                           type,
-                                           outputMessage);
+        httpMessageConverter.writeInternal(EntityModel.of("content"), type, outputMessage);
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(contentEntryArgumentCaptor.capture(),
-                                                          eq(type),
-                                                          eq(outputMessage));
+        verify(httpMessageConverter)
+            .defaultWriteInternal(contentEntryArgumentCaptor.capture(), eq(type), eq(outputMessage));
         assertThat(contentEntryArgumentCaptor.getValue().getEntry()).isEqualTo("content");
     }
 
@@ -173,7 +159,8 @@ public class AlfrescoJackson2HttpMessageConverterTest {
     }
 
     @Test
-    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue() throws Exception {
+    public void writeInternalShouldConvertObjectUsingPagedModelConverterWhenIsAPagedModelInsideMappingJacksonValue()
+        throws Exception {
         //given
         final MappingJacksonValue baseMappingJacksonValue = new MappingJacksonValue(basePagedModel);
         given(pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(basePagedModel))
@@ -185,10 +172,14 @@ public class AlfrescoJackson2HttpMessageConverterTest {
         httpMessageConverter.writeInternal(baseMappingJacksonValue, type, outputMessage);
 
         //then
-        verify(httpMessageConverter).defaultWriteInternal(
-            argThat(argument -> argument instanceof MappingJacksonValue
-                && ((MappingJacksonValue) argument).getValue() == alfrescoPageContentListWrapper),
-            eq(type), eq(outputMessage));
+        verify(httpMessageConverter)
+            .defaultWriteInternal(
+                argThat(argument ->
+                    argument instanceof MappingJacksonValue &&
+                    ((MappingJacksonValue) argument).getValue() == alfrescoPageContentListWrapper
+                ),
+                eq(type),
+                eq(outputMessage)
+            );
     }
-
 }

@@ -52,24 +52,31 @@ public class TestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IdentityTokenProducer keycloakTokenProducer(@Value("${keycloak.auth-server-url:}") String authServerUrl,
-                                                       @Value("${keycloak.realm:}") String realm) {
+    public IdentityTokenProducer keycloakTokenProducer(
+        @Value("${keycloak.auth-server-url:}") String authServerUrl,
+        @Value("${keycloak.realm:}") String realm
+    ) {
         return new KeycloakTokenProducer(authServerUrl, realm);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(value = "identity.test.token-interceptor.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(
+        value = "identity.test.token-interceptor.enabled",
+        havingValue = "true",
+        matchIfMissing = true
+    )
     public IdentityTokenInterceptor identityTokenInterceptor(IdentityTokenProducer keycloakTokenProducer) {
         return new IdentityTokenInterceptor(keycloakTokenProducer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RestTemplateBuilder restTemplateBuilder(@Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor) {
+    public RestTemplateBuilder restTemplateBuilder(
+        @Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor
+    ) {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                         false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         mapper.registerModule(new Jackson2HalModule());
 
@@ -80,19 +87,21 @@ public class TestConfiguration {
         }
 
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        jackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
+        jackson2HttpMessageConverter.setSupportedMediaTypes(
+            Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
+        );
         jackson2HttpMessageConverter.setObjectMapper(mapper);
 
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().additionalMessageConverters(
-            jackson2HttpMessageConverter,
-            new StringHttpMessageConverter(StandardCharsets.UTF_8),
-            new ByteArrayHttpMessageConverter());
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
+            .additionalMessageConverters(
+                jackson2HttpMessageConverter,
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
+                new ByteArrayHttpMessageConverter()
+            );
         if (identityTokenInterceptor != null) {
-            return restTemplateBuilder
-                .additionalInterceptors(identityTokenInterceptor);
+            return restTemplateBuilder.additionalInterceptors(identityTokenInterceptor);
         } else {
             return restTemplateBuilder;
         }
     }
-
 }

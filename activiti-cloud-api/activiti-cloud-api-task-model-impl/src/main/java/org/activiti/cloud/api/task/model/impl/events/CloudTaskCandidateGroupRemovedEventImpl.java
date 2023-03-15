@@ -20,23 +20,19 @@ import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupRemovedEvent;
 
-public class CloudTaskCandidateGroupRemovedEventImpl extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
-        implements CloudTaskCandidateGroupRemovedEvent {
+public class CloudTaskCandidateGroupRemovedEventImpl
+    extends CloudRuntimeEventImpl<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>
+    implements CloudTaskCandidateGroupRemovedEvent {
 
-    public CloudTaskCandidateGroupRemovedEventImpl() {
-    }
+    public CloudTaskCandidateGroupRemovedEventImpl() {}
 
     public CloudTaskCandidateGroupRemovedEventImpl(TaskCandidateGroup taskCandidateGroup) {
         super(taskCandidateGroup);
         setEntityId(taskCandidateGroup.getGroupId());
     }
 
-    public CloudTaskCandidateGroupRemovedEventImpl(String id,
-                                                   Long timestamp,
-                                                   TaskCandidateGroup taskCandidateGroup) {
-        super(id,
-              timestamp,
-              taskCandidateGroup);
+    public CloudTaskCandidateGroupRemovedEventImpl(String id, Long timestamp, TaskCandidateGroup taskCandidateGroup) {
+        super(id, timestamp, taskCandidateGroup);
         setEntityId(taskCandidateGroup.getGroupId());
     }
 

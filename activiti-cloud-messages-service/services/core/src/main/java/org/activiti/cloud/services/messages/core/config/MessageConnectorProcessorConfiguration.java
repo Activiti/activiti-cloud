@@ -19,6 +19,4 @@ import org.activiti.cloud.services.messages.core.channels.MessageConnectorProces
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {
-
-}
+public class MessageConnectorProcessorConfiguration implements MessageConnectorProcessor {}

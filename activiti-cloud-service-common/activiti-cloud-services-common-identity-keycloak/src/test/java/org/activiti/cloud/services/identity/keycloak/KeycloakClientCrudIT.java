@@ -33,23 +33,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(
-    classes = {KeycloakClientApplication.class},
+    classes = { KeycloakClientApplication.class },
     properties = {
         "keycloak.realm=activiti",
         "keycloak.use-resource-role-mappings=false",
-        "identity.client.cache.cacheExpireAfterWrite=PT5s"}
+        "identity.client.cache.cacheExpireAfterWrite=PT5s",
+    }
 )
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class KeycloakClientCrudIT {
 
     public static final String ADMIN_USER_ID = "5f682999-d11d-4a42-bc42-86b7e6752223";
+
     @Autowired
     private KeycloakClient keycloakClient;
 
     @Test
     public void should_handleClientCRUD() {
         String clientId = "crudClientId";
-        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
+            .newKeycloakClientRepresentationBuilder()
             .withClientId(clientId)
             .withClientName(clientId)
             .enabled(true)
@@ -74,15 +77,14 @@ public class KeycloakClientCrudIT {
 
         keycloakClient.deleteClient(idOfClient);
         Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));
-        assertThat(exception)
-            .isInstanceOf(FeignException.NotFound.class);
+        assertThat(exception).isInstanceOf(FeignException.NotFound.class);
     }
-
 
     @Test
     public void should_createRoleRepresentationForClient() {
         String clientId = "crudClientId2";
-        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder.newKeycloakClientRepresentationBuilder()
+        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
+            .newKeycloakClientRepresentationBuilder()
             .withClientId(clientId)
             .withClientName(clientId)
             .enabled(true)
@@ -101,14 +103,14 @@ public class KeycloakClientCrudIT {
         keycloakClient.createRoleRepresentationForClient(idOfClient, keycloakRoleMapping);
 
         KeycloakRoleMapping roleRepresentationForClient = keycloakClient.getRoleRepresentationForClient(
-            idOfClient, keycloakRoleMapping.getName());
+            idOfClient,
+            keycloakRoleMapping.getName()
+        );
         assertThat(roleRepresentationForClient).isNotNull();
     }
-
 
     private String getIdOfClient(String clientId) {
         List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(clientId);
         return clients.get(0).getId();
     }
-
 }

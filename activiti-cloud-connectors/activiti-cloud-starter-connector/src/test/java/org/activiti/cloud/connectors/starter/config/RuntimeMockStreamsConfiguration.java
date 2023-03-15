@@ -19,7 +19,4 @@ import org.activiti.cloud.connectors.starter.test.it.RuntimeMockStreams;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {
-
-
-}
+public class RuntimeMockStreamsConfiguration implements RuntimeMockStreams {}

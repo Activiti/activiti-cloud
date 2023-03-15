@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.VariableDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
@@ -33,27 +44,19 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ProcessDefinitionServiceTest {
 
     private final ProcessRuntime processRuntime = Mockito.mock(ProcessRuntime.class);
 
-    private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(ProcessDefinitionDecorator.class);
+    private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
+        ProcessDefinitionDecorator.class
+    );
 
-    private final ProcessDefinitionService processDefinitionService =
-        new ProcessDefinitionService(processRuntime, List.of(processDefinitionDecorator));
+    private final ProcessDefinitionService processDefinitionService = new ProcessDefinitionService(
+        processRuntime,
+        List.of(processDefinitionDecorator)
+    );
 
     @Test
     void should_getProcessDefinitionsWithVariables_whenIncludeVariablesParameterPresent() {
@@ -61,26 +64,30 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any()))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
-        when(processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId()))))
+        when(
+            processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
+        )
             .thenAnswer(call -> {
                 CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
                 cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
                 return cloudProcessDefinition;
             });
 
-        List<ProcessDefinition> result =
-            processDefinitionService.getProcessDefinitions(Pageable.of(0, 50), List.of("variables")).getContent();
+        List<ProcessDefinition> result = processDefinitionService
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"))
+            .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions = ((ExtendedCloudProcessDefinition) result.get(0)).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions =
+            ((ExtendedCloudProcessDefinition) result.get(0)).getVariableDefinitions();
         assertThat(variableDefinitions).hasSize(1);
         assertThat(variableDefinitions.get(0)).isEqualTo(variableDefinition);
-        verify(processDefinitionDecorator).decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+        verify(processDefinitionDecorator)
+            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
     }
 
     @ParameterizedTest
@@ -90,13 +97,13 @@ class ProcessDefinitionServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processRuntime.processDefinitions(any()))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
-        List<ProcessDefinition> result =
-            processDefinitionService.getProcessDefinitions(Pageable.of(0, 50), include).getContent();
+        List<ProcessDefinition> result = processDefinitionService
+            .getProcessDefinitions(Pageable.of(0, 50), include)
+            .getContent();
 
         assertThat(result).hasSize(1);
         verify(processDefinitionDecorator, never()).decorate(any());
@@ -105,5 +112,4 @@ class ProcessDefinitionServiceTest {
     private static Stream<Arguments> emptyIncludeVariables() {
         return Stream.of(Arguments.of(List.of()), Arguments.of(List.of("")), Arguments.of(List.of("other")));
     }
-
 }

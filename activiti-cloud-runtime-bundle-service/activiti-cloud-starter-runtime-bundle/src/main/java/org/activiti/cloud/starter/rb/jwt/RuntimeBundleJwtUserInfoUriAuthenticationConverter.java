@@ -24,7 +24,9 @@ public class RuntimeBundleJwtUserInfoUriAuthenticationConverter implements Conve
 
     private JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter;
 
-    public RuntimeBundleJwtUserInfoUriAuthenticationConverter(JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter) {
+    public RuntimeBundleJwtUserInfoUriAuthenticationConverter(
+        JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter
+    ) {
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
     }
 

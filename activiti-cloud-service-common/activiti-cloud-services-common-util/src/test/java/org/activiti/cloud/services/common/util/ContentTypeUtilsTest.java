@@ -21,7 +21,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.toJsonFilename;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test ;
+import org.junit.jupiter.api.Test;
 
 public class ContentTypeUtilsTest {
 
@@ -59,7 +59,6 @@ public class ContentTypeUtilsTest {
         assertThat(removeExtension("../filename.ext")).isEqualTo("../filename");
     }
 
-
     @Test
     public void testToJsonFilename() {
         assertThat(toJsonFilename(null)).isEqualTo(null);
@@ -75,5 +74,4 @@ public class ContentTypeUtilsTest {
         assertThat(changeToJsonFilename("file.json")).isEqualTo("file.json");
         assertThat(changeToJsonFilename("file.v1")).isEqualTo("file.json");
     }
-
 }

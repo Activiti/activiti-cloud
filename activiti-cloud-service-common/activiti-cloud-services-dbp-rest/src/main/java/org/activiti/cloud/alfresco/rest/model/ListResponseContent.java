@@ -22,13 +22,10 @@ public class ListResponseContent<T> {
     private EntriesResponseContent<T> list;
 
     public static <T> ListResponseContent<T> wrap(List<EntryResponseContent<T>> list, PaginationMetadata pagination) {
-
-        return new ListResponseContent<>(new EntriesResponseContent<>(list,
-                                                                      pagination));
+        return new ListResponseContent<>(new EntriesResponseContent<>(list, pagination));
     }
 
-    public ListResponseContent() {
-    }
+    public ListResponseContent() {}
 
     public ListResponseContent(EntriesResponseContent<T> list) {
         this.list = list;
@@ -37,5 +34,4 @@ public class ListResponseContent<T> {
     public EntriesResponseContent<T> getList() {
         return list;
     }
-
 }

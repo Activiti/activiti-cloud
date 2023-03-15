@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
-import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
-import org.springframework.lang.NonNull;
-
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
+import org.springframework.lang.NonNull;
 
 public class JwtPrincipalRolesProviderChain implements PrincipalRolesProvider {
 
@@ -33,11 +32,12 @@ public class JwtPrincipalRolesProviderChain implements PrincipalRolesProvider {
 
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return providers.stream()
-                        .map(provider -> provider.getRoles(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+        return providers
+            .stream()
+            .map(provider -> provider.getRoles(principal))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {

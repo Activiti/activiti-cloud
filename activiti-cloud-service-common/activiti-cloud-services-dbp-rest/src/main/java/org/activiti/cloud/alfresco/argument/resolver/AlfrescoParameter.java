@@ -20,8 +20,7 @@ public abstract class AlfrescoParameter<T> {
     protected boolean set;
     protected T value;
 
-    public AlfrescoParameter(boolean set,
-                             T value) {
+    public AlfrescoParameter(boolean set, T value) {
         this.set = set;
         this.value = value;
     }
@@ -33,5 +32,4 @@ public abstract class AlfrescoParameter<T> {
     public T getValue() {
         return value;
     }
-
 }

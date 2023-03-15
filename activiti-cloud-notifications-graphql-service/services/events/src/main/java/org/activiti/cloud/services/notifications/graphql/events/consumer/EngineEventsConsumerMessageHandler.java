@@ -30,8 +30,7 @@ public class EngineEventsConsumerMessageHandler {
 
     private final Transformer transformer;
 
-    public EngineEventsConsumerMessageHandler(Transformer transformer)
-    {
+    public EngineEventsConsumerMessageHandler(Transformer transformer) {
         this.transformer = transformer;
     }
 
@@ -42,7 +41,6 @@ public class EngineEventsConsumerMessageHandler {
 
         logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
 
-        return MessageBuilder.<List<EngineEvent>>createMessage(transformer.transform(events),
-                                                               message.getHeaders());
+        return MessageBuilder.<List<EngineEvent>>createMessage(transformer.transform(events), message.getHeaders());
     }
 }

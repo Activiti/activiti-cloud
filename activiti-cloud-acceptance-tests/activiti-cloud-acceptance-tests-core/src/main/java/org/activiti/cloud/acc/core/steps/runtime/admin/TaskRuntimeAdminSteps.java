@@ -44,12 +44,9 @@ public class TaskRuntimeAdminSteps {
         assertThat(baseService.isServiceUp()).isTrue();
     }
 
-
     @Step
     public void completeTask(String id, CompleteTaskPayload completeTaskPayload) {
-
-        taskRuntimeAdminService
-                .completeTask(id,completeTaskPayload);
+        taskRuntimeAdminService.completeTask(id, completeTaskPayload);
     }
 
     @Step
@@ -58,22 +55,17 @@ public class TaskRuntimeAdminSteps {
     }
 
     @Step
-    public PagedModel<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks() {
         return taskRuntimeAdminService.getTasks();
     }
 
     @Step
-    public CloudTask updateTask(String taskId, UpdateTaskPayload updateTaskPayload){
-        return taskRuntimeAdminService.updateTask(
-                taskId,
-                updateTaskPayload);
+    public CloudTask updateTask(String taskId, UpdateTaskPayload updateTaskPayload) {
+        return taskRuntimeAdminService.updateTask(taskId, updateTaskPayload);
     }
 
     @Step
-    public CloudTask assignTask(String taskId, AssignTaskPayload assignTaskPayload){
-        return taskRuntimeAdminService.assign(
-                taskId,
-                assignTaskPayload);
+    public CloudTask assignTask(String taskId, AssignTaskPayload assignTaskPayload) {
+        return taskRuntimeAdminService.assign(taskId, assignTaskPayload);
     }
-
 }

@@ -17,9 +17,7 @@
 package org.activiti.cloud.identity;
 
 public interface IdentityClientRepresentation {
-
     public String getClientId();
 
     public String getSecret();
-
 }

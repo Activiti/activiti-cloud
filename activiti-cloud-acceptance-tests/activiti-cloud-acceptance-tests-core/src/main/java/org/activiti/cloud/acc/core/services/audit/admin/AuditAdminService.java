@@ -23,7 +23,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface AuditAdminService {
-
     @RequestLine("GET /admin/v1/events?search={search}&sort=timestamp%2Cdesc&sort=id%2Cdesc")
     PagedModel<CloudRuntimeEvent> getEvents(@Param("search") String search);
 
@@ -32,5 +31,4 @@ public interface AuditAdminService {
 
     @RequestLine("DELETE /admin/v1/events")
     CollectionModel<EntityModel<CloudRuntimeEvent>> deleteEvents();
-
 }

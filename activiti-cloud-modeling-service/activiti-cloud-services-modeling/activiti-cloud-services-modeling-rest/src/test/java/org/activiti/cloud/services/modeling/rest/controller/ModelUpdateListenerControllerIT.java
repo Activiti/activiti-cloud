@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -45,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Integration tests for models rest api dealing with Json models
  */
-@ActiveProfiles(profiles = {"test", "generic"})
+@ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @WithMockModelerUser
@@ -81,24 +82,26 @@ public class ModelUpdateListenerControllerIT {
     @Test
     public void should_callUpdateListenerMatchingWithModelType_when_updatingModelContent() throws Exception {
         String name = "updated-model-name";
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-            genericJsonModelType.getName()));
+        Model genericJsonModel = modelRepository.createModel(
+            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
+        );
 
         Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
 
         mockMvc
-            .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedModel)))
+            .perform(
+                put("/v1/models/{modelId}", genericJsonModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updatedModel))
+            )
             .andExpect(status().is2xxSuccessful());
 
-        verify(genericJsonModelUpdateListener,
-            times(1))
+        verify(genericJsonModelUpdateListener, times(1))
             .execute(
                 argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
-                argThat(newModel -> newModel.getName().equals(name)));
+                argThat(newModel -> newModel.getName().equals(name))
+            );
 
-        verify(genericNonJsonModelUpdateListener,
-            never())
-            .execute(any(), any());
+        verify(genericNonJsonModelUpdateListener, never()).execute(any(), any());
     }
 }

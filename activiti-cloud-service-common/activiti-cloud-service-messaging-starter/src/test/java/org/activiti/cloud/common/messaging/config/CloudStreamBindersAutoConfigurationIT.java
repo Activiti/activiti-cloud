@@ -16,7 +16,6 @@
 
 package org.activiti.cloud.common.messaging.config;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

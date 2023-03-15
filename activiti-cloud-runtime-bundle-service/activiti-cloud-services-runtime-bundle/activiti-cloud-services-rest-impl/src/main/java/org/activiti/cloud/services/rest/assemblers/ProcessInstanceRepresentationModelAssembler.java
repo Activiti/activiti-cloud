@@ -30,23 +30,26 @@
 
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.rest.controllers.HomeControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-public class ProcessInstanceRepresentationModelAssembler implements RepresentationModelAssembler<ProcessInstance, EntityModel<CloudProcessInstance>> {
+public class ProcessInstanceRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessInstance, EntityModel<CloudProcessInstance>> {
 
     private ToCloudProcessInstanceConverter toCloudProcessInstanceConverter;
 
-    public ProcessInstanceRepresentationModelAssembler(ToCloudProcessInstanceConverter toCloudProcessInstanceConverter) {
+    public ProcessInstanceRepresentationModelAssembler(
+        ToCloudProcessInstanceConverter toCloudProcessInstanceConverter
+    ) {
         this.toCloudProcessInstanceConverter = toCloudProcessInstanceConverter;
     }
 
@@ -54,14 +57,16 @@ public class ProcessInstanceRepresentationModelAssembler implements Representati
     public EntityModel<CloudProcessInstance> toModel(ProcessInstance processInstance) {
         CloudProcessInstance cloudProcessInstance = toCloudProcessInstanceConverter.from(processInstance);
         Link processInstancesRel = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstances(null))
-                .withRel("processInstances");
-        Link selfLink = linkTo(methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudProcessInstance.getId())).withSelfRel();
-        Link variablesLink = linkTo(methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudProcessInstance.getId())).withRel("variables");
+            .withRel("processInstances");
+        Link selfLink = linkTo(
+            methodOn(ProcessInstanceControllerImpl.class).getProcessInstanceById(cloudProcessInstance.getId())
+        )
+            .withSelfRel();
+        Link variablesLink = linkTo(
+            methodOn(ProcessInstanceVariableControllerImpl.class).getVariables(cloudProcessInstance.getId())
+        )
+            .withRel("variables");
         Link homeLink = linkTo(HomeControllerImpl.class).withRel("home");
-        return EntityModel.of(cloudProcessInstance,
-                              selfLink,
-                              variablesLink,
-                              processInstancesRel,
-                              homeLink);
+        return EntityModel.of(cloudProcessInstance, selfLink, variablesLink, processInstancesRel, homeLink);
     }
 }

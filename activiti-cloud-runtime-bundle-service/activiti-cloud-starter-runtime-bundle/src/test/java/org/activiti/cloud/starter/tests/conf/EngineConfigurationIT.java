@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.starter.tests.conf;
 
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.AbstractMap;
+import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
@@ -28,25 +32,26 @@ import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.AbstractMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.*;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
-                              "ACT_MESSAGING_DEST_SEPARATOR=.",
-                              "ACT_MESSAGING_DEST_PREFIX=namespace",
-                              "ACT_RB_ENG_EVT_DEST=engine-events",
-                              "ACT_RB_SIG_EVT_DEST=signal-event",
-                              "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
-                              "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
-                              "ACT_RB_MSG_EVT_DEST=message-events",
-                              "ACT_RB_CMD_RES_DEST=command-results",
-                              "ACT_INT_RES_CONSUMER=integration-result",
-                              "ACT_INT_ERR_CONSUMER:integration-error"})
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
+        "ACT_MESSAGING_DEST_SEPARATOR=.",
+        "ACT_MESSAGING_DEST_PREFIX=namespace",
+        "ACT_RB_ENG_EVT_DEST=engine-events",
+        "ACT_RB_SIG_EVT_DEST=signal-event",
+        "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
+        "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
+        "ACT_RB_MSG_EVT_DEST=message-events",
+        "ACT_RB_CMD_RES_DEST=command-results",
+        "ACT_INT_RES_CONSUMER=integration-result",
+        "ACT_INT_ERR_CONSUMER:integration-error",
+    }
+)
 @DirtiesContext
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class EngineConfigurationIT {
 
     @Autowired
@@ -64,19 +69,23 @@ public class EngineConfigurationIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
-            .contains(entry("mealsConnector", "namespace.mealsconnector"),
-                      entry("rest.GET", "namespace.rest.get"),
-                      entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
-                      entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
-                      entry("payment", "namespace.payment"),
-                      entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "namespace.variable-mapping-connector.variablemappingactionname"),
-                      entry("miCloudConnector", "namespace.micloudconnector"));
+            .extractingFromEntries(entry ->
+                new AbstractMap.SimpleEntry<String, String>(entry.getKey(), entry.getValue().getDestination())
+            )
+            .contains(
+                entry("mealsConnector", "namespace.mealsconnector"),
+                entry("rest.GET", "namespace.rest.get"),
+                entry("perfromBusinessTask", "namespace.perfrombusinesstask"),
+                entry("anyImplWithoutHandler", "namespace.anyimplwithouthandler"),
+                entry("payment", "namespace.payment"),
+                entry("Constants Connector.constantsActionName", "namespace.constants-connector.constantsactionname"),
+                entry(
+                    "Variable Mapping Connector.variableMappingActionName",
+                    "namespace.variable-mapping-connector.variablemappingactionname"
+                ),
+                entry("miCloudConnector", "namespace.micloudconnector")
+            );
     }
-
 
     @Test
     public void shouldUseCloudActivityBehaviorFactory() {
@@ -142,26 +151,35 @@ public class EngineConfigurationIT {
     @Test
     public void shouldHaveChannelBindingsSetForCloudConnectors() {
         //when
-        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties("integrationResultsConsumer");
-        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties("integrationErrorsConsumer");
+        BindingProperties integrationResultsConsumer = bindingServiceProperties.getBindingProperties(
+            "integrationResultsConsumer"
+        );
+        BindingProperties integrationErrorsConsumer = bindingServiceProperties.getBindingProperties(
+            "integrationErrorsConsumer"
+        );
 
         //then
-        assertThat(integrationResultsConsumer.getDestination()).isEqualTo("namespace.integration-result.my-activiti-rb-app");
+        assertThat(integrationResultsConsumer.getDestination())
+            .isEqualTo("namespace.integration-result.my-activiti-rb-app");
         assertThat(integrationResultsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
-        assertThat(integrationErrorsConsumer.getDestination()).isEqualTo("namespace.integration-error.my-activiti-rb-app");
+        assertThat(integrationErrorsConsumer.getDestination())
+            .isEqualTo("namespace.integration-error.my-activiti-rb-app");
         assertThat(integrationErrorsConsumer.getGroup()).isEqualTo("my-activiti-rb-app");
     }
 
     @Test
     public void shouldHaveChannelBindingsSetForAsyncJobExecutor() {
         //when
-        BindingProperties asyncExecutorJobsInput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsInput");
-        BindingProperties asyncExecutorJobsOutput = bindingServiceProperties.getBindingProperties("asyncExecutorJobsOutput");
+        BindingProperties asyncExecutorJobsInput = bindingServiceProperties.getBindingProperties(
+            "asyncExecutorJobsInput"
+        );
+        BindingProperties asyncExecutorJobsOutput = bindingServiceProperties.getBindingProperties(
+            "asyncExecutorJobsOutput"
+        );
 
         //then
         assertThat(asyncExecutorJobsInput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
         assertThat(asyncExecutorJobsInput.getGroup()).isEqualTo("my-activiti-rb-app");
         assertThat(asyncExecutorJobsOutput.getDestination()).isEqualTo("namespace.async-executor-jobs.activiti-app");
     }
-
 }

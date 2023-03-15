@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.starter.tests;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
-
+import java.io.IOException;
+import java.math.BigInteger;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.math.BigInteger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ProcessVariablesMigrationHelper {
@@ -36,14 +35,15 @@ public class ProcessVariablesMigrationHelper {
 
     @Transactional
     public BigInteger getTaskProcessVariableCount(String taskId) {
-        return (BigInteger) entityManager.createNativeQuery(
-            "select count(*) from task_process_variable tpv where tpv.task_id = '" + taskId + "'")
+        return (BigInteger) entityManager
+            .createNativeQuery("select count(*) from task_process_variable tpv where tpv.task_id = '" + taskId + "'")
             .getSingleResult();
     }
 
     @Transactional
     public void deleteFromTaskProcessVariable(String taskId) {
-        entityManager.createNativeQuery("delete from task_process_variable tpv where tpv.task_id = '" + taskId + "'")
+        entityManager
+            .createNativeQuery("delete from task_process_variable tpv where tpv.task_id = '" + taskId + "'")
             .executeUpdate();
     }
 

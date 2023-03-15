@@ -20,12 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageConnectorSource {
-
     String OUTPUT = "messageConnectorOutput";
 
     @OutputBinding(OUTPUT)
     default MessageChannel output() {
         return MessageChannels.direct(OUTPUT).get();
     }
-
 }

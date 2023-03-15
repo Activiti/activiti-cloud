@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.modeling.mock;
 
+import static org.springframework.http.HttpMethod.PUT;
+
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-
-import static org.springframework.http.HttpMethod.PUT;
 
 /**
  * Builder for multipart MockMvc requests.
@@ -32,18 +32,14 @@ public class MockMultipartRequestBuilder {
         this.multipartRequestBuilder = multipartRequestBuilder;
     }
 
-    public static MockMultipartRequestBuilder putMultipart(String urlTemplate,
-                                                           Object... uriVars) {
-        return multipart(urlTemplate,
-                         uriVars)
-                .put();
+    public static MockMultipartRequestBuilder putMultipart(String urlTemplate, Object... uriVars) {
+        return multipart(urlTemplate, uriVars).put();
     }
 
-    public static MockMultipartRequestBuilder multipart(String urlTemplate,
-                                                        Object... uriVars) {
+    public static MockMultipartRequestBuilder multipart(String urlTemplate, Object... uriVars) {
         return new MockMultipartRequestBuilder(
-                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart(urlTemplate,
-                                                                                              uriVars));
+            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart(urlTemplate, uriVars)
+        );
     }
 
     public MockMultipartRequestBuilder put() {
@@ -59,13 +55,12 @@ public class MockMultipartRequestBuilder {
         return multipartRequestBuilder;
     }
 
-    public MockMultipartHttpServletRequestBuilder file(String controlName,
-                                                       String fileName,
-                                                       String contentType,
-                                                       byte[] bytes) {
-        return file(new MockMultipartFile(controlName,
-                                          fileName,
-                                          contentType,
-                                          bytes));
+    public MockMultipartHttpServletRequestBuilder file(
+        String controlName,
+        String fileName,
+        String contentType,
+        byte[] bytes
+    ) {
+        return file(new MockMultipartFile(controlName, fileName, contentType, bytes));
     }
 }

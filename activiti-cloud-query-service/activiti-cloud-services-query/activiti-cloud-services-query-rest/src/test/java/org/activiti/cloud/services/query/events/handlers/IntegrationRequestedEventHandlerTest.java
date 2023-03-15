@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.util.Date;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -27,15 +35,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class IntegrationRequestedEventHandlerTest {
@@ -67,15 +66,16 @@ class IntegrationRequestedEventHandlerTest {
         verify(serviceTaskEntity).setCompletedDate(eq(null));
 
         verify(entityManager).persist(integrationContextEntity);
-
     }
 
     private CloudIntegrationRequestedEvent createIntegrationRequestedEvent() {
-        IntegrationContext integrationContext = new IntegrationContextImpl() {{
-            setClientId("clientId");
-            setExecutionId("executionId");
-            setProcessInstanceId("processInstanceId");
-        }};
+        IntegrationContext integrationContext = new IntegrationContextImpl() {
+            {
+                setClientId("clientId");
+                setExecutionId("executionId");
+                setProcessInstanceId("processInstanceId");
+            }
+        };
 
         return new CloudIntegrationRequestedEventImpl(integrationContext);
     }

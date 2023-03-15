@@ -35,8 +35,7 @@ public interface ProjectService {
 
     Project createProject(Project project);
 
-    Project updateProject(Project projectToUpdate,
-                          Project newProject);
+    Project updateProject(Project projectToUpdate, Project newProject);
 
     void deleteProject(Project project);
 
@@ -48,8 +47,7 @@ public interface ProjectService {
 
     FileContent exportProject(Project project) throws IOException;
 
-    Project copyProject(Project projectToCopy,
-                        String newProjectName);
+    Project copyProject(Project projectToCopy, String newProjectName);
 
     ProjectAccessControl getProjectAccessControl(Project project);
 
@@ -62,5 +60,4 @@ public interface ProjectService {
     void validateProjectIgnoreWarnings(Project project);
 
     Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream) throws IOException;
-
 }

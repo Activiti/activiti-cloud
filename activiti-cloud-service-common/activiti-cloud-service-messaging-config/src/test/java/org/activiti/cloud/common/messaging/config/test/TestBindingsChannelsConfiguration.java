@@ -18,6 +18,4 @@ package org.activiti.cloud.common.messaging.config.test;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class TestBindingsChannelsConfiguration implements TestBindingsChannels {
-
-}
+public class TestBindingsChannelsConfiguration implements TestBindingsChannels {}

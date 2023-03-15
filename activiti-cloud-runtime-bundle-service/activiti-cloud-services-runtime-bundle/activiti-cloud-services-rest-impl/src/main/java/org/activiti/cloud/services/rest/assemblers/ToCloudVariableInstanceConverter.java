@@ -33,5 +33,4 @@ public class ToCloudVariableInstanceConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudVariableInstance);
         return cloudVariableInstance;
     }
-
 }

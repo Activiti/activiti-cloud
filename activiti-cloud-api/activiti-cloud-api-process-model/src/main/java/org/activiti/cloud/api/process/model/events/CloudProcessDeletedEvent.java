@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudProcessDeletedEvent extends CloudProcessRuntimeEvent {
-
-}
+public interface CloudProcessDeletedEvent extends CloudProcessRuntimeEvent {}

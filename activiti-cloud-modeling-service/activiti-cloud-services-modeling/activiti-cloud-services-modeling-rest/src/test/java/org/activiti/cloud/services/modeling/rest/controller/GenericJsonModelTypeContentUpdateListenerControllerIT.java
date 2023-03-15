@@ -86,41 +86,41 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
     @Test
     public void should_callJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+        Model genericJsonModel = modelRepository.createModel(
+            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
+        );
 
         String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericJsonModel.getId()).file("file",
-                                                                    "simple-model.json",
-                                                                    "application/json",
-                                                                    stringModel.getBytes()))
-                .andExpect(status().isNoContent());
+        mockMvc
+            .perform(
+                putMultipart("/v1/models/{modelId}/content", genericJsonModel.getId())
+                    .file("file", "simple-model.json", "application/json", stringModel.getBytes())
+            )
+            .andExpect(status().isNoContent());
 
-        verify(genericJsonContentUpdateListener,
-                       times(1))
-                .execute(argThat(model -> model.getId().equals(genericJsonModel.getId())),
-                         argThat(content -> new String(content.getFileContent()).equals(stringModel)));
+        verify(genericJsonContentUpdateListener, times(1))
+            .execute(
+                argThat(model -> model.getId().equals(genericJsonModel.getId())),
+                argThat(content -> new String(content.getFileContent()).equals(stringModel))
+            );
     }
 
     @Test
     public void should_notCallNonJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                             genericJsonModelType.getName()));
+        Model genericJsonModel = modelRepository.createModel(
+            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
+        );
 
         String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericJsonModel.getId()).file("file",
-                                                                    "simple-model.json",
-                                                                    "application/json",
-                                                                    stringModel.getBytes()))
-                .andExpect(status().isNoContent());
+        mockMvc
+            .perform(
+                putMultipart("/v1/models/{modelId}/content", genericJsonModel.getId())
+                    .file("file", "simple-model.json", "application/json", stringModel.getBytes())
+            )
+            .andExpect(status().isNoContent());
 
-        verify(genericNonJsonContentUpdateListener,
-                       times(0))
-                .execute(any(),
-                         any());
+        verify(genericNonJsonContentUpdateListener, times(0)).execute(any(), any());
     }
 }

@@ -27,24 +27,22 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 public class QueryRepositoryConfig implements RepositoryRestConfigurer {
 
     @Override
-    public void configureRepositoryRestConfiguration(
-            RepositoryRestConfiguration config, CorsRegistry cors) {
-
+    public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         // Expose only repositories annotated with @RepositoryRestResource
         config.setRepositoryDetectionStrategy(RepositoryDetectionStrategies.ANNOTATED);
 
         //by default the ids are not exposed the the REST API
-        config.exposeIdsFor(ProcessInstanceEntity.class)
-                .exposeIdsFor(TaskEntity.class)
-                .exposeIdsFor(ProcessVariableEntity.class)
-                .exposeIdsFor(ProcessDefinitionEntity.class)
-                .exposeIdsFor(ProcessModelEntity.class)
-                .exposeIdsFor(BPMNSequenceFlowEntity.class)
-                .exposeIdsFor(BPMNActivityEntity.class)
-                .exposeIdsFor(TaskCandidateGroupEntity.class)
-                .exposeIdsFor(TaskCandidateUserEntity.class)
-                .exposeIdsFor(ServiceTaskEntity.class)
-                .exposeIdsFor(ApplicationEntity.class);
+        config
+            .exposeIdsFor(ProcessInstanceEntity.class)
+            .exposeIdsFor(TaskEntity.class)
+            .exposeIdsFor(ProcessVariableEntity.class)
+            .exposeIdsFor(ProcessDefinitionEntity.class)
+            .exposeIdsFor(ProcessModelEntity.class)
+            .exposeIdsFor(BPMNSequenceFlowEntity.class)
+            .exposeIdsFor(BPMNActivityEntity.class)
+            .exposeIdsFor(TaskCandidateGroupEntity.class)
+            .exposeIdsFor(TaskCandidateUserEntity.class)
+            .exposeIdsFor(ServiceTaskEntity.class)
+            .exposeIdsFor(ApplicationEntity.class);
     }
-
 }

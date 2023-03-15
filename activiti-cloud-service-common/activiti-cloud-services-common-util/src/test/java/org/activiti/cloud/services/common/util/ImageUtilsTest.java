@@ -30,13 +30,15 @@ class ImageUtilsTest {
 
     @Test
     void should_convertSvgToPng() throws Exception {
-        byte[] svg = FileUtils.resourceAsStream(SVG_FILE_LOCATION)
-                .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
-                .readAllBytes();
+        byte[] svg = FileUtils
+            .resourceAsStream(SVG_FILE_LOCATION)
+            .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
+            .readAllBytes();
         byte[] png = ImageUtils.svgToPng(svg);
-        byte[] expectedPng = FileUtils.resourceAsStream(PNG_FILE_LOCATION)
-                .orElseThrow(() -> new IllegalArgumentException(PNG_FILE_LOCATION + " file not found"))
-                .readAllBytes();
+        byte[] expectedPng = FileUtils
+            .resourceAsStream(PNG_FILE_LOCATION)
+            .orElseThrow(() -> new IllegalArgumentException(PNG_FILE_LOCATION + " file not found"))
+            .readAllBytes();
         assertThat(png).isEqualTo(expectedPng);
     }
 

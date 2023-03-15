@@ -15,9 +15,16 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,14 +38,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -55,10 +54,10 @@ public class ProcessEngineEventsAggregatorTest {
     private CommandContext commandContext;
 
     @Captor
-    private ArgumentCaptor<List<CloudRuntimeEvent<?,?>>> eventsCaptor;
+    private ArgumentCaptor<List<CloudRuntimeEvent<?, ?>>> eventsCaptor;
 
     @Mock
-    private CloudRuntimeEvent<?,?> event;
+    private CloudRuntimeEvent<?, ?> event;
 
     @BeforeEach
     public void setUp() {
@@ -95,27 +94,31 @@ public class ProcessEngineEventsAggregatorTest {
     @Test
     public void addShouldAddTheEventEventToTheEventAttributeListWhenTheAttributeAlreadyExists() {
         //given
-        ArrayList<CloudRuntimeEvent<?,?>> currentEvents = new ArrayList<>();
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(currentEvents);
+        ArrayList<CloudRuntimeEvent<?, ?>> currentEvents = new ArrayList<>();
+        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(currentEvents);
 
         //when
         eventsAggregator.add(event);
 
         //then
         assertThat(currentEvents).containsExactly(event);
-        verify(commandContext, never()).addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), any());
+        verify(commandContext, never())
+            .addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), any());
     }
 
     @Test
     public void addShouldCreateAnewListAndRegisterItAsAttributeWhenTheAttributeDoesNotExist() {
         //given
-        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS)).willReturn(null);
+        given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
+            .willReturn(null);
 
         //when
         eventsAggregator.add(event);
 
         //then
-        verify(commandContext).addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), eventsCaptor.capture());
+        verify(commandContext)
+            .addAttribute(eq(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS), eventsCaptor.capture());
         assertThat(eventsCaptor.getValue()).containsExactly(event);
     }
 
@@ -142,5 +145,4 @@ public class ProcessEngineEventsAggregatorTest {
         //then
         verify(commandContext, never()).addCloseListener(closeListener);
     }
-
 }

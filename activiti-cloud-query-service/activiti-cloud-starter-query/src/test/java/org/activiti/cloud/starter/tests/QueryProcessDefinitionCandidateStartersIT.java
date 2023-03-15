@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
@@ -41,18 +44,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-
 @DirtiesContext
-@Import({
-    ProcessDefinitionRestTemplate.class
-})
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import({ ProcessDefinitionRestTemplate.class })
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class QueryProcessDefinitionCandidateStartersIT {
 
     @Autowired
@@ -94,9 +93,7 @@ public class QueryProcessDefinitionCandidateStartersIT {
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
-        assertThat(responseEntity.getBody())
-            .isNotNull()
-            .isEmpty();
+        assertThat(responseEntity.getBody()).isNotNull().isEmpty();
     }
 
     @Test
@@ -108,12 +105,15 @@ public class QueryProcessDefinitionCandidateStartersIT {
         ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
         secondProcessDefinition.setId(UUID.randomUUID().toString());
 
-        CloudProcessCandidateStarterUserAddedEventImpl candidateStarterUserAddedEvent =
-            new CloudProcessCandidateStarterUserAddedEventImpl(new ProcessCandidateStarterUserImpl(firstProcessDefinition.getId(), "hruser"));
+        CloudProcessCandidateStarterUserAddedEventImpl candidateStarterUserAddedEvent = new CloudProcessCandidateStarterUserAddedEventImpl(
+            new ProcessCandidateStarterUserImpl(firstProcessDefinition.getId(), "hruser")
+        );
 
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition),
-                      candidateStarterUserAddedEvent);
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstProcessDefinition),
+            new CloudProcessDeployedEventImpl(secondProcessDefinition),
+            candidateStarterUserAddedEvent
+        );
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
@@ -134,12 +134,15 @@ public class QueryProcessDefinitionCandidateStartersIT {
         ProcessDefinitionImpl secondProcessDefinition = new ProcessDefinitionImpl();
         secondProcessDefinition.setId(UUID.randomUUID().toString());
 
-        CloudProcessCandidateStarterGroupAddedEventImpl candidateStarterGroupAddedEvent =
-            new CloudProcessCandidateStarterGroupAddedEventImpl(new ProcessCandidateStarterGroupImpl(firstProcessDefinition.getId(), "hr"));
+        CloudProcessCandidateStarterGroupAddedEventImpl candidateStarterGroupAddedEvent = new CloudProcessCandidateStarterGroupAddedEventImpl(
+            new ProcessCandidateStarterGroupImpl(firstProcessDefinition.getId(), "hr")
+        );
 
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition),
-                      candidateStarterGroupAddedEvent);
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstProcessDefinition),
+            new CloudProcessDeployedEventImpl(secondProcessDefinition),
+            candidateStarterGroupAddedEvent
+        );
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
@@ -150,5 +153,4 @@ public class QueryProcessDefinitionCandidateStartersIT {
             .extracting(ProcessDefinition::getId)
             .containsExactly(firstProcessDefinition.getId());
     }
-
 }

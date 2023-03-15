@@ -39,16 +39,14 @@ public class AuditorAwareIT {
 
     @Test
     public void testCurrentAuditor() {
-
         // GIVEN
         when(securityManager.getAuthenticatedUserId()).thenReturn("test_user");
 
         // WHEN
-        assertThat(auditorAware.getCurrentAuditor()).hasValueSatisfying(
-                currentUser ->
-                        // THEN
-                        assertThat(currentUser).isEqualTo("test_user")
-        );
+        assertThat(auditorAware.getCurrentAuditor())
+            .hasValueSatisfying(currentUser ->
+                // THEN
+                assertThat(currentUser).isEqualTo("test_user")
+            );
     }
-
 }

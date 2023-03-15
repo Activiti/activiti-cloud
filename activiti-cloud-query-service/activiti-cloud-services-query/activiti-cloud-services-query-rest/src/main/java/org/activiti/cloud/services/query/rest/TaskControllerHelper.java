@@ -53,7 +53,8 @@ public class TaskControllerHelper {
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-        TaskLookupRestrictionService taskLookupRestrictionService) {
+        TaskLookupRestrictionService taskLookupRestrictionService
+    ) {
         this.taskRepository = taskRepository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.predicateAggregator = predicateAggregator;
@@ -61,41 +62,43 @@ public class TaskControllerHelper {
         this.taskLookupRestrictionService = taskLookupRestrictionService;
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> findAll(Predicate predicate,
-        VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters) {
-
+    public PagedModel<EntityModel<QueryCloudTask>> findAll(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters
+    ) {
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
     @Transactional
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(Predicate predicate,
-                                                                               VariableSearch variableSearch,
-                                                                               Pageable pageable,
-                                                                               List<QueryDslPredicateFilter> filters,
-                                                                               List<String> processVariableKeys) {
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys
+    ) {
         addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
         initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate,
-                                                                     Pageable pageable) {
-
+    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {
         Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                     page,
-                                                     taskRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(Predicate predicate,
-                                                                VariableSearch variableSearch,
-                                                                Pageable pageable,
-                                                                List<QueryDslPredicateFilter> filters,
-                                                                List<String> processVariableKeys) {
-
-        if(processVariableKeys == null || processVariableKeys.isEmpty()){
+    public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys
+    ) {
+        if (processVariableKeys == null || processVariableKeys.isEmpty()) {
             return this.findAll(predicate, variableSearch, pageable, filters);
         } else {
             return this.findAllWithProcessVariables(predicate, variableSearch, pageable, filters, processVariableKeys);
@@ -103,15 +106,15 @@ public class TaskControllerHelper {
     }
 
     @Transactional
-    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(Predicate predicate,
-                                                                                                  List<String> processVariableKeys,
-                                                                                                  Pageable pageable) {
+    public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(
+        Predicate predicate,
+        List<String> processVariableKeys,
+        Pageable pageable
+    ) {
         addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
         initializeProcessVariables(page);
-        return pagedCollectionModelAssembler.toModel(pageable,
-            page,
-            taskRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
     private void initializeProcessVariables(Page<TaskEntity> page) {
@@ -134,19 +137,26 @@ public class TaskControllerHelper {
         return taskRepository.existsInProcessInstanceScope(conditions);
     }
 
-    private Page<TaskEntity> findPage(Predicate predicate, VariableSearch variableSearch, Pageable pageable, List<QueryDslPredicateFilter> filters) {
+    private Page<TaskEntity> findPage(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters
+    ) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 
         Page<TaskEntity> page;
         if (variableSearch.isSet()) {
-            page = taskRepository
-                .findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(),
+            page =
+                taskRepository.findByVariableNameAndValue(
+                    variableSearch.getName(),
+                    variableSearch.getValue(),
                     extendedPredicate,
-                    pageable);
+                    pageable
+                );
         } else {
             page = taskRepository.findAll(extendedPredicate, pageable);
         }
         return page;
     }
-
 }

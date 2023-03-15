@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.identity.exceptions;
 
-public class IdentityException extends RuntimeException{
+public class IdentityException extends RuntimeException {
+
     public IdentityException(String message) {
         super("Invalid Security data: " + message);
     }

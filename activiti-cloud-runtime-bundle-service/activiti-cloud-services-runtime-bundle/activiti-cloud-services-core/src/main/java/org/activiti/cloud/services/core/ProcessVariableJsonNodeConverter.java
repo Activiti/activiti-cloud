@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.core;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 
 public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpringConverter<JsonNode> {
 
@@ -30,7 +29,6 @@ public class ProcessVariableJsonNodeConverter implements ProcessVariableValueSpr
 
     @Override
     public JsonNode convert(String source) {
-
         try {
             return objectMapper.readTree(source);
         } catch (IOException e) {

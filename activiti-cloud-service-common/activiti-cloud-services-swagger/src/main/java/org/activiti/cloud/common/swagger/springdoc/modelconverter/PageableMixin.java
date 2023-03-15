@@ -21,10 +21,13 @@ import org.springdoc.api.annotations.ParameterObject;
 
 @ParameterObject
 public class PageableMixin {
+
     @Parameter(style = ParameterStyle.FORM)
     private Integer maxItems;
+
     @Parameter(style = ParameterStyle.FORM)
     private Integer skipCount;
+
     @Parameter(style = ParameterStyle.FORM)
     private String sort;
 

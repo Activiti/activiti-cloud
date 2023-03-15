@@ -21,9 +21,7 @@ import org.activiti.cloud.api.process.model.CloudApplication;
 import org.springframework.hateoas.PagedModel;
 
 public interface ApplicationQueryService {
-
     @RequestLine("GET /v1/applications")
     @Headers("Content-Type: application/json")
     PagedModel<CloudApplication> getApplications();
-
 }

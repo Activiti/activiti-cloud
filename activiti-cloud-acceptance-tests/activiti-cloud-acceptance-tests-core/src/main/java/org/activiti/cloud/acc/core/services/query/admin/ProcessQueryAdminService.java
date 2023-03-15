@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.acc.core.services.query.admin;
 
-import java.util.Map;
-
 import feign.*;
+import java.util.Map;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -27,7 +26,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryAdminService {
-
     @RequestLine("GET /admin/v1/process-definitions")
     @Headers("Content-Type: application/json")
     PagedModel<CloudProcessDefinition> getProcessDefinitions();
@@ -57,14 +55,17 @@ public interface ProcessQueryAdminService {
 
     @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/service-tasks?status={status}")
     @Headers("Content-Type: application/json")
-    PagedModel<CloudServiceTask> getServiceTasksByStatus(@Param("processInstanceId") String processInstanceId,
-                                                         @Param("status") String status);
+    PagedModel<CloudServiceTask> getServiceTasksByStatus(
+        @Param("processInstanceId") String processInstanceId,
+        @Param("status") String status
+    );
 
     @RequestLine("GET /admin/v1/service-tasks/{serviceTaskId}/integration-context")
     @Headers("Content-Type: application/json")
     CloudIntegrationContext getCloudIntegrationContext(@Param("serviceTaskId") String serviceTaskId);
 
     @RequestLine("GET /admin/v1/process-instances?processDefinitionKey={processDefinitionKey}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(@Param("processDefinitionKey") String processDefinitionKey);
-
+    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
+        @Param("processDefinitionKey") String processDefinitionKey
+    );
 }

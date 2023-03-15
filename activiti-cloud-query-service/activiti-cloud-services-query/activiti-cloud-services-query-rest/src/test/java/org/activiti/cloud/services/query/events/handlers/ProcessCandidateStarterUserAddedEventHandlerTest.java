@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
@@ -26,15 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCandidateStarterUserAddedEventHandlerTest {
@@ -48,15 +47,21 @@ public class ProcessCandidateStarterUserAddedEventHandlerTest {
     @Test
     public void handleShouldStoreNewProcessCandidateStarterUser() {
         //given
-        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(UUID.randomUUID().toString(),
-                                                                        UUID.randomUUID().toString());
-        CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(candidateUser);
+        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString()
+        );
+        CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(
+            candidateUser
+        );
 
         //when
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessCandidateStarterUserEntity> captor = ArgumentCaptor.forClass(ProcessCandidateStarterUserEntity.class);
+        ArgumentCaptor<ProcessCandidateStarterUserEntity> captor = ArgumentCaptor.forClass(
+            ProcessCandidateStarterUserEntity.class
+        );
         verify(entityManager).persist(captor.capture());
         assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
         assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
@@ -65,13 +70,22 @@ public class ProcessCandidateStarterUserAddedEventHandlerTest {
     @Test
     public void handleShouldNotStoreProcessCandidateStarterUserIfExists() {
         //given
-        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(UUID.randomUUID().toString(),
-                                                                                            UUID.randomUUID().toString());
-        CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(candidateUser);
+        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString()
+        );
+        CloudProcessCandidateStarterUserAddedEventImpl event = new CloudProcessCandidateStarterUserAddedEventImpl(
+            candidateUser
+        );
 
         //when
-        when(entityManager.find(ProcessCandidateStarterUserEntity.class,
-             new ProcessCandidateStarterUserId(candidateUser.getProcessDefinitionId(), candidateUser.getUserId()))).thenReturn(new ProcessCandidateStarterUserEntity());
+        when(
+            entityManager.find(
+                ProcessCandidateStarterUserEntity.class,
+                new ProcessCandidateStarterUserId(candidateUser.getProcessDefinitionId(), candidateUser.getUserId())
+            )
+        )
+            .thenReturn(new ProcessCandidateStarterUserEntity());
         handler.handle(event);
 
         //then
@@ -84,7 +98,9 @@ public class ProcessCandidateStarterUserAddedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name());
+        assertThat(handledEvent)
+            .isEqualTo(
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_ADDED.name()
+            );
     }
-
 }

@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -53,14 +52,17 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,
-                                                                                       SimpMessageHeaderAccessor.class);
-                if (accessor != null && messageSelector.test(accessor)) {
-                    Optional.ofNullable(accessor.getHeader(X_AUTHORIZATION))
+        registration.interceptors(
+            new ChannelInterceptor() {
+                @Override
+                public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                    SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(
+                        message,
+                        SimpMessageHeaderAccessor.class
+                    );
+                    if (accessor != null && messageSelector.test(accessor)) {
+                        Optional
+                            .ofNullable(accessor.getHeader(X_AUTHORIZATION))
                             .map(String.class::cast)
                             .map(header -> header.replace(BEARER, "").trim())
                             .ifPresent(bearer -> {
@@ -70,17 +72,16 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
 
                                 accessor.setUser(principal);
                             });
+                    }
+                    return message;
                 }
-                return message;
             }
-        });
+        );
     }
-
 
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
-
 
     public void setMessageSelector(Predicate<SimpMessageHeaderAccessor> messageSelector) {
         this.messageSelector = messageSelector;
@@ -94,5 +95,4 @@ public class JWSAuthenticationInterceptorConfigurer implements WebSocketMessageB
             return headerValues.contains(value);
         }
     }
-
 }

@@ -30,7 +30,10 @@ public class SchemaService {
     }
 
     public Optional<JSONObject> getJsonSchemaFromType(String schemaType) {
-        return schemaProviders.stream().filter(schema -> schema.getModelType().equalsIgnoreCase(schemaType)).findFirst()
+        return schemaProviders
+            .stream()
+            .filter(schema -> schema.getModelType().equalsIgnoreCase(schemaType))
+            .findFirst()
             .map(SchemaProvider::getJsonSchemaForType);
     }
 }

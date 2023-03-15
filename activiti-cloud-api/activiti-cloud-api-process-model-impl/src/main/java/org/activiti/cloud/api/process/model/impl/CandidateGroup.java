@@ -23,8 +23,7 @@ public class CandidateGroup {
         this.group = group;
     }
 
-    public CandidateGroup() {
-    }
+    public CandidateGroup() {}
 
     public String getGroup() {
         return group;

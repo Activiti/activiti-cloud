@@ -27,7 +27,6 @@ public class IntegrationResultSenderImpl implements IntegrationResultSender {
     private final IntegrationResultChannelResolver resolver;
 
     public IntegrationResultSenderImpl(StreamBridge streamBridge, IntegrationResultChannelResolver resolver) {
-
         this.streamBridge = streamBridge;
         this.resolver = resolver;
     }

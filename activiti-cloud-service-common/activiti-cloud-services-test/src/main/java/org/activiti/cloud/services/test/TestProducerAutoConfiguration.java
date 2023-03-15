@@ -35,5 +35,4 @@ public class TestProducerAutoConfiguration implements StreamProducer {
     public MyProducer myProducer(@Qualifier(PRODUCER) MessageChannel producer) {
         return new MyProducer(producer);
     }
-
 }

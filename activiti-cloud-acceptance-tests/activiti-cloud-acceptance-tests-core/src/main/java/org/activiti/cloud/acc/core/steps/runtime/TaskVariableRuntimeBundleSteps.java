@@ -46,28 +46,25 @@ public class TaskVariableRuntimeBundleSteps {
 
     @Step
     public void updateVariable(String taskId, String name, Object value) {
-
-        taskVariableApiClient.updateVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-            .withVariable(name, value).build());
+        taskVariableApiClient.updateVariable(
+            taskId,
+            name,
+            TaskPayloadBuilder.updateVariable().withTaskId(taskId).withVariable(name, value).build()
+        );
     }
 
     @Step
-    public void createVariable(String taskId,
-        String name,
-        Object value) {
-
-        taskVariableApiClient.createVariable(taskId,
-            TaskPayloadBuilder
-                .createVariable()
-                .withTaskId(taskId)
-                .withVariable(name,
-                    value)
-                .build());
+    public void createVariable(String taskId, String name, Object value) {
+        taskVariableApiClient.createVariable(
+            taskId,
+            TaskPayloadBuilder.createVariable().withTaskId(taskId).withVariable(name, value).build()
+        );
     }
 
     @Step
     public Collection<CloudVariableInstance> getVariables(String taskId) {
-        return taskVariableApiClient.getVariables(taskId)
+        return taskVariableApiClient
+            .getVariables(taskId)
             .getContent()
             .stream()
             .map(EntityModel::getContent)

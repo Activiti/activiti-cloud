@@ -19,6 +19,11 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import java.util.List;
+import java.util.Optional;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -37,12 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
 
 public class ProcessInstanceService {
 
@@ -63,12 +62,14 @@ public class ProcessInstanceService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ProcessInstanceService(ProcessInstanceRepository processInstanceRepository,
-                                  TaskRepository taskRepository,
-                                  ProcessInstanceRestrictionService processInstanceRestrictionService,
-                                  SecurityPoliciesManager securityPoliciesApplicationService,
-                                  SecurityManager securityManager,
-                                  EntityFinder entityFinder) {
+    public ProcessInstanceService(
+        ProcessInstanceRepository processInstanceRepository,
+        TaskRepository taskRepository,
+        ProcessInstanceRestrictionService processInstanceRestrictionService,
+        SecurityPoliciesManager securityPoliciesApplicationService,
+        SecurityManager securityManager,
+        EntityFinder entityFinder
+    ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
         this.processInstanceRestrictionService = processInstanceRestrictionService;
@@ -78,35 +79,54 @@ public class ProcessInstanceService {
     }
 
     public Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable) {
-
-        Predicate transformedPredicate = processInstanceRestrictionService.restrictProcessInstanceQuery(Optional.ofNullable(predicate)
-                .orElseGet(BooleanBuilder::new),
-            SecurityPolicyAccess.READ);
+        Predicate transformedPredicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new),
+            SecurityPolicyAccess.READ
+        );
 
         return processInstanceRepository.findAll(transformedPredicate, pageable);
     }
 
     @Transactional
-    public Page<ProcessInstanceEntity> findAllWithVariables(Predicate predicate, List<String> variableKeys, Pageable pageable) {
+    public Page<ProcessInstanceEntity> findAllWithVariables(
+        Predicate predicate,
+        List<String> variableKeys,
+        Pageable pageable
+    ) {
         Session session = entityManager.unwrap(Session.class);
         Filter filter = session.enableFilter("variablesFilter");
         filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
         // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
         // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
-        processInstanceEntities.forEach(processInstanceEntity -> Hibernate.initialize(processInstanceEntity.getVariables()));
+        processInstanceEntities.forEach(processInstanceEntity ->
+            Hibernate.initialize(processInstanceEntity.getVariables())
+        );
         return processInstanceEntities;
     }
 
     public ProcessInstanceEntity findById(String processInstanceId) {
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository, processInstanceId,
-            String.format("Unable to find process instance for the given id:'%s'", processInstanceId));
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
+            processInstanceId,
+            String.format("Unable to find process instance for the given id:'%s'", processInstanceId)
+        );
 
         if (!canRead(processInstanceEntity)) {
-            LOGGER.debug(String.format("User %s not permitted to access definition %s and/or process instance id %s",
-                securityManager.getAuthenticatedUserId(), processInstanceEntity.getProcessDefinitionKey(), processInstanceId));
-            throw new ActivitiForbiddenException(String.format("Operation not permitted for %s and/or process instance",
-                processInstanceEntity.getProcessDefinitionKey()));
+            LOGGER.debug(
+                String.format(
+                    "User %s not permitted to access definition %s and/or process instance id %s",
+                    securityManager.getAuthenticatedUserId(),
+                    processInstanceEntity.getProcessDefinitionKey(),
+                    processInstanceId
+                )
+            );
+            throw new ActivitiForbiddenException(
+                String.format(
+                    "Operation not permitted for %s and/or process instance",
+                    processInstanceEntity.getProcessDefinitionKey()
+                )
+            );
         }
         return processInstanceEntity;
     }
@@ -114,13 +134,26 @@ public class ProcessInstanceService {
     public Page<ProcessInstanceEntity> subprocesses(String processInstanceId, Predicate predicate, Pageable pageable) {
         Predicate transformedPredicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
-        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(processInstanceRepository,
+        ProcessInstanceEntity processInstanceEntity = entityFinder.findById(
+            processInstanceRepository,
             processInstanceId,
-            "Unable to find process for the given id:'" + processInstanceId + "'");
+            "Unable to find process for the given id:'" + processInstanceId + "'"
+        );
 
         if (!canRead(processInstanceEntity)) {
-            LOGGER.debug("User " + securityManager.getAuthenticatedUserId() + " not permitted to access definition " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance id " + processInstanceId);
-            throw new ActivitiForbiddenException("Operation not permitted for " + processInstanceEntity.getProcessDefinitionKey() + " and/or process instance");
+            LOGGER.debug(
+                "User " +
+                securityManager.getAuthenticatedUserId() +
+                " not permitted to access definition " +
+                processInstanceEntity.getProcessDefinitionKey() +
+                " and/or process instance id " +
+                processInstanceId
+            );
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for " +
+                processInstanceEntity.getProcessDefinitionKey() +
+                " and/or process instance"
+            );
         }
 
         QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
@@ -131,10 +164,16 @@ public class ProcessInstanceService {
     }
 
     private boolean canRead(ProcessInstanceEntity processInstanceEntity) {
-        return securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(),
-            processInstanceEntity.getServiceName()) &&
-            (securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
-                isInvolvedInATask(processInstanceEntity.getId()));
+        return (
+            securityPoliciesApplicationService.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            ) &&
+            (
+                securityManager.getAuthenticatedUserId().equals(processInstanceEntity.getInitiator()) ||
+                isInvolvedInATask(processInstanceEntity.getId())
+            )
+        );
     }
 
     private boolean isInvolvedInATask(String processInstanceId) {
@@ -143,7 +182,8 @@ public class ProcessInstanceService {
 
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
 
-        BooleanExpression taskInvolved = taskEntity.assignee.eq(authenticatedUserId)
+        BooleanExpression taskInvolved = taskEntity.assignee
+            .eq(authenticatedUserId)
             .or(taskEntity.owner.eq(authenticatedUserId))
             .or(taskEntity.taskCandidateUsers.any().userId.eq(authenticatedUserId));
 

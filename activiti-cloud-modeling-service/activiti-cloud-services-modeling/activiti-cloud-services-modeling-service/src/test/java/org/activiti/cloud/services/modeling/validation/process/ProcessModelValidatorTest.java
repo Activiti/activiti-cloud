@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,12 @@ public class ProcessModelValidatorTest {
     private ProcessModelContentConverter processModelContentConverter;
 
     @Spy
-    Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(Arrays.asList(new BpmnModelValidator(), new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter)));
+    Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(
+        Arrays.asList(
+            new BpmnModelValidator(),
+            new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter)
+        )
+    );
 
     @Test
     void should_validateWithNoErrors_when_categoryIsSet() throws Exception {
@@ -54,12 +60,11 @@ public class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("test-category");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
-            .willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
-        processModelValidator.validate(bytesFromModel,
-            new ProjectValidationContext()));
+        Throwable exception = catchThrowable(() ->
+            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
+        );
 
         assertThat(exception).isNull();
     }
@@ -70,12 +75,11 @@ public class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
-            .willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable( () ->
-            processModelValidator.validate(bytesFromModel,
-                new ProjectValidationContext()));
+        Throwable exception = catchThrowable(() ->
+            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
+        );
 
         assertThat(exception).isNull();
     }
@@ -85,12 +89,11 @@ public class ProcessModelValidatorTest {
         BpmnModel bpmnModel = new BpmnModel();
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
-            .willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
 
         Throwable exception = catchThrowable(() ->
-            processModelValidator.validate(bytesFromModel,
-                new ProjectValidationContext()));
+            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
+        );
 
         assertThat(exception)
             .isInstanceOf(SemanticModelValidationException.class)

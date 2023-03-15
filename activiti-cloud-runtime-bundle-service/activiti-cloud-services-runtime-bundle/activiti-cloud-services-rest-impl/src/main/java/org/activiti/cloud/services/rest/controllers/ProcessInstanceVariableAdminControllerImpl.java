@@ -40,9 +40,11 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     private final CollectionModelAssembler resourcesAssembler;
 
     @Autowired
-    public ProcessInstanceVariableAdminControllerImpl(ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
-                                                      ProcessAdminRuntime processAdminRuntime,
-                                                      CollectionModelAssembler resourcesAssembler) {
+    public ProcessInstanceVariableAdminControllerImpl(
+        ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        ProcessAdminRuntime processAdminRuntime,
+        CollectionModelAssembler resourcesAssembler
+    ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.resourcesAssembler = resourcesAssembler;
@@ -50,16 +52,19 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
 
     @Override
     public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(String processInstanceId) {
-        return resourcesAssembler.toCollectionModel(processAdminRuntime.variables(ProcessPayloadBuilder.variables()
-                .withProcessInstanceId(processInstanceId)
-                .build()),
-            variableRepresentationModelAssembler);
+        return resourcesAssembler.toCollectionModel(
+            processAdminRuntime.variables(
+                ProcessPayloadBuilder.variables().withProcessInstanceId(processInstanceId).build()
+            ),
+            variableRepresentationModelAssembler
+        );
     }
 
     @Override
-    public ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
-                                                @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-
+    public ResponseEntity<Void> updateVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
+    ) {
         if (setProcessVariablesPayload != null) {
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }
@@ -69,11 +74,12 @@ public class ProcessInstanceVariableAdminControllerImpl implements ProcessInstan
     }
 
     @Override
-    public ResponseEntity<Void> removeVariables(@PathVariable String processInstanceId,
-                                                @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload) {
-        if (removeProcessVariablesPayload!=null) {
+    public ResponseEntity<Void> removeVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload
+    ) {
+        if (removeProcessVariablesPayload != null) {
             removeProcessVariablesPayload.setProcessInstanceId(processInstanceId);
-
         }
         processAdminRuntime.removeVariables(removeProcessVariablesPayload);
 

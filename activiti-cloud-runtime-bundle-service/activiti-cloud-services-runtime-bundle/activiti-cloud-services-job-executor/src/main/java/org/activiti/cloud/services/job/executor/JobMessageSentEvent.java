@@ -16,11 +16,11 @@
 package org.activiti.cloud.services.job.executor;
 
 import java.util.Objects;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
 
 public class JobMessageSentEvent extends ApplicationEvent {
+
     private static final long serialVersionUID = 1L;
     private final Message<?> message;
 
@@ -28,7 +28,6 @@ public class JobMessageSentEvent extends ApplicationEvent {
         super(source);
         this.message = message;
     }
-
 
     public Message<?> getMessage() {
         return message;
@@ -41,16 +40,12 @@ public class JobMessageSentEvent extends ApplicationEvent {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         JobMessageSentEvent other = (JobMessageSentEvent) obj;
         return Objects.equals(message, other.message);
     }
-
 
     @Override
     public String toString() {
@@ -62,6 +57,4 @@ public class JobMessageSentEvent extends ApplicationEvent {
         builder.append("]");
         return builder.toString();
     }
-
-
 }

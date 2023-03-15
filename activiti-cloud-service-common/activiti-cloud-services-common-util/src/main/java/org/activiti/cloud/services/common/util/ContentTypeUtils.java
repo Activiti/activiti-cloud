@@ -62,8 +62,8 @@ public final class ContentTypeUtils {
      */
     public static Optional<String> getContentTypeByExtension(String extension) {
         return Optional.ofNullable(
-            Optional.ofNullable(DEFAULT.get(extension))
-                .orElseGet(() -> CONTENT_TYPES.get(extension)));
+            Optional.ofNullable(DEFAULT.get(extension)).orElseGet(() -> CONTENT_TYPES.get(extension))
+        );
     }
 
     /**
@@ -97,56 +97,50 @@ public final class ContentTypeUtils {
     }
 
     public static String toJsonFilename(String filename) {
-        return setExtension(filename,
-            JSON);
+        return setExtension(filename, JSON);
     }
 
     public static String changeToJsonFilename(String filename) {
-        return changeExtension(filename,
-            JSON);
+        return changeExtension(filename, JSON);
     }
 
-    public static String setExtension(String filename,
-        String extension) {
-
+    public static String setExtension(String filename, String extension) {
         if (filename == null) {
             return null;
         }
 
-        return Optional.ofNullable(extension)
+        return Optional
+            .ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> filename + fullExtension)
             .orElse(filename);
     }
 
-    public static String changeExtension(String filename,
-        String extension) {
-
+    public static String changeExtension(String filename, String extension) {
         if (filename == null) {
             return null;
         }
 
-        return Optional.ofNullable(extension)
+        return Optional
+            .ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(ext -> !filename.endsWith(ext))
             .map(fullExtension -> removeExtension(filename) + fullExtension)
             .orElse(filename);
     }
 
-    public static String removeExtension(String filename,
-        String extension) {
-
+    public static String removeExtension(String filename, String extension) {
         if (filename == null) {
             return null;
         }
 
-        return Optional.ofNullable(extension)
+        return Optional
+            .ofNullable(extension)
             .map(ContentTypeUtils::fullExtension)
             .filter(filename::endsWith)
             .map(filename::lastIndexOf)
-            .map(extensionIndex -> filename.substring(0,
-                extensionIndex))
+            .map(extensionIndex -> filename.substring(0, extensionIndex))
             .orElse(filename);
     }
 
@@ -154,9 +148,7 @@ public final class ContentTypeUtils {
         return EXTENSION_SEPARATOR + extension;
     }
 
-    private ContentTypeUtils() {
-
-    }
+    private ContentTypeUtils() {}
 
     static String getExtension(String fileName) {
         if (fileName == null) {
@@ -170,7 +162,6 @@ public final class ContentTypeUtils {
     }
 
     private static int getIndexOfExtension(String path) {
-
         int extensionPos = path.lastIndexOf(EXTENSION_SEPARATOR);
         int lastUnixPos = path.lastIndexOf(UNIX_SEPARATOR);
         int lastWindowsPos = path.lastIndexOf(WINDOWS_SEPARATOR);
@@ -181,7 +172,6 @@ public final class ContentTypeUtils {
     }
 
     static String removeExtension(final String fileName) {
-
         if (fileName == null) {
             return null;
         }
@@ -191,7 +181,5 @@ public final class ContentTypeUtils {
         }
 
         return fileName.substring(0, index);
-
     }
-
 }

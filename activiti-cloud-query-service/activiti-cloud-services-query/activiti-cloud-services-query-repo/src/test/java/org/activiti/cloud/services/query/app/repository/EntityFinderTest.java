@@ -15,20 +15,19 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EntityFinderTest {
@@ -47,9 +46,11 @@ public class EntityFinderTest {
         given(repository.findById(processInstanceId)).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        ProcessInstanceEntity retrieveProcessInstanceEntity = entityFinder.findById(repository,
-                                                                                    processInstanceId,
-                                                                                    "error");
+        ProcessInstanceEntity retrieveProcessInstanceEntity = entityFinder.findById(
+            repository,
+            processInstanceId,
+            "error"
+        );
 
         //then
         assertThat(retrieveProcessInstanceEntity).isEqualTo(processInstanceEntity);
@@ -76,9 +77,7 @@ public class EntityFinderTest {
         given(repository.findOne(predicate)).willReturn(Optional.of(processInstanceEntity));
 
         //when
-        ProcessInstanceEntity retrievedProcessInstanceEntity = entityFinder.findOne(repository,
-                                                                                    predicate,
-                                                                                    "error");
+        ProcessInstanceEntity retrievedProcessInstanceEntity = entityFinder.findOne(repository, predicate, "error");
 
         //then
         assertThat(retrievedProcessInstanceEntity).isEqualTo(processInstanceEntity);
@@ -96,5 +95,4 @@ public class EntityFinderTest {
             .isThrownBy(() -> entityFinder.findOne(repository, predicate, "Error"))
             .withMessageContaining("Error");
     }
-
 }

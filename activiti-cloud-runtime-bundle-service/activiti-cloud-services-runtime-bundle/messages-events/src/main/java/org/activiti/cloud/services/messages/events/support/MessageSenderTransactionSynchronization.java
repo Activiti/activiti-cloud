@@ -29,8 +29,7 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
     private final Message<?> message;
     private final MessageChannel messageChannel;
 
-    public MessageSenderTransactionSynchronization(Message<?> message,
-                                                  MessageChannel messageChannel) {
+    public MessageSenderTransactionSynchronization(Message<?> message, MessageChannel messageChannel) {
         this.message = message;
         this.messageChannel = messageChannel;
     }
@@ -42,11 +41,10 @@ public class MessageSenderTransactionSynchronization implements TransactionSynch
         try {
             boolean sent = messageChannel.send(message);
 
-            if(!sent) {
+            if (!sent) {
                 throw new MessageDispatchingException(message);
             }
-
-        } catch(Exception cause) {
+        } catch (Exception cause) {
             logger.error("Sending bpmn message {} failed due to error: {}", message, cause.getMessage());
         }
     }

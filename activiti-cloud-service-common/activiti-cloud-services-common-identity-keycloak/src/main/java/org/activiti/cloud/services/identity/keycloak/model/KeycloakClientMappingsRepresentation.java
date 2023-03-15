@@ -43,8 +43,7 @@ public class KeycloakClientMappingsRepresentation {
         return mappings;
     }
 
-    public void setMappings(
-        List<KeycloakRoleMapping> mappings) {
+    public void setMappings(List<KeycloakRoleMapping> mappings) {
         this.mappings = mappings;
     }
 }

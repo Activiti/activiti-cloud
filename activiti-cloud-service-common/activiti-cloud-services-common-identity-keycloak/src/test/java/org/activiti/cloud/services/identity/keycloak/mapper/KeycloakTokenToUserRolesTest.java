@@ -39,14 +39,10 @@ public class KeycloakTokenToUserRolesTest {
 
         UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
 
-        assertThat(userRoles.getGlobalAccess().getRoles())
-            .hasSize(3)
-            .containsOnly("role1", "role2", "role3");
+        assertThat(userRoles.getGlobalAccess().getRoles()).hasSize(3).containsOnly("role1", "role2", "role3");
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
-            .containsOnly(
-                tuple("resource1", List.of("role1")),
-                tuple("resource2", List.of("role1", "role2")));
+            .containsOnly(tuple("resource1", List.of("role1")), tuple("resource2", List.of("role1", "role2")));
     }
 
     @Test
@@ -60,11 +56,8 @@ public class KeycloakTokenToUserRolesTest {
         mockJwt(false, true);
 
         UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
-        assertThat(userRoles.getGlobalAccess().getRoles())
-            .hasSize(3)
-            .containsOnly("role1", "role2", "role3");
-        assertThat(userRoles.getApplicationAccess())
-            .isEmpty();
+        assertThat(userRoles.getGlobalAccess().getRoles()).hasSize(3).containsOnly("role1", "role2", "role3");
+        assertThat(userRoles.getApplicationAccess()).isEmpty();
     }
 
     @Test
@@ -74,48 +67,47 @@ public class KeycloakTokenToUserRolesTest {
         UserRoles userRoles = KeycloakTokenToUserRoles.toUserRoles(jwt);
         assertThat(userRoles.getApplicationAccess())
             .extracting(UserApplicationAccess::getName, UserApplicationAccess::getRoles)
-            .containsOnly(
-                tuple("resource1", List.of("role1")),
-                tuple("resource2", List.of("role1", "role2")));
+            .containsOnly(tuple("resource1", List.of("role1")), tuple("resource2", List.of("role1", "role2")));
 
-        assertThat(userRoles.getGlobalAccess().getRoles())
-            .isEmpty();
+        assertThat(userRoles.getGlobalAccess().getRoles()).isEmpty();
     }
 
-    private void mockJwt(boolean withResourceRoleMappings,
-        boolean withRealmRoleMappings) {
-
+    private void mockJwt(boolean withResourceRoleMappings, boolean withRealmRoleMappings) {
         JSONObject resourceRoleMappings;
         JSONObject realmRoleMappings;
 
         if (withResourceRoleMappings) {
-            resourceRoleMappings = new JSONObject(Map.of(
-                "resource1", new JSONObject(Map.of("roles", List.of("role1"))),
-                "resource2", new JSONObject(Map.of("roles", List.of("role1", "role2")))
-            ));
+            resourceRoleMappings =
+                new JSONObject(
+                    Map.of(
+                        "resource1",
+                        new JSONObject(Map.of("roles", List.of("role1"))),
+                        "resource2",
+                        new JSONObject(Map.of("roles", List.of("role1", "role2")))
+                    )
+                );
         } else {
             resourceRoleMappings = null;
         }
 
         if (withRealmRoleMappings) {
-            realmRoleMappings = new JSONObject(Map.of(
-                "roles", List.of("role1", "role2", "role3")
-            ));
+            realmRoleMappings = new JSONObject(Map.of("roles", List.of("role1", "role2", "role3")));
         } else {
             realmRoleMappings = null;
         }
 
-        jwt = Jwt.withTokenValue("mock-token-value")
-            .header("mock-header", "mock-header-value")
-            .claims(e -> {
-                if (withRealmRoleMappings) {
-                    e.put(REALM, realmRoleMappings);
-                }
-                if (withResourceRoleMappings) {
-                    e.put(RESOURCE, resourceRoleMappings);
-                }
-            })
-            .build();
+        jwt =
+            Jwt
+                .withTokenValue("mock-token-value")
+                .header("mock-header", "mock-header-value")
+                .claims(e -> {
+                    if (withRealmRoleMappings) {
+                        e.put(REALM, realmRoleMappings);
+                    }
+                    if (withResourceRoleMappings) {
+                        e.put(RESOURCE, resourceRoleMappings);
+                    }
+                })
+                .build();
     }
-
 }

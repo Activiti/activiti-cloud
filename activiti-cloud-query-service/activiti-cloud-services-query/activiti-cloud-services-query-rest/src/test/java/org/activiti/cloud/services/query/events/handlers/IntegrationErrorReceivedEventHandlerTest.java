@@ -59,10 +59,12 @@ class IntegrationErrorReceivedEventHandlerTest {
         String fileName = "exampleFileName";
         String sourceDeclaringClass = "java.lang.Example";
         String sourceMethodName = "doSomething";
-        StackTraceElement originalError = new StackTraceElement(sourceDeclaringClass,
-                                                                sourceMethodName,
-                                                                fileName,
-                                                                lineNumber);
+        StackTraceElement originalError = new StackTraceElement(
+            sourceDeclaringClass,
+            sourceMethodName,
+            fileName,
+            lineNumber
+        );
 
         IntegrationContextEntity integrationContext = new IntegrationContextEntity();
         when(cloudIntegrationEvent.getErrorMessage()).thenReturn(errorMessage);
@@ -78,8 +80,7 @@ class IntegrationErrorReceivedEventHandlerTest {
         //then
         verify(entityManager, times(2)).persist(entityManagerPersistCaptor.capture());
         List<Object> allCapturedValues = entityManagerPersistCaptor.getAllValues();
-        assertThat(allCapturedValues)
-            .hasSize(2);
+        assertThat(allCapturedValues).hasSize(2);
 
         IntegrationContextEntity integrationContextEntity = (IntegrationContextEntity) allCapturedValues.get(0);
         List<StackTraceElement> stackTraceElements = integrationContextEntity.getStackTraceElements();

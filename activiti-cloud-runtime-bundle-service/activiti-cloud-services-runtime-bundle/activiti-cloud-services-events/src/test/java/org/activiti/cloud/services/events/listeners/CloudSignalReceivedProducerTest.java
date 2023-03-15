@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
 import org.activiti.api.runtime.event.impl.BPMNSignalReceivedEventImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNSignalReceivedEventImpl;
@@ -25,9 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 public class CloudSignalReceivedProducerTest {
 
@@ -36,6 +36,7 @@ public class CloudSignalReceivedProducerTest {
 
     @Mock
     private ToCloudProcessRuntimeEventConverter eventConverter;
+
     @Mock
     private ProcessEngineEventsAggregator eventsAggregator;
 

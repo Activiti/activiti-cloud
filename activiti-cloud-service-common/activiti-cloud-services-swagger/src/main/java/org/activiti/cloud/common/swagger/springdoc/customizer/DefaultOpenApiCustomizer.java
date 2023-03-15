@@ -17,5 +17,4 @@ package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import org.springdoc.core.customizers.OpenApiCustomiser;
 
-public interface DefaultOpenApiCustomizer extends OpenApiCustomiser {
-}
+public interface DefaultOpenApiCustomizer extends OpenApiCustomiser {}

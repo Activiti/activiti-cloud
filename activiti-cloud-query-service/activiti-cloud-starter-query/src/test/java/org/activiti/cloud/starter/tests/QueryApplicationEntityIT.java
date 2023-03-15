@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
+import java.util.Collection;
 import java.util.UUID;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
@@ -39,25 +44,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import java.util.Collection;
-
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class QueryApplicationEntityIT {
 
     private static final String APPS_URL = "/v1/applications";
     private static final String ADMIN_APPS_URL = "/admin/v1/applications";
 
-    private static final ParameterizedTypeReference<PagedModel<ApplicationEntity>> PAGED_APPLICATION_RESPONSE_TYPE =
-            new ParameterizedTypeReference<PagedModel<ApplicationEntity>>() {
-    };
+    private static final ParameterizedTypeReference<PagedModel<ApplicationEntity>> PAGED_APPLICATION_RESPONSE_TYPE = new ParameterizedTypeReference<PagedModel<ApplicationEntity>>() {};
 
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
@@ -88,84 +87,109 @@ public class QueryApplicationEntityIT {
     }
 
     private void getDeployedApplication(String url) {
-        CloudApplicationDeployedEvent applicationDeployed1 = buildCloudApplicationDeployedEvent("deployment1",
-                "appName", 1);
-        CloudApplicationDeployedEvent applicationDeployed2 = buildCloudApplicationDeployedEvent("deployment2",
-                "appName", 2);
-        CloudApplicationDeployedEvent applicationDeployedDuplicated = buildCloudApplicationDeployedEvent("deployment3",
-                "appName", 1);
+        CloudApplicationDeployedEvent applicationDeployed1 = buildCloudApplicationDeployedEvent(
+            "deployment1",
+            "appName",
+            1
+        );
+        CloudApplicationDeployedEvent applicationDeployed2 = buildCloudApplicationDeployedEvent(
+            "deployment2",
+            "appName",
+            2
+        );
+        CloudApplicationDeployedEvent applicationDeployedDuplicated = buildCloudApplicationDeployedEvent(
+            "deployment3",
+            "appName",
+            1
+        );
         producer.send(applicationDeployed1, applicationDeployed2, applicationDeployedDuplicated);
 
-        await().untilAsserted(() -> {
-            assertThat(applicationRepository.findAll()).hasSize(2);
-        });
+        await()
+            .untilAsserted(() -> {
+                assertThat(applicationRepository.findAll()).hasSize(2);
+            });
 
-        await().untilAsserted(() -> {
-            ResponseEntity<PagedModel<ApplicationEntity>> responseEntity = testRestTemplate.exchange(url,
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<PagedModel<ApplicationEntity>> responseEntity = testRestTemplate.exchange(
+                    url,
                     HttpMethod.GET,
                     identityTokenProducer.entityWithAuthorizationHeader(),
-                    PAGED_APPLICATION_RESPONSE_TYPE);
+                    PAGED_APPLICATION_RESPONSE_TYPE
+                );
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ApplicationEntity> applicationEntities = responseEntity.getBody().getContent();
-            assertThat(applicationEntities)
-                    .extracting(ApplicationEntity::getId,
-                            ApplicationEntity::getName,
-                            ApplicationEntity::getVersion)
-                    .contains(tuple(applicationDeployed1.getEntity().getId(),
+                Collection<ApplicationEntity> applicationEntities = responseEntity.getBody().getContent();
+                assertThat(applicationEntities)
+                    .extracting(ApplicationEntity::getId, ApplicationEntity::getName, ApplicationEntity::getVersion)
+                    .contains(
+                        tuple(
+                            applicationDeployed1.getEntity().getId(),
                             applicationDeployed1.getAppName(),
-                            applicationDeployed1.getEntity().getVersion().toString()),
-                            tuple(applicationDeployed2.getEntity().getId(),
-                                    applicationDeployed2.getAppName(),
-                                    applicationDeployed2.getEntity().getVersion().toString()));
-        });
+                            applicationDeployed1.getEntity().getVersion().toString()
+                        ),
+                        tuple(
+                            applicationDeployed2.getEntity().getId(),
+                            applicationDeployed2.getAppName(),
+                            applicationDeployed2.getEntity().getVersion().toString()
+                        )
+                    );
+            });
     }
 
     @Test
     public void shouldGetDeployedApplicationFilteredByName() {
         String appToFilter = "appName";
-        CloudApplicationDeployedEvent applicationDeployed1 = buildCloudApplicationDeployedEvent("deployment1",
-                appToFilter, 1);
-        CloudApplicationDeployedEvent applicationDeployed2 = buildCloudApplicationDeployedEvent("deployment2",
-                appToFilter, 2);
-        CloudApplicationDeployedEvent applicationDeployedDuplicated = buildCloudApplicationDeployedEvent("deployment3",
-                "appName_test", 1);
+        CloudApplicationDeployedEvent applicationDeployed1 = buildCloudApplicationDeployedEvent(
+            "deployment1",
+            appToFilter,
+            1
+        );
+        CloudApplicationDeployedEvent applicationDeployed2 = buildCloudApplicationDeployedEvent(
+            "deployment2",
+            appToFilter,
+            2
+        );
+        CloudApplicationDeployedEvent applicationDeployedDuplicated = buildCloudApplicationDeployedEvent(
+            "deployment3",
+            "appName_test",
+            1
+        );
         producer.send(applicationDeployed1, applicationDeployed2, applicationDeployedDuplicated);
 
-        await().untilAsserted(() -> {
-            ResponseEntity<PagedModel<ApplicationEntity>> responseEntity =
-                    testRestTemplate.exchange(APPS_URL + "?name=" + appToFilter,
-                            HttpMethod.GET,
-                            identityTokenProducer.entityWithAuthorizationHeader(),
-                            PAGED_APPLICATION_RESPONSE_TYPE);
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<PagedModel<ApplicationEntity>> responseEntity = testRestTemplate.exchange(
+                    APPS_URL + "?name=" + appToFilter,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    PAGED_APPLICATION_RESPONSE_TYPE
+                );
 
-            //then
-            assertThat(responseEntity).isNotNull();
-            assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            Collection<ApplicationEntity> applicationEntities = responseEntity.getBody().getContent();
-            assertThat(applicationEntities)
-                    .extracting(ApplicationEntity::getName)
-                    .containsOnly(appToFilter);
-        });
+                Collection<ApplicationEntity> applicationEntities = responseEntity.getBody().getContent();
+                assertThat(applicationEntities).extracting(ApplicationEntity::getName).containsOnly(appToFilter);
+            });
     }
 
-    private CloudApplicationDeployedEvent buildCloudApplicationDeployedEvent(String id,
-                                                                             String name, int version){
+    private CloudApplicationDeployedEvent buildCloudApplicationDeployedEvent(String id, String name, int version) {
         DeploymentImpl deployment = new DeploymentImpl();
         deployment.setId(id);
         deployment.setName(name);
         deployment.setVersion(version);
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEventImpl =
-            new CloudApplicationDeployedEventImpl(
-                        UUID.randomUUID().toString(),
-                        System.currentTimeMillis(),
-                        deployment,
-                        ApplicationEvents.APPLICATION_DEPLOYED);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEventImpl = new CloudApplicationDeployedEventImpl(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            deployment,
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
         cloudApplicationDeployedEventImpl.setAppName(name);
         return cloudApplicationDeployedEventImpl;
     }

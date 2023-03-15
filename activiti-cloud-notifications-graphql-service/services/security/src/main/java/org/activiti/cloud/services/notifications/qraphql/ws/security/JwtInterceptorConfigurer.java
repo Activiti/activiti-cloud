@@ -48,37 +48,42 @@ public class JwtInterceptorConfigurer implements WebSocketMessageBrokerConfigure
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message,
-                                                                                       SimpMessageHeaderAccessor.class);
-                if (accessor != null) {
-                    if(headerValues.contains(accessor.getHeader(headerName))) {
-                        Optional.ofNullable(accessor.getUser())
+        registration.interceptors(
+            new ChannelInterceptor() {
+                @Override
+                public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                    SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(
+                        message,
+                        SimpMessageHeaderAccessor.class
+                    );
+                    if (accessor != null) {
+                        if (headerValues.contains(accessor.getHeader(headerName))) {
+                            Optional
+                                .ofNullable(accessor.getUser())
                                 .filter(JWSAuthentication.class::isInstance)
                                 .map(JWSAuthentication.class::cast)
                                 .ifPresent(jWSAuthentication -> {
                                     try {
-                                        logger.info("Verifying Access Token for {}", accessor.getHeader(GRAPHQL_MESSAGE_TYPE));
+                                        logger.info(
+                                            "Verifying Access Token for {}",
+                                            accessor.getHeader(GRAPHQL_MESSAGE_TYPE)
+                                        );
                                         tokenVerifier.verifyToken((String) jWSAuthentication.getCredentials());
                                     } catch (Exception e) {
                                         throw new BadCredentialsException("Invalid token", e);
                                     }
                                 });
+                        }
                     }
+                    return message;
                 }
-                return message;
             }
-        });
+        );
     }
-
 
     public void setHeaderValues(List<String> headerValues) {
         this.headerValues = headerValues;
     }
-
 
     public void setHeaderName(String headerName) {
         this.headerName = headerName;

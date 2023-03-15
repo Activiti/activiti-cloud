@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.common.file;
 
-import java.util.Optional;
-
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.isJsonContentType;
+
+import java.util.Optional;
 
 /**
  * Generic file content
@@ -30,9 +30,7 @@ public class FileContent {
 
     private final byte[] fileContent;
 
-    public FileContent(String filename,
-                       String contentType,
-                       byte[] fileContent) {
+    public FileContent(String filename, String contentType, byte[] fileContent) {
         this.filename = filename;
         this.contentType = contentType;
         this.fileContent = fileContent;
@@ -56,8 +54,6 @@ public class FileContent {
 
     @Override
     public String toString() {
-        return Optional.ofNullable(fileContent)
-                .map(String::new)
-                .orElse("");
+        return Optional.ofNullable(fileContent).map(String::new).orElse("");
     }
 }

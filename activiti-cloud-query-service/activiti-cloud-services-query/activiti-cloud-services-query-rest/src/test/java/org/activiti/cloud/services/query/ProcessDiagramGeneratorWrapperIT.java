@@ -103,10 +103,8 @@ public class ProcessDiagramGeneratorWrapperIT {
         BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(subProcessTest.getInputStream());
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
-        when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
-        when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("");
+        when(processDiagramGenerator.isGenerateDefaultDiagram()).thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName()).thenReturn("");
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -129,10 +127,8 @@ public class ProcessDiagramGeneratorWrapperIT {
         BpmnModel bpmnModel = processDiagramGenerator.parseBpmnModelXml(subProcessTest.getInputStream());
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
-        when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
-        when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("invalid-file-name");
+        when(processDiagramGenerator.isGenerateDefaultDiagram()).thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName()).thenReturn("invalid-file-name");
 
         //THEN
         //WHEN
@@ -151,8 +147,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
         //GIVEN
         BpmnModel bpmnModel = new BpmnModel();
-        bpmnModel.addGraphicInfo("key",
-                                 null);
+        bpmnModel.addGraphicInfo("key", null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
@@ -179,8 +174,7 @@ public class ProcessDiagramGeneratorWrapperIT {
         //application-test-process-diagram.properties:
         //activiti.engine.diagram.activity.font=Lucida
         //activiti.engine.diagram.label.font=InvalidFont
-        when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{"Lucida", "Serif"});
+        when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { "Lucida", "Serif" });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -201,8 +195,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
-        when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+        when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { DEFAULT_DIAGRAM_FONT_NAME });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();

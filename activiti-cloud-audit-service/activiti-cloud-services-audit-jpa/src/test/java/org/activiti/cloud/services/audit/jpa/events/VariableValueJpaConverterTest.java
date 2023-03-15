@@ -127,13 +127,9 @@ class VariableValueJpaConverterTest {
 
     @Test
     void should_throwExceptionConvertToEntityAttribute() {
-        Throwable exception = catchThrowable( () -> variableValueJpaConverter.convertToEntityAttribute("{..invalidJson"));
+        Throwable exception = catchThrowable(() -> variableValueJpaConverter.convertToEntityAttribute("{..invalidJson")
+        );
 
-        assertThat(exception)
-            .isInstanceOf(AuditException.class)
-            .hasMessage("Unable to deserialize object.");
+        assertThat(exception).isInstanceOf(AuditException.class).hasMessage("Unable to deserialize object.");
     }
-
-
-
 }

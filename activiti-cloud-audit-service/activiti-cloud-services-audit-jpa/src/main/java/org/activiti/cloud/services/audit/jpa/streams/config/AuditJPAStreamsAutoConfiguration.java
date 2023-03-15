@@ -36,21 +36,26 @@ public class AuditJPAStreamsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuditConsumerChannelHandler auditConsumerChannelHandler(EventsRepository eventsRepository,
-                                                                   APIEventToEntityConverters eventConverters) {
-        return new AuditConsumerChannelHandlerImpl(eventsRepository,
-                                                   eventConverters);
+    public AuditConsumerChannelHandler auditConsumerChannelHandler(
+        EventsRepository eventsRepository,
+        APIEventToEntityConverters eventConverters
+    ) {
+        return new AuditConsumerChannelHandlerImpl(eventsRepository, eventConverters);
     }
 
     @FunctionBinding(input = AuditConsumerChannels.AUDIT_CONSUMER)
     @Bean
-    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerChannelHandlerConsumer(AuditConsumerChannelHandler handler) {
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> auditConsumerChannelHandlerConsumer(
+        AuditConsumerChannelHandler handler
+    ) {
         return message -> {
-            handler.receiveCloudRuntimeEvent(message.getHeaders(),
-                Optional.ofNullable(message.getPayload())
+            handler.receiveCloudRuntimeEvent(
+                message.getHeaders(),
+                Optional
+                    .ofNullable(message.getPayload())
                     .orElse(Collections.emptyList())
-                    .toArray(new CloudRuntimeEvent[0]));
+                    .toArray(new CloudRuntimeEvent[0])
+            );
         };
     }
-
 }

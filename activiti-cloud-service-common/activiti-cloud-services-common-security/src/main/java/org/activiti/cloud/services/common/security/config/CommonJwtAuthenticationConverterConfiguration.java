@@ -43,6 +43,7 @@ public class CommonJwtAuthenticationConverterConfiguration {
 
     @Value("${jwt.userinfo.cache.cacheExpireAfterWrite:PT10m}")
     private String cacheExpireAfterWrite;
+
     @Value("${jwt.userinfo.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
 
@@ -59,16 +60,21 @@ public class CommonJwtAuthenticationConverterConfiguration {
         this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
-
     @Bean("commonJwtAuthenticationConverter")
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
-                JwtAccessTokenProvider jwtAccessTokenProvider,
-                OAuth2UserServiceCacheable oAuth2UserServiceCacheable) {
+        JwtAccessTokenProvider jwtAccessTokenProvider,
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
+    ) {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId(iamName);
-        JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(jwtAccessTokenProvider);
-        return new JwtUserInfoUriAuthenticationConverter(jwtGrantedAuthoritiesConverter, clientRegistration,
-            oAuth2UserServiceCacheable);
+        JwtGrantedAuthorityConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthorityConverter(
+            jwtAccessTokenProvider
+        );
+        return new JwtUserInfoUriAuthenticationConverter(
+            jwtGrantedAuthoritiesConverter,
+            clientRegistration,
+            oAuth2UserServiceCacheable
+        );
     }
 
     @Bean
@@ -78,15 +84,17 @@ public class CommonJwtAuthenticationConverterConfiguration {
 
     @Bean
     public CaffeineCache userInfoApiCallCache() {
-        return new CaffeineCache("userInfoApiCall",
-            Caffeine.newBuilder()
+        return new CaffeineCache(
+            "userInfoApiCall",
+            Caffeine
+                .newBuilder()
                 .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
                 .maximumSize(cacheMaxSize)
-                .build());
+                .build()
+        );
     }
 
     public void setIamName(String iamName) {
         this.iamName = iamName;
     }
-
 }

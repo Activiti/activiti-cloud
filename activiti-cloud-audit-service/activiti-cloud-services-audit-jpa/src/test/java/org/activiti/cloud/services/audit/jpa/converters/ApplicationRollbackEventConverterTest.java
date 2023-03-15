@@ -25,25 +25,32 @@ import org.junit.jupiter.api.Test;
 
 class ApplicationRollbackEventConverterTest {
 
-    private ApplicationRollbackEventConverter eventConverter = new ApplicationRollbackEventConverter(new EventContextInfoAppender());
+    private ApplicationRollbackEventConverter eventConverter = new ApplicationRollbackEventConverter(
+        new EventContextInfoAppender()
+    );
 
     @Test
     public void should_convertToAPIRollbackEvent() {
         ApplicationDeployedAuditEventEntity auditEventEntity = (ApplicationDeployedAuditEventEntity) eventConverter.convertToEntity(
-            createRollbackEvent());
+            createRollbackEvent()
+        );
 
-        CloudApplicationDeployedEventImpl event = (CloudApplicationDeployedEventImpl) eventConverter.convertToAPI(auditEventEntity);
+        CloudApplicationDeployedEventImpl event = (CloudApplicationDeployedEventImpl) eventConverter.convertToAPI(
+            auditEventEntity
+        );
 
         assertThat(event.getEventType()).isEqualTo(ApplicationEvents.APPLICATION_ROLLBACK);
     }
 
     private CloudApplicationDeployedEventImpl createRollbackEvent() {
-        DeploymentImpl entity =  new DeploymentImpl();
+        DeploymentImpl entity = new DeploymentImpl();
         entity.setId("entityId");
-        CloudApplicationDeployedEventImpl event =new CloudApplicationDeployedEventImpl("eventId",
+        CloudApplicationDeployedEventImpl event = new CloudApplicationDeployedEventImpl(
+            "eventId",
             System.currentTimeMillis(),
             entity,
-            ApplicationEvents.APPLICATION_ROLLBACK);
+            ApplicationEvents.APPLICATION_ROLLBACK
+        );
         event.setSequenceNumber(0);
         return event;
     }

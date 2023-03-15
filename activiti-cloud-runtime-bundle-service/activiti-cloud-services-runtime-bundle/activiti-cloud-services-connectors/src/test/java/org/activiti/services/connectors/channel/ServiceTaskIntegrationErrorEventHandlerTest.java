@@ -20,6 +20,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -40,8 +42,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationErrorEventHandlerTest {
@@ -72,25 +72,26 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     public void setUp() {
         when(runtimeService.createExecutionQuery()).thenReturn(executionQuery);
         when(executionQuery.executionId(EXECUTION_ID)).thenReturn(executionQuery);
-
     }
 
     @Test
     public void should_propagateErrorAndAggregateEvent_when_clientIdMatches() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId()))
+            .willReturn(integrationContextEntity);
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn(CLIENT_ID);
 
-        when(runtimeService.createExecutionQuery()
-            .executionId(EXECUTION_ID)
-            .list()).thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
+            .thenReturn(Collections.singletonList(executionEntity));
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
-        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(new IntegrationRequestImpl(integrationContext),
-            new CloudBpmnError("Test Error"));
+        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
+            new IntegrationRequestImpl(integrationContext),
+            new CloudBpmnError("Test Error")
+        );
 
         //when
         handler.receive(integrationErrorEvent);
@@ -102,25 +103,28 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         assertThat(command).isExactlyInstanceOf(CompositeCommand.class);
         CompositeCommand compositeCommand = (CompositeCommand) command;
         assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
-        assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
+        assertThat(compositeCommand.getCommands().get(1))
+            .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
     }
 
     @Test
     public void should_AggregateEventButNotPropagateError_when_clientIdDoesNotMatch() {
         //given
         IntegrationContextEntityImpl integrationContextEntity = buildIntegrationContextEntity();
-        given(integrationContextService.findById(integrationContextEntity.getId())).willReturn(integrationContextEntity);
+        given(integrationContextService.findById(integrationContextEntity.getId()))
+            .willReturn(integrationContextEntity);
 
         ExecutionEntity executionEntity = mock(ExecutionEntity.class);
         given(executionEntity.getActivityId()).willReturn("idDifferentFromExpected");
 
-        when(runtimeService.createExecutionQuery()
-            .executionId(EXECUTION_ID)
-            .list()).thenReturn(Collections.singletonList(executionEntity));
+        when(runtimeService.createExecutionQuery().executionId(EXECUTION_ID).list())
+            .thenReturn(Collections.singletonList(executionEntity));
 
         IntegrationContextImpl integrationContext = buildIntegrationContext();
-        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(new IntegrationRequestImpl(integrationContext),
-            new CloudBpmnError("Test Error"));
+        IntegrationError integrationErrorEvent = new IntegrationErrorImpl(
+            new IntegrationRequestImpl(integrationContext),
+            new CloudBpmnError("Test Error")
+        );
 
         //when
         handler.receive(integrationErrorEvent);
@@ -146,5 +150,4 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
         return integrationContext;
     }
-
 }

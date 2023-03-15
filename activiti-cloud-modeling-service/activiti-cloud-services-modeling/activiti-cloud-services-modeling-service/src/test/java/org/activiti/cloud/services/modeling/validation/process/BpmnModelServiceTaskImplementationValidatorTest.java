@@ -55,18 +55,27 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
         BpmnModel model = new BpmnModel();
 
         //when
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //then
         assertThat(validator.validate(model, validationContext))
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName,
-                        ModelValidationError::getReferenceId)
-                .contains(tuple(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                        format(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                        BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME, null));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName,
+                ModelValidationError::getReferenceId
+            )
+            .contains(
+                tuple(
+                    BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                    format(
+                        BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                        serviceTask.getId()
+                    ),
+                    BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME,
+                    null
+                )
+            );
     }
 
     private ServiceTask buildServiceTask(String implementation) {
@@ -83,23 +92,31 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
         ServiceTask serviceTask = buildServiceTask("invalid-implementation");
         BpmnModel model = new BpmnModel();
 
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //when
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
 
         //then
         assertThat(validationResult)
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName,
-                        ModelValidationError::getReferenceId)
-                .contains(tuple(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                        format(BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                        BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME, null));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName,
+                ModelValidationError::getReferenceId
+            )
+            .contains(
+                tuple(
+                    BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                    format(
+                        BpmnModelServiceTaskImplementationValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                        serviceTask.getId()
+                    ),
+                    BpmnModelServiceTaskImplementationValidator.SERVICE_USER_TASK_VALIDATOR_NAME,
+                    null
+                )
+            );
     }
-
 
     private static Stream<Arguments> provideValidServiceTaskImplementations() {
         return Stream.of(
@@ -118,8 +135,7 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
         ServiceTask serviceTask = buildServiceTask(implementation);
         BpmnModel model = new BpmnModel();
 
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //when
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
@@ -127,5 +143,4 @@ public class BpmnModelServiceTaskImplementationValidatorTest {
         //then
         assertThat(validationResult).isEmpty();
     }
-
 }

@@ -16,12 +16,11 @@
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
 import javax.validation.constraints.NotBlank;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties(prefix="spring.activiti.cloud.services.notifications.graphql.events")
+@ConfigurationProperties(prefix = "spring.activiti.cloud.services.notifications.graphql.events")
 public class EngineEventsConsumerProperties {
 
     /**
@@ -33,14 +32,14 @@ public class EngineEventsConsumerProperties {
      * Customizes common process engine event attributes using comma separator
      */
     @NotBlank
-    private String processEngineEventAttributeKeys = "serviceName,appName,processDefinitionKey,processInstanceId,businessKey";
+    private String processEngineEventAttributeKeys =
+        "serviceName,appName,processDefinitionKey,processInstanceId,businessKey";
 
     /**
      * Customizes eventType key attribute name
      */
     @NotBlank
     private String processEngineEventTypeKey = "eventType";
-
 
     public EngineEventsConsumerProperties() {
         // default constructor

@@ -20,21 +20,17 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ProcessEngineIntegrationChannels {
-
     String INTEGRATION_RESULTS_CONSUMER = "integrationResultsConsumer";
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
     @InputBinding(INTEGRATION_RESULTS_CONSUMER)
     default SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER)
-                              .get();
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER).get();
     }
 
     @InputBinding(INTEGRATION_ERRORS_CONSUMER)
     default SubscribableChannel integrationErrorsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER)
-                              .get();
+        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER).get();
     }
-
 }

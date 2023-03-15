@@ -27,9 +27,10 @@ public class ExpiredValidationCheck implements AbastractTimeValidationCheck {
 
     @Override
     public boolean isValid(Jwt accessToken) {
-        return !(accessToken.getExpiresAt() != null &&
+        return !(
+            accessToken.getExpiresAt() != null &&
             accessToken.getExpiresAt().toEpochMilli() != 0 &&
-            currentTime(offset) > accessToken.getExpiresAt().toEpochMilli());
+            currentTime(offset) > accessToken.getExpiresAt().toEpochMilli()
+        );
     }
-
 }

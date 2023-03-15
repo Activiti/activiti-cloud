@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
@@ -44,10 +43,12 @@ public class MessageSentEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         MessageSentAuditEventEntity messageEventEntity = (MessageSentAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNMessageSentEventImpl(messageEventEntity.getEventId(),
-                                                 messageEventEntity.getTimestamp(),
-                                                 messageEventEntity.getMessage(),
-                                                 messageEventEntity.getProcessDefinitionId(),
-                                                 messageEventEntity.getProcessInstanceId());
+        return new CloudBPMNMessageSentEventImpl(
+            messageEventEntity.getEventId(),
+            messageEventEntity.getTimestamp(),
+            messageEventEntity.getMessage(),
+            messageEventEntity.getProcessDefinitionId(),
+            messageEventEntity.getProcessInstanceId()
+        );
     }
 }

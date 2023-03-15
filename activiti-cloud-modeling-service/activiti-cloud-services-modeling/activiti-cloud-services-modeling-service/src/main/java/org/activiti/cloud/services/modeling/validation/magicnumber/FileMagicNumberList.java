@@ -34,5 +34,4 @@ public class FileMagicNumberList {
     public void setMagicNumber(List<FileMagicNumber> magicNumber) {
         this.magicNumber = magicNumber;
     }
-
 }

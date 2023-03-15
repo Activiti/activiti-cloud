@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.test.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
@@ -28,15 +36,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.activiti.test.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class ApplicationDeployedEventHandlerTest {
@@ -60,18 +59,19 @@ public class ApplicationDeployedEventHandlerTest {
         deployment.setName(APPLICATION_DEPLOYMENT_NAME);
         deployment.setVersion(2);
 
-        CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(UUID.randomUUID().toString(),
-                                                                                                           System.currentTimeMillis(),
-                                                                                                           deployment,
-                                                                                                           ApplicationEvents.APPLICATION_DEPLOYED);
+        CloudApplicationDeployedEventImpl applicationDeployedEvent = new CloudApplicationDeployedEventImpl(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            deployment,
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
         applicationDeployedEvent.setAppName("ApplicationEventName");
 
         //when
         handler.handle(applicationDeployedEvent);
 
         //then
-        ArgumentCaptor<ApplicationEntity> applicationCaptor = ArgumentCaptor
-            .forClass(ApplicationEntity.class);
+        ArgumentCaptor<ApplicationEntity> applicationCaptor = ArgumentCaptor.forClass(ApplicationEntity.class);
 
         verify(entityManager).persist(applicationCaptor.capture());
         ApplicationEntity application = applicationCaptor.getValue();
@@ -93,7 +93,8 @@ public class ApplicationDeployedEventHandlerTest {
             UUID.randomUUID().toString(),
             System.currentTimeMillis(),
             deployment,
-            ApplicationEvents.APPLICATION_DEPLOYED);
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
         applicationDeployedFirstEvent.setAppName("ApplicationEventName");
         given(applicationRepository.existsByNameAndVersion(any(), any())).willReturn(true);
 
@@ -108,7 +109,6 @@ public class ApplicationDeployedEventHandlerTest {
     public void getHandledEventShouldReturnApplicationDeployedEvent() {
         String handledEvent = handler.getHandledEvent();
 
-        Assertions.assertThat(handledEvent)
-            .isEqualTo(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
+        Assertions.assertThat(handledEvent).isEqualTo(ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
     }
 }

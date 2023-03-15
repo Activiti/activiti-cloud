@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
@@ -39,17 +50,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
@@ -81,7 +81,7 @@ public class ProjectControllerExistingNameIT {
     @Test
     @Order(1)
     @Transactional(propagation = Propagation.NEVER)
-    @WithActivitiMockUser(username = "otherUser", roles = {"ACTIVITI_MODELER"})
+    @WithActivitiMockUser(username = "otherUser", roles = { "ACTIVITI_MODELER" })
     public void should_createProjectWithOtherUser() throws Exception {
         projectRepository.createProject(project("application-xy"));
         projectRepository.createProject(project("creating-project"));
@@ -89,7 +89,8 @@ public class ProjectControllerExistingNameIT {
         projectRepository.createProject(project("copying-project"));
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .hasSize(4)
-            .extracting(ProjectEntity::getCreatedBy).containsOnly("otherUser");
+            .extracting(ProjectEntity::getCreatedBy)
+            .containsOnly("otherUser");
     }
 
     @Test
@@ -97,20 +98,20 @@ public class ProjectControllerExistingNameIT {
     @Transactional(propagation = Propagation.NEVER)
     @WithMockModelerUser
     public void should_returnStatusCreated_when_importingProjectWithExistingNameCreatedByOtherUser() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
             "project-xy.zip",
             "project/zip",
-            resourceAsByteArray("project/project-xy.zip"));
+            resourceAsByteArray("project/project-xy.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import")
-                .file(zipFile)
-                .accept(APPLICATION_JSON_VALUE))
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
-            .contains(tuple("otherUser", "application-xy"),
-                tuple("testuser", "application-xy"));
+            .contains(tuple("otherUser", "application-xy"), tuple("testuser", "application-xy"));
     }
 
     @Test
@@ -118,15 +119,17 @@ public class ProjectControllerExistingNameIT {
     @Transactional(propagation = Propagation.NEVER)
     @WithMockModelerUser
     public void should_returnStatusCreated_when_creatingProjectWithExistingNameCreatedByOtherUser() throws Exception {
-        mockMvc.perform(post("/v1/projects")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(project("creating-project"))))
+        mockMvc
+            .perform(
+                post("/v1/projects")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("creating-project")))
+            )
             .andExpect(status().isCreated());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
-            .contains(tuple("otherUser", "creating-project"),
-                tuple("testuser", "creating-project"));
+            .contains(tuple("otherUser", "creating-project"), tuple("testuser", "creating-project"));
     }
 
     @Test
@@ -136,16 +139,17 @@ public class ProjectControllerExistingNameIT {
     public void should_returnStatusOk_when_updatingProjectWithExistingNameCreatedByOtherUser() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                project.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(project("updating-project"))))
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("updating-project")))
+            )
             .andExpect(status().isOk());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
-            .contains(tuple("otherUser", "updating-project"),
-                tuple("testuser", "updating-project"));
+            .contains(tuple("otherUser", "updating-project"), tuple("testuser", "updating-project"));
     }
 
     @Test
@@ -155,13 +159,12 @@ public class ProjectControllerExistingNameIT {
     public void should_returnStatusOk_when_copyingProjectWithExistingNameCreatedByOtherUser() throws Exception {
         Project project = projectRepository.createProject(project("project-to-copy"));
 
-        mockMvc.perform(post("/v1/projects/{projectId}/copy?name=copying-project", project.getId()))
+        mockMvc
+            .perform(post("/v1/projects/{projectId}/copy?name=copying-project", project.getId()))
             .andExpect(status().isOk());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
-            .contains(tuple("otherUser", "copying-project"),
-                tuple("testuser", "copying-project"));
+            .contains(tuple("otherUser", "copying-project"), tuple("testuser", "copying-project"));
     }
-
 }

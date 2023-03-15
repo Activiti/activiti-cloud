@@ -24,8 +24,10 @@ import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.springframework.lang.NonNull;
 
 public interface ValidationStrategy<V extends ModelValidator> {
-
-    List<ModelValidationError> getValidationErrors(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback);
+    List<ModelValidationError> getValidationErrors(
+        @NonNull Collection<V> validators,
+        @NonNull ValidationCallback<V> callback
+    );
 
     void validate(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) throws ModelingException;
 

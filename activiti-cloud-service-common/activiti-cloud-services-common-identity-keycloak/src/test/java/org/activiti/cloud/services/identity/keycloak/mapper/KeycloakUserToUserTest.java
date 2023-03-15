@@ -28,7 +28,6 @@ class KeycloakUserToUserTest {
 
     @Test
     void should_transformKeycloakUserToUser() {
-
         KeycloakUser kUser = new KeycloakUser();
         kUser.setId("123");
         kUser.setEmail("test@test.it");

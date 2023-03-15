@@ -34,8 +34,6 @@ public class IsNotBeforeValidationCheck implements AbastractTimeValidationCheck 
      * @return if the nbf claim is either in the past or the future
      */
     public boolean isValid(Jwt accessToken) {
-        return accessToken.getNotBefore() == null ||
-            currentTime(offset) >= accessToken.getNotBefore().toEpochMilli();
+        return accessToken.getNotBefore() == null || currentTime(offset) >= accessToken.getNotBefore().toEpochMilli();
     }
-
 }

@@ -84,5 +84,4 @@ public class FileMagicNumber {
         }
         this.setBytes(stringBytes);
     }
-
 }

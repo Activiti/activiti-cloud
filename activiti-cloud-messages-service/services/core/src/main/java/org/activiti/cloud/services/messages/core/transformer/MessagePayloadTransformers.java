@@ -24,5 +24,4 @@ public class MessagePayloadTransformers {
     public static StartMessagePayloadTransformer toStartMessagePayload() {
         return new StartMessagePayloadTransformer();
     }
-
 }

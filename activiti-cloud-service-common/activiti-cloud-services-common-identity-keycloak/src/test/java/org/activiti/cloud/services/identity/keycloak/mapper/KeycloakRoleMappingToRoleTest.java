@@ -24,36 +24,35 @@ import org.junit.jupiter.api.Test;
 
 class KeycloakRoleMappingToRoleTest {
 
-  private KeycloakRoleMappingToRole keycloakRoleMappingToRole = new KeycloakRoleMappingToRole();
+    private KeycloakRoleMappingToRole keycloakRoleMappingToRole = new KeycloakRoleMappingToRole();
 
-  @Test
-  public void shouldTransformKeycloakRoleMappingToRole() {
-    KeycloakRoleMapping kRole = new KeycloakRoleMapping();
-    kRole.setId("123");
-    kRole.setName("test");
+    @Test
+    public void shouldTransformKeycloakRoleMappingToRole() {
+        KeycloakRoleMapping kRole = new KeycloakRoleMapping();
+        kRole.setId("123");
+        kRole.setName("test");
 
-    Role role = keycloakRoleMappingToRole.toRole(kRole);
+        Role role = keycloakRoleMappingToRole.toRole(kRole);
 
-    assertThat(role.getId()).isEqualTo(kRole.getId());
-    assertThat(role.getName()).isEqualTo(kRole.getName());
-  }
+        assertThat(role.getId()).isEqualTo(kRole.getId());
+        assertThat(role.getName()).isEqualTo(kRole.getName());
+    }
 
-  @Test
-  public void shouldTransformKeycloakRoleMappingsToRoles() {
-    KeycloakRoleMapping kRole1 = new KeycloakRoleMapping();
-    kRole1.setId("123");
-    kRole1.setName("test");
+    @Test
+    public void shouldTransformKeycloakRoleMappingsToRoles() {
+        KeycloakRoleMapping kRole1 = new KeycloakRoleMapping();
+        kRole1.setId("123");
+        kRole1.setName("test");
 
-    KeycloakRoleMapping kRole2 = new KeycloakRoleMapping();
-    kRole2.setId("456");
-    kRole2.setName("test 2");
+        KeycloakRoleMapping kRole2 = new KeycloakRoleMapping();
+        kRole2.setId("456");
+        kRole2.setName("test 2");
 
-    List<Role> role = keycloakRoleMappingToRole.toRoles(List.of(kRole1, kRole2));
+        List<Role> role = keycloakRoleMappingToRole.toRoles(List.of(kRole1, kRole2));
 
-    assertThat(role.get(0).getId()).isEqualTo(kRole1.getId());
-    assertThat(role.get(0).getName()).isEqualTo(kRole1.getName());
-    assertThat(role.get(1).getId()).isEqualTo(kRole2.getId());
-    assertThat(role.get(1).getName()).isEqualTo(kRole2.getName());
-  }
-
+        assertThat(role.get(0).getId()).isEqualTo(kRole1.getId());
+        assertThat(role.get(0).getName()).isEqualTo(kRole1.getName());
+        assertThat(role.get(1).getId()).isEqualTo(kRole2.getId());
+        assertThat(role.get(1).getName()).isEqualTo(kRole2.getName());
+    }
 }

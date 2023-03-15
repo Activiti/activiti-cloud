@@ -47,10 +47,8 @@ public class IntegrationRequestReplayerTest {
         given(runtimeService.createExecutionQuery()).willReturn(executionQuery);
         given(executionQuery.list()).willReturn(Collections.emptyList());
 
-
         assertThatExceptionOfType(ActivitiException.class)
-            .isThrownBy(
-            () -> integrationRequestReplayer.replay("missingExecution", "missingFlowNode"))
-                .withMessageContaining("Unable to replay integration request");
+            .isThrownBy(() -> integrationRequestReplayer.replay("missingExecution", "missingFlowNode"))
+            .withMessageContaining("Unable to replay integration request");
     }
 }

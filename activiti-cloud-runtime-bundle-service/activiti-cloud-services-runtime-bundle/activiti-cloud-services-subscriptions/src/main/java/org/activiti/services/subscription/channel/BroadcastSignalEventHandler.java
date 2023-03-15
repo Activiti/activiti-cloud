@@ -31,8 +31,7 @@ public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
         if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
             runtimeService.signalEventReceived(signalPayload.getName());
         } else {
-            runtimeService.signalEventReceived(signalPayload.getName(),
-                                               signalPayload.getVariables());
+            runtimeService.signalEventReceived(signalPayload.getName(), signalPayload.getVariables());
         }
     }
 }

@@ -28,31 +28,32 @@ import org.activiti.cloud.identity.exceptions.IdentityInvalidUserException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidUserRoleException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class IdentityManagementRestExceptionHandler {
 
-    @ExceptionHandler({IdentityInvalidUserRoleException.class,
-        IdentityInvalidUserException.class,
-        IdentityInvalidRoleException.class,
-        IdentityInvalidGroupException.class,
-        IdentityInvalidGroupRoleException.class})
+    @ExceptionHandler(
+        {
+            IdentityInvalidUserRoleException.class,
+            IdentityInvalidUserException.class,
+            IdentityInvalidRoleException.class,
+            IdentityInvalidGroupException.class,
+            IdentityInvalidGroupRoleException.class,
+        }
+    )
     @ResponseStatus(BAD_REQUEST)
-    public void handleAppException(Exception ex,
-        HttpServletResponse response) throws IOException {
-        response.sendError(BAD_REQUEST.value(),
-            ex.getMessage());
+    public void handleAppException(Exception ex, HttpServletResponse response) throws IOException {
+        response.sendError(BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(IdentityInvalidApplicationException.class)
     @ResponseStatus(NOT_FOUND)
-    public void handleAppException(IdentityInvalidApplicationException ex,
-        HttpServletResponse response) throws IOException {
-        response.sendError(NOT_FOUND.value(),
-            ex.getMessage());
+    public void handleAppException(IdentityInvalidApplicationException ex, HttpServletResponse response)
+        throws IOException {
+        response.sendError(NOT_FOUND.value(), ex.getMessage());
     }
 }

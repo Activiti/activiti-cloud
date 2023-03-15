@@ -42,9 +42,11 @@ public class ApplicationRollbackEventConverter extends BaseEventToEntityConverte
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ApplicationDeployedAuditEventEntity applicationDeployedAuditEventEntity = (ApplicationDeployedAuditEventEntity) auditEventEntity;
-        return new CloudApplicationDeployedEventImpl(applicationDeployedAuditEventEntity.getEventId(),
-                                                     applicationDeployedAuditEventEntity.getTimestamp(),
-                                                     applicationDeployedAuditEventEntity.getDeployment(),
-                                                     ApplicationEvents.APPLICATION_ROLLBACK);
+        return new CloudApplicationDeployedEventImpl(
+            applicationDeployedAuditEventEntity.getEventId(),
+            applicationDeployedAuditEventEntity.getTimestamp(),
+            applicationDeployedAuditEventEntity.getDeployment(),
+            ApplicationEvents.APPLICATION_ROLLBACK
+        );
     }
 }

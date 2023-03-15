@@ -47,9 +47,7 @@ public class PublicKeyValidationCheck implements ValidationCheck {
 
     private final ConcurrentHashMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
 
-    public PublicKeyValidationCheck(String authServerUrl,
-                                    String realm,
-                                    ObjectMapper objectMapper) {
+    public PublicKeyValidationCheck(String authServerUrl, String realm, ObjectMapper objectMapper) {
         this.authServerUrl = authServerUrl;
         this.realm = realm;
         this.objectMapper = objectMapper;
@@ -57,7 +55,6 @@ public class PublicKeyValidationCheck implements ValidationCheck {
 
     @Override
     public boolean isValid(Jwt accessToken) {
-
         boolean result = false;
 
         JWSObject jwsObject = getJwsObject(accessToken);
@@ -65,7 +62,7 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         PublicKey publicKey = getPublicKey(jwsObject.getHeader());
         JWSAlgorithm algorithm = jwsObject.getHeader().getAlgorithm();
 
-        if(isAlgorithmsSupported(algorithm)) {
+        if (isAlgorithmsSupported(algorithm)) {
             try {
                 RSASSAVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
                 result = jwsObject.verify(verifier);
@@ -95,8 +92,10 @@ public class PublicKeyValidationCheck implements ValidationCheck {
     }
 
     private PublicKey getPublicKey(JWSHeader jwsHeader) {
-        return publicKeys.computeIfAbsent(getRealmCertsUrl(),
-                                          (url) -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
+        return publicKeys.computeIfAbsent(
+            getRealmCertsUrl(),
+            url -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader)
+        );
     }
 
     private PublicKey retrievePublicKeyFromCertsEndpoint(String realmCertsUrl, JWSHeader jwsHeader) {
@@ -125,7 +124,6 @@ public class PublicKeyValidationCheck implements ValidationCheck {
             BigInteger publicExponent = new BigInteger(1, urlDecoder.decode(exponentBase64));
 
             return keyFactory.generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
-
         } catch (Exception e) {
             LOGGER.error("Cannot retrieve public key", e);
         }
@@ -139,7 +137,4 @@ public class PublicKeyValidationCheck implements ValidationCheck {
     private String getRealmUrl() {
         return String.format("%s/realms/%s", authServerUrl, realm);
     }
-
-
-
 }

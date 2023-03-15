@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.validation.process;
 
 import static java.lang.String.format;
 import static org.springframework.util.StringUtils.isEmpty;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +39,8 @@ import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonModelValidator {
 
     public static final String INVALID_SERVICE_IMPLEMENTATION_PROBLEM = "Invalid service implementation";
-    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "Invalid service implementation on service '%s'";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION =
+        "Invalid service implementation on service '%s'";
     public static final String SERVICE_USER_TASK_VALIDATOR_NAME = "BPMN service task validator";
 
     private final ConnectorModelType connectorModelType;
@@ -46,70 +48,85 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonMo
     private final ConnectorModelContentConverter connectorModelContentConverter;
     private final FlowElementsExtractor flowElementsExtractor;
 
-    public BpmnModelServiceTaskImplementationValidator(ConnectorModelType connectorModelType,
+    public BpmnModelServiceTaskImplementationValidator(
+        ConnectorModelType connectorModelType,
         ConnectorModelContentConverter connectorModelContentConverter,
-        FlowElementsExtractor flowElementsExtractor) {
+        FlowElementsExtractor flowElementsExtractor
+    ) {
         this.connectorModelType = connectorModelType;
         this.connectorModelContentConverter = connectorModelContentConverter;
         this.flowElementsExtractor = flowElementsExtractor;
     }
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-                                                 ValidationContext validationContext) {
+    public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         List<String> availableImplementations = getAvailableImplementations(validationContext);
 
-        return flowElementsExtractor.extractFlowElements(bpmnModel, ServiceTask.class).stream()
-                .filter(serviceTask -> serviceTask.getImplementation() != null)
-                .map(serviceTask -> validateServiceTaskImplementation(serviceTask, availableImplementations))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+        return flowElementsExtractor
+            .extractFlowElements(bpmnModel, ServiceTask.class)
+            .stream()
+            .filter(serviceTask -> serviceTask.getImplementation() != null)
+            .map(serviceTask -> validateServiceTaskImplementation(serviceTask, availableImplementations))
+            .filter(Optional::isPresent)
+            .map(Optional::get);
     }
 
     private List<String> getAvailableImplementations(ValidationContext validationContext) {
-        return validationContext.getAvailableModels(connectorModelType)
-                .stream()
-                .map(this::concatNameAndActions)
-                .flatMap(Stream::sorted)
-                .collect(Collectors.toList());
+        return validationContext
+            .getAvailableModels(connectorModelType)
+            .stream()
+            .map(this::concatNameAndActions)
+            .flatMap(Stream::sorted)
+            .collect(Collectors.toList());
     }
 
     private Stream<String> concatNameAndActions(Model model) {
-        return extractConnectorModelContent(model).map(connectorModelContent -> connectorModelContent
-                .getActions()
-                .values()
-                .stream()
-                .map(connectorModelAction -> concatNameAndAction(connectorModelAction,
-                                                                 model)))
-                .orElse(Stream.empty());
+        return extractConnectorModelContent(model)
+            .map(connectorModelContent ->
+                connectorModelContent
+                    .getActions()
+                    .values()
+                    .stream()
+                    .map(connectorModelAction -> concatNameAndAction(connectorModelAction, model))
+            )
+            .orElse(Stream.empty());
     }
 
     private Optional<ConnectorModelContent> extractConnectorModelContent(Model model) {
-        return Optional.ofNullable(model.getContent())
-                .flatMap(connectorModelContentConverter::convertToModelContent)
-                .filter(connectorModelContent -> connectorModelContent.getActions() != null);
+        return Optional
+            .ofNullable(model.getContent())
+            .flatMap(connectorModelContentConverter::convertToModelContent)
+            .filter(connectorModelContent -> connectorModelContent.getActions() != null);
     }
 
-    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature,
-                                       Model model) {
-        return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName()) ?
-                model.getName() :
-                model.getName() + "." + connectorModelFeature.getName();
+    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature, Model model) {
+        return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName())
+            ? model.getName()
+            : model.getName() + "." + connectorModelFeature.getName();
     }
 
-    private Optional<ModelValidationError> validateServiceTaskImplementation(ServiceTask serviceTask,
-            List<String> availableImplementations) {
+    private Optional<ModelValidationError> validateServiceTaskImplementation(
+        ServiceTask serviceTask,
+        List<String> availableImplementations
+    ) {
         if (isValidImplementation(serviceTask.getImplementation(), availableImplementations)) {
             return Optional.<ModelValidationError>empty();
         }
         return Optional.of(
-                new ModelValidationError(INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
-                        format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                                serviceTask.getId()), SERVICE_USER_TASK_VALIDATOR_NAME));
+            new ModelValidationError(
+                INVALID_SERVICE_IMPLEMENTATION_PROBLEM,
+                format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
+                SERVICE_USER_TASK_VALIDATOR_NAME
+            )
+        );
     }
 
     private boolean isValidImplementation(String implementation, List<String> availableImplementations) {
-        return availableImplementations.contains(implementation) || Arrays.stream(ServiceTaskImplementationType.values())
-                .anyMatch(serviceImplementation -> implementation.startsWith(serviceImplementation.getPrefix()));
+        return (
+            availableImplementations.contains(implementation) ||
+            Arrays
+                .stream(ServiceTaskImplementationType.values())
+                .anyMatch(serviceImplementation -> implementation.startsWith(serviceImplementation.getPrefix()))
+        );
     }
 }

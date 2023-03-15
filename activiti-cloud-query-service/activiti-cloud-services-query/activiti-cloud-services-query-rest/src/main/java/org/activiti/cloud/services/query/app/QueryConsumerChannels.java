@@ -20,7 +20,6 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface QueryConsumerChannels {
-
     String QUERY_CONSUMER = "queryConsumer";
 
     @InputBinding(QUERY_CONSUMER)

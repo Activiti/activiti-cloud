@@ -24,8 +24,10 @@ public class CloudVariableCreatedProducer implements VariableEventListener<Varia
     private ToCloudVariableEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudVariableCreatedProducer(ToCloudVariableEventConverter converter,
-                                        ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudVariableCreatedProducer(
+        ToCloudVariableEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +36,4 @@ public class CloudVariableCreatedProducer implements VariableEventListener<Varia
     public void onEvent(VariableCreatedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
-
 }

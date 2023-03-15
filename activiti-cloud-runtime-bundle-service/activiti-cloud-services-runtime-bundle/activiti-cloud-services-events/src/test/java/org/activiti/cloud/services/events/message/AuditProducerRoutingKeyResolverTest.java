@@ -18,9 +18,7 @@ package org.activiti.cloud.services.events.message;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-
 import org.junit.jupiter.api.Test;
-
 
 public class AuditProducerRoutingKeyResolverTest {
 
@@ -29,70 +27,68 @@ public class AuditProducerRoutingKeyResolverTest {
     @Test
     public void testResolveRoutingKeyFromValidHeadersInAnyOrder() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder
+            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app-name")
+            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
 
         // when
         String routingKey = subject.resolve(headers);
 
         // then
         assertThat(routingKey).isEqualTo("engineEvents.service-name.app-name");
-
     }
 
     @Test
     public void testResolveRoutingKeyFromEmptyHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder
+            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "")
+            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
 
         // when
         String routingKey = subject.resolve(headers);
 
         // then
         assertThat(routingKey).isEqualTo("engineEvents.service-name._");
-
     }
 
     @Test
     public void testResolveRoutingKeyFromNullHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, null)
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
+        Map<String, Object> headers = MapBuilder
+            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, null)
+            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "service-name");
 
         // when
         String routingKey = subject.resolve(headers);
 
         // then
         assertThat(routingKey).isEqualTo("engineEvents.service-name._");
-
     }
 
     @Test
     public void testResolveRoutingKeyWithEscapedValues() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app:na#me")
-                                                .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "ser.vice*na me");
+        Map<String, Object> headers = MapBuilder
+            .<String, Object>map(RuntimeBundleInfoMessageHeaders.APP_NAME, "app:na#me")
+            .with(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, "ser.vice*na me");
 
         // when
         String routingKey = subject.resolve(headers);
 
         // then
         assertThat(routingKey).isEqualTo("engineEvents.ser-vice-na-me.app-na-me");
-
     }
 
     @Test
     public void testResolveRoutingKeyWithNonExistingHeaders() {
         // given
-        Map<String, Object> headers = MapBuilder.<String, Object> emptyMap();
+        Map<String, Object> headers = MapBuilder.<String, Object>emptyMap();
 
         // when
         String routingKey = subject.resolve(headers);
 
         // then
         assertThat(routingKey).isEqualTo("engineEvents._._");
-
     }
-
 }

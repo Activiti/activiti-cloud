@@ -20,12 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface AuditConsumer {
-
     String AUDIT_CONSUMER = "auditConsumer";
 
     @InputBinding(AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AUDIT_CONSUMER)
-                              .get();
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER).get();
     }
 }

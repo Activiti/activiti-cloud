@@ -51,5 +51,4 @@ public class TaskEntityVariableEntityUpdatedEventHandlerTest {
         //then
         verify(variableUpdater).update(eq(updatedVariableEntity), anyString());
     }
-
 }

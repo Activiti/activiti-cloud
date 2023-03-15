@@ -15,7 +15,20 @@
  */
 package org.activiti.cloud.acc.core.steps.runtime;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
+import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -39,20 +52,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
-import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableRuntimeFeignContext
 public class ProcessRuntimeBundleSteps {
@@ -94,50 +93,43 @@ public class ProcessRuntimeBundleSteps {
     @Step
     public CloudProcessInstance startProcess(String process, boolean variables, String businessKey) throws IOException {
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(process)
-                .withName("processInstanceName")
-                .withBusinessKey(businessKey);
+            .start()
+            .withProcessDefinitionKey(process)
+            .withName("processInstanceName")
+            .withBusinessKey(businessKey);
 
-
-        if(variables){
+        if (variables) {
             payload.withVariable("test_variable_name", "test-variable-value");
             payload.withVariable("test_bigdecimal_variable_name", wrap(BigDecimal.valueOf(1234567890L, 2)));
             payload.withVariable("test_date_variable_name", wrap(Date.from(Instant.EPOCH)));
             payload.withVariable("test_long_variable_name", wrap(1234567890L));
             payload.withVariable("test_int_variable_name", 7);
             payload.withVariable("test_bool_variable_name", true);
-            payload.withVariable("test_json_variable_name",objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}"));
-            payload.withVariable("test_long_json_variable_name",objectMapper.readTree("{ \"verylongjson\":\""+ StringUtils.repeat("a", 4000)+"\"}"));
+            payload.withVariable(
+                "test_json_variable_name",
+                objectMapper.readTree("{ \"test-json-variable-element1\":\"test-json-variable-value1\"}")
+            );
+            payload.withVariable(
+                "test_long_json_variable_name",
+                objectMapper.readTree("{ \"verylongjson\":\"" + StringUtils.repeat("a", 4000) + "\"}")
+            );
         }
 
         return startProcess(payload.build());
     }
 
     protected Map<String, String> wrap(BigDecimal value) {
-        return ProcessVariableValue.builder()
-                                   .type("bigdecimal")
-                                   .value(value.toString())
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue.builder().type("bigdecimal").value(value.toString()).build().toMap();
     }
 
     protected Map<String, String> wrap(Long value) {
-        return ProcessVariableValue.builder()
-                                   .type("long")
-                                   .value(value.toString())
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue.builder().type("long").value(value.toString()).build().toMap();
     }
 
     protected Map<String, String> wrap(Date value) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
 
-        return ProcessVariableValue.builder()
-                                   .type("date")
-                                   .value(formatter.format(value))
-                                   .build()
-                                   .toMap();
+        return ProcessVariableValue.builder().type("date").value(formatter.format(value)).build().toMap();
     }
 
     @Step
@@ -147,18 +139,16 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public CloudProcessInstance startProcess(String process) {
-        return startProcess(ProcessPayloadBuilder.start()
-                                                 .withProcessDefinitionKey(process)
-                                                 .withName("process-instance-name")
-                                                 .build());
+        return startProcess(
+            ProcessPayloadBuilder.start().withProcessDefinitionKey(process).withName("process-instance-name").build()
+        );
     }
 
     @Step
-    public CloudProcessInstance startProcessWithVariables(String process, Map<String,Object> variables) {
-        return startProcess(ProcessPayloadBuilder.start()
-                                                 .withProcessDefinitionKey(process)
-                                                 .withVariables(variables)
-                                                 .build());
+    public CloudProcessInstance startProcessWithVariables(String process, Map<String, Object> variables) {
+        return startProcess(
+            ProcessPayloadBuilder.start().withProcessDefinitionKey(process).withVariables(variables).build()
+        );
     }
 
     @Step
@@ -168,9 +158,10 @@ public class ProcessRuntimeBundleSteps {
 
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
-        assertThatRestNotFoundErrorIsThrownBy(
-                () -> processInstanceApiClient.getProcessInstanceById(processInstanceId).getContent()
-        ).withMessageContaining("Unable to find process instance for the given id:'" + processInstanceId + "'");
+        assertThatRestNotFoundErrorIsThrownBy(() ->
+                processInstanceApiClient.getProcessInstanceById(processInstanceId).getContent()
+            )
+            .withMessageContaining("Unable to find process instance for the given id:'" + processInstanceId + "'");
     }
 
     @Step
@@ -200,8 +191,9 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public Collection<CloudProcessInstance> getAllProcessInstances(){
-        return processInstanceApiClient.getProcessInstances(DEFAULT_PAGEABLE)
+    public Collection<CloudProcessInstance> getAllProcessInstances() {
+        return processInstanceApiClient
+            .getProcessInstances(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -209,13 +201,14 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public CloudProcessInstance getProcessInstanceById(String id){
+    public CloudProcessInstance getProcessInstanceById(String id) {
         return processInstanceApiClient.getProcessInstanceById(id).getContent();
     }
 
     @Step
-    public Collection<CloudProcessInstance> getSubProcesses(String parentId){
-        return processInstanceApiClient.subprocesses(parentId, DEFAULT_PAGEABLE)
+    public Collection<CloudProcessInstance> getSubProcesses(String parentId) {
+        return processInstanceApiClient
+            .subprocesses(parentId, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -223,8 +216,9 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public Collection<ProcessDefinition> getProcessDefinitions(){
-        return processDefinitionsApiClient.getProcessDefinitions(List.of(), DEFAULT_PAGEABLE)
+    public Collection<ProcessDefinition> getProcessDefinitions() {
+        return processDefinitionsApiClient
+            .getProcessDefinitions(List.of(), DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -232,18 +226,19 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public ProcessDefinition getProcessDefinitionByKey(String key){
+    public ProcessDefinition getProcessDefinitionByKey(String key) {
         return processDefinitionsApiClient.getProcessDefinition(key).getContent();
     }
 
     @Step
-    public String getProcessDiagramByKey(String key){
+    public String getProcessDiagramByKey(String key) {
         return processRuntimeDiagramService.getProcessDefinitionModel(key);
     }
 
     @Step
     public Collection<CloudTask> getTaskByProcessInstanceId(String processInstanceId) {
-        return processInstanceTasksApiClient.getTasks(processInstanceId, DEFAULT_PAGEABLE)
+        return processInstanceTasksApiClient
+            .getTasks(processInstanceId, DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -251,32 +246,27 @@ public class ProcessRuntimeBundleSteps {
     }
 
     @Step
-    public CloudProcessInstance startProcessWithProcessInstanceName(String process,
-        String processName) {
-        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(ProcessPayloadBuilder
-            .start()
-            .withName(processName)
-            .withProcessDefinitionKey(process)
-            .build())
-            .getContent());
+    public CloudProcessInstance startProcessWithProcessInstanceName(String process, String processName) {
+        return dirtyContextHandler.dirty(
+            processInstanceApiClient
+                .startProcess(
+                    ProcessPayloadBuilder.start().withName(processName).withProcessDefinitionKey(process).build()
+                )
+                .getContent()
+        );
     }
 
     @Step
     public void checkProcessInstanceName(String processInstanceId, String processInstanceName) {
-        assertThat(processInstanceApiClient.getProcessInstanceById(processInstanceId)
-            .getContent()
-            .getName())
+        assertThat(processInstanceApiClient.getProcessInstanceById(processInstanceId).getContent().getName())
             .isEqualTo(processInstanceName);
     }
 
-
     @Step
     public CloudProcessInstance setProcessName(String processInstanceId, String processInstanceName) {
-        return processInstanceApiClient.updateProcess(
-            processInstanceId,
-            ProcessPayloadBuilder.update().withName(processInstanceName).build())
+        return processInstanceApiClient
+            .updateProcess(processInstanceId, ProcessPayloadBuilder.update().withName(processInstanceName).build())
             .getContent();
-
     }
 
     @Step
@@ -288,5 +278,4 @@ public class ProcessRuntimeBundleSteps {
     public void message(ReceiveMessagePayload payload) throws IOException {
         processInstanceApiClient.receive(payload);
     }
-
 }

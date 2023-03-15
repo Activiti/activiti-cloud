@@ -42,7 +42,10 @@ class DNSNameValidatorTest {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("Invalid-name", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'Invalid-name'");
+            .containsOnly(
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'Invalid-name'"
+            );
     }
 
     @Test
@@ -50,16 +53,21 @@ class DNSNameValidatorTest {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("invalid!name", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'invalid!name'");
+            .containsOnly(
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'invalid!name'"
+            );
     }
-
 
     @Test
     public void should_returnRegexMismatchError_when_itContainsUppercase() {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("invalid name", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'invalid name'");
+            .containsOnly(
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'invalid name'"
+            );
     }
 
     @Test
@@ -75,8 +83,12 @@ class DNSNameValidatorTest {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("field.empty", "The myType name cannot be empty",
-                          "regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''");
+            .containsOnly(
+                "field.empty",
+                "The myType name cannot be empty",
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: ''"
+            );
     }
 
     @Test
@@ -84,8 +96,12 @@ class DNSNameValidatorTest {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("   ", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("field.empty", "The myType name cannot be empty",
-                          "regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '   '");
+            .containsOnly(
+                "field.empty",
+                "The myType name cannot be empty",
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: '   '"
+            );
     }
 
     @Test
@@ -93,8 +109,11 @@ class DNSNameValidatorTest {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName("abc-123-def-456-ghi-789-jkl", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("length.greater", "The myType name length cannot be greater than 26: 'abc-123-def-456-ghi-789-jkl'",
-                          "regex.mismatch", "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'abc-123-def-456-ghi-789-jkl'");
+            .containsOnly(
+                "length.greater",
+                "The myType name length cannot be greater than 26: 'abc-123-def-456-ghi-789-jkl'",
+                "regex.mismatch",
+                "The myType name should follow DNS-1035 conventions: it must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character: 'abc-123-def-456-ghi-789-jkl'"
+            );
     }
-
 }

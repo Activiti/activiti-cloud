@@ -33,14 +33,9 @@ public class FunctionBindingPropertySource extends PropertySource {
 
     public FunctionBindingPropertySource(ConfigurableEnvironment environment) {
         super(FunctionBindingPropertySource.class.getSimpleName());
-
         this.definition = environment.getProperty(SPRING_CLOUD_FUNCTION_DEFINITION, "");
 
-        environment
-            .getPropertySources()
-            .addAfter(
-                StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-                this);
+        environment.getPropertySources().addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, this);
     }
 
     public void register(String name) {
@@ -53,9 +48,12 @@ public class FunctionBindingPropertySource extends PropertySource {
             return null;
         }
 
-        return Stream.concat(Stream.of(definition.split(";")).filter(StringUtils::hasText),
-                             functions.stream().filter(StringUtils::hasText))
-                     .distinct()
-                     .collect(Collectors.joining(";"));
+        return Stream
+            .concat(
+                Stream.of(definition.split(";")).filter(StringUtils::hasText),
+                functions.stream().filter(StringUtils::hasText)
+            )
+            .distinct()
+            .collect(Collectors.joining(";"));
     }
 }

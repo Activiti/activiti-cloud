@@ -23,20 +23,12 @@ public class ExtendedPageMetadata extends PagedModel.PageMetadata {
     @JsonIgnore
     private long skipCount;
 
-    public ExtendedPageMetadata(long skipCount,
-                                long size,
-                                long number,
-                                long totalElements,
-                                long totalPages) {
-        super(size,
-              number,
-              totalElements,
-              totalPages);
+    public ExtendedPageMetadata(long skipCount, long size, long number, long totalElements, long totalPages) {
+        super(size, number, totalElements, totalPages);
         this.skipCount = skipCount;
     }
 
     public long getSkipCount() {
         return skipCount;
     }
-
 }

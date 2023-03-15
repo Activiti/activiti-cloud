@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BaseBPMNActivityEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-
-import javax.persistence.EntityManager;
 
 public abstract class BaseBPMNActivityEventHandler {
 
@@ -42,11 +41,9 @@ public abstract class BaseBPMNActivityEventHandler {
         BaseBPMNActivityEntity bpmnActivityEntity = null;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class,
-                                                    pkId);
+            bpmnActivityEntity = entityManager.find(ServiceTaskEntity.class, pkId);
         } else {
-            bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class,
-                                                    pkId);
+            bpmnActivityEntity = entityManager.find(BPMNActivityEntity.class, pkId);
         }
 
         if (bpmnActivityEntity == null) {
@@ -54,7 +51,6 @@ public abstract class BaseBPMNActivityEventHandler {
         }
 
         return bpmnActivityEntity;
-
     }
 
     public BaseBPMNActivityEntity createBpmnActivityEntity(CloudRuntimeEvent<?, ?> event) {
@@ -67,17 +63,23 @@ public abstract class BaseBPMNActivityEventHandler {
         BaseBPMNActivityEntity bpmnActivityEntity;
 
         if ("serviceTask".equals(bpmnActivity.getActivityType())) {
-            bpmnActivityEntity = new ServiceTaskEntity(event.getServiceName(),
-                                                       event.getServiceFullName(),
-                                                       event.getServiceVersion(),
-                                                       event.getAppName(),
-                                                       event.getAppVersion());
+            bpmnActivityEntity =
+                new ServiceTaskEntity(
+                    event.getServiceName(),
+                    event.getServiceFullName(),
+                    event.getServiceVersion(),
+                    event.getAppName(),
+                    event.getAppVersion()
+                );
         } else {
-            bpmnActivityEntity = new BPMNActivityEntity(event.getServiceName(),
-                                                        event.getServiceFullName(),
-                                                        event.getServiceVersion(),
-                                                        event.getAppName(),
-                                                        event.getAppVersion());
+            bpmnActivityEntity =
+                new BPMNActivityEntity(
+                    event.getServiceName(),
+                    event.getServiceFullName(),
+                    event.getServiceVersion(),
+                    event.getAppName(),
+                    event.getAppVersion()
+                );
         }
 
         bpmnActivityEntity.setId(pkId);

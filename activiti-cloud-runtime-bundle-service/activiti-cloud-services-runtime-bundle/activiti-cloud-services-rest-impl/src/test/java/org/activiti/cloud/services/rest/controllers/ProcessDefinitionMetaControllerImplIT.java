@@ -42,8 +42,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({StreamConfig.class})
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@Import({ StreamConfig.class })
+@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
 public class ProcessDefinitionMetaControllerImplIT {
 
     @Autowired
@@ -65,9 +65,7 @@ public class ProcessDefinitionMetaControllerImplIT {
         final BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
 
-        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta",
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta", 1).accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
-
 }

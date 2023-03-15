@@ -24,12 +24,10 @@ import java.util.Optional;
 public class QueryDslPredicateAggregator {
 
     public Predicate applyFilters(Predicate currentPredicate, List<QueryDslPredicateFilter> filters) {
-        Predicate extendedPredicate = Optional.ofNullable(currentPredicate)
-            .orElseGet(BooleanBuilder::new);
+        Predicate extendedPredicate = Optional.ofNullable(currentPredicate).orElseGet(BooleanBuilder::new);
         for (QueryDslPredicateFilter filter : filters) {
             extendedPredicate = filter.extend(extendedPredicate);
         }
         return extendedPredicate;
     }
-
 }

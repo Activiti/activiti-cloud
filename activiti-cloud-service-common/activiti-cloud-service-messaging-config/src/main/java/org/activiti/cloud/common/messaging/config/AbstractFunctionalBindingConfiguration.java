@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +44,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
-
 public abstract class AbstractFunctionalBindingConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
@@ -52,8 +52,10 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Assert.notNull(applicationContext,
-            this.getClass().getSimpleName() + " can not process beans because the application context is null");
+        Assert.notNull(
+            applicationContext,
+            this.getClass().getSimpleName() + " can not process beans because the application context is null"
+        );
         this.applicationContext = applicationContext;
     }
 
@@ -78,7 +80,7 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     }
 
     protected Class<?> getGatewayInterface(boolean hasOutput) {
-        if(hasOutput) {
+        if (hasOutput) {
             return ConnectorGateway.class;
         } else {
             return ConsumerGateway.class;
@@ -93,18 +95,20 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     }
 
     protected Type discoverFunctionType(Object bean, String beanName) {
-        return FunctionTypeUtils.discoverFunctionType(bean,
-                                                      beanName,
-                                                      GenericApplicationContext.class.cast(applicationContext));
-
+        return FunctionTypeUtils.discoverFunctionType(
+            bean,
+            beanName,
+            GenericApplicationContext.class.cast(applicationContext)
+        );
     }
 
-    protected void registerFunctionRegistration(String functionName,
-                                                FunctionRegistration functionRegistration) {
+    protected void registerFunctionRegistration(String functionName, FunctionRegistration functionRegistration) {
         GenericApplicationContext.class.cast(applicationContext)
-                                       .registerBean(functionName + REGISTRATION_NAME_SUFFIX,
-                                                     FunctionRegistration.class,
-                                                     () -> functionRegistration);
+            .registerBean(
+                functionName + REGISTRATION_NAME_SUFFIX,
+                FunctionRegistration.class,
+                () -> functionRegistration
+            );
     }
 
     protected CompositeMessageConverter getMessageConverter() {
@@ -128,8 +132,6 @@ public abstract class AbstractFunctionalBindingConfiguration implements Applicat
     }
 
     protected MessageConverterConfigurer getMessageConverterConfigurer() {
-        return applicationContext.getBean("messageConverterConfigurer",
-                                          MessageConverterConfigurer.class);
+        return applicationContext.getBean("messageConverterConfigurer", MessageConverterConfigurer.class);
     }
-
 }

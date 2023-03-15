@@ -65,25 +65,23 @@ public class ProcessVariablesPayloadConverterTest {
         input.put("jsonNodeValue2", new ProcessVariableValue("json", "{}"));
 
         // when
-        StartProcessPayload result = subject.convert(ProcessPayloadBuilder.start()
-                                                                          .withVariables(input)
-                                                                          .build());
+        StartProcessPayload result = subject.convert(ProcessPayloadBuilder.start().withVariables(input).build());
         // then
-        assertThat(result.getVariables()).containsEntry("int", 123)
-                          .containsEntry("string", "123")
-                          .containsEntry("bool", true)
-                          .containsEntry("nullValue", null)
-                          .containsEntry("stringValue", "name")
-                          .containsEntry("quoteValue", "\"")
-                          .containsEntry("intValue", 10)
-                          .containsEntry("longValue", 10L)
-                          .containsEntry("booleanValue", true)
-                          .containsEntry("doubleValue", 10.00)
-                          .containsEntry("localDateValue", LocalDate.of(2020, 4, 20))
-                          .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
-                          .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
-                          .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
-                          .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
+        assertThat(result.getVariables())
+            .containsEntry("int", 123)
+            .containsEntry("string", "123")
+            .containsEntry("bool", true)
+            .containsEntry("nullValue", null)
+            .containsEntry("stringValue", "name")
+            .containsEntry("quoteValue", "\"")
+            .containsEntry("intValue", 10)
+            .containsEntry("longValue", 10L)
+            .containsEntry("booleanValue", true)
+            .containsEntry("doubleValue", 10.00)
+            .containsEntry("localDateValue", LocalDate.of(2020, 4, 20))
+            .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
+            .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
+            .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
+            .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
     }
-
 }

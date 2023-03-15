@@ -19,7 +19,8 @@ import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class GroupCandidatesRepresentationModelAssembler implements RepresentationModelAssembler<CandidateGroup, EntityModel<CandidateGroup>> {
+public class GroupCandidatesRepresentationModelAssembler
+    implements RepresentationModelAssembler<CandidateGroup, EntityModel<CandidateGroup>> {
 
     private String taskId;
 

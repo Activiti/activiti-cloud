@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -39,34 +38,36 @@ public class ProcessVariablesPayloadConverter {
     }
 
     public StartProcessPayload convert(StartProcessPayload payload) {
-        return Optional.ofNullable(payload)
-                       .map(StartProcessPayload::getVariables)
-                       .map(variables -> ProcessPayloadBuilder.start()
-                                                              .withBusinessKey(payload.getBusinessKey())
-                                                              .withName(payload.getName())
-                                                              .withProcessDefinitionId(payload.getProcessDefinitionId())
-                                                              .withProcessDefinitionKey(payload.getProcessDefinitionKey())
-                                                              .withVariables(mapVariableValues(variables))
-                                                              .build())
-                       .orElse(payload);
+        return Optional
+            .ofNullable(payload)
+            .map(StartProcessPayload::getVariables)
+            .map(variables ->
+                ProcessPayloadBuilder
+                    .start()
+                    .withBusinessKey(payload.getBusinessKey())
+                    .withName(payload.getName())
+                    .withProcessDefinitionId(payload.getProcessDefinitionId())
+                    .withProcessDefinitionKey(payload.getProcessDefinitionKey())
+                    .withVariables(mapVariableValues(variables))
+                    .build()
+            )
+            .orElse(payload);
     }
 
     public StartMessagePayload convert(StartMessagePayload payload) {
-        return Optional.ofNullable(payload)
-                       .map(StartMessagePayload::getVariables)
-                       .map(variables -> MessagePayloadBuilder.from(payload)
-                                                              .withVariables(mapVariableValues(variables))
-                                                              .build())
-                       .orElse(payload);
+        return Optional
+            .ofNullable(payload)
+            .map(StartMessagePayload::getVariables)
+            .map(variables -> MessagePayloadBuilder.from(payload).withVariables(mapVariableValues(variables)).build())
+            .orElse(payload);
     }
 
     private Map<String, Object> mapVariableValues(Map<String, Object> input) {
-        return input.entrySet()
-                    .stream()
-                    .map(this::parseValue)
-                    .collect(LinkedHashMap::new,
-                             (m,v) -> m.put(v.getKey(), v.getValue()),
-                             HashMap::putAll);
+        return input
+            .entrySet()
+            .stream()
+            .map(this::parseValue)
+            .collect(LinkedHashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
     }
 
     private Map.Entry<String, Object> parseValue(Map.Entry<String, Object> entry) {
@@ -82,11 +83,10 @@ public class ProcessVariablesPayloadConverter {
 
                     entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
                 }
-
             } else if (ProcessVariableValue.class.isInstance(entryValue)) {
                 entryValue = variableValueConverter.convert(ProcessVariableValue.class.cast(entryValue));
             }
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {}
 
         return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entryValue);
     }

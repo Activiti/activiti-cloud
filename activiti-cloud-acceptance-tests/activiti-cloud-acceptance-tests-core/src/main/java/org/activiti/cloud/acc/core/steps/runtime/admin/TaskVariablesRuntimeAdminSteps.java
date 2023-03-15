@@ -30,29 +30,24 @@ public class TaskVariablesRuntimeAdminSteps {
     private TaskVariablesRuntimeAdminService taskRuntimeService;
 
     @Step
-    public void updateVariable(String taskId, String name, Object value){
-
-        taskRuntimeService.updateTaskVariable(taskId, name, TaskPayloadBuilder.updateVariable().withTaskId(taskId)
-                .withVariable(name, value).build());
+    public void updateVariable(String taskId, String name, Object value) {
+        taskRuntimeService.updateTaskVariable(
+            taskId,
+            name,
+            TaskPayloadBuilder.updateVariable().withTaskId(taskId).withVariable(name, value).build()
+        );
     }
 
     @Step
-    public void createVariable(String taskId,
-                               String name,
-                               Object value) {
-
-        taskRuntimeService.createTaskVariable(taskId,
-                                              TaskPayloadBuilder
-                                                      .createVariable()
-                                                      .withTaskId(taskId)
-                                                      .withVariable(name,
-                                                                    value)
-                                                      .build());
+    public void createVariable(String taskId, String name, Object value) {
+        taskRuntimeService.createTaskVariable(
+            taskId,
+            TaskPayloadBuilder.createVariable().withTaskId(taskId).withVariable(name, value).build()
+        );
     }
 
     @Step
     public CollectionModel<CloudVariableInstance> getVariables(String taskId) {
         return taskRuntimeService.getVariables(taskId);
     }
-
 }

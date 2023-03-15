@@ -35,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-
 @ExtendWith(MockitoExtension.class)
 public class JwtPrincipalGroupsProviderChainTest {
 
@@ -57,16 +56,13 @@ public class JwtPrincipalGroupsProviderChainTest {
         // given
         Principal principal = mock(JwtAuthenticationToken.class);
         when(provider1.getGroups(any())).thenReturn(null);
-        when(provider2.getGroups(any())).thenReturn(Arrays.asList("group1",
-            "group2"));
+        when(provider2.getGroups(any())).thenReturn(Arrays.asList("group1", "group2"));
 
         // when
         List<String> result = subject.getGroups(principal);
 
         // then
-        assertThat(result).isNotEmpty()
-            .containsExactly("group1",
-                "group2");
+        assertThat(result).isNotEmpty().containsExactly("group1", "group2");
 
         verify(provider1).getGroups(eq(principal));
         verify(provider2).getGroups(eq(principal));
@@ -89,6 +85,5 @@ public class JwtPrincipalGroupsProviderChainTest {
 
         verify(provider1).getGroups(eq(principal));
         verify(provider2).getGroups(eq(principal));
-
     }
 }

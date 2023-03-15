@@ -24,8 +24,10 @@ public class CloudTaskActivatedProducer implements TaskEventListener<TaskActivat
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskActivatedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskActivatedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

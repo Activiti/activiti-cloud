@@ -21,18 +21,17 @@ package org.activiti.cloud.api.model.shared.messages;
  */
 public final class CloudRuntimeEventsMessageHeaders {
 
-    public final static String ROUTING_KEY = "routingKey";
-    public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
-    public final static String BUSINESS_KEY = "businessKey";
-    public final static String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
-    public final static String PROCESS_INSTANCE_ID = "processInstanceId";
-    public final static String PROCESS_NAME = "processName";
-    public final static String PROCESS_DEFINITION_ID = "processDefinitionId";
-    public final static String PROCESS_DEFINITION_KEY = "processDefinitionKey";
-    public final static String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
-    public final static String PROCESS_DEFINITION_NAME = "processDefinitionName";
-    public final static String DEPLOYMENT_ID = "deploymentId";
-    public final static String DEPLOYMENT_NAME = "deploymentName";
-    public final static String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
-
+    public static final String ROUTING_KEY = "routingKey";
+    public static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
+    public static final String BUSINESS_KEY = "businessKey";
+    public static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
+    public static final String PROCESS_INSTANCE_ID = "processInstanceId";
+    public static final String PROCESS_NAME = "processName";
+    public static final String PROCESS_DEFINITION_ID = "processDefinitionId";
+    public static final String PROCESS_DEFINITION_KEY = "processDefinitionKey";
+    public static final String PROCESS_DEFINITION_VERSION = "processDefinitionVersion";
+    public static final String PROCESS_DEFINITION_NAME = "processDefinitionName";
+    public static final String DEPLOYMENT_ID = "deploymentId";
+    public static final String DEPLOYMENT_NAME = "deploymentName";
+    public static final String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
 }

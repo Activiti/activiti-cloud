@@ -34,5 +34,4 @@ public interface ProcessRuntimeChannels {
     default SubscribableChannel runtimeCmdResults() {
         return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).get();
     }
-
 }

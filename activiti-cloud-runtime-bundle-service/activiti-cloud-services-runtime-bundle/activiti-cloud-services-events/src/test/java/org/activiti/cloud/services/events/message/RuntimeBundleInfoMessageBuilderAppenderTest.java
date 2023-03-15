@@ -34,35 +34,33 @@ public class RuntimeBundleInfoMessageBuilderAppenderTest {
 
     private RuntimeBundleInfoMessageBuilderAppender subject;
 
-
     @BeforeEach
     public void setUp() {
-           RuntimeBundleProperties properties = new RuntimeBundleProperties();
+        RuntimeBundleProperties properties = new RuntimeBundleProperties();
 
-           properties.setAppName(APP_NAME);
-           properties.setServiceType(SERVICE_TYPE);
-           properties.setServiceVersion(SERVICE_VERSION);
-           properties.setRbSpringAppName(SPRING_APP_NAME);
+        properties.setAppName(APP_NAME);
+        properties.setServiceType(SERVICE_TYPE);
+        properties.setServiceVersion(SERVICE_VERSION);
+        properties.setRbSpringAppName(SPRING_APP_NAME);
 
-           subject = new RuntimeBundleInfoMessageBuilderAppender(properties);
+        subject = new RuntimeBundleInfoMessageBuilderAppender(properties);
     }
 
     @Test
     public void testApply() {
         // given
-        MessageBuilder<CloudRuntimeEvent<?,?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
+        MessageBuilder<CloudRuntimeEvent<?, ?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
 
         // when
         subject.apply(request);
 
         // then
-        Message<CloudRuntimeEvent<?,?>> message = request.build();
+        Message<CloudRuntimeEvent<?, ?>> message = request.build();
 
         assertThat(message.getHeaders())
-                .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, APP_NAME)
-                .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, SPRING_APP_NAME)
-                .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, SERVICE_TYPE)
-                .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, SERVICE_VERSION);
+            .containsEntry(RuntimeBundleInfoMessageHeaders.APP_NAME, APP_NAME)
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_NAME, SPRING_APP_NAME)
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_TYPE, SERVICE_TYPE)
+            .containsEntry(RuntimeBundleInfoMessageHeaders.SERVICE_VERSION, SERVICE_VERSION);
     }
-
 }

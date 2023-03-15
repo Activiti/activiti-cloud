@@ -22,8 +22,8 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AliasFor;
 
-@Retention( RetentionPolicy.RUNTIME )
-@Target( {ElementType.METHOD, ElementType.TYPE} )
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Qualifier
 @FunctionBinding
 public @interface ConditionalFunctionBinding {
@@ -35,5 +35,4 @@ public @interface ConditionalFunctionBinding {
 
     @AliasFor(annotation = FunctionBinding.class, attribute = "condition")
     String condition();
-
 }

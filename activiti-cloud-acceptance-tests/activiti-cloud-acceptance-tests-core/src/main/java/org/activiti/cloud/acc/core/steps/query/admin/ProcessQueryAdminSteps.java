@@ -19,7 +19,7 @@ import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-
+import net.thucydides.core.annotations.Step;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessModelQueryAdminService;
 import org.activiti.cloud.acc.core.services.query.admin.ProcessQueryAdminDiagramService;
@@ -34,8 +34,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-
-import net.thucydides.core.annotations.Step;
 
 @EnableRuntimeFeignContext
 public class ProcessQueryAdminSteps {
@@ -59,64 +57,71 @@ public class ProcessQueryAdminSteps {
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getAllProcessInstancesAdmin(){
+    public PagedModel<CloudProcessInstance> getAllProcessInstancesAdmin() {
         return processQueryAdminService.getProcessInstances();
     }
 
     @Step
-    public PagedModel<CloudProcessDefinition> getAllProcessDefinitions(){
+    public PagedModel<CloudProcessDefinition> getAllProcessDefinitions() {
         return processQueryAdminService.getProcessDefinitions();
     }
 
     @Step
-    public String getProcessModel(String processDefinitionId){
+    public String getProcessModel(String processDefinitionId) {
         return processModelQueryAdminService.getProcessModel(processDefinitionId);
     }
 
     @Step
-    public PagedModel<CloudProcessDefinition> getProcessDefinitions(){
+    public PagedModel<CloudProcessDefinition> getProcessDefinitions() {
         return processQueryAdminService.getProcessDefinitions();
     }
 
     @Step
-    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances(){
+    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances() {
         return processQueryAdminService.deleteProcessInstances();
     }
+
     @Step
     public String getProcessInstanceDiagram(String id) {
         return processQueryAdminDiagramService.getProcessInstanceDiagram(id);
     }
+
     @Step
     public void checkProcessInstanceDiagram(String diagram) throws Exception {
         assertThat(diagram).isNotEmpty();
         assertThat(svgToPng(diagram.getBytes())).isNotEmpty();
     }
+
     @Step
     public void checkProcessInstanceNoDiagram(String diagram) {
         assertThat(diagram).isEmpty();
     }
+
     @Step
     public PagedModel<CloudServiceTask> getServiceTasks() {
         return processQueryAdminService.getServiceTasks();
     }
+
     @Step
     public PagedModel<CloudServiceTask> getServiceTasksByQuery(Map<String, String> queryMap) {
         return processQueryAdminService.getServiceTasks(queryMap);
     }
+
     @Step
     public CloudServiceTask getServiceTaskById(String serviceTaskId) {
         return processQueryAdminService.getServiceTaskById(serviceTaskId);
     }
+
     @Step
     public PagedModel<CloudServiceTask> getServiceTasks(String processInstanceId) {
         return processQueryAdminService.getServiceTasks(processInstanceId);
     }
+
     @Step
-    public PagedModel<CloudServiceTask> getServiceTasksByStatus(String processInstanceId,
-                                                                 String status) {
-        return processQueryAdminService.getServiceTasksByStatus(processInstanceId,
-                                                                status);
+    public PagedModel<CloudServiceTask> getServiceTasksByStatus(String processInstanceId, String status) {
+        return processQueryAdminService.getServiceTasksByStatus(processInstanceId, status);
     }
+
     @Step
     public CloudIntegrationContext getCloudIntegrationContext(String serviceTaskId) {
         return processQueryAdminService.getCloudIntegrationContext(serviceTaskId);

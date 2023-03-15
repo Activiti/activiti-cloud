@@ -24,10 +24,7 @@ import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.springframework.util.StreamUtils;
-
 import org.springframework.web.multipart.MultipartFile;
-
-
 
 /**
  * Zip stream based on a {@link ZipInputStream}
@@ -49,8 +46,7 @@ public class ZipStream {
         try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
             ZipEntry zipEntry;
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                consumer.accept(new ZipStreamEntry(zipEntry,
-                                                   zipInputStream));
+                consumer.accept(new ZipStreamEntry(zipEntry, zipInputStream));
             }
         }
     }
@@ -88,15 +84,11 @@ public class ZipStream {
 
         private final boolean isDirectory;
 
-        ZipStreamEntry(ZipEntry zipEntry,
-                       ZipInputStream zipInputStream) throws IOException {
+        ZipStreamEntry(ZipEntry zipEntry, ZipInputStream zipInputStream) throws IOException {
             this.zipEntry = zipEntry;
             this.isDirectory = zipEntry.isDirectory();
-            this.content = !isDirectory ?
-                    Optional.of(StreamUtils.copyToByteArray(zipInputStream)) :
-                    Optional.empty();
+            this.content = !isDirectory ? Optional.of(StreamUtils.copyToByteArray(zipInputStream)) : Optional.empty();
             path = Paths.get(zipEntry.getName());
-
         }
 
         /**
@@ -121,15 +113,12 @@ public class ZipStream {
          */
         public Optional<String> getFolderName(int index) {
             Path folderPath = null;
-            int foldersCount = isDirectory ?
-                    path.getNameCount() :
-                    path.getNameCount() - 1;
+            int foldersCount = isDirectory ? path.getNameCount() : path.getNameCount() - 1;
             if (0 <= index && index < foldersCount) {
                 folderPath = path.getName(index);
             }
 
-            return Optional.ofNullable(folderPath)
-                    .map(Path::toString);
+            return Optional.ofNullable(folderPath).map(Path::toString);
         }
 
         /**
@@ -164,6 +153,5 @@ public class ZipStream {
         public boolean isAtRoot() {
             return path.getNameCount() == 1;
         }
-
     }
 }

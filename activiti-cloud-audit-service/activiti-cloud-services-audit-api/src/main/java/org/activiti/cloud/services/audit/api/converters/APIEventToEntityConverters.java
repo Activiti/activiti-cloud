@@ -25,8 +25,10 @@ public class APIEventToEntityConverters {
     private Map<String, EventToEntityConverter> converters;
 
     public APIEventToEntityConverters(Set<EventToEntityConverter> convertersSet) {
-        this.converters = convertersSet.stream().collect(Collectors.toMap(EventToEntityConverter::getSupportedEvent,
-                                                                          Function.identity()));
+        this.converters =
+            convertersSet
+                .stream()
+                .collect(Collectors.toMap(EventToEntityConverter::getSupportedEvent, Function.identity()));
     }
 
     public Map<String, EventToEntityConverter> getConverters() {

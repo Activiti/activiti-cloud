@@ -15,12 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 import javax.transaction.Transactional;
-
-import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
@@ -42,20 +46,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
-
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/process-instances",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceDeleteController {
 
     private final ProcessInstanceRepository processInstanceRepository;
@@ -73,13 +69,15 @@ public class ProcessInstanceDeleteController {
     private ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
 
     @Autowired
-    public ProcessInstanceDeleteController(ProcessInstanceRepository processInstanceRepository,
-                                            TaskRepository taskRepository,
-                                            VariableRepository variableRepository,
-                                            ServiceTaskRepository serviceTaskRepository,
-                                            BPMNActivityRepository bpmnActivityRepository,
-                                            BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
-                                            ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler) {
+    public ProcessInstanceDeleteController(
+        ProcessInstanceRepository processInstanceRepository,
+        TaskRepository taskRepository,
+        VariableRepository variableRepository,
+        ServiceTaskRepository serviceTaskRepository,
+        BPMNActivityRepository bpmnActivityRepository,
+        BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler
+    ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
         this.variableRepository = variableRepository;
@@ -92,13 +90,15 @@ public class ProcessInstanceDeleteController {
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
     @Transactional
-    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances (@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
-                                                                                      @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate) {
-
+    public CollectionModel<EntityModel<CloudProcessInstance>> deleteProcessInstances(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate
+    ) {
         Collection<EntityModel<CloudProcessInstance>> result = new ArrayList<>();
-        Iterable <ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
+        Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
-        for(ProcessInstanceEntity entity : iterable){
+        for (ProcessInstanceEntity entity : iterable) {
             Optional.ofNullable(entity.getTasks()).ifPresent(taskRepository::deleteAll);
             Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
             Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
@@ -112,11 +112,4 @@ public class ProcessInstanceDeleteController {
 
         return CollectionModel.of(result);
     }
-
-
-
-
-
-
-
 }

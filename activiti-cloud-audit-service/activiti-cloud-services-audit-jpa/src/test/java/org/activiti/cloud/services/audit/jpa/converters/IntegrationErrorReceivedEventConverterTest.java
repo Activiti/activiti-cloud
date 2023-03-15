@@ -38,22 +38,21 @@ public class IntegrationErrorReceivedEventConverterTest {
     public void createEventEntity_should_setErrorRelatedProperties() {
         //given
         CloudIntegrationErrorReceivedEventImpl errorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(
-            new IntegrationContextImpl(), "errorCode", "Something went wrong",
+            new IntegrationContextImpl(),
+            "errorCode",
+            "Something went wrong",
             RuntimeException.class.getName(),
-            Collections.singletonList(new StackTraceElement("any", "any", "any", 1)));
+            Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
+        );
         errorReceivedEvent.setSequenceNumber(1);
 
         //when
-        IntegrationErrorReceivedEventEntity errorReceivedEventEntity = converter
-            .createEventEntity(errorReceivedEvent);
+        IntegrationErrorReceivedEventEntity errorReceivedEventEntity = converter.createEventEntity(errorReceivedEvent);
 
         //then
-        assertThat(errorReceivedEventEntity.getIntegrationContext())
-            .isEqualTo(errorReceivedEvent.getEntity());
-        assertThat(errorReceivedEventEntity.getErrorCode())
-            .isEqualTo(errorReceivedEvent.getErrorCode());
-        assertThat(errorReceivedEventEntity.getErrorMessage())
-            .isEqualTo(errorReceivedEventEntity.getErrorMessage());
+        assertThat(errorReceivedEventEntity.getIntegrationContext()).isEqualTo(errorReceivedEvent.getEntity());
+        assertThat(errorReceivedEventEntity.getErrorCode()).isEqualTo(errorReceivedEvent.getErrorCode());
+        assertThat(errorReceivedEventEntity.getErrorMessage()).isEqualTo(errorReceivedEventEntity.getErrorMessage());
         assertThat(errorReceivedEventEntity.getErrorClassName())
             .isEqualTo(errorReceivedEventEntity.getErrorClassName());
         assertThat(errorReceivedEventEntity.getStackTraceElements())

@@ -30,7 +30,7 @@ public class TokenHolder {
         TokenHolder.authToken = authToken;
     }
 
-    public static String getUserName(){
+    public static String getUserName() {
         return userName;
     }
 

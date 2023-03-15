@@ -20,7 +20,9 @@ import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
 
-public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents> implements CloudApplicationDeployedEvent {
+public class CloudApplicationDeployedEventImpl
+    extends CloudRuntimeEventImpl<Deployment, ApplicationEvent.ApplicationEvents>
+    implements CloudApplicationDeployedEvent {
 
     private final ApplicationEvents eventType;
 
@@ -28,10 +30,12 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
         this.eventType = ApplicationEvents.APPLICATION_DEPLOYED;
     }
 
-    public CloudApplicationDeployedEventImpl(String id,
-                                             Long timestamp,
-                                             Deployment entity,
-                                             ApplicationEvents eventType) {
+    public CloudApplicationDeployedEventImpl(
+        String id,
+        Long timestamp,
+        Deployment entity,
+        ApplicationEvents eventType
+    ) {
         super(id, timestamp, entity);
         this.eventType = eventType;
         setEntityId(entity.getId());
@@ -45,5 +49,4 @@ public class CloudApplicationDeployedEventImpl extends CloudRuntimeEventImpl<Dep
     public ApplicationEvents getEventType() {
         return eventType;
     }
-
 }

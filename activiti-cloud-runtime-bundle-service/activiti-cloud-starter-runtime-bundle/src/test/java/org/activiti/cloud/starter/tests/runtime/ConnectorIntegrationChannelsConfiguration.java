@@ -18,6 +18,4 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class ConnectorIntegrationChannelsConfiguration implements ConnectorIntegrationChannels{
-
-}
+public class ConnectorIntegrationChannelsConfiguration implements ConnectorIntegrationChannels {}

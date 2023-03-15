@@ -50,27 +50,23 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-@SpringBootTest(properties = {
-    "activiti.cloud.application.name=foo",
-    "spring.application.name=bar",
-
-    "application.min.version=1",
-    "application.max.version=17",
-
-    "spring.cloud.stream.function.autodetect=false",
-
-    "activiti.cloud.messaging.destination-transformers-enabled=false",
-
-    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
-    "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
-
-    "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
-    "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
-    "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
-
-    "spring.cloud.stream.bindings.commandResults.destination=commandResults"
-})
-@Import({TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class})
+@SpringBootTest(
+    properties = {
+        "activiti.cloud.application.name=foo",
+        "spring.application.name=bar",
+        "application.min.version=1",
+        "application.max.version=17",
+        "spring.cloud.stream.function.autodetect=false",
+        "activiti.cloud.messaging.destination-transformers-enabled=false",
+        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
+        "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+    }
+)
+@Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
 public class ConnectorConfigurationIT {
 
     private static final String FUNCTION_NAME_A = "auditConsumerHandlerA";
@@ -106,7 +102,7 @@ public class ConnectorConfigurationIT {
     @Value("${application.max.version}")
     private String maxVersion;
 
-    private String condition = AnnotationUtils.getDefaultValue(ConnectorBinding.class,"condition").toString();
+    private String condition = AnnotationUtils.getDefaultValue(ConnectorBinding.class, "condition").toString();
 
     private ExpressionParser parser = new SpelExpressionParser();
 
@@ -132,7 +128,11 @@ public class ConnectorConfigurationIT {
         }
 
         @Bean(FUNCTION_NAME_C)
-        @ConnectorBinding(input = AUDIT_CONSUMER, output= COMMAND_RESULTS, condition = "headers['type']=='TestAuditConsumerC'")
+        @ConnectorBinding(
+            input = AUDIT_CONSUMER,
+            output = COMMAND_RESULTS,
+            condition = "headers['type']=='TestAuditConsumerC'"
+        )
         public Connector<?, ?> auditProcessorHandler() {
             return payload -> {
                 assertThat(payload).isNotNull().isEqualTo("TestC");
@@ -150,7 +150,7 @@ public class ConnectorConfigurationIT {
     }
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         expression = resolveExpression(condition);
         output.clear();
     }
@@ -158,15 +158,16 @@ public class ConnectorConfigurationIT {
     @Test
     public void testFunctionDefinitions() {
         // given
-        String functionDefinitions = (String) functionBindingPropertySource
-            .getProperty(FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION);
+        String functionDefinitions = (String) functionBindingPropertySource.getProperty(
+            FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION
+        );
 
         assertThat(functionDefinitions).isNotNull();
 
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).isEqualTo(new String[] {""});
+        assertThat(functions).isEqualTo(new String[] { "" });
     }
 
     @Test
@@ -186,9 +187,13 @@ public class ConnectorConfigurationIT {
     @Test
     public void testConditionDefaultAttributeValue() {
         // when
-        Object condition = AnnotationUtils.getDefaultValue(ConnectorBinding.class,"condition");
+        Object condition = AnnotationUtils.getDefaultValue(ConnectorBinding.class, "condition");
         // then
-        Assertions.assertThat(condition).isEqualTo("T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}");
+        Assertions
+            .assertThat(condition)
+            .isEqualTo(
+                "T(Integer).valueOf(headers['appVersion']) >= ${application.min.version} and T(Integer).valueOf(headers['appVersion']) <= ${application.max.version}"
+            );
     }
 
     @Test
@@ -197,15 +202,17 @@ public class ConnectorConfigurationIT {
         String expression = resolveExpression(condition);
 
         // then
-        Assertions.assertThat(expression).isEqualTo("T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17");
+        Assertions
+            .assertThat(expression)
+            .isEqualTo(
+                "T(Integer).valueOf(headers['appVersion']) >= 1 and T(Integer).valueOf(headers['appVersion']) <= 17"
+            );
     }
 
     @Test
     public void testShouldPassMessageWithValidMinAppVersionCondition() {
         // given
-        Message<?> message = MessageBuilder.withPayload(Map.of())
-            .setHeader("appVersion", minVersion)
-            .build();
+        Message<?> message = MessageBuilder.withPayload(Map.of()).setHeader("appVersion", minVersion).build();
 
         // when
         Boolean result = getExpressionValue(message);
@@ -217,9 +224,7 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldPassMessageWithValidMaxAppVersionCondition() {
         // given
-        Message<?> message = MessageBuilder.withPayload(Map.of())
-            .setHeader("appVersion", maxVersion)
-            .build();
+        Message<?> message = MessageBuilder.withPayload(Map.of()).setHeader("appVersion", maxVersion).build();
         // when
         Boolean result = getExpressionValue(message);
 
@@ -230,7 +235,8 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldDiscardMessageWithInvalidAppVersionCondition() {
         // given
-        Message<?> message = MessageBuilder.withPayload(Map.of())
+        Message<?> message = MessageBuilder
+            .withPayload(Map.of())
             .setHeader("appVersion", "20")
             .setHeader("resultDestination", "commandResults")
             .build();
@@ -244,7 +250,8 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldHandleMessageWithValidAppVersion() {
         // given
-        Message<?> message = MessageBuilder.withPayload(Map.of())
+        Message<?> message = MessageBuilder
+            .withPayload(Map.of())
             .setHeader("appVersion", "6")
             .setHeader("resultDestination", "commandResults")
             .build();
@@ -254,7 +261,8 @@ public class ConnectorConfigurationIT {
 
         // then
         Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
-        assertThat(reply).isNotNull()
+        assertThat(reply)
+            .isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
             .isEqualTo("TestVersion".getBytes(StandardCharsets.UTF_8));
@@ -263,7 +271,8 @@ public class ConnectorConfigurationIT {
     @Test
     public void testShouldDiscardMessageWithInValidAppVersion() {
         // given
-        Message<?> message = MessageBuilder.withPayload(Map.of())
+        Message<?> message = MessageBuilder
+            .withPayload(Map.of())
             .setHeader("appVersion", "20")
             .setHeader("resultDestination", "commandResults")
             .build();
@@ -278,33 +287,31 @@ public class ConnectorConfigurationIT {
     @Test
     public void testConnectorsResolvesFunctionAndReplies() {
         // given
-        Message<String> message = MessageBuilder.withPayload("TestC")
-                                                .setHeader("type", "TestAuditConsumerC")
-                                                .setHeader("appVersion", "1")
-                                                .setHeader("resultDestination", "commandResults")
-                                                .build();
+        Message<String> message = MessageBuilder
+            .withPayload("TestC")
+            .setHeader("type", "TestAuditConsumerC")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", "commandResults")
+            .build();
         // when
         input.send(message, "engineEvents");
 
         // then
         Message<byte[]> reply = output.receive(10000, bindingResolver.apply(COMMAND_RESULTS));
-        assertThat(reply).isNotNull()
+        assertThat(reply)
+            .isNotNull()
             .extracting(Message::getPayload)
             .isNotNull()
             .isEqualTo("TestReply".getBytes(StandardCharsets.UTF_8));
     }
 
     private String resolveExpression(String value) {
-        BeanExpressionResolver resolver = this.applicationContext.getBeanFactory()
-            .getBeanExpressionResolver();
-        BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
-            null);
+        BeanExpressionResolver resolver = this.applicationContext.getBeanFactory().getBeanExpressionResolver();
+        BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(), null);
 
-        String resolvedValue = this.applicationContext.getBeanFactory()
-            .resolveEmbeddedValue(value);
+        String resolvedValue = this.applicationContext.getBeanFactory().resolveEmbeddedValue(value);
         if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
-            resolvedValue = (String) resolver.evaluate(resolvedValue,
-                expressionContext);
+            resolvedValue = (String) resolver.evaluate(resolvedValue, expressionContext);
         }
         return resolvedValue;
     }
@@ -312,7 +319,6 @@ public class ConnectorConfigurationIT {
     private Boolean getExpressionValue(Message<?> message) {
         evaluationContext.setRootObject(message);
 
-        return parser.parseExpression(expression)
-            .getValue(evaluationContext, Boolean.class);
+        return parser.parseExpression(expression).getValue(evaluationContext, Boolean.class);
     }
 }

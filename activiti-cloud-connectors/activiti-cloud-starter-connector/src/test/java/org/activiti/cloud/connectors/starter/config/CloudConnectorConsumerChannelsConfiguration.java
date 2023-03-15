@@ -19,6 +19,4 @@ import org.activiti.cloud.connectors.starter.channels.CloudConnectorConsumerChan
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class CloudConnectorConsumerChannelsConfiguration implements CloudConnectorConsumerChannels {
-
-}
+public class CloudConnectorConsumerChannelsConfiguration implements CloudConnectorConsumerChannels {}

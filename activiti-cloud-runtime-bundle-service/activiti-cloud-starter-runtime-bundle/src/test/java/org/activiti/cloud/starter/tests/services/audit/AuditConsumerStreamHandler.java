@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
+import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,8 +31,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.Message;
 
-import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
-
 @Profile(AUDIT_PRODUCER_IT)
 @TestConfiguration
 @Import(AuditConsumerConfiguration.class)
@@ -38,12 +38,12 @@ public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> allReceivedEvents = new ArrayList<>();
 
     @FunctionBinding(input = AuditConsumer.AUDIT_CONSUMER)
     @Bean
-    public Consumer<Message<List<CloudRuntimeEvent<?,?>>>> receive() {
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> receive() {
         return message -> {
             latestReceivedEvents = new ArrayList<>(message.getPayload());
             allReceivedEvents = new ArrayList<>(allReceivedEvents);

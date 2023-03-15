@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -22,10 +25,6 @@ import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
 
 public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
 
@@ -43,11 +42,13 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
 
         BPMNSequenceFlow bpmnSequenceFlow = activityEvent.getEntity();
 
-        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(event.getServiceName(),
-                                                                                   event.getServiceFullName(),
-                                                                                   event.getServiceVersion(),
-                                                                                   event.getAppName(),
-                                                                                   event.getAppVersion());
+        BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(
+            event.getServiceName(),
+            event.getServiceFullName(),
+            event.getServiceVersion(),
+            event.getAppName(),
+            event.getAppVersion()
+        );
         bpmnSequenceFlowEntity.setId(UUID.randomUUID().toString());
         bpmnSequenceFlowEntity.setElementId(bpmnSequenceFlow.getElementId());
         bpmnSequenceFlowEntity.setProcessDefinitionId(bpmnSequenceFlow.getProcessDefinitionId());

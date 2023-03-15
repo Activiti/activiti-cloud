@@ -29,25 +29,31 @@ public class IdentitySearchCacheConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
     private String cacheExpireAfterWrite;
+
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
 
     @Bean
     public CaffeineCache userSearchCache() {
-        return new CaffeineCache("userSearch",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "userSearch",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean
     public CaffeineCache groupSearchCache() {
-        return new CaffeineCache("groupSearch",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "groupSearch",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
-
 }

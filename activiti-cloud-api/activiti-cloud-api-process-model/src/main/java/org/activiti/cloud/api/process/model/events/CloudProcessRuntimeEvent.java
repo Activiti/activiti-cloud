@@ -19,8 +19,6 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-
-public interface CloudProcessRuntimeEvent extends CloudRuntimeEvent<ProcessInstance, ProcessRuntimeEvent.ProcessEvents>,
-                                                  ProcessRuntimeEvent<ProcessInstance> {
-
-}
+public interface CloudProcessRuntimeEvent
+    extends
+        CloudRuntimeEvent<ProcessInstance, ProcessRuntimeEvent.ProcessEvents>, ProcessRuntimeEvent<ProcessInstance> {}

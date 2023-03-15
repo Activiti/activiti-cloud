@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 
 @Entity(name = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserAddedEventEntity.TASK_CANDIDATE_USER_ADDED_EVENT)
@@ -37,8 +36,7 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     @Column(columnDefinition = "text")
     private TaskCandidateUserImpl candidateUser;
 
-    public TaskCandidateUserAddedEventEntity() {
-    }
+    public TaskCandidateUserAddedEventEntity() {}
 
     public TaskCandidateUserAddedEventEntity(CloudTaskCandidateUserAddedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +48,18 @@ public class TaskCandidateUserAddedEventEntity extends AuditEventEntity {
     }
 
     public void setCandidateUser(TaskCandidateUser candidateUser) {
-        this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(),candidateUser.getTaskId());
+        this.candidateUser = new TaskCandidateUserImpl(candidateUser.getUserId(), candidateUser.getTaskId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskCandidateUserAddedEventEntity [candidateUser=")
-               .append(candidateUser)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("TaskCandidateUserAddedEventEntity [candidateUser=")
+            .append(candidateUser)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

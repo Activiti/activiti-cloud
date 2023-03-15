@@ -35,7 +35,7 @@ public class KeycloakTokenToUserRoles {
     public static UserRoles toUserRoles(Jwt token) {
         UserRoles userRoles = new UserRoles();
 
-        if(token != null) {
+        if (token != null) {
             List<UserApplicationAccess> applicationAccess = getResourceRoles(token);
             userRoles.setApplicationAccess(applicationAccess);
 
@@ -46,7 +46,8 @@ public class KeycloakTokenToUserRoles {
     }
 
     private static List<UserApplicationAccess> getResourceRoles(Jwt token) {
-        return Optional.ofNullable(token.getClaimAsMap(RESOURCE))
+        return Optional
+            .ofNullable(token.getClaimAsMap(RESOURCE))
             .map(Map::entrySet)
             .orElse(Collections.emptySet())
             .stream()
@@ -55,7 +56,7 @@ public class KeycloakTokenToUserRoles {
     }
 
     private static List<String> getGlobalRoles(Jwt jwt) {
-        if(jwt.getClaim(REALM) != null) {
+        if (jwt.getClaim(REALM) != null) {
             return getRoles(jwt.getClaim(REALM));
         } else {
             return Collections.emptyList();
@@ -63,7 +64,6 @@ public class KeycloakTokenToUserRoles {
     }
 
     private static List<String> getRoles(JSONObject getRolesParent) {
-        return Optional.ofNullable((List<String>) getRolesParent.get(ROLES))
-            .orElse(Collections.emptyList());
+        return Optional.ofNullable((List<String>) getRolesParent.get(ROLES)).orElse(Collections.emptyList());
     }
 }

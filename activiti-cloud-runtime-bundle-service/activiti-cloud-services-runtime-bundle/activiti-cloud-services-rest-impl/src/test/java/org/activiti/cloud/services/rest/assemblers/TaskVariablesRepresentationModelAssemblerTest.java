@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.rest.assemblers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+
 import java.util.Optional;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -25,11 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import org.springframework.hateoas.Link;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskVariablesRepresentationModelAssemblerTest {
@@ -55,5 +55,4 @@ public class TaskVariablesRepresentationModelAssemblerTest {
         assertThat(globalVariablesLink).isPresent();
         assertThat(globalVariablesLink.get().getHref()).contains("my-identifier");
     }
-
 }

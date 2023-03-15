@@ -16,7 +16,6 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import java.util.Date;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -37,8 +36,7 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private Date completedDate;
     private Date suspendedDate;
 
-    public CloudProcessInstanceImpl() {
-    }
+    public CloudProcessInstanceImpl() {}
 
     public CloudProcessInstanceImpl(ProcessInstance processInstance) {
         super(processInstance);

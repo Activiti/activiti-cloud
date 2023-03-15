@@ -15,18 +15,17 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "activiti.keycloak")
 public class ActivitiKeycloakProperties {
 
     public static enum GrantType {
-        client_credentials
+        client_credentials,
     }
 
     @NotEmpty
@@ -61,5 +60,4 @@ public class ActivitiKeycloakProperties {
     public void setGrantType(GrantType grantType) {
         this.grantType = grantType;
     }
-
 }

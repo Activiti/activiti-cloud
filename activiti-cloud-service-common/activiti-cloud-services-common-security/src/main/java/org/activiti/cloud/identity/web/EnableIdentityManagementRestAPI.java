@@ -29,12 +29,15 @@ import org.springframework.context.annotation.Import;
  * This annotation enables the IdentityManagementRestController that exposes
  * users and groups search using the target identity management service (e.g. Keycloak)
  */
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Import({IdentityManagementController.class,
-    IdentityManagementRestExceptionHandler.class,
-    IdentitySearchCacheConfiguration.class
-})
+@Import(
+    {
+        IdentityManagementController.class,
+        IdentityManagementRestExceptionHandler.class,
+        IdentitySearchCacheConfiguration.class,
+    }
+)
 public @interface EnableIdentityManagementRestAPI {
 }

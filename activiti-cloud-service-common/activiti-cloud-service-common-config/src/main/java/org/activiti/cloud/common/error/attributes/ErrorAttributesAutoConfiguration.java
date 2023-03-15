@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.common.error.attributes;
 
+import java.util.List;
+import java.util.Map;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
@@ -28,9 +30,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.web.context.request.WebRequest;
 
-import java.util.List;
-import java.util.Map;
-
 @Configuration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 public class ErrorAttributesAutoConfiguration {
@@ -40,10 +39,8 @@ public class ErrorAttributesAutoConfiguration {
     public ErrorAttributes errorAttributes(List<ErrorAttributesCustomizer> errorAttributesCustomizers) {
         return new DefaultErrorAttributes() {
             @Override
-            public Map<String, Object> getErrorAttributes(WebRequest webRequest,
-                                                          ErrorAttributeOptions options) {
-                Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
-                    options);
+            public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+                Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, options);
 
                 for (ErrorAttributesCustomizer customizer : errorAttributesCustomizers) {
                     errorAttributes = customizer.customize(errorAttributes, getError(webRequest));
@@ -55,7 +52,7 @@ public class ErrorAttributesAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name="errorAttributesMessageSanitizer")
+    @ConditionalOnMissingBean(name = "errorAttributesMessageSanitizer")
     public ErrorAttributesCustomizer errorAttributesMessageSanitizer() {
         return new ErrorAttributesMessageSanitizer();
     }

@@ -36,8 +36,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @ExtendWith(MockitoExtension.class)
 public class JwtAccessTokenValidatorTest {
 
-    private final JwtAccessTokenValidator validator = new JwtAccessTokenValidator(List.of(new ExpiredValidationCheck(0),
-                                                                                          new IsNotBeforeValidationCheck(0)));
+    private final JwtAccessTokenValidator validator = new JwtAccessTokenValidator(
+        List.of(new ExpiredValidationCheck(0), new IsNotBeforeValidationCheck(0))
+    );
 
     @Mock
     private JwtAdapter jwtAdapter;
@@ -122,10 +123,6 @@ public class JwtAccessTokenValidatorTest {
             claims.put("nbf", Instant.now().minusSeconds(10));
         }
 
-        return new Jwt(TOKEN_VALUE,
-            issuedAt,
-            expiresAt,
-            headers,
-            claims);
+        return new Jwt(TOKEN_VALUE, issuedAt, expiresAt, headers, claims);
     }
 }

@@ -19,6 +19,4 @@ import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {
-
-}
+public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {}

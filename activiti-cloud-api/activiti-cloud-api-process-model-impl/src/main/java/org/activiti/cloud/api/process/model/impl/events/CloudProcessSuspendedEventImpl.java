@@ -18,21 +18,18 @@ package org.activiti.cloud.api.process.model.impl.events;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
 
-public class CloudProcessSuspendedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessSuspendedEvent {
+public class CloudProcessSuspendedEventImpl
+    extends CloudProcessInstanceEventImpl
+    implements CloudProcessSuspendedEvent {
 
-    public CloudProcessSuspendedEventImpl() {
-    }
+    public CloudProcessSuspendedEventImpl() {}
 
     public CloudProcessSuspendedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessSuspendedEventImpl(String id,
-                                          Long timestamp,
-                                          ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessSuspendedEventImpl(String id, Long timestamp, ProcessInstance processInstance) {
+        super(id, timestamp, processInstance);
     }
 
     @Override

@@ -22,5 +22,4 @@ import org.springframework.messaging.MessagingException;
 public interface ConnectorGateway extends Function<Message<?>, Message<?>> {
     @Override
     Message<?> apply(Message<?> message) throws MessagingException;
-
 }

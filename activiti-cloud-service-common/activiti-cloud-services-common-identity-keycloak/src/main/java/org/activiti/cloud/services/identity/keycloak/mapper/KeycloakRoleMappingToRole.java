@@ -22,18 +22,14 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 
 public class KeycloakRoleMappingToRole {
 
-  public static List<Role> toRoles(List<KeycloakRoleMapping> userRoleMapping) {
-      return userRoleMapping
-          .stream()
-          .map(KeycloakRoleMappingToRole::toRole)
-          .collect(Collectors.toList());
-  }
+    public static List<Role> toRoles(List<KeycloakRoleMapping> userRoleMapping) {
+        return userRoleMapping.stream().map(KeycloakRoleMappingToRole::toRole).collect(Collectors.toList());
+    }
 
-  public static Role toRole(KeycloakRoleMapping kRole) {
-    Role role = new Role();
-    role.setId(kRole.getId());
-    role.setName(kRole.getName());
-    return role;
-  }
-
+    public static Role toRole(KeycloakRoleMapping kRole) {
+        Role role = new Role();
+        role.setId(kRole.getId());
+        role.setName(kRole.getName());
+        return role;
+    }
 }

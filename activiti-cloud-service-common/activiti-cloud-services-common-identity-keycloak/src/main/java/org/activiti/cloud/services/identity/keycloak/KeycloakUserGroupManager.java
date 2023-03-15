@@ -26,7 +26,6 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 
 public class KeycloakUserGroupManager implements UserGroupManager {
 
-
     private final KeycloakClient keycloakClient;
 
     public KeycloakUserGroupManager(KeycloakClient keycloakClient) {
@@ -69,14 +68,16 @@ public class KeycloakUserGroupManager implements UserGroupManager {
 
     @Override
     public List<String> getGroups() {
-        return keycloakClient.getAllGroups()
-                .stream().map(KeycloakGroup::getName).collect(Collectors.toList());
+        return keycloakClient.getAllGroups().stream().map(KeycloakGroup::getName).collect(Collectors.toList());
     }
 
     @Override
     public List<String> getUsers() {
-        return keycloakClient.getAllUsers(keycloakClient.countAllUsers())
-                .stream().map(KeycloakUser::getUsername).collect(Collectors.toList());
+        return keycloakClient
+            .getAllUsers(keycloakClient.countAllUsers())
+            .stream()
+            .map(KeycloakUser::getUsername)
+            .collect(Collectors.toList());
     }
 
     private KeycloakUser loadRepresentation(String username) {

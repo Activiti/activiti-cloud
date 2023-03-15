@@ -31,8 +31,4 @@ public class IntegrationErrorChannelResolverImpl implements IntegrationErrorChan
 
         return destination;
     }
-
-
-
-
 }

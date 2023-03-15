@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
+import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
@@ -34,18 +38,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.types.Predicate;
-
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
-
 @RestController
 @RequestMapping(
-        value = "/admin/v1/service-tasks",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/service-tasks",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ServiceTaskAdminController {
 
     private final ServiceTaskRepository serviceTaskRepository;
@@ -56,11 +53,12 @@ public class ServiceTaskAdminController {
 
     private final EntityFinder entityFinder;
 
-
-    public ServiceTaskAdminController(ServiceTaskRepository serviceTaskRepository,
-                                      ServiceTaskRepresentationModelAssembler representationModelAssembler,
-                                      AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler,
-                                      EntityFinder entityFinder) {
+    public ServiceTaskAdminController(
+        ServiceTaskRepository serviceTaskRepository,
+        ServiceTaskRepresentationModelAssembler representationModelAssembler,
+        AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler,
+        EntityFinder entityFinder
+    ) {
         this.serviceTaskRepository = serviceTaskRepository;
         this.representationModelAssembler = representationModelAssembler;
         this.entityFinder = entityFinder;
@@ -68,24 +66,28 @@ public class ServiceTaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudServiceTask>> findAll(@Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
-                                                             @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
-                                                             Pageable pageable) {
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                     serviceTaskRepository.findAll(predicate,
-                                                                                   pageable),
-                                                     representationModelAssembler);
+    public PagedModel<EntityModel<CloudServiceTask>> findAll(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ServiceTaskEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            serviceTaskRepository.findAll(predicate, pageable),
+            representationModelAssembler
+        );
     }
 
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
     public EntityModel<CloudServiceTask> findById(@PathVariable String serviceTaskId) {
-
         Predicate filter = QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId);
 
-        ServiceTaskEntity entity = entityFinder.findOne(serviceTaskRepository,
-                                                        filter,
-                                                        "Unable to find service task entity for the given id:'" + serviceTaskId + "'");
+        ServiceTaskEntity entity = entityFinder.findOne(
+            serviceTaskRepository,
+            filter,
+            "Unable to find service task entity for the given id:'" + serviceTaskId + "'"
+        );
 
         return representationModelAssembler.toModel(entity);
     }

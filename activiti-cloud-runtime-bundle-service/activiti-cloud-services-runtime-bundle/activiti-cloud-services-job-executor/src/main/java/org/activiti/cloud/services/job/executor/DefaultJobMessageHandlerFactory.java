@@ -24,5 +24,4 @@ public class DefaultJobMessageHandlerFactory implements JobMessageHandlerFactory
     public MessageHandler create(ProcessEngineConfigurationImpl configuration) {
         return new JobMessageHandler(configuration);
     }
-
 }

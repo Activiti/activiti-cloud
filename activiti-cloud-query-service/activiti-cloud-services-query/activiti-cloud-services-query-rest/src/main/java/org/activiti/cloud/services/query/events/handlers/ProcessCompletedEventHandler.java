@@ -34,52 +34,54 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class ProcessCompletedEventHandler implements QueryEventHandler {
 
-  private final EntityManager entityManager;
-  private final TaskCancelledEventHandler taskCancelledEventHandler;
+    private final EntityManager entityManager;
+    private final TaskCancelledEventHandler taskCancelledEventHandler;
 
-  public ProcessCompletedEventHandler(EntityManager entityManager,
-                                      TaskCancelledEventHandler taskCancelledEventHandler) {
-    this.entityManager = entityManager;
-    this.taskCancelledEventHandler = taskCancelledEventHandler;
-  }
-
-  @Override
-  public void handle(CloudRuntimeEvent<?, ?> event) {
-    CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
-    String processInstanceId = completedEvent.getEntity().getId();
-    Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                        processInstanceId));
-    if (findResult.isPresent()) {
-      ProcessInstanceEntity processInstanceEntity = findResult.get();
-      processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
-      processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
-      processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
-      entityManager.persist(processInstanceEntity);
-      callCancelledEventHandlerToCancelRemainingTasks(processInstanceEntity);
-
-    } else {
-      throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
+    public ProcessCompletedEventHandler(
+        EntityManager entityManager,
+        TaskCancelledEventHandler taskCancelledEventHandler
+    ) {
+        this.entityManager = entityManager;
+        this.taskCancelledEventHandler = taskCancelledEventHandler;
     }
-  }
 
-  private void callCancelledEventHandlerToCancelRemainingTasks(ProcessInstanceEntity processInstanceEntity) {
-    Predicate<TaskEntity> cancellableTasks = task -> TaskStatus.ASSIGNED.equals(task.getStatus())
-        || TaskStatus.CREATED.equals(task.getStatus());
+    @Override
+    public void handle(CloudRuntimeEvent<?, ?> event) {
+        CloudProcessCompletedEvent completedEvent = (CloudProcessCompletedEvent) event;
+        String processInstanceId = completedEvent.getEntity().getId();
+        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, processInstanceId)
+        );
+        if (findResult.isPresent()) {
+            ProcessInstanceEntity processInstanceEntity = findResult.get();
+            processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+            processInstanceEntity.setLastModified(new Date(completedEvent.getTimestamp()));
+            processInstanceEntity.setCompletedDate(new Date(completedEvent.getTimestamp()));
+            entityManager.persist(processInstanceEntity);
+            callCancelledEventHandlerToCancelRemainingTasks(processInstanceEntity);
+        } else {
+            throw new QueryException("Unable to find process instance with the given id: " + processInstanceId);
+        }
+    }
 
-    Stream.ofNullable(processInstanceEntity.getTasks())
-        .flatMap(Set::stream)
-        .filter(cancellableTasks)
-        .map(task -> {
-          CloudTaskImpl cloudTask = new CloudTaskImpl();
-          cloudTask.setId(task.getId());
-          return new CloudTaskCancelledEventImpl(cloudTask);
-        })
-        .forEach(taskCancelledEventHandler::handle);
-  }
+    private void callCancelledEventHandlerToCancelRemainingTasks(ProcessInstanceEntity processInstanceEntity) {
+        Predicate<TaskEntity> cancellableTasks = task ->
+            TaskStatus.ASSIGNED.equals(task.getStatus()) || TaskStatus.CREATED.equals(task.getStatus());
 
+        Stream
+            .ofNullable(processInstanceEntity.getTasks())
+            .flatMap(Set::stream)
+            .filter(cancellableTasks)
+            .map(task -> {
+                CloudTaskImpl cloudTask = new CloudTaskImpl();
+                cloudTask.setId(task.getId());
+                return new CloudTaskCancelledEventImpl(cloudTask);
+            })
+            .forEach(taskCancelledEventHandler::handle);
+    }
 
-  @Override
-  public String getHandledEvent() {
-    return ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name();
-  }
+    @Override
+    public String getHandledEvent() {
+        return ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name();
+    }
 }

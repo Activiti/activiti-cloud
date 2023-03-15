@@ -15,18 +15,15 @@
  */
 package org.activiti.cloud.services.notifications.graphql.events.consumer;
 
-
 import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface EngineEventsConsumerChannels {
-
     String SOURCE = "graphQLEngineEventsConsumerSource";
 
     @InputBinding(SOURCE)
     default SubscribableChannel input() {
         return MessageChannels.publishSubscribe(SOURCE).get();
     }
-
 }

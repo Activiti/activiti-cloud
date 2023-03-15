@@ -33,48 +33,70 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @Configuration
-@ConditionalOnProperty(name="spring.activiti.cloud.services.notification.graphql.ws.security.enabled", matchIfMissing = true)
+@ConditionalOnProperty(
+    name = "spring.activiti.cloud.services.notification.graphql.ws.security.enabled",
+    matchIfMissing = true
+)
 @Import(WebSocketMessageBrokerSecurityConfigurer.class)
 public class WebSocketMessageBrokerSecurityAutoConfiguration {
 
     @Configuration
-    @PropertySources(value= {
-            @PropertySource(value="classpath:META-INF/graphql-security.properties"),
-            @PropertySource(value="classpath:graphql-security.properties", ignoreResourceNotFound = true)
-    })
+    @PropertySources(
+        value = {
+            @PropertySource(value = "classpath:META-INF/graphql-security.properties"),
+            @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true),
+        }
+    )
     public static class DefaultWebSocketMessageBrokerSecurityConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(JWSAuthenticationManager keycloakWebSocketAuthManager) {
+        public JWSAuthenticationInterceptorConfigurer jwsTokenChannelSecurityContextConfigurer(
+            JWSAuthenticationManager keycloakWebSocketAuthManager
+        ) {
             return new JWSAuthenticationInterceptorConfigurer(keycloakWebSocketAuthManager);
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
+        public JwtInterceptorConfigurer jwsTokenChannelAuthenticationConfigurer(
+            GraphQLAccessTokenVerifier keycloakTokenVerifier
+        ) {
             return new JwtInterceptorConfigurer(keycloakTokenVerifier);
         }
 
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnExpression("'${activiti.cloud.services.oauth2.iam-name}'!='keycloak'")
-        public GraphQLAccessTokenVerifier jwtTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
-                                                           JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                                           JwtDecoder jwtDecoder) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> jwt.getClaimAsStringList("role"));
+        public GraphQLAccessTokenVerifier jwtTokenVerifier(
+            JwtAccessTokenValidator jwtAccessTokenValidator,
+            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+            JwtDecoder jwtDecoder
+        ) {
+            return new JwtAccessTokenVerifier(
+                jwtAccessTokenValidator,
+                jwtUserInfoUriAuthenticationConverter,
+                jwtDecoder,
+                jwt -> jwt.getClaimAsStringList("role")
+            );
         }
 
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak")
-        public GraphQLAccessTokenVerifier keycloakTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
-                                                                JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                                                JwtDecoder jwtDecoder,
-                                                                Function<Jwt, JwtAdapter> jwtAdapterSupplier) {
-            return new JwtAccessTokenVerifier(jwtAccessTokenValidator, jwtUserInfoUriAuthenticationConverter, jwtDecoder, jwt -> jwtAdapterSupplier.apply(jwt).getRoles());
+        public GraphQLAccessTokenVerifier keycloakTokenVerifier(
+            JwtAccessTokenValidator jwtAccessTokenValidator,
+            JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+            JwtDecoder jwtDecoder,
+            Function<Jwt, JwtAdapter> jwtAdapterSupplier
+        ) {
+            return new JwtAccessTokenVerifier(
+                jwtAccessTokenValidator,
+                jwtUserInfoUriAuthenticationConverter,
+                jwtDecoder,
+                jwt -> jwtAdapterSupplier.apply(jwt).getRoles()
+            );
         }
-
 
         @Bean
         @ConditionalOnMissingBean

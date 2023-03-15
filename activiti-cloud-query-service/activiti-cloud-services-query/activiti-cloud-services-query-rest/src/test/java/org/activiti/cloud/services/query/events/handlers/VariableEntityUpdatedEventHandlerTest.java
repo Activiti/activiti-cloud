@@ -21,8 +21,8 @@ import static org.mockito.Mockito.verify;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,25 +57,26 @@ public class VariableEntityUpdatedEventHandlerTest {
         verify(processVariableUpdateEventHandler).handle(captor.capture());
 
         ProcessVariableEntity variableEntity = captor.getValue();
-        Assertions.assertThat(variableEntity)
-                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
-                .hasName("var")
-                .hasServiceName("runtime-bundle-a")
-                .hasValue("v1")
-                .hasType("string");
+        Assertions
+            .assertThat(variableEntity)
+            .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+            .hasName("var")
+            .hasServiceName("runtime-bundle-a")
+            .hasValue("v1")
+            .hasType("string");
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "string",
-                                          "v1",
-                                          "10", null);
+        return new VariableInstanceImpl<>("var", "string", "v1", "10", null);
     }
 
     @Test
     public void handleShouldUseTaskVariableUpdateHandlerWhenTaskIdIsSet() {
         //given
-        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(buildVariableWithTaskId(), "v0");
+        CloudVariableUpdatedEventImpl<String> event = new CloudVariableUpdatedEventImpl<>(
+            buildVariableWithTaskId(),
+            "v0"
+        );
         event.setServiceName("runtime-bundle-a");
 
         //when
@@ -86,12 +87,13 @@ public class VariableEntityUpdatedEventHandlerTest {
         verify(taskVariableUpdatedEventHandler).handle(captor.capture());
 
         TaskVariableEntity variableEntity = captor.getValue();
-        Assertions.assertThat(variableEntity)
-                .hasTaskId("20")
-                .hasName("var")
-                .hasValue("v1")
-                .hasServiceName("runtime-bundle-a")
-                .hasType("string");
+        Assertions
+            .assertThat(variableEntity)
+            .hasTaskId("20")
+            .hasName("var")
+            .hasValue("v1")
+            .hasServiceName("runtime-bundle-a")
+            .hasType("string");
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {

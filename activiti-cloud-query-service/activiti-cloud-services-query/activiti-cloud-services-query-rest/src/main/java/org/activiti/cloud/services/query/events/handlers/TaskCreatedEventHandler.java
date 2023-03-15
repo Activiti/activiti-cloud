@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-
-import javax.persistence.EntityManager;
 
 public class TaskCreatedEventHandler implements QueryEventHandler {
 
@@ -38,24 +37,23 @@ public class TaskCreatedEventHandler implements QueryEventHandler {
         TaskEntity queryTaskEntity = new TaskEntity(taskCreatedEvent);
 
         if (!queryTaskEntity.isStandalone()) {
-            ProcessInstanceEntity processInstanceEntity = entityManager.getReference(ProcessInstanceEntity.class,
-                                                                                     queryTaskEntity.getProcessInstanceId());
+            ProcessInstanceEntity processInstanceEntity = entityManager.getReference(
+                ProcessInstanceEntity.class,
+                queryTaskEntity.getProcessInstanceId()
+            );
             queryTaskEntity.setProcessInstance(processInstanceEntity);
             queryTaskEntity.setProcessDefinitionName(processInstanceEntity.getProcessDefinitionName());
             queryTaskEntity.setProcessVariables(processInstanceEntity.getVariables());
         }
 
-        persistIntoDatabase(event,
-                            queryTaskEntity);
+        persistIntoDatabase(event, queryTaskEntity);
     }
 
-    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event,
-                                     TaskEntity queryTaskEntity) {
+    private void persistIntoDatabase(CloudRuntimeEvent<?, ?> event, TaskEntity queryTaskEntity) {
         try {
             entityManager.persist(queryTaskEntity);
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCreatedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling TaskCreatedEvent[" + event + "]", cause);
         }
     }
 

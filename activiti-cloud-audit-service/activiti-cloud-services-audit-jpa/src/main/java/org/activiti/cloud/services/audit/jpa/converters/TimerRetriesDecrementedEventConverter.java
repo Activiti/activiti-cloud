@@ -43,10 +43,12 @@ public class TimerRetriesDecrementedEventConverter extends BaseEventToEntityConv
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TimerRetriesDecrementedAuditEventEntity timerEventEntity = (TimerRetriesDecrementedAuditEventEntity) auditEventEntity;
 
-        return new CloudBPMNTimerRetriesDecrementedEventImpl(timerEventEntity.getEventId(),
-                                                             timerEventEntity.getTimestamp(),
-                                                             timerEventEntity.getTimer(),
-                                                             timerEventEntity.getProcessDefinitionId(),
-                                                             timerEventEntity.getProcessInstanceId());
+        return new CloudBPMNTimerRetriesDecrementedEventImpl(
+            timerEventEntity.getEventId(),
+            timerEventEntity.getTimestamp(),
+            timerEventEntity.getTimer(),
+            timerEventEntity.getProcessDefinitionId(),
+            timerEventEntity.getProcessInstanceId()
+        );
     }
 }

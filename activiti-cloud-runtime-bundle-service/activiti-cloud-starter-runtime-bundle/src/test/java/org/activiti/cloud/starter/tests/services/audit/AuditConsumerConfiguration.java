@@ -18,6 +18,4 @@ package org.activiti.cloud.starter.tests.services.audit;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class AuditConsumerConfiguration implements AuditConsumer {
-
-}
+public class AuditConsumerConfiguration implements AuditConsumer {}

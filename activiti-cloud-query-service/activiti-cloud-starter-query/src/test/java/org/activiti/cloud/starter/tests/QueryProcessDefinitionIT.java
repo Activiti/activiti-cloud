@@ -18,6 +18,9 @@ package org.activiti.cloud.starter.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
@@ -42,19 +45,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import org.springframework.util.StreamUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({
-    ProcessDefinitionRestTemplate.class
-})
-@ContextConfiguration(initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import({ ProcessDefinitionRestTemplate.class })
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class QueryProcessDefinitionIT {
 
     public static final String TEST_CATEGORY = "Test category";
@@ -99,29 +98,29 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
         secondProcessDefinition.setCategory(TEST_CATEGORY);
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition),
-                      createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
-                      createCandidateStarterEventForProcess(secondProcessDefinition.getId()));
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstProcessDefinition),
+            new CloudProcessDeployedEventImpl(secondProcessDefinition),
+            createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
+            createCandidateStarterEventForProcess(secondProcessDefinition.getId())
+        );
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())
-                .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getKey,
-                            ProcessDefinition::getCategory)
-                .containsExactly(tuple(firstProcessDefinition.getId(),
-                                       "My First Process",
-                                       "myFirstProcessKey",
-                                        TEST_CATEGORY),
-                                 tuple(secondProcessDefinition.getId(),
-                                       "My second Process",
-                                       "mySecondProcess",
-                                        TEST_CATEGORY));
+            .isNotNull()
+            .extracting(
+                ProcessDefinition::getId,
+                ProcessDefinition::getName,
+                ProcessDefinition::getKey,
+                ProcessDefinition::getCategory
+            )
+            .containsExactly(
+                tuple(firstProcessDefinition.getId(), "My First Process", "myFirstProcessKey", TEST_CATEGORY),
+                tuple(secondProcessDefinition.getId(), "My second Process", "mySecondProcess", TEST_CATEGORY)
+            );
     }
 
     @Test
@@ -136,32 +135,50 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setId(UUID.randomUUID().toString());
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
-        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(firstProcessDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
-                                                                                   StandardCharsets.UTF_8));
-        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(secondProcessDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
-                StandardCharsets.UTF_8));
-        producer.send(firstProcessDeployedEvent,
-                      secondProcessDeployedEvent,
-                      createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
-                      createCandidateStarterEventForProcess(secondProcessDefinition.getId()));
+        CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(
+            firstProcessDefinition
+        );
+        firstProcessDeployedEvent.setProcessModelContent(
+            StreamUtils.copyToString(
+                Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
+                StandardCharsets.UTF_8
+            )
+        );
+        CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(
+            secondProcessDefinition
+        );
+        secondProcessDeployedEvent.setProcessModelContent(
+            StreamUtils.copyToString(
+                Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                StandardCharsets.UTF_8
+            )
+        );
+        producer.send(
+            firstProcessDeployedEvent,
+            secondProcessDeployedEvent,
+            createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
+            createCandidateStarterEventForProcess(secondProcessDefinition.getId())
+        );
 
         //when
         ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(firstProcessDefinition.getId());
 
         //then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
+            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/processWithVariables.bpmn20.xml"));
 
         //when
         responseEntity = restTemplate.getProcDefinitionModel(secondProcessDefinition.getId());
 
         //then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
 
     @Test
@@ -177,23 +194,23 @@ public class QueryProcessDefinitionIT {
         secondProcessDefinition.setKey("mySecondProcess");
         secondProcessDefinition.setName("My second Process");
 
-        producer.send(new CloudProcessDeployedEventImpl(firstProcessDefinition),
-                      new CloudProcessDeployedEventImpl(secondProcessDefinition),
-                      createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
-                      createCandidateStarterEventForProcess(secondProcessDefinition.getId()));
+        producer.send(
+            new CloudProcessDeployedEventImpl(firstProcessDefinition),
+            new CloudProcessDeployedEventImpl(secondProcessDefinition),
+            createCandidateStarterEventForProcess(firstProcessDefinition.getId()),
+            createCandidateStarterEventForProcess(secondProcessDefinition.getId())
+        );
 
         //when
-        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey("mySecondProcess");
+        ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitionsFilteredOnKey(
+            "mySecondProcess"
+        );
 
         //then
         assertThat(responseEntity.getBody())
-                .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getKey)
-                .containsExactly(tuple(secondProcessDefinition.getId(),
-                                       "My second Process",
-                                       "mySecondProcess"));
+            .isNotNull()
+            .extracting(ProcessDefinition::getId, ProcessDefinition::getName, ProcessDefinition::getKey)
+            .containsExactly(tuple(secondProcessDefinition.getId(), "My second Process", "mySecondProcess"));
     }
 
     @Test
@@ -210,25 +227,28 @@ public class QueryProcessDefinitionIT {
         duplicatedProcessDefinition.setKey("myProcessUpdated");
         duplicatedProcessDefinition.setName("My Process updated");
         duplicatedProcessDefinition.setDescription("Updated description");
-        producer.send(new CloudProcessDeployedEventImpl(initialProcessDefinition),
-                      new CloudProcessDeployedEventImpl(duplicatedProcessDefinition),
-                      createCandidateStarterEventForProcess(processDefinitionId),
-                      createCandidateStarterEventForProcess(processDefinitionId)); // should be ok to duplicate candidate events
+        producer.send(
+            new CloudProcessDeployedEventImpl(initialProcessDefinition),
+            new CloudProcessDeployedEventImpl(duplicatedProcessDefinition),
+            createCandidateStarterEventForProcess(processDefinitionId),
+            createCandidateStarterEventForProcess(processDefinitionId)
+        ); // should be ok to duplicate candidate events
 
         //when
         ResponseEntity<PagedModel<CloudProcessDefinition>> responseEntity = restTemplate.getProcDefinitions();
 
         //then
         assertThat(responseEntity.getBody())
-                .isNotNull()
-                .extracting(ProcessDefinition::getId,
-                            ProcessDefinition::getKey,
-                            ProcessDefinition::getName,
-                            ProcessDefinition::getDescription)
-                .containsExactly(tuple(initialProcessDefinition.getId(),
-                                       "myProcessUpdated",
-                                       "My Process updated",
-                                       "Updated description"));
+            .isNotNull()
+            .extracting(
+                ProcessDefinition::getId,
+                ProcessDefinition::getKey,
+                ProcessDefinition::getName,
+                ProcessDefinition::getDescription
+            )
+            .containsExactly(
+                tuple(initialProcessDefinition.getId(), "myProcessUpdated", "My Process updated", "Updated description")
+            );
     }
 
     @Test
@@ -240,29 +260,44 @@ public class QueryProcessDefinitionIT {
         processDefinition.setName("My First Process");
 
         CloudProcessDeployedEventImpl firstProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        firstProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
-                StandardCharsets.UTF_8));
+        firstProcessDeployedEvent.setProcessModelContent(
+            StreamUtils.copyToString(
+                Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("parse-for-test/processWithVariables.bpmn20.xml"),
+                StandardCharsets.UTF_8
+            )
+        );
         CloudProcessDeployedEventImpl secondProcessDeployedEvent = new CloudProcessDeployedEventImpl(processDefinition);
-        secondProcessDeployedEvent.setProcessModelContent(StreamUtils.copyToString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
-                StandardCharsets.UTF_8));
-        producer.send(firstProcessDeployedEvent,
-                      secondProcessDeployedEvent,
-                      createCandidateStarterEventForProcess(processDefinition.getId()));
+        secondProcessDeployedEvent.setProcessModelContent(
+            StreamUtils.copyToString(
+                Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("parse-for-test/SimpleProcess.bpmn20.xml"),
+                StandardCharsets.UTF_8
+            )
+        );
+        producer.send(
+            firstProcessDeployedEvent,
+            secondProcessDeployedEvent,
+            createCandidateStarterEventForProcess(processDefinition.getId())
+        );
 
         //when
         ResponseEntity<String> responseEntity = restTemplate.getProcDefinitionModel(processDefinition.getId());
 
         //then
         assertThat(responseEntity.getBody())
-                .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
+            .isXmlEqualToContentOf(new File("src/test/resources/parse-for-test/SimpleProcess.bpmn20.xml"));
     }
 
-    private CloudProcessCandidateStarterUserAddedEventImpl createCandidateStarterEventForProcess(String processDefinitionId) {
-        return  new CloudProcessCandidateStarterUserAddedEventImpl(
-                     new ProcessCandidateStarterUserImpl(processDefinitionId, "hruser"));
-
+    private CloudProcessCandidateStarterUserAddedEventImpl createCandidateStarterEventForProcess(
+        String processDefinitionId
+    ) {
+        return new CloudProcessCandidateStarterUserAddedEventImpl(
+            new ProcessCandidateStarterUserImpl(processDefinitionId, "hruser")
+        );
     }
-
 }

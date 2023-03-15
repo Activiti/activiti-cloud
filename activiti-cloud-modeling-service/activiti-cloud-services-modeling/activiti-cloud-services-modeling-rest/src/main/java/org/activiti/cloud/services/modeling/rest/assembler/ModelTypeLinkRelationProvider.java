@@ -46,5 +46,4 @@ public class ModelTypeLinkRelationProvider implements LinkRelationProvider {
     public boolean supports(LookupContext delimiter) {
         return ModelType.class.isAssignableFrom(delimiter.getType());
     }
-
 }

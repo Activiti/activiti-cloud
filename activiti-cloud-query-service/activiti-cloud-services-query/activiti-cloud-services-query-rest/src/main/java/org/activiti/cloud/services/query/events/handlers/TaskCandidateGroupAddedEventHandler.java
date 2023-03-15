@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -22,8 +23,6 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCandidateGroupAddedEven
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupId;
-
-import javax.persistence.EntityManager;
 
 public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
 
@@ -35,19 +34,19 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-
         CloudTaskCandidateGroupAddedEvent taskCandidateGroupAddedEvent = (CloudTaskCandidateGroupAddedEvent) event;
         TaskCandidateGroup taskCandidateGroup = taskCandidateGroupAddedEvent.getEntity();
-        TaskCandidateGroupEntity taskCandidateGroupEntity = new TaskCandidateGroupEntity(taskCandidateGroup.getTaskId(),
-                                                                                         taskCandidateGroup.getGroupId());
+        TaskCandidateGroupEntity taskCandidateGroupEntity = new TaskCandidateGroupEntity(
+            taskCandidateGroup.getTaskId(),
+            taskCandidateGroup.getGroupId()
+        );
 
         try {
             if (!taskCandidateEntityAlreadyExists(taskCandidateGroupEntity)) {
                 entityManager.persist(taskCandidateGroupEntity);
             }
         } catch (Exception cause) {
-            throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling TaskCandidateGroupAddedEvent[" + event + "]", cause);
         }
     }
 
@@ -57,7 +56,12 @@ public class TaskCandidateGroupAddedEventHandler implements QueryEventHandler {
     }
 
     private boolean taskCandidateEntityAlreadyExists(TaskCandidateGroupEntity entity) {
-        return entityManager.find(TaskCandidateGroupEntity.class,
-                                  new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())) != null;
+        return (
+            entityManager.find(
+                TaskCandidateGroupEntity.class,
+                new TaskCandidateGroupId(entity.getTaskId(), entity.getGroupId())
+            ) !=
+            null
+        );
     }
 }

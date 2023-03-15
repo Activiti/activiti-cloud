@@ -26,8 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles({"graphql-ws"})
-@SpringBootTest(webEnvironment=WebEnvironment.NONE)
+@ActiveProfiles({ "graphql-ws" })
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
 
     @Autowired
@@ -35,8 +35,7 @@ public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class TestConfiguration {
-    }
+    static class TestConfiguration {}
 
     @Test
     public void testConfigurationProperties() {
@@ -52,5 +51,4 @@ public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
         assertThat(configurationProperties.getBufferCount()).isEqualTo(50);
         assertThat(configurationProperties.getBufferTimeSpanMs()).isEqualTo(999); // overrides from graphql-ws.properties
     }
-
 }

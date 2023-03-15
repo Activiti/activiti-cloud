@@ -54,9 +54,11 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
     private final CollectionModelAssembler resourcesAssembler;
 
     @Autowired
-    public ProcessInstanceVariableControllerImpl(ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
-                                                 ProcessRuntime processRuntime,
-                                                 CollectionModelAssembler resourcesAssembler) {
+    public ProcessInstanceVariableControllerImpl(
+        ProcessInstanceVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        ProcessRuntime processRuntime,
+        CollectionModelAssembler resourcesAssembler
+    ) {
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.processRuntime = processRuntime;
         this.resourcesAssembler = resourcesAssembler;
@@ -64,16 +66,19 @@ public class ProcessInstanceVariableControllerImpl implements ProcessInstanceVar
 
     @Override
     public CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId) {
-        return resourcesAssembler.toCollectionModel(processRuntime.variables(ProcessPayloadBuilder.variables()
-                                                                               .withProcessInstanceId(processInstanceId)
-                                                                               .build()),
-                                              variableRepresentationModelAssembler);
+        return resourcesAssembler.toCollectionModel(
+            processRuntime.variables(
+                ProcessPayloadBuilder.variables().withProcessInstanceId(processInstanceId).build()
+            ),
+            variableRepresentationModelAssembler
+        );
     }
 
     @Override
-    public ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
-                                             @RequestBody SetProcessVariablesPayload setProcessVariablesPayload) {
-
+    public ResponseEntity<Void> updateVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
+    ) {
         if (setProcessVariablesPayload != null) {
             setProcessVariablesPayload.setProcessInstanceId(processInstanceId);
         }

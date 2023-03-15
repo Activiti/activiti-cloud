@@ -58,28 +58,30 @@ public class ExecutionContextMessageBuilderAppenderTest {
     @Test
     public void testApply() {
         // given
-        MessageBuilder<CloudRuntimeEvent<?,?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
+        MessageBuilder<CloudRuntimeEvent<?, ?>> request = MessageBuilder.withPayload(new IgnoredRuntimeEvent());
 
         // when
         subject.apply(request);
 
         // then
-        Message<CloudRuntimeEvent<?,?>> message = request.build();
+        Message<CloudRuntimeEvent<?, ?>> message = request.build();
 
         assertThat(message.getHeaders())
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY, MOCK_BUSINESS_KEY)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, MOCK_PROCESS_INSTANCE_ID)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID, MOCK_PROCESS_DEFINITION_ID)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_KEY, MOCK_PROCESS_DEFINITION_KEY)
-                .containsEntry(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, MOCK_PARENT_PROCESS_INSTANCE_ID)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION, MOCK_PROCESS_DEFINITION_VERSION)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_NAME, MOCK_PROCESS_NAME)
-                .containsEntry(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME, MOCK_PARENT_PROCESS_NAME)
-                .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME, MOCK_PROCESS_DEFINITION_NAME)
-                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_ID, MOCK_DEPLOYMENT_ID)
-                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME)
-                .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_VERSION, MOCK_APP_VERSION);
-
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_BUSINESS_KEY, MOCK_BUSINESS_KEY)
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_INSTANCE_ID, MOCK_PROCESS_INSTANCE_ID)
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_ID, MOCK_PROCESS_DEFINITION_ID)
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_KEY, MOCK_PROCESS_DEFINITION_KEY)
+            .containsEntry(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_ID, MOCK_PARENT_PROCESS_INSTANCE_ID)
+            .containsEntry(
+                ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_VERSION,
+                MOCK_PROCESS_DEFINITION_VERSION
+            )
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_NAME, MOCK_PROCESS_NAME)
+            .containsEntry(ExecutionContextMessageHeaders.PARENT_PROCESS_INSTANCE_NAME, MOCK_PARENT_PROCESS_NAME)
+            .containsEntry(ExecutionContextMessageHeaders.ROOT_PROCESS_DEFINITION_NAME, MOCK_PROCESS_DEFINITION_NAME)
+            .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_ID, MOCK_DEPLOYMENT_ID)
+            .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_NAME, MOCK_DEPLOYMENT_NAME)
+            .containsEntry(ExecutionContextMessageHeaders.DEPLOYMENT_VERSION, MOCK_APP_VERSION);
     }
 
     private ExecutionContext mockExecutionContext() {
@@ -117,6 +119,4 @@ public class ExecutionContextMessageBuilderAppenderTest {
 
         return context;
     }
-
-
 }

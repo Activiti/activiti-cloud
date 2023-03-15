@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.validation;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -59,12 +58,11 @@ public class JsonSchemaModelValidatorConfiguration {
             JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaInputStream));
 
             return SchemaLoader
-                    .builder()
-                    .schemaClient(SchemaClient.classPathAwareClient())
-                    .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
-                    .draftV7Support()
-                    .build();
+                .builder()
+                .schemaClient(SchemaClient.classPathAwareClient())
+                .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
+                .draftV7Support()
+                .build();
         }
     }
-
 }

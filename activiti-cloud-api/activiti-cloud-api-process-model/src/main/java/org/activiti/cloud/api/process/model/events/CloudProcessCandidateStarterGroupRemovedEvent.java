@@ -15,5 +15,4 @@
  */
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudProcessCandidateStarterGroupRemovedEvent extends CloudProcessCandidateStarterGroupEvent {
-}
+public interface CloudProcessCandidateStarterGroupRemovedEvent extends CloudProcessCandidateStarterGroupEvent {}

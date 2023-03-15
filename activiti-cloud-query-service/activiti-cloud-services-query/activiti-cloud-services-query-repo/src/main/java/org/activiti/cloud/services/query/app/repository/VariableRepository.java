@@ -25,15 +25,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface VariableRepository extends PagingAndSortingRepository<ProcessVariableEntity, Long>,
-                                            QuerydslPredicateExecutor<ProcessVariableEntity>,
-                                            QuerydslBinderCustomizer<QProcessVariableEntity> {
-
+public interface VariableRepository
+    extends
+        PagingAndSortingRepository<ProcessVariableEntity, Long>,
+        QuerydslPredicateExecutor<ProcessVariableEntity>,
+        QuerydslBinderCustomizer<QProcessVariableEntity> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QProcessVariableEntity root) {
-
-        bindings.bind(String.class).first(
-                (StringPath path, String value) -> path.eq(value));
+    default void customize(QuerydslBindings bindings, QProcessVariableEntity root) {
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }

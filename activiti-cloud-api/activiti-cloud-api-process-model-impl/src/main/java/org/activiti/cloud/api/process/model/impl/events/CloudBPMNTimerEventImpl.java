@@ -21,32 +21,28 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudBPMNTimerEventImpl extends CloudRuntimeEventImpl<BPMNTimer, BPMNTimerEvent.TimerEvents> {
 
-    public CloudBPMNTimerEventImpl() {
-    }
+    public CloudBPMNTimerEventImpl() {}
 
-    public CloudBPMNTimerEventImpl(BPMNTimer entity,
-                                   String processDefinitionId,
-                                   String processInstanceId) {
+    public CloudBPMNTimerEventImpl(BPMNTimer entity, String processDefinitionId, String processInstanceId) {
         super(entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
         setEntityId(entity.getElementId());
     }
 
-    public CloudBPMNTimerEventImpl(String id,
-                                    Long timestamp,
-                                    BPMNTimer entity,
-                                    String processDefinitionId,
-                                    String processInstanceId) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudBPMNTimerEventImpl(
+        String id,
+        Long timestamp,
+        BPMNTimer entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
 
-        if (entity!=null) {
+        if (entity != null) {
             setEntityId(entity.getElementId());
         }
     }
-
 }

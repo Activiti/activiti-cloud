@@ -15,6 +15,18 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -43,25 +55,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessInstanceVariableController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -108,73 +105,80 @@ public class ProcessInstanceEntityVariableEntityControllerIT {
     }
 
     @Test
-    public void getVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getVariablesShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson()
+        throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         ProcessVariableEntity variableEntity = buildVariable();
 
-
-        given(variableRepository.findAll(any(),
-                                         eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(variableEntity),
-                                           pageRequest,
-                                           12));
+        given(variableRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
 
         //when
-        MvcResult result = mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables?skipCount=11&maxItems=10",
-                                               variableEntity.getProcessInstanceId())
-                                                   .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/variables?skipCount=11&maxItems=10",
+                    variableEntity.getProcessInstanceId()
+                )
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 
     @Test
     public void getVariablesShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        PageRequest pageRequest = PageRequest.of(1,
-                                                 10);
+        PageRequest pageRequest = PageRequest.of(1, 10);
 
         ProcessVariableEntity variableEntity = buildVariable();
 
-        given(variableRepository.findAll(any(),
-                                         eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(variableEntity),
-                                           pageRequest,
-                                           11));
+        given(variableRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 11));
 
         //when
-        mockMvc.perform(get("/v1/process-instances/{processInstanceId}/variables?page=1&size=10",
-                                               variableEntity.getProcessInstanceId())
-                                                   .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get(
+                    "/v1/process-instances/{processInstanceId}/variables?page=1&size=10",
+                    variableEntity.getProcessInstanceId()
+                )
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 
     private ProcessVariableEntity buildVariable() {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(1L,
-                                                                                String.class.getName(),
-                                                                                "firstName",
-                                                                                UUID.randomUUID().toString(),
-                                                                                "My app",
-                                                                                "My app",
-                                                                                "1",
-                                                                                null,
-                                                                                null,
-                                                                                new Date(),
-                                                                                new Date(),
-                                                                                UUID.randomUUID().toString());
+        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
+            1L,
+            String.class.getName(),
+            "firstName",
+            UUID.randomUUID().toString(),
+            "My app",
+            "My app",
+            "1",
+            null,
+            null,
+            new Date(),
+            new Date(),
+            UUID.randomUUID().toString()
+        );
         variableEntity.setValue("John");
         return variableEntity;
     }

@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.identity;
 
+import java.util.List;
+import java.util.Set;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -32,17 +31,18 @@ import java.util.Set;
  *
  */
 public interface IdentityManagementService extends IdentityService {
+    List<User> findUsers(UserSearchParams userSearchParams);
 
-  List<User> findUsers(UserSearchParams userSearchParams);
+    List<Group> findGroups(GroupSearchParams groupSearchParams);
 
-  List<Group> findGroups(GroupSearchParams groupSearchParams);
+    UserRoles getUserRoles(Jwt principal);
 
-  UserRoles getUserRoles(Jwt principal);
+    void addApplicationPermissions(
+        String application,
+        List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations
+    );
 
-  void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations);
+    List<SecurityResponseRepresentation> getApplicationPermissions(String application, Set<String> roles);
 
-  List<SecurityResponseRepresentation> getApplicationPermissions (String application, Set<String> roles);
-
-  User findUserById(String userId);
-
+    User findUserById(String userId);
 }

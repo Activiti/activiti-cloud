@@ -22,7 +22,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface RuntimeMockStreams {
-
     String INTEGRATION_RESULT_CONSUMER = "integrationResultsConsumer";
     String INTEGRATION_EVENT_PRODUCER = "integrationEventsProducer";
     String INTEGRATION_ERROR_CONSUMER = "integrationErrorConsumer";
@@ -41,5 +40,4 @@ public interface RuntimeMockStreams {
     default SubscribableChannel integrationErrorConsumer() {
         return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).get();
     }
-
 }

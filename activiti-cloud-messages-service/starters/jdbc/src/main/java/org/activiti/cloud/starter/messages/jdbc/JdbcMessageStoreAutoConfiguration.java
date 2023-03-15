@@ -16,7 +16,6 @@
 package org.activiti.cloud.starter.messages.jdbc;
 
 import javax.sql.DataSource;
-
 import org.activiti.cloud.services.messages.core.config.MessageAggregatorProperties;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -41,11 +40,8 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 @ConditionalOnClass(JdbcMessageStore.class)
-@AutoConfigureBefore({MessagesCoreAutoConfiguration.class})
-@AutoConfigureAfter({
-    DataSourceAutoConfiguration.class,
-    DataSourceTransactionManagerAutoConfiguration.class
-})
+@AutoConfigureBefore({ MessagesCoreAutoConfiguration.class })
+@AutoConfigureAfter({ DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class })
 @PropertySource("classpath:config/activiti-cloud-starter-messages-jdbc.properties")
 public class JdbcMessageStoreAutoConfiguration {
 
@@ -78,5 +74,4 @@ public class JdbcMessageStoreAutoConfiguration {
     public LockRegistry lockRegistry(LockRepository lockRepository) {
         return new JdbcLockRegistry(lockRepository);
     }
-
 }

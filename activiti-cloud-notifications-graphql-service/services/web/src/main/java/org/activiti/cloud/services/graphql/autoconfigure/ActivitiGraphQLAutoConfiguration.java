@@ -15,15 +15,6 @@
  */
 package org.activiti.cloud.services.graphql.autoconfigure;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
@@ -33,12 +24,19 @@ import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
 @Configuration
-@ConditionalOnClass({GraphQL.class})
+@ConditionalOnClass({ GraphQL.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
 public class ActivitiGraphQLAutoConfiguration {
 
@@ -53,9 +51,9 @@ public class ActivitiGraphQLAutoConfiguration {
          */
         @Autowired
         public void configureObjectMapper(ObjectMapper objectMapper) {
-            objectMapper.configOverride(Map.class)
-                        .setInclude(Value.construct(JsonInclude.Include.ALWAYS,
-                                                    JsonInclude.Include.ALWAYS));
+            objectMapper
+                .configOverride(Map.class)
+                .setInclude(Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.ALWAYS));
         }
 
         @Bean

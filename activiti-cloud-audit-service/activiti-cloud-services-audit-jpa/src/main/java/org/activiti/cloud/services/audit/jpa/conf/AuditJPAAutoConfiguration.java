@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.audit.jpa.conf;
 
+import java.util.Set;
 import org.activiti.cloud.services.audit.api.converters.APIEventToEntityConverters;
 import org.activiti.cloud.services.audit.api.converters.EventToEntityConverter;
 import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
@@ -71,98 +72,123 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Set;
-
 @Configuration
 public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public EventRepresentationModelAssembler eventRepresentationModelAssembler(){
+    public EventRepresentationModelAssembler eventRepresentationModelAssembler() {
         return new EventRepresentationModelAssembler();
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public EventContextInfoAppender eventContextInfoAppender(){
+    public EventContextInfoAppender eventContextInfoAppender() {
         return new EventContextInfoAppender();
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ActivityCancelledEventConverter activityCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ActivityCancelledEventConverter activityCancelledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ActivityCancelledEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ActivityCompletedEventConverter activityCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ActivityCompletedEventConverter activityCompletedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ActivityCompletedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ActivityStartedEventConverter activityStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ActivityStartedEventConverter activityStartedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ActivityStartedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public SignalReceivedEventConverter signalReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public SignalReceivedEventConverter signalReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new SignalReceivedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessCancelledEventConverter processCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCancelledEventConverter processCancelledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCancelledEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessCompletedEventConverter processCompletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCompletedEventConverter processCompletedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCompletedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessCreatedEventConverter processCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCreatedEventConverter processCreatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCreatedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessResumedEventConverter processResumedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessResumedEventConverter processResumedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessResumedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessStartedEventConverter processStartedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessStartedEventConverter processStartedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessStartedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessSuspendedEventConverter processSuspendedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessSuspendedEventConverter processSuspendedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessSuspendedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessUpdatedEventConverter processUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessUpdatedEventConverter processUpdatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessUpdatedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ProcessDeletedEventConverter processDeletedEventConverter(EventsRepository eventsRepository, EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessDeletedEventConverter processDeletedEventConverter(
+        EventsRepository eventsRepository,
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessDeletedEventConverter(eventsRepository, eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public SequenceFlowTakenEventConverter sequenceFlowTakenEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public SequenceFlowTakenEventConverter sequenceFlowTakenEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new SequenceFlowTakenEventConverter(eventContextInfoAppender);
     }
 
@@ -204,79 +230,103 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public VariableCreatedEventConverter variableCreatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public VariableCreatedEventConverter variableCreatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new VariableCreatedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public VariableDeletedEventConverter variableDeletedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public VariableDeletedEventConverter variableDeletedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new VariableDeletedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public VariableUpdatedEventConverter variableUpdatedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public VariableUpdatedEventConverter variableUpdatedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new VariableUpdatedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDeployedEventConverter processDeployedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessDeployedEventConverter processDeployedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessDeployedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterUserAddedEventConverter processCandidateStarterUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCandidateStarterUserAddedEventConverter processCandidateStarterUserAddedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCandidateStarterUserAddedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterUserRemovedEventConverter processCandidateStarterUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCandidateStarterUserRemovedEventConverter processCandidateStarterUserRemovedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCandidateStarterUserRemovedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterGroupAddedEventConverter processCandidateStarterGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCandidateStarterGroupAddedEventConverter processCandidateStarterGroupAddedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCandidateStarterGroupAddedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessCandidateStarterGroupRemovedEventConverter processCandidateStarterGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ProcessCandidateStarterGroupRemovedEventConverter processCandidateStarterGroupRemovedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ProcessCandidateStarterGroupRemovedEventConverter(eventContextInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public APIEventToEntityConverters apiEventToEntityConverters(Set<EventToEntityConverter> eventToEntityConverters){
+    public APIEventToEntityConverters apiEventToEntityConverters(Set<EventToEntityConverter> eventToEntityConverters) {
         return new APIEventToEntityConverters(eventToEntityConverters);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public TaskCandidateUserAddedEventConverter taskCandidateUserAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateUserAddedEventConverter taskCandidateUserAddedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TaskCandidateUserAddedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public TaskCandidateUserRemovedEventConverter taskCandidateUserRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateUserRemovedEventConverter taskCandidateUserRemovedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TaskCandidateUserRemovedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public TaskCandidateGroupAddedEventConverter taskCandidateGroupAddedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateGroupAddedEventConverter taskCandidateGroupAddedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TaskCandidateGroupAddedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public TaskCandidateGroupRemovedEventConverter taskCandidateGroupRemovedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TaskCandidateGroupRemovedEventConverter taskCandidateGroupRemovedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TaskCandidateGroupRemovedEventConverter(eventContextInfoAppender);
     }
 
@@ -288,13 +338,17 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public TimerScheduledEventConverter timerScheduledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerScheduledEventConverter timerScheduledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TimerScheduledEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public TimerCancelledEventConverter timerCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerCancelledEventConverter timerCancelledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TimerCancelledEventConverter(eventContextInfoAppender);
     }
 
@@ -312,19 +366,25 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public TimerRetriesDecrementedEventConverter timerRetriesDecrementedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public TimerRetriesDecrementedEventConverter timerRetriesDecrementedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new TimerRetriesDecrementedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public MessageReceivedEventConverter messageReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public MessageReceivedEventConverter messageReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new MessageReceivedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public MessageWaitingEventConverter messageWaitingEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public MessageWaitingEventConverter messageWaitingEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new MessageWaitingEventConverter(eventContextInfoAppender);
     }
 
@@ -342,38 +402,49 @@ public class AuditJPAAutoConfiguration {
 
     @ConditionalOnMissingBean
     @Bean
-    public MessageSubscriptionCancelledEventConverter messageSubscriptionCancelledEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public MessageSubscriptionCancelledEventConverter messageSubscriptionCancelledEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new MessageSubscriptionCancelledEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public IntegrationRequestedEventConverter integrationRequestedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public IntegrationRequestedEventConverter integrationRequestedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new IntegrationRequestedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public IntegrationResultReceivedEventConverter integrationResultReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public IntegrationResultReceivedEventConverter integrationResultReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new IntegrationResultReceivedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public IntegrationErrorReceivedEventConverter integrationErrorReceivedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public IntegrationErrorReceivedEventConverter integrationErrorReceivedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new IntegrationErrorReceivedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ApplicationDeployedEventConverter applicationDeployedEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ApplicationDeployedEventConverter applicationDeployedEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ApplicationDeployedEventConverter(eventContextInfoAppender);
     }
 
     @ConditionalOnMissingBean
     @Bean
-    public ApplicationRollbackEventConverter applicationRollbackEventConverter(EventContextInfoAppender eventContextInfoAppender) {
+    public ApplicationRollbackEventConverter applicationRollbackEventConverter(
+        EventContextInfoAppender eventContextInfoAppender
+    ) {
         return new ApplicationRollbackEventConverter(eventContextInfoAppender);
     }
-
 }

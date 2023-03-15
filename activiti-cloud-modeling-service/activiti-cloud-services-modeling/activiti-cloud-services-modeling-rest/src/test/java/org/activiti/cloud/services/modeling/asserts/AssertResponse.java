@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.asserts;
 
+import static org.assertj.core.api.Assertions.*;
+
 import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Asserts for rest response

@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.services.test.asserts;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+
 import io.restassured.module.mockmvc.response.MockMvcResponse;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 /**
  * Asserts for response content
@@ -40,16 +40,13 @@ public class AssertResponseContent {
         assertThat(response).isNotNull();
         assertThat(response.getContentType()).isNotNull();
         assertThat(response.getContentAsByteArray()).isNotEmpty();
-        assertThat(response.getHeader(CONTENT_DISPOSITION))
-                .isNotEmpty()
-                .startsWith(ATTACHMENT_CONTENT_DISPOSITION);
+        assertThat(response.getHeader(CONTENT_DISPOSITION)).isNotEmpty().startsWith(ATTACHMENT_CONTENT_DISPOSITION);
 
-        String filename = response.getHeader(CONTENT_DISPOSITION)
-                .substring(ATTACHMENT_CONTENT_DISPOSITION.length());
+        String filename = response.getHeader(CONTENT_DISPOSITION).substring(ATTACHMENT_CONTENT_DISPOSITION.length());
 
-        return new AssertFileContent(new FileContent(filename,
-                                                     response.getContentType(),
-                                                     response.getContentAsByteArray()));
+        return new AssertFileContent(
+            new FileContent(filename, response.getContentType(), response.getContentAsByteArray())
+        );
     }
 
     public static AssertResponseContent assertThatResponseContent(MvcResult mvcResult) {

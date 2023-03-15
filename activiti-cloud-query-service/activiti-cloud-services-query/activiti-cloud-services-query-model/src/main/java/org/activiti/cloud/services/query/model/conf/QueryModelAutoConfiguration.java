@@ -29,5 +29,4 @@ public class QueryModelAutoConfiguration {
         //it's only here as a workaround to be able to inject the object mapper
         return new VariableValueJsonConverter(objectMapper);
     }
-
 }

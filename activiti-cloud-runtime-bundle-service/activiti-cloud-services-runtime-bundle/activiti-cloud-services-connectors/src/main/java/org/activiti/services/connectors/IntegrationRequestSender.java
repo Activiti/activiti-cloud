@@ -23,26 +23,26 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 public class IntegrationRequestSender {
+
     public static final String CONNECTOR_TYPE = "connectorType";
 
     private final StreamBridge streamBridge;
     private final IntegrationContextMessageBuilderFactory messageBuilderFactory;
 
-    public IntegrationRequestSender(StreamBridge streamBridge,
-                                    IntegrationContextMessageBuilderFactory messageBuilderFactory) {
+    public IntegrationRequestSender(
+        StreamBridge streamBridge,
+        IntegrationContextMessageBuilderFactory messageBuilderFactory
+    ) {
         this.streamBridge = streamBridge;
         this.messageBuilderFactory = messageBuilderFactory;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendIntegrationRequest(IntegrationRequest event) {
-        streamBridge.send(event.getIntegrationContext()
-                                         .getConnectorType(), buildIntegrationRequestMessage(event));
+        streamBridge.send(event.getIntegrationContext().getConnectorType(), buildIntegrationRequestMessage(event));
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {
-        return messageBuilderFactory.create(event.getIntegrationContext())
-                .withPayload(event)
-                .build();
+        return messageBuilderFactory.create(event.getIntegrationContext()).withPayload(event).build();
     }
 }

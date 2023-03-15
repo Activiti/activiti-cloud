@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.acc.shared.serenity.exception;
 
-import net.serenitybdd.core.Serenity;
-
 import static org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import static org.assertj.core.api.ThrowableAssert.catchThrowable;
+
+import net.serenitybdd.core.Serenity;
 
 /**
  * Expected exception handler
@@ -32,8 +32,10 @@ public class ExpectedExceptionHandler {
      * @param expectedException expected exception
      * @param throwingCallable the callable
      */
-    public static boolean isThrowingExpectedException(ExpectedException expectedException,
-                                                      ThrowingCallable throwingCallable) {
+    public static boolean isThrowingExpectedException(
+        ExpectedException expectedException,
+        ThrowingCallable throwingCallable
+    ) {
         try {
             Serenity.setSessionVariable(EXPECTED_EXCEPTION).to(expectedException);
             return expectedException.isExpectedException(catchThrowable(throwingCallable));

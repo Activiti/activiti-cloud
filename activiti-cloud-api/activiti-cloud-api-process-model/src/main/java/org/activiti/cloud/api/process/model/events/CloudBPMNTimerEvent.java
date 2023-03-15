@@ -19,6 +19,4 @@ import org.activiti.api.process.model.BPMNTimer;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudBPMNTimerEvent extends CloudRuntimeEvent<BPMNTimer, BPMNTimerEvent.TimerEvents> {
-
-}
+public interface CloudBPMNTimerEvent extends CloudRuntimeEvent<BPMNTimer, BPMNTimerEvent.TimerEvents> {}

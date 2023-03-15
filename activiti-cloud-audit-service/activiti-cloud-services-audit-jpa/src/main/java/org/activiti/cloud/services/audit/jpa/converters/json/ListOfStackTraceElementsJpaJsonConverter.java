@@ -15,44 +15,41 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters.json;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-import javax.persistence.AttributeConverter;
-
-import org.activiti.cloud.services.audit.api.AuditException;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import javax.persistence.AttributeConverter;
+import org.activiti.cloud.services.audit.api.AuditException;
 
 public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 
-    private final static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(List<StackTraceElement> entity) {
         try {
             return objectMapper.writeValueAsString(entity);
         } catch (JsonProcessingException e) {
-            throw new AuditException("Unable to serialize object.",
-                                     e);
+            throw new AuditException("Unable to serialize object.", e);
         }
     }
 
     @Override
     public List<StackTraceElement> convertToEntityAttribute(String entityTextRepresentation) {
         try {
-            if(entityTextRepresentation != null && entityTextRepresentation.length() > 0) {
-                return objectMapper.readValue(entityTextRepresentation,
-                                              new TypeReference<List<StackTraceElement>>() { });
+            if (entityTextRepresentation != null && entityTextRepresentation.length() > 0) {
+                return objectMapper.readValue(
+                    entityTextRepresentation,
+                    new TypeReference<List<StackTraceElement>>() {}
+                );
             } else {
                 return Collections.emptyList();
             }
         } catch (IOException e) {
-            throw new AuditException("Unable to deserialize object.",
-                                        e);
+            throw new AuditException("Unable to deserialize object.", e);
         }
     }
 }

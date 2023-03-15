@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.acc.modeling.service;
 
+import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingDecoder;
+import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingEncoder;
+
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
@@ -23,22 +26,17 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.form.FormEncoder;
 import feign.jackson.JacksonEncoder;
+import java.io.File;
 import org.activiti.cloud.acc.shared.rest.feign.FeignRestDataClient;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.EntityModel;
-
-import java.io.File;
-
-import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingDecoder;
-import static org.activiti.cloud.acc.modeling.rest.ModelingFeignConfiguration.modelingEncoder;
+import org.springframework.hateoas.PagedModel;
 
 /**
  * Modeling groups service
  */
 public interface ModelingProjectsService extends FeignRestDataClient<ModelingProjectsService, Project> {
-
     String PATH = "/v1/projects";
 
     @RequestLine("GET ?name={name}")
@@ -64,30 +62,23 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
 
     default Response exportProjectByUri(String uri) {
         return FeignRestDataClient
-                .builder(new FormEncoder(new JacksonEncoder()),
-                         new Decoder.Default())
-                .target(getType(),
-                        uri)
-                .exportProject();
+            .builder(new FormEncoder(new JacksonEncoder()), new Decoder.Default())
+            .target(getType(), uri)
+            .exportProject();
     }
 
     default Response validateProjectByUri(String uri) {
         return FeignRestDataClient
-                .builder(new FormEncoder(new JacksonEncoder()),
-                        new Decoder.Default())
-                .target(getType(),
-                        uri)
-                .validateProject();
+            .builder(new FormEncoder(new JacksonEncoder()), new Decoder.Default())
+            .target(getType(), uri)
+            .validateProject();
     }
 
-    default EntityModel<Model> importProjectModelByUri(String uri,
-                                                    File file) {
+    default EntityModel<Model> importProjectModelByUri(String uri, File file) {
         return FeignRestDataClient
-                .builder(new FormEncoder(new JacksonEncoder()),
-                         modelingDecoder)
-                .target(getType(),
-                        uri)
-                .importProjectModel(file);
+            .builder(new FormEncoder(new JacksonEncoder()), modelingDecoder)
+            .target(getType(), uri)
+            .importProjectModel(file);
     }
 
     @Override
@@ -100,13 +91,7 @@ public interface ModelingProjectsService extends FeignRestDataClient<ModelingPro
         return modelingDecoder;
     }
 
-    static ModelingProjectsService build(Encoder encoder,
-                                         Decoder decoder,
-                                         String baseUrl) {
-        return FeignRestDataClient
-                .builder(encoder,
-                         decoder)
-                .target(ModelingProjectsService.class,
-                        baseUrl + PATH);
+    static ModelingProjectsService build(Encoder encoder, Decoder decoder, String baseUrl) {
+        return FeignRestDataClient.builder(encoder, decoder).target(ModelingProjectsService.class, baseUrl + PATH);
     }
 }

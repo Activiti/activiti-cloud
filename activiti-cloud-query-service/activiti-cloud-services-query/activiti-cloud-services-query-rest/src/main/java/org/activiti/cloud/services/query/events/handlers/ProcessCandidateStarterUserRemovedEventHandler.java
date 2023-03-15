@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserRemovedEvent;
 import org.activiti.cloud.services.query.model.*;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class ProcessCandidateStarterUserRemovedEventHandler implements QueryEventHandler {
 
@@ -36,15 +35,17 @@ public class ProcessCandidateStarterUserRemovedEventHandler implements QueryEven
         CloudProcessCandidateStarterUserRemovedEvent processCandidateStarterUserRemovedEvent = (CloudProcessCandidateStarterUserRemovedEvent) event;
         org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserRemovedEvent.getEntity();
 
-        ProcessCandidateStarterUserId id = new ProcessCandidateStarterUserId(processCandidateStarterUser.getProcessDefinitionId(),
-                                                                              processCandidateStarterUser.getUserId());
+        ProcessCandidateStarterUserId id = new ProcessCandidateStarterUserId(
+            processCandidateStarterUser.getProcessDefinitionId(),
+            processCandidateStarterUser.getUserId()
+        );
 
         try {
-            Optional.ofNullable(entityManager.find(ProcessCandidateStarterUserEntity.class, id))
+            Optional
+                .ofNullable(entityManager.find(ProcessCandidateStarterUserEntity.class, id))
                 .ifPresent(entityManager::remove);
         } catch (Exception cause) {
-            throw new QueryException("Error handling ProcessCandidateStarterUserRemovedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling ProcessCandidateStarterUserRemovedEvent[" + event + "]", cause);
         }
     }
 

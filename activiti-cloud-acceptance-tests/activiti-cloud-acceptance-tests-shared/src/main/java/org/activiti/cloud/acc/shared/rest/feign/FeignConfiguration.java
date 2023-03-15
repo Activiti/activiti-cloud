@@ -35,15 +35,12 @@ public class FeignConfiguration {
 
     @Bean
     public AuthenticationService authenticationClient() {
-        return Feign.builder()
-                .encoder(new FormEncoder())
-                .decoder(new GsonDecoder())
-                .logger(new Logger.ErrorLogger())
-                .logLevel(Logger.Level.BASIC)
-                .target(AuthenticationService.class,
-                        baseTestsConfigurationProperties.getAuthUrl());
+        return Feign
+            .builder()
+            .encoder(new FormEncoder())
+            .decoder(new GsonDecoder())
+            .logger(new Logger.ErrorLogger())
+            .logLevel(Logger.Level.BASIC)
+            .target(AuthenticationService.class, baseTestsConfigurationProperties.getAuthUrl());
     }
-
-
-
 }

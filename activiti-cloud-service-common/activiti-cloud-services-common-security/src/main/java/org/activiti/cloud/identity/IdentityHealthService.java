@@ -16,6 +16,5 @@
 package org.activiti.cloud.identity;
 
 public interface IdentityHealthService {
-
     boolean isIdentityUp();
 }

@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Import;
 public class ActivitiRuntimeBundleAutoConfiguration {
 
     @Bean
-    @ConditionalOnProperty(name=ACTIVITI_CLOUD_MESSAGING_PARTITIONED, havingValue = "true")
-    @ConditionalOnMissingBean(name=ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME)
+    @ConditionalOnProperty(name = ACTIVITI_CLOUD_MESSAGING_PARTITIONED, havingValue = "true")
+    @ConditionalOnMissingBean(name = ACTIVITI_AUDIT_PRODUCER_PATITION_KEY_EXTRACTOR_NAME)
     public ActivitiAuditProducerPartitionKeyExtractor activitiAuditProducerPartitionKeyExtractor() {
         return new ActivitiAuditProducerPartitionKeyExtractor();
     }

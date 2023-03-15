@@ -27,16 +27,21 @@ public class ExtendedPageMetadataConverter {
             int firstPageSize = skipCountRemainder;
             long totalElementsNotInTheFirstPage = basePageMetadata.getTotalElements() - firstPageSize;
             // then calculate the number of pages other than the first one and increment it by one (the first page)
-            totalPages = new PagedModel.PageMetadata(basePageMetadata.getSize(),
-                                                         basePageMetadata.getNumber(),
-                                                         totalElementsNotInTheFirstPage).getTotalPages() + 1;
+            totalPages =
+                new PagedModel.PageMetadata(
+                    basePageMetadata.getSize(),
+                    basePageMetadata.getNumber(),
+                    totalElementsNotInTheFirstPage
+                )
+                    .getTotalPages() +
+                1;
         }
-        return new ExtendedPageMetadata(skipCount,
-                                        basePageMetadata.getSize(),
-                                        basePageMetadata.getNumber(),
-                                        basePageMetadata.getTotalElements(),
-                                        totalPages
+        return new ExtendedPageMetadata(
+            skipCount,
+            basePageMetadata.getSize(),
+            basePageMetadata.getNumber(),
+            basePageMetadata.getTotalElements(),
+            totalPages
         );
     }
-
 }

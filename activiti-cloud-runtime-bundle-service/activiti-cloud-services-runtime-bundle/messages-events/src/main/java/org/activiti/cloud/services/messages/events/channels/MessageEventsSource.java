@@ -20,12 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface MessageEventsSource {
-
     String MESSAGE_EVENTS_OUTPUT = "messageEventsOutput";
 
     @OutputBinding(MESSAGE_EVENTS_OUTPUT)
     default MessageChannel messageEventsOutput() {
         return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).get();
     }
-
 }

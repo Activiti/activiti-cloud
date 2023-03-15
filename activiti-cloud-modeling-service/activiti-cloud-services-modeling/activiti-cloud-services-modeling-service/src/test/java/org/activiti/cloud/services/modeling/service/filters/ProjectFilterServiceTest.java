@@ -16,13 +16,13 @@
 
 package org.activiti.cloud.services.modeling.service.filters;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
 class ProjectFilterServiceTest {
+
     private static final String EXAMPLE_NAME = "example";
     private static final String WRONG_NAME = "wrongfilter";
     private static final List<String> ONE_TWO_PROJECT_IDS = List.of("1", "2");
@@ -62,7 +62,9 @@ class ProjectFilterServiceTest {
     void should_getIntersectionOfResults_when_multipleFilters() {
         final ProjectFilter projectFilterOne = getProjectFilter("one", ONE_PROJECT_ID);
         final ProjectFilter projectFilterOneTwo = getProjectFilter("onetwo", ONE_TWO_PROJECT_IDS);
-        final ProjectFilterService projectFilterService = new ProjectFilterService(List.of(projectFilterOne, projectFilterOneTwo));
+        final ProjectFilterService projectFilterService = new ProjectFilterService(
+            List.of(projectFilterOne, projectFilterOneTwo)
+        );
 
         List<String> filteredProjectIds = projectFilterService.getFilterIds(List.of("one", "onetwo"));
 
@@ -82,5 +84,4 @@ class ProjectFilterServiceTest {
             }
         };
     }
-
 }

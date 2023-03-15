@@ -51,8 +51,9 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         Set<String> globalRoles = Sets.newSet(annotation.roles());
         Set<String> groups = Sets.newSet(annotation.groups());
         String username = annotation.username();
-        Map<String,String[]> resourceRoles = Arrays.stream(annotation.resourcesRoles())
-            .collect(Collectors.toMap(ResourceRoles::resource,ResourceRoles::roles));
+        Map<String, String[]> resourceRoles = Arrays
+            .stream(annotation.resourcesRoles())
+            .collect(Collectors.toMap(ResourceRoles::resource, ResourceRoles::roles));
 
         Map<String, Object> claims = prepareClaims(globalRoles, groups, username, resourceRoles);
 
@@ -64,36 +65,30 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
             grantedAuthorities.add(new SimpleGrantedAuthority(annotation.rolePrefix() + role));
         });
 
-        String token = Jwts.builder()
+        String token = Jwts
+            .builder()
             .setIssuer("Activiti Cloud")
             .setSubject(annotation.username())
             .setIssuedAt(Date.from(Instant.now()))
             .setExpiration(Date.from(Instant.now().plusSeconds(600)))
-            .signWith(
-                SignatureAlgorithm.HS256,
-                TextCodec.BASE64.decode("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=")
-            )
+            .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.decode("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E="))
             .compact();
 
-        Jwt jwt = new Jwt(token,
-            Instant.now(),
-            Instant.now().plusSeconds(600),
-            headers,
-            claims);
+        Jwt jwt = new Jwt(token, Instant.now(), Instant.now().plusSeconds(600), headers, claims);
 
-        JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(jwt,
-            grantedAuthorities);
+        JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(jwt, grantedAuthorities);
 
         securityContext.setAuthentication(jwtAuthenticationToken);
 
         return securityContext;
     }
 
-    private Map<String, Object> prepareClaims(Set<String> globalRoles,
+    private Map<String, Object> prepareClaims(
+        Set<String> globalRoles,
         Set<String> groups,
         String username,
-        Map<String,String[]> resourceRoles) {
-
+        Map<String, String[]> resourceRoles
+    ) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("preferred_username", username);
 
@@ -106,7 +101,4 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
 
         return claims;
     }
-
-
-
 }

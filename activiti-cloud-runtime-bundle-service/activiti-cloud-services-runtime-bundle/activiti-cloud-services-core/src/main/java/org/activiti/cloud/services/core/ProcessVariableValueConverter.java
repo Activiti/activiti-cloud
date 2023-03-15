@@ -26,7 +26,7 @@ import org.activiti.engine.ActivitiException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
-public class ProcessVariableValueConverter  {
+public class ProcessVariableValueConverter {
 
     private static Map<String, Class<?>> typeRegistry = new HashMap<>();
 
@@ -61,5 +61,4 @@ public class ProcessVariableValueConverter  {
             throw new ActivitiException("VariableValue conversion error", ex);
         }
     }
-
 }

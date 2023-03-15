@@ -31,9 +31,10 @@ public class ClientCredentialsAuthRequestInterceptor implements AuthTokenRequest
     private final OAuth2AuthorizedClientManager authorizedClientManager;
     private final ClientRegistration clientRegistration;
 
-
-    public ClientCredentialsAuthRequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager,
-                                                   ClientRegistration clientRegistration) {
+    public ClientCredentialsAuthRequestInterceptor(
+        OAuth2AuthorizedClientManager authorizedClientManager,
+        ClientRegistration clientRegistration
+    ) {
         this.authorizedClientManager = authorizedClientManager;
         this.clientRegistration = clientRegistration;
     }

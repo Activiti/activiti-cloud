@@ -22,19 +22,16 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface MessageClientStream {
-
     String MY_CMD_PRODUCER = "myCmdProducer";
     String MY_CMD_RESULTS = "myCmdResults";
 
     @OutputBinding(MY_CMD_PRODUCER)
     default MessageChannel myCmdProducer() {
-        return MessageChannels.direct(MY_CMD_PRODUCER)
-                              .get();
+        return MessageChannels.direct(MY_CMD_PRODUCER).get();
     }
 
     @InputBinding(MY_CMD_RESULTS)
     default SubscribableChannel myCmdResults() {
-        return MessageChannels.publishSubscribe(MY_CMD_RESULTS)
-                              .get();
+        return MessageChannels.publishSubscribe(MY_CMD_RESULTS).get();
     }
 }

@@ -16,6 +16,5 @@
 package org.activiti.cloud.api.task.model.events;
 
 public interface CloudTaskCancelledEvent extends CloudTaskRuntimeEvent {
-
     String getCause();
 }

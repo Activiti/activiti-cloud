@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.task.model.events.CloudTaskSuspendedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskSuspendedEventEntity.TASK_SUSPENDED_EVENT)
 @DiscriminatorValue(value = TaskSuspendedEventEntity.TASK_SUSPENDED_EVENT)
@@ -28,8 +27,7 @@ public class TaskSuspendedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_SUSPENDED_EVENT = "TaskSuspendedEvent";
 
-    public TaskSuspendedEventEntity() {
-    }
+    public TaskSuspendedEventEntity() {}
 
     public TaskSuspendedEventEntity(CloudTaskSuspendedEvent cloudEvent) {
         super(cloudEvent);

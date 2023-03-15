@@ -33,11 +33,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
-    properties = {"spring.activiti.process-definition-location-prefix=classpath*:/invalid-processes/"},
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource({"classpath:application-test.properties", "classpath:access-control.properties"})
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+    properties = { "spring.activiti.process-definition-location-prefix=classpath*:/invalid-processes/" },
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@TestPropertySource({ "classpath:application-test.properties", "classpath:access-control.properties" })
+@ContextConfiguration(
+    classes = RuntimeITConfiguration.class,
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 @DirtiesContext
 public class NeverFailDeploymentStrategyIT {
 

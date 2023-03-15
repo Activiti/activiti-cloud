@@ -20,7 +20,8 @@ import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class ProcessDefinitionRepresentationModelAssembler implements RepresentationModelAssembler<ProcessDefinitionEntity, EntityModel<CloudProcessDefinition>> {
+public class ProcessDefinitionRepresentationModelAssembler
+    implements RepresentationModelAssembler<ProcessDefinitionEntity, EntityModel<CloudProcessDefinition>> {
 
     @Override
     public EntityModel<CloudProcessDefinition> toModel(ProcessDefinitionEntity processDefinitionEntity) {

@@ -20,23 +20,19 @@ import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 
-public class CloudTaskCandidateUserRemovedEventImpl extends CloudRuntimeEventImpl<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>
-        implements CloudTaskCandidateUserRemovedEvent {
+public class CloudTaskCandidateUserRemovedEventImpl
+    extends CloudRuntimeEventImpl<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>
+    implements CloudTaskCandidateUserRemovedEvent {
 
-    public CloudTaskCandidateUserRemovedEventImpl() {
-    }
+    public CloudTaskCandidateUserRemovedEventImpl() {}
 
     public CloudTaskCandidateUserRemovedEventImpl(TaskCandidateUser taskCandidateUser) {
         super(taskCandidateUser);
         setEntityId(taskCandidateUser.getUserId());
     }
 
-    public CloudTaskCandidateUserRemovedEventImpl(String id,
-                                                  Long timestamp,
-                                                  TaskCandidateUser taskCandidateUser) {
-        super(id,
-              timestamp,
-              taskCandidateUser);
+    public CloudTaskCandidateUserRemovedEventImpl(String id, Long timestamp, TaskCandidateUser taskCandidateUser) {
+        super(id, timestamp, taskCandidateUser);
         setEntityId(taskCandidateUser.getUserId());
     }
 

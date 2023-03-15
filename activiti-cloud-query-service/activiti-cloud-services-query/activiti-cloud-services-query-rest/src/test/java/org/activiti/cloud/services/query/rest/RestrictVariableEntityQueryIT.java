@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Arrays;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -40,8 +41,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Arrays;
 
 /**
  * This is present in case of a future scenario where we need to filter task or process instance variables more generally rather than per task or per proc.
@@ -88,7 +87,6 @@ public class RestrictVariableEntityQueryIT {
 
     @Test
     public void shouldGetTaskVariablesWhenCandidateForTask() throws Exception {
-
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("1");
         taskRepository.save(taskEntity);
@@ -100,8 +98,7 @@ public class RestrictVariableEntityQueryIT {
         variableEntity.setTask(taskEntity);
         taskVariableRepository.save(variableEntity);
 
-        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1",
-                                                                                "testuser");
+        TaskCandidateUserEntity taskCandidateUser = new TaskCandidateUserEntity("1", "testuser");
         taskCandidateUserRepository.save(taskCandidateUser);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
@@ -115,7 +112,6 @@ public class RestrictVariableEntityQueryIT {
 
     @Test
     public void shouldGetProcessInstanceVariablesWhenPermitted() throws Exception {
-
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId("15");
         processInstanceEntity.setName("name");
@@ -137,8 +133,7 @@ public class RestrictVariableEntityQueryIT {
         Iterable<ProcessVariableEntity> iterable = variableRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
-
-/* The DSL queries seem to be able to join from variable to task or procInst but not both.
+    /* The DSL queries seem to be able to join from variable to task or procInst but not both.
    Could probably do it using queryFactory approach http://www.querydsl.com/static/querydsl/latest/reference/html/ch02.html#jpa_integration
    But would then have to handle the pagination to make consistent with using repository.
    No immediate need and would be inefficient to do those joins.

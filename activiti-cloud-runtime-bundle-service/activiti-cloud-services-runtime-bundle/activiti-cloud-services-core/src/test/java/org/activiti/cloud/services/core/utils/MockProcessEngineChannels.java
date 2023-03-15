@@ -35,5 +35,4 @@ public class MockProcessEngineChannels implements ProcessEngineChannels {
     public MessageChannel auditProducer() {
         return new MockMessageChannel();
     }
-
 }

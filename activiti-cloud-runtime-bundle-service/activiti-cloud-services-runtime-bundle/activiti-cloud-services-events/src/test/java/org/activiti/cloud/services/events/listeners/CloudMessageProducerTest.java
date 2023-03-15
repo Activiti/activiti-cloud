@@ -112,17 +112,19 @@ public class CloudMessageProducerTest {
     @Test
     public void shouldConvertMessageSubscriptionCancelledEventToCloudEventAndAddToAggregator() {
         //given
-        MessageSubscription entity = MessageSubscriptionImpl.builder()
-                .withId("entityId")
-                .withEventName("messageName")
-                .withConfiguration("correlationKey")
-                .build();
+        MessageSubscription entity = MessageSubscriptionImpl
+            .builder()
+            .withId("entityId")
+            .withEventName("messageName")
+            .withConfiguration("correlationKey")
+            .build();
 
         MessageSubscriptionCancelledEvent eventFired = new MessageSubscriptionCancelledEventImpl(entity);
 
-        CloudMessageSubscriptionCancelledEventImpl cloudEventFired = CloudMessageSubscriptionCancelledEventImpl.builder()
-                                                                        .withEntity(entity)
-                                                                        .build();
+        CloudMessageSubscriptionCancelledEventImpl cloudEventFired = CloudMessageSubscriptionCancelledEventImpl
+            .builder()
+            .withEntity(entity)
+            .build();
 
         given(eventConverter.from(eventFired)).willReturn(cloudEventFired);
 
@@ -132,5 +134,4 @@ public class CloudMessageProducerTest {
         //then
         verify(eventsAggregator).add(cloudEventFired);
     }
-
 }

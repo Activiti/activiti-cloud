@@ -22,15 +22,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
 import org.springframework.test.context.TestPropertySource;
-@TestPropertySource(properties = {
-    "spring.datasource.platform=h2"
-})
+
+@TestPropertySource(properties = { "spring.datasource.platform=h2" })
 public class JdbcMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
-    static class MessagesApplication {
-
-    }
+    static class MessagesApplication {}
 
     @Test
     public void testMessageStore() throws Exception {

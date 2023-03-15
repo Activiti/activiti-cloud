@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.common.util;
 
 public class ImageProcessingException extends Exception {
+
     public ImageProcessingException(Throwable cause) {
         super(cause);
     }

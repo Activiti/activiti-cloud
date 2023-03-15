@@ -23,8 +23,7 @@ public class ReplayServiceTaskRequest {
     @NotEmpty
     private String flowNodeId;
 
-    public ReplayServiceTaskRequest() {
-    }
+    public ReplayServiceTaskRequest() {}
 
     public ReplayServiceTaskRequest(String flowNodeId) {
         this.flowNodeId = flowNodeId;
@@ -33,5 +32,4 @@ public class ReplayServiceTaskRequest {
     public String getFlowNodeId() {
         return flowNodeId;
     }
-
 }

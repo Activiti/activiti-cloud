@@ -18,6 +18,4 @@ package org.activiti.cloud.notifications.graphql.config;
 import org.springframework.boot.test.context.TestConfiguration;
 
 @TestConfiguration
-public class EngineEventsConfiguration implements EngineEvents {
-
-}
+public class EngineEventsConfiguration implements EngineEvents {}

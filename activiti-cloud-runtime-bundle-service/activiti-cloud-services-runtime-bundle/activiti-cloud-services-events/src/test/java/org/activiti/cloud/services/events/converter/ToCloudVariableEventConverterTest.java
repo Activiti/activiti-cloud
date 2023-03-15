@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.events.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.event.impl.VariableCreatedEventImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -29,13 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ToCloudVariableEventConverterTest {
 
@@ -44,12 +43,19 @@ class ToCloudVariableEventConverterTest {
 
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+
     @Mock
     private CachingProcessExtensionService processExtensionService;
 
     @Test
     void should_returnNull_whenPropertiesAreEmpty() {
-        VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            "processInstanceId",
+            null
+        );
         VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
 
         Extension extension = new Extension();
@@ -66,7 +72,13 @@ class ToCloudVariableEventConverterTest {
 
     @Test
     void should_returnNull_whenProcessDefinitionIdIsNull() {
-        VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            "processInstanceId",
+            null
+        );
         VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, null);
 
         Extension extension = new Extension();
@@ -84,7 +96,13 @@ class ToCloudVariableEventConverterTest {
 
     @Test
     void should_convertToCloudVariableCreatedEventWithVariableDefinitionId() {
-        VariableInstance variableInstance = new VariableInstanceImpl<>("variableName", "string", "example", "processInstanceId", null);
+        VariableInstance variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "example",
+            "processInstanceId",
+            null
+        );
         VariableCreatedEventImpl event = new VariableCreatedEventImpl(variableInstance, "processDefinitionId");
 
         Extension extension = new Extension();

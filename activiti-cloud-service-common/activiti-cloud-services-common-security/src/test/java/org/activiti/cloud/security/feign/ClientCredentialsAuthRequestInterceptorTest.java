@@ -37,10 +37,13 @@ class ClientCredentialsAuthRequestInterceptorTest {
 
     @Mock
     private OAuth2AuthorizedClientManager authorizedClientManager;
+
     @Mock
     private ClientRegistration clientRegistration;
+
     @Mock
     private OAuth2AuthorizedClient authorizedClient;
+
     @Mock
     private OAuth2AccessToken accessToken;
 
@@ -84,5 +87,4 @@ class ClientCredentialsAuthRequestInterceptorTest {
         clientCredentialsAuthRequestInterceptor.apply(requestTemplate);
         assertThat(requestTemplate.headers()).isEmpty();
     }
-
 }

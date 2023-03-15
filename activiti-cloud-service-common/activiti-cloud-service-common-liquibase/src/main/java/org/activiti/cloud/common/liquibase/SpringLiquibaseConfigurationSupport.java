@@ -17,12 +17,10 @@
 package org.activiti.cloud.common.liquibase;
 
 import javax.sql.DataSource;
-
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
-
-import liquibase.integration.spring.SpringLiquibase;
 
 public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoaderAware {
 

@@ -39,5 +39,4 @@ public class KeycloakHealthServiceTest {
         when(keycloakUserGroupManager.getGroups()).thenReturn(Collections.emptyList());
         assertThat(keycloakHealthService.isIdentityUp()).isTrue();
     }
-
 }

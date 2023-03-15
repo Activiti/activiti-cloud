@@ -28,7 +28,7 @@ public class RuntimeBundleInfoAppender {
         this.properties = properties;
     }
 
-    public CloudRuntimeEventImpl<?,?> appendRuntimeBundleInfoTo(CloudRuntimeEventImpl<?,?> cloudRuntimeEvent) {
+    public CloudRuntimeEventImpl<?, ?> appendRuntimeBundleInfoTo(CloudRuntimeEventImpl<?, ?> cloudRuntimeEvent) {
         cloudRuntimeEvent.setAppName(properties.getAppName());
         cloudRuntimeEvent.setServiceName(properties.getServiceName());
         cloudRuntimeEvent.setServiceFullName(properties.getServiceFullName());
@@ -47,5 +47,4 @@ public class RuntimeBundleInfoAppender {
 
         return cloudRuntimeEntity;
     }
-
 }

@@ -21,32 +21,28 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudBPMNSignalEventImpl extends CloudRuntimeEventImpl<BPMNSignal, BPMNSignalEvent.SignalEvents> {
 
-    public CloudBPMNSignalEventImpl() {
-    }
+    public CloudBPMNSignalEventImpl() {}
 
-    public CloudBPMNSignalEventImpl(BPMNSignal entity,
-                                    String processDefinitionId,
-                                    String processInstanceId) {
+    public CloudBPMNSignalEventImpl(BPMNSignal entity, String processDefinitionId, String processInstanceId) {
         super(entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
         setEntityId(entity.getElementId());
     }
 
-    public CloudBPMNSignalEventImpl(String id,
-                                    Long timestamp,
-                                    BPMNSignal entity,
-                                    String processDefinitionId,
-                                    String processInstanceId) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudBPMNSignalEventImpl(
+        String id,
+        Long timestamp,
+        BPMNSignal entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
 
-        if (entity!=null) {
+        if (entity != null) {
             setEntityId(entity.getElementId());
         }
     }
-
 }

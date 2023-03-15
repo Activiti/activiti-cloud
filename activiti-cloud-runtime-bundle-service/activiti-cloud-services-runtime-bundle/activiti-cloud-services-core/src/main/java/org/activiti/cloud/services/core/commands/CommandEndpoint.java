@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.activiti.api.model.shared.EmptyResult;
 import org.activiti.api.model.shared.Payload;
 import org.slf4j.Logger;
@@ -33,30 +32,23 @@ public class CommandEndpoint<T extends Payload> {
     private Map<String, CommandExecutor<T>> commandExecutors;
 
     public CommandEndpoint(Set<CommandExecutor<T>> cmdExecutors) {
-        this.commandExecutors = cmdExecutors.stream()
-                                            .collect(Collectors.toMap(CommandExecutor::getHandledType,
-                                                                      Function.identity()));
+        this.commandExecutors =
+            cmdExecutors.stream().collect(Collectors.toMap(CommandExecutor::getHandledType, Function.identity()));
     }
 
     public <R> R execute(T payload) {
-
-        SecurityContextHolder.getContext()
-                             .setAuthentication(new CommandEndpointAdminAuthentication());
+        SecurityContextHolder.getContext().setAuthentication(new CommandEndpointAdminAuthentication());
         try {
             return (R) processCommand(payload);
-
         } finally {
             SecurityContextHolder.clearContext();
         }
-
     }
 
     private Object processCommand(T payload) {
-
         CommandExecutor<T> cmdExecutor = commandExecutors.get(payload.getClass().getName());
         if (cmdExecutor != null) {
             return cmdExecutor.execute(payload);
-
         } else {
             LOGGER.warn(">>> No Command Found for type: " + payload.getClass());
         }

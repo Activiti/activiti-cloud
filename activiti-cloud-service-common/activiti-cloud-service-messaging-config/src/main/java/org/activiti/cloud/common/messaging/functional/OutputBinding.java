@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.AliasFor;
 
-@Retention( RetentionPolicy.RUNTIME )
-@Target( ElementType.METHOD )
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 @Qualifier
 @Bean
 public @interface OutputBinding {

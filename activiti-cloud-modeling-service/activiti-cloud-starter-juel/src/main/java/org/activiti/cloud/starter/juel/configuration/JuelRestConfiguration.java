@@ -21,6 +21,4 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(JuelExpressionResolverController.class)
-public class JuelRestConfiguration {
-
-}
+public class JuelRestConfiguration {}

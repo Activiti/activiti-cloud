@@ -28,6 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 public class DefaultJobMessageProducer implements JobMessageProducer {
+
     private static final Logger logger = LoggerFactory.getLogger(DefaultJobMessageProducer.class);
 
     private static final String ROUTING_KEY = "routingKey";
@@ -36,9 +37,11 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
     private final ApplicationEventPublisher eventPublisher;
     private final JobMessageBuilderFactory jobMessageBuilderFactory;
 
-    public DefaultJobMessageProducer(StreamBridge streamBridge,
-                                     ApplicationEventPublisher eventPublisher,
-                                     JobMessageBuilderFactory jobMessageBuilderFactory) {
+    public DefaultJobMessageProducer(
+        StreamBridge streamBridge,
+        ApplicationEventPublisher eventPublisher,
+        JobMessageBuilderFactory jobMessageBuilderFactory
+    ) {
         this.streamBridge = streamBridge;
         this.eventPublisher = eventPublisher;
         this.jobMessageBuilderFactory = jobMessageBuilderFactory;
@@ -46,21 +49,23 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
 
     @Override
     public void sendMessage(@NonNull String destination, @NonNull Job job) {
-        if(!TransactionSynchronizationManager.isSynchronizationActive()) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
         Assert.hasLength(job.getId(), "job id must not be empty");
         Assert.hasLength(destination, "destination must not be empty");
 
-        Message<String> message = jobMessageBuilderFactory.create(job)
-                                                          .withPayload(job.getId())
-                                                          .setHeader(ROUTING_KEY, destination)
-                                                          .build();
+        Message<String> message = jobMessageBuilderFactory
+            .create(job)
+            .withPayload(job.getId())
+            .setHeader(ROUTING_KEY, destination)
+            .build();
 
         // Let's send message right after the main transaction has successfully committed.
-        TransactionSynchronizationManager.registerSynchronization(new JobMessageTransactionSynchronization(message,
-                                                                                                           destination));
+        TransactionSynchronizationManager.registerSynchronization(
+            new JobMessageTransactionSynchronization(message, destination)
+        );
     }
 
     class JobMessageTransactionSynchronization implements TransactionSynchronization {
@@ -80,13 +85,12 @@ public class DefaultJobMessageProducer implements JobMessageProducer {
             try {
                 boolean sent = streamBridge.send(destination, message);
 
-                if(!sent) {
+                if (!sent) {
                     throw new MessageDispatchingException(message);
                 }
 
                 eventPublisher.publishEvent(new JobMessageSentEvent(message, destination));
-
-            } catch(Exception cause) {
+            } catch (Exception cause) {
                 logger.error("Sending job message {} failed due to error: {}", message, cause.getMessage());
 
                 eventPublisher.publishEvent(new JobMessageFailedEvent(message, cause, destination));

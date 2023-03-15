@@ -41,9 +41,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
 
     @SpringBootApplication
-    static class Application {
-
-    }
+    static class Application {}
 
     @SpyBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
@@ -113,10 +111,8 @@ public class ProcessDiagramGeneratorWrapperIT {
         BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
-        when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
-        when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("");
+        when(processDiagramGenerator.isGenerateDefaultDiagram()).thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName()).thenReturn("");
 
         //WHEN
         byte[] diagram = processDiagramGenerator.generateDiagram(bpmnModel);
@@ -141,10 +137,8 @@ public class ProcessDiagramGeneratorWrapperIT {
         BpmnModel bpmnModel = processEngine.getBpmnModel(processInstance.getProcessDefinitionId());
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isFalse();
 
-        when(processDiagramGenerator.isGenerateDefaultDiagram())
-                .thenReturn(true);
-        when(processDiagramGenerator.getDefaultDiagramImageFileName())
-                .thenReturn("invalid-file-name");
+        when(processDiagramGenerator.isGenerateDefaultDiagram()).thenReturn(true);
+        when(processDiagramGenerator.getDefaultDiagramImageFileName()).thenReturn("invalid-file-name");
 
         //THEN
         //WHEN
@@ -163,8 +157,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
         //GIVEN
         BpmnModel bpmnModel = new BpmnModel();
-        bpmnModel.addGraphicInfo("key",
-                                 null);
+        bpmnModel.addGraphicInfo("key", null);
         assertThat(bpmnModel.hasDiagramInterchangeInfo()).isTrue();
 
         //THEN
@@ -188,8 +181,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testProcessDiagramFonts() {
         //GIVEN
-        when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{"Lucida"});
+        when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { "Lucida" });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();
@@ -210,8 +202,7 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Test
     public void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
-        when(processDiagramGenerator.getAvailableFonts())
-                .thenReturn(new String[]{DEFAULT_DIAGRAM_FONT_NAME});
+        when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { DEFAULT_DIAGRAM_FONT_NAME });
 
         //WHEN
         String activityFont = processDiagramGenerator.getActivityFontName();

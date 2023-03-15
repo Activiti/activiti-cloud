@@ -15,6 +15,25 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static java.util.Arrays.asList;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsStream;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -34,26 +53,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static org.activiti.cloud.services.common.util.FileUtils.resourceAsStream;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
@@ -96,16 +95,12 @@ public class ProjectServiceImplTest {
         when(taskOne.getCandidateUsers()).thenReturn(asList("userOne", "userTwo"));
         when(taskTwo.getAssignee()).thenReturn("userThree");
         when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+            .thenReturn(userTasks);
 
         ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
 
-        assertThat(projectAccessControl.getGroups())
-                .hasSize(2)
-                .contains("groupOne", "groupTwo");
-        assertThat(projectAccessControl.getUsers())
-                .hasSize(3)
-                .contains("userOne", "userTwo", "userThree");
+        assertThat(projectAccessControl.getGroups()).hasSize(2).contains("groupOne", "groupTwo");
+        assertThat(projectAccessControl.getUsers()).hasSize(3).contains("userOne", "userTwo", "userThree");
     }
 
     @Test
@@ -116,16 +111,12 @@ public class ProjectServiceImplTest {
         when(taskOne.getCandidateUsers()).thenReturn(asList("${username_Var}", "userOne"));
         when(taskTwo.getAssignee()).thenReturn("${processsVariable.username}");
         when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+            .thenReturn(userTasks);
 
         ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
 
-        assertThat(projectAccessControl.getGroups())
-                .hasSize(2)
-                .contains("groupOne", "groupTwo");
-        assertThat(projectAccessControl.getUsers())
-                .hasSize(1)
-                .contains("userOne");
+        assertThat(projectAccessControl.getGroups()).hasSize(2).contains("groupOne", "groupTwo");
+        assertThat(projectAccessControl.getUsers()).hasSize(1).contains("userOne");
     }
 
     @Test
@@ -136,7 +127,7 @@ public class ProjectServiceImplTest {
         when(taskOne.getCandidateUsers()).thenReturn(null);
         when(taskTwo.getAssignee()).thenReturn(null);
         when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+            .thenReturn(userTasks);
 
         ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
 
@@ -148,7 +139,7 @@ public class ProjectServiceImplTest {
     public void should_returnEmptyLists_when_thereAreNotUserTasks() {
         List<UserTask> userTasks = new LinkedList<>();
         when(modelService.getTasksBy(eq(project), any(ProcessModelType.class), eq(UserTask.class)))
-                .thenReturn(userTasks);
+            .thenReturn(userTasks);
 
         ProjectAccessControl projectAccessControl = projectService.getProjectAccessControl(project);
 
@@ -198,9 +189,12 @@ public class ProjectServiceImplTest {
 
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
 
-        Exception exception = assertThrows(ImportProjectException.class, () -> {
-            projectService.importProject(file.get(), "new-project-name");
-        });
+        Exception exception = assertThrows(
+            ImportProjectException.class,
+            () -> {
+                projectService.importProject(file.get(), "new-project-name");
+            }
+        );
         String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
 
@@ -229,9 +223,12 @@ public class ProjectServiceImplTest {
 
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
 
-        Exception exception = assertThrows(ImportProjectException.class, () -> {
-            projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
-        });
+        Exception exception = assertThrows(
+            ImportProjectException.class,
+            () -> {
+                projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
+            }
+        );
         String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
 
@@ -269,9 +266,11 @@ public class ProjectServiceImplTest {
         ProcessModelType processModelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
         projectValidators.add(new ProjectNameValidator());
-        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-x"));
-        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType)).thenReturn(Optional.of("process-y"));
-        when(modelService.importModel(eq(project),eq(processModelType),any())).thenReturn(new ModelImpl());
+        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType))
+            .thenReturn(Optional.of("process-x"));
+        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
+            .thenReturn(Optional.of("process-y"));
+        when(modelService.importModel(eq(project), eq(processModelType), any())).thenReturn(new ModelImpl());
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 

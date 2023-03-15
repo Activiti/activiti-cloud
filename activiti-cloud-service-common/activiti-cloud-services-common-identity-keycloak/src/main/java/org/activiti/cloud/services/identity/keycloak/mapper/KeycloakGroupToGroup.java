@@ -26,5 +26,4 @@ public class KeycloakGroupToGroup {
         group.setName(kGroup.getName());
         return group;
     }
-
 }

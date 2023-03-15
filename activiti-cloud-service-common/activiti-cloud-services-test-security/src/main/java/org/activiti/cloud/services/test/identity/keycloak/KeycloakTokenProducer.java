@@ -119,9 +119,7 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     }
 
     private String getAccessTokenResponse(String user, String password) {
-        String url = String.format(TOKEN_ENDPOINT,
-            authServerUrl,
-            realm);
+        String url = String.format(TOKEN_ENDPOINT, authServerUrl, realm);
         ResponseEntity<Map> response = callTokenEndpoint(url, user, password);
         return (String) response.getBody().get(TOKEN_FIELD);
     }
@@ -138,5 +136,4 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestParams, headers);
         return restTemplate.postForEntity(url, request, Map.class);
     }
-
 }

@@ -21,7 +21,6 @@ import java.util.List;
  * Versioned entity interface
  */
 public interface VersionedEntity<V extends VersionEntity> {
-
     List<V> getVersions();
 
     void setVersions(List<V> versions);
