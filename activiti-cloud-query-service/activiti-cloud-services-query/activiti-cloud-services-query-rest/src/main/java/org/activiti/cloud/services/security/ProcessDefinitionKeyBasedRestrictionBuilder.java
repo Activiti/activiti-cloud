@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.security;
 
-import java.util.Map;
-import java.util.Set;
-
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import java.util.Map;
+import java.util.Set;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -32,34 +31,34 @@ public class ProcessDefinitionKeyBasedRestrictionBuilder {
 
     private SecurityPoliciesProperties securityPoliciesProperties;
 
-    public ProcessDefinitionKeyBasedRestrictionBuilder(SecurityPoliciesManager securityPoliciesManager,
-                                                       SecurityPoliciesProperties securityPoliciesProperties) {
+    public ProcessDefinitionKeyBasedRestrictionBuilder(
+        SecurityPoliciesManager securityPoliciesManager,
+        SecurityPoliciesProperties securityPoliciesProperties
+    ) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.securityPoliciesProperties = securityPoliciesProperties;
     }
 
-    private BooleanExpression equalsIgnoringCaseAndHyphen(StringPath propertyPath,
-                                                          String value) {
+    private BooleanExpression equalsIgnoringCaseAndHyphen(StringPath propertyPath, String value) {
         //expect to remove hyphens when passing in environment variables
-        return Expressions.stringTemplate("replace({0},'-','')",
-                                          propertyPath).equalsIgnoreCase(value.replace("-",
-                                                                                       ""));
+        return Expressions.stringTemplate("replace({0},'-','')", propertyPath).equalsIgnoreCase(value.replace("-", ""));
     }
 
-    private BooleanExpression buildServiceNameRestriction(String serviceName,
-                                                          StringPath serviceNamePath,
-                                                          StringPath serviceFullNamePath) {
-        BooleanExpression appNamePredicate = equalsIgnoringCaseAndHyphen(serviceNamePath,
-                                                                         serviceName);
-        appNamePredicate = appNamePredicate.or(equalsIgnoringCaseAndHyphen(serviceFullNamePath,
-                                                                           serviceName));
+    private BooleanExpression buildServiceNameRestriction(
+        String serviceName,
+        StringPath serviceNamePath,
+        StringPath serviceFullNamePath
+    ) {
+        BooleanExpression appNamePredicate = equalsIgnoringCaseAndHyphen(serviceNamePath, serviceName);
+        appNamePredicate = appNamePredicate.or(equalsIgnoringCaseAndHyphen(serviceFullNamePath, serviceName));
         return appNamePredicate;
     }
 
-
-    public Predicate applyProcessDefinitionKeyFilter(Predicate currentPredicate,
-                                                     SecurityPolicyAccess securityPolicyAccess,
-                                                     ProcessDefinitionKeyBasedFilter filterMetaData) {
+    public Predicate applyProcessDefinitionKeyFilter(
+        Predicate currentPredicate,
+        SecurityPolicyAccess securityPolicyAccess,
+        ProcessDefinitionKeyBasedFilter filterMetaData
+    ) {
         ProcessDefinitionRestrictionProperties restrictionProperties = filterMetaData.getRestrictionProperties();
 
         Map<String, Set<String>> restrictions = securityPoliciesManager.getAllowedKeys(securityPolicyAccess);
@@ -67,10 +66,8 @@ public class ProcessDefinitionKeyBasedRestrictionBuilder {
         BooleanExpression securityExpression = null;
         for (String appName : restrictions.keySet()) {
             Set<String> defKeys = restrictions.get(appName);
-            securityExpression = addProcessDefRestrictionToExpression(restrictionProperties,
-                                                                      securityExpression,
-                                                                      appName,
-                                                                      defKeys);
+            securityExpression =
+                addProcessDefRestrictionToExpression(restrictionProperties, securityExpression, appName, defKeys);
         }
 
         //policies are defined but none are applicable
@@ -82,15 +79,17 @@ public class ProcessDefinitionKeyBasedRestrictionBuilder {
         return securityExpression != null ? securityExpression.and(currentPredicate) : currentPredicate;
     }
 
-
-    private BooleanExpression addProcessDefRestrictionToExpression(ProcessDefinitionRestrictionProperties restrictionProperties,
-                                                                   BooleanExpression securityExpression,
-                                                                   String appName,
-                                                                   Set<String> defKeys) {
-
-        BooleanExpression appNamePredicate = buildServiceNameRestriction(appName,
-                                                                                                       restrictionProperties.getServiceNamePath(),
-                                                                                                       restrictionProperties.getServiceFullNamePath());
+    private BooleanExpression addProcessDefRestrictionToExpression(
+        ProcessDefinitionRestrictionProperties restrictionProperties,
+        BooleanExpression securityExpression,
+        String appName,
+        Set<String> defKeys
+    ) {
+        BooleanExpression appNamePredicate = buildServiceNameRestriction(
+            appName,
+            restrictionProperties.getServiceNamePath(),
+            restrictionProperties.getServiceFullNamePath()
+        );
 
         BooleanExpression nextExpression = appNamePredicate;
         //will filter by app name and will also filter by definition keys if no wildcard
@@ -105,6 +104,4 @@ public class ProcessDefinitionKeyBasedRestrictionBuilder {
         }
         return securityExpression;
     }
-
-
 }

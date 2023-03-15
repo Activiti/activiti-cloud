@@ -18,6 +18,8 @@ package org.activiti.cloud.services.audit.jpa.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Iterator;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -31,9 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Collections;
-import java.util.Iterator;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
@@ -52,10 +51,8 @@ public class RestrictEventQueryIT {
     @MockBean
     private UserGroupManager userGroupManager;
 
-
     @Test
     public void shouldGetProcessInstancesWhenPermitted() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(15L);
         eventEntity.setProcessDefinitionId("defKey1");
@@ -65,17 +62,17 @@ public class RestrictEventQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
-
     @Test
     public void shouldGetProcessInstancesWhenUserPermittedByWildcard() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(16L);
         eventEntity.setProcessDefinitionId("defKeyWild");
@@ -85,18 +82,18 @@ public class RestrictEventQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
 
-
     @Test
     public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(17L);
         eventEntity.setProcessDefinitionId("defKeyWild");
@@ -107,8 +104,10 @@ public class RestrictEventQueryIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isTrue();
@@ -116,7 +115,6 @@ public class RestrictEventQueryIT {
 
     @Test
     public void shouldNotGetProcessInstancesWhenPolicyNotForUser() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(18L);
         eventEntity.setProcessDefinitionId("defKeyWild");
@@ -126,15 +124,17 @@ public class RestrictEventQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
         //this user should see proc instances - but not for test-cmd-endpoint-wild
 
         Iterator<AuditEventEntity> iterator = iterable.iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             AuditEventEntity auditEvent = iterator.next();
             assertThat(auditEvent.getServiceName()).isNotEqualToIgnoringCase("audit-wild");
             assertThat(auditEvent.getServiceName()).isEqualToIgnoringCase("audit");
@@ -143,7 +143,6 @@ public class RestrictEventQueryIT {
 
     @Test
     public void shouldMatchAppNameCaseInsensitiveIgnoringHyphens() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(19L);
         eventEntity.setProcessDefinitionId("defKey1");
@@ -162,16 +161,19 @@ public class RestrictEventQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 
         Iterator<AuditEventEntity> iterator = iterable.iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             AuditEventEntity auditEventEntity = iterator.next();
             assertThat(auditEventEntity.getServiceName()).isNotEqualToIgnoringCase("audit-dontmatchthisone");
-            assertThat(auditEventEntity.getServiceName().replace("-","")).isEqualToIgnoringCase("audit".replace("-",""));
+            assertThat(auditEventEntity.getServiceName().replace("-", ""))
+                .isEqualToIgnoringCase("audit".replace("-", ""));
         }
 
         assertThat(eventsRepository.count(spec)).isEqualTo(2);
@@ -179,20 +181,19 @@ public class RestrictEventQueryIT {
 
     @Test
     public void shouldNotGetProcessInstancesWhenNotPermitted() throws Exception {
-
         when(securityManager.getAuthenticatedUserId()).thenReturn("intruder");
 
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
 
-
     @Test
     public void shouldGetProcessInstancesWhenMatchesFullServiceName() throws Exception {
-
         ProcessStartedAuditEventEntity eventEntity = new ProcessStartedAuditEventEntity();
         eventEntity.setId(21L);
         eventEntity.setProcessDefinitionId("defKey2");
@@ -201,8 +202,10 @@ public class RestrictEventQueryIT {
         eventsRepository.save(eventEntity);
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
-        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(null,
-                SecurityPolicyAccess.READ);
+        Specification<AuditEventEntity> spec = securityPoliciesApplicationService.createSpecWithSecurity(
+            null,
+            SecurityPolicyAccess.READ
+        );
 
         Iterable<AuditEventEntity> iterable = eventsRepository.findAll(spec);
 

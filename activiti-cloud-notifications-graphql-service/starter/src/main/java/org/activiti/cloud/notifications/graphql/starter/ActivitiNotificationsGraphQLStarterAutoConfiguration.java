@@ -29,23 +29,25 @@ public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
     @Configuration
     public class DefaultActivitiNotificationsGraphQLStarterConfiguration {
 
-		@Bean
-		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value="keycloak.cors", matchIfMissing = true)
-		public WebMvcConfigurer graphQLBackendCorsConfiguration() {
-			return new WebMvcConfigurer() {
-				@Override
-				public void addCorsMappings(CorsRegistry registry) {
-					registry.addMapping("/**")
-							.allowedOrigins("*")
-							.allowedMethods(HttpMethod.GET.toString(),
-										    HttpMethod.POST.toString(),
-										    HttpMethod.PUT.toString(),
-										    HttpMethod.DELETE.toString(),
-										    HttpMethod.OPTIONS.toString());
-				}
-			};
-		}
+        @Bean
+        @ConditionalOnMissingBean
+        @ConditionalOnProperty(value = "keycloak.cors", matchIfMissing = true)
+        public WebMvcConfigurer graphQLBackendCorsConfiguration() {
+            return new WebMvcConfigurer() {
+                @Override
+                public void addCorsMappings(CorsRegistry registry) {
+                    registry
+                        .addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods(
+                            HttpMethod.GET.toString(),
+                            HttpMethod.POST.toString(),
+                            HttpMethod.PUT.toString(),
+                            HttpMethod.DELETE.toString(),
+                            HttpMethod.OPTIONS.toString()
+                        );
+                }
+            };
+        }
     }
-
 }

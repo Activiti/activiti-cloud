@@ -17,10 +17,9 @@ package org.activiti.cloud.services.events.message;
 
 public class RuntimeBundleInfoMessageHeaders {
 
-    public final static String APP_NAME = "appName";
-    public final static String SERVICE_NAME = "serviceName";
-    public final static String SERVICE_FULL_NAME = "serviceFullName";
-    public final static String SERVICE_TYPE = "serviceType";
-    public final static String SERVICE_VERSION = "serviceVersion";
-
+    public static final String APP_NAME = "appName";
+    public static final String SERVICE_NAME = "serviceName";
+    public static final String SERVICE_FULL_NAME = "serviceFullName";
+    public static final String SERVICE_TYPE = "serviceType";
+    public static final String SERVICE_VERSION = "serviceVersion";
 }

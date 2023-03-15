@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.core.StringRegularExpression.matchesRegex;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.spring.ProcessDeployedEventProducer;
@@ -28,21 +39,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.core.StringRegularExpression.matchesRegex;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class RuntimeBundleSwaggerIT {
 
     @Autowired
@@ -53,14 +55,16 @@ public class RuntimeBundleSwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
-        mockMvc.perform(get("/v3/api-docs/Runtime Bundle").accept(MediaType.APPLICATION_JSON))
+        mockMvc
+            .perform(get("/v3/api-docs/Runtime Bundle").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.servers").isNotEmpty())
             .andExpect(jsonPath("$.servers[0].url").value(equalTo("/")))
             .andExpect(jsonPath("$.paths").isNotEmpty())
-            .andExpect(jsonPath("$.paths[\"/v1/process-definitions/{id}/model\"].get.operationId")
-                .value("getProcessDiagram"))
+            .andExpect(
+                jsonPath("$.paths[\"/v1/process-definitions/{id}/model\"].get.operationId").value("getProcessDiagram")
+            )
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.components.schemas").isNotEmpty())
@@ -73,5 +77,4 @@ public class RuntimeBundleSwaggerIT {
             .andExpect(jsonPath("$.components.schemas[\"SaveTaskPayload\"].properties").value(hasKey("payloadType")))
             .andExpect(jsonPath("$.info.title").value("OpenAPI definition"));
     }
-
 }

@@ -42,27 +42,31 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageInputChannelFactory jobMessageInputChannelFactory(SubscribableChannelBindingTargetFactory bindingTargetFactory,
-                                                                       BindingServiceProperties bindingServiceProperties,
-                                                                       ConfigurableListableBeanFactory beanFactory) {
+    public JobMessageInputChannelFactory jobMessageInputChannelFactory(
+        SubscribableChannelBindingTargetFactory bindingTargetFactory,
+        BindingServiceProperties bindingServiceProperties,
+        ConfigurableListableBeanFactory beanFactory
+    ) {
         return new JobMessageInputChannelFactory(bindingTargetFactory, bindingServiceProperties, beanFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
-                                                                       JobMessageProducer jobMessageProducer) {
+    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(
+        BindingServiceProperties bindingServiceProperties,
+        JobMessageProducer jobMessageProducer
+    ) {
         return new DefaultMessageBasedJobManagerFactory(bindingServiceProperties, jobMessageProducer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageProducer jobMessageProducer(StreamBridge streamBridge,
-                                                 ApplicationEventPublisher eventPublisher,
-                                                 JobMessageBuilderFactory jobMessageBuilderFactory) {
-        return new DefaultJobMessageProducer(streamBridge,
-                                             eventPublisher,
-                                             jobMessageBuilderFactory);
+    public JobMessageProducer jobMessageProducer(
+        StreamBridge streamBridge,
+        ApplicationEventPublisher eventPublisher,
+        JobMessageBuilderFactory jobMessageBuilderFactory
+    ) {
+        return new DefaultJobMessageProducer(streamBridge, eventPublisher, jobMessageBuilderFactory);
     }
 
     @Bean
@@ -73,17 +77,19 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(ConfigurableListableBeanFactory beanFactory,
-                                                                                 BindingService bindingService,
-                                                                                 JobMessageInputChannelFactory jobMessageInputChannelFactory,
-                                                                                 MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory) {
-
-        return new MessageBasedJobManagerConfigurator(beanFactory,
-                                                      bindingService,
-                                                      jobMessageInputChannelFactory,
-                                                      messageBasedJobManagerFactory,
-                                                      jobMessageHandlerFactory);
+    public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(
+        ConfigurableListableBeanFactory beanFactory,
+        BindingService bindingService,
+        JobMessageInputChannelFactory jobMessageInputChannelFactory,
+        MessageBasedJobManagerFactory messageBasedJobManagerFactory,
+        JobMessageHandlerFactory jobMessageHandlerFactory
+    ) {
+        return new MessageBasedJobManagerConfigurator(
+            beanFactory,
+            bindingService,
+            jobMessageInputChannelFactory,
+            messageBasedJobManagerFactory,
+            jobMessageHandlerFactory
+        );
     }
-
 }

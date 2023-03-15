@@ -17,19 +17,17 @@ package org.activiti.cloud.services.query.model;
 
 public class VariableValue<T> {
 
-	private T value;
+    private T value;
 
-    public VariableValue() {
-    }
+    public VariableValue() {}
 
     public VariableValue(T value) {
         this.value = value;
     }
 
-	public T getValue() {
+    public T getValue() {
         return value;
     }
-
 
     /**
      * Encountered Java type [class org.activiti.cloud.services.query.model.VariableValue] for which we could not locate a JavaTypeDescriptor
@@ -40,30 +38,24 @@ public class VariableValue<T> {
      *
      */
     @Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		VariableValue<?> other = (VariableValue<?>) obj;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        VariableValue<?> other = (VariableValue<?>) obj;
+        if (value == null) {
+            if (other.value != null) return false;
+        } else if (!value.equals(other.value)) return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return "VariableValue [value=" + value + "]";
-	}
-
+    @Override
+    public String toString() {
+        return "VariableValue [value=" + value + "]";
+    }
 }

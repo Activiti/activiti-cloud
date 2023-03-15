@@ -44,6 +44,5 @@ public class ActivateProcessInstanceCmdExecutorTest {
         activateProcessInstanceCmdExecutor.execute(resumeProcessPayload);
 
         verify(processAdminRuntime).resume(resumeProcessPayload);
-
     }
 }

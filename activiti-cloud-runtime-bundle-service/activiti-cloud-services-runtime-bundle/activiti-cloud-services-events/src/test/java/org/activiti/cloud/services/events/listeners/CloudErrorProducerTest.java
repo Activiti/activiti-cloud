@@ -44,7 +44,6 @@ public class CloudErrorProducerTest {
 
     @Test
     public void shouldConvertErrorReceivedEventToCloudEventAndAddToAggregator() {
-
         BPMNErrorReceivedEvent eventFired = new BPMNErrorReceivedEventImpl(new BPMNErrorImpl());
         CloudBPMNErrorReceivedEvent cloudEventFired = new CloudBPMNErrorReceivedEventImpl();
 
@@ -54,5 +53,4 @@ public class CloudErrorProducerTest {
 
         verify(eventsAggregator).add(cloudEventFired);
     }
-
 }

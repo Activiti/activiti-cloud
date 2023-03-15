@@ -35,7 +35,6 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
 
     protected abstract AuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent);
 
-
     @Override
     public CloudRuntimeEvent convertToAPI(AuditEventEntity auditEventEntity) {
         CloudRuntimeEventImpl<?, ?> apiEvent = createAPIEvent(auditEventEntity);
@@ -50,6 +49,5 @@ public abstract class BaseEventToEntityConverter implements EventToEntityConvert
         return eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity);
     }
 
-    protected abstract CloudRuntimeEventImpl<?,?> createAPIEvent(AuditEventEntity auditEventEntity);
-
+    protected abstract CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity);
 }

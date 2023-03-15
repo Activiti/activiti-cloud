@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessUpdatedAuditEventEntity.PROCESS_UPDATED_EVENT)
 @DiscriminatorValue(value = ProcessUpdatedAuditEventEntity.PROCESS_UPDATED_EVENT)
@@ -28,8 +27,7 @@ public class ProcessUpdatedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_UPDATED_EVENT = "ProcessUpdatedEvent";
 
-    public ProcessUpdatedAuditEventEntity() {
-    }
+    public ProcessUpdatedAuditEventEntity() {}
 
     public ProcessUpdatedAuditEventEntity(CloudProcessUpdatedEvent cloudEvent) {
         super(cloudEvent);

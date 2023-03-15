@@ -29,19 +29,23 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 @Configuration
-@PropertySource("classpath:keycloak-configuration.properties" )
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
+@PropertySource("classpath:keycloak-configuration.properties")
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
 public class KeycloakSecurityConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "false", matchIfMissing = true)
-    public Function<Jwt, JwtAdapter>  jwtGlobalAdapter() {
+    public Function<Jwt, JwtAdapter> jwtGlobalAdapter() {
         return jwt -> new KeycloakJwtAdapter(jwt);
     }
 
     @Bean
     @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "true")
-    public Function<Jwt, JwtAdapter> jwtResourceResourceAdapter(@Value("${keycloak.resource}" ) String resource) {
+    public Function<Jwt, JwtAdapter> jwtResourceResourceAdapter(@Value("${keycloak.resource}") String resource) {
         return jwt -> new KeycloakResourceJwtAdapter(resource, jwt);
     }
 
@@ -50,5 +54,4 @@ public class KeycloakSecurityConfiguration {
     public JwtAccessTokenProvider jwtAccessTokenProvider(Function<Jwt, JwtAdapter> jwtAdapterSupplier) {
         return new JwtAccessTokenProvider(jwtAdapterSupplier);
     }
-
 }

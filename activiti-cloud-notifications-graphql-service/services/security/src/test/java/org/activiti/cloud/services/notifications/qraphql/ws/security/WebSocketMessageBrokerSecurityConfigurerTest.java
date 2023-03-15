@@ -32,9 +32,7 @@ public class WebSocketMessageBrokerSecurityConfigurerTest {
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class GraphQLSecurityWebSocketMessageBrokerConfigurationTestApplication {
-
-    }
+    static class GraphQLSecurityWebSocketMessageBrokerConfigurationTestApplication {}
 
     @Test
     public void testContextLoads() {
@@ -42,6 +40,4 @@ public class WebSocketMessageBrokerSecurityConfigurerTest {
         assertThat(configuration.getAuthorities()).containsExactly("ACTIVITI_USER", "ACTIVITI_ADMIN");
         assertThat(configuration.sameOriginDisabled()).isTrue();
     }
-
-
 }

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.connectors.starter.test.it;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,8 +24,6 @@ import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @Profile(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @Component

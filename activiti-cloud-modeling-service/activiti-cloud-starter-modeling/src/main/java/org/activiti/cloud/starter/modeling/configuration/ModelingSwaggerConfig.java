@@ -28,15 +28,18 @@ public class ModelingSwaggerConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder,
-                               @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath) {
+    public OpenAPI baseOpenApi(
+        BaseOpenApiBuilder baseOpenApiBuilder,
+        @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath
+    ) {
         return baseOpenApiBuilder.build("Modeling ReST API", swaggerBasePath);
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "modelingApi")
     public GroupedOpenApi modelingApi() {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Modeling")
             .packagesToScan("org.activiti.cloud.services.modeling.rest")
             .build();

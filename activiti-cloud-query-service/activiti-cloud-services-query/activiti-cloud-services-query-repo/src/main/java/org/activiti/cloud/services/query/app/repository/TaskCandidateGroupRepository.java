@@ -26,16 +26,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface TaskCandidateGroupRepository extends PagingAndSortingRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>,
-    QuerydslPredicateExecutor<TaskCandidateGroupEntity>,
-    QuerydslBinderCustomizer<QTaskCandidateGroupEntity> {
-
+public interface TaskCandidateGroupRepository
+    extends
+        PagingAndSortingRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>,
+        QuerydslPredicateExecutor<TaskCandidateGroupEntity>,
+        QuerydslBinderCustomizer<QTaskCandidateGroupEntity> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QTaskCandidateGroupEntity root) {
-
-        bindings.bind(String.class).first(
-            (StringPath path, String value) -> path.eq(value));
-
+    default void customize(QuerydslBindings bindings, QTaskCandidateGroupEntity root) {
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }

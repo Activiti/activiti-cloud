@@ -35,7 +35,7 @@ The configuration below contains a mixed case for properties to check if it does
         "authorizations.security-constraints[1].authRoles[0]=ACTIVITI_DEVOPS",
         "authorizations.security-constraints[1].securityCollections[0].patterns[0]=/v1/ghi/*",
     },
-    classes = {AuthorizationProperties.class}
+    classes = { AuthorizationProperties.class }
 )
 @EnableConfigurationProperties(value = AuthorizationProperties.class)
 class AuthorizationPropertiesTest {
@@ -50,15 +50,35 @@ class AuthorizationPropertiesTest {
         assertEquals("ACTIVITI_USER", authorizationProperties.getSecurityConstraints().get(0).getAuthRoles()[0]);
         assertEquals("ACTIVITI_ADMIN", authorizationProperties.getSecurityConstraints().get(0).getAuthRoles()[1]);
         assertEquals(2, authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections().length);
-        assertEquals(2, authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns().length);
-        assertEquals(1, authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[1].getPatterns().length);
-        assertEquals("/v1/*", authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns()[0]);
-        assertEquals("/v1/abc/*", authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns()[1]);
-        assertEquals("/v1/def/*", authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[1].getPatterns()[0]);
+        assertEquals(
+            2,
+            authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns().length
+        );
+        assertEquals(
+            1,
+            authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[1].getPatterns().length
+        );
+        assertEquals(
+            "/v1/*",
+            authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns()[0]
+        );
+        assertEquals(
+            "/v1/abc/*",
+            authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[0].getPatterns()[1]
+        );
+        assertEquals(
+            "/v1/def/*",
+            authorizationProperties.getSecurityConstraints().get(0).getSecurityCollections()[1].getPatterns()[0]
+        );
         assertEquals(1, authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections().length);
-        assertEquals(1, authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections()[0].getPatterns().length);
+        assertEquals(
+            1,
+            authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections()[0].getPatterns().length
+        );
         assertEquals("ACTIVITI_DEVOPS", authorizationProperties.getSecurityConstraints().get(1).getAuthRoles()[0]);
-        assertEquals("/v1/ghi/*", authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections()[0].getPatterns()[0]);
+        assertEquals(
+            "/v1/ghi/*",
+            authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections()[0].getPatterns()[0]
+        );
     }
-
 }

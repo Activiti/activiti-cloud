@@ -29,8 +29,8 @@ import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImp
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceTasksControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
-import org.activiti.cloud.services.rest.controllers.ServiceTaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleExceptionHandler;
+import org.activiti.cloud.services.rest.controllers.ServiceTaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskVariableAdminControllerImpl;
@@ -43,7 +43,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(ServicesRestWebMvcAutoConfiguration.class)
-@Import({HomeControllerImpl.class,
+@Import(
+    {
+        HomeControllerImpl.class,
         ConnectorDefinitionControllerImpl.class,
         ProcessDefinitionAdminControllerImpl.class,
         ProcessDefinitionControllerImpl.class,
@@ -62,7 +64,7 @@ import org.springframework.context.annotation.Import;
         CandidateUserAdminControllerImpl.class,
         CandidateGroupControllerImpl.class,
         CandidateGroupAdminControllerImpl.class,
-        ServiceTaskAdminControllerImpl.class})
-public class ServicesRestControllersAutoConfiguration {
-
-}
+        ServiceTaskAdminControllerImpl.class,
+    }
+)
+public class ServicesRestControllersAutoConfiguration {}

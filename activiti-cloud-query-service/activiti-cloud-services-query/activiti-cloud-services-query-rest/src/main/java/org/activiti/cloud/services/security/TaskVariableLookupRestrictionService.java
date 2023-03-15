@@ -28,8 +28,7 @@ public class TaskVariableLookupRestrictionService {
         this.taskLookupRestrictionService = taskLookupRestrictionService;
     }
 
-    public Predicate restrictTaskVariableQuery(Predicate predicate){
+    public Predicate restrictTaskVariableQuery(Predicate predicate) {
         return taskLookupRestrictionService.restrictTaskVariableQuery(predicate);
     }
-
 }

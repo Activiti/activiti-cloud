@@ -18,6 +18,4 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MessageClientStreamConfiguration implements MessageClientStream {
-
-}
+public class MessageClientStreamConfiguration implements MessageClientStream {}

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.common.util;
 
-
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 import java.io.IOException;
@@ -25,7 +24,6 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-
 /**
  * Utils for handling http request/response
  */
@@ -34,29 +32,26 @@ public final class HttpUtils {
     public static final String HEADER_ATTACHEMNT_FILENAME = "attachment;filename=";
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-    public static void writeFileToResponse(HttpServletResponse response,
-        FileContent fileContent,
-        boolean attachment) throws IOException {
+    public static void writeFileToResponse(HttpServletResponse response, FileContent fileContent, boolean attachment)
+        throws IOException {
         response.setContentType(fileContent.getContentType());
         if (attachment) {
-            response.setHeader(CONTENT_DISPOSITION,
-                HEADER_ATTACHEMNT_FILENAME + fileContent.getFilename());
+            response.setHeader(CONTENT_DISPOSITION, HEADER_ATTACHEMNT_FILENAME + fileContent.getFilename());
         }
-        writeChunked(fileContent.getFileContent(),
-            response.getOutputStream());
+        writeChunked(fileContent.getFileContent(), response.getOutputStream());
     }
 
     public static FileContent multipartToFileContent(MultipartFile file) throws IOException {
-        return new FileContent(file.getOriginalFilename(),
+        return new FileContent(
+            file.getOriginalFilename(),
             file.getContentType(),
-            StreamUtils.copyToByteArray(file.getInputStream()));
+            StreamUtils.copyToByteArray(file.getInputStream())
+        );
     }
 
-    private HttpUtils() {
-    }
+    private HttpUtils() {}
 
-    private static void writeChunked(final byte[] data, final OutputStream output)
-        throws IOException {
+    private static void writeChunked(final byte[] data, final OutputStream output) throws IOException {
         if (data != null) {
             int bytes = data.length;
             int offset = 0;
@@ -68,6 +63,4 @@ public final class HttpUtils {
             }
         }
     }
-
-
 }

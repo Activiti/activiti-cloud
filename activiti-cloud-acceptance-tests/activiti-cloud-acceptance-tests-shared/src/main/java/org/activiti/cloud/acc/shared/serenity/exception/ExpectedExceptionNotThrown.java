@@ -26,8 +26,7 @@ public class ExpectedExceptionNotThrown extends RuntimeException {
         this.expectedExeption = expectedExeption;
     }
 
-    public ExpectedExceptionNotThrown(String message,
-                                      ExpectedException expectedExeption) {
+    public ExpectedExceptionNotThrown(String message, ExpectedException expectedExeption) {
         super(message);
         this.expectedExeption = expectedExeption;
     }

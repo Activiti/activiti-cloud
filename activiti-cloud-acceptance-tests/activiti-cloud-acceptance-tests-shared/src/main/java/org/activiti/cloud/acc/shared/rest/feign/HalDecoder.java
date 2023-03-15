@@ -31,7 +31,12 @@ public class HalDecoder extends ResponseEntityDecoder {
     }
 
     public HalDecoder(ObjectMapper objectMapper) {
-        super(new JacksonDecoder(objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                                         .registerModule(new Jackson2HalModule())));
+        super(
+            new JacksonDecoder(
+                objectMapper
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .registerModule(new Jackson2HalModule())
+            )
+        );
     }
 }

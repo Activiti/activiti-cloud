@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.List;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.api.process.model.builders.StartProcessPayloadBuilder;
@@ -44,14 +45,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
-
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = ServicesAuditITConfiguration.class,
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class ErrorAuditProducerIT {
 
     private static final String ERROR_START_EVENT_SUBPROCESS = "errorStartEventSubProcess";
@@ -69,76 +70,78 @@ public class ErrorAuditProducerIT {
 
     @Test
     public void should_produceBpmnErrorEvents_when_processIsExecuted() {
-
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(new StartProcessPayloadBuilder()
-            .withProcessDefinitionKey(ERROR_START_EVENT_SUBPROCESS)
-            .withName("processInstanceName")
-            .withBusinessKey("businessKey")
-            .build());
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            new StartProcessPayloadBuilder()
+                .withProcessDefinitionKey(ERROR_START_EVENT_SUBPROCESS)
+                .withName("processInstanceName")
+                .withBusinessKey("businessKey")
+                .build()
+        );
 
         assertThat(startProcessEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         CloudProcessInstance processInstance = startProcessEntity.getBody();
 
-        await().untilAsserted(() -> {
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
-            assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
+        await()
+            .untilAsserted(() -> {
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(RUNTIME_BUNDLE_INFO_HEADERS);
+                assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-            assertThat(receivedEvents)
-                .filteredOn(event -> (event.getEventType().equals(ACTIVITY_STARTED) ||
-                    event.getEventType().equals(ACTIVITY_COMPLETED)))
-                .extracting(CloudRuntimeEvent::getEventType,
-                    event -> ((BPMNActivity) event.getEntity()).getActivityType(),
-                    event -> ((BPMNActivity) event.getEntity()).getElementId(),
-                    event -> ((BPMNActivity) event.getEntity()).getProcessInstanceId())
-                .contains(tuple(ACTIVITY_STARTED,
-                    "endEvent",
-                    "subEnd",
-                    processInstance.getId()),
-                    tuple(ACTIVITY_STARTED,
-                        "startEvent",
-                        "subStart1",
-                        processInstance.getId()),
-                    tuple(ACTIVITY_COMPLETED,
-                        "startEvent",
-                        "subStart1",
-                        processInstance.getId()));
-
-            assertThat(receivedEvents)
-                .filteredOn(CloudBPMNErrorReceivedEvent.class::isInstance)
-                .extracting(CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionKey,
-                    CloudRuntimeEvent::getProcessDefinitionVersion,
-                    CloudRuntimeEvent::getBusinessKey,
-                    event -> bpmnError(event).getElementId(),
-                    event -> bpmnError(event).getProcessDefinitionId(),
-                    event -> bpmnError(event).getProcessInstanceId(),
-                    event -> bpmnError(event).getErrorCode(),
-                    event -> bpmnError(event).getErrorId(),
-                    event -> bpmnError(event).getActivityType(),
-                    event -> bpmnError(event).getActivityName()
-                )
-                .containsExactly(
-                    tuple(ERROR_RECEIVED,
-                        processInstance.getProcessDefinitionId(),
-                        processInstance.getId(),
-                        processInstance.getProcessDefinitionKey(),
-                        processInstance.getProcessDefinitionVersion(),
-                        processInstance.getBusinessKey(),
-                        "subStart1",
-                        processInstance.getProcessDefinitionId(),
-                        processInstance.getId(),
-                        "123",
-                        "errorId",
-                        null,
-                        null
+                assertThat(receivedEvents)
+                    .filteredOn(event ->
+                        (
+                            event.getEventType().equals(ACTIVITY_STARTED) ||
+                            event.getEventType().equals(ACTIVITY_COMPLETED)
+                        )
                     )
-                );
-        });
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        event -> ((BPMNActivity) event.getEntity()).getActivityType(),
+                        event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                        event -> ((BPMNActivity) event.getEntity()).getProcessInstanceId()
+                    )
+                    .contains(
+                        tuple(ACTIVITY_STARTED, "endEvent", "subEnd", processInstance.getId()),
+                        tuple(ACTIVITY_STARTED, "startEvent", "subStart1", processInstance.getId()),
+                        tuple(ACTIVITY_COMPLETED, "startEvent", "subStart1", processInstance.getId())
+                    );
 
+                assertThat(receivedEvents)
+                    .filteredOn(CloudBPMNErrorReceivedEvent.class::isInstance)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getProcessDefinitionId,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionKey,
+                        CloudRuntimeEvent::getProcessDefinitionVersion,
+                        CloudRuntimeEvent::getBusinessKey,
+                        event -> bpmnError(event).getElementId(),
+                        event -> bpmnError(event).getProcessDefinitionId(),
+                        event -> bpmnError(event).getProcessInstanceId(),
+                        event -> bpmnError(event).getErrorCode(),
+                        event -> bpmnError(event).getErrorId(),
+                        event -> bpmnError(event).getActivityType(),
+                        event -> bpmnError(event).getActivityName()
+                    )
+                    .containsExactly(
+                        tuple(
+                            ERROR_RECEIVED,
+                            processInstance.getProcessDefinitionId(),
+                            processInstance.getId(),
+                            processInstance.getProcessDefinitionKey(),
+                            processInstance.getProcessDefinitionVersion(),
+                            processInstance.getBusinessKey(),
+                            "subStart1",
+                            processInstance.getProcessDefinitionId(),
+                            processInstance.getId(),
+                            "123",
+                            "errorId",
+                            null,
+                            null
+                        )
+                    );
+            });
     }
 
     private BPMNError bpmnError(CloudRuntimeEvent<?, ?> event) {

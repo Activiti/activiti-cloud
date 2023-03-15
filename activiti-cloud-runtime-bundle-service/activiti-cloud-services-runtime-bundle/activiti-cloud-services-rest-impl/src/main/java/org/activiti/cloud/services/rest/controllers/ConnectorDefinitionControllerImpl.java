@@ -30,17 +30,16 @@
 
 package org.activiti.cloud.services.rest.controllers;
 
+import java.util.List;
 import org.activiti.cloud.services.rest.api.ConnectorDefinitionController;
-import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
+import org.activiti.cloud.services.rest.assemblers.ConnectorDefinitionRepresentationModelAssembler;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.engine.ActivitiObjectNotFoundException;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionController {
@@ -52,10 +51,10 @@ public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionCon
     private final CollectionModelAssembler resourcesAssembler;
 
     public ConnectorDefinitionControllerImpl(
-            List<ConnectorDefinition> connectorDefinitions,
-            ConnectorDefinitionRepresentationModelAssembler connectorDefinitionRepresentationModelAssembler,
-            CollectionModelAssembler resourcesAssembler) {
-
+        List<ConnectorDefinition> connectorDefinitions,
+        ConnectorDefinitionRepresentationModelAssembler connectorDefinitionRepresentationModelAssembler,
+        CollectionModelAssembler resourcesAssembler
+    ) {
         this.connectorDefinitions = connectorDefinitions;
         this.connectorDefinitionRepresentationModelAssembler = connectorDefinitionRepresentationModelAssembler;
         this.resourcesAssembler = resourcesAssembler;
@@ -63,15 +62,20 @@ public class ConnectorDefinitionControllerImpl implements ConnectorDefinitionCon
 
     @Override
     public CollectionModel<EntityModel<ConnectorDefinition>> getConnectorDefinitions() {
-        return resourcesAssembler.toCollectionModel(connectorDefinitions,
-                connectorDefinitionRepresentationModelAssembler);
+        return resourcesAssembler.toCollectionModel(
+            connectorDefinitions,
+            connectorDefinitionRepresentationModelAssembler
+        );
     }
 
     @Override
     public EntityModel<ConnectorDefinition> getConnectorDefinition(@PathVariable String id) {
-        return connectorDefinitionRepresentationModelAssembler.toModel(connectorDefinitions.stream()
-                .filter(connectorDefinition ->
-                        connectorDefinition.getId().equals(id)).findAny().orElseThrow(() -> new ActivitiObjectNotFoundException(id + " not found")));
+        return connectorDefinitionRepresentationModelAssembler.toModel(
+            connectorDefinitions
+                .stream()
+                .filter(connectorDefinition -> connectorDefinition.getId().equals(id))
+                .findAny()
+                .orElseThrow(() -> new ActivitiObjectNotFoundException(id + " not found"))
+        );
     }
-
 }

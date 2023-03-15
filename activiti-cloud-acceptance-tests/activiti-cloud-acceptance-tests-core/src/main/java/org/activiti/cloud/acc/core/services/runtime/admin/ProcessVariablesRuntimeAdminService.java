@@ -24,15 +24,17 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.springframework.http.ResponseEntity;
 
 public interface ProcessVariablesRuntimeAdminService {
-
     @RequestLine("PUT /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<List<String>> updateVariables(@Param("id") String id,
-                                                 SetProcessVariablesPayload setProcessVariablesPayload);
+    ResponseEntity<List<String>> updateVariables(
+        @Param("id") String id,
+        SetProcessVariablesPayload setProcessVariablesPayload
+    );
 
     @RequestLine("DELETE /admin/v1/process-instances/{id}/variables")
     @Headers("Content-Type: application/json")
-    ResponseEntity<Void> removeVariables(@Param("id") String id,
-                                         RemoveProcessVariablesPayload removeProcessVariablesPayload);
-
+    ResponseEntity<Void> removeVariables(
+        @Param("id") String id,
+        RemoveProcessVariablesPayload removeProcessVariablesPayload
+    );
 }

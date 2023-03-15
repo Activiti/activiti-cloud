@@ -20,7 +20,8 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 
-public class CloudProcessCandidateStarterUserAddedEventImpl extends CloudRuntimeEventImpl<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>
+public class CloudProcessCandidateStarterUserAddedEventImpl
+    extends CloudRuntimeEventImpl<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>
     implements CloudProcessCandidateStarterUserAddedEvent {
 
     public CloudProcessCandidateStarterUserAddedEventImpl() {}
@@ -29,12 +30,12 @@ public class CloudProcessCandidateStarterUserAddedEventImpl extends CloudRuntime
         super(processCandidateStarterUser);
     }
 
-    public CloudProcessCandidateStarterUserAddedEventImpl(String id,
-                                                          Long timestamp,
-                                                          ProcessCandidateStarterUser processCandidateStarterUser) {
-        super(id,
-              timestamp,
-              processCandidateStarterUser);
+    public CloudProcessCandidateStarterUserAddedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessCandidateStarterUser processCandidateStarterUser
+    ) {
+        super(id, timestamp, processCandidateStarterUser);
         setEntityId(processCandidateStarterUser.getUserId());
     }
 

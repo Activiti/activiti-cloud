@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserAddedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserEntity;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterUserId;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
 
 public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventHandler {
 
@@ -36,16 +35,17 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCandidateStarterUserAddedEvent processCandidateStarterUserAddedEvent = (CloudProcessCandidateStarterUserAddedEvent) event;
         org.activiti.api.process.model.ProcessCandidateStarterUser processCandidateStarterUser = processCandidateStarterUserAddedEvent.getEntity();
-        ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(processCandidateStarterUser.getProcessDefinitionId(),
-                                                                                         processCandidateStarterUser.getUserId());
+        ProcessCandidateStarterUserEntity entity = new ProcessCandidateStarterUserEntity(
+            processCandidateStarterUser.getProcessDefinitionId(),
+            processCandidateStarterUser.getUserId()
+        );
 
         try {
             if (!candidateStarterEntityAlreadyExists(entity)) {
                 entityManager.persist(entity);
             }
         } catch (Exception cause) {
-            throw new QueryException("Error handling ProcessCandidateStarterUserAddedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling ProcessCandidateStarterUserAddedEvent[" + event + "]", cause);
         }
     }
 
@@ -55,8 +55,12 @@ public class ProcessCandidateStarterUserAddedEventHandler implements QueryEventH
     }
 
     private boolean candidateStarterEntityAlreadyExists(ProcessCandidateStarterUserEntity entity) {
-        return entityManager.find(ProcessCandidateStarterUserEntity.class,
-                                  new ProcessCandidateStarterUserId(entity.getProcessDefinitionId(), entity.getUserId())) != null;
-
+        return (
+            entityManager.find(
+                ProcessCandidateStarterUserEntity.class,
+                new ProcessCandidateStarterUserId(entity.getProcessDefinitionId(), entity.getUserId())
+            ) !=
+            null
+        );
     }
 }

@@ -23,7 +23,6 @@ import io.swagger.v3.core.converter.ModelConverter;
 import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,8 +57,9 @@ public abstract class InternalModelConverter<T> implements ModelConverter {
     protected abstract JavaType getContainedType(JavaType javaType);
 
     private ResolvedRecursiveType resolveType(JavaType javaType) {
-        return new ResolvedRecursiveType(getAlternateTypeClass(),
-            TypeBindings.create(getAlternateTypeClass(), List.of(getContainedType(javaType))));
+        return new ResolvedRecursiveType(
+            getAlternateTypeClass(),
+            TypeBindings.create(getAlternateTypeClass(), List.of(getContainedType(javaType)))
+        );
     }
-
 }

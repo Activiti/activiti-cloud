@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
@@ -39,20 +38,27 @@ public class ModelContentService {
 
     private final Map<String, List<ContentUpdateListener>> contentUpdateListenersMapByModelType;
 
-    public ModelContentService(Set<ModelContentValidator> modelValidators,
-                               Set<ModelContentConverter<? extends ModelContent>> modelConverters,
-                               Set<ContentUpdateListener> contentUpdateListeners) {
-        this.modelContentValidatorsMapByModelType = modelValidators
+    public ModelContentService(
+        Set<ModelContentValidator> modelValidators,
+        Set<ModelContentConverter<? extends ModelContent>> modelConverters,
+        Set<ContentUpdateListener> contentUpdateListeners
+    ) {
+        this.modelContentValidatorsMapByModelType =
+            modelValidators
                 .stream()
                 .collect(Collectors.groupingBy(validator -> validator.getHandledModelType().getName()));
 
-        this.modelContentConvertersMapByModelType = modelConverters
+        this.modelContentConvertersMapByModelType =
+            modelConverters
                 .stream()
-                .collect(Collectors.toMap(converter -> converter.getHandledModelType().getName(),
-                                          Function.identity()));
-        this.contentUpdateListenersMapByModelType = contentUpdateListeners
+                .collect(Collectors.toMap(converter -> converter.getHandledModelType().getName(), Function.identity()));
+        this.contentUpdateListenersMapByModelType =
+            contentUpdateListeners
                 .stream()
-                .collect(Collectors.groupingBy(contentUpdateListener -> contentUpdateListener.getHandledModelType().getName()));
+                .collect(
+                    Collectors.groupingBy(contentUpdateListener -> contentUpdateListener.getHandledModelType().getName()
+                    )
+                );
     }
 
     public List<ModelContentValidator> findModelValidators(String modelType) {
@@ -68,9 +74,6 @@ public class ModelContentService {
     }
 
     public String getModelContentId(Model model) {
-        return String.join("-",
-                           model.getType().toLowerCase(),
-                           model.getId());
+        return String.join("-", model.getType().toLowerCase(), model.getId());
     }
-
 }

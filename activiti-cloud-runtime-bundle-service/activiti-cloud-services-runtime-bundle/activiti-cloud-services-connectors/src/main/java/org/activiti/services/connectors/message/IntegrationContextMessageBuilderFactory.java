@@ -22,8 +22,7 @@ import org.activiti.cloud.services.events.message.MessageBuilderChainFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleInfoMessageBuilderAppender;
 import org.springframework.util.Assert;
 
-public class IntegrationContextMessageBuilderFactory
-        implements MessageBuilderChainFactory<IntegrationContext> {
+public class IntegrationContextMessageBuilderFactory implements MessageBuilderChainFactory<IntegrationContext> {
 
     private final RuntimeBundleProperties properties;
 
@@ -38,9 +37,8 @@ public class IntegrationContextMessageBuilderFactory
         Assert.notNull(integrationContext, "integrationContext must not be null");
 
         return new MessageBuilderAppenderChain()
-                .routingKeyResolver(new IntegrationContextRoutingKeyResolver())
-                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                .chain(new IntegrationContextMessageBuilderAppender(integrationContext));
+            .routingKeyResolver(new IntegrationContextRoutingKeyResolver())
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(new IntegrationContextMessageBuilderAppender(integrationContext));
     }
-
 }

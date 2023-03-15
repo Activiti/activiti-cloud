@@ -19,6 +19,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VALUE;
 import static org.activiti.cloud.modeling.api.process.VariableMappingType.VARIABLE;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -51,21 +52,22 @@ public class ProcessExtensions {
 
     public static Map<String, ProcessVariable> processVariables(Collection<String> processVariables) {
         return processVariables
-                .stream()
-                .collect(Collectors.toMap(Function.identity(),
-                                          ProcessExtensions::toProcessVariable));
+            .stream()
+            .collect(Collectors.toMap(Function.identity(), ProcessExtensions::toProcessVariable));
     }
 
     public static Map<String, TaskVariableMapping> variableMappings(Collection<String> processVariables) {
         TaskVariableMapping taskVariableMapping = new TaskVariableMapping();
-        taskVariableMapping.setInputs(processVariables
-            .stream()
-            .collect(toMap(Function.identity(),
-                ProcessExtensions::toFixedProcessVariableMapping)));
-        taskVariableMapping.setOutputs(processVariables
-            .stream()
-            .collect(toMap(Function.identity(),
-                ProcessExtensions::toVariableProcessVariableMapping)));
+        taskVariableMapping.setInputs(
+            processVariables
+                .stream()
+                .collect(toMap(Function.identity(), ProcessExtensions::toFixedProcessVariableMapping))
+        );
+        taskVariableMapping.setOutputs(
+            processVariables
+                .stream()
+                .collect(toMap(Function.identity(), ProcessExtensions::toVariableProcessVariableMapping))
+        );
 
         return singletonMap(EXTENSIONS_TASK_NAME, taskVariableMapping);
     }

@@ -37,12 +37,14 @@ class FileContentSanitizerTest {
 
     @Test
     void should_sanitizeSvgFileContent() throws IOException {
-        byte[] svg = FileUtils.resourceAsStream(SVG_FILE_LOCATION)
-                .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
-                .readAllBytes();
+        byte[] svg = FileUtils
+            .resourceAsStream(SVG_FILE_LOCATION)
+            .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
+            .readAllBytes();
 
         FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(
-                new FileContent("img.svg", ContentTypeUtils.CONTENT_TYPE_SVG, svg));
+            new FileContent("img.svg", ContentTypeUtils.CONTENT_TYPE_SVG, svg)
+        );
 
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("img.png");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_PNG);
@@ -51,12 +53,18 @@ class FileContentSanitizerTest {
 
     @Test
     void should_sanitizeSvgInJsonFileContent() throws IOException {
-        byte[] svg = FileUtils.resourceAsStream(SVG_FILE_LOCATION)
-                .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
-                .readAllBytes();
+        byte[] svg = FileUtils
+            .resourceAsStream(SVG_FILE_LOCATION)
+            .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
+            .readAllBytes();
         String svgImageInBase64 = "{\"image\": \"" + SVG_IMAGE_PREFIX + Base64.getEncoder().encodeToString(svg) + "\"}";
-        FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(new FileContent("img.json",
-                ContentTypeUtils.CONTENT_TYPE_JSON, svgImageInBase64.getBytes(StandardCharsets.UTF_8)));
+        FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(
+            new FileContent(
+                "img.json",
+                ContentTypeUtils.CONTENT_TYPE_JSON,
+                svgImageInBase64.getBytes(StandardCharsets.UTF_8)
+            )
+        );
 
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("img.json");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
@@ -65,15 +73,19 @@ class FileContentSanitizerTest {
 
     @Test
     void should_deserializeJsonWithoutChangingFormat() throws IOException {
-        byte[] json = FileUtils.resourceAsStream(JSON_FILE_LOCATION)
+        byte[] json = FileUtils
+            .resourceAsStream(JSON_FILE_LOCATION)
             .orElseThrow(() -> new IllegalArgumentException(SVG_FILE_LOCATION + " file not found"))
             .readAllBytes();
 
-        FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(new FileContent("basic-process.json",
-            ContentTypeUtils.CONTENT_TYPE_JSON, json));
+        FileContent sanitizedContent = fileContentSanitizer.sanitizeContent(
+            new FileContent("basic-process.json", ContentTypeUtils.CONTENT_TYPE_JSON, json)
+        );
 
         Assertions.assertThat(sanitizedContent.getFilename()).isEqualTo("basic-process.json");
         Assertions.assertThat(sanitizedContent.getContentType()).isEqualTo(ContentTypeUtils.CONTENT_TYPE_JSON);
-        Assertions.assertThat(sanitizedContent.toString().trim()).isEqualTo(new String(json, StandardCharsets.UTF_8).trim());
+        Assertions
+            .assertThat(sanitizedContent.toString().trim())
+            .isEqualTo(new String(json, StandardCharsets.UTF_8).trim());
     }
 }

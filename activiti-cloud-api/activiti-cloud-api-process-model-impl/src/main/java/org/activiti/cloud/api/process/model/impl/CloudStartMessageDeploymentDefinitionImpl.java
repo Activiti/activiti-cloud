@@ -16,14 +16,14 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import java.util.Objects;
-
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.StartMessageSubscription;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
 import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinition;
 
-public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntityImpl
-                                                       implements CloudStartMessageDeploymentDefinition {
+public class CloudStartMessageDeploymentDefinitionImpl
+    extends CloudRuntimeEntityImpl
+    implements CloudStartMessageDeploymentDefinition {
 
     private ProcessDefinition processDefinition;
 
@@ -40,7 +40,7 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
         super.setServiceVersion(builder.serviceVersion);
     }
 
-    CloudStartMessageDeploymentDefinitionImpl() { }
+    CloudStartMessageDeploymentDefinitionImpl() {}
 
     @Override
     public ProcessDefinition getProcessDefinition() {
@@ -51,6 +51,7 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
     public StartMessageSubscription getMessageSubscription() {
         return messageSubscription;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(messageSubscription, processDefinition);
@@ -68,18 +69,21 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
             return false;
         }
         CloudStartMessageDeploymentDefinitionImpl other = (CloudStartMessageDeploymentDefinitionImpl) obj;
-        return Objects.equals(messageSubscription, other.messageSubscription) &&
-               Objects.equals(processDefinition, other.processDefinition);
+        return (
+            Objects.equals(messageSubscription, other.messageSubscription) &&
+            Objects.equals(processDefinition, other.processDefinition)
+        );
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudStartMessageDeploymentDefinitionImpl [processDefinition=")
-               .append(processDefinition)
-               .append(", messageSubscription=")
-               .append(messageSubscription)
-               .append("]");
+        builder
+            .append("CloudStartMessageDeploymentDefinitionImpl [processDefinition=")
+            .append(processDefinition)
+            .append(", messageSubscription=")
+            .append(messageSubscription)
+            .append("]");
         return builder.toString();
     }
 
@@ -101,96 +105,94 @@ public class CloudStartMessageDeploymentDefinitionImpl extends CloudRuntimeEntit
         private String serviceType;
         private String serviceVersion;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         /**
-        * Builder method for processDefinition parameter.
-        * @param processDefinition field to set
-        * @return builder
-        */
+         * Builder method for processDefinition parameter.
+         * @param processDefinition field to set
+         * @return builder
+         */
         public Builder withProcessDefinition(ProcessDefinition processDefinition) {
             this.processDefinition = processDefinition;
             return this;
         }
 
         /**
-        * Builder method for messageEventSubscription parameter.
-        * @param messageSubscription field to set
-        * @return builder
-        */
+         * Builder method for messageEventSubscription parameter.
+         * @param messageSubscription field to set
+         * @return builder
+         */
         public Builder withMessageSubscription(StartMessageSubscription messageSubscription) {
             this.messageSubscription = messageSubscription;
             return this;
         }
 
         /**
-        * Builder method for appName parameter.
-        * @param appName field to set
-        * @return builder
-        */
+         * Builder method for appName parameter.
+         * @param appName field to set
+         * @return builder
+         */
         public Builder withAppName(String appName) {
             this.appName = appName;
             return this;
         }
 
         /**
-        * Builder method for appVersion parameter.
-        * @param appVersion field to set
-        * @return builder
-        */
+         * Builder method for appVersion parameter.
+         * @param appVersion field to set
+         * @return builder
+         */
         public Builder withAppVersion(String appVersion) {
             this.appVersion = appVersion;
             return this;
         }
 
         /**
-        * Builder method for serviceName parameter.
-        * @param serviceName field to set
-        * @return builder
-        */
+         * Builder method for serviceName parameter.
+         * @param serviceName field to set
+         * @return builder
+         */
         public Builder withServiceName(String serviceName) {
             this.serviceName = serviceName;
             return this;
         }
 
         /**
-        * Builder method for serviceFullName parameter.
-        * @param serviceFullName field to set
-        * @return builder
-        */
+         * Builder method for serviceFullName parameter.
+         * @param serviceFullName field to set
+         * @return builder
+         */
         public Builder withServiceFullName(String serviceFullName) {
             this.serviceFullName = serviceFullName;
             return this;
         }
 
         /**
-        * Builder method for serviceType parameter.
-        * @param serviceType field to set
-        * @return builder
-        */
+         * Builder method for serviceType parameter.
+         * @param serviceType field to set
+         * @return builder
+         */
         public Builder withServiceType(String serviceType) {
             this.serviceType = serviceType;
             return this;
         }
 
         /**
-        * Builder method for serviceVersion parameter.
-        * @param serviceVersion field to set
-        * @return builder
-        */
+         * Builder method for serviceVersion parameter.
+         * @param serviceVersion field to set
+         * @return builder
+         */
         public Builder withServiceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
             return this;
         }
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         * @return built class
+         */
         public CloudStartMessageDeploymentDefinitionImpl build() {
             return new CloudStartMessageDeploymentDefinitionImpl(this);
         }
     }
-
 }

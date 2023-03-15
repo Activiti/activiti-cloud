@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
 @DiscriminatorValue(value = VariableDeletedEventEntity.VARIABLE_DELETED_EVENT)
@@ -28,8 +27,7 @@ public class VariableDeletedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_DELETED_EVENT = "VariableDeletedEvent";
 
-    public VariableDeletedEventEntity() {
-    }
+    public VariableDeletedEventEntity() {}
 
     public VariableDeletedEventEntity(CloudVariableDeletedEvent cloudEvent) {
         super(cloudEvent);

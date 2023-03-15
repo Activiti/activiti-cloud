@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.api.process.model.impl.events;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudProcessStartedEventImplTest {
 
@@ -30,7 +30,6 @@ public class CloudProcessStartedEventImplTest {
         processInstance.setProcessDefinitionId("defId");
         processInstance.setBusinessKey("business");
 
-
         //when
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl(processInstance);
 
@@ -40,5 +39,4 @@ public class CloudProcessStartedEventImplTest {
         assertThat(processStartedEvent.getProcessDefinitionId()).isEqualTo("defId");
         assertThat(processStartedEvent.getBusinessKey()).isEqualTo("business");
     }
-
 }

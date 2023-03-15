@@ -19,7 +19,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 public interface IdentityTokenProducer {
-
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     String getTokenString();

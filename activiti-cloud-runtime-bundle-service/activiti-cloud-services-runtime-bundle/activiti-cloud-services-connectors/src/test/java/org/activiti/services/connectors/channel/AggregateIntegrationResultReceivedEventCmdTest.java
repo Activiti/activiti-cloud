@@ -64,7 +64,6 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         verify(processEngineEventsAggregator).add(messageCaptor.capture());
         CloudIntegrationResultReceivedEventImpl event = messageCaptor.getValue();
         assertThat(event.getEntity()).isEqualTo(integrationContext);
-
     }
 
     @Test
@@ -78,5 +77,4 @@ public class AggregateIntegrationResultReceivedEventCmdTest {
         //then
         verifyNoInteractions(processEngineEventsAggregator);
     }
-
 }

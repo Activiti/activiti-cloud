@@ -19,6 +19,4 @@ import org.activiti.cloud.connectors.starter.channels.ProcessRuntimeChannels;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {
-
-}
+public class ProcessRuntimeChannelsConfiguration implements ProcessRuntimeChannels {}

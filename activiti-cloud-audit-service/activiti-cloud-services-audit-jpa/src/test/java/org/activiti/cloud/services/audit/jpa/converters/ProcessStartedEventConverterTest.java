@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
@@ -27,10 +31,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessStartedEventConverterTest {
@@ -66,9 +66,11 @@ public class ProcessStartedEventConverterTest {
     }
 
     private CloudProcessStartedEventImpl buildProcessStartedEvent() {
-        CloudProcessStartedEventImpl cloudAuditEventEntity = new CloudProcessStartedEventImpl("ProcessStartedEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              new ProcessInstanceImpl());
+        CloudProcessStartedEventImpl cloudAuditEventEntity = new CloudProcessStartedEventImpl(
+            "ProcessStartedEventId",
+            System.currentTimeMillis(),
+            new ProcessInstanceImpl()
+        );
         cloudAuditEventEntity.setAppName("app");
         cloudAuditEventEntity.setAppVersion("v2");
         cloudAuditEventEntity.setServiceName("service");
@@ -104,10 +106,8 @@ public class ProcessStartedEventConverterTest {
         //when
         ProcessStartedEventConverter converter = new ProcessStartedEventConverter(new EventContextInfoAppender());
 
-        CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl)converter.convertToAPI(auditEventEntity);
-        assertThat(apiEvent)
-                .isNotNull()
-                .isInstanceOf(CloudProcessStartedEvent.class);
+        CloudProcessStartedEventImpl apiEvent = (CloudProcessStartedEventImpl) converter.convertToAPI(auditEventEntity);
+        assertThat(apiEvent).isNotNull().isInstanceOf(CloudProcessStartedEvent.class);
         assertThat(apiEvent.getId()).isEqualTo(auditEventEntity.getEventId());
         assertThat(apiEvent.getTimestamp()).isEqualTo(auditEventEntity.getTimestamp());
         assertThat(apiEvent.getEntity()).isEqualTo(auditEventEntity.getProcessInstance());
@@ -129,8 +129,8 @@ public class ProcessStartedEventConverterTest {
         doReturn(apiEvent).when(eventConverter).createAPIEvent(auditEventEntity);
 
         CloudProcessStartedEventImpl updatedApiEvent = new CloudProcessStartedEventImpl();
-        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity)).willReturn(updatedApiEvent);
-
+        given(eventContextInfoAppender.addProcessContextInfoToApiEvent(apiEvent, auditEventEntity))
+            .willReturn(updatedApiEvent);
 
         //when
         CloudRuntimeEvent convertedEvent = eventConverter.convertToAPI(auditEventEntity);

@@ -54,102 +54,103 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ProcessCompletedEventHandlerTest {
 
-  @InjectMocks
-  private ProcessCompletedEventHandler handler;
+    @InjectMocks
+    private ProcessCompletedEventHandler handler;
 
-  @Mock
-  private TaskCancelledEventHandler taskCancelledEventHandler;
+    @Mock
+    private TaskCancelledEventHandler taskCancelledEventHandler;
 
-  @Mock
-  private EntityManager entityManager;
+    @Mock
+    private EntityManager entityManager;
 
-  @Captor
-  private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cancelledEventArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cancelledEventArgumentCaptor;
 
-  @Test
-  void handleShouldUpdateCurrentProcessInstanceStateToCompleted() {
-    //given
-    CloudProcessCompletedEvent event = createProcessCompletedEvent();
+    @Test
+    void handleShouldUpdateCurrentProcessInstanceStateToCompleted() {
+        //given
+        CloudProcessCompletedEvent event = createProcessCompletedEvent();
 
-    ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-    given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(
-        currentProcessInstanceEntity);
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId()))
+            .willReturn(currentProcessInstanceEntity);
 
-    //when
-    handler.handle(event);
+        //when
+        handler.handle(event);
 
-    //then
-    verify(entityManager).persist(currentProcessInstanceEntity);
-    verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
-    verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
-  }
+        //then
+        verify(entityManager).persist(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
+    }
 
-  private CloudProcessCompletedEvent createProcessCompletedEvent() {
-    ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-    processInstance.setId(UUID.randomUUID().toString());
-    return new CloudProcessCompletedEventImpl(processInstance);
-  }
+    private CloudProcessCompletedEvent createProcessCompletedEvent() {
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId(UUID.randomUUID().toString());
+        return new CloudProcessCompletedEventImpl(processInstance);
+    }
 
-  @Test
-  void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
-    //given
-    CloudProcessCompletedEvent event = createProcessCompletedEvent();
-    given(entityManager.find(ProcessInstanceEntity.class, event.getProcessInstanceId())).willReturn(null);
+    @Test
+    void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
+        //given
+        CloudProcessCompletedEvent event = createProcessCompletedEvent();
+        given(entityManager.find(ProcessInstanceEntity.class, event.getProcessInstanceId())).willReturn(null);
 
-    //then
-    //when
-    assertThatExceptionOfType(QueryException.class)
-        .isThrownBy(() -> handler.handle(event))
-        .withMessageContaining("Unable to find process instance with the given id: ");
-  }
+        //then
+        //when
+        assertThatExceptionOfType(QueryException.class)
+            .isThrownBy(() -> handler.handle(event))
+            .withMessageContaining("Unable to find process instance with the given id: ");
+    }
 
-  @Test
-  void getHandledEventShouldReturnProcessCompletedEvent() {
-    //when
-    String handledEvent = handler.getHandledEvent();
+    @Test
+    void getHandledEventShouldReturnProcessCompletedEvent() {
+        //when
+        String handledEvent = handler.getHandledEvent();
 
-    //then
-    assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
-  }
+        //then
+        assertThat(handledEvent).isEqualTo(ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED.name());
+    }
 
-  @Test
-  void handleShouldUpdateAssignedAndCreatedChildTasksAsCancelled() {
-    //given
-    ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-    processInstance.setId(UUID.randomUUID().toString());
-    CloudProcessCompletedEvent event = new CloudProcessCompletedEventImpl(processInstance);
+    @Test
+    void handleShouldUpdateAssignedAndCreatedChildTasksAsCancelled() {
+        //given
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId(UUID.randomUUID().toString());
+        CloudProcessCompletedEvent event = new CloudProcessCompletedEventImpl(processInstance);
 
-    ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
-    TaskEntity createdTask = getTaskMock(TaskStatus.CREATED);
-    TaskEntity assignedTask = getTaskMock(TaskStatus.ASSIGNED);
-    TaskEntity suspendedTask = getTaskMock(TaskStatus.SUSPENDED);
-    when(currentProcessInstanceEntity.getTasks()).thenReturn(Set.of(createdTask, assignedTask, suspendedTask));
-    given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId())).willReturn(
-        currentProcessInstanceEntity);
+        ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
+        TaskEntity createdTask = getTaskMock(TaskStatus.CREATED);
+        TaskEntity assignedTask = getTaskMock(TaskStatus.ASSIGNED);
+        TaskEntity suspendedTask = getTaskMock(TaskStatus.SUSPENDED);
+        when(currentProcessInstanceEntity.getTasks()).thenReturn(Set.of(createdTask, assignedTask, suspendedTask));
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId()))
+            .willReturn(currentProcessInstanceEntity);
 
-    //when
-    handler.handle(event);
+        //when
+        handler.handle(event);
 
-    //then
-    verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
-    verify(entityManager).persist(currentProcessInstanceEntity);
-    verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
+        //then
+        verify(currentProcessInstanceEntity).setLastModified(any(Date.class));
+        verify(entityManager).persist(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity).setStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED);
 
-    verify(taskCancelledEventHandler, times(2)).handle(cancelledEventArgumentCaptor.capture());
+        verify(taskCancelledEventHandler, times(2)).handle(cancelledEventArgumentCaptor.capture());
 
-    List<String> cancelledEntityIDs = cancelledEventArgumentCaptor.getAllValues()
-        .stream()
-        .map(CloudRuntimeEvent::getEntityId)
-        .collect(Collectors.toList());
+        List<String> cancelledEntityIDs = cancelledEventArgumentCaptor
+            .getAllValues()
+            .stream()
+            .map(CloudRuntimeEvent::getEntityId)
+            .collect(Collectors.toList());
 
-    assertThat(cancelledEntityIDs).containsExactlyInAnyOrder(createdTask.getId(), assignedTask.getId());
-  }
+        assertThat(cancelledEntityIDs).containsExactlyInAnyOrder(createdTask.getId(), assignedTask.getId());
+    }
 
-  @NotNull
-  private static TaskEntity getTaskMock(TaskStatus status) {
-    TaskEntity mockTask = mock(TaskEntity.class);
-    when(mockTask.getStatus()).thenReturn(status);
-    lenient().when(mockTask.getId()).thenReturn(RandomStringUtils.random(1));
-    return mockTask;
-  }
+    @NotNull
+    private static TaskEntity getTaskMock(TaskStatus status) {
+        TaskEntity mockTask = mock(TaskEntity.class);
+        when(mockTask.getStatus()).thenReturn(status);
+        lenient().when(mockTask.getId()).thenReturn(RandomStringUtils.random(1));
+        return mockTask;
+    }
 }

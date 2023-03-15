@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import java.util.Date;
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -29,13 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCreatedEventHandlerTest {
@@ -58,24 +57,19 @@ public class TaskEntityCreatedEventHandlerTest {
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
         when(processInstanceEntity.getProcessDefinitionName()).thenReturn("processDefinitionName");
 
-        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                     "task",
-                                     Task.TaskStatus.CREATED);
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(), "task", Task.TaskStatus.CREATED);
         task.setCreatedDate(new Date());
         task.setProcessInstanceId(UUID.randomUUID().toString());
         task.setProcessDefinitionId("processDefinitionId");
         task.setTaskDefinitionKey("taskDefinitionKey");
 
-        CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(
-                task
-        );
+        CloudTaskCreatedEventImpl event = new CloudTaskCreatedEventImpl(task);
         event.setServiceName("runtime-bundle-a");
         event.setProcessDefinitionVersion(10);
         event.setBusinessKey("businessKey");
 
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        task.getProcessInstanceId()))
-                          .thenReturn(processInstanceEntity);
+        when(entityManager.getReference(ProcessInstanceEntity.class, task.getProcessInstanceId()))
+            .thenReturn(processInstanceEntity);
 
         //when
         handler.handle(event);
@@ -93,7 +87,6 @@ public class TaskEntityCreatedEventHandlerTest {
         assertThat(captor.getValue().getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(captor.getValue().getTaskDefinitionKey()).isEqualTo(task.getTaskDefinitionKey());
         assertThat(captor.getValue().getProcessDefinitionName()).isEqualTo("processDefinitionName");
-
     }
 
     @Test

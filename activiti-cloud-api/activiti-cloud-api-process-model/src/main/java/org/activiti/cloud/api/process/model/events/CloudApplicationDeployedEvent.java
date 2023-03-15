@@ -16,10 +16,9 @@
 package org.activiti.cloud.api.process.model.events;
 
 import org.activiti.api.process.model.Deployment;
+import org.activiti.api.process.model.events.ApplicationDeployedEvent;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.api.process.model.events.ApplicationDeployedEvent;
 
-public interface CloudApplicationDeployedEvent extends CloudRuntimeEvent<Deployment, ApplicationEvent.ApplicationEvents>, ApplicationDeployedEvent {
-
-}
+public interface CloudApplicationDeployedEvent
+    extends CloudRuntimeEvent<Deployment, ApplicationEvent.ApplicationEvents>, ApplicationDeployedEvent {}

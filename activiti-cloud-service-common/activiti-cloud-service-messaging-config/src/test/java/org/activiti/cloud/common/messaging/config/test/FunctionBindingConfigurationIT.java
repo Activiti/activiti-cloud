@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
+import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
+import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
+import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
+
 import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,31 +50,20 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.activiti.cloud.common.messaging.config.AbstractFunctionalBindingConfiguration.getInBinding;
-import static org.activiti.cloud.common.messaging.config.InputBindingConfiguration.INPUT_BINDING;
-import static org.activiti.cloud.common.messaging.config.OutputBindingConfiguration.OUTPUT_BINDING;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_CONSUMER;
-import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.QUERY_CONSUMER;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
-
-@SpringBootTest(properties = {
-    "activiti.cloud.application.name=foo",
-    "spring.application.name=bar",
-
-    "activiti.cloud.messaging.destination-transformers-enabled=false",
-
-    "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
-    "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
-
-    "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
-    "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
-    "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
-
-    "spring.cloud.stream.bindings.commandResults.destination=commandResults"
-})
-@Import({TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class})
+@SpringBootTest(
+    properties = {
+        "activiti.cloud.application.name=foo",
+        "spring.application.name=bar",
+        "activiti.cloud.messaging.destination-transformers-enabled=false",
+        "spring.cloud.stream.bindings.commandConsumer.destination=commandConsumer",
+        "spring.cloud.stream.bindings.commandConsumer.group=${spring.application.name}",
+        "spring.cloud.stream.bindings.auditProducer.destination=engineEvents",
+        "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
+        "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+    }
+)
+@Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
 public class FunctionBindingConfigurationIT {
 
     private static final String FUNCTION_HANDLER_NAME = "queryConsumerHandler";
@@ -121,12 +119,14 @@ public class FunctionBindingConfigurationIT {
         public Function<Message<?>, Message<?>> commandProcessorHandler(TestBindingsChannels channels) {
             return message -> {
                 assertThat(message).isNotNull();
-                Message outMessage = MessageBuilder.withPayload(message.getPayload()).setHeader("type", "Test Send").build();
+                Message outMessage = MessageBuilder
+                    .withPayload(message.getPayload())
+                    .setHeader("type", "Test Send")
+                    .build();
                 channels.auditProducer().send(outMessage);
                 return MessageBuilder.withPayload(message.getPayload()).setHeader("type", "Test Reply").build();
             };
         }
-
     }
 
     @BeforeEach
@@ -137,17 +137,23 @@ public class FunctionBindingConfigurationIT {
 
     @Test
     public void testFunctionDefinitions() {
-
         // given
-        String functionDefinitions = (String) functionBindingPropertySource
-            .getProperty(FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION);
+        String functionDefinitions = (String) functionBindingPropertySource.getProperty(
+            FunctionBindingPropertySource.SPRING_CLOUD_FUNCTION_DEFINITION
+        );
 
         assertThat(functionDefinitions).isNotNull();
 
         String[] functions = functionDefinitions.split(";");
 
         // then
-        assertThat(functions).doesNotContain(FUNCTION_AUDIT_SUPPLIER_NAME, FUNCTION_COMMAND_SUPPLIER_NAME, FUNCTION_HANDLER_NAME, FUNCTION_PROCESSOR_NAME);
+        assertThat(functions)
+            .doesNotContain(
+                FUNCTION_AUDIT_SUPPLIER_NAME,
+                FUNCTION_COMMAND_SUPPLIER_NAME,
+                FUNCTION_HANDLER_NAME,
+                FUNCTION_PROCESSOR_NAME
+            );
     }
 
     @Test
@@ -168,16 +174,21 @@ public class FunctionBindingConfigurationIT {
     void testInputBindingsDefinitions() {
         Assertions.assertThat(context.getBean(COMMAND_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_COMMAND_CONSUMER_NAME);
-        Assertions.assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME))).isEqualTo(COMMAND_CONSUMER);
+        Assertions
+            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_COMMAND_CONSUMER_NAME)))
+            .isEqualTo(COMMAND_CONSUMER);
 
         Assertions.assertThat(context.getBean(AUDIT_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_AUDIT_CONSUMER_NAME);
-        Assertions.assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME))).isEqualTo(AUDIT_CONSUMER);
+        Assertions
+            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_AUDIT_CONSUMER_NAME)))
+            .isEqualTo(AUDIT_CONSUMER);
 
         Assertions.assertThat(context.getBean(QUERY_CONSUMER, MessageChannel.class)).isNotNull();
         Assertions.assertThat(bindingServiceProperties.getInputBindings()).contains(FUNCTION_QUERY_CONSUMER_NAME);
-        Assertions.assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME))).isEqualTo(QUERY_CONSUMER);
-
+        Assertions
+            .assertThat(streamFunctionProperties.getBindings().get(getInBinding(FUNCTION_QUERY_CONSUMER_NAME)))
+            .isEqualTo(QUERY_CONSUMER);
     }
 
     @Test
@@ -233,13 +244,18 @@ public class FunctionBindingConfigurationIT {
         channels.commandConsumer().send(message);
 
         // then
-        Awaitility.await().untilAsserted(() -> {
-            Message<?> outputMessage = output.receive(10000, bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS));
-            assertThat(outputMessage).isNotNull();
-            assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
+        Awaitility
+            .await()
+            .untilAsserted(() -> {
+                Message<?> outputMessage = output.receive(
+                    10000,
+                    bindingResolver.apply(TestBindingsChannels.COMMAND_RESULTS)
+                );
+                assertThat(outputMessage).isNotNull();
+                assertThat(outputMessage.getHeaders().get("type", String.class)).isEqualTo("Test Reply");
 
-            assertThat(consumerMessage).isNotNull();
-            assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
-        });
+                assertThat(consumerMessage).isNotNull();
+                assertThat(consumerMessage.getHeaders().get("type", String.class)).isEqualTo("Test Send");
+            });
     }
 }

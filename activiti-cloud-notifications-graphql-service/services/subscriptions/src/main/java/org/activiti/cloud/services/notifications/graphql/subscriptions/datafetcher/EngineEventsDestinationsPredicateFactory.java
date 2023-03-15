@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
+import graphql.schema.DataFetchingEnvironment;
 import java.util.List;
 import java.util.function.Predicate;
-
-import graphql.schema.DataFetchingEnvironment;
 import org.activiti.cloud.services.notifications.graphql.events.RoutingKeyResolver;
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 import org.slf4j.Logger;
@@ -45,17 +44,18 @@ public class EngineEventsDestinationsPredicateFactory implements EngineEventsPre
 
         logger.info("Resolved destinations {} for environment: {}", destinations, environment);
 
-        return (engineEvent) -> {
+        return engineEvent -> {
             String routingKey = routingKeyResolver.resolveRoutingKey(engineEvent);
 
             logger.debug("Resolved routing key {} for {}", routingKey, engineEvent);
 
-            return destinations.stream()
-                               .anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
+            return destinations.stream().anyMatch(pattern -> pathMatcher.match(pattern, routingKey));
         };
     }
 
-    public EngineEventsDestinationsPredicateFactory destinationResolver(DataFetcherDestinationResolver destinationResolver) {
+    public EngineEventsDestinationsPredicateFactory destinationResolver(
+        DataFetcherDestinationResolver destinationResolver
+    ) {
         this.destinationResolver = destinationResolver;
 
         return this;

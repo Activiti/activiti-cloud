@@ -39,9 +39,11 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
     private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
     private String usernameClaim = "preferred_username";
 
-    public JwtUserInfoUriAuthenticationConverter(Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
-                                                 ClientRegistration clientRegistration,
-                                                 OAuth2UserServiceCacheable oAuth2UserServiceCacheable) {
+    public JwtUserInfoUriAuthenticationConverter(
+        Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
+        ClientRegistration clientRegistration,
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
+    ) {
         this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
         this.clientRegistration = clientRegistration;
         this.oAuth2UserServiceCacheable = oAuth2UserServiceCacheable;
@@ -60,10 +62,15 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
 
     public String getPrincipalClaimName(Jwt jwt) {
         String username = jwt.getClaimAsString(usernameClaim);
-        if(username == null) {
+        if (username == null) {
             Instant issuedAt = jwt.getIssuedAt();
             Instant expiresAt = jwt.getExpiresAt();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
+            OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                TokenType.BEARER,
+                jwt.getTokenValue(),
+                issuedAt,
+                expiresAt
+            );
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
             OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, getCacheKey(jwt));
             username = oAuth2User.getName();
@@ -76,5 +83,4 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
             ? jwt.getClaimAsString(SESSION_ID_CLAIM)
             : jwt.getClaimAsString(SUBJECT_CLAIM);
     }
-
 }

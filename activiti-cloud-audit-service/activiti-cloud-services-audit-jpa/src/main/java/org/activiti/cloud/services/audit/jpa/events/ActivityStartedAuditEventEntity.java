@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNActivityStartedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ActivityStartedAuditEventEntity.ACTIVITY_STARTED_EVENT)
 @DiscriminatorValue(value = ActivityStartedAuditEventEntity.ACTIVITY_STARTED_EVENT)
@@ -28,8 +27,7 @@ public class ActivityStartedAuditEventEntity extends BPMNActivityAuditEventEntit
 
     protected static final String ACTIVITY_STARTED_EVENT = "ActivityStartedEvent";
 
-    public ActivityStartedAuditEventEntity() {
-    }
+    public ActivityStartedAuditEventEntity() {}
 
     public ActivityStartedAuditEventEntity(CloudBPMNActivityStartedEvent cloudEvent) {
         super(cloudEvent);

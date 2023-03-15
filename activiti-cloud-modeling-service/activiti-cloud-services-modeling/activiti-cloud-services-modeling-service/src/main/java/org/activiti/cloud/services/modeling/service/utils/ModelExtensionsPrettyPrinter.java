@@ -27,8 +27,7 @@ public class ModelExtensionsPrettyPrinter extends DefaultPrettyPrinter {
 
     @Override
     public ModelExtensionsPrettyPrinter createInstance() {
-        return new ModelExtensionsPrettyPrinter()
-            .withEmptyObjectSeparator(useEmptyObjectSeparator);
+        return new ModelExtensionsPrettyPrinter().withEmptyObjectSeparator(useEmptyObjectSeparator);
     }
 
     public ModelExtensionsPrettyPrinter withEmptyObjectSeparator(boolean useEmptyObjectSeparator) {
@@ -44,15 +43,14 @@ public class ModelExtensionsPrettyPrinter extends DefaultPrettyPrinter {
     }
 
     @Override
-    public void writeEndObject(JsonGenerator g, int nrOfEntries) throws IOException
-    {
+    public void writeEndObject(JsonGenerator g, int nrOfEntries) throws IOException {
         if (!_objectIndenter.isInline()) {
             --_nesting;
         }
         if (nrOfEntries > 0) {
             _objectIndenter.writeIndentation(g, _nesting);
         } else {
-            if(useEmptyObjectSeparator) {
+            if (useEmptyObjectSeparator) {
                 g.writeRaw(' ');
             }
         }

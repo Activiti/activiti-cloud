@@ -18,13 +18,12 @@ package org.activiti.cloud.alfresco.converter.json;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.activiti.cloud.alfresco.rest.model.ListResponseContent;
 import org.activiti.cloud.alfresco.rest.model.PaginationMetadata;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 public class PagedModelConverter {
 
@@ -34,27 +33,30 @@ public class PagedModelConverter {
         this.pageMetadataConverter = pageMetadataConverter;
     }
 
-    public <T> ListResponseContent<T> pagedCollectionModelToListResponseContent(PagedModel<EntityModel<T>> pagedCollectionModel) {
+    public <T> ListResponseContent<T> pagedCollectionModelToListResponseContent(
+        PagedModel<EntityModel<T>> pagedCollectionModel
+    ) {
         List<EntryResponseContent<T>> baseContent = getAlfrescoContentEntries(pagedCollectionModel);
 
-        PaginationMetadata pagination = pageMetadataConverter.toAlfrescoPageMetadata(pagedCollectionModel.getMetadata(),
-                                                                                     baseContent.size());
+        PaginationMetadata pagination = pageMetadataConverter.toAlfrescoPageMetadata(
+            pagedCollectionModel.getMetadata(),
+            baseContent.size()
+        );
 
-        return ListResponseContent.wrap(baseContent,
-                                        pagination);
+        return ListResponseContent.wrap(baseContent, pagination);
     }
 
     public <T> ListResponseContent<T> resourcesToListResponseContent(CollectionModel<EntityModel<T>> resources) {
-
-        return ListResponseContent.wrap(getAlfrescoContentEntries(resources),
-                                        null);
+        return ListResponseContent.wrap(getAlfrescoContentEntries(resources), null);
     }
 
-    private <T> List<EntryResponseContent<T>> getAlfrescoContentEntries(CollectionModel<EntityModel<T>> pagedCollectionModel) {
+    private <T> List<EntryResponseContent<T>> getAlfrescoContentEntries(
+        CollectionModel<EntityModel<T>> pagedCollectionModel
+    ) {
         Collection<EntityModel<T>> pagedResourceContent = pagedCollectionModel.getContent();
-        return pagedResourceContent.stream()
-                .map(
-                        resource -> new EntryResponseContent<>(resource.getContent())
-                ).collect(Collectors.toList());
+        return pagedResourceContent
+            .stream()
+            .map(resource -> new EntryResponseContent<>(resource.getContent()))
+            .collect(Collectors.toList());
     }
 }

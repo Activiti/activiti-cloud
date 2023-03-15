@@ -16,12 +16,12 @@
 
 package org.activiti.cloud.modeling.converter;
 
-import java.io.IOException;
-import java.util.Base64;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
+import java.io.IOException;
+import java.util.Base64;
 import org.activiti.cloud.services.common.util.ImageProcessingException;
 import org.activiti.cloud.services.common.util.ImageUtils;
 import org.slf4j.Logger;
@@ -41,8 +41,7 @@ public class StringSanitizingDeserializer extends StringDeserializer {
 
     @Override
     public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        if (p.hasToken(JsonToken.VALUE_STRING) &&
-                p.getText().trim().toLowerCase().startsWith(SVG_IMAGE_PREFIX)) {
+        if (p.hasToken(JsonToken.VALUE_STRING) && p.getText().trim().toLowerCase().startsWith(SVG_IMAGE_PREFIX)) {
             final String deserializedString = convertSvgToPng(p.getText());
             if (deserializedString != null) {
                 return deserializedString;

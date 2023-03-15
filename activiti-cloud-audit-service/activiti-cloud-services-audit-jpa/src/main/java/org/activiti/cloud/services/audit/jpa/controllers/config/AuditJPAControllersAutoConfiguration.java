@@ -22,11 +22,5 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({
-    AuditEventsAdminControllerImpl.class,
-    AuditEventsControllerImpl.class,
-    AuditEventsDeleteController.class
-})
-public class AuditJPAControllersAutoConfiguration {
-
-}
+@Import({ AuditEventsAdminControllerImpl.class, AuditEventsControllerImpl.class, AuditEventsDeleteController.class })
+public class AuditJPAControllersAutoConfiguration {}

@@ -18,30 +18,23 @@ package org.activiti.cloud.api.task.model.impl.events;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 
-public class CloudTaskCancelledEventImpl extends CloudTaskEventImpl
-        implements CloudTaskCancelledEvent {
+public class CloudTaskCancelledEventImpl extends CloudTaskEventImpl implements CloudTaskCancelledEvent {
 
     private String cause;
 
-    public CloudTaskCancelledEventImpl() {
-    }
+    public CloudTaskCancelledEventImpl() {}
 
     public CloudTaskCancelledEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskCancelledEventImpl(Task task,
-                                       String cause) {
+    public CloudTaskCancelledEventImpl(Task task, String cause) {
         super(task);
         this.cause = cause;
     }
 
-    public CloudTaskCancelledEventImpl(String id,
-                                       Long timestamp,
-                                       Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskCancelledEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override

@@ -25,7 +25,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
 public class KeycloakRolesClaimProvider implements RolesClaimProvider {
 
     @Override
@@ -49,5 +53,4 @@ public class KeycloakRolesClaimProvider implements RolesClaimProvider {
         realmAccess.put("roles", globalRolesArray);
         claims.put("realm_access", realmAccess);
     }
-
 }

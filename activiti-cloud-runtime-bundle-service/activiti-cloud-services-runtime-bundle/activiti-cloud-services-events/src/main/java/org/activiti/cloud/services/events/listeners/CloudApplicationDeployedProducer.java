@@ -29,9 +29,11 @@ public class CloudApplicationDeployedProducer {
     private ProcessEngineChannels producer;
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
 
-    public CloudApplicationDeployedProducer(RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-                                            ProcessEngineChannels producer,
-                                            RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory) {
+    public CloudApplicationDeployedProducer(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ProcessEngineChannels producer,
+        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.producer = producer;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
@@ -39,21 +41,28 @@ public class CloudApplicationDeployedProducer {
 
     @EventListener
     public void sendApplicationDeployedEvents(ApplicationDeployedEvents applicationDeployedEvents) {
-        producer.auditProducer().send(
-                runtimeBundleMessageBuilderFactory.create()
-                        .withPayload(
-                                applicationDeployedEvents.getApplicationDeployedEvents()
-                                        .stream()
-                                        .map(applicationDeployedEvent -> {
-                                            CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
-                                                    applicationDeployedEvent.getId(),
-                                                    applicationDeployedEvent.getTimestamp(),
-                                                    applicationDeployedEvent.getEntity(),
-                                                    applicationDeployedEvent.getEventType());
-                                            runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudApplicationDeployedEvent);
-                                            return cloudApplicationDeployedEvent;
-                                        })
-                                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
-                        .build());
+        producer
+            .auditProducer()
+            .send(
+                runtimeBundleMessageBuilderFactory
+                    .create()
+                    .withPayload(
+                        applicationDeployedEvents
+                            .getApplicationDeployedEvents()
+                            .stream()
+                            .map(applicationDeployedEvent -> {
+                                CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
+                                    applicationDeployedEvent.getId(),
+                                    applicationDeployedEvent.getTimestamp(),
+                                    applicationDeployedEvent.getEntity(),
+                                    applicationDeployedEvent.getEventType()
+                                );
+                                runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudApplicationDeployedEvent);
+                                return cloudApplicationDeployedEvent;
+                            })
+                            .toArray(CloudRuntimeEvent<?, ?>[]::new)
+                    )
+                    .build()
+            );
     }
 }

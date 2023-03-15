@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-
 import org.activiti.cloud.services.modeling.validation.JsonSchemaFlattener;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,49 +31,45 @@ public class JsonSchemaFlattenerTest {
 
     @Test
     public void should_flattenProcessExtensionSchema() throws IOException {
-        JSONObject schema =  getSchemaFromResource("/schema/process-extensions-schema.json");
+        JSONObject schema = getSchemaFromResource("/schema/process-extensions-schema.json");
         assertThat(schema).isNotNull();
 
         JSONObject flattenSchema = flattener.flatten(schema);
         assertThat(flattenSchema).isNotNull();
 
-        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        JSONObject definitions = (JSONObject) flattenSchema.get("definitions");
         assertThat(definitions).isNotNull();
     }
 
     @Test
     public void should_flattenSchemaShouldAddDefiniitons_when_noDefinitionsPresent() throws IOException {
-
-        JSONObject schema =  getTestJSONObjectWithoutDefinitions("classpath://schema/model-extensions-schema.json");
+        JSONObject schema = getTestJSONObjectWithoutDefinitions("classpath://schema/model-extensions-schema.json");
         assertThat(schema).isNotNull();
 
         JSONObject flattenSchema = flattener.flatten(schema);
         assertThat(flattenSchema).isNotNull();
 
-        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        JSONObject definitions = (JSONObject) flattenSchema.get("definitions");
         assertThat(definitions).isNotNull();
     }
 
     @Test
     public void should_flattenSchemaShouldAddSection_when_definitionsArePresent() throws IOException {
-
-        JSONObject schema =  getTestJSONObjectWithDefinitions("classpath://schema/model-extensions-schema.json");
+        JSONObject schema = getTestJSONObjectWithDefinitions("classpath://schema/model-extensions-schema.json");
         assertThat(schema).isNotNull();
 
-        String sectionName =  flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
+        String sectionName = flattener.getSectionNameFromFileName("schema/model-extensions-schema.json");
 
         JSONObject flattenSchema = flattener.flatten(schema);
         assertThat(flattenSchema).isNotNull();
 
-        JSONObject definitions = (JSONObject)flattenSchema.get("definitions");
+        JSONObject definitions = (JSONObject) flattenSchema.get("definitions");
         assertThat(definitions).isNotNull();
         assertThat(definitions.has(sectionName)).isTrue();
     }
 
     private JSONObject getSchemaFromResource(String schemaFileName) throws IOException {
-
-        return new JSONObject(new JSONTokener(new ClassPathResource(schemaFileName)
-            .getInputStream()));
+        return new JSONObject(new JSONTokener(new ClassPathResource(schemaFileName).getInputStream()));
     }
 
     private JSONObject getTestJSONObjectWithoutDefinitions(String classPath) {
@@ -116,5 +111,4 @@ public class JsonSchemaFlattenerTest {
 
         return object;
     }
-
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.messages.core.aggregator;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.aopalliance.aop.Advice;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.expression.Expression;
@@ -32,13 +31,13 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.TaskScheduler;
 
-
 /**
  * {@link org.springframework.beans.factory.FactoryBean} to create an
  * {@link MessageConnectorAggregator}.
  *
  */
-public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator> {
+public class MessageConnectorAggregatorFactoryBean
+    extends AbstractSimpleMessageHandlerFactoryBean<MessageConnectorAggregator> {
 
     private MessageGroupProcessor processorBean;
 
@@ -80,7 +79,6 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
 
     public MessageConnectorAggregatorFactoryBean() {
         super();
-
         // defaults
         this.popSequence(false)
             .completeGroupsWhenEmpty(true)
@@ -303,5 +301,4 @@ public class MessageConnectorAggregatorFactoryBean extends AbstractSimpleMessage
     protected Class<? extends MessageHandler> getPreCreationHandlerType() {
         return MessageConnectorAggregator.class;
     }
-
 }

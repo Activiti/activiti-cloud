@@ -15,7 +15,9 @@
  */
 package org.activiti.cloud.starter.messages.hazelcast;
 
-
+import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.spring.transaction.HazelcastTransactionManager;
 import org.activiti.cloud.services.messages.core.config.MessagesCoreAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,12 +33,8 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.spring.transaction.HazelcastTransactionManager;
-
 @Configuration
-@AutoConfigureBefore({MessagesCoreAutoConfiguration.class})
+@AutoConfigureBefore({ MessagesCoreAutoConfiguration.class })
 @ConditionalOnClass(HazelcastInstance.class)
 public class HazelcastMessageStoreAutoConfiguration {
 
@@ -45,8 +43,7 @@ public class HazelcastMessageStoreAutoConfiguration {
     public Config hazelcastConfig() {
         Config config = new Config();
 
-        config.getCPSubsystemConfig()
-              .setCPMemberCount(3);
+        config.getCPSubsystemConfig().setCPMemberCount(3);
 
         return config;
     }

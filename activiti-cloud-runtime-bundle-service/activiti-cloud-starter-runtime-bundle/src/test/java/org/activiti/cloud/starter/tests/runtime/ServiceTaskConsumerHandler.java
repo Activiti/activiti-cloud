@@ -71,7 +71,7 @@ public class ServiceTaskConsumerHandler {
 
     @FunctionBinding(input = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
     @Bean
-    public Consumer<Message<IntegrationRequest>> receiveRequestConnector(){
+    public Consumer<Message<IntegrationRequest>> receiveRequestConnector() {
         return message -> {
             assertIntegrationContextHeaders(message.getPayload(), message.getHeaders());
 
@@ -84,15 +84,25 @@ public class ServiceTaskConsumerHandler {
             String variableToUpdate = "age";
 
             HashMap<String, Object> resultVariables = new HashMap<>();
-            resultVariables.put(variableToUpdate,
-                ((Integer) requestVariables.get(variableToUpdate)) + 1);
+            resultVariables.put(variableToUpdate, ((Integer) requestVariables.get(variableToUpdate)) + 1);
             //invert value of boolean
             resultVariables.put("boolVar", !(Boolean) requestVariables.get("boolVar"));
 
-            resultVariables.put("customPojoTypeInConnector", "Type of customPojo var in connector is " + customPojo.getClass());
-            resultVariables.put("customPojoField1InConnector", "Value of field1 on customPojo is " + objectMapper.convertValue(customPojo, CustomPojo.class).getField1());
+            resultVariables.put(
+                "customPojoTypeInConnector",
+                "Type of customPojo var in connector is " + customPojo.getClass()
+            );
+            resultVariables.put(
+                "customPojoField1InConnector",
+                "Value of field1 on customPojo is " +
+                objectMapper.convertValue(customPojo, CustomPojo.class).getField1()
+            );
             //even the annotated pojo in connector won't be deserialized as the relevant type unless we tell objectMapper to do so
-            resultVariables.put("customPojoAnnotatedTypeInConnector", "Type of customPojoAnnotated var in connector is " + requestVariables.get("customPojoAnnotated").getClass());
+            resultVariables.put(
+                "customPojoAnnotatedTypeInConnector",
+                "Type of customPojoAnnotated var in connector is " +
+                requestVariables.get("customPojoAnnotated").getClass()
+            );
 
             integrationContext.addOutBoundVariables(resultVariables);
 
@@ -118,34 +128,29 @@ public class ServiceTaskConsumerHandler {
             Integer offSet = (Integer) inBoundVariables.get(variableThree);
 
             assertThat(inBoundVariables.entrySet())
-                .extracting(Map.Entry::getKey,
-                    Map.Entry::getValue)
+                .extracting(Map.Entry::getKey, Map.Entry::getValue)
                 .containsOnly(
-                    tuple(variableOne,
-                        "inName"),
-                    tuple(variableTwo,
-                        20),
-                    tuple(variableThree,
-                        5),
-                    tuple(constant,
-                        "myConstantValue"));
+                    tuple(variableOne, "inName"),
+                    tuple(variableTwo, 20),
+                    tuple(variableThree, 5),
+                    tuple(constant, "myConstantValue")
+                );
 
-            integrationContext.addOutBoundVariable("out_variable_name_1",
-                "outName");
-            integrationContext.addOutBoundVariable("out_variable_name_2",
-                currentAge + offSet);
-            integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name",
-                "outTest");
-            integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name",
-                "outTest");
+            integrationContext.addOutBoundVariable("out_variable_name_1", "outName");
+            integrationContext.addOutBoundVariable("out_variable_name_2", currentAge + offSet);
+            integrationContext.addOutBoundVariable("out_unmapped_variable_matching_name", "outTest");
+            integrationContext.addOutBoundVariable("out_unmapped_variable_non_matching_name", "outTest");
 
             try {
-                JsonNode value = new ObjectMapper().readTree("{\n"
-                    + "  \"city\": {\n"
-                    + "    \"name\": \"London\",\n"
-                    + "    \"place\": \"Tower of London\"\n"
-                    + "  }\n"
-                    + "}");
+                JsonNode value = new ObjectMapper()
+                    .readTree(
+                        "{\n" +
+                        "  \"city\": {\n" +
+                        "    \"name\": \"London\",\n" +
+                        "    \"place\": \"Tower of London\"\n" +
+                        "  }\n" +
+                        "}"
+                    );
 
                 integrationContext.addOutBoundVariable("sightSeeing", value);
                 integrationContext.addOutBoundVariable("visitors", Arrays.asList("Peter", "Paul", "Jack"));
@@ -154,7 +159,6 @@ public class ServiceTaskConsumerHandler {
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException(e);
             }
-
         };
     }
 
@@ -169,14 +173,8 @@ public class ServiceTaskConsumerHandler {
             Object constantValue = inBoundVariables.get("_constant_value_");
 
             assertThat(inBoundVariables.entrySet())
-                .extracting(Map.Entry::getKey,
-                    Map.Entry::getValue)
-                .containsOnly(tuple("name",
-                        "inName"),
-                    tuple("age",
-                        20),
-                    tuple("_constant_value_",
-                        "myConstantValue"));
+                .extracting(Map.Entry::getKey, Map.Entry::getValue)
+                .containsOnly(tuple("name", "inName"), tuple("age", 20), tuple("_constant_value_", "myConstantValue"));
 
             integrationContext.addOutBoundVariable("name", "outName");
             integrationContext.addOutBoundVariable("age", 25);
@@ -186,7 +184,10 @@ public class ServiceTaskConsumerHandler {
         };
     }
 
-    @ConditionalFunctionBinding(input = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER, condition = "headers['processDefinitionVersion']!=null")
+    @ConditionalFunctionBinding(
+        input = ConnectorIntegrationChannels.REST_CONNECTOR_CONSUMER,
+        condition = "headers['processDefinitionVersion']!=null"
+    )
     @Bean
     public Consumer<Message<IntegrationRequest>> receiveRestConnector() {
         return message -> {
@@ -203,7 +204,8 @@ public class ServiceTaskConsumerHandler {
         IntegrationContext integrationContext = integrationRequest.getIntegrationContext();
 
         // Mandatory headers assertions
-        Assertions.assertThat(headers)
+        Assertions
+            .assertThat(headers)
             .containsKey(ROUTING_KEY)
             .containsKey(MESSAGE_PAYLOAD_TYPE)
             .containsEntry(PROCESS_DEFINITION_VERSION, integrationContext.getProcessDefinitionVersion())
@@ -221,13 +223,13 @@ public class ServiceTaskConsumerHandler {
 
         // conditional on existing businessKey in integration context
         if (integrationContext.getBusinessKey() != null) {
-            Assertions.assertThat(headers)
-                .containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
+            Assertions.assertThat(headers).containsEntry(BUSINESS_KEY, integrationContext.getBusinessKey());
         }
 
         // conditional on existing parentProcessInstanceId in integration context
         if (integrationContext.getParentProcessInstanceId() != null) {
-            Assertions.assertThat(headers)
+            Assertions
+                .assertThat(headers)
                 .containsEntry(PARENT_PROCESS_INSTANCE_ID, integrationContext.getParentProcessInstanceId());
         }
     }

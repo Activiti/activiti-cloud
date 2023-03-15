@@ -19,7 +19,4 @@ import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {
-
-
-}
+public class QueryConsumerChannelsConfiguration implements QueryConsumerChannels {}

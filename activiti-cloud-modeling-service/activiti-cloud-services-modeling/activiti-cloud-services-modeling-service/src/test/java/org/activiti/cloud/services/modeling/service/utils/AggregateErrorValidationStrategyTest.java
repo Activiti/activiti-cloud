@@ -79,16 +79,26 @@ public class AggregateErrorValidationStrategyTest {
             .validateModelContent(any(), any());
 
         // when
-        SemanticModelValidationException exception = assertThrows(SemanticModelValidationException.class,
-            () -> validationStrategy.validate(
-                List.of(modelContentValidator, otherModelContentValidator),
-                validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
-            ));
+        SemanticModelValidationException exception = assertThrows(
+            SemanticModelValidationException.class,
+            () ->
+                validationStrategy.validate(
+                    List.of(modelContentValidator, otherModelContentValidator),
+                    validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
+                )
+        );
 
         // then
         assertThat(exception).hasMessage("Semantic model validation errors encountered: 3 schema violations found");
-        assertThat(exception.getValidationErrors()).isNotNull().hasSize(3).containsExactly(Stream.concat(validatorErrors.stream(),
-                otherValidatorErrors.stream()).collect(Collectors.toList()).toArray(ModelValidationError[]::new));
+        assertThat(exception.getValidationErrors())
+            .isNotNull()
+            .hasSize(3)
+            .containsExactly(
+                Stream
+                    .concat(validatorErrors.stream(), otherValidatorErrors.stream())
+                    .collect(Collectors.toList())
+                    .toArray(ModelValidationError[]::new)
+            );
     }
 
     @Test
@@ -107,9 +117,13 @@ public class AggregateErrorValidationStrategyTest {
             .validateModelContent(any(), any());
 
         // then
-        assertThrows(SyntacticModelValidationException.class, () -> validationStrategy.validate(
-            List.of(modelContentValidator, otherModelContentValidator),
-            validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
-        ));
+        assertThrows(
+            SyntacticModelValidationException.class,
+            () ->
+                validationStrategy.validate(
+                    List.of(modelContentValidator, otherModelContentValidator),
+                    validator -> validator.validateModelContent(model.getContent(), ValidationContext.EMPTY_CONTEXT)
+                )
+        );
     }
 }

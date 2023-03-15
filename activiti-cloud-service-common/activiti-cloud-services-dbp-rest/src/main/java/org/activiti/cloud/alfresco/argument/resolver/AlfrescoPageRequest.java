@@ -28,7 +28,6 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
 
     public AlfrescoPageRequest(long skipCount, int maxItems, Pageable pageable) {
         super(0, maxItems);
-
         this.skipCount = skipCount;
         this.pageable = pageable;
     }
@@ -85,12 +84,12 @@ public class AlfrescoPageRequest extends AbstractPageRequest implements Pageable
     @Override
     public Pageable withPage(int pageNumber) {
         if (pageNumber < 0) {
-            throw new IllegalArgumentException(format("Invalid request of a pageNumber %d. "
-                + "pageNumber must be a non negative number", pageNumber));
+            throw new IllegalArgumentException(
+                format("Invalid request of a pageNumber %d. " + "pageNumber must be a non negative number", pageNumber)
+            );
         }
 
-        return new AlfrescoPageRequest(
-            (long) pageNumber * getPageSize(), getPageSize(), getPageable());
+        return new AlfrescoPageRequest((long) pageNumber * getPageSize(), getPageSize(), getPageable());
     }
 
     @Override

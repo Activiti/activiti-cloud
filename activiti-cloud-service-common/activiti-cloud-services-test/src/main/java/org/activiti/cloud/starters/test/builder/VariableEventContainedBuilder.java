@@ -35,16 +35,16 @@ public class VariableEventContainedBuilder {
         this.eventsAggregator = eventsAggregator;
     }
 
-    public <T> VariableEventContainedBuilder aCreatedVariable(String name,
-                                                              T value,
-                                                              String type) {
+    public <T> VariableEventContainedBuilder aCreatedVariable(String name, T value, String type) {
         return aCreatedVariableWithProcessDefinitionKey(name, value, type, null);
     }
 
-    public <T> VariableEventContainedBuilder aCreatedVariableWithProcessDefinitionKey(String name,
-                                                                                      T value,
-                                                                                      String type,
-                                                                                      String processDefinitionKey) {
+    public <T> VariableEventContainedBuilder aCreatedVariableWithProcessDefinitionKey(
+        String name,
+        T value,
+        String type,
+        String processDefinitionKey
+    ) {
         variableInstance = buildVariable(name, type, value);
         CloudVariableCreatedEventImpl cloudVariableCreatedEvent = new CloudVariableCreatedEventImpl(variableInstance);
         cloudVariableCreatedEvent.setProcessDefinitionKey(processDefinitionKey);
@@ -64,19 +64,19 @@ public class VariableEventContainedBuilder {
     public <T> VariableEventContainedBuilder anUpdatedVariable(String name, T value, T beforeUpdateValue, String type) {
         beforeUpdateVariableInstance = buildVariable(name, type, beforeUpdateValue);
         variableInstance = buildVariable(name, type, value);
-        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(beforeUpdateVariableInstance),
-                                   new CloudVariableUpdatedEventImpl<>(variableInstance, beforeUpdateValue));
+        eventsAggregator.addEvents(
+            new CloudVariableCreatedEventImpl(beforeUpdateVariableInstance),
+            new CloudVariableUpdatedEventImpl<>(variableInstance, beforeUpdateValue)
+        );
         return this;
     }
 
-    public <T> VariableEventContainedBuilder aDeletedVariable(String name,
-                                                              T value,
-                                                              String type) {
-        variableInstance = buildVariable(name,
-                                         type,
-                                         value);
-        eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(variableInstance),
-                                   new CloudVariableDeletedEventImpl(variableInstance));
+    public <T> VariableEventContainedBuilder aDeletedVariable(String name, T value, String type) {
+        variableInstance = buildVariable(name, type, value);
+        eventsAggregator.addEvents(
+            new CloudVariableCreatedEventImpl(variableInstance),
+            new CloudVariableDeletedEventImpl(variableInstance)
+        );
         return this;
     }
 
@@ -85,30 +85,24 @@ public class VariableEventContainedBuilder {
     }
 
     public VariableInstance onProcessInstance(ProcessInstance processInstance) {
-
-        setProcessInstanceInfo(variableInstance,
-                               processInstance);
-        setProcessInstanceInfo(beforeUpdateVariableInstance,
-                               processInstance);
+        setProcessInstanceInfo(variableInstance, processInstance);
+        setProcessInstanceInfo(beforeUpdateVariableInstance, processInstance);
         return variableInstance;
     }
 
-    private void setProcessInstanceInfo(VariableInstanceImpl<?> variableInstance,
-                                        ProcessInstance processInstance) {
+    private void setProcessInstanceInfo(VariableInstanceImpl<?> variableInstance, ProcessInstance processInstance) {
         if (variableInstance != null) {
             variableInstance.setProcessInstanceId(processInstance.getId());
         }
     }
 
     public VariableInstance onTask(Task task) {
-        setTaskInfo(variableInstance,
-                    task);
+        setTaskInfo(variableInstance, task);
         setTaskInfo(beforeUpdateVariableInstance, task);
         return variableInstance;
     }
 
-    private void setTaskInfo(VariableInstanceImpl<?> variableInstance,
-                             Task task) {
+    private void setTaskInfo(VariableInstanceImpl<?> variableInstance, Task task) {
         if (variableInstance != null) {
             variableInstance.setProcessInstanceId(task.getProcessInstanceId());
             variableInstance.setTaskId(task.getId());

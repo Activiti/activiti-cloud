@@ -24,8 +24,10 @@ public class CloudTaskCreatedProducer implements TaskEventListener<TaskCreatedEv
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskCreatedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                    ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskCreatedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }
@@ -34,5 +36,4 @@ public class CloudTaskCreatedProducer implements TaskEventListener<TaskCreatedEv
     public void onEvent(TaskCreatedEvent event) {
         eventsAggregator.add(converter.from(event));
     }
-
 }

@@ -21,7 +21,6 @@ import static org.activiti.cloud.services.messages.core.support.Predicates.START
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.services.messages.core.support.MessageComparators;
 import org.activiti.cloud.services.messages.core.transformer.StartMessagePayloadTransformer;
@@ -40,35 +39,29 @@ public class StartMessagePayloadGroupProcessor extends AbstractMessageGroupProce
 
     @Override
     protected Collection<Message<?>> process(MessageGroup group) {
-        Collection<Message<?>> result =group.getMessages()
-                                            .stream()
-                                            .filter(MESSAGE_SENT)
-                                            .collect(Collectors.toList());
+        Collection<Message<?>> result = group.getMessages().stream().filter(MESSAGE_SENT).collect(Collectors.toList());
 
-        messageGroupStore.removeMessagesFromGroup(group.getGroupId(),
-                                                  result);
-        return result.stream()
-                     .sorted(MessageComparators.TIMESTAMP)
-                     .map(this::buildOutputMessage)
-                     .collect(Collectors.toList());
-
+        messageGroupStore.removeMessagesFromGroup(group.getGroupId(), result);
+        return result
+            .stream()
+            .sorted(MessageComparators.TIMESTAMP)
+            .map(this::buildOutputMessage)
+            .collect(Collectors.toList());
     }
 
     protected Message<?> buildOutputMessage(Message<?> message) {
         StartMessagePayload startPayload = StartMessagePayloadTransformer.from(message);
 
-        return MessageBuilder.withPayload(startPayload)
-                             .setHeader(MESSAGE_PAYLOAD_TYPE,
-                                        StartMessagePayload.class.getSimpleName())
-                             .build();
+        return MessageBuilder
+            .withPayload(startPayload)
+            .setHeader(MESSAGE_PAYLOAD_TYPE, StartMessagePayload.class.getSimpleName())
+            .build();
     }
 
     @Override
     protected boolean canProcess(MessageGroup group) {
         Collection<Message<?>> messages = group.getMessages();
 
-        return messages.stream().anyMatch(START_MESSAGE_DEPLOYED)
-                && messages.stream().anyMatch(MESSAGE_SENT);
+        return messages.stream().anyMatch(START_MESSAGE_DEPLOYED) && messages.stream().anyMatch(MESSAGE_SENT);
     }
-
 }

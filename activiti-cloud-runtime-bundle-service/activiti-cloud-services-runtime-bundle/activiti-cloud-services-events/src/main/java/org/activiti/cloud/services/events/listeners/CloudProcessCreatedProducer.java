@@ -24,8 +24,10 @@ public class CloudProcessCreatedProducer implements ProcessEventListener<Process
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudProcessCreatedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                       ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudProcessCreatedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

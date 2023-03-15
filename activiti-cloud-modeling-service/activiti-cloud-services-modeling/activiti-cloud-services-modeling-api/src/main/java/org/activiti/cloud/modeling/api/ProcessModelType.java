@@ -30,7 +30,7 @@ public class ProcessModelType implements ModelType {
 
     public static final String BPMN = "bpmn";
 
-    public static final String[] ALLOWED_FILE_EXTENSIONS = new String[]{BPMN20_XML, BPMN_XML, BPMN};
+    public static final String[] ALLOWED_FILE_EXTENSIONS = new String[] { BPMN20_XML, BPMN_XML, BPMN };
 
     @Override
     public String getName() {

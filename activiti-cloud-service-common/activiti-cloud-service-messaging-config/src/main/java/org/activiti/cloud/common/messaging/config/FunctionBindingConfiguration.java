@@ -46,20 +46,20 @@ import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
-                   before = FunctionConfiguration.class)
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean
-    public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties){
-       return destination ->  Optional
-            .ofNullable(bindingServiceProperties.getBindingDestination(destination))
-            .orElse(destination);
+    public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties) {
+        return destination ->
+            Optional.ofNullable(bindingServiceProperties.getBindingDestination(destination)).orElse(destination);
     }
 
     @Bean
-    public FunctionBindingPropertySource functionDefinitionPropertySource(ConfigurableApplicationContext applicationContext) {
+    public FunctionBindingPropertySource functionDefinitionPropertySource(
+        ConfigurableApplicationContext applicationContext
+    ) {
         return new FunctionBindingPropertySource(applicationContext.getEnvironment());
     }
 
@@ -71,87 +71,97 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     @Bean("resolveExpression")
     public Function<String, String> resolveExpression(ConfigurableApplicationContext applicationContext) {
         return value -> {
-            BeanExpressionResolver resolver = applicationContext.getBeanFactory()
-                                                                .getBeanExpressionResolver();
-            BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(),
-                                                                                null);
+            BeanExpressionResolver resolver = applicationContext.getBeanFactory().getBeanExpressionResolver();
+            BeanExpressionContext expressionContext = new BeanExpressionContext(
+                applicationContext.getBeanFactory(),
+                null
+            );
 
-            String resolvedValue = applicationContext.getBeanFactory()
-                                                     .resolveEmbeddedValue(value);
+            String resolvedValue = applicationContext.getBeanFactory().resolveEmbeddedValue(value);
             if (resolvedValue.startsWith("#{") && value.endsWith("}")) {
-                resolvedValue = (String) resolver.evaluate(resolvedValue,
-                                                           expressionContext);
+                resolvedValue = (String) resolver.evaluate(resolvedValue, expressionContext);
             }
             return resolvedValue;
         };
     }
 
     @Bean(name = "functionBindingBeanPostProcessor")
-    public BeanPostProcessor functionBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
-                                                              IntegrationFlowContext integrationFlowContext,
-                                                              Function<String, String> resolveExpression) {
+    public BeanPostProcessor functionBindingBeanPostProcessor(
+        FunctionAnnotationService functionAnnotationService,
+        IntegrationFlowContext integrationFlowContext,
+        Function<String, String> resolveExpression
+    ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                if (Supplier.class.isInstance(bean) ||
+                if (
+                    Supplier.class.isInstance(bean) ||
                     Function.class.isInstance(bean) ||
-                    Consumer.class.isInstance(bean)) {
-
-                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
+                    Consumer.class.isInstance(bean)
+                ) {
+                    Optional
+                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
                         .ifPresent(functionBinding -> {
-
                             Type functionType = discoverFunctionType(bean, beanName);
 
-                            FunctionRegistration functionRegistration = new FunctionRegistration(bean).type(functionType);
+                            FunctionRegistration functionRegistration = new FunctionRegistration(bean)
+                                .type(functionType);
 
-                            registerFunctionRegistration(beanName,
-                                                         functionRegistration);
+                            registerFunctionRegistration(beanName, functionRegistration);
 
-                            GenericSelector<Message<?>> selector = Optional.ofNullable(functionBinding)
-                                                                           .map(FunctionBinding::condition)
-                                                                           .filter(StringUtils::hasText)
-                                                                           .map(resolveExpression)
-                                                                           .map(ExpressionEvaluatingSelector::new)
-                                                                           .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
+                            GenericSelector<Message<?>> selector = Optional
+                                .ofNullable(functionBinding)
+                                .map(FunctionBinding::condition)
+                                .filter(StringUtils::hasText)
+                                .map(resolveExpression)
+                                .map(ExpressionEvaluatingSelector::new)
+                                .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
                             if (Supplier.class.isInstance(bean)) {
                                 FunctionInvocationWrapper supplier = functionFromDefinition(beanName);
 
-                                IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlows.fromSupplier(supplier)
-                                                                                             .filter(selector,  filter -> filter.discardChannel("nullChannel")
-                                                                                                                                .throwExceptionOnRejection(true))
-                                                                                             .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
-                                                                                             .channel(functionBinding.output());
-                                integrationFlowContext.registration(supplierFlowBuilder.get())
-                                                      .register();
-                           }
-                            else {
+                                IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlows
+                                    .fromSupplier(supplier)
+                                    .filter(
+                                        selector,
+                                        filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                    )
+                                    .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
+                                    .channel(functionBinding.output());
+                                integrationFlowContext.registration(supplierFlowBuilder.get()).register();
+                            } else {
                                 GenericHandler<Message> handler = (message, headers) -> {
                                     FunctionInvocationWrapper function = functionFromDefinition(beanName);
                                     return function.apply(message);
                                 };
 
-                                IntegrationFlowBuilder functionFlowBuilder = IntegrationFlows.from(getGatewayInterface(Function.class.isInstance(bean)),
-                                                                                                   gateway -> gateway.replyTimeout(0L)
-                                                                                                                     .errorChannel("errorChannel"))
-                                                                                             .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.input())
-                                                                                             .filter(selector, filter -> filter.discardChannel("nullChannel")
-                                                                                                                               .throwExceptionOnRejection(true))
-                                                                                             .handle(Message.class, handler);
+                                IntegrationFlowBuilder functionFlowBuilder = IntegrationFlows
+                                    .from(
+                                        getGatewayInterface(Function.class.isInstance(bean)),
+                                        gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
+                                    )
+                                    .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.input())
+                                    .filter(
+                                        selector,
+                                        filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                    )
+                                    .handle(Message.class, handler);
                                 if (Function.class.isInstance(bean)) {
-                                    functionFlowBuilder.bridge()
-                                                       .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
-                                                       .channel(functionBinding.output());
+                                    functionFlowBuilder
+                                        .bridge()
+                                        .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
+                                        .channel(functionBinding.output());
                                 }
 
-                                IntegrationFlow inputChannelFlow = IntegrationFlows.from(functionBinding.input())
-                                                                                   .gateway(functionFlowBuilder.get(),
-                                                                                            spec -> spec.replyTimeout(0L)
-                                                                                                        .errorChannel("errorChannel"))
-                                                                                   .get();
+                                IntegrationFlow inputChannelFlow = IntegrationFlows
+                                    .from(functionBinding.input())
+                                    .gateway(
+                                        functionFlowBuilder.get(),
+                                        spec -> spec.replyTimeout(0L).errorChannel("errorChannel")
+                                    )
+                                    .get();
 
-                                integrationFlowContext.registration(inputChannelFlow)
-                                                      .register();
+                                integrationFlowContext.registration(inputChannelFlow).register();
                             }
                         });
                 }

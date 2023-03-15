@@ -24,7 +24,6 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessRuntimeAdminService {
-
     @RequestLine("GET /admin/v1/process-instances?sort=startDate%2Cdesc&sort=id%2Cdesc")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudProcessInstance> getProcessInstances();
@@ -39,5 +38,4 @@ public interface ProcessRuntimeAdminService {
     @RequestLine("PUT /admin/v1/process-instances/message")
     @Headers("Content-Type: application/json")
     void message(ReceiveMessagePayload startProcess);
-
 }

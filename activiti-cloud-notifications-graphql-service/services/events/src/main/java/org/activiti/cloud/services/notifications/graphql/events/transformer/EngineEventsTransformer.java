@@ -18,7 +18,6 @@ package org.activiti.cloud.services.notifications.graphql.events.transformer;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.activiti.cloud.services.notifications.graphql.events.model.EngineEvent;
 
 /**
@@ -35,11 +34,8 @@ public class EngineEventsTransformer implements Transformer {
     }
 
     @Override
-    public List<EngineEvent> transform(List<Map<String,Object>> events) {
-        return events.stream()
-                .filter(this::isValid)
-                .map(it -> new EngineEvent(it))
-                .collect(Collectors.toList());
+    public List<EngineEvent> transform(List<Map<String, Object>> events) {
+        return events.stream().filter(this::isValid).map(it -> new EngineEvent(it)).collect(Collectors.toList());
     }
 
     private boolean isValid(Map<String, Object> event) {

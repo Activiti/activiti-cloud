@@ -35,9 +35,11 @@ public class ProcessModelController {
 
     private SecurityPoliciesManager securityPoliciesManager;
 
-    public ProcessModelController(ProcessModelRepository processModelRepository,
-                                  EntityFinder entityFinder,
-                                  SecurityPoliciesManager securityPoliciesManager) {
+    public ProcessModelController(
+        ProcessModelRepository processModelRepository,
+        EntityFinder entityFinder,
+        SecurityPoliciesManager securityPoliciesManager
+    ) {
         this.processModelRepository = processModelRepository;
         this.entityFinder = entityFinder;
         this.securityPoliciesManager = securityPoliciesManager;
@@ -46,14 +48,22 @@ public class ProcessModelController {
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
     public String getProcessModel(@PathVariable("processDefinitionId") String processDefinitionId) {
-        ProcessModelEntity processModelEntity = entityFinder.findById(processModelRepository,
-                                                                      processDefinitionId,
-                                                                      "Unable to find process model for the given id:'" + processDefinitionId + "`");
-        if (securityPoliciesManager.arePoliciesDefined() && !securityPoliciesManager.canRead(processModelEntity.getProcessDefinition().getKey(),
-                                                                                             processModelEntity.getProcessDefinition().getServiceName())) {
-            throw new ActivitiForbiddenException("Operation not permitted for " + processModelEntity.getProcessDefinition().getKey());
+        ProcessModelEntity processModelEntity = entityFinder.findById(
+            processModelRepository,
+            processDefinitionId,
+            "Unable to find process model for the given id:'" + processDefinitionId + "`"
+        );
+        if (
+            securityPoliciesManager.arePoliciesDefined() &&
+            !securityPoliciesManager.canRead(
+                processModelEntity.getProcessDefinition().getKey(),
+                processModelEntity.getProcessDefinition().getServiceName()
+            )
+        ) {
+            throw new ActivitiForbiddenException(
+                "Operation not permitted for " + processModelEntity.getProcessDefinition().getKey()
+            );
         }
-        return processModelEntity
-                .getProcessModelContent();
+        return processModelEntity.getProcessModelContent();
     }
 }

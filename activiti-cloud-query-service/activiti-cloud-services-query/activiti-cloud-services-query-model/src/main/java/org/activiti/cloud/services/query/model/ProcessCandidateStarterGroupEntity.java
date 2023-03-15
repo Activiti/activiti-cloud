@@ -16,9 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.*;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
+import java.util.Objects;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,15 +27,17 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.Objects;
-
-@Entity(name="ProcessCandidateStarterGroup")
+@Entity(name = "ProcessCandidateStarterGroup")
 @IdClass(ProcessCandidateStarterGroupId.class)
-@Table(name="PROCESS_CANDIDATE_STARTER_GROUP", indexes= {
-		@Index(name="pcsg_groupId_idx", columnList="groupId", unique=false),
-		@Index(name="pcsg_processDefinition_idx", columnList="processDefinitionId", unique=false)
-	}
+@Table(
+    name = "PROCESS_CANDIDATE_STARTER_GROUP",
+    indexes = {
+        @Index(name = "pcsg_groupId_idx", columnList = "groupId", unique = false),
+        @Index(name = "pcsg_processDefinition_idx", columnList = "processDefinitionId", unique = false),
+    }
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -53,19 +53,26 @@ public class ProcessCandidateStarterGroupEntity {
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+        name = "processDefinitionId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        nullable = true,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private ProcessDefinitionEntity processDefinition;
 
     @JsonCreator
-    public ProcessCandidateStarterGroupEntity(@JsonProperty("processDefinitionId") String processDefinitionId,
-                                              @JsonProperty("groupId") String groupId) {
+    public ProcessCandidateStarterGroupEntity(
+        @JsonProperty("processDefinitionId") String processDefinitionId,
+        @JsonProperty("groupId") String groupId
+    ) {
         this.processDefinitionId = processDefinitionId;
         this.groupId = groupId;
     }
 
-    public ProcessCandidateStarterGroupEntity() {
-    }
+    public ProcessCandidateStarterGroupEntity() {}
 
     public String getProcessDefinitionId() {
         return processDefinitionId;
@@ -105,7 +112,6 @@ public class ProcessCandidateStarterGroupEntity {
             return false;
         }
         ProcessCandidateStarterGroupEntity other = (ProcessCandidateStarterGroupEntity) obj;
-        return Objects.equals(processDefinitionId, other.processDefinitionId) &&
-                Objects.equals(groupId, other.groupId);
+        return Objects.equals(processDefinitionId, other.processDefinitionId) && Objects.equals(groupId, other.groupId);
     }
 }

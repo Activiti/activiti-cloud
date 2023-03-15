@@ -15,6 +15,18 @@
  */
 package org.activiti.cloud.services.audit.jpa.controller;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -46,33 +58,17 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(AuditEventsAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    AuditAPIAutoConfiguration.class,
-    AuditJPAAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import({ AuditAPIAutoConfiguration.class, AuditJPAAutoConfiguration.class, AlfrescoWebAutoConfiguration.class })
 public class EventsEngineEventsAdminControllerIT {
 
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
     private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
 
-    private static String CSV_CONTENT = "\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
+    private static String CSV_CONTENT =
+        "\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
         "\"testApp\",\"\",\"\",\"{\"\"appVersion\"\":null,\"\"id\"\":\"\"10\"\",\"\"name\"\":null,\"\"processDefinitionId\"\":\"\"1\"\",\"\"processDefinitionKey\"\":null,\"\"initiator\"\":null,\"\"startDate\"\":null,\"\"completedDate\"\":null,\"\"businessKey\"\":null,\"\"status\"\":null,\"\"parentId\"\":null,\"\"processDefinitionVersion\"\":null,\"\"processDefinitionName\"\":null}\",\"\",\"PROCESS_STARTED\",\"processEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
         "\"testApp\",\"\",\"\",\"{\"\"name\"\":\"\"var\"\",\"\"type\"\":null,\"\"processInstanceId\"\":\"\"processId\"\",\"\"value\"\":null,\"\"taskId\"\":\"\"taskId\"\",\"\"taskVariable\"\":true}\",\"var\",\"VARIABLE_CREATED\",\"variableEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
 
@@ -95,19 +91,14 @@ public class EventsEngineEventsAdminControllerIT {
 
     @Test
     public void getEvents() throws Exception {
-        PageRequest pageable = PageRequest.of(1,
-                10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                pageable,
-                11);
+        PageRequest pageable = PageRequest.of(1, 10);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 11);
 
         given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(get("/admin/{version}/events", "v1")
-                .param("page", "1")
-                .param("size", "10")
-                .param("sort", "asc"))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/admin/{version}/events", "v1").param("page", "1").param("size", "10").param("sort", "asc"))
+            .andExpect(status().isOk());
     }
 
     @Test
@@ -117,16 +108,15 @@ public class EventsEngineEventsAdminControllerIT {
 
         given(eventsRepository.findAllByOrderByTimestampDesc()).willReturn(events);
 
-        MvcResult response = mockMvc.perform(get("/admin/{version}/events/export/" + CSV_FILENAME, "v1"))
+        MvcResult response = mockMvc
+            .perform(get("/admin/{version}/events/export/" + CSV_FILENAME, "v1"))
             .andExpect(status().isOk())
             .andReturn();
 
         assertCsv(response.getResponse(), CSV_CONTENT);
     }
 
-
     private List<AuditEventEntity> buildEventsData(int recordsNumber) {
-
         List<AuditEventEntity> eventsList = new ArrayList<>();
 
         for (long i = 0; i < recordsNumber; i++) {
@@ -173,67 +163,53 @@ public class EventsEngineEventsAdminControllerIT {
 
     @Test
     public void getEventsAlfresco() throws Exception {
-
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                10,
-                PageRequest.of(0,
-                        20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
         given(eventsRepository.findAll(any(AlfrescoPageRequest.class)))
-                .willReturn(new PageImpl<>(events,
-                        pageRequest,
-                        12));
+            .willReturn(new PageImpl<>(events, pageRequest, 12));
 
-        MvcResult result = mockMvc.perform(get("/admin/{version}/events?skipCount=11&maxItems=10",
-                "v1")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(get("/admin/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 
     @Test
     public void headEvents() throws Exception {
-        PageRequest pageable = PageRequest.of(1,
-                10);
-        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1),
-                pageable,
-                10);
+        PageRequest pageable = PageRequest.of(1, 10);
+        Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 10);
 
         given(eventsRepository.findAll(any(PageRequest.class))).willReturn(eventsPage);
 
-        mockMvc.perform(head("/admin/{version}/events",
-                "v1"))
-                .andExpect(status().isOk());
+        mockMvc.perform(head("/admin/{version}/events", "v1")).andExpect(status().isOk());
     }
 
     @Test
     public void headEventsAlfresco() throws Exception {
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                10,
-                PageRequest.of(0,
-                        20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
 
-        given(eventsRepository.findAll(
-                any(AlfrescoPageRequest.class)))
-                .willReturn(new PageImpl<>(events,
-                        pageRequest,
-                        12));
+        given(eventsRepository.findAll(any(AlfrescoPageRequest.class)))
+            .willReturn(new PageImpl<>(events, pageRequest, 12));
 
-        mockMvc.perform(head("/admin/{version}/events?skipCount=11&maxItems=10",
-                "v1")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(head("/admin/{version}/events?skipCount=11&maxItems=10", "v1").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     private void assertCsv(MockHttpServletResponse response, String expectedContent) {
@@ -245,13 +221,10 @@ public class EventsEngineEventsAdminControllerIT {
 
         String contentDispositionHeader = response.getHeader(CONTENT_DISPOSITION);
 
-        assertThat(contentDispositionHeader)
-            .isNotEmpty()
-            .startsWith(HEADER_ATTACHMENT_FILENAME);
+        assertThat(contentDispositionHeader).isNotEmpty().startsWith(HEADER_ATTACHMENT_FILENAME);
 
         String fileName = contentDispositionHeader.substring(HEADER_ATTACHMENT_FILENAME.length());
         assertThat(fileName).isEqualTo(CSV_FILENAME);
         assertThat(new String(contentBytes)).isEqualTo(expectedContent);
     }
-
 }

@@ -19,6 +19,4 @@ import org.activiti.cloud.services.audit.api.streams.AuditConsumerChannels;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AuditConsumerChannelsConfiguration implements AuditConsumerChannels {
-
-}
+public class AuditConsumerChannelsConfiguration implements AuditConsumerChannels {}

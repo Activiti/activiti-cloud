@@ -23,9 +23,7 @@ import feign.RequestLine;
  * Runtime Bundle service to manage diagrams
  */
 public interface ProcessQueryDiagramService {
-
     @RequestLine("GET /v1/process-instances/{id}/diagram")
     @Headers("Content-Type: image/svg+xml")
     String getProcessInstanceDiagram(@Param("id") String id);
-
 }

@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 import java.util.List;
-
 import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class TaskBuilder {
@@ -75,22 +74,22 @@ public class TaskBuilder {
         return this;
     }
 
-    public TaskBuilder withCreatedDate(Date createdDate){
+    public TaskBuilder withCreatedDate(Date createdDate) {
         when(taskEntity.getCreatedDate()).thenReturn(createdDate);
         return this;
     }
 
-    public TaskBuilder withCompletedDate(Date completedDate){
+    public TaskBuilder withCompletedDate(Date completedDate) {
         when(taskEntity.getCompletedDate()).thenReturn(completedDate);
         return this;
     }
 
-    public TaskBuilder withCandidateUsers( List<String> candidateUsers){
+    public TaskBuilder withCandidateUsers(List<String> candidateUsers) {
         when(taskEntity.getCandidateUsers()).thenReturn(candidateUsers);
         return this;
     }
 
-    public TaskBuilder withCandidateGroups( List<String> candidateGroups){
+    public TaskBuilder withCandidateGroups(List<String> candidateGroups) {
         when(taskEntity.getCandidateGroups()).thenReturn(candidateGroups);
         return this;
     }

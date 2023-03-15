@@ -47,61 +47,66 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
-                   before = FunctionConfiguration.class)
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 public class OutputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String OUTPUT_BINDING = "_source";
 
     @Bean
-    public BeanPostProcessor outputBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
-                                                            BindingServiceProperties bindingServiceProperties,
-                                                            StreamFunctionProperties streamFunctionProperties,
-                                                            DefaultListableBeanFactory beanFactory) {
+    public BeanPostProcessor outputBindingBeanPostProcessor(
+        FunctionAnnotationService functionAnnotationService,
+        BindingServiceProperties bindingServiceProperties,
+        StreamFunctionProperties streamFunctionProperties,
+        DefaultListableBeanFactory beanFactory
+    ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
-                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
-                            .ifPresent(functionBinding -> {
-                                String outputBinding = beanName + OUTPUT_BINDING;
-                                final String beanOutName = getOutBinding(outputBinding);
+                    Optional
+                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
+                        .ifPresent(functionBinding -> {
+                            String outputBinding = beanName + OUTPUT_BINDING;
+                            final String beanOutName = getOutBinding(outputBinding);
 
-                                String outputBindings = bindingServiceProperties.getOutputBindings();
+                            String outputBindings = bindingServiceProperties.getOutputBindings();
 
-                                if (!StringUtils.hasText(outputBindings)) {
-                                    outputBindings = outputBinding;
-                                } else {
-                                    outputBindings += ";" + outputBinding;
-                                }
+                            if (!StringUtils.hasText(outputBindings)) {
+                                outputBindings = outputBinding;
+                            } else {
+                                outputBindings += ";" + outputBinding;
+                            }
 
-                                bindingServiceProperties.setOutputBindings(outputBindings);
+                            bindingServiceProperties.setOutputBindings(outputBindings);
 
-                                streamFunctionProperties.getBindings()
-                                                        .put(beanOutName, beanName);
+                            streamFunctionProperties.getBindings().put(beanOutName, beanName);
 
-                                if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                    getMessageConverterConfigurer().configureOutputChannel(MessageChannel.class.cast(bean),
-                                                                                           beanName);
-                                }
+                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                                getMessageConverterConfigurer()
+                                    .configureOutputChannel(MessageChannel.class.cast(bean), beanName);
+                            }
 
-                                CompositeMessageConverter messageConverter = getMessageConverter();
+                            CompositeMessageConverter messageConverter = getMessageConverter();
 
-                                BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(beanName);
+                            BindingProperties bindingProperties = bindingServiceProperties.getBindingProperties(
+                                beanName
+                            );
 
-                                Optional.ofNullable(bindingProperties.getProducer())
-                                    .filter(ProducerProperties::isPartitioned)
-                                    .ifPresent(isPartitioned -> {
-                                        InterceptableChannel.class.cast(bean)
-                                                                  .addInterceptor(new DefaultPartitioningInterceptor(bindingProperties,
-                                                                                                                     beanFactory));
-                                    });
+                            Optional
+                                .ofNullable(bindingProperties.getProducer())
+                                .filter(ProducerProperties::isPartitioned)
+                                .ifPresent(isPartitioned -> {
+                                    InterceptableChannel.class.cast(bean)
+                                        .addInterceptor(
+                                            new DefaultPartitioningInterceptor(bindingProperties, beanFactory)
+                                        );
+                                });
 
-                                InterceptableChannel.class.cast(bean)
-                                                          .addInterceptor(new OutboundContentTypeConvertingInterceptor("application/json",
-                                                                                                                       messageConverter));
-
-                            });
+                            InterceptableChannel.class.cast(bean)
+                                .addInterceptor(
+                                    new OutboundContentTypeConvertingInterceptor("application/json", messageConverter)
+                                );
+                        });
                 }
 
                 return bean;
@@ -122,8 +127,10 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
         private final MessageConverter messageConverter;
 
-        private OutboundContentTypeConvertingInterceptor(String contentType,
-                                                         CompositeMessageConverter messageConverter) {
+        private OutboundContentTypeConvertingInterceptor(
+            String contentType,
+            CompositeMessageConverter messageConverter
+        ) {
             this.mimeType = MessageConverterUtils.getMimeType(contentType);
             this.messageConverter = messageConverter;
         }
@@ -134,12 +141,13 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                 return message;
             }
 
-            String contentTypeFromHeader = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE) ?
-                message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
+            String contentTypeFromHeader = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)
+                ? message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
                 : null;
-            String contentTypeFromPayload = message.getPayload() instanceof String ?
-                JavaClassMimeTypeUtils.mimeTypeFromObject(message.getPayload(),
-                                                            ObjectUtils.nullSafeToString(contentTypeFromHeader)).toString()
+            String contentTypeFromPayload = message.getPayload() instanceof String
+                ? JavaClassMimeTypeUtils
+                    .mimeTypeFromObject(message.getPayload(), ObjectUtils.nullSafeToString(contentTypeFromHeader))
+                    .toString()
                 : contentTypeFromHeader;
 
             MessageHeaders messageHeaders = getMessageHeaders(message);
@@ -147,16 +155,19 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
             @SuppressWarnings("unchecked")
             Message<byte[]> outboundMessage = getOutboundMessage(message, messageHeaders);
 
-            MessageHeaders outboundMessageHeaders = getOutboundMessageHeaders(outboundMessage, contentTypeFromPayload, contentTypeFromHeader);
+            MessageHeaders outboundMessageHeaders = getOutboundMessageHeaders(
+                outboundMessage,
+                contentTypeFromPayload,
+                contentTypeFromHeader
+            );
 
-            return MessageBuilder.fromMessage(outboundMessage)
-                                 .copyHeaders(outboundMessageHeaders)
-                                 .build();
+            return MessageBuilder.fromMessage(outboundMessage).copyHeaders(outboundMessageHeaders).build();
         }
 
         private boolean isByteArrayWithContentType(Message<?> message) {
-            return message.getPayload() instanceof byte[]
-                    && message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE);
+            return (
+                message.getPayload() instanceof byte[] && message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)
+            );
         }
 
         private MessageHeaders getMessageHeaders(Message<?> message) {
@@ -171,10 +182,18 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
             return messageHeaders;
         }
 
-        private MessageHeaders getOutboundMessageHeaders(Message<?> outboundMessage, String contentTypeFromPayload, String contentTypeFromHeader) {
+        private MessageHeaders getOutboundMessageHeaders(
+            Message<?> outboundMessage,
+            String contentTypeFromPayload,
+            String contentTypeFromHeader
+        ) {
             MessageHeaders outboundMessageHeaders = outboundMessage.getHeaders();
 
-            if (contentTypeFromPayload != null && !contentTypeFromPayload.equals(contentTypeFromHeader) && contentTypeFromHeader != null) {
+            if (
+                contentTypeFromPayload != null &&
+                !contentTypeFromPayload.equals(contentTypeFromHeader) &&
+                contentTypeFromHeader != null
+            ) {
                 @SuppressWarnings("unchecked")
                 MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(outboundMessage);
                 accessor.setContentType(MimeType.valueOf(contentTypeFromPayload));
@@ -185,15 +204,13 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
         private Message<byte[]> getOutboundMessage(Message<?> message, MessageHeaders messageHeaders) {
             Message<byte[]> outboundMessage = message.getPayload() instanceof byte[]
-                    ? (Message<byte[]>) message
-                    : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
+                ? (Message<byte[]>) message
+                : (Message<byte[]>) this.messageConverter.toMessage(message.getPayload(), messageHeaders);
 
             if (outboundMessage == null) {
-                throw new IllegalStateException("Failed to convert message: '" + message
-                        + "' to outbound message.");
+                throw new IllegalStateException("Failed to convert message: '" + message + "' to outbound message.");
             }
             return outboundMessage;
         }
     }
-
 }

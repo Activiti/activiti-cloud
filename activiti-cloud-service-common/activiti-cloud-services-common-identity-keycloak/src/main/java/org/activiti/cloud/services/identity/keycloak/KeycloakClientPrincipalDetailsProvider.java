@@ -34,34 +34,29 @@ public class KeycloakClientPrincipalDetailsProvider implements PrincipalGroupsPr
         this.keycloakClient = keycloakClient;
     }
 
-
     @Override
     public List<String> getGroups(Principal principal) {
-        return keycloakClient.getUserGroups(subjectId(principal))
-                                      .stream()
-                                      .map(KeycloakGroup::getName)
-                                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                                                                            Collections::unmodifiableList));
+        return keycloakClient
+            .getUserGroups(subjectId(principal))
+            .stream()
+            .map(KeycloakGroup::getName)
+            .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
     @Override
     public List<String> getRoles(Principal principal) {
-        return keycloakClient.getUserRoleMapping(subjectId(principal))
-                                      .stream()
-                                      .map(KeycloakRoleMapping::getName)
-                                      .collect(Collectors.collectingAndThen(Collectors.toList(),
-                                                                            Collections::unmodifiableList));
+        return keycloakClient
+            .getUserRoleMapping(subjectId(principal))
+            .stream()
+            .map(KeycloakRoleMapping::getName)
+            .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
-
     protected String subjectId(Principal principal) {
-        return Optional.of(principal)
-                       .map(Principal::getName)
-                       .orElseThrow(this::securityException);
+        return Optional.of(principal).map(Principal::getName).orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {
         return new SecurityException("Invalid Keycloak principal subject id");
     }
-
 }

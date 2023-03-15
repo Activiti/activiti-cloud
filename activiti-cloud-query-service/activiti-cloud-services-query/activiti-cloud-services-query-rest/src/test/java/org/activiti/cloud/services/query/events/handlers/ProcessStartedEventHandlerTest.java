@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -27,14 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessStartedEventHandlerTest {
@@ -51,8 +50,8 @@ public class ProcessStartedEventHandlerTest {
         CloudProcessStartedEvent event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.CREATED);
-        given(entityManager.find(ProcessInstanceEntity.class,
-                                 event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId()))
+            .willReturn(currentProcessInstanceEntity);
         //when
         handler.handle(event);
 
@@ -69,16 +68,14 @@ public class ProcessStartedEventHandlerTest {
         CloudProcessStartedEvent event = buildProcessStartedEvent();
         ProcessInstanceEntity currentProcessInstanceEntity = mock(ProcessInstanceEntity.class);
         given(currentProcessInstanceEntity.getStatus()).willReturn(ProcessInstance.ProcessInstanceStatus.RUNNING);
-        given(entityManager.find(ProcessInstanceEntity.class,
-                                 event.getEntity().getId())).willReturn(currentProcessInstanceEntity);
+        given(entityManager.find(ProcessInstanceEntity.class, event.getEntity().getId()))
+            .willReturn(currentProcessInstanceEntity);
         //when
         handler.handle(event);
 
         //then
-        verify(entityManager,
-               never()).persist(currentProcessInstanceEntity);
-        verify(currentProcessInstanceEntity,
-               never()).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
+        verify(entityManager, never()).persist(currentProcessInstanceEntity);
+        verify(currentProcessInstanceEntity, never()).setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
     }
 
     private CloudProcessStartedEvent buildProcessStartedEvent() {

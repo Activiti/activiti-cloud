@@ -47,8 +47,9 @@ public class VariableUpdatedEventConverter extends BaseEventToEntityConverter {
         String eventId = variableUpdatedEventEntity.getEventId();
         Long timestamp = variableUpdatedEventEntity.getTimestamp();
         VariableInstance variableInstance = variableUpdatedEventEntity.getVariableInstance();
-        Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null ?
-            variableUpdatedEventEntity.getPreviousValue().getValue() : null;
+        Object previousValue = variableUpdatedEventEntity.getPreviousValue() != null
+            ? variableUpdatedEventEntity.getPreviousValue().getValue()
+            : null;
         return new CloudVariableUpdatedEventImpl<>(eventId, timestamp, variableInstance, previousValue);
     }
 }

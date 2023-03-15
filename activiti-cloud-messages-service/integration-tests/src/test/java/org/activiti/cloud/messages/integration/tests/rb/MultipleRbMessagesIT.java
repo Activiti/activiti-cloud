@@ -15,7 +15,13 @@
  */
 package org.activiti.cloud.messages.integration.tests.rb;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import java.sql.SQLException;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -47,15 +53,9 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.sql.SQLException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @Testcontainers
 class MultipleRbMessagesIT {
+
     private static final String INTERMEDIATE_CATCH_MESSAGE_PROCESS = "IntermediateCatchMessageProcess";
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
     private static final String BUSINESS_KEY = "businessKey";
@@ -76,8 +76,7 @@ class MultipleRbMessagesIT {
 
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseServer() throws SQLException {
-            return Server.createTcpServer(
-                "-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
+            return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
         }
     }
 
@@ -86,24 +85,27 @@ class MultipleRbMessagesIT {
     static class RbApplication {
 
         @Bean
-        public BpmnMessageReceivedEventMessageProducer throwMessageReceivedEventListener(MessageEventsDispatcher messageEventsDispatcher,
-                                                                                         BpmnMessageEventMessageBuilderFactory messageBuilderFactory) {
-            return spy(new BpmnMessageReceivedEventMessageProducer(messageEventsDispatcher,
-                                                                   messageBuilderFactory));
+        public BpmnMessageReceivedEventMessageProducer throwMessageReceivedEventListener(
+            MessageEventsDispatcher messageEventsDispatcher,
+            BpmnMessageEventMessageBuilderFactory messageBuilderFactory
+        ) {
+            return spy(new BpmnMessageReceivedEventMessageProducer(messageEventsDispatcher, messageBuilderFactory));
         }
 
         @Bean
-        public BpmnMessageWaitingEventMessageProducer throwMessageWaitingEventMessageProducer(MessageEventsDispatcher messageEventsDispatcher,
-                                                                                              BpmnMessageEventMessageBuilderFactory messageBuilderFactory) {
-            return spy(new BpmnMessageWaitingEventMessageProducer(messageEventsDispatcher,
-                                                                  messageBuilderFactory));
+        public BpmnMessageWaitingEventMessageProducer throwMessageWaitingEventMessageProducer(
+            MessageEventsDispatcher messageEventsDispatcher,
+            BpmnMessageEventMessageBuilderFactory messageBuilderFactory
+        ) {
+            return spy(new BpmnMessageWaitingEventMessageProducer(messageEventsDispatcher, messageBuilderFactory));
         }
 
         @Bean
-        public BpmnMessageSentEventMessageProducer bpmnMessageSentEventProducer(MessageEventsDispatcher messageEventsDispatcher,
-                                                                                BpmnMessageEventMessageBuilderFactory messageBuilderFactory) {
-            return spy(new BpmnMessageSentEventMessageProducer(messageEventsDispatcher,
-                                                               messageBuilderFactory));
+        public BpmnMessageSentEventMessageProducer bpmnMessageSentEventProducer(
+            MessageEventsDispatcher messageEventsDispatcher,
+            BpmnMessageEventMessageBuilderFactory messageBuilderFactory
+        ) {
+            return spy(new BpmnMessageSentEventMessageProducer(messageEventsDispatcher, messageBuilderFactory));
         }
 
         @Bean
@@ -115,33 +117,43 @@ class MultipleRbMessagesIT {
         public ReceiveMessageCmdExecutor receiveMessageCmdExecutor(ProcessAdminRuntime processAdminRuntime) {
             return spy(new ReceiveMessageCmdExecutor(processAdminRuntime));
         }
-
     }
 
     @BeforeAll
     public static void setUp() {
-        TestPropertyValues.of(KeycloakContainerApplicationInitializer.getContainerProperties())
-                          .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
-                          .applyToSystemProperties(() -> {
-                                h2Context = new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE)
-                                                                                             .properties("spring.main.banner-mode=off")
-                                                                                             .profiles("h2")
-                                                                                             .run();
+        TestPropertyValues
+            .of(KeycloakContainerApplicationInitializer.getContainerProperties())
+            .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
+            .applyToSystemProperties(() -> {
+                h2Context =
+                    new SpringApplicationBuilder(H2Application.class)
+                        .web(WebApplicationType.NONE)
+                        .properties("spring.main.banner-mode=off")
+                        .profiles("h2")
+                        .run();
 
-                                rb1Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081",
-                                                                                                          "spring.main.banner-mode=off",
-                                                                                                          "activiti.cloud.application.name=messages-app1",
-                                                                                                          "spring.application.name=rb")
-                                                                                              .run();
+                rb1Context =
+                    new SpringApplicationBuilder(RbApplication.class)
+                        .properties(
+                            "server.port=8081",
+                            "spring.main.banner-mode=off",
+                            "activiti.cloud.application.name=messages-app1",
+                            "spring.application.name=rb"
+                        )
+                        .run();
 
-                                rb2Context = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082",
-                                                                                                          "spring.main.banner-mode=off",
-                                                                                                          "activiti.cloud.application.name=messages-app2",
-                                                                                                          "spring.application.name=rb")
-                                                                                              .run();
+                rb2Context =
+                    new SpringApplicationBuilder(RbApplication.class)
+                        .properties(
+                            "server.port=8082",
+                            "spring.main.banner-mode=off",
+                            "activiti.cloud.application.name=messages-app2",
+                            "spring.application.name=rb"
+                        )
+                        .run();
 
-                                return true;
-                            });
+                return true;
+            });
     }
 
     @AfterAll
@@ -161,15 +173,17 @@ class MultipleRbMessagesIT {
     @Test
     void shouldHandleBpmnMessagesBetweenMulitpleRuntimeBundles() {
         //given
-        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder.start()
-                                                                       .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
-                                                                       .withBusinessKey(BUSINESS_KEY)
-                                                                       .build();
+        StartProcessPayload throwProcessPayload = ProcessPayloadBuilder
+            .start()
+            .withProcessDefinitionKey(INTERMEDIATE_THROW_MESSAGE_PROCESS)
+            .withBusinessKey(BUSINESS_KEY)
+            .build();
 
-        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder.start()
-                                                                       .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
-                                                                       .withBusinessKey(BUSINESS_KEY)
-                                                                       .build();
+        StartProcessPayload catchProcessPayload = ProcessPayloadBuilder
+            .start()
+            .withProcessDefinitionKey(INTERMEDIATE_CATCH_MESSAGE_PROCESS)
+            .withBusinessKey(BUSINESS_KEY)
+            .build();
 
         //when
         executeCommand(rb1Context, throwProcessPayload);
@@ -182,26 +196,32 @@ class MultipleRbMessagesIT {
         assertThrowCatchBpmnMessages(rb2Context);
     }
 
-    void executeCommand(ConfigurableApplicationContext context,
-                        Payload payload) {
+    void executeCommand(ConfigurableApplicationContext context, Payload payload) {
         CommandEndpoint<Payload> commandEndpoint = context.getBean(CommandEndpoint.class);
         commandEndpoint.execute(payload);
     }
 
     void assertThrowCatchBpmnMessages(ConfigurableApplicationContext context) {
-        BpmnMessageReceivedEventMessageProducer bpmnMessageReceivedEventMessageProducer = context.getBean(BpmnMessageReceivedEventMessageProducer.class);
-        BpmnMessageSentEventMessageProducer bpmnMessageSentEventMessageProducer = context.getBean(BpmnMessageSentEventMessageProducer.class);
-        BpmnMessageWaitingEventMessageProducer bpmnMessageWaitingEventMessageProducer = context.getBean(BpmnMessageWaitingEventMessageProducer.class);
+        BpmnMessageReceivedEventMessageProducer bpmnMessageReceivedEventMessageProducer = context.getBean(
+            BpmnMessageReceivedEventMessageProducer.class
+        );
+        BpmnMessageSentEventMessageProducer bpmnMessageSentEventMessageProducer = context.getBean(
+            BpmnMessageSentEventMessageProducer.class
+        );
+        BpmnMessageWaitingEventMessageProducer bpmnMessageWaitingEventMessageProducer = context.getBean(
+            BpmnMessageWaitingEventMessageProducer.class
+        );
         StartMessageCmdExecutor startMessageCmdExecutor = context.getBean(StartMessageCmdExecutor.class);
         ReceiveMessageCmdExecutor receiveMessageCmdExecutor = context.getBean(ReceiveMessageCmdExecutor.class);
 
-        await().untilAsserted(() -> {
-            verify(bpmnMessageSentEventMessageProducer, times(1)).onEvent(any());
-            verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(any());
-            verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(any());
+        await()
+            .untilAsserted(() -> {
+                verify(bpmnMessageSentEventMessageProducer, times(1)).onEvent(any());
+                verify(bpmnMessageWaitingEventMessageProducer, times(1)).onEvent(any());
+                verify(bpmnMessageReceivedEventMessageProducer, times(1)).onEvent(any());
 
-            verify(receiveMessageCmdExecutor, times(1)).execute(any());
-            verify(startMessageCmdExecutor, never()).execute(any());
-        });
+                verify(receiveMessageCmdExecutor, times(1)).execute(any());
+                verify(startMessageCmdExecutor, never()).execute(any());
+            });
     }
 }

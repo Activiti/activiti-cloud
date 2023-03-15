@@ -15,6 +15,11 @@
  */
 package org.activit.cloud.services.metadata.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.cloud.services.metadata.MetadataProperties;
 import org.activiti.cloud.services.metadata.MetadataService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MetadataServiceTest {
@@ -41,14 +40,13 @@ public class MetadataServiceTest {
 
     @BeforeEach
     public void setUp() {
+        HashMap<String, String> application = new HashMap<>();
+        application.put("name", "app");
+        application.put("version", "1");
 
-        HashMap<String,String> application = new HashMap<>();
-        application.put("name","app");
-        application.put("version","1");
-
-        HashMap<String,String> service = new HashMap<>();
-        service.put("name","rb");
-        service.put("version","2");
+        HashMap<String, String> service = new HashMap<>();
+        service.put("name", "rb");
+        service.put("version", "2");
 
         when(metadataProperties.getApplication()).thenReturn(application);
         when(metadataProperties.getService()).thenReturn(service);
@@ -56,8 +54,7 @@ public class MetadataServiceTest {
 
     @Test
     public void shouldGetMetaData() {
-
-        Map<String,String> metaData = metadataService.getMetadata();
+        Map<String, String> metaData = metadataService.getMetadata();
 
         assertThat(metaData.keySet()).hasSize(4);
         assertThat(metaData.keySet()).contains("activiti-cloud-service-name");
@@ -68,5 +65,4 @@ public class MetadataServiceTest {
         assertThat(metaData.values()).contains("1");
         assertThat(metaData.values()).contains("app");
     }
-
 }

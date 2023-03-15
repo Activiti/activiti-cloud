@@ -25,5 +25,4 @@ public class DummyServiceTask2 implements JavaDelegate {
         count = count + 1;
         execution.setVariable("count2", count);
     }
-
 }

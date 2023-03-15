@@ -28,9 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.Principal;
-
 import javax.websocket.Session;
-
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +49,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
-
 
 @ExtendWith(MockitoExtension.class)
 public class GraphQLBrokerSubProtocolHandlerTest {
@@ -81,7 +78,9 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleConnectionInitMessageFromClient() throws Exception {
         // given
-        TextMessage message = new TextMessage("{\"id\":\"1\",\"payload\":null,\"type\":\"connection_init\"}".getBytes());
+        TextMessage message = new TextMessage(
+            "{\"id\":\"1\",\"payload\":null,\"type\":\"connection_init\"}".getBytes()
+        );
         WebSocketSession session = mockWebSocketSession();
         when(outputChannel.send(any(Message.class))).thenReturn(true);
 
@@ -100,7 +99,9 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleStartMessageFromClient() throws Exception {
         // given
-        TextMessage message = new TextMessage("{\"id\":\"1\", \"payload\":{\"query\": \"{}\"}, \"type\":\"start\"}".getBytes());
+        TextMessage message = new TextMessage(
+            "{\"id\":\"1\", \"payload\":{\"query\": \"{}\"}, \"type\":\"start\"}".getBytes()
+        );
         WebSocketSession session = mockWebSocketSession();
         when(outputChannel.send(any(Message.class))).thenReturn(true);
 
@@ -138,7 +139,9 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     @Test
     public void testHandleConnectionTerminateMessageFromClient() throws Exception {
         // given
-        TextMessage message = new TextMessage("{\"id\":\"1\", \"payload\":null, \"type\":\"connection_terminate\"}".getBytes());
+        TextMessage message = new TextMessage(
+            "{\"id\":\"1\", \"payload\":null, \"type\":\"connection_terminate\"}".getBytes()
+        );
 
         WebSocketSession session = mockWebSocketSession();
 
@@ -179,7 +182,6 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(session).sendMessage(any(TextMessage.class));
-
     }
 
     @Test
@@ -195,7 +197,6 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         // then
         verify(session).close(eq(CloseStatus.PROTOCOL_ERROR));
-
     }
 
     @Test
@@ -232,10 +233,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
         Session nativeSession = mock(Session.class);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
-        StandardWebSocketSession wsSession = new StandardWebSocketSession(null,
-                                                                          null,
-                                                                          null,
-                                                                          null);
+        StandardWebSocketSession wsSession = new StandardWebSocketSession(null, null, null, null);
         wsSession.initializeNativeSession(nativeSession);
 
         return wsSession;
@@ -244,8 +242,7 @@ public class GraphQLBrokerSubProtocolHandlerTest {
     private Message<GraphQLMessage> connectionAckMessage(String operationId, WebSocketSession session) {
         SimpMessageHeaderAccessor headerAccessor = simpHeaderAccessor(session);
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.CONNECTION_ACK);
+        GraphQLMessage payload = new GraphQLMessage(operationId, GraphQLMessageType.CONNECTION_ACK);
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
@@ -260,5 +257,4 @@ public class GraphQLBrokerSubProtocolHandlerTest {
 
         return headerAccessor;
     }
-
 }

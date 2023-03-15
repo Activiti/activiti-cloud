@@ -22,11 +22,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 
 @TestConfiguration
-@Import({HelperConfiguration.class,
-    AuditConsumerStreamHandler.class,
-    ServiceTaskConsumerHandler.class,
-    IntegrationResultSender.class
-})
-public class ServicesAuditITConfiguration {
-
-}
+@Import(
+    {
+        HelperConfiguration.class,
+        AuditConsumerStreamHandler.class,
+        ServiceTaskConsumerHandler.class,
+        IntegrationResultSender.class,
+    }
+)
+public class ServicesAuditITConfiguration {}

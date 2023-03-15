@@ -31,28 +31,24 @@ public class CloudProcessDeletedService {
     private final RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-
-    public CloudProcessDeletedService(ProcessEngineChannels producer,
+    public CloudProcessDeletedService(
+        ProcessEngineChannels producer,
         RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
-
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
         this.producer = producer;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
     }
 
     public void sendDeleteEvent(String processInstanceId) {
-
         sendEvent(buildProcessInstance(processInstanceId));
     }
 
     protected void sendEvent(ProcessInstance processInstance) {
-
-        producer.auditProducer().send(
-            runtimeBundleMessageBuilderFactory.create()
-                .withPayload(buildEvents(processInstance))
-                .build()
-        );
+        producer
+            .auditProducer()
+            .send(runtimeBundleMessageBuilderFactory.create().withPayload(buildEvents(processInstance)).build());
     }
 
     protected List<CloudRuntimeEvent<?, ?>> buildEvents(ProcessInstance processInstance) {
@@ -65,5 +61,4 @@ public class CloudProcessDeletedService {
         processInstance.setId(processInstanceId);
         return processInstance;
     }
-
 }

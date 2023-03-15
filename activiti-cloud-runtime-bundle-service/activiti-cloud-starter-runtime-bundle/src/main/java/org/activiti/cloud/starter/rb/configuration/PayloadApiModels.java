@@ -39,90 +39,105 @@ public class PayloadApiModels {
 
     @Schema(name = "StartProcessPayload")
     public static class StartProcessPayloadApiModel extends StartProcessPayload {
+
         @Schema(allowableValues = "StartProcessPayload")
         public String payloadType;
     }
 
     @Schema(name = "SignalPayload")
     public static class SignalPayloadApiModel extends SignalPayload {
+
         @Schema(allowableValues = "SignalPayload")
         public String payloadType;
     }
 
     @Schema(name = "UpdateProcessPayload")
     public static class UpdateProcessPayloadApiModel extends UpdateProcessPayload {
+
         @Schema(allowableValues = "UpdateProcessPayload")
         public String payloadType;
     }
 
     @Schema(name = "SetProcessVariablesPayload")
     public static class SetProcessVariablesPayloadApiModel extends SetProcessVariablesPayload {
+
         @Schema(allowableValues = "SetProcessVariablesPayload")
         public String payloadType;
     }
 
     @Schema(name = "RemoveProcessVariablesPayload")
     public static class RemoveProcessVariablesPayloadApiModel extends RemoveProcessVariablesPayload {
+
         @Schema(allowableValues = "RemoveProcessVariablesPayload")
         public String payloadType;
     }
 
     @Schema(name = "CandidateGroupsPayload")
     public static class CandidateGroupsPayloadApiModel extends CandidateGroupsPayload {
+
         @Schema(allowableValues = "CandidateGroupsPayload")
         public String payloadType;
     }
 
     @Schema(name = "CandidateUsersPayload")
     public static class CandidateUsersPayloadApiModel extends CandidateUsersPayload {
+
         @Schema(allowableValues = "CandidateUsersPayload")
         public String payloadType;
     }
 
     @Schema(name = "AssignTaskPayload")
     public static class AssignTaskPayloadApiModel extends AssignTaskPayload {
+
         @Schema(allowableValues = "AssignTaskPayload")
         public String payloadType;
     }
 
     @Schema(name = "CompleteTaskPayload")
     public static class CompleteTaskPayloadApiModel extends CompleteTaskPayload {
+
         @Schema(allowableValues = "CompleteTaskPayload")
         public String payloadType;
     }
 
     @Schema(name = "CreateTaskPayload")
     public static class CreateTaskPayloadApiModel extends CreateTaskPayload {
+
         @Schema(allowableValues = "CreateTaskPayload")
         public String payloadType;
     }
 
     @Schema(name = "CreateTaskVariablePayload")
     public static class CreateTaskVariablePayloadApiModel extends CreateTaskVariablePayload {
+
         @Schema(allowableValues = "CreateTaskVariablePayload")
         public String payloadType;
     }
 
     @Schema(name = "UpdateTaskVariablePayload")
     public static class UpdateTaskVariablePayloadApiModel extends UpdateTaskVariablePayload {
+
         @Schema(allowableValues = "UpdateTaskVariablePayload")
         public String payloadType;
     }
 
     @Schema(name = "UpdateTaskPayload")
     public static class UpdateTaskPayloadApiModel extends UpdateTaskPayload {
+
         @Schema(allowableValues = "UpdateTaskPayload")
         public String payloadType;
     }
 
     @Schema(name = "SaveTaskPayload")
     public static class SaveTaskPayloadApiModel extends SaveTaskPayload {
+
         @Schema(allowableValues = "SaveTaskPayload")
         public String payloadType;
     }
 
     @Schema(name = "CreateProcessInstancePayload")
     public static class CreateProcessInstancePayloadApiModel extends CreateProcessInstancePayload {
+
         @Schema(allowableValues = "CreateProcessInstancePayload")
         public String payloadType;
     }

@@ -21,7 +21,9 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
 
     private final IntegrationResultDestinationBuilder integrationResultDestinationBuilder;
 
-    public IntegrationResultChannelResolverImpl(IntegrationResultDestinationBuilder integrationResultDestinationBuilder) {
+    public IntegrationResultChannelResolverImpl(
+        IntegrationResultDestinationBuilder integrationResultDestinationBuilder
+    ) {
         this.integrationResultDestinationBuilder = integrationResultDestinationBuilder;
     }
 
@@ -31,8 +33,4 @@ public class IntegrationResultChannelResolverImpl implements IntegrationResultCh
 
         return destination;
     }
-
-
-
-
 }

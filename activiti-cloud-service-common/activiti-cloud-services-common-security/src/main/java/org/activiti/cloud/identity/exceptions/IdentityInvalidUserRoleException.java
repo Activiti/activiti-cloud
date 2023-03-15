@@ -16,7 +16,8 @@
 package org.activiti.cloud.identity.exceptions;
 
 public class IdentityInvalidUserRoleException extends IdentityException {
+
     public IdentityInvalidUserRoleException(String username, String role) {
-        super("role {" + role  + "} can't be assigned to user {" + username + "}");
+        super("role {" + role + "} can't be assigned to user {" + username + "}");
     }
 }

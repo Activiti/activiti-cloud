@@ -27,40 +27,58 @@ import org.springframework.lang.NonNull;
 
 public class AggregateErrorValidationStrategy<V extends ModelValidator> implements ValidationStrategy<V> {
 
-    private final static String ERROR_MESSAGE = "Semantic model validation errors encountered: %d schema violations found";
+    private static final String ERROR_MESSAGE =
+        "Semantic model validation errors encountered: %d schema violations found";
 
-    private final static String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
+    private static final String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
 
-
-    protected List<SemanticModelValidationException> getSemanticModelValidationExceptions(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
+    protected List<SemanticModelValidationException> getSemanticModelValidationExceptions(
+        @NonNull Collection<V> validators,
+        @NonNull ValidationCallback<V> callback
+    ) {
         final List<SemanticModelValidationException> semanticModelValidationExceptionList = new ArrayList<>();
 
-        validators.stream().forEach(modelValidator -> {
-            try {
-                callback.accept(modelValidator);
-            } catch(SemanticModelValidationException e) {
-                semanticModelValidationExceptionList.add(e);
-            }
-        });
+        validators
+            .stream()
+            .forEach(modelValidator -> {
+                try {
+                    callback.accept(modelValidator);
+                } catch (SemanticModelValidationException e) {
+                    semanticModelValidationExceptionList.add(e);
+                }
+            });
 
         return semanticModelValidationExceptionList;
     }
 
     @Override
-    public List<ModelValidationError> getValidationErrors(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) {
-        final List<SemanticModelValidationException> semanticModelValidationExceptionList = getSemanticModelValidationExceptions(validators, callback);
+    public List<ModelValidationError> getValidationErrors(
+        @NonNull Collection<V> validators,
+        @NonNull ValidationCallback<V> callback
+    ) {
+        final List<SemanticModelValidationException> semanticModelValidationExceptionList = getSemanticModelValidationExceptions(
+            validators,
+            callback
+        );
 
         return getValidationErrors(semanticModelValidationExceptionList);
     }
 
     @Override
-    public void validate(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback) throws ModelingException {
-        final List<SemanticModelValidationException> validationExceptions = getSemanticModelValidationExceptions(validators, callback);
+    public void validate(@NonNull Collection<V> validators, @NonNull ValidationCallback<V> callback)
+        throws ModelingException {
+        final List<SemanticModelValidationException> validationExceptions = getSemanticModelValidationExceptions(
+            validators,
+            callback
+        );
         throwExceptionIfNeeded(validationExceptions);
     }
 
-    protected List<ModelValidationError> getValidationErrors(@NonNull List<SemanticModelValidationException> semanticModelValidationExceptionList) {
-        return semanticModelValidationExceptionList.stream()
+    protected List<ModelValidationError> getValidationErrors(
+        @NonNull List<SemanticModelValidationException> semanticModelValidationExceptionList
+    ) {
+        return semanticModelValidationExceptionList
+            .stream()
             .filter(validationException -> validationException.getValidationErrors() != null)
             .flatMap(validationException -> validationException.getValidationErrors().stream())
             .distinct()
@@ -68,15 +86,23 @@ public class AggregateErrorValidationStrategy<V extends ModelValidator> implemen
     }
 
     private void throwExceptionIfNeeded(@NonNull List<SemanticModelValidationException> validationExceptions) {
-        if(!validationExceptions.isEmpty()){
+        if (!validationExceptions.isEmpty()) {
             if (validationExceptions.size() == 1) {
                 throw validationExceptions.stream().findFirst().get();
             } else {
                 final List<ModelValidationError> modelValidationErrors = getValidationErrors(validationExceptions);
 
-                if(modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())) {
+                if (
+                    modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())
+                ) {
                     throw new SemanticModelValidationException(
-                        String.format(ERROR_MESSAGE, modelValidationErrors.stream().filter(modelValidationError -> !modelValidationError.isWarning()).count()),
+                        String.format(
+                            ERROR_MESSAGE,
+                            modelValidationErrors
+                                .stream()
+                                .filter(modelValidationError -> !modelValidationError.isWarning())
+                                .count()
+                        ),
                         modelValidationErrors
                     );
                 }

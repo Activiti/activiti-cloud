@@ -28,10 +28,13 @@ public class JuelSwaggerConfig {
     @Bean
     @ConditionalOnMissingBean(name = "juelApi")
     public GroupedOpenApi juelApi(@Value("${activiti.cloud.swagger.juel-base-path:}") String swaggerBasePath) {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Juel")
             .packagesToScan("org.activiti.cloud.starter.juel")
-            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .addOpenApiCustomiser(openApi ->
+                openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
+            )
             .build();
     }
 }

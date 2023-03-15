@@ -25,6 +25,7 @@ import static org.activiti.cloud.services.modeling.validation.DNSNameValidator.D
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.io.IOException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -65,31 +66,33 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                           "simple-connector.json",
-                           resourceAsByteArray("connector/connector-simple.json"),
-                           "application/json")
-                .post("/v1/models/{modelId}/validate",
-                      connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "simple-connector.json",
+                resourceAsByteArray("connector/connector-simple.json"),
+                "application/json"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
-       final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                           "simple-connector.json",
-                           resourceAsByteArray("connector/connector-simple.json"),
-                           "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                      connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "simple-connector.json",
+                resourceAsByteArray("connector/connector-simple.json"),
+                "text/plain"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 
     @Test
@@ -97,15 +100,16 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                        "connector-with-events.json",
-                        resourceAsByteArray("connector/connector-with-events.json"),
-                        "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                        connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "connector-with-events.json",
+                resourceAsByteArray("connector/connector-with-events.json"),
+                "text/plain"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 
     @Test
@@ -113,22 +117,25 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-simple-connector.json",
-                                   resourceAsByteArray("connector/invalid-simple-connector.json"),
-                                   "application/json")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                .hasValidationErrors("extraneous key [icon] is not permitted",
-                                     "extraneous key [output] is not permitted",
-                                     "extraneous key [input] is not permitted",
-                                     "required key [id] not found",
-                                     "required key [name] not found");
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-simple-connector.json",
+                    resourceAsByteArray("connector/invalid-simple-connector.json"),
+                    "application/json"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "extraneous key [icon] is not permitted",
+                "extraneous key [output] is not permitted",
+                "extraneous key [input] is not permitted",
+                "required key [id] not found",
+                "required key [name] not found"
+            );
     }
 
     @Test
@@ -136,57 +143,68 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-json-connector.json",
-                                   resourceAsByteArray("connector/invalid-json-connector.json"),
-                                   "application/json")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSyntacticValidationException()
-                .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-json-connector.json",
+                    resourceAsByteArray("connector/invalid-json-connector.json"),
+                    "application/json"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSyntacticValidationException()
+            .hasValidationErrors(
+                "org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]"
+            );
     }
 
     @Test
-    public void should_throwSyntacticValidationException_when_validatingInvalidConnectorTextContentType() throws IOException {
-       final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
-        assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-json-connector.json",
-                                   resourceAsByteArray("connector/invalid-json-connector.json"),
-                                   "text/plain")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSyntacticValidationException()
-                .hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
-    }
-
-    @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameTooLong() throws IOException {
+    public void should_throwSyntacticValidationException_when_validatingInvalidConnectorTextContentType()
+        throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-connector-name-too-long.json",
-                                   resourceAsByteArray("connector/invalid-connector-name-too-long.json"),
-                                   "text/plain")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-json-connector.json",
+                    resourceAsByteArray("connector/invalid-json-connector.json"),
+                    "text/plain"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSyntacticValidationException()
+            .hasValidationErrors(
+                "org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]"
+            );
+    }
 
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                .hasValidationErrors("expected maxLength: 26, actual: 27",
-                                     "string [123456789_123456789_1234567] does not match pattern " + DNS_LABEL_REGEX);
+    @Test
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameTooLong()
+        throws IOException {
+        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+
+        assertThatResponse(
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-too-long.json",
+                    resourceAsByteArray("connector/invalid-connector-name-too-long.json"),
+                    "text/plain"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected maxLength: 26, actual: 27",
+                "string [123456789_123456789_1234567] does not match pattern " + DNS_LABEL_REGEX
+            );
     }
 
     @Test
@@ -194,73 +212,82 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-connector-name-empty.json",
-                                   resourceAsByteArray("connector/invalid-connector-name-empty.json"),
-                                   "text/plain")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                .hasValidationErrors("expected minLength: 1, actual: 0",
-                                     "string [] does not match pattern " + DNS_LABEL_REGEX);
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-empty.json",
+                    resourceAsByteArray("connector/invalid-connector-name-empty.json"),
+                    "text/plain"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected minLength: 1, actual: 0",
+                "string [] does not match pattern " + DNS_LABEL_REGEX
+            );
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore()
+        throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-connector-name-with-underscore.json",
-                                   resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
-                                   "text/plain")
-                        .post("/v1/models/{modelId}/validate",
-                              connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                .hasValidationErrors("string [name_with_underscore] does not match pattern " + DNS_LABEL_REGEX);
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-with-underscore.json",
+                    resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
+                    "text/plain"
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("string [name_with_underscore] does not match pattern " + DNS_LABEL_REGEX);
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase()
+        throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                   "invalid-connector-name-with-uppercase.json",
-                            resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
-                            CONTENT_TYPE_JSON)
-                    .post("/v1/models/{modelId}/validate",
-                        connectorModel.getId())
-                    .then()
-
-                    .expect(status().isBadRequest()))
+            given()
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-with-uppercase.json",
+                    resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
+                    CONTENT_TYPE_JSON
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
             .isSemanticValidationException()
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
     }
 
     @Test
-    public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions() throws IOException {
+    public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
+        throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                        "connector-with-custom-type.json",
-                        resourceAsByteArray("connector/connector-with-custom-type.json"),
-                        "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                        connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "connector-with-custom-type.json",
+                resourceAsByteArray("connector/connector-with-custom-type.json"),
+                "text/plain"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 
     @Test
@@ -268,34 +295,37 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                        "connector-with-errors.json",
-                        resourceAsByteArray("connector/connector-with-errors.json"),
-                        "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                        connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "connector-with-errors.json",
+                resourceAsByteArray("connector/connector-with-errors.json"),
+                "text/plain"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorErrorInvalidProperty() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorErrorInvalidProperty()
+        throws IOException {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         assertThatResponse(
-                given()
-                        .multiPart("file",
-                                "connector-with-errors-invalid-property.json",
-                                resourceAsByteArray("connector/connector-with-errors-invalid-property.json"),
-                                CONTENT_TYPE_JSON)
-                        .post("/v1/models/{modelId}/validate",
-                                connectorModel.getId())
-                        .then()
-
-                        .expect(status().isBadRequest()))
-                .isSemanticValidationException()
-                .hasValidationErrors("extraneous key [invalid] is not permitted");
+            given()
+                .multiPart(
+                    "file",
+                    "connector-with-errors-invalid-property.json",
+                    resourceAsByteArray("connector/connector-with-errors-invalid-property.json"),
+                    CONTENT_TYPE_JSON
+                )
+                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("extraneous key [invalid] is not permitted");
     }
 
     @Test
@@ -303,14 +333,15 @@ public class ConnectorValidationControllerIT {
         final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         given()
-                .multiPart("file",
-                        "connector-with-event-model.json",
-                        resourceAsByteArray("connector/connector-with-event-model.json"),
-                        "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                        connectorModel.getId())
-                .then()
-                .expect(status().isNoContent())
-                .body(isEmptyString());
+            .multiPart(
+                "file",
+                "connector-with-event-model.json",
+                resourceAsByteArray("connector/connector-with-event-model.json"),
+                "text/plain"
+            )
+            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
     }
 }

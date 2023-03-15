@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
@@ -81,8 +82,11 @@ public class ConnectorModelControllerIT {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
         mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("connector-name"))))
+            .perform(
+                post("/v1/projects/{projectId}/models", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(connectorModel("connector-name")))
+            )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo("connector-name")));
     }
@@ -91,12 +95,16 @@ public class ConnectorModelControllerIT {
     public void should_throwRequiredFieldException_when_creatingConnectorWithNameNull() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel(null))));
+        ResultActions resultActions = mockMvc.perform(
+            post("/v1/projects/{projectId}/models", project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel(null)))
+        );
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.required")
+        assertThatResponse(resultActions.andReturn())
+            .isValidationException()
+            .hasValidationErrorCodes("field.required")
             .hasValidationErrorMessages("The model name is required");
     }
 
@@ -104,12 +112,16 @@ public class ConnectorModelControllerIT {
     public void should_throwEmptyFieldException_when_creatingConnectorModelWithNameEmpty() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel(""))));
+        ResultActions resultActions = mockMvc.perform(
+            post("/v1/projects/{projectId}/models", project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("")))
+        );
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException().hasValidationErrorCodes("field.empty")
+        assertThatResponse(resultActions.andReturn())
+            .isValidationException()
+            .hasValidationErrorCodes("field.empty")
             .hasValidationErrorMessages("The model name cannot be empty");
     }
 
@@ -117,23 +129,30 @@ public class ConnectorModelControllerIT {
     public void should_throwTooLongNameException_when_createConnectorModelWithNameTooLong() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567"))));
+        ResultActions resultActions = mockMvc.perform(
+            post("/v1/projects/{projectId}/models", project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567")))
+        );
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
+        assertThatResponse(resultActions.andReturn())
+            .isValidationException()
             .hasValidationErrorCodes("length.greater")
-            .hasValidationErrorMessages("The model name length cannot be greater than 26: '123456789_123456789_1234567'");
+            .hasValidationErrorMessages(
+                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+            );
     }
 
     @Test
     public void should_create_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
+        ResultActions resultActions = mockMvc.perform(
+            post("/v1/projects/{projectId}/models", project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore")))
+        );
 
         resultActions.andExpect(status().isCreated());
     }
@@ -142,21 +161,25 @@ public class ConnectorModelControllerIT {
     public void should_create_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
         Project project = projectRepository.createProject(project("project-with-connectors"));
 
-        ResultActions resultActions = mockMvc
-            .perform(post("/v1/projects/{projectId}/models", project.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
+        ResultActions resultActions = mockMvc.perform(
+            post("/v1/projects/{projectId}/models", project.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase")))
+        );
 
         resultActions.andExpect(status().isCreated());
     }
-
 
     @Test
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModel() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("updated-connector-name"))))
+            .perform(
+                put("/v1/models/{modelId}", connectorModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(connectorModel("updated-connector-name")))
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
     }
@@ -166,8 +189,11 @@ public class ConnectorModelControllerIT {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel(null))))
+            .perform(
+                put("/v1/models/{modelId}", connectorModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(connectorModel(null)))
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("connector-name")));
     }
@@ -176,12 +202,15 @@ public class ConnectorModelControllerIT {
     public void should_throwEmptyNameException_when_updatingConnectorModelWithNameEmpty() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
-        ResultActions resultActions = mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel(""))));
+        ResultActions resultActions = mockMvc.perform(
+            put("/v1/models/{modelId}", connectorModel.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("")))
+        );
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
+        assertThatResponse(resultActions.andReturn())
+            .isValidationException()
             .hasValidationErrorCodes("field.empty")
             .hasValidationErrorMessages("The model name cannot be empty");
     }
@@ -190,24 +219,30 @@ public class ConnectorModelControllerIT {
     public void should_throwBadNameException_when_updatingConnectorModelWithNameTooLong() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
-        ResultActions resultActions = mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567"))));
+        ResultActions resultActions = mockMvc.perform(
+            put("/v1/models/{modelId}", connectorModel.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567")))
+        );
 
         resultActions.andExpect(status().isBadRequest());
-        assertThatResponse(resultActions.andReturn()).isValidationException()
+        assertThatResponse(resultActions.andReturn())
+            .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'");
+                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+            );
     }
 
     @Test
     public void should_update_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
-        ResultActions resultActions = mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore"))));
+        ResultActions resultActions = mockMvc.perform(
+            put("/v1/models/{modelId}", connectorModel.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("name_with_underscore")))
+        );
 
         resultActions.andExpect(status().isOk());
     }
@@ -216,9 +251,11 @@ public class ConnectorModelControllerIT {
     public void should_update_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
         Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
-        ResultActions resultActions = mockMvc
-            .perform(put("/v1/models/{modelId}", connectorModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase"))));
+        ResultActions resultActions = mockMvc.perform(
+            put("/v1/models/{modelId}", connectorModel.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(connectorModel("NameWithUppercase")))
+        );
 
         resultActions.andExpect(status().isOk());
     }

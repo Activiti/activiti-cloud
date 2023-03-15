@@ -24,7 +24,10 @@ public class CollectionModelConverter extends InternalModelConverter<ListRespons
 
     @Override
     protected boolean applies(JavaType javaType) {
-        return CollectionModel.class.equals(javaType.getRawClass()) && EntityModel.class.equals(javaType.containedType(0).getRawClass());
+        return (
+            CollectionModel.class.equals(javaType.getRawClass()) &&
+            EntityModel.class.equals(javaType.containedType(0).getRawClass())
+        );
     }
 
     @Override
@@ -36,5 +39,4 @@ public class CollectionModelConverter extends InternalModelConverter<ListRespons
     protected JavaType getContainedType(JavaType javaType) {
         return javaType.containedType(0).containedType(0);
     }
-
 }

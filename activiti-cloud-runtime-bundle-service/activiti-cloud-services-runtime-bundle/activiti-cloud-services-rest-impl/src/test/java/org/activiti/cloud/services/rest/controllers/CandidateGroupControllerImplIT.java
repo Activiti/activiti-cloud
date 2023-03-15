@@ -55,7 +55,9 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(CandidateGroupControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
+@Import(
+    {
+        CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
@@ -64,7 +66,9 @@ import org.springframework.test.web.servlet.MvcResult;
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class})
+        StreamConfig.class,
+    }
+)
 public class CandidateGroupControllerImplIT {
 
     @Autowired
@@ -94,42 +98,37 @@ public class CandidateGroupControllerImplIT {
 
     @Test
     public void getGroupCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-
-        List<String> stringList = Arrays.asList("hrgroup",
-                                                "testgroup");
+        List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-groups",
-                                                    1).accept(MediaType.APPLICATION_JSON))
+        MvcResult result =
+            this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[0].entry.group")
-                .isEqualTo("hrgroup");
+            .node("list.entries[0].entry.group")
+            .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[1].entry.group")
-                .isEqualTo("testgroup");
+            .node("list.entries[1].entry.group")
+            .isEqualTo("testgroup");
     }
 
     @Test
     public void getGroupCandidatesShouldHaveProperHALFormat() throws Exception {
-
-        List<String> stringList = Arrays.asList("hrgroup",
-                                                "testgroup");
+        List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-groups",
-                                                    1).accept(MediaTypes.HAL_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(get("/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateGroups[0].group")
-                .isEqualTo("hrgroup");
+            .node("_embedded.candidateGroups[0].group")
+            .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateGroups[1].group")
-                .isEqualTo("testgroup");
+            .node("_embedded.candidateGroups[1].group")
+            .isEqualTo("testgroup");
     }
-
 }

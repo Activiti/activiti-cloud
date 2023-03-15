@@ -27,24 +27,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
-@Import({IdentitySearchCacheConfiguration.class, ActivitiKeycloakAutoConfiguration.class})
+@Import({ IdentitySearchCacheConfiguration.class, ActivitiKeycloakAutoConfiguration.class })
 public class KeycloakClientApplication {
 
     @Bean
-    public SecurityContextTokenProvider securityContextTokenProvider(@Value("${keycloak.auth-server-url:}") String authServerUrl,
-                                                                     @Value("${keycloak.realm:}") String realm,
-                                                                     @Value("${keycloak.user:testuser}") String user) {
-        return () -> Optional.of(new KeycloakTokenProducer(authServerUrl, realm)
-                                     .withTestUser(user)
-                                     .withTestPassword("password")
-                                     .withResource("activiti")
-                                     .getAccessTokenString());
+    public SecurityContextTokenProvider securityContextTokenProvider(
+        @Value("${keycloak.auth-server-url:}") String authServerUrl,
+        @Value("${keycloak.realm:}") String realm,
+        @Value("${keycloak.user:testuser}") String user
+    ) {
+        return () ->
+            Optional.of(
+                new KeycloakTokenProducer(authServerUrl, realm)
+                    .withTestUser(user)
+                    .withTestPassword("password")
+                    .withResource("activiti")
+                    .getAccessTokenString()
+            );
     }
 
-
-
-	public static void main(String[] args) {
-		SpringApplication.run(KeycloakClientApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(KeycloakClientApplication.class, args);
+    }
 }

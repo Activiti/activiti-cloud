@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import java.util.Date;
+import java.util.Optional;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessResumedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class ProcessResumedEventHandler implements QueryEventHandler {
 
@@ -38,8 +37,12 @@ public class ProcessResumedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessResumedEvent processResumedEvent = (CloudProcessResumedEvent) event;
         String processInstanceId = processResumedEvent.getEntity().getId();
-        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class, processInstanceId));
-        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + processInstanceId));
+        Optional<ProcessInstanceEntity> findResult = Optional.ofNullable(
+            entityManager.find(ProcessInstanceEntity.class, processInstanceId)
+        );
+        ProcessInstanceEntity processInstanceEntity = findResult.orElseThrow(() ->
+            new QueryException("Unable to find process instance with the given id: " + processInstanceId)
+        );
         processInstanceEntity.setStatus(ProcessInstance.ProcessInstanceStatus.RUNNING);
         processInstanceEntity.setLastModified(new Date(processResumedEvent.getTimestamp()));
 

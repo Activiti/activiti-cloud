@@ -66,6 +66,5 @@ public class CloudTimerProducerTest {
 
         //then
         verify(eventsAggregator).add(cloudEventScheduled);
-
     }
 }

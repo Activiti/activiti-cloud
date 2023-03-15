@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.alfresco.argument.resolver;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.web.context.request.NativeWebRequest;
-
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.web.context.request.NativeWebRequest;
 
 public class AlfrescoPageRequestParameterParserTest {
 
@@ -33,16 +33,13 @@ public class AlfrescoPageRequestParameterParserTest {
     @Test
     public void parseMaxItemsShouldReturnValueOfMaxItemsParameter() throws Exception {
         //given
-        NativeWebRequest webRequest = buildRequest(MAX_ITEMS_KEY,
-                                                   "50");
+        NativeWebRequest webRequest = buildRequest(MAX_ITEMS_KEY, "50");
 
         //when
         MaxItemsParameter maxItems = pageParameterParser.parseMaxItems(webRequest);
 
         //then
-        assertThat(maxItems)
-                .isSet()
-                .hasValue(50);
+        assertThat(maxItems).isSet().hasValue(50);
     }
 
     @Test
@@ -54,13 +51,10 @@ public class AlfrescoPageRequestParameterParserTest {
         MaxItemsParameter maxItems = pageParameterParser.parseMaxItems(webRequest);
 
         //then
-        assertThat(maxItems)
-                .isNotSet()
-                .hasValue(DEFAULT_PAGE_SIZE);
+        assertThat(maxItems).isNotSet().hasValue(DEFAULT_PAGE_SIZE);
     }
 
-    private NativeWebRequest buildRequest(String paramName,
-                                          String paramValue) {
+    private NativeWebRequest buildRequest(String paramName, String paramValue) {
         NativeWebRequest webRequest = mock(NativeWebRequest.class);
         given(webRequest.getParameter(paramName)).willReturn(paramValue);
         return webRequest;
@@ -69,16 +63,13 @@ public class AlfrescoPageRequestParameterParserTest {
     @Test
     public void parseSkipCountShouldReturnValueOfSkipCountParameter() throws Exception {
         //given
-        NativeWebRequest request = buildRequest(SKIP_COUNT_KEY,
-                                                "200");
+        NativeWebRequest request = buildRequest(SKIP_COUNT_KEY, "200");
 
         //when
         SkipCountParameter skipCount = pageParameterParser.parseSkipCount(request);
 
         //then
-        assertThat(skipCount)
-                .isSet()
-                .hasValue(200L);
+        assertThat(skipCount).isSet().hasValue(200L);
     }
 
     @Test
@@ -90,9 +81,7 @@ public class AlfrescoPageRequestParameterParserTest {
         SkipCountParameter skipCount = pageParameterParser.parseSkipCount(request);
 
         //then
-        assertThat(skipCount)
-                .isNotSet()
-                .hasValue(0L);
+        assertThat(skipCount).isNotSet().hasValue(0L);
     }
 
     @Test
@@ -106,13 +95,7 @@ public class AlfrescoPageRequestParameterParserTest {
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
 
         //then
-        assertThat(alfrescoQueryParameters.getSkipCountParameter())
-                .isNotNull()
-                .isSet()
-                .hasValue(30L);
-        assertThat(alfrescoQueryParameters.getMaxItemsParameter())
-                .isNotNull()
-                .isSet()
-                .hasValue(10);
+        assertThat(alfrescoQueryParameters.getSkipCountParameter()).isNotNull().isSet().hasValue(30L);
+        assertThat(alfrescoQueryParameters.getMaxItemsParameter()).isNotNull().isSet().hasValue(10);
     }
 }

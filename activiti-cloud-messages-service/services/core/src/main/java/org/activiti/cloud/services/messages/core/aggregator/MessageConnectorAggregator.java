@@ -17,7 +17,6 @@ package org.activiti.cloud.services.messages.core.aggregator;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-
 import org.springframework.integration.aggregator.AbstractCorrelatingMessageHandler;
 import org.springframework.integration.aggregator.CorrelationStrategy;
 import org.springframework.integration.aggregator.MessageGroupProcessor;
@@ -38,8 +37,12 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
     private volatile boolean expireGroupsUponCompletion = false;
     private volatile boolean completeGroupsWhenEmpty = false;
 
-    public MessageConnectorAggregator(MessageGroupProcessor processor, MessageGroupStore store,
-            CorrelationStrategy correlationStrategy, ReleaseStrategy releaseStrategy) {
+    public MessageConnectorAggregator(
+        MessageGroupProcessor processor,
+        MessageGroupStore store,
+        CorrelationStrategy correlationStrategy,
+        ReleaseStrategy releaseStrategy
+    ) {
         super(processor, store, correlationStrategy, releaseStrategy);
     }
 
@@ -67,15 +70,14 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
         return this.expireGroupsUponCompletion;
     }
 
-
     public boolean isCompleteGroupsWhenEmpty() {
         return completeGroupsWhenEmpty;
     }
 
-
     public void setCompleteGroupsWhenEmpty(boolean completeGroupsWhenEmpty) {
         this.completeGroupsWhenEmpty = completeGroupsWhenEmpty;
     }
+
     /**
      * Remove all completed messages from group. Complete the group if empty and remove if expired
      * If the {@link #expireGroupsUponCompletion} is true, then remove group fully.
@@ -83,17 +85,17 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
      * @param completedMessages The completed messages.
      */
     @Override
-    protected void afterRelease(MessageGroup messageGroup,
-                                @Nullable Collection<Message<?>> completedMessages) {
+    protected void afterRelease(MessageGroup messageGroup, @Nullable Collection<Message<?>> completedMessages) {
         Object groupId = messageGroup.getGroupId();
         MessageGroupStore messageStore = getMessageStore();
         boolean isCompleted = false;
 
         if (completedMessages != null && !completedMessages.isEmpty()) {
-            Collection<Message<?>> deletedMessages = messageGroup.getMessages()
-                        .stream()
-                        .filter(completedMessages::contains)
-                        .collect(Collectors.toList());
+            Collection<Message<?>> deletedMessages = messageGroup
+                .getMessages()
+                .stream()
+                .filter(completedMessages::contains)
+                .collect(Collectors.toList());
 
             if (!deletedMessages.isEmpty()) {
                 messageStore.removeMessagesFromGroup(groupId, deletedMessages);
@@ -111,5 +113,4 @@ public class MessageConnectorAggregator extends AbstractCorrelatingMessageHandle
             remove(messageGroup);
         }
     }
-
 }

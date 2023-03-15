@@ -22,7 +22,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface TestBindingsChannels {
-
     String COMMAND_CONSUMER = "commandConsumer";
 
     String AUDIT_CONSUMER = "auditConsumer";
@@ -34,9 +33,9 @@ public interface TestBindingsChannels {
     String AUDIT_PRODUCER = "auditProducer";
 
     @InputBinding(COMMAND_CONSUMER)
-    default SubscribableChannel commandConsumer()  {
+    default SubscribableChannel commandConsumer() {
         return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
-    };
+    }
 
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
@@ -57,5 +56,4 @@ public interface TestBindingsChannels {
     default MessageChannel auditProducer() {
         return MessageChannels.direct(AUDIT_PRODUCER).get();
     }
-
 }

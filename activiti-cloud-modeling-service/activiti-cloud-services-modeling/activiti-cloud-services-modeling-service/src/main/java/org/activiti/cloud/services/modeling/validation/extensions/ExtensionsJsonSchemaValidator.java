@@ -31,43 +31,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * The generic JSON extensions schema for all the models
  */
-public abstract class ExtensionsJsonSchemaValidator extends JsonSchemaModelValidator implements ModelExtensionsValidator {
+public abstract class ExtensionsJsonSchemaValidator
+    extends JsonSchemaModelValidator
+    implements ModelExtensionsValidator {
 
     @Autowired
     private JsonConverter<Model> extensionsConverter;
 
     @Override
-    public void validate(byte[] bytes,
-                         ValidationContext validationContext) {
-        super.validate(bytes,
-                       validationContext);
+    public void validate(byte[] bytes, ValidationContext validationContext) {
+        super.validate(bytes, validationContext);
 
         if (!validationContext.isEmpty()) {
-            validateExtensionsInContext(bytes,
-                                         validationContext);
+            validateExtensionsInContext(bytes, validationContext);
         }
     }
 
-    private void validateExtensionsInContext(byte[] bytes,
-                                              ValidationContext validationContext) {
-        List<ModelValidationError> validationExceptions = getValidationErrors(convertBytesToModel(bytes),
-                                                                              validationContext);
+    private void validateExtensionsInContext(byte[] bytes, ValidationContext validationContext) {
+        List<ModelValidationError> validationExceptions = getValidationErrors(
+            convertBytesToModel(bytes),
+            validationContext
+        );
         if (!validationExceptions.isEmpty()) {
-            throw new SemanticModelValidationException("Semantic model validation errors encountered: "
-                    + validationExceptions.stream().map(ModelValidationError::getDescription).collect(Collectors.joining(",")),
-                                                       validationExceptions);
+            throw new SemanticModelValidationException(
+                "Semantic model validation errors encountered: " +
+                validationExceptions
+                    .stream()
+                    .map(ModelValidationError::getDescription)
+                    .collect(Collectors.joining(",")),
+                validationExceptions
+            );
         }
     }
 
-    protected abstract List<ModelValidationError> getValidationErrors(Model model,
-                                                                      ValidationContext validationContext);
+    protected abstract List<ModelValidationError> getValidationErrors(Model model, ValidationContext validationContext);
 
     protected Model convertBytesToModel(byte[] bytes) {
         try {
             return extensionsConverter.convertToEntity(bytes);
         } catch (ModelingException ex) {
-            throw new SyntacticModelValidationException("Cannot convert json extensions to a model",
-                                                        ex);
+            throw new SyntacticModelValidationException("Cannot convert json extensions to a model", ex);
         }
     }
 }

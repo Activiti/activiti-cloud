@@ -19,6 +19,4 @@ import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEngineIntegrationChannels {
-
-}
+public class ProcessEngineIntegrationChannelsConfiguration implements ProcessEngineIntegrationChannels {}

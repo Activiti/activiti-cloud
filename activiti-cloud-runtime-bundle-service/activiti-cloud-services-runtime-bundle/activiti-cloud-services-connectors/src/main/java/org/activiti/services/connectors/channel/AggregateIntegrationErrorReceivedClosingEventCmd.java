@@ -19,11 +19,15 @@ package org.activiti.services.connectors.channel;
 import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
-class AggregateIntegrationErrorReceivedClosingEventCmd extends CommandContextCloseListenerAdapter implements Command<Void> {
+class AggregateIntegrationErrorReceivedClosingEventCmd
+    extends CommandContextCloseListenerAdapter
+    implements Command<Void> {
 
     private final AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd;
 
-    AggregateIntegrationErrorReceivedClosingEventCmd(AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd) {
+    AggregateIntegrationErrorReceivedClosingEventCmd(
+        AggregateIntegrationErrorReceivedEventCmd aggregateIntegrationErrorReceivedEventCmd
+    ) {
         this.aggregateIntegrationErrorReceivedEventCmd = aggregateIntegrationErrorReceivedEventCmd;
     }
 

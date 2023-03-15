@@ -16,6 +16,7 @@
 
 package org.activiti.services.connectors.channel;
 
+import java.util.List;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -24,36 +25,43 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.services.connectors.behavior.MQServiceTaskBehavior;
 
-import java.util.List;
-
 public class IntegrationRequestReplayer {
 
     private final RuntimeService runtimeService;
     private final ManagementService managementService;
     private final MQServiceTaskBehavior mqServiceTaskBehavior;
 
-    public IntegrationRequestReplayer(RuntimeService runtimeService,
-                                      ManagementService managementService,
-                                      MQServiceTaskBehavior mqServiceTaskBehavior) {
+    public IntegrationRequestReplayer(
+        RuntimeService runtimeService,
+        ManagementService managementService,
+        MQServiceTaskBehavior mqServiceTaskBehavior
+    ) {
         this.runtimeService = runtimeService;
         this.managementService = managementService;
         this.mqServiceTaskBehavior = mqServiceTaskBehavior;
     }
 
     public void replay(String executionId, String flowNodeId) {
-        List<Execution> executions = runtimeService.createExecutionQuery()
+        List<Execution> executions = runtimeService
+            .createExecutionQuery()
             .executionId(executionId)
             .activityId(flowNodeId)
             .list();
         if (!executions.isEmpty()) {
             ExecutionEntity execution = (ExecutionEntity) executions.get(0);
-            managementService.executeCommand((Command<Void>) commandContext -> {
-                mqServiceTaskBehavior.execute(execution);
-                return null;
-            });
+            managementService.executeCommand(
+                (Command<Void>) commandContext -> {
+                    mqServiceTaskBehavior.execute(execution);
+                    return null;
+                }
+            );
         } else {
-            String message = "Unable to replay integration request because no task is in this RB is waiting for integration result with execution id `" +
-                executionId + ", flow node id `" + flowNodeId + "'";
+            String message =
+                "Unable to replay integration request because no task is in this RB is waiting for integration result with execution id `" +
+                executionId +
+                ", flow node id `" +
+                flowNodeId +
+                "'";
             throw new ActivitiException(message);
         }
     }

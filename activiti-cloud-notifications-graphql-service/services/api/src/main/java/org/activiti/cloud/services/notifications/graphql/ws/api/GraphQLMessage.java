@@ -15,19 +15,18 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 @JsonInclude(value = Include.ALWAYS)
 public class GraphQLMessage {
 
-	private Map<String, Object> payload;
-	private String id;
-	private GraphQLMessageType type;
+    private Map<String, Object> payload;
+    private String id;
+    private GraphQLMessageType type;
 
     private GraphQLMessage(Builder builder) {
         this.type = builder.type;
@@ -35,58 +34,57 @@ public class GraphQLMessage {
         this.payload = builder.payload;
     }
 
-    GraphQLMessage() {
-	}
+    GraphQLMessage() {}
 
     public GraphQLMessage(String id, GraphQLMessageType type) {
         this(id, type, Collections.emptyMap());
     }
 
-	public GraphQLMessage(String id, GraphQLMessageType type, Map<String, Object> payload) {
-		super();
-		this.payload = payload;
-		this.id = id;
-		this.type = type;
-	}
+    public GraphQLMessage(String id, GraphQLMessageType type, Map<String, Object> payload) {
+        super();
+        this.payload = payload;
+        this.id = id;
+        this.type = type;
+    }
 
-	public Map<String, Object> getPayload() {
-		return payload;
-	}
+    public Map<String, Object> getPayload() {
+        return payload;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public GraphQLMessageType getType() {
-		return type;
-	}
+    public GraphQLMessageType getType() {
+        return type;
+    }
 
-	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
         if (!(other instanceof GraphQLMessage)) {
-			return false;
-		}
-		GraphQLMessage otherMsg = (GraphQLMessage) other;
-		return (Objects.equals(this.payload, otherMsg.getPayload()));
-	}
+            return false;
+        }
+        GraphQLMessage otherMsg = (GraphQLMessage) other;
+        return (Objects.equals(this.payload, otherMsg.getPayload()));
+    }
 
-	@Override
-	public int hashCode() {
-		return (Objects.hashCode(this.payload) * 23);
-	}
+    @Override
+    public int hashCode() {
+        return (Objects.hashCode(this.payload) * 23);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
-		sb.append(" [payload=");
-		sb.append(this.payload);
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+        sb.append(" [payload=");
+        sb.append(this.payload);
         sb.append(", id=").append(this.id);
         sb.append(", type=").append(this.type).append("]");
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
     /**
      * Creates builder to build {@link GraphQLMessage}.
@@ -97,12 +95,10 @@ public class GraphQLMessage {
     }
 
     public interface ITypeStage {
-
         public IBuildStage type(GraphQLMessageType type);
     }
 
     public interface IBuildStage {
-
         public IBuildStage id(String id);
 
         public IBuildStage payload(Map<String, Object> payload);
@@ -119,8 +115,7 @@ public class GraphQLMessage {
         private String id;
         private Map<String, Object> payload = Collections.emptyMap();
 
-        private Builder() {
-        }
+        private Builder() {}
 
         @Override
         public IBuildStage type(GraphQLMessageType type) {
@@ -145,7 +140,4 @@ public class GraphQLMessage {
             return new GraphQLMessage(this);
         }
     }
-
-
-
 }

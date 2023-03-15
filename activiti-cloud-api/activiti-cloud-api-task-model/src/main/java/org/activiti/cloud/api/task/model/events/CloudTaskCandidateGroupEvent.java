@@ -19,7 +19,7 @@ import org.activiti.api.task.model.TaskCandidateGroup;
 import org.activiti.api.task.model.events.TaskCandidateGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudTaskCandidateGroupEvent extends CloudRuntimeEvent<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>,
-                                                      TaskCandidateGroupEvent {
-
-}
+public interface CloudTaskCandidateGroupEvent
+    extends
+        CloudRuntimeEvent<TaskCandidateGroup, TaskCandidateGroupEvent.TaskCandidateGroupEvents>,
+        TaskCandidateGroupEvent {}

@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;

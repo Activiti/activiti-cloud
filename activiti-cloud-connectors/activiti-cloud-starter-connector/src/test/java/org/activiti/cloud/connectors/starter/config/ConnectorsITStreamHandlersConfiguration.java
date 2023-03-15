@@ -35,7 +35,10 @@ public class ConnectorsITStreamHandlersConfiguration {
     @FunctionBinding(input = RuntimeMockStreams.INTEGRATION_RESULT_CONSUMER)
     @Bean
     public Consumer<Flux<IntegrationResult>> integrationMockResultConsumer(ConnectorsITStreamHandlers streamHandlers) {
-        return flux -> flux.log("integrationMockResultConsumer", Level.INFO).subscribe(result -> streamHandlers.consumeIntegrationResultsMock(result));
+        return flux ->
+            flux
+                .log("integrationMockResultConsumer", Level.INFO)
+                .subscribe(result -> streamHandlers.consumeIntegrationResultsMock(result));
     }
 
     @FunctionBinding(input = RuntimeMockStreams.INTEGRATION_ERROR_CONSUMER)

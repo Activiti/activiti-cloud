@@ -15,12 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.validation.project;
 
+import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
-
-import java.util.stream.Stream;
 
 /**
  * Implementation of {@link ProjectValidator} for validating that a project has at least one project.
@@ -37,13 +36,12 @@ public class ProjectConsistencyValidator implements ProjectValidator {
     }
 
     @Override
-    public Stream<ModelValidationError> validate(Project project,
-                                                 ValidationContext validationContext) {
-        return validationContext.getAvailableModels(processModelType)
-                .stream()
-                .findFirst()
-                .map(model -> Stream.<ModelValidationError>empty())
-                .orElseGet(() -> Stream.of(
-                    new ModelValidationError(EMPTY_PROJECT_PROBLEM, EMPTY_PROJECT_DESCRIPTION)));
+    public Stream<ModelValidationError> validate(Project project, ValidationContext validationContext) {
+        return validationContext
+            .getAvailableModels(processModelType)
+            .stream()
+            .findFirst()
+            .map(model -> Stream.<ModelValidationError>empty())
+            .orElseGet(() -> Stream.of(new ModelValidationError(EMPTY_PROJECT_PROBLEM, EMPTY_PROJECT_DESCRIPTION)));
     }
 }

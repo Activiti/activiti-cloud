@@ -27,14 +27,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@RequestMapping(value = "/v1/process-instances/{processInstanceId}/variables", produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(
+    value = "/v1/process-instances/{processInstanceId}/variables",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public interface ProcessInstanceVariableController {
-
     @RequestMapping(method = RequestMethod.GET)
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId);
 
     @RequestMapping(method = RequestMethod.PUT)
-    ResponseEntity<Void> updateVariables(@PathVariable String processInstanceId,
-                                      @RequestBody SetProcessVariablesPayload setProcessVariablesPayload);
-
+    ResponseEntity<Void> updateVariables(
+        @PathVariable String processInstanceId,
+        @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
+    );
 }

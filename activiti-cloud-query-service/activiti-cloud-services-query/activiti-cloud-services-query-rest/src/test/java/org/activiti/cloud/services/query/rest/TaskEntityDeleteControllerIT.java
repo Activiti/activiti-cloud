@@ -15,7 +15,19 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.List;
+import javax.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -40,26 +52,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-import java.util.List;
-
-import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @TestPropertySource(properties = "activiti.rest.enable-deletion=true")
 @WebMvcTest(TaskDeleteController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
@@ -108,19 +105,16 @@ public class TaskEntityDeleteControllerIT {
     }
 
     @Test
-    public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception{
-
+    public void deleteTasksShouldReturnAllTasksAndDeleteThem() throws Exception {
         //given
         List<TaskEntity> taskEntities = Collections.singletonList(buildDefaultTask());
-        given(taskRepository.findAll(any(Predicate.class)))
-                .willReturn(taskEntities);
+        given(taskRepository.findAll(any(Predicate.class))).willReturn(taskEntities);
 
         //when
-        mockMvc.perform(delete("/admin/v1/tasks")
-                .with(csrf())
-                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(delete("/admin/v1/tasks").with(csrf()).accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk());
 
         verify(taskRepository).deleteAll(taskEntities);
     }

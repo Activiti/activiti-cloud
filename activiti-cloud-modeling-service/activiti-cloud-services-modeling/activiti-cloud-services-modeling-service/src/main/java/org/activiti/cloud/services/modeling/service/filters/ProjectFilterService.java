@@ -16,26 +16,28 @@
 
 package org.activiti.cloud.services.modeling.service.filters;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProjectFilterService {
 
     private final Map<String, ProjectFilter> projectFilters;
 
     public ProjectFilterService(List<ProjectFilter> projectFilters) {
-        this.projectFilters = projectFilters.stream()
-            .collect(Collectors.toMap(ProjectFilter::filterName, projectFilter -> projectFilter));
+        this.projectFilters =
+            projectFilters
+                .stream()
+                .collect(Collectors.toMap(ProjectFilter::filterName, projectFilter -> projectFilter));
     }
 
     public List<String> getFilterIds(List<String> filterNames) {
-        List<List<String>> allFilters = filterNames.stream()
+        List<List<String>> allFilters = filterNames
+            .stream()
             .filter(StringUtils::isNotBlank)
             .map(String::toLowerCase)
             .map(projectFilters::get)

@@ -34,7 +34,8 @@ public class StandAloneTaskFilterTest {
         Predicate extendedPredicate = standAloneTaskFilter.extend(currentPredicate);
 
         //then
-        assertThat(extendedPredicate).isEqualTo(QTaskEntity.taskEntity.processInstanceId.isNull().and(currentPredicate));
+        assertThat(extendedPredicate)
+            .isEqualTo(QTaskEntity.taskEntity.processInstanceId.isNull().and(currentPredicate));
     }
 
     @Test

@@ -20,12 +20,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface StreamProducer {
-
     String PRODUCER = "producer";
 
     @OutputBinding(PRODUCER)
     default MessageChannel producer() {
         return MessageChannels.direct(PRODUCER).get();
     }
-
 }

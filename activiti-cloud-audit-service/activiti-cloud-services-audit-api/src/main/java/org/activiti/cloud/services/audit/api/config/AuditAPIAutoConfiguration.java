@@ -28,5 +28,4 @@ public class AuditAPIAutoConfiguration {
     public EventsLinkRelationProvider eventsRelProvider() {
         return new EventsLinkRelationProvider();
     }
-
 }

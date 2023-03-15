@@ -31,13 +31,17 @@ public class RuntimeBundleSecurityAutoConfiguration {
     private final Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter;
 
     @Autowired
-    public RuntimeBundleSecurityAutoConfiguration(Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter) {
+    public RuntimeBundleSecurityAutoConfiguration(
+        Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter
+    ) {
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
     }
 
     @Primary
     @Bean("runtimeBundleJwtUserInfoUriAuthenticationConverter")
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter((JwtUserInfoUriAuthenticationConverter) jwtUserInfoUriAuthenticationConverter);
+        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter(
+            (JwtUserInfoUriAuthenticationConverter) jwtUserInfoUriAuthenticationConverter
+        );
     }
 }

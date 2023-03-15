@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.config;
 
+import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubProtocolHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
@@ -40,12 +42,9 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
-
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnClass({GraphQL.class, EnableWebSocketMessageBroker.class})
+@ConditionalOnClass({ GraphQL.class, EnableWebSocketMessageBroker.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
 public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
@@ -57,7 +56,8 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         private final GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
 
         public DefaultGraphQLWebSocketMessageBrokerConfiguration(
-            GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties) {
+            GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties
+        ) {
             this.configurationProperties = configurationProperties;
         }
 
@@ -71,26 +71,31 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
         @Override
         public void registerStompEndpoints(StompEndpointRegistry registry) {
-            registry.addEndpoint(configurationProperties.getEndpoint())
+            registry
+                .addEndpoint(configurationProperties.getEndpoint())
                 .setHandshakeHandler(new DefaultHandshakeHandler())
                 .setAllowedOrigins(configurationProperties.getAllowedOrigins())
-                .addInterceptors(new HttpSessionHandshakeInterceptor())
-            ;
+                .addInterceptors(new HttpSessionHandshakeInterceptor());
         }
 
         @Bean
         @ConditionalOnMissingBean(GraphQLBrokerMessageHandler.class)
-        public MessageHandler graphQLBrokerMessageHandler(SubscribableChannel clientInboundChannel,
+        public MessageHandler graphQLBrokerMessageHandler(
+            SubscribableChannel clientInboundChannel,
             MessageChannel clientOutboundChannel,
             SubscribableChannel brokerChannel,
             TaskScheduler messageBrokerTaskScheduler,
-            GraphQLSubscriptionExecutor graphQLSubscriptionExecutor) {
-            GraphQLBrokerMessageHandler messageHandler = new GraphQLBrokerMessageHandler(clientInboundChannel,
+            GraphQLSubscriptionExecutor graphQLSubscriptionExecutor
+        ) {
+            GraphQLBrokerMessageHandler messageHandler = new GraphQLBrokerMessageHandler(
+                clientInboundChannel,
                 clientOutboundChannel,
                 brokerChannel,
-                graphQLSubscriptionExecutor);
+                graphQLSubscriptionExecutor
+            );
 
-            messageHandler.setTaskScheduler(messageBrokerTaskScheduler)
+            messageHandler
+                .setTaskScheduler(messageBrokerTaskScheduler)
                 .setBufferCount(configurationProperties.getBufferCount())
                 .setBufferTimeSpanMs(configurationProperties.getBufferTimeSpanMs());
 
@@ -100,10 +105,14 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
         @Override
         @Bean
         @ConditionalOnMissingBean(SubProtocolWebSocketHandler.class)
-        public WebSocketHandler subProtocolWebSocketHandler(AbstractSubscribableChannel clientInboundChannel,
-                AbstractSubscribableChannel clientOutboundChannel) {
-            SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(clientInboundChannel,
-                                                                                  clientOutboundChannel);
+        public WebSocketHandler subProtocolWebSocketHandler(
+            AbstractSubscribableChannel clientInboundChannel,
+            AbstractSubscribableChannel clientOutboundChannel
+        ) {
+            SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(
+                clientInboundChannel,
+                clientOutboundChannel
+            );
 
             handler.addProtocolHandler(graphQLBrokerSubProtocolHandler());
             handler.setDefaultProtocolHandler(graphQLBrokerSubProtocolHandler());
@@ -134,5 +143,4 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
             return container;
         }
     }
-
 }

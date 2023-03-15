@@ -41,29 +41,33 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(after = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class},
-                   before = FunctionConfiguration.class)
+@AutoConfiguration(
+    after = { BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class },
+    before = FunctionConfiguration.class
+)
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
 
     @Bean(name = "connectorBindingPostProcessor")
-    public BeanPostProcessor connectorBindingPostProcessor(FunctionAnnotationService functionAnnotationService,
-                                                           IntegrationFlowContext integrationFlowContext,
-                                                           Function<String, String> resolveExpression) {
+    public BeanPostProcessor connectorBindingPostProcessor(
+        FunctionAnnotationService functionAnnotationService,
+        IntegrationFlowContext integrationFlowContext,
+        Function<String, String> resolveExpression
+    ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (Connector.class.isInstance(bean) || ConsumerConnector.class.isInstance(bean)) {
-
                     final AtomicReference<String> responseDestination = new AtomicReference<>();
 
-                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
+                    Optional
+                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, ConnectorBinding.class))
                         .ifPresent(connectorBinding -> {
                             Type functionType = discoverFunctionType(bean, beanName);
 
-                            FunctionRegistration functionRegistration = new FunctionRegistration(bean).type(functionType);
+                            FunctionRegistration functionRegistration = new FunctionRegistration(bean)
+                                .type(functionType);
 
-                            registerFunctionRegistration(beanName,
-                                                         functionRegistration);
+                            registerFunctionRegistration(beanName, functionRegistration);
 
                             responseDestination.set(connectorBinding.outputHeader());
 
@@ -73,8 +77,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                                 Message<?> response = null;
                                 if (result != null) {
-                                    response = MessageBuilder.withPayload(result)
-                                        .build();
+                                    response = MessageBuilder.withPayload(result).build();
                                     String destination = headers.get(responseDestination.get(), String.class);
 
                                     if (StringUtils.hasText(destination)) {
@@ -86,19 +89,24 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 return response;
                             };
 
-                            GenericSelector<Message<?>> selector = Optional.ofNullable(connectorBinding)
+                            GenericSelector<Message<?>> selector = Optional
+                                .ofNullable(connectorBinding)
                                 .map(ConnectorBinding::condition)
                                 .filter(StringUtils::hasText)
                                 .map(resolveExpression)
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            IntegrationFlow connectorFlow = IntegrationFlows.from(getGatewayInterface(Function.class.isInstance(bean)),
-                                                                                                      (gateway) -> gateway.replyTimeout(0L)
-                                                                                                                          .errorChannel("errorChannel"))
+                            IntegrationFlow connectorFlow = IntegrationFlows
+                                .from(
+                                    getGatewayInterface(Function.class.isInstance(bean)),
+                                    gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
+                                )
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationRequest")
-                                .filter(selector, filter -> filter.discardChannel("nullChannel")
-                                                                  .throwExceptionOnRejection(true))
+                                .filter(
+                                    selector,
+                                    filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                )
                                 .handle(Message.class, handler)
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationResult")
                                 .bridge()
@@ -106,17 +114,16 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             String inputChannel = connectorBinding.input();
 
-                            IntegrationFlow inputChannelFlow = IntegrationFlows.from(inputChannel)
+                            IntegrationFlow inputChannelFlow = IntegrationFlows
+                                .from(inputChannel)
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
                                 .get();
 
-                            integrationFlowContext.registration(inputChannelFlow)
-                                .register();
+                            integrationFlowContext.registration(inputChannelFlow).register();
                         });
                 }
                 return bean;
             }
         };
     }
-
 }

@@ -43,8 +43,10 @@ public class TaskCandidateGroupAddedEventConverter extends BaseEventToEntityConv
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCandidateGroupAddedEventEntity eventEntity = (TaskCandidateGroupAddedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateGroupAddedEventImpl(eventEntity.getEventId(),
-                                                         eventEntity.getTimestamp(),
-                                                         eventEntity.getCandidateGroup());
+        return new CloudTaskCandidateGroupAddedEventImpl(
+            eventEntity.getEventId(),
+            eventEntity.getTimestamp(),
+            eventEntity.getCandidateGroup()
+        );
     }
 }

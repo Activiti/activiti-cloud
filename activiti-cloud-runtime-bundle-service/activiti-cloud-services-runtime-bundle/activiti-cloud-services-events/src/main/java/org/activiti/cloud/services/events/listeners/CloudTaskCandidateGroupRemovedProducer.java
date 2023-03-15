@@ -19,13 +19,16 @@ import org.activiti.api.task.runtime.events.TaskCandidateGroupRemovedEvent;
 import org.activiti.api.task.runtime.events.listener.TaskCandidateEventListener;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
 
-public class CloudTaskCandidateGroupRemovedProducer implements TaskCandidateEventListener<TaskCandidateGroupRemovedEvent> {
+public class CloudTaskCandidateGroupRemovedProducer
+    implements TaskCandidateEventListener<TaskCandidateGroupRemovedEvent> {
 
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskCandidateGroupRemovedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                                  ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskCandidateGroupRemovedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

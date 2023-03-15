@@ -22,5 +22,4 @@ import org.springframework.messaging.MessagingException;
 public interface ConsumerGateway extends Consumer<Message<?>> {
     @Override
     void accept(Message<?> message) throws MessagingException;
-
 }

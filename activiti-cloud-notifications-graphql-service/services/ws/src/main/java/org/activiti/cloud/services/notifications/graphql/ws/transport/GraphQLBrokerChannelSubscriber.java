@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
+import graphql.ExecutionResult;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import graphql.ExecutionResult;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.reactivestreams.Subscriber;
@@ -36,37 +35,38 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.UnicastProcessor;
 
-public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResult>{
+public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResult> {
 
     private static Logger log = LoggerFactory.getLogger(GraphQLBrokerChannelSubscriber.class);
 
-	private final MessageChannel outboundChannel;
+    private final MessageChannel outboundChannel;
 
-	private final Message<?> message;
+    private final Message<?> message;
 
-	private final String operationMessageId;
+    private final String operationMessageId;
 
-	private final UnicastProcessor<ExecutionResult> processor = UnicastProcessor.create();
+    private final UnicastProcessor<ExecutionResult> processor = UnicastProcessor.create();
 
     private final AtomicReference<Subscription> subscriptionRef = new AtomicReference<>();
 
     private final Disposable control;
 
-	public GraphQLBrokerChannelSubscriber(Message<?> message,  String operationMessageId,
-			MessageChannel outboundChannel,
-			long bufferTimeSpanMs, int bufferCount)
-	{
-		this.outboundChannel = outboundChannel;
-		this.operationMessageId = operationMessageId;
-		this.message = message;
+    public GraphQLBrokerChannelSubscriber(
+        Message<?> message,
+        String operationMessageId,
+        MessageChannel outboundChannel,
+        long bufferTimeSpanMs,
+        int bufferCount
+    ) {
+        this.outboundChannel = outboundChannel;
+        this.operationMessageId = operationMessageId;
+        this.message = message;
 
-        this.control = Flux.from(processor)
-                           .map(ExecutionResult::getData)
-                           .subscribe(this::sendDataToClient);
-	}
+        this.control = Flux.from(processor).map(ExecutionResult::getData).subscribe(this::sendDataToClient);
+    }
 
-	public void cancel() {
-	    control.dispose();
+    public void cancel() {
+        control.dispose();
 
         Subscription subscription = subscriptionRef.get();
 
@@ -75,9 +75,9 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
         if (subscription != null) {
             try {
                 subscription.cancel();
-            } catch(Exception ignore) { }
+            } catch (Exception ignore) {}
         }
-	}
+    }
 
     @Override
     public void onSubscribe(Subscription s) {
@@ -90,7 +90,7 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
     @Override
     public void onNext(ExecutionResult executionResult) {
         log.debug("Process {} executionResult {} ", subscriptionRef.get(), executionResult);
-    	processor.onNext(executionResult);
+        processor.onNext(executionResult);
 
         requestNext(1);
     }
@@ -103,10 +103,9 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 
         GraphQLMessage operationMessage = new GraphQLMessage(operationMessageId, GraphQLMessageType.ERROR, payload);
 
-		Message<GraphQLMessage> responseMessage =
-				MessageBuilder.createMessage(operationMessage, getMessageHeaders());
+        Message<GraphQLMessage> responseMessage = MessageBuilder.createMessage(operationMessage, getMessageHeaders());
 
-		outboundChannel.send(responseMessage);
+        outboundChannel.send(responseMessage);
     }
 
     @Override
@@ -117,9 +116,9 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 
         GraphQLMessage operationMessage = new GraphQLMessage(operationMessageId, GraphQLMessageType.COMPLETE);
 
-		Message<?> responseMessage = MessageBuilder.createMessage(operationMessage, getMessageHeaders());
+        Message<?> responseMessage = MessageBuilder.createMessage(operationMessage, getMessageHeaders());
 
-		outboundChannel.send(responseMessage);
+        outboundChannel.send(responseMessage);
     }
 
     private void requestNext(int n) {
@@ -130,13 +129,13 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
     }
 
     protected void sendDataToClient(Object data) {
-	    Map<String, Object> payload = Collections.singletonMap("data", data);
-	    GraphQLMessage operationData = new GraphQLMessage(operationMessageId, GraphQLMessageType.DATA, payload);
+        Map<String, Object> payload = Collections.singletonMap("data", data);
+        GraphQLMessage operationData = new GraphQLMessage(operationMessageId, GraphQLMessageType.DATA, payload);
 
-		Message<?> responseMessage = MessageBuilder.createMessage(operationData, getMessageHeaders());
+        Message<?> responseMessage = MessageBuilder.createMessage(operationData, getMessageHeaders());
 
-		// Send message directly to user
-	    outboundChannel.send(responseMessage);
+        // Send message directly to user
+        outboundChannel.send(responseMessage);
     }
 
     private MessageHeaders getMessageHeaders() {
@@ -145,5 +144,4 @@ public class GraphQLBrokerChannelSubscriber implements Subscriber<ExecutionResul
 
         return headerAccessor.getMessageHeaders();
     }
-
 }

@@ -31,9 +31,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
-    static class MessagesApplication {
-
-    }
+    static class MessagesApplication {}
 
     @TestConfiguration
     static class Configuration {
@@ -48,5 +46,4 @@ public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
     public void testMessageStore() {
         assertThat(this.aggregatingMessageHandler.getMessageStore()).isInstanceOf(RedisMessageStore.class);
     }
-
 }

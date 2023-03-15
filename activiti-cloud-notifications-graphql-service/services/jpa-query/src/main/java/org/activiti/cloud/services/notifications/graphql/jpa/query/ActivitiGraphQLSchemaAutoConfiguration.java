@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
+import static graphql.schema.GraphQLScalarType.newScalar;
+
 import com.introproventures.graphql.jpa.query.autoconfigure.EnableGraphQLJpaQuerySchema;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuilderCustomizer;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaBuilderAutoConfiguration;
@@ -27,26 +29,31 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
-import static graphql.schema.GraphQLScalarType.newScalar;
-
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
 @AutoConfiguration(before = GraphQLSchemaBuilderAutoConfiguration.class)
-@ConditionalOnClass({GraphQL.class, ProcessInstanceEntity.class})
-@ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.jpa-query.enabled", matchIfMissing = true)
+@ConditionalOnClass({ GraphQL.class, ProcessInstanceEntity.class })
+@ConditionalOnProperty(
+    name = "spring.activiti.cloud.services.notifications.graphql.jpa-query.enabled",
+    matchIfMissing = true
+)
 @EnableGraphQLJpaQuerySchema(basePackageClasses = ProcessInstanceEntity.class)
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
     @Bean
     GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer() {
-        return builder -> builder.name("Query")
-                                 .description("Activiti Cloud Query Schema")
-                                 .scalar(VariableValue.class,
-                                         newScalar().name("VariableValue")
-                                                    .description("VariableValue type")
-                                                    .coercing(new JavaScalars.GraphQLObjectCoercing())
-                                                    .build());
+        return builder ->
+            builder
+                .name("Query")
+                .description("Activiti Cloud Query Schema")
+                .scalar(
+                    VariableValue.class,
+                    newScalar()
+                        .name("VariableValue")
+                        .description("VariableValue type")
+                        .coercing(new JavaScalars.GraphQLObjectCoercing())
+                        .build()
+                );
     }
-
 }

@@ -15,39 +15,40 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-
-import javax.persistence.EntityManager;
 
 public class TaskVariableUpdater {
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
 
-    public TaskVariableUpdater(EntityManager entityManager,
-                               EntityManagerFinder entityManagerFinder) {
+    public TaskVariableUpdater(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
     }
 
-    public void update(TaskVariableEntity updatedVariableEntity,
-                       String notFoundMessage) {
+    public void update(TaskVariableEntity updatedVariableEntity, String notFoundMessage) {
         String taskId = updatedVariableEntity.getTaskId();
-        TaskEntity taskEntity = entityManagerFinder.findTaskWithVariables(taskId)
-                                                   .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
+        TaskEntity taskEntity = entityManagerFinder
+            .findTaskWithVariables(taskId)
+            .orElseThrow(() -> new QueryException("Task instance id " + taskId + " not found!"));
 
-        taskEntity.getVariable(updatedVariableEntity.getName())
-                  .ifPresentOrElse(variableEntity -> {
-                      variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
-                      variableEntity.setType(updatedVariableEntity.getType());
-                      variableEntity.setValue(updatedVariableEntity.getValue());
+        taskEntity
+            .getVariable(updatedVariableEntity.getName())
+            .ifPresentOrElse(
+                variableEntity -> {
+                    variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
+                    variableEntity.setType(updatedVariableEntity.getType());
+                    variableEntity.setValue(updatedVariableEntity.getValue());
 
-                      entityManager.merge(variableEntity);
-                  }, () -> {
-                      throw new QueryException(notFoundMessage);
-                  });
-
+                    entityManager.merge(variableEntity);
+                },
+                () -> {
+                    throw new QueryException(notFoundMessage);
+                }
+            );
     }
 }

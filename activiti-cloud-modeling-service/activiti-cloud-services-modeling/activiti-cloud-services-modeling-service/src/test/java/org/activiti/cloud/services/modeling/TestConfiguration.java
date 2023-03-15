@@ -26,5 +26,4 @@ public class TestConfiguration {
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
-
 }

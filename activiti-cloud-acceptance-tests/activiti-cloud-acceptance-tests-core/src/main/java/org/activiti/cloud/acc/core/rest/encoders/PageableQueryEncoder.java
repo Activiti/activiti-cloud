@@ -35,7 +35,6 @@ public class PageableQueryEncoder implements Encoder {
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-
         if (object instanceof Pageable) {
             Pageable pageable = (Pageable) object;
             template.query("page", String.valueOf(pageable.getPageNumber()));
@@ -49,7 +48,6 @@ public class PageableQueryEncoder implements Encoder {
                 }
                 template.query("sort", sortQueries);
             }
-
         } else {
             delegate.encode(object, bodyType, template);
         }

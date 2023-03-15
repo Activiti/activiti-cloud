@@ -25,14 +25,14 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 
 public class ImageUtils {
 
-    private ImageUtils() {
-    }
+    private ImageUtils() {}
 
     public static byte[] svgToPng(byte[] streamBytes) throws IOException, ImageProcessingException {
-        try (ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
-             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            new PNGTranscoder().transcode(new TranscoderInput(input),
-                    new TranscoderOutput(output));
+        try (
+            ByteArrayInputStream input = new ByteArrayInputStream(streamBytes);
+            ByteArrayOutputStream output = new ByteArrayOutputStream()
+        ) {
+            new PNGTranscoder().transcode(new TranscoderInput(input), new TranscoderOutput(output));
             output.flush();
             return output.toByteArray();
         } catch (TranscoderException e) {

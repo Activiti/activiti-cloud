@@ -23,8 +23,7 @@ public class CloudVariableUpdatedEventImpl<T> extends CloudVariableEventImpl imp
 
     private T previousValue;
 
-    public CloudVariableUpdatedEventImpl() {
-    }
+    public CloudVariableUpdatedEventImpl() {}
 
     public CloudVariableUpdatedEventImpl(VariableInstance entity, T previousValue) {
         super(entity);

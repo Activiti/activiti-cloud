@@ -50,31 +50,29 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    public ProcessModelValidator(ProcessModelType processModelType,
-                                 Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
-                                 ProcessModelContentConverter processModelContentConverter) {
+    public ProcessModelValidator(
+        ProcessModelType processModelType,
+        Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
         this.processModelType = processModelType;
         this.bpmnCommonModelValidators = bpmnCommonModelValidators;
         this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
-    public void validate(byte[] bytes,
-        ValidationContext validationContext) {
-
+    public void validate(byte[] bytes, ValidationContext validationContext) {
         BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
         List<ModelValidationError> validationErrors = bpmnCommonModelValidators
             .stream()
-            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
-                validationContext))
+            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel, validationContext))
             .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
             String messageError = "Semantic process model validation errors encountered: " + validationErrors;
             log.debug(messageError);
-            throw new SemanticModelValidationException(messageError,
-                                                       validationErrors);
+            throw new SemanticModelValidationException(messageError, validationErrors);
         }
     }
 

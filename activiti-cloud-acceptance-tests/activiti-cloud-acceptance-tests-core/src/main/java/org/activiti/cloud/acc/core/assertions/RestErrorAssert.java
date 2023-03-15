@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.acc.core.assertions;
 
-import javax.servlet.http.HttpServletResponse;
+import static org.assertj.core.api.Assertions.*;
 
 import feign.FeignException;
+import javax.servlet.http.HttpServletResponse;
 import net.thucydides.core.steps.StepEventBus;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Rest errors assertions
@@ -38,10 +37,7 @@ public class RestErrorAssert {
         Throwable throwable = catchThrowable(throwingCallable);
         assertThat(throwable).isInstanceOf(FeignException.class);
 
-        StepEventBus
-                .getEventBus()
-                .getBaseStepListener()
-                .exceptionExpected(FeignException.class);
+        StepEventBus.getEventBus().getBaseStepListener().exceptionExpected(FeignException.class);
 
         return new RestErrorAssert((FeignException) throwable);
     }
@@ -84,5 +80,4 @@ public class RestErrorAssert {
     public RestErrorAssert withInternalServerErrorCode() {
         return withErrorCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-
 }

@@ -15,23 +15,19 @@
  */
 package org.activiti.cloud.services.modeling.validation.project;
 
+import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.modeling.validation.DNSNameValidator;
 
-import java.util.stream.Stream;
-
 /**
  * Implementation of {@link ProjectValidator} for validating the project name
  */
-public class ProjectNameValidator implements ProjectValidator,
-                                             DNSNameValidator {
+public class ProjectNameValidator implements ProjectValidator, DNSNameValidator {
 
     @Override
-    public Stream<ModelValidationError> validate(Project project,
-                                                 ValidationContext validationContext) {
-        return validateDNSName(project.getName(),
-                               "project");
+    public Stream<ModelValidationError> validate(Project project, ValidationContext validationContext) {
+        return validateDNSName(project.getName(), "project");
     }
 }

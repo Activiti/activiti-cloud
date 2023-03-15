@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
 @DiscriminatorValue(value = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
@@ -30,8 +29,7 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     private String cause;
 
-    public TaskCancelledEventEntity() {
-    }
+    public TaskCancelledEventEntity() {}
 
     public TaskCancelledEventEntity(CloudTaskCancelledEvent cloudEvent) {
         super(cloudEvent);
@@ -49,11 +47,12 @@ public class TaskCancelledEventEntity extends TaskAuditEventEntity {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TaskCancelledEventEntity [cause=")
-               .append(cause)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("TaskCancelledEventEntity [cause=")
+            .append(cause)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

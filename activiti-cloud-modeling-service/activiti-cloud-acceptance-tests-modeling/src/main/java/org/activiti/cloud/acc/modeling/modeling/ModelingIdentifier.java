@@ -20,6 +20,4 @@ import java.util.function.Predicate;
 /**
  * Model identifier
  */
-public interface ModelingIdentifier<M> extends Predicate<M> {
-
-}
+public interface ModelingIdentifier<M> extends Predicate<M> {}

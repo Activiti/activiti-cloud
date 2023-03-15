@@ -19,7 +19,6 @@ package org.activiti.cloud.services.modeling.service.filters;
 import java.util.List;
 
 public interface ProjectFilter {
-
     String filterName();
 
     List<String> getFilterIds();

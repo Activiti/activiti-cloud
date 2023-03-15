@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -23,9 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class VariableEntityDeletedEventHandlerTest {
@@ -52,10 +52,7 @@ public class VariableEntityDeletedEventHandlerTest {
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
-        return new VariableInstanceImpl<>("var",
-                                          "v1",
-                                          "string",
-                                          "procInstId", null);
+        return new VariableInstanceImpl<>("var", "v1", "string", "procInstId", null);
     }
 
     @Test

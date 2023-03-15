@@ -25,7 +25,5 @@ import org.activiti.cloud.modeling.api.ValidationContext;
  * Interface for validating {@link BpmnModel} objects
  */
 public interface BpmnCommonModelValidator extends ModelValidationErrorProducer {
-
     Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext);
-
 }

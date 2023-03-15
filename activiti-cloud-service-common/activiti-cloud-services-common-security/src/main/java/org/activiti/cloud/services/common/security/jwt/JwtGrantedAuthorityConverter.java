@@ -39,5 +39,4 @@ public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<G
         }
         return grantedAuthorities;
     }
-
 }

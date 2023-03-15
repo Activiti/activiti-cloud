@@ -19,6 +19,4 @@ import org.activiti.cloud.connectors.starter.test.it.MockCloudRuntimeEventsChann
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {
-
-}
+public class MockCloudRuntimeEventsChannelsConfiguration implements MockCloudRuntimeEventsChannels {}

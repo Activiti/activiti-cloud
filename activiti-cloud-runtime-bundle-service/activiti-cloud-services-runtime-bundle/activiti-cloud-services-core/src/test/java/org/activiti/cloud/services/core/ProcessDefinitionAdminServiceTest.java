@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.VariableDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Pageable;
@@ -49,10 +48,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ProcessDefinitionAdminServiceTest {
 
     private final ProcessAdminRuntime processAdminRuntime = Mockito.mock(ProcessAdminRuntime.class);
-    private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(ProcessDefinitionDecorator.class);
+    private final ProcessDefinitionDecorator processDefinitionDecorator = Mockito.mock(
+        ProcessDefinitionDecorator.class
+    );
 
-    private final ProcessDefinitionAdminService processDefinitionAdminService =
-        new ProcessDefinitionAdminService(processAdminRuntime, List.of(processDefinitionDecorator));
+    private final ProcessDefinitionAdminService processDefinitionAdminService = new ProcessDefinitionAdminService(
+        processAdminRuntime,
+        List.of(processDefinitionDecorator)
+    );
 
     @Test
     void should_getProcessDefinitionsWithVariables_whenIncludeVariablesParameterPresent() {
@@ -60,26 +63,30 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any()))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         VariableDefinitionImpl variableDefinition = new VariableDefinitionImpl();
         when(processDefinitionDecorator.applies("variables")).thenReturn(true);
-        when(processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId()))))
+        when(
+            processDefinitionDecorator.decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())))
+        )
             .thenAnswer(call -> {
                 CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
                 cloudProcessDefinition.setVariableDefinitions(List.of(variableDefinition));
                 return cloudProcessDefinition;
             });
 
-        List<ProcessDefinition> result =
-            processDefinitionAdminService.getProcessDefinitions(Pageable.of(0, 50), List.of("variables")).getContent();
+        List<ProcessDefinition> result = processDefinitionAdminService
+            .getProcessDefinitions(Pageable.of(0, 50), List.of("variables"))
+            .getContent();
 
         assertThat(result).hasSize(1);
-        List<VariableDefinition> variableDefinitions = ((ExtendedCloudProcessDefinition) result.get(0)).getVariableDefinitions();
+        List<VariableDefinition> variableDefinitions =
+            ((ExtendedCloudProcessDefinition) result.get(0)).getVariableDefinitions();
         assertThat(variableDefinitions).hasSize(1);
         assertThat(variableDefinitions.get(0)).isEqualTo(variableDefinition);
-        verify(processDefinitionDecorator).decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
+        verify(processDefinitionDecorator)
+            .decorate(argThat(argument -> argument.getId().equals(processDefinition.getId())));
     }
 
     @ParameterizedTest
@@ -89,13 +96,13 @@ public class ProcessDefinitionAdminServiceTest {
         processDefinition.setId("id");
         ArrayList<ProcessDefinition> processDefinitions = new ArrayList<>();
         processDefinitions.add(processDefinition);
-        when(processAdminRuntime.processDefinitions(any()))
-            .thenReturn(new PageImpl<>(processDefinitions, 1));
+        when(processAdminRuntime.processDefinitions(any())).thenReturn(new PageImpl<>(processDefinitions, 1));
 
         lenient().when(processDefinitionDecorator.applies("variables")).thenReturn(true);
 
-        List<ProcessDefinition> result =
-            processDefinitionAdminService.getProcessDefinitions(Pageable.of(0, 50), include).getContent();
+        List<ProcessDefinition> result = processDefinitionAdminService
+            .getProcessDefinitions(Pageable.of(0, 50), include)
+            .getContent();
 
         assertThat(result).hasSize(1);
         verify(processDefinitionDecorator, never()).decorate(any());

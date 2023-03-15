@@ -19,32 +19,30 @@ import org.activiti.api.process.model.BPMNMessage;
 import org.activiti.api.process.model.events.BPMNMessageEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public abstract class CloudBPMNMessageEventImpl extends CloudRuntimeEventImpl<BPMNMessage, BPMNMessageEvent.MessageEvents> {
+public abstract class CloudBPMNMessageEventImpl
+    extends CloudRuntimeEventImpl<BPMNMessage, BPMNMessageEvent.MessageEvents> {
 
-    public CloudBPMNMessageEventImpl() {
-    }
+    public CloudBPMNMessageEventImpl() {}
 
-    public CloudBPMNMessageEventImpl(BPMNMessage entity,
-                                     String processDefinitionId,
-                                     String processInstanceId) {
+    public CloudBPMNMessageEventImpl(BPMNMessage entity, String processDefinitionId, String processInstanceId) {
         super(entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
         setEntityId(entity.getElementId());
     }
 
-    public CloudBPMNMessageEventImpl(String id,
-                                     Long timestamp,
-                                     BPMNMessage entity,
-                                     String processDefinitionId,
-                                     String processInstanceId) {
-        super(id,
-              timestamp,
-              entity);
+    public CloudBPMNMessageEventImpl(
+        String id,
+        Long timestamp,
+        BPMNMessage entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity);
         setProcessDefinitionId(processDefinitionId);
         setProcessInstanceId(processInstanceId);
 
-        if (entity!=null) {
+        if (entity != null) {
             setEntityId(entity.getElementId());
         }
     }

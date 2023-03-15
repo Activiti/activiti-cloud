@@ -21,8 +21,7 @@ public class VariableValue<T> {
 
     private T value;
 
-    public VariableValue() {
-    }
+    public VariableValue() {}
 
     public VariableValue(T value) {
         this.value = value;
@@ -41,7 +40,7 @@ public class VariableValue<T> {
         if (this == o) {
             return true;
         }
-        if (o == null ) {
+        if (o == null) {
             return false;
         }
         if (getClass() != o.getClass()) {

@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.acc.shared.steps;
 
+import static org.assertj.core.api.Assertions.*;
+
 import net.thucydides.core.annotations.Step;
-import org.activiti.cloud.acc.shared.rest.feign.EnableFeignContext;
 import org.activiti.cloud.acc.shared.model.AuthToken;
 import org.activiti.cloud.acc.shared.rest.TokenHolder;
+import org.activiti.cloud.acc.shared.rest.feign.EnableFeignContext;
 import org.activiti.cloud.acc.shared.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * User authentication steps
@@ -38,15 +38,16 @@ public class AuthenticationSteps {
     private AuthenticationService authenticationService;
 
     @Step
-    public void authenticateUser(String authUsername){
-        if(authUsername.equals("admin")){
+    public void authenticateUser(String authUsername) {
+        if (authUsername.equals("admin")) {
             AUTH_PASSWORD = "admin";
         }
-        AuthToken authToken = authenticationService
-                .authenticate(AUTH_CLIENT_ID,
-                        AUTH_GRANT_TYPE,
-                        authUsername,
-                        AUTH_PASSWORD);
+        AuthToken authToken = authenticationService.authenticate(
+            AUTH_CLIENT_ID,
+            AUTH_GRANT_TYPE,
+            authUsername,
+            AUTH_PASSWORD
+        );
         TokenHolder.setAuthToken(authToken);
         TokenHolder.setUserName(authUsername);
     }

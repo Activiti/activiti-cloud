@@ -20,7 +20,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 
-public class ToCloudProcessInstanceConverter  {
+public class ToCloudProcessInstanceConverter {
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
@@ -33,5 +33,4 @@ public class ToCloudProcessInstanceConverter  {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessInstance);
         return cloudProcessInstance;
     }
-
 }

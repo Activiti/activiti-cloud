@@ -29,5 +29,4 @@ public class MockMessageChannel implements MessageChannel {
     public boolean send(Message<?> message, long timeout) {
         return false;
     }
-
 }

@@ -66,7 +66,9 @@ class NameValidatorTest {
         Stream<ModelValidationError> errors = nameValidator.validateName("Abc 123 def 456 ghi 789 jkl", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("length.greater", "The myType name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'");
+            .containsOnly(
+                "length.greater",
+                "The myType name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+            );
     }
-
 }

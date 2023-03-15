@@ -18,7 +18,6 @@ package org.activiti.cloud.acc.core.steps.runtime.admin;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
@@ -45,16 +44,18 @@ public class ProcessVariablesRuntimeAdminSteps {
     }
 
     @Step
-    public ResponseEntity<List<String>> updateVariables(String id,
-                                                 SetProcessVariablesPayload setProcessVariablesPayload) {
+    public ResponseEntity<List<String>> updateVariables(
+        String id,
+        SetProcessVariablesPayload setProcessVariablesPayload
+    ) {
         return processVariablesRuntimeAdminService.updateVariables(id, setProcessVariablesPayload);
     }
 
     @Step
-    public ResponseEntity<Void> removeVariables(String id,
-                                         RemoveProcessVariablesPayload removeProcessVariablesPayload) {
+    public ResponseEntity<Void> removeVariables(
+        String id,
+        RemoveProcessVariablesPayload removeProcessVariablesPayload
+    ) {
         return processVariablesRuntimeAdminService.removeVariables(id, removeProcessVariablesPayload);
-
     }
-
 }

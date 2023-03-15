@@ -31,9 +31,11 @@ public class CloudProcessCandidateStarterGroupAddedProducer {
     private RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    public CloudProcessCandidateStarterGroupAddedProducer(ProcessEngineChannels producer,
-                                                          RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-                                                          RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    public CloudProcessCandidateStarterGroupAddedProducer(
+        ProcessEngineChannels producer,
+        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+    ) {
         this.producer = producer;
         this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
@@ -41,19 +43,29 @@ public class CloudProcessCandidateStarterGroupAddedProducer {
 
     @EventListener
     public void sendProcessCandidateStarterUserAddedEvents(ProcessCandidateStarterUserAddedEvents events) {
-        producer.auditProducer().send(
-            runtimeBundleMessageBuilderFactory.create()
-                .withPayload(
-                    events.getEvents()
-                        .stream()
-                        .map(event -> toCloudEvent(event))
-                        .toArray(CloudRuntimeEvent<?, ?>[]::new))
-                .build());
+        producer
+            .auditProducer()
+            .send(
+                runtimeBundleMessageBuilderFactory
+                    .create()
+                    .withPayload(
+                        events
+                            .getEvents()
+                            .stream()
+                            .map(event -> toCloudEvent(event))
+                            .toArray(CloudRuntimeEvent<?, ?>[]::new)
+                    )
+                    .build()
+            );
     }
 
     private CloudProcessCandidateStarterUserAddedEvent toCloudEvent(ProcessCandidateStarterUserAddedEvent event) {
-        CloudProcessCandidateStarterUserAddedEventImpl cloudProcessCandidateStarterUserAddedEvent = new CloudProcessCandidateStarterUserAddedEventImpl(event.getEntity());
-        cloudProcessCandidateStarterUserAddedEvent.setProcessDefinitionId(cloudProcessCandidateStarterUserAddedEvent.getEntity().getProcessDefinitionId());
+        CloudProcessCandidateStarterUserAddedEventImpl cloudProcessCandidateStarterUserAddedEvent = new CloudProcessCandidateStarterUserAddedEventImpl(
+            event.getEntity()
+        );
+        cloudProcessCandidateStarterUserAddedEvent.setProcessDefinitionId(
+            cloudProcessCandidateStarterUserAddedEvent.getEntity().getProcessDefinitionId()
+        );
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessCandidateStarterUserAddedEvent);
         return cloudProcessCandidateStarterUserAddedEvent;
     }

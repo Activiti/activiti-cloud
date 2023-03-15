@@ -25,9 +25,7 @@ public class ExtendedSerenityStories extends SerenityStories {
 
     @Override
     public InjectableStepsFactory stepsFactory() {
-        return new ExtendedSerenityStepsFactory(configuration(),
-                                                getRootPackage(),
-                                                getClassLoader());
+        return new ExtendedSerenityStepsFactory(configuration(), getRootPackage(), getClassLoader());
     }
 
     @Override

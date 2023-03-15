@@ -32,8 +32,7 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator implements
 
     private final ConnectorModelType connectorModelType;
 
-    public ConnectorModelValidator(SchemaLoader connectorSchemaLoader,
-                                   ConnectorModelType connectorModelType) {
+    public ConnectorModelValidator(SchemaLoader connectorSchemaLoader, ConnectorModelType connectorModelType) {
         this.connectorSchemaLoader = connectorSchemaLoader;
         this.connectorModelType = connectorModelType;
     }

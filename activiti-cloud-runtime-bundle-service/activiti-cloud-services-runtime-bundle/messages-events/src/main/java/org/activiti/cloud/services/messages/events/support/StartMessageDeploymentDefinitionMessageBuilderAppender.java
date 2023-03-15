@@ -28,7 +28,9 @@ public class StartMessageDeploymentDefinitionMessageBuilderAppender implements M
 
     private final StartMessageDeploymentDefinition startMessageDeploymentDefinition;
 
-    public StartMessageDeploymentDefinitionMessageBuilderAppender(StartMessageDeploymentDefinition startMessageDeploymentDefinition) {
+    public StartMessageDeploymentDefinitionMessageBuilderAppender(
+        StartMessageDeploymentDefinition startMessageDeploymentDefinition
+    ) {
         Assert.notNull(startMessageDeploymentDefinition, "startMessageDeploymentDefinition must not be null");
 
         this.startMessageDeploymentDefinition = startMessageDeploymentDefinition;
@@ -41,9 +43,8 @@ public class StartMessageDeploymentDefinitionMessageBuilderAppender implements M
         StartMessageSubscription messageEventSubscription = startMessageDeploymentDefinition.getMessageSubscription();
 
         // TODO Add more headers
-        return request.setHeader(MESSAGE_EVENT_NAME, messageEventSubscription.getEventName())
-                      .setHeader(MESSAGE_EVENT_ID, messageEventSubscription.getId())
-       ;
+        return request
+            .setHeader(MESSAGE_EVENT_NAME, messageEventSubscription.getEventName())
+            .setHeader(MESSAGE_EVENT_ID, messageEventSubscription.getId());
     }
-
 }

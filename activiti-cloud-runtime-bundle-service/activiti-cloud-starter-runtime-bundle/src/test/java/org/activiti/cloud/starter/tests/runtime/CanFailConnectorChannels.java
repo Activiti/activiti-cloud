@@ -21,13 +21,10 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface CanFailConnectorChannels {
-
     String CAN_FAIL_CONNECTOR = "canFailConnector";
 
     @InputBinding(CAN_FAIL_CONNECTOR)
     default SubscribableChannel canFailConnector() {
-        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR)
-                              .get();
+        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR).get();
     }
-
 }

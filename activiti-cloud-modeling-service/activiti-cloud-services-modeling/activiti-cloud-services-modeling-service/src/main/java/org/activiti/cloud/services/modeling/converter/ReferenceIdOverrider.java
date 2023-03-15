@@ -17,7 +17,6 @@ package org.activiti.cloud.services.modeling.converter;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.bpmn.model.ReferenceOverrider;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.bpmn.model.UserTask;

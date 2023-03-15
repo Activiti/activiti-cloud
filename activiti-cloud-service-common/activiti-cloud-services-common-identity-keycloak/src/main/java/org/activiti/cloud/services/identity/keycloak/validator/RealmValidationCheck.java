@@ -35,7 +35,9 @@ public class RealmValidationCheck implements ValidationCheck {
     public boolean isValid(Jwt accessToken) {
         String realmUrl = this.getRealmUrl();
         if (accessToken.getIssuer() != null && !realmUrl.equals(accessToken.getIssuer().toString())) {
-            LOGGER.error("Invalid token issuer. Expected '" + realmUrl + "', but was '" + accessToken.getIssuer() + "'");
+            LOGGER.error(
+                "Invalid token issuer. Expected '" + realmUrl + "', but was '" + accessToken.getIssuer() + "'"
+            );
             return false;
         }
 

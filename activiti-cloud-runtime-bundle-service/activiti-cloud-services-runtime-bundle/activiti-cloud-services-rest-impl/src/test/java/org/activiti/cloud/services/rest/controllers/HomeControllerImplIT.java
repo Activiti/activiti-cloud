@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(HomeControllerImpl.class)
 @AutoConfigureMockMvc
-@Import({StreamConfig.class})
+@Import({ StreamConfig.class })
 public class HomeControllerImplIT {
 
     @Autowired
@@ -39,8 +39,7 @@ public class HomeControllerImplIT {
     @Test
     public void getHomeInfo() throws Exception {
         this.mockMvc.perform(get("/v1/"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Welcome to an instance of the Activiti Process Engine")));
     }
-
 }

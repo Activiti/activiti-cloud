@@ -16,11 +16,12 @@
 package org.activiti.cloud.identity.exceptions;
 
 public class IdentityInvalidRoleException extends IdentityException {
+
     public IdentityInvalidRoleException() {
         super("invalid role");
     }
 
     public IdentityInvalidRoleException(String role) {
-        super("role {"+ role + "} is invalid or doesn't exist");
+        super("role {" + role + "} is invalid or doesn't exist");
     }
 }

@@ -47,9 +47,10 @@ public class JwtSecurityContextPrincipalProviderTest {
         Optional<Principal> result = subject.getCurrentPrincipal();
 
         // then
-        assertThat(result).isPresent()
-                          .containsInstanceOf(JwtAuthenticationToken.class)
-                          .contains((jwtAuthenticationToken));
+        assertThat(result)
+            .isPresent()
+            .containsInstanceOf(JwtAuthenticationToken.class)
+            .contains((jwtAuthenticationToken));
     }
 
     @Test
@@ -63,5 +64,4 @@ public class JwtSecurityContextPrincipalProviderTest {
         // then
         assertThat(result).isEmpty();
     }
-
 }

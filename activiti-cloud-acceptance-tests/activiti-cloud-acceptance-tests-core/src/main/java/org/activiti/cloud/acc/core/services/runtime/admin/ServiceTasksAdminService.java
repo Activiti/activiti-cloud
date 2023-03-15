@@ -18,16 +18,15 @@ package org.activiti.cloud.acc.core.services.runtime.admin;
 import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
+import java.util.List;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
-
 public interface ServiceTasksAdminService {
-
     @RequestLine("POST /admin/v1/executions/{executionId}/replay/service-task")
     @Headers("Content-Type: application/json")
-    ResponseEntity<List<String>> replayServiceTask(@Param("executionId") String executionId,
-                                                   ReplayServiceTaskRequest replayServiceTaskRequest);
-
+    ResponseEntity<List<String>> replayServiceTask(
+        @Param("executionId") String executionId,
+        ReplayServiceTaskRequest replayServiceTaskRequest
+    );
 }

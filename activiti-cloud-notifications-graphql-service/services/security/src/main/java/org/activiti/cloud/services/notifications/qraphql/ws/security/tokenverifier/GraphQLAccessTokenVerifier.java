@@ -16,7 +16,5 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier;
 
 public interface GraphQLAccessTokenVerifier {
-
     GraphQLAccessToken verifyToken(String credentials) throws Exception;
-
 }

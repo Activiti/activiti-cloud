@@ -27,8 +27,7 @@ public class IntegrationRequestImpl extends CloudRuntimeEntityImpl implements In
 
     private String errorDestination;
 
-    public IntegrationRequestImpl() {
-    }
+    public IntegrationRequestImpl() {}
 
     public IntegrationRequestImpl(IntegrationContext integrationContext) {
         this.integrationContext = integrationContext;

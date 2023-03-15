@@ -34,10 +34,12 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     private final JwtDecoder jwtDecoder;
     private final Function<Jwt, List<String>> rolesSupplier;
 
-    public JwtAccessTokenVerifier(JwtAccessTokenValidator jwtAccessTokenValidator,
-                                  JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
-                                  JwtDecoder jwtDecoder,
-                                  Function<Jwt, List<String>> rolesSupplier) {
+    public JwtAccessTokenVerifier(
+        JwtAccessTokenValidator jwtAccessTokenValidator,
+        JwtUserInfoUriAuthenticationConverter jwtUserInfoUriAuthenticationConverter,
+        JwtDecoder jwtDecoder,
+        Function<Jwt, List<String>> rolesSupplier
+    ) {
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
         this.jwtDecoder = jwtDecoder;
@@ -47,17 +49,13 @@ public class JwtAccessTokenVerifier implements GraphQLAccessTokenVerifier {
     @Override
     public GraphQLAccessToken verifyToken(String tokenString) {
         Jwt jwt = jwtDecoder.decode(tokenString);
-        if(jwtAccessTokenValidator.isValid(jwt)) {
-            JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(jwt);
-            return new GraphQLAccessToken(
-                accessToken.getName(),
-                Set.copyOf(rolesSupplier.apply(jwt)),
-                accessToken
+        if (jwtAccessTokenValidator.isValid(jwt)) {
+            JwtAuthenticationToken accessToken = (JwtAuthenticationToken) jwtUserInfoUriAuthenticationConverter.convert(
+                jwt
             );
+            return new GraphQLAccessToken(accessToken.getName(), Set.copyOf(rolesSupplier.apply(jwt)), accessToken);
         } else {
             throw new BadCredentialsException("Invalid JWT token");
         }
-
     }
-
 }

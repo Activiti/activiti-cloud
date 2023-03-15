@@ -19,6 +19,5 @@ import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudSequenceFlowEvent extends CloudRuntimeEvent<BPMNSequenceFlow, SequenceFlowEvent.SequenceFlowEvents> {
-
-}
+public interface CloudSequenceFlowEvent
+    extends CloudRuntimeEvent<BPMNSequenceFlow, SequenceFlowEvent.SequenceFlowEvents> {}

@@ -32,10 +32,13 @@ public class AuditSwaggerConfig implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(name = "auditApi")
     public GroupedOpenApi auditApi(@Value("${activiti.cloud.swagger.audit-base-path:}") String swaggerBasePath) {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Audit")
             .packagesToScan("org.activiti.cloud.services.audit")
-            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .addOpenApiCustomiser(openApi ->
+                openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
+            )
             .build();
     }
 

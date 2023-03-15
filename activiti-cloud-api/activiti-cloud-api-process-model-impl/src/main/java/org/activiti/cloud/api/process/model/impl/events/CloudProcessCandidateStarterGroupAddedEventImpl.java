@@ -20,7 +20,8 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 
-public class CloudProcessCandidateStarterGroupAddedEventImpl extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
+public class CloudProcessCandidateStarterGroupAddedEventImpl
+    extends CloudRuntimeEventImpl<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>
     implements CloudProcessCandidateStarterGroupAddedEvent {
 
     public CloudProcessCandidateStarterGroupAddedEventImpl() {}
@@ -29,12 +30,12 @@ public class CloudProcessCandidateStarterGroupAddedEventImpl extends CloudRuntim
         super(processCandidateStarterGroup);
     }
 
-    public CloudProcessCandidateStarterGroupAddedEventImpl(String id,
-                                                             Long timestamp,
-                                                             ProcessCandidateStarterGroup processCandidateStarterGroup) {
-        super(id,
-              timestamp,
-              processCandidateStarterGroup);
+    public CloudProcessCandidateStarterGroupAddedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessCandidateStarterGroup processCandidateStarterGroup
+    ) {
+        super(id, timestamp, processCandidateStarterGroup);
         setEntityId(processCandidateStarterGroup.getGroupId());
     }
 

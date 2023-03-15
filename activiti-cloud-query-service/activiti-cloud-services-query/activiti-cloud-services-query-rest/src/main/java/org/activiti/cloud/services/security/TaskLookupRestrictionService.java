@@ -18,10 +18,9 @@ package org.activiti.cloud.services.security;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import java.util.List;
 import javax.validation.constraints.NotNull;
-
-import com.querydsl.jpa.JPAExpressions;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -47,8 +46,7 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         this.securityManager = securityManager;
     }
 
-    public Predicate restrictTaskQuery(Predicate predicate){
-
+    public Predicate restrictTaskQuery(Predicate predicate) {
         return restrictTaskQuery(predicate, QTaskEntity.taskEntity);
     }
 
@@ -57,18 +55,16 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
         return restrictTaskQuery(currentPredicate);
     }
 
-    public Predicate restrictTaskVariableQuery(Predicate predicate){
-
+    public Predicate restrictTaskVariableQuery(Predicate predicate) {
         QTaskEntity task = QTaskVariableEntity.taskVariableEntity.task;
 
-        Predicate extendedPredicate = addAndConditionToPredicate(predicate,task.isNotNull());
+        Predicate extendedPredicate = addAndConditionToPredicate(predicate, task.isNotNull());
 
         return restrictTaskQuery(extendedPredicate, task);
     }
 
-    public Predicate restrictToInvolvedUsersQuery(Predicate predicate){
-
-        if (!restrictionsInvolvedUserEnabled){
+    public Predicate restrictToInvolvedUsersQuery(Predicate predicate) {
+        if (!restrictionsInvolvedUserEnabled) {
             return restrictTaskQuery(predicate);
         }
 
@@ -78,19 +74,20 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
         Predicate defaultRestrictions = restrictTaskQuery(new BooleanBuilder());
 
-        BooleanExpression userIsInvolved = processInstanceEntity.initiator.eq(userId) //is Initiator
-                .or(taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process
-                        JPAExpressions.select(taskEntity.processInstanceId)
-                                .from(taskEntity)
-                                .where(defaultRestrictions)))
-                .or(defaultRestrictions); //apply default conditions
+        BooleanExpression userIsInvolved = processInstanceEntity.initiator
+            .eq(userId) //is Initiator
+            .or(
+                taskEntity.processInstanceId.in( //user is Involved in one of the tasks of the Process
+                    JPAExpressions.select(taskEntity.processInstanceId).from(taskEntity).where(defaultRestrictions)
+                )
+            )
+            .or(defaultRestrictions); //apply default conditions
 
-        return addAndConditionToPredicate(predicate,userIsInvolved);
+        return addAndConditionToPredicate(predicate, userIsInvolved);
     }
 
-    private Predicate restrictTaskQuery(Predicate predicate, QTaskEntity task){
-
-        if (!restrictionsEnabled){
+    private Predicate restrictTaskQuery(Predicate predicate, QTaskEntity task) {
+        if (!restrictionsEnabled) {
             return predicate;
         }
 
@@ -99,40 +96,43 @@ public class TaskLookupRestrictionService implements QueryDslPredicateFilter {
 
         BooleanExpression restriction = null;
 
-        if(userId!=null) {
-
+        if (userId != null) {
             BooleanExpression isNotAssigned = task.assignee.isNull();
-            restriction = task.assignee.eq(userId) //user is assignee
+            restriction =
+                task.assignee
+                    .eq(userId) //user is assignee
                     .or(task.owner.eq(userId)) //user is owner
-                    .or(task.taskCandidateUsers.any().userId.eq(userId) //is candidate user and task is not assigned
-                                .and(isNotAssigned));
-
+                    .or(
+                        task.taskCandidateUsers
+                            .any()
+                            .userId.eq(userId) //is candidate user and task is not assigned
+                            .and(isNotAssigned)
+                    );
 
             List<String> groups = null;
             if (securityManager != null) {
                 groups = securityManager.getAuthenticatedUserGroups();
             }
-            if(groups!=null && groups.size()>0) {
+            if (groups != null && groups.size() > 0) {
                 //belongs to candidate group and task is not assigned
-                restriction = restriction.or(task.taskCandidateGroups.any().groupId.in(groups)
-                                                     .and(isNotAssigned));
+                restriction = restriction.or(task.taskCandidateGroups.any().groupId.in(groups).and(isNotAssigned));
             }
 
             //or there are no candidates set and task is not assigned
-            restriction = restriction.or(task.taskCandidateUsers.isEmpty()
-                                                 .and(task.taskCandidateGroups.isEmpty())
-                                                 .and(isNotAssigned));
-
+            restriction =
+                restriction.or(
+                    task.taskCandidateUsers.isEmpty().and(task.taskCandidateGroups.isEmpty()).and(isNotAssigned)
+                );
         }
 
-        return addAndConditionToPredicate(predicate,restriction);
+        return addAndConditionToPredicate(predicate, restriction);
     }
 
-    private Predicate addAndConditionToPredicate(Predicate predicate, BooleanExpression expression){
-        if(expression != null && predicate !=null){
+    private Predicate addAndConditionToPredicate(Predicate predicate, BooleanExpression expression) {
+        if (expression != null && predicate != null) {
             return expression.and(predicate);
         }
-        if(expression == null){
+        if (expression == null) {
             return predicate;
         }
         return expression;

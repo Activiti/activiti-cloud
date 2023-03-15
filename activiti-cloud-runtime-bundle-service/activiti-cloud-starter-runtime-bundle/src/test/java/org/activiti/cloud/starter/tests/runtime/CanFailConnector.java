@@ -39,17 +39,14 @@ public class CanFailConnector {
         this.shouldSendError = shouldSendError;
     }
 
-
     public void canFailConnector(Message<IntegrationRequest> message) {
         latestReceivedIntegrationRequest = message.getPayload();
         integrationErrorSent.set(false);
         if (shouldSendError) {
             integrationErrorSent.set(true);
-            integrationErrorSender.send(message.getPayload(),
-                new RuntimeException("task failed"));
+            integrationErrorSender.send(message.getPayload(), new RuntimeException("task failed"));
         } else {
-            integrationResultSender.send(message.getPayload(),
-                message.getPayload().getIntegrationContext());
+            integrationResultSender.send(message.getPayload(), message.getPayload().getIntegrationContext());
         }
     }
 

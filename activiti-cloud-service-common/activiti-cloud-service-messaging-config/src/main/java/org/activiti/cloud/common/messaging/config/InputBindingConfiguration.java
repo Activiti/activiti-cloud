@@ -29,49 +29,48 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
-@AutoConfiguration(after = BinderFactoryAutoConfiguration.class,
-                   before = FunctionConfiguration.class)
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 public class InputBindingConfiguration extends AbstractFunctionalBindingConfiguration {
 
     public static final String INPUT_BINDING = "_sink";
 
     @Bean
-    public BeanPostProcessor inputBindingBeanPostProcessor(FunctionAnnotationService functionAnnotationService,
-                                                           BindingServiceProperties bindingServiceProperties,
-                                                           StreamFunctionProperties streamFunctionProperties) {
+    public BeanPostProcessor inputBindingBeanPostProcessor(
+        FunctionAnnotationService functionAnnotationService,
+        BindingServiceProperties bindingServiceProperties,
+        StreamFunctionProperties streamFunctionProperties
+    ) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (MessageChannel.class.isInstance(bean)) {
+                    Optional
+                        .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
+                        .ifPresent(functionBinding -> {
+                            final String inputBinding = beanName + INPUT_BINDING;
+                            final String beanInName = getInBinding(inputBinding);
 
-                    Optional.ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
-                            .ifPresent(functionBinding -> {
-                                final String inputBinding = beanName + INPUT_BINDING;
-                                final String beanInName = getInBinding(inputBinding);
+                            String inputBindings = bindingServiceProperties.getInputBindings();
 
-                                String inputBindings = bindingServiceProperties.getInputBindings();
+                            if (!StringUtils.hasText(inputBindings)) {
+                                inputBindings = inputBinding;
+                            } else {
+                                inputBindings += ";" + inputBinding;
+                            }
 
-                                if (!StringUtils.hasText(inputBindings)) {
-                                    inputBindings = inputBinding;
-                                } else {
-                                    inputBindings += ";" + inputBinding;
-                                }
+                            bindingServiceProperties.setInputBindings(inputBindings);
 
-                                bindingServiceProperties.setInputBindings(inputBindings);
+                            streamFunctionProperties.getBindings().put(beanInName, beanName);
 
-                                streamFunctionProperties.getBindings()
-                                                        .put(beanInName, beanName);
-
-                                if (!DirectWithAttributesChannel.class.isInstance(bean)) {
-                                    getMessageConverterConfigurer().configureInputChannel(MessageChannel.class.cast(bean),
-                                                                                          beanName);
-                                }
-                            });
+                            if (!DirectWithAttributesChannel.class.isInstance(bean)) {
+                                getMessageConverterConfigurer()
+                                    .configureInputChannel(MessageChannel.class.cast(bean), beanName);
+                            }
+                        });
                 }
 
                 return bean;
             }
         };
     }
-
 }

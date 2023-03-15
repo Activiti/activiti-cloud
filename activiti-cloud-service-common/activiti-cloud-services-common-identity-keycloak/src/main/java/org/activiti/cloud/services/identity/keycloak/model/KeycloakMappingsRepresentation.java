@@ -27,8 +27,7 @@ public class KeycloakMappingsRepresentation {
         return realmMappings;
     }
 
-    public void setRealmMappings(
-        List<KeycloakRoleMapping> realmMappings) {
+    public void setRealmMappings(List<KeycloakRoleMapping> realmMappings) {
         this.realmMappings = realmMappings;
     }
 
@@ -36,8 +35,7 @@ public class KeycloakMappingsRepresentation {
         return clientMappings;
     }
 
-    public void setClientMappings(
-        Map<String, KeycloakClientMappingsRepresentation> clientMappings) {
+    public void setClientMappings(Map<String, KeycloakClientMappingsRepresentation> clientMappings) {
         this.clientMappings = clientMappings;
     }
 }

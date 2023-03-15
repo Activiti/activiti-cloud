@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
-import org.hibernate.annotations.DynamicInsert;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import org.activiti.cloud.api.process.model.events.CloudBPMNTimerRetriesDecrementedEvent;
+import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
 @DiscriminatorValue(value = TimerRetriesDecrementedAuditEventEntity.TIMER_RETRIES_DECREMENTED_EVENT)
@@ -28,8 +27,7 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
 
     protected static final String TIMER_RETRIES_DECREMENTED_EVENT = "TimerRetriesDecrementedEvent";
 
-    public TimerRetriesDecrementedAuditEventEntity() {
-    }
+    public TimerRetriesDecrementedAuditEventEntity() {}
 
     public TimerRetriesDecrementedAuditEventEntity(CloudBPMNTimerRetriesDecrementedEvent cloudEvent) {
         super(cloudEvent);
@@ -39,5 +37,4 @@ public class TimerRetriesDecrementedAuditEventEntity extends TimerAuditEventEnti
     public int hashCode() {
         return super.hashCode();
     }
-
 }

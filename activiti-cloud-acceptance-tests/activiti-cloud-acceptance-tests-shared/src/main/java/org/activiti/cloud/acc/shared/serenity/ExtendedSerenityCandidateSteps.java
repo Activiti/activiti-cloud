@@ -17,7 +17,6 @@ package org.activiti.cloud.acc.shared.serenity;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.jbehave.core.annotations.ScenarioType;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.steps.BeforeOrAfterStep;
@@ -36,9 +35,11 @@ public class ExtendedSerenityCandidateSteps implements CandidateSteps {
 
     private final InjectableStepsFactory stepsFactory;
 
-    public ExtendedSerenityCandidateSteps(CandidateSteps candidateSteps,
-                                          Configuration configuration,
-                                          InjectableStepsFactory stepsFactory) {
+    public ExtendedSerenityCandidateSteps(
+        CandidateSteps candidateSteps,
+        Configuration configuration,
+        InjectableStepsFactory stepsFactory
+    ) {
         this.candidateSteps = candidateSteps;
         this.configuration = configuration;
         this.stepsFactory = stepsFactory;
@@ -47,12 +48,10 @@ public class ExtendedSerenityCandidateSteps implements CandidateSteps {
     @Override
     public List<StepCandidate> listCandidates() {
         return candidateSteps
-                .listCandidates()
-                .parallelStream()
-                .map(step -> new ExtendedSerenityStepCandidate(step,
-                                                               configuration,
-                                                               stepsFactory))
-                .collect(Collectors.toList());
+            .listCandidates()
+            .parallelStream()
+            .map(step -> new ExtendedSerenityStepCandidate(step, configuration, stepsFactory))
+            .collect(Collectors.toList());
     }
 
     public List<BeforeOrAfterStep> listBeforeOrAfterStories() {

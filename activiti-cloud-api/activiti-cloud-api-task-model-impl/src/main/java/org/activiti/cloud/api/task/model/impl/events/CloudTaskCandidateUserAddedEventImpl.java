@@ -20,23 +20,19 @@ import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserAddedEvent;
 
-public class CloudTaskCandidateUserAddedEventImpl extends CloudRuntimeEventImpl<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>
-        implements CloudTaskCandidateUserAddedEvent {
+public class CloudTaskCandidateUserAddedEventImpl
+    extends CloudRuntimeEventImpl<TaskCandidateUser, TaskCandidateUserEvent.TaskCandidateUserEvents>
+    implements CloudTaskCandidateUserAddedEvent {
 
-    public CloudTaskCandidateUserAddedEventImpl() {
-    }
+    public CloudTaskCandidateUserAddedEventImpl() {}
 
     public CloudTaskCandidateUserAddedEventImpl(TaskCandidateUser taskCandidateUser) {
         super(taskCandidateUser);
         setEntityId(taskCandidateUser.getUserId());
     }
 
-    public CloudTaskCandidateUserAddedEventImpl(String id,
-                                                Long timestamp,
-                                                TaskCandidateUser taskCandidateUser) {
-        super(id,
-              timestamp,
-              taskCandidateUser);
+    public CloudTaskCandidateUserAddedEventImpl(String id, Long timestamp, TaskCandidateUser taskCandidateUser) {
+        super(id, timestamp, taskCandidateUser);
         setEntityId(taskCandidateUser.getUserId());
     }
 

@@ -21,8 +21,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents> {
 
-    public CloudTaskEventImpl() {
-    }
+    public CloudTaskEventImpl() {}
 
     public CloudTaskEventImpl(Task task) {
         super(task);
@@ -30,21 +29,16 @@ public abstract class CloudTaskEventImpl extends CloudRuntimeEventImpl<Task, Tas
     }
 
     private void setFlattenInformation(Task task) {
-            setEntityId(task.getId());
-            setProcessDefinitionId(task.getProcessDefinitionId());
-            setProcessInstanceId(task.getProcessInstanceId());
-            setProcessDefinitionVersion(task.getProcessDefinitionVersion());
-            setBusinessKey(task.getBusinessKey());
-            setAppVersion(task.getAppVersion());
+        setEntityId(task.getId());
+        setProcessDefinitionId(task.getProcessDefinitionId());
+        setProcessInstanceId(task.getProcessInstanceId());
+        setProcessDefinitionVersion(task.getProcessDefinitionVersion());
+        setBusinessKey(task.getBusinessKey());
+        setAppVersion(task.getAppVersion());
     }
 
-    public CloudTaskEventImpl(String id,
-                              Long timestamp,
-                              Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
         setFlattenInformation(task);
     }
-
 }

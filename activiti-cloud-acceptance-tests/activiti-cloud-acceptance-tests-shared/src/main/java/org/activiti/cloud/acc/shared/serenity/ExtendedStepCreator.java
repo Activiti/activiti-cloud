@@ -15,9 +15,11 @@
  */
 package org.activiti.cloud.acc.shared.serenity;
 
+import static org.jbehave.core.steps.AbstractStepResult.failed;
+import static org.jbehave.core.steps.AbstractStepResult.successful;
+
 import java.lang.reflect.Method;
 import java.util.Map;
-
 import net.thucydides.core.steps.StepEventBus;
 import org.activiti.cloud.acc.shared.rest.error.ExpectRestError;
 import org.activiti.cloud.acc.shared.rest.error.ExpectRestNotFound;
@@ -39,9 +41,6 @@ import org.jbehave.core.steps.StepResult;
 import org.jbehave.core.steps.Timer;
 import org.jbehave.core.steps.context.StepsContext;
 
-import static org.jbehave.core.steps.AbstractStepResult.failed;
-import static org.jbehave.core.steps.AbstractStepResult.successful;
-
 /**
  * Extended StepCreator that can create ExpectingExceptionParametrisedStep if ExpectingException is detected
  */
@@ -49,43 +48,38 @@ public class ExtendedStepCreator extends StepCreator {
 
     private Keywords keywords;
 
-    public ExtendedStepCreator(Class<?> stepsType,
-                               InjectableStepsFactory stepsFactory,
-                               StepsContext stepsContext,
-                               ParameterConverters parameterConverters,
-                               ParameterControls parameterControls,
-                               StepMatcher stepMatcher,
-                               StepMonitor stepMonitor,
-                               Keywords keywords) {
-        super(stepsType,
-              stepsFactory,
-              stepsContext,
-              parameterConverters,
-              parameterControls,
-              stepMatcher,
-              stepMonitor);
-
+    public ExtendedStepCreator(
+        Class<?> stepsType,
+        InjectableStepsFactory stepsFactory,
+        StepsContext stepsContext,
+        ParameterConverters parameterConverters,
+        ParameterControls parameterControls,
+        StepMatcher stepMatcher,
+        StepMonitor stepMonitor,
+        Keywords keywords
+    ) {
+        super(stepsType, stepsFactory, stepsContext, parameterConverters, parameterControls, stepMatcher, stepMonitor);
         this.keywords = keywords;
     }
 
     @Override
-    public Step createParametrisedStep(Method method,
-                                       String stepAsString,
-                                       String stepWithoutStartingWord,
-                                       Map<String, String> namedParameters) {
-
+    public Step createParametrisedStep(
+        Method method,
+        String stepAsString,
+        String stepWithoutStartingWord,
+        Map<String, String> namedParameters
+    ) {
         ExpectedException expectedException = getExpectedException(method);
-        return expectedException != null ?
-                new ExpectingExceptionParametrisedStep(stepAsString,
-                                                       method,
-                                                       stepWithoutStartingWord,
-                                                       namedParameters,
-                                                       getKeywords(),
-                                                       expectedException) :
-                super.createParametrisedStep(method,
-                                             stepAsString,
-                                             stepWithoutStartingWord,
-                                             namedParameters);
+        return expectedException != null
+            ? new ExpectingExceptionParametrisedStep(
+                stepAsString,
+                method,
+                stepWithoutStartingWord,
+                namedParameters,
+                getKeywords(),
+                expectedException
+            )
+            : super.createParametrisedStep(method, stepAsString, stepWithoutStartingWord, namedParameters);
     }
 
     /**
@@ -103,14 +97,12 @@ public class ExtendedStepCreator extends StepCreator {
 
         ExpectRestError expectRestError = method.getAnnotation(ExpectRestError.class);
         if (expectRestError != null) {
-            expectedException = new ExpectedRestException(expectRestError.statusCode(),
-                                                        expectRestError.value());
+            expectedException = new ExpectedRestException(expectRestError.statusCode(), expectRestError.value());
         }
 
         ExpectRestNotFound expectRestNotFound = method.getAnnotation(ExpectRestNotFound.class);
         if (expectRestNotFound != null) {
-            expectedException = new ExpectedRestException(expectRestNotFound.statusCode(),
-                                                          expectRestNotFound.value());
+            expectedException = new ExpectedRestException(expectRestNotFound.statusCode(), expectRestNotFound.value());
         }
         return expectedException;
     }
@@ -130,17 +122,15 @@ public class ExtendedStepCreator extends StepCreator {
 
         private ExpectedException expectedException;
 
-        public ExpectingExceptionParametrisedStep(String stepAsString,
-                                                  Method method,
-                                                  String stepWithoutStartingWord,
-                                                  Map<String, String> namedParameters,
-                                                  Keywords keywords,
-                                                  ExpectedException expectedException) {
-            super(stepAsString,
-                  method,
-                  stepWithoutStartingWord,
-                  namedParameters);
-
+        public ExpectingExceptionParametrisedStep(
+            String stepAsString,
+            Method method,
+            String stepWithoutStartingWord,
+            Map<String, String> namedParameters,
+            Keywords keywords,
+            ExpectedException expectedException
+        ) {
+            super(stepAsString, method, stepWithoutStartingWord, namedParameters);
             this.stepAsString = stepAsString;
             this.keywords = keywords;
             this.expectedException = expectedException;
@@ -155,29 +145,23 @@ public class ExtendedStepCreator extends StepCreator {
             Timer timer = new Timer().start();
 
             boolean isExpectedExceptionThrown = ExpectedExceptionHandler.isThrowingExpectedException(
-                    expectedException,
-                    () -> performWithThrowing(storyFailureIfItHappened)
+                expectedException,
+                () -> performWithThrowing(storyFailureIfItHappened)
             );
 
             if (!isExpectedExceptionThrown) {
                 ExpectedExceptionNotThrown failureCause = new ExpectedExceptionNotThrown(
-                        "The exception was not thrown as expected: " + expectedException,
-                        expectedException);
-                return failed(stepAsString,
-                              new UUIDExceptionWrapper(stepAsString,
-                                                       failureCause))
-                        .withParameterValues(asString(keywords))
-                        .setTimings(timer.stop());
-            }
-
-            StepEventBus
-                    .getEventBus()
-                    .getBaseStepListener()
-                    .exceptionExpected(ExpectedException.class);
-
-            return successful(stepAsString)
+                    "The exception was not thrown as expected: " + expectedException,
+                    expectedException
+                );
+                return failed(stepAsString, new UUIDExceptionWrapper(stepAsString, failureCause))
                     .withParameterValues(asString(keywords))
                     .setTimings(timer.stop());
+            }
+
+            StepEventBus.getEventBus().getBaseStepListener().exceptionExpected(ExpectedException.class);
+
+            return successful(stepAsString).withParameterValues(asString(keywords)).setTimings(timer.stop());
         }
 
         /**

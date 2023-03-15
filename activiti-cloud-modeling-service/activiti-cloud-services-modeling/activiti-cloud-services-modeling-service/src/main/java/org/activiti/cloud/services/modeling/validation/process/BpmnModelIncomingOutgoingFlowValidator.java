@@ -15,14 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.validation.process;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Implementation of {@link BpmnCommonModelValidator} for validating Incoming and Outgoing flows
@@ -34,7 +33,8 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelVa
 
     public BpmnModelIncomingOutgoingFlowValidator(
         List<FlowNodeFlowsValidator> flowNodeFlowsValidators,
-        FlowElementsExtractor flowElementsExtractor) {
+        FlowElementsExtractor flowElementsExtractor
+    ) {
         this.flowNodeFlowsValidators = flowNodeFlowsValidators;
         this.flowElementsExtractor = flowElementsExtractor;
     }
@@ -42,16 +42,16 @@ public class BpmnModelIncomingOutgoingFlowValidator implements BpmnCommonModelVa
     @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         List<ModelValidationError> errors = new ArrayList<>();
-        flowElementsExtractor.extractFlowElements(bpmnModel, FlowNode.class)
+        flowElementsExtractor
+            .extractFlowElements(bpmnModel, FlowNode.class)
             .forEach(flowNode -> errors.addAll(validateFlowNode(flowNode)));
         return errors.stream();
     }
 
     private List<ModelValidationError> validateFlowNode(FlowNode flowNode) {
-
         List<ModelValidationError> errors = new ArrayList<>();
 
-        for (FlowNodeFlowsValidator validator: flowNodeFlowsValidators) {
+        for (FlowNodeFlowsValidator validator : flowNodeFlowsValidators) {
             if (validator.canValidate(flowNode)) {
                 errors.addAll(validator.validate(flowNode));
             }

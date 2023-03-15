@@ -21,16 +21,14 @@ import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 public class KeycloakUserToUser {
 
     public static User toUser(KeycloakUser kUser) {
-        return User.builder()
+        return User
+            .builder()
             .id(kUser.getId())
             .firstName(kUser.getFirstName())
             .lastName(kUser.getLastName())
             .username(kUser.getUsername())
             .email(kUser.getEmail())
-            .displayName(String.join(" ",
-                kUser.getFirstName(),
-                kUser.getLastName()))
+            .displayName(String.join(" ", kUser.getFirstName(), kUser.getLastName()))
             .build();
     }
-
 }

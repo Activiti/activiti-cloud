@@ -60,10 +60,10 @@ public class ProcessQuerySteps {
 
     @Step
     public CloudProcessInstance getProcessInstance(String processInstanceId) {
-        await().untilAsserted(() ->
-            assertThat(
-                catchThrowable(() -> processQueryService.getProcessInstance(processInstanceId))
-            ).isNull());
+        await()
+            .untilAsserted(() ->
+                assertThat(catchThrowable(() -> processQueryService.getProcessInstance(processInstanceId))).isNull()
+            );
         return processQueryService.getProcessInstance(processInstanceId);
     }
 
@@ -73,59 +73,66 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public void checkProcessInstanceStatus(String processInstanceId,
-        ProcessInstance.ProcessInstanceStatus expectedStatus) {
+    public void checkProcessInstanceStatus(
+        String processInstanceId,
+        ProcessInstance.ProcessInstanceStatus expectedStatus
+    ) {
         assertThat(expectedStatus).isNotNull();
 
-        await().untilAsserted(() -> {
-            CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
-            assertThat(processInstance).isNotNull();
-            assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
-            assertThat(processInstance.getServiceName()).isNotEmpty();
-            assertThat(processInstance.getServiceFullName()).isNotEmpty();
-
-        });
+        await()
+            .untilAsserted(() -> {
+                CloudProcessInstance processInstance = getProcessInstance(processInstanceId);
+                assertThat(processInstance).isNotNull();
+                assertThat(processInstance.getStatus()).isEqualTo(expectedStatus);
+                assertThat(processInstance.getServiceName()).isNotEmpty();
+                assertThat(processInstance.getServiceFullName()).isNotEmpty();
+            });
     }
 
     @Step
     public void checkProcessInstanceHasVariable(String processInstanceId, String variableName) {
-
-        await().untilAsserted(() -> {
-            assertThat(variableName).isNotNull();
-            final Collection<CloudVariableInstance> variableInstances = processQueryService
-                .getProcessInstanceVariables(processInstanceId).getContent();
-            assertThat(variableInstances).isNotNull();
-            assertThat(variableInstances).isNotEmpty();
-            //one of the variables should have name matching variableName
-            assertThat(variableInstances).extracting(VariableInstance::getName)
-                .contains(variableName);
-        });
+        await()
+            .untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
+                final Collection<CloudVariableInstance> variableInstances = processQueryService
+                    .getProcessInstanceVariables(processInstanceId)
+                    .getContent();
+                assertThat(variableInstances).isNotNull();
+                assertThat(variableInstances).isNotEmpty();
+                //one of the variables should have name matching variableName
+                assertThat(variableInstances).extracting(VariableInstance::getName).contains(variableName);
+            });
     }
 
     @Step
-    public void checkProcessInstanceHasVariableValue(String processInstanceId, String variableName,
-        Object variableValue) {
-
-        await().untilAsserted(() -> {
-            assertThat(variableName).isNotNull();
-            final Collection<CloudVariableInstance> variableInstances = processQueryService
-                .getProcessInstanceVariables(processInstanceId).getContent();
-            assertThat(variableInstances).isNotNull();
-            assertThat(variableInstances).isNotEmpty();
-            //one of the variables should have name matching variableName and value
-            assertThat(variableInstances)
-                .extracting(VariableInstance::getName, VariableInstance::getValue)
-                .contains(tuple(variableName, variableValue));
-        });
+    public void checkProcessInstanceHasVariableValue(
+        String processInstanceId,
+        String variableName,
+        Object variableValue
+    ) {
+        await()
+            .untilAsserted(() -> {
+                assertThat(variableName).isNotNull();
+                final Collection<CloudVariableInstance> variableInstances = processQueryService
+                    .getProcessInstanceVariables(processInstanceId)
+                    .getContent();
+                assertThat(variableInstances).isNotNull();
+                assertThat(variableInstances).isNotEmpty();
+                //one of the variables should have name matching variableName and value
+                assertThat(variableInstances)
+                    .extracting(VariableInstance::getName, VariableInstance::getValue)
+                    .contains(tuple(variableName, variableValue));
+            });
     }
 
     @Step
-    public void checkProcessInstanceName(String processInstanceId,
-        String processInstanceName) {
-        await().untilAsserted(
-            () -> assertThat(processQueryService.getProcessInstance(processInstanceId).getName())
-                .isNotNull()
-                .isEqualTo(processInstanceName));
+    public void checkProcessInstanceName(String processInstanceId, String processInstanceName) {
+        await()
+            .untilAsserted(() ->
+                assertThat(processQueryService.getProcessInstance(processInstanceId).getName())
+                    .isNotNull()
+                    .isEqualTo(processInstanceName)
+            );
     }
 
     @Step
@@ -144,19 +151,16 @@ public class ProcessQuerySteps {
     }
 
     @Step
-    public PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
-        String processDefinitionKey) {
+    public PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(String processDefinitionKey) {
         return processQueryService.getProcessInstancesByProcessDefinitionKey(processDefinitionKey);
     }
 
     @Step
     public String getProcessInstanceDiagram(String id) {
-        await().untilAsserted(() ->
-            assertThat(
-                catchThrowable(() ->
-                    processQueryDiagramService.getProcessInstanceDiagram(id)
-                )
-            ).isNull());
+        await()
+            .untilAsserted(() ->
+                assertThat(catchThrowable(() -> processQueryDiagramService.getProcessInstanceDiagram(id))).isNull()
+            );
         return processQueryDiagramService.getProcessInstanceDiagram(id);
     }
 
@@ -170,5 +174,4 @@ public class ProcessQuerySteps {
     public void checkProcessInstanceNoDiagram(String diagram) {
         assertThat(diagram).isEmpty();
     }
-
 }

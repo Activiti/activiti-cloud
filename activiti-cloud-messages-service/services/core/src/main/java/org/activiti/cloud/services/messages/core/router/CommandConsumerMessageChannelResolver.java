@@ -29,14 +29,17 @@ import org.springframework.messaging.core.DestinationResolutionException;
 import org.springframework.messaging.core.DestinationResolver;
 
 public class CommandConsumerMessageChannelResolver implements DestinationResolver<MessageChannel> {
+
     private final Map<String, MessageChannel> bindingChannelCache = new ConcurrentHashMap<>();
     private final BindingService bindingService;
     private final Function<String, String> destinationMapper;
     private final StreamBridge streamBridge;
 
-    public CommandConsumerMessageChannelResolver(Function<String, String> destinationMapper,
-                                                 BindingService bindingService,
-                                                 StreamBridge streamBridge) {
+    public CommandConsumerMessageChannelResolver(
+        Function<String, String> destinationMapper,
+        BindingService bindingService,
+        StreamBridge streamBridge
+    ) {
         this.destinationMapper = destinationMapper;
         this.streamBridge = streamBridge;
         this.bindingService = bindingService;
@@ -46,21 +49,19 @@ public class CommandConsumerMessageChannelResolver implements DestinationResolve
     public MessageChannel resolveDestination(String destination) throws DestinationResolutionException {
         String channelName = getChannelName(destination).orElse(MessageConnectorSource.OUTPUT);
 
-        return this.bindingChannelCache.computeIfAbsent(channelName,
-                                                        this::createMessageChannelProxyForBinding);
+        return this.bindingChannelCache.computeIfAbsent(channelName, this::createMessageChannelProxyForBinding);
     }
 
     protected Optional<String> getChannelName(String destination) {
         BindingServiceProperties bindingProperties = bindingService.getBindingServiceProperties();
 
-        return bindingProperties.getBindings()
-                                .entrySet()
-                                .stream()
-                                .filter(entry -> entry.getValue()
-                                                      .getDestination()
-                                                      .equals(destination))
-                                .map(Map.Entry::getKey)
-                                .findFirst();
+        return bindingProperties
+            .getBindings()
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().getDestination().equals(destination))
+            .map(Map.Entry::getKey)
+            .findFirst();
     }
 
     private MessageChannel createMessageChannelProxyForBinding(String bindingName) {

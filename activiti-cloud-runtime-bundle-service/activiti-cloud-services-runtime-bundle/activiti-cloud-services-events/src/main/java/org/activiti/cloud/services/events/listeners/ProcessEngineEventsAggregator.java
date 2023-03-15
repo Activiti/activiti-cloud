@@ -40,7 +40,8 @@ import org.activiti.engine.impl.context.ExecutionContext;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 
-public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?,?>, MessageProducerCommandContextCloseListener>{
+public class ProcessEngineEventsAggregator
+    extends BaseCommandContextEventsAggregator<CloudRuntimeEvent<?, ?>, MessageProducerCommandContextCloseListener> {
 
     private final MessageProducerCommandContextCloseListener closeListener;
 
@@ -74,50 +75,51 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
         ExecutionContext executionContext = resolveExecutionContext(commandContext, executionId);
 
         // Let's inject execution context info into event using event execution process context
-        if(executionContext != null) {
-            ExecutionContextInfoAppender executionContextInfoAppender = createExecutionContextInfoAppender(executionContext);
+        if (executionContext != null) {
+            ExecutionContextInfoAppender executionContextInfoAppender = createExecutionContextInfoAppender(
+                executionContext
+            );
 
-            CloudRuntimeEventImpl<?,?> event = CloudRuntimeEventImpl.class.cast(element);
+            CloudRuntimeEventImpl<?, ?> event = CloudRuntimeEventImpl.class.cast(element);
 
             element = executionContextInfoAppender.appendExecutionContextInfoTo(event);
         }
 
         super.add(element);
-
     }
 
     protected ExecutionContext resolveExecutionContext(CommandContext commandContext, String executionId) {
+        if (executionId != null && commandContext.getGenericAttribute(executionId) == null) {
+            ExecutionEntity executionEntity = commandContext.getExecutionEntityManager().findById(executionId);
 
-        if(executionId != null && commandContext.getGenericAttribute(executionId) == null) {
-            ExecutionEntity executionEntity = commandContext.getExecutionEntityManager()
-                                                            .findById(executionId);
-
-            mayBeAddRootExecutionContext(commandContext,
-                                         executionEntity);
+            mayBeAddRootExecutionContext(commandContext, executionEntity);
 
             ExecutionContext executionContext = createExecutionContext(executionEntity);
 
             if (executionEntity != null) {
-                commandContext.addAttribute(executionId,
-                                            executionContext);
+                commandContext.addAttribute(executionId, executionContext);
             }
         }
 
         return commandContext.getGenericAttribute(executionId);
-
     }
 
     protected void mayBeAddRootExecutionContext(CommandContext commandContext, ExecutionEntity executionEntity) {
-        ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT);
+        ExecutionContext rootExecutionContext = commandContext.getGenericAttribute(
+            MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT
+        );
 
-        if(rootExecutionContext == null && executionEntity.getRootProcessInstanceId() != null) {
-            ExecutionEntity rootProcessInstance = commandContext.getExecutionEntityManager()
-                                                                .findById(executionEntity.getRootProcessInstanceId());
+        if (rootExecutionContext == null && executionEntity.getRootProcessInstanceId() != null) {
+            ExecutionEntity rootProcessInstance = commandContext
+                .getExecutionEntityManager()
+                .findById(executionEntity.getRootProcessInstanceId());
 
             rootExecutionContext = createExecutionContext(rootProcessInstance);
 
-            commandContext.addAttribute(MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT,
-                                        rootExecutionContext);
+            commandContext.addAttribute(
+                MessageProducerCommandContextCloseListener.ROOT_EXECUTION_CONTEXT,
+                rootExecutionContext
+            );
         }
     }
 
@@ -130,36 +132,35 @@ public class ProcessEngineEventsAggregator extends BaseCommandContextEventsAggre
     }
 
     protected String resolveExecutionId(CloudRuntimeEvent<?, ?> element) {
-        if(element instanceof CloudProcessRuntimeEvent) {
+        if (element instanceof CloudProcessRuntimeEvent) {
             return element.getEntityId();
-        } else if(element instanceof CloudVariableEvent) {
+        } else if (element instanceof CloudVariableEvent) {
             return ((VariableInstance) element.getEntity()).getProcessInstanceId();
-        } else if(element instanceof CloudTaskRuntimeEvent) {
+        } else if (element instanceof CloudTaskRuntimeEvent) {
             return ((Task) element.getEntity()).getProcessInstanceId();
-        } else if(element instanceof CloudBPMNActivityEvent) {
+        } else if (element instanceof CloudBPMNActivityEvent) {
             return ((BPMNActivity) element.getEntity()).getProcessInstanceId();
-        } else if(element instanceof CloudSequenceFlowEvent) {
+        } else if (element instanceof CloudSequenceFlowEvent) {
             return ((BPMNSequenceFlow) element.getEntity()).getProcessInstanceId();
-        } else if(element instanceof CloudIntegrationEvent) {
+        } else if (element instanceof CloudIntegrationEvent) {
             return ((CloudIntegrationEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudTaskCandidateUserEvent) {
+        } else if (element instanceof CloudTaskCandidateUserEvent) {
             return ((CloudTaskCandidateUserEvent) element).getProcessInstanceId();
-        } else if(element instanceof CloudTaskCandidateGroupEvent) {
+        } else if (element instanceof CloudTaskCandidateGroupEvent) {
             return ((CloudTaskCandidateGroupEvent) element).getProcessInstanceId();
-        } else if(element instanceof CloudBPMNSignalEvent) {
+        } else if (element instanceof CloudBPMNSignalEvent) {
             return ((CloudBPMNSignalEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudBPMNTimerEvent) {
+        } else if (element instanceof CloudBPMNTimerEvent) {
             return ((CloudBPMNTimerEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudBPMNMessageEvent) {
+        } else if (element instanceof CloudBPMNMessageEvent) {
             return ((CloudBPMNMessageEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudBPMNErrorReceivedEvent) {
+        } else if (element instanceof CloudBPMNErrorReceivedEvent) {
             return ((CloudBPMNErrorReceivedEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudMessageSubscriptionCancelledEvent) {
+        } else if (element instanceof CloudMessageSubscriptionCancelledEvent) {
             return ((CloudMessageSubscriptionCancelledEvent) element).getEntity().getProcessInstanceId();
-        } else if(element instanceof CloudIntegrationEvent) {
+        } else if (element instanceof CloudIntegrationEvent) {
             return ((CloudIntegrationEvent) element).getEntity().getProcessInstanceId();
         }
         return null;
     }
-
 }

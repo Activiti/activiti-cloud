@@ -70,13 +70,18 @@ public class TaskControllerHelperTest {
         Predicate extendedPredicate = mock(Predicate.class);
         given(predicateAggregator.applyFilters(initialPredicate, filters)).willReturn(extendedPredicate);
 
-        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>("any"),
-            "string");
+        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>("any"), "string");
         PageRequest pageable = PageRequest.of(0, 10);
         PageImpl<TaskEntity> pageResult = new PageImpl<>(Collections.singletonList(new TaskEntity()));
-        given(taskRepository.findByVariableNameAndValue(variableSearch.getName(), variableSearch.getValue(),
-            extendedPredicate, pageable)).willReturn(
-            pageResult);
+        given(
+            taskRepository.findByVariableNameAndValue(
+                variableSearch.getName(),
+                variableSearch.getValue(),
+                extendedPredicate,
+                pageable
+            )
+        )
+            .willReturn(pageResult);
 
         given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler))
             .willReturn(cloudTaskPagedModel);
@@ -84,7 +89,10 @@ public class TaskControllerHelperTest {
         //when
         PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
-            variableSearch, pageable, filters);
+            variableSearch,
+            pageable,
+            filters
+        );
 
         //then
         assertThat(resultPagedModel).isEqualTo(cloudTaskPagedModel);
@@ -98,8 +106,7 @@ public class TaskControllerHelperTest {
         Predicate extendedPredicate = mock(Predicate.class);
         given(predicateAggregator.applyFilters(initialPredicate, filters)).willReturn(extendedPredicate);
 
-        VariableSearch variableSearch = new VariableSearch(null, null,
-            null);
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
         PageRequest pageable = PageRequest.of(0, 10);
         PageImpl<TaskEntity> pageResult = new PageImpl<>(Collections.singletonList(new TaskEntity()));
         given(taskRepository.findAll(extendedPredicate, pageable)).willReturn(pageResult);
@@ -110,7 +117,10 @@ public class TaskControllerHelperTest {
         //when
         PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
-            variableSearch, pageable, filters);
+            variableSearch,
+            pageable,
+            filters
+        );
 
         //then
         assertThat(resultPagedModel).isEqualTo(cloudTaskPagedModel);

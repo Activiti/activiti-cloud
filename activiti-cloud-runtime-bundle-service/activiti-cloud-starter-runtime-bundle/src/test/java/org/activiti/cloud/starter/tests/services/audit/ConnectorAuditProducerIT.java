@@ -15,6 +15,19 @@
  */
 package org.activiti.cloud.starter.tests.services.audit;
 
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
+import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
+import static org.activiti.api.process.model.events.BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
+import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
+import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,32 +68,36 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_COMPLETED;
-import static org.activiti.api.process.model.events.BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED;
-import static org.activiti.api.process.model.events.BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED;
-import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_ERROR_RECEIVED;
-import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_REQUESTED;
-import static org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents.INTEGRATION_RESULT_RECEIVED;
-import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_COMPLETED;
-import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER;
-import static org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.awaitility.Awaitility.await;
-
 @ActiveProfiles(ConnectorAuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = ServicesAuditITConfiguration.class,
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 public class ConnectorAuditProducerIT {
 
     private static final String ROUTING_KEY_HEADER = "routingKey";
-    private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {"appName", "serviceName", "serviceVersion", "serviceFullName", ROUTING_KEY_HEADER};
-    private static final String[] EXECUTION_CONTEXT_HEADERS = {"rootProcessInstanceId", "rootProcessDefinitionId", "rootProcessDefinitionKey", "rootProcessDefinitionVersion", "deploymentId", "deploymentName", "deploymentVersion"};
+    private static final String[] RUNTIME_BUNDLE_INFO_HEADERS = {
+        "appName",
+        "serviceName",
+        "serviceVersion",
+        "serviceFullName",
+        ROUTING_KEY_HEADER,
+    };
+    private static final String[] EXECUTION_CONTEXT_HEADERS = {
+        "rootProcessInstanceId",
+        "rootProcessDefinitionId",
+        "rootProcessDefinitionKey",
+        "rootProcessDefinitionVersion",
+        "deploymentId",
+        "deploymentName",
+        "deploymentVersion",
+    };
 
-    public static final String[] ALL_REQUIRED_HEADERS = Stream.of(RUNTIME_BUNDLE_INFO_HEADERS, EXECUTION_CONTEXT_HEADERS)
+    public static final String[] ALL_REQUIRED_HEADERS = Stream
+        .of(RUNTIME_BUNDLE_INFO_HEADERS, EXECUTION_CONTEXT_HEADERS)
         .flatMap(Stream::of)
         .toArray(String[]::new);
 
@@ -114,11 +131,12 @@ public class ConnectorAuditProducerIT {
 
     @Test
     public void shouldProduceIntegrationResultEventsDuringMultiInstanceCloudConnectorExecution() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("miParallelCloudConnector",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "miParallelCloudConnector",
             Collections.singletonMap("instanceCount", 3),
-            null);
+            null
+        );
 
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
@@ -129,33 +147,41 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudBPMNActivityStartedEvent> receivedActivityStartedEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == ACTIVITY_STARTED && event.getEntityId()
-                        .equals("miCloudConnectorId"))
+                List<CloudBPMNActivityStartedEvent> receivedActivityStartedEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == ACTIVITY_STARTED && event.getEntityId().equals("miCloudConnectorId")
+                    )
                     .map(CloudBPMNActivityStartedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityStartedEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
-                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                        event -> ((BPMNActivity) event.getEntity()).getActivityName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-1"),
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == INTEGRATION_REQUESTED &&
-                        ((IntegrationContext) event.getEntity()).getClientId()
-                            .equals("miCloudConnectorId"))
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == INTEGRATION_REQUESTED &&
+                        ((IntegrationContext) event.getEntity()).getClientId().equals("miCloudConnectorId")
+                    )
                     .map(CloudIntegrationRequestedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
-                                event -> ((IntegrationContext) event.getEntity()).getClientName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                        event -> ((IntegrationContext) event.getEntity()).getClientName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-1"),
@@ -163,7 +189,6 @@ public class ConnectorAuditProducerIT {
                     );
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationResultFor(integrationRequestedEvents);
@@ -173,52 +198,61 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
-                List<CloudBPMNActivityCompletedEvent> receivedActivityCompletedEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == ACTIVITY_COMPLETED && event.getEntityId()
-                        .equals("miCloudConnectorId"))
+                List<CloudBPMNActivityCompletedEvent> receivedActivityCompletedEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == ACTIVITY_COMPLETED && event.getEntityId().equals("miCloudConnectorId")
+                    )
                     .map(CloudBPMNActivityCompletedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityCompletedEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
-                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                        event -> ((BPMNActivity) event.getEntity()).getActivityName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-1"),
                         tuple(ACTIVITY_COMPLETED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
-                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == INTEGRATION_RESULT_RECEIVED &&
-                        ((IntegrationContext) event.getEntity()).getClientId()
-                            .equals("miCloudConnectorId"))
+                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == INTEGRATION_RESULT_RECEIVED &&
+                        ((IntegrationContext) event.getEntity()).getClientId().equals("miCloudConnectorId")
+                    )
                     .map(CloudIntegrationResultReceivedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
-                                event -> ((IntegrationContext) event.getEntity()).getClientName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                        event -> ((IntegrationContext) event.getEntity()).getClientName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-1"),
                         tuple(INTEGRATION_RESULT_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
-                assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
-                    RuntimeEvent::getProcessInstanceId)
+                assertThat(receivedEvents)
+                    .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
             });
     }
 
     @Test
     public void shouldProduceIntegrationErrorEventsDuringMultiInstanceCloudConnectorExecution() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("miParallelCloudConnector",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "miParallelCloudConnector",
             Collections.singletonMap("instanceCount", 3),
-            null);
+            null
+        );
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
         //then
@@ -228,33 +262,41 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudBPMNActivityStartedEvent> receivedActivityStartedEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == ACTIVITY_STARTED && event.getEntityId()
-                        .equals("miCloudConnectorId"))
+                List<CloudBPMNActivityStartedEvent> receivedActivityStartedEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == ACTIVITY_STARTED && event.getEntityId().equals("miCloudConnectorId")
+                    )
                     .map(CloudBPMNActivityStartedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedActivityStartedEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((BPMNActivity) event.getEntity()).getElementId(),
-                                event -> ((BPMNActivity) event.getEntity()).getActivityName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((BPMNActivity) event.getEntity()).getElementId(),
+                        event -> ((BPMNActivity) event.getEntity()).getActivityName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-1"),
                         tuple(ACTIVITY_STARTED, "miCloudConnectorId", "miCloudConnectorName-2")
                     );
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == INTEGRATION_REQUESTED &&
-                        ((IntegrationContext) event.getEntity()).getClientId()
-                            .equals("miCloudConnectorId"))
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == INTEGRATION_REQUESTED &&
+                        ((IntegrationContext) event.getEntity()).getClientId().equals("miCloudConnectorId")
+                    )
                     .map(CloudIntegrationRequestedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
-                                event -> ((IntegrationContext) event.getEntity()).getClientName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                        event -> ((IntegrationContext) event.getEntity()).getClientName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(INTEGRATION_REQUESTED, "miCloudConnectorId", "miCloudConnectorName-1"),
@@ -262,20 +304,18 @@ public class ConnectorAuditProducerIT {
                     );
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         Error error = new Error("IntegrationError");
         error.fillInStackTrace();
 
         // throw error in cloud connector
-        integrationRequestedEvents.stream()
+        integrationRequestedEvents
+            .stream()
             .map(request -> {
-                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                    error);
+                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()), error);
             })
-            .map(payload -> MessageBuilder.withPayload(payload)
-                .build())
+            .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_ERRORS_CONSUMER, request));
         //then
         await()
@@ -284,17 +324,21 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = receivedEvents.stream()
-                    .filter(event -> event.getEventType() == INTEGRATION_ERROR_RECEIVED &&
-                        ((IntegrationContext) event.getEntity()).getClientId()
-                            .equals("miCloudConnectorId"))
+                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = receivedEvents
+                    .stream()
+                    .filter(event ->
+                        event.getEventType() == INTEGRATION_ERROR_RECEIVED &&
+                        ((IntegrationContext) event.getEntity()).getClientId().equals("miCloudConnectorId")
+                    )
                     .map(CloudIntegrationErrorReceivedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType,
-                                event -> ((IntegrationContext) event.getEntity()).getClientId(),
-                                event -> ((IntegrationContext) event.getEntity()).getClientName())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId(),
+                        event -> ((IntegrationContext) event.getEntity()).getClientName()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-0"),
                         tuple(INTEGRATION_ERROR_RECEIVED, "miCloudConnectorId", "miCloudConnectorName-1"),
@@ -305,11 +349,12 @@ public class ConnectorAuditProducerIT {
 
     @Test
     public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnErrorConnectorProcess() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("cloudBpmnErrorCloudConnectorProcess",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorCloudConnectorProcess",
             null,
-            null);
+            null
+        );
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
         //then
@@ -319,17 +364,19 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
 
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationErrorFor(integrationRequestedEvents);
@@ -340,26 +387,29 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_ERROR_RECEIVED);
+                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_ERROR_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector"));
 
-                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = receivedEvents.stream()
+                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = receivedEvents
+                    .stream()
                     .filter(event -> event.getEventType() == ERROR_RECEIVED)
                     .map(CloudBPMNErrorReceivedEvent.class::cast)
                     .collect(Collectors.toList());
 
                 assertThat(receivedBmpnErrorEvents)
-                    .extracting(CloudBPMNErrorReceivedEvent::getEventType,
-                        event -> ((BPMNError) event.getEntity()).getErrorCode())
-                    .containsExactlyInAnyOrder(
-                        tuple(ERROR_RECEIVED,
-                            "CLOUD_BPMN_ERROR")
-                    );
+                    .extracting(
+                        CloudBPMNErrorReceivedEvent::getEventType,
+                        event -> ((BPMNError) event.getEntity()).getErrorCode()
+                    )
+                    .containsExactlyInAnyOrder(tuple(ERROR_RECEIVED, "CLOUD_BPMN_ERROR"));
             });
 
         // given reset state
@@ -367,7 +417,9 @@ public class ConnectorAuditProducerIT {
         streamHandler.clear();
 
         // when fix business error
-        List<CloudTask> tasks = new ArrayList<>(processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent());
+        List<CloudTask> tasks = new ArrayList<>(
+            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
+        );
         assertThat(tasks).hasSize(1);
 
         taskRestTemplate.complete(tasks.get(0));
@@ -379,16 +431,18 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationResultFor(integrationRequestedEvents);
@@ -400,27 +454,31 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_RESULT_RECEIVED);
+                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_RESULT_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_RESULT_RECEIVED, "performBusinessTaskCloudConnector")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_RESULT_RECEIVED, "performBusinessTaskCloudConnector"));
 
-                assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
-                    RuntimeEvent::getProcessInstanceId)
+                assertThat(receivedEvents)
+                    .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
             });
     }
 
     @Test
     public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnTerminateEndEventProcess() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("cloudBpmnErrorEndEventProcess",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorEndEventProcess",
             null,
-            null);
+            null
+        );
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
         //then
@@ -430,16 +488,18 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector2")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector2"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationErrorFor(integrationRequestedEvents);
@@ -450,23 +510,27 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_ERROR_RECEIVED);
+                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_ERROR_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector2")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector2"));
 
-                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(receivedEvents,
-                    ERROR_RECEIVED);
+                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(
+                    receivedEvents,
+                    ERROR_RECEIVED
+                );
                 assertThat(receivedBmpnErrorEvents)
-                    .extracting(CloudBPMNErrorReceivedEvent::getEventType,
-                        event -> ((BPMNError) event.getEntity()).getErrorCode())
-                    .containsExactlyInAnyOrder(
-                        tuple(ERROR_RECEIVED,
-                            "CLOUD_BPMN_ERROR")
-                    );
+                    .extracting(
+                        CloudBPMNErrorReceivedEvent::getEventType,
+                        event -> ((BPMNError) event.getEntity()).getErrorCode()
+                    )
+                    .containsExactlyInAnyOrder(tuple(ERROR_RECEIVED, "CLOUD_BPMN_ERROR"));
             });
 
         // given reset state
@@ -474,7 +538,9 @@ public class ConnectorAuditProducerIT {
         streamHandler.clear();
 
         // when fix business error
-        List<CloudTask> tasks = new ArrayList<>(processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent());
+        List<CloudTask> tasks = new ArrayList<>(
+            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
+        );
         assertThat(tasks).hasSize(1);
 
         taskRestTemplate.complete(tasks.get(0));
@@ -484,19 +550,22 @@ public class ConnectorAuditProducerIT {
             .untilAsserted(() -> {
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = getProcessInstanceEvents(startProcessEntity);
 
-                assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
-                    RuntimeEvent::getProcessInstanceId)
-                    .contains(tuple(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED, startProcessEntity.getBody().getId()));
+                assertThat(receivedEvents)
+                    .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
+                    .contains(
+                        tuple(ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED, startProcessEntity.getBody().getId())
+                    );
             });
     }
 
     @Test
     public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnErrorBoundarySubprocessEventProcess() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("cloudBpmnErrorBoundarySubprocessEventProcess",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorBoundarySubprocessEventProcess",
             null,
-            null);
+            null
+        );
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
         //then
@@ -506,16 +575,18 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector4")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector4"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationErrorFor(integrationRequestedEvents);
@@ -526,23 +597,27 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_ERROR_RECEIVED);
+                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_ERROR_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector4")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector4"));
 
-                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(receivedEvents,
-                    ERROR_RECEIVED);
+                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(
+                    receivedEvents,
+                    ERROR_RECEIVED
+                );
                 assertThat(receivedBmpnErrorEvents)
-                    .extracting(CloudBPMNErrorReceivedEvent::getEventType,
-                        event -> ((BPMNError) event.getEntity()).getErrorCode())
-                    .containsExactlyInAnyOrder(
-                        tuple(ERROR_RECEIVED,
-                            "CLOUD_BPMN_ERROR")
-                    );
+                    .extracting(
+                        CloudBPMNErrorReceivedEvent::getEventType,
+                        event -> ((BPMNError) event.getEntity()).getErrorCode()
+                    )
+                    .containsExactlyInAnyOrder(tuple(ERROR_RECEIVED, "CLOUD_BPMN_ERROR"));
             });
 
         // given reset state
@@ -550,7 +625,9 @@ public class ConnectorAuditProducerIT {
         streamHandler.clear();
 
         // when fix business error
-        List<CloudTask> tasks = new ArrayList<>(processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent());
+        List<CloudTask> tasks = new ArrayList<>(
+            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
+        );
         assertThat(tasks).hasSize(1);
 
         taskRestTemplate.complete(tasks.get(0));
@@ -562,16 +639,18 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector4")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector4"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationResultFor(integrationRequestedEvents);
@@ -583,41 +662,44 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_RESULT_RECEIVED);
+                List<CloudIntegrationResultReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_RESULT_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
                     .containsExactlyInAnyOrder(
                         tuple(INTEGRATION_RESULT_RECEIVED, "performBusinessTaskCloudConnector4")
                     );
 
-                assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
-                    RuntimeEvent::getProcessInstanceId)
+                assertThat(receivedEvents)
+                    .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
             });
     }
 
-    private void sendIntegrationResultFor(
-        List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
-
+    private void sendIntegrationResultFor(List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
         // complete cloud connector tasks
-        integrationRequestedEvents.stream()
+        integrationRequestedEvents
+            .stream()
             .map(request -> {
-                return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()),
-                    request.getEntity());
+                return new IntegrationResultImpl(new IntegrationRequestImpl(request.getEntity()), request.getEntity());
             })
-            .map(payload -> MessageBuilder.withPayload(payload)
-                .build())
+            .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_RESULTS_CONSUMER, request));
     }
 
     @Test
     public void shouldProduceIntegrationCloudBpmnErrorEventsForCloudBpmnErrorEventSubprocessProcess() {
-
         //when
-        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey("cloudBpmnErrorEventSubprocessProcess",
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
+            "cloudBpmnErrorEventSubprocessProcess",
             null,
-            null);
+            null
+        );
         List<CloudIntegrationRequestedEvent> integrationRequestedEvents = new ArrayList<>();
 
         //then
@@ -627,16 +709,18 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_REQUESTED);
+                List<CloudIntegrationRequestedEvent> receivedIntegrationRequestedEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_REQUESTED
+                );
                 assertThat(receivedIntegrationRequestedEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector3")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_REQUESTED, "performBusinessTaskCloudConnector3"));
 
                 integrationRequestedEvents.addAll(receivedIntegrationRequestedEvents);
-
             });
 
         sendIntegrationErrorFor(integrationRequestedEvents);
@@ -647,23 +731,27 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(receivedEvents,
-                    INTEGRATION_ERROR_RECEIVED);
+                List<CloudIntegrationErrorReceivedEvent> receivedIntegrationResultEvents = getEventsByType(
+                    receivedEvents,
+                    INTEGRATION_ERROR_RECEIVED
+                );
                 assertThat(receivedIntegrationResultEvents)
-                    .extracting(RuntimeEvent::getEventType, event -> ((IntegrationContext) event.getEntity()).getClientId())
-                    .containsExactlyInAnyOrder(
-                        tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector3")
-                    );
+                    .extracting(
+                        RuntimeEvent::getEventType,
+                        event -> ((IntegrationContext) event.getEntity()).getClientId()
+                    )
+                    .containsExactlyInAnyOrder(tuple(INTEGRATION_ERROR_RECEIVED, "performBusinessTaskCloudConnector3"));
 
-                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(receivedEvents,
-                    ERROR_RECEIVED);
+                List<CloudBPMNErrorReceivedEvent> receivedBmpnErrorEvents = getEventsByType(
+                    receivedEvents,
+                    ERROR_RECEIVED
+                );
                 assertThat(receivedBmpnErrorEvents)
-                    .extracting(CloudBPMNErrorReceivedEvent::getEventType,
-                        event -> ((BPMNError) event.getEntity()).getErrorCode())
-                    .containsExactlyInAnyOrder(
-                        tuple(ERROR_RECEIVED,
-                            "CLOUD_BPMN_ERROR")
-                    );
+                    .extracting(
+                        CloudBPMNErrorReceivedEvent::getEventType,
+                        event -> ((BPMNError) event.getEntity()).getErrorCode()
+                    )
+                    .containsExactlyInAnyOrder(tuple(ERROR_RECEIVED, "CLOUD_BPMN_ERROR"));
             });
 
         // given reset state
@@ -671,7 +759,9 @@ public class ConnectorAuditProducerIT {
         streamHandler.clear();
 
         // when fix business error
-        List<CloudTask> tasks = new ArrayList<>(processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent());
+        List<CloudTask> tasks = new ArrayList<>(
+            processInstanceRestTemplate.getTasks(startProcessEntity).getBody().getContent()
+        );
         assertThat(tasks).hasSize(1);
 
         taskRestTemplate.complete(tasks.get(0));
@@ -683,40 +773,40 @@ public class ConnectorAuditProducerIT {
 
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
 
-                assertThat(receivedEvents).extracting(RuntimeEvent::getEventType,
-                    RuntimeEvent::getProcessInstanceId)
+                assertThat(receivedEvents)
+                    .extracting(RuntimeEvent::getEventType, RuntimeEvent::getProcessInstanceId)
                     .contains(tuple(PROCESS_COMPLETED, startProcessEntity.getBody().getId()));
             });
     }
 
-    private void sendIntegrationErrorFor(
-        List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
+    private void sendIntegrationErrorFor(List<CloudIntegrationRequestedEvent> integrationRequestedEvents) {
         RuntimeException cause = new RuntimeException("Runtime exception");
         CloudBpmnError error = new CloudBpmnError("CLOUD_BPMN_ERROR", cause);
 
-        integrationRequestedEvents.stream()
+        integrationRequestedEvents
+            .stream()
             .map(request -> {
-                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()),
-                    error);
+                return new IntegrationErrorImpl(new IntegrationRequestImpl(request.getEntity()), error);
             })
-            .map(payload -> MessageBuilder.withPayload(payload)
-                .build())
+            .map(payload -> MessageBuilder.withPayload(payload).build())
             .forEach(request -> streamBridge.send(INTEGRATION_ERRORS_CONSUMER, request));
     }
 
-    private List<CloudRuntimeEvent<?, ?>> getProcessInstanceEvents(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-        return streamHandler.getAllReceivedEvents()
+    private List<CloudRuntimeEvent<?, ?>> getProcessInstanceEvents(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
+        return streamHandler
+            .getAllReceivedEvents()
             .stream()
             .filter(event -> processInstanceEntity.getBody().getId().equals(event.getProcessInstanceId()))
             .collect(Collectors.toList());
     }
 
-    private <T> List<T> getEventsByType(List<CloudRuntimeEvent<?, ?>> receivedEvents,
-        Enum<?> eventType) {
-        return receivedEvents.stream()
+    private <T> List<T> getEventsByType(List<CloudRuntimeEvent<?, ?>> receivedEvents, Enum<?> eventType) {
+        return receivedEvents
+            .stream()
             .filter(event -> event.getEventType() == eventType)
             .map(it -> (T) it)
             .collect(Collectors.toList());
     }
-
 }

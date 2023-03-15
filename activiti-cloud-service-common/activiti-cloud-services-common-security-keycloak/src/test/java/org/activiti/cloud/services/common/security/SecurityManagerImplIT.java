@@ -36,8 +36,7 @@ public class SecurityManagerImplIT {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class Application {
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
@@ -57,7 +56,7 @@ public class SecurityManagerImplIT {
     }
 
     @Test
-    @WithActivitiMockUser(groups = {"hr", "admins"})
+    @WithActivitiMockUser(groups = { "hr", "admins" })
     public void testGetAuthenticatedUserGroups() {
         // given
 
@@ -65,12 +64,11 @@ public class SecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserGroups();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("hr", "admins");
+        assertThat(result).isNotEmpty().containsExactly("hr", "admins");
     }
 
     @Test
-    @WithActivitiMockUser(roles = {"ACTIVITI_USER"})
+    @WithActivitiMockUser(roles = { "ACTIVITI_USER" })
     public void testGetAuthenticatedUserRoles() {
         // given
 
@@ -78,8 +76,7 @@ public class SecurityManagerImplIT {
         List<String> result = securityManager.getAuthenticatedUserRoles();
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("ACTIVITI_USER");
+        assertThat(result).isNotEmpty().containsExactly("ACTIVITI_USER");
     }
 
     @Test
@@ -87,7 +84,9 @@ public class SecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserId(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserId();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -98,7 +97,9 @@ public class SecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserGroups(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserGroups();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -109,12 +110,11 @@ public class SecurityManagerImplIT {
         // given
 
         // when
-        Throwable thrown = catchThrowable(() -> { securityManager.getAuthenticatedUserRoles(); });
+        Throwable thrown = catchThrowable(() -> {
+            securityManager.getAuthenticatedUserRoles();
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
-
     }
-
-
 }

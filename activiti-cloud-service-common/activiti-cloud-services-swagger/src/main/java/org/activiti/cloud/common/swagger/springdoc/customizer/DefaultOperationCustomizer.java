@@ -17,5 +17,4 @@ package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import org.springdoc.core.customizers.OperationCustomizer;
 
-public interface DefaultOperationCustomizer extends OperationCustomizer {
-}
+public interface DefaultOperationCustomizer extends OperationCustomizer {}

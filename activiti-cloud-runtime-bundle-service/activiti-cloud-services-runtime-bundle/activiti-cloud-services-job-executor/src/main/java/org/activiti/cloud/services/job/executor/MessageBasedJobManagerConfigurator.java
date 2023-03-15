@@ -27,6 +27,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigurator, SmartLifecycle {
+
     private static final Logger logger = LoggerFactory.getLogger(MessageBasedJobManagerConfigurator.class);
 
     private static final String MESSAGE_BASED_JOB_MANAGER = "messageBasedJobManager";
@@ -45,11 +46,13 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
 
     private boolean running = false;
 
-    public MessageBasedJobManagerConfigurator(ConfigurableListableBeanFactory beanFactory,
-                                              BindingService bindingService,
-                                              JobMessageInputChannelFactory inputChannelFactory,
-                                              MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                              JobMessageHandlerFactory jobMessageHandlerFactory) {
+    public MessageBasedJobManagerConfigurator(
+        ConfigurableListableBeanFactory beanFactory,
+        BindingService bindingService,
+        JobMessageInputChannelFactory inputChannelFactory,
+        MessageBasedJobManagerFactory messageBasedJobManagerFactory,
+        JobMessageHandlerFactory jobMessageHandlerFactory
+    ) {
         this.bindingService = bindingService;
         this.inputChannelFactory = inputChannelFactory;
         this.messageBasedJobManagerFactory = messageBasedJobManagerFactory;
@@ -82,7 +85,6 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
         configuration.setJobManager(messageBasedJobManager);
 
         logger.info("Configured message based job manager class: {}", this.messageBasedJobManager.getClass());
-
     }
 
     /**
@@ -99,7 +101,6 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
         inputChannel = inputChannelFactory.createInputChannel(channelName, bindingProperties);
 
         logger.info("Configured message job input channel '{}' with bindings: {}", channelName, bindingProperties);
-
     }
 
     @Override
@@ -109,7 +110,10 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
 
     @Override
     public void start() {
-        logger.info("Subscribing job message handler to input channel {}", messageBasedJobManager.getInputChannelName());
+        logger.info(
+            "Subscribing job message handler to input channel {}",
+            messageBasedJobManager.getInputChannelName()
+        );
 
         jobMessageHandler = createJobMessageHandler(configuration);
 
@@ -119,8 +123,7 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
 
         // Now start async executor
         if (!configuration.getAsyncExecutor().isActive()) {
-            configuration.getAsyncExecutor()
-                         .start();
+            configuration.getAsyncExecutor().start();
         }
 
         running = true;
@@ -128,7 +131,10 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
 
     @Override
     public void stop() {
-        logger.info("Unsubscribing job message handler to input channel {}", messageBasedJobManager.getInputChannelName());
+        logger.info(
+            "Unsubscribing job message handler to input channel {}",
+            messageBasedJobManager.getInputChannelName()
+        );
 
         try {
             // Let's unbind consumer from input channel
@@ -137,10 +143,8 @@ public class MessageBasedJobManagerConfigurator implements ProcessEngineConfigur
 
             // Let's gracefully shutdown executor
             if (configuration.getAsyncExecutor().isActive()) {
-                configuration.getAsyncExecutor()
-                             .shutdown();
+                configuration.getAsyncExecutor().shutdown();
             }
-
         } finally {
             running = false;
         }

@@ -26,13 +26,17 @@ import org.junit.jupiter.api.Test;
 
 public class ErrorReceivedEventConverterTest {
 
-    private ErrorReceivedEventConverter eventConverter = new ErrorReceivedEventConverter(new EventContextInfoAppender());
+    private ErrorReceivedEventConverter eventConverter = new ErrorReceivedEventConverter(
+        new EventContextInfoAppender()
+    );
 
     @Test
     public void should_convert_toEntityErrorReceivedEvent() {
         CloudBPMNErrorReceivedEventImpl event = createErrorReceivedEvent();
 
-        ErrorReceivedAuditEventEntity auditEventEntity = (ErrorReceivedAuditEventEntity) eventConverter.convertToEntity(event);
+        ErrorReceivedAuditEventEntity auditEventEntity = (ErrorReceivedAuditEventEntity) eventConverter.convertToEntity(
+            event
+        );
 
         assertThatIsEqualTo(auditEventEntity, event);
     }
@@ -40,9 +44,13 @@ public class ErrorReceivedEventConverterTest {
     @Test
     public void should_convertToAPIErrorReceivedEvent() {
         //given
-        ErrorReceivedAuditEventEntity auditEventEntity = (ErrorReceivedAuditEventEntity) eventConverter.convertToEntity(createErrorReceivedEvent());
+        ErrorReceivedAuditEventEntity auditEventEntity = (ErrorReceivedAuditEventEntity) eventConverter.convertToEntity(
+            createErrorReceivedEvent()
+        );
 
-        CloudBPMNErrorReceivedEventImpl event= (CloudBPMNErrorReceivedEventImpl) eventConverter.convertToAPI(auditEventEntity);
+        CloudBPMNErrorReceivedEventImpl event = (CloudBPMNErrorReceivedEventImpl) eventConverter.convertToAPI(
+            auditEventEntity
+        );
         assertThatIsEqualTo(auditEventEntity, event);
     }
 
@@ -61,11 +69,13 @@ public class ErrorReceivedEventConverterTest {
         error.setErrorId("errorId");
         error.setErrorCode("errorCode");
 
-        CloudBPMNErrorReceivedEventImpl event = new CloudBPMNErrorReceivedEventImpl("eventId",
-                                                                                    System.currentTimeMillis(),
-                                                                                    error,
-                                                                                    error.getProcessDefinitionId(),
-                                                                                    error.getProcessInstanceId());
+        CloudBPMNErrorReceivedEventImpl event = new CloudBPMNErrorReceivedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            error,
+            error.getProcessDefinitionId(),
+            error.getProcessInstanceId()
+        );
 
         //Set explicitly to be sure
         event.setEntityId("entityId");
@@ -80,7 +90,10 @@ public class ErrorReceivedEventConverterTest {
         return event;
     }
 
-    private void assertThatIsEqualTo(ErrorReceivedAuditEventEntity auditEventEntity, CloudBPMNErrorReceivedEvent event) {
+    private void assertThatIsEqualTo(
+        ErrorReceivedAuditEventEntity auditEventEntity,
+        CloudBPMNErrorReceivedEvent event
+    ) {
         assertThat(event).isNotNull();
         assertThat(auditEventEntity).isNotNull();
         assertThat(auditEventEntity.getEntityId()).isEqualTo(event.getEntityId());

@@ -29,26 +29,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class KeycloakGroupToGroupTest {
 
-  @Mock
-  private KeycloakClient keycloakClient;
+    @Mock
+    private KeycloakClient keycloakClient;
 
-  @Mock
-  private KeycloakRoleMappingToRole keycloakRoleMappingToRole;
+    @Mock
+    private KeycloakRoleMappingToRole keycloakRoleMappingToRole;
 
-  @InjectMocks
-  private KeycloakGroupToGroup keycloakGroupToGroup;
+    @InjectMocks
+    private KeycloakGroupToGroup keycloakGroupToGroup;
 
-  @Test
-  void shouldTransformKeycloakGroupToGroup() {
+    @Test
+    void shouldTransformKeycloakGroupToGroup() {
+        KeycloakGroup kGroup = new KeycloakGroup();
+        kGroup.setId("123");
+        kGroup.setName("test");
 
-    KeycloakGroup kGroup = new KeycloakGroup();
-    kGroup.setId("123");
-    kGroup.setName("test");
+        Group group = keycloakGroupToGroup.toGroup(kGroup);
 
-    Group group = keycloakGroupToGroup.toGroup(kGroup);
-
-    assertThat(group.getId()).isEqualTo(kGroup.getId());
-    assertThat(group.getName()).isEqualTo(kGroup.getName());
-  }
-
+        assertThat(group.getId()).isEqualTo(kGroup.getId());
+        assertThat(group.getName()).isEqualTo(kGroup.getName());
+    }
 }

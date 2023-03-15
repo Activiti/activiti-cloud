@@ -24,7 +24,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 
 public interface TaskQueryAdminService {
-
     @RequestLine("GET /admin/v1/tasks/{taskId}")
     @Headers("Accept: application/hal+json;charset=UTF-8")
     CloudTask getTask(@Param("taskId") String taskId);
@@ -33,7 +32,9 @@ public interface TaskQueryAdminService {
     @Headers("Accept: application/hal+json;charset=UTF-8")
     PagedModel<CloudTask> getTasks();
 
-    @RequestLine("GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc")
+    @RequestLine(
+        "GET /admin/v1/tasks?rootTasksOnly=true&processInstanceId={processInstanceId}&sort=createdDate%2Cdesc&sort=id%2Cdesc"
+    )
     @Headers("Content-Type: application/json")
     PagedModel<CloudTask> getRootTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
 
@@ -51,5 +52,4 @@ public interface TaskQueryAdminService {
     @RequestLine("GET /admin/v1/process-instances/{processInstanceId}/tasks")
     @Headers("Content-Type: application/json")
     PagedModel<CloudTask> getTasksByProcessInstance(@Param("processInstanceId") String processInstanceId);
-
 }

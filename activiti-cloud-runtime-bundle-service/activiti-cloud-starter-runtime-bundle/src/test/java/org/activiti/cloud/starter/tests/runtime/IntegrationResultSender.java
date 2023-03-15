@@ -29,22 +29,16 @@ public class IntegrationResultSender {
 
     private StreamBridge streamBridge;
 
-    public IntegrationResultSender(
-        StreamBridge streamBridge) {
+    public IntegrationResultSender(StreamBridge streamBridge) {
         this.streamBridge = streamBridge;
     }
 
-
-    public void send(IntegrationRequest integrationRequest,
-        IntegrationContext integrationContext) {
-        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest,
-            integrationContext);
-        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult)
-            .build();
+    public void send(IntegrationRequest integrationRequest, IntegrationContext integrationContext) {
+        IntegrationResultImpl integrationResult = new IntegrationResultImpl(integrationRequest, integrationContext);
+        Message<IntegrationResultImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getResultDestination();
 
         streamBridge.send(destination, message);
     }
-
 }

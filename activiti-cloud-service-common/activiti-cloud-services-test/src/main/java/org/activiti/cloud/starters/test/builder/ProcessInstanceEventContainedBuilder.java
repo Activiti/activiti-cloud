@@ -17,15 +17,14 @@ package org.activiti.cloud.starters.test.builder;
 
 import java.util.Date;
 import java.util.UUID;
-
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.starters.test.EventsAggregator;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 
 public class ProcessInstanceEventContainedBuilder {
 
@@ -37,20 +36,20 @@ public class ProcessInstanceEventContainedBuilder {
 
     public ProcessInstance aCompletedProcessInstance(String name) {
         ProcessInstance processInstance = buildProcessInstance(name);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-                                   new CloudProcessStartedEventImpl(processInstance,
-                                                                    null,
-                                                                    null),
-                                   new CloudProcessCompletedEventImpl(processInstance));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance, null, null),
+            new CloudProcessCompletedEventImpl(processInstance)
+        );
         return processInstance;
     }
 
     public ProcessInstanceImpl aRunningProcessInstance(String name) {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-                                   new CloudProcessStartedEventImpl(processInstance,
-                                                       null,
-                                                       null));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance, null, null)
+        );
         return processInstance;
     }
 
@@ -84,39 +83,49 @@ public class ProcessInstanceEventContainedBuilder {
     public ProcessInstanceImpl aRunningProcessInstanceWithStartDate(String name, Date startDate) {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
         processInstance.setStartDate(startDate);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-            new CloudProcessStartedEventImpl(processInstance));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance)
+        );
         return processInstance;
     }
 
     public ProcessInstanceImpl aRunningProcessInstanceWithCompletedDate(String name, Date completedDate) {
         ProcessInstanceImpl completedProcess = buildProcessInstance(name);
         completedProcess.setCompletedDate(completedDate);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(completedProcess),
-            new CloudProcessCompletedEventImpl(UUID.randomUUID().toString(), completedDate.getTime(), completedProcess));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(completedProcess),
+            new CloudProcessCompletedEventImpl(UUID.randomUUID().toString(), completedDate.getTime(), completedProcess)
+        );
         return completedProcess;
     }
 
     public ProcessInstanceImpl aRunningProcessInstanceWithInitiator(String name, String initiator) {
         ProcessInstanceImpl processInstance = buildProcessInstance(name, initiator);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-                new CloudProcessStartedEventImpl(processInstance));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance)
+        );
         return processInstance;
     }
 
     public ProcessInstanceImpl aRunningProcessInstanceWithAppVersion(String name, String appVersion) {
         ProcessInstanceImpl processInstance = buildProcessInstance(name);
         processInstance.setAppVersion(appVersion);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(processInstance),
-                new CloudProcessStartedEventImpl(processInstance));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance)
+        );
         return processInstance;
     }
 
     public CloudProcessInstanceImpl aRunningProcessInstanceWithSuspendedDate(String name, Date suspendedDate) {
         CloudProcessInstanceImpl suspendedProcess = buildSuspendedProcessInstance(name);
         suspendedProcess.setSuspendedDate(suspendedDate);
-        eventsAggregator.addEvents(new CloudProcessCreatedEventImpl(suspendedProcess),
-            new CloudProcessSuspendedEventImpl(UUID.randomUUID().toString(), suspendedDate.getTime(), suspendedProcess));
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(suspendedProcess),
+            new CloudProcessSuspendedEventImpl(UUID.randomUUID().toString(), suspendedDate.getTime(), suspendedProcess)
+        );
         return suspendedProcess;
     }
 }

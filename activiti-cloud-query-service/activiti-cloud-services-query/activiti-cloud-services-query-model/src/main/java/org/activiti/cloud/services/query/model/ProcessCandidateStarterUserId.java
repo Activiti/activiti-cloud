@@ -19,13 +19,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ProcessCandidateStarterUserId implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String processDefinitionId;
     private String userId;
 
-    public ProcessCandidateStarterUserId() {
-    }
+    public ProcessCandidateStarterUserId() {}
 
     public ProcessCandidateStarterUserId(String processDefinitionId, String userId) {
         this.processDefinitionId = processDefinitionId;
@@ -54,7 +54,6 @@ public class ProcessCandidateStarterUserId implements Serializable {
             return false;
         }
         ProcessCandidateStarterUserId other = (ProcessCandidateStarterUserId) obj;
-        return Objects.equals(processDefinitionId, other.processDefinitionId) &&
-                Objects.equals(userId, other.userId);
+        return Objects.equals(processDefinitionId, other.processDefinitionId) && Objects.equals(userId, other.userId);
     }
 }

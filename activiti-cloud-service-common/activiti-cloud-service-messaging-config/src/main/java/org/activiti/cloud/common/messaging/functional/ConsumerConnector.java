@@ -18,6 +18,4 @@ package org.activiti.cloud.common.messaging.functional;
 import java.util.function.Consumer;
 
 @FunctionalInterface
-public interface ConsumerConnector<T> extends Consumer<T> {
-
-}
+public interface ConsumerConnector<T> extends Consumer<T> {}

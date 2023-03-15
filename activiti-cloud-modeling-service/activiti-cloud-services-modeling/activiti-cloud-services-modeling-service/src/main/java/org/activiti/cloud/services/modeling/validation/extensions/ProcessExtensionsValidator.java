@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.validation.extensions;
 
 import java.util.stream.Stream;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -27,8 +26,9 @@ import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
  * Interface for validating process extensions
  */
 public interface ProcessExtensionsValidator extends ModelValidationErrorProducer {
-
-    Stream<ModelValidationError> validateExtensions(Extensions extensions,
-                                          BpmnProcessModelContent bpmnModel,
-                                          ValidationContext validationContext);
+    Stream<ModelValidationError> validateExtensions(
+        Extensions extensions,
+        BpmnProcessModelContent bpmnModel,
+        ValidationContext validationContext
+    );
 }

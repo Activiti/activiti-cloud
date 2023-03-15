@@ -19,6 +19,7 @@ import org.activiti.api.process.model.ProcessCandidateStarterGroup;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudProcessCandidateStarterGroupEvent extends CloudRuntimeEvent<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>,
-                                                                ProcessCandidateStarterGroupEvent {
-}
+public interface CloudProcessCandidateStarterGroupEvent
+    extends
+        CloudRuntimeEvent<ProcessCandidateStarterGroup, ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents>,
+        ProcessCandidateStarterGroupEvent {}

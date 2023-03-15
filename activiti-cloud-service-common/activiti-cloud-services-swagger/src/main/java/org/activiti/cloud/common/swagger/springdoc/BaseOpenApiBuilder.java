@@ -57,14 +57,23 @@ public class BaseOpenApiBuilder {
 
     public OpenAPI build(String title, String serviceURLPrefix) {
         OpenAPI openAPI = new OpenAPI()
-            .info(new Info().title(title)
-                .version(buildProperties.getVersion())
-                .license(new License()
-                    .name(String.format("© %s-%s %s. All rights reserved",
-                        buildProperties.get("inceptionYear"),
-                        buildProperties.get("year"),
-                        buildProperties.get("organization.name"))))
-                .termsOfService(buildProperties.get("organization.url")))
+            .info(
+                new Info()
+                    .title(title)
+                    .version(buildProperties.getVersion())
+                    .license(
+                        new License()
+                            .name(
+                                String.format(
+                                    "© %s-%s %s. All rights reserved",
+                                    buildProperties.get("inceptionYear"),
+                                    buildProperties.get("year"),
+                                    buildProperties.get("organization.name")
+                                )
+                            )
+                    )
+                    .termsOfService(buildProperties.get("organization.url"))
+            )
             .components(new Components().addSecuritySchemes("oauth", securityScheme()));
         openAPI.addExtension(SERVICE_URL_PREFIX, serviceURLPrefix);
         return openAPI;
@@ -77,10 +86,13 @@ public class BaseOpenApiBuilder {
             .bearerFormat("jwt")
             .in(SecurityScheme.In.HEADER)
             .description("Authorizing with SSO")
-            .flows(new OAuthFlows()
-                .implicit(new OAuthFlow()
-                    .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
-                    .scopes(new Scopes())));
+            .flows(
+                new OAuthFlows()
+                    .implicit(
+                        new OAuthFlow()
+                            .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
+                            .scopes(new Scopes())
+                    )
+            );
     }
-
 }

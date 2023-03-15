@@ -55,19 +55,25 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 
 @Configuration
 @PropertySource("classpath:keycloak-client.properties")
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
-@EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
+@EnableConfigurationProperties({ ActivitiKeycloakProperties.class, KeycloakProperties.class })
 public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")
     private String cacheExpireAfterWrite;
+
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
+
     @Autowired
     private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
-
 
     @Bean(name = "userGroupManager")
     @ConditionalOnMissingBean(KeycloakUserGroupManager.class)
@@ -78,7 +84,9 @@ public class ActivitiKeycloakAutoConfiguration {
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(KeycloakClient keycloakClient) {
+    public KeycloakClientPrincipalDetailsProvider keycloakClientPrincipalDetailsProvider(
+        KeycloakClient keycloakClient
+    ) {
         return new KeycloakClientPrincipalDetailsProvider(keycloakClient);
     }
 
@@ -90,29 +98,38 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     public CaffeineCache groupRoleMappingCache() {
-        return new CaffeineCache("groupRoleMapping",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "groupRoleMapping",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean
     public CaffeineCache userRoleMappingCache() {
-        return new CaffeineCache("userRoleMapping",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "userRoleMapping",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean
     public CaffeineCache userGroupsCache() {
-        return new CaffeineCache("userGroups",
-                                 Caffeine.newBuilder()
-                                     .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
-                                     .maximumSize(cacheMaxSize)
-                                     .build());
+        return new CaffeineCache(
+            "userGroups",
+            Caffeine
+                .newBuilder()
+                .expireAfterWrite(Duration.parse(cacheExpireAfterWrite))
+                .maximumSize(cacheMaxSize)
+                .build()
+        );
     }
 
     @Bean(name = "identityHealthService")
@@ -122,28 +139,40 @@ public class ActivitiKeycloakAutoConfiguration {
     }
 
     @Bean
-    public PublicKeyValidationCheck publicKeyValidationCheck(@Value("${keycloak.auth-server-url}") String authServerUrl,
-                                                    @Value("${keycloak.realm}") String realm,
-                                                    ObjectMapper objectMapper) {
+    public PublicKeyValidationCheck publicKeyValidationCheck(
+        @Value("${keycloak.auth-server-url}") String authServerUrl,
+        @Value("${keycloak.realm}") String realm,
+        ObjectMapper objectMapper
+    ) {
         return new PublicKeyValidationCheck(authServerUrl, realm, objectMapper);
     }
 
     @Bean
-    public RealmValidationCheck realmValidationCheck(@Value("${keycloak.auth-server-url}") String authServerUrl,
-                                                @Value("${keycloak.realm}") String realm) {
+    public RealmValidationCheck realmValidationCheck(
+        @Value("${keycloak.auth-server-url}") String authServerUrl,
+        @Value("${keycloak.realm}") String realm
+    ) {
         return new RealmValidationCheck(authServerUrl, realm);
     }
-
 
     @Bean
     public KeycloakClient keycloakClient(
         @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
         ObjectFactory<HttpMessageConverters> messageConverters,
-        ObjectProvider<HttpMessageConverterCustomizer> customizers) {
+        ObjectProvider<HttpMessageConverterCustomizer> customizers
+    ) {
         ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
-        ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(clientRegistrationRepository, "keycloak");
-        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(oAuth2AuthorizedClientService, clientRegistrationRepository, clientRegistration);
-        KeycloakClient keycloakClient = Feign.builder()
+        ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(
+            clientRegistrationRepository,
+            "keycloak"
+        );
+        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
+            oAuth2AuthorizedClientService,
+            clientRegistrationRepository,
+            clientRegistration
+        );
+        KeycloakClient keycloakClient = Feign
+            .builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters, customizers))
@@ -151,5 +180,4 @@ public class ActivitiKeycloakAutoConfiguration {
             .target(KeycloakClient.class, url);
         return keycloakClient;
     }
-
 }

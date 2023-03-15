@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
+import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
@@ -26,13 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessCandidateStarterUserRemovedEventHandlerTest {
@@ -48,21 +47,34 @@ public class ProcessCandidateStarterUserRemovedEventHandlerTest {
         //given
         String processDefinitionId = UUID.randomUUID().toString();
         String userId = UUID.randomUUID().toString();
-        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(processDefinitionId, userId);
-        CloudProcessCandidateStarterUserRemovedEventImpl event = new CloudProcessCandidateStarterUserRemovedEventImpl(candidateUser);
+        ProcessCandidateStarterUserImpl candidateUser = new ProcessCandidateStarterUserImpl(
+            processDefinitionId,
+            userId
+        );
+        CloudProcessCandidateStarterUserRemovedEventImpl event = new CloudProcessCandidateStarterUserRemovedEventImpl(
+            candidateUser
+        );
 
-        ProcessCandidateStarterUserEntity processCandidateStarterUserEntity =
-            new ProcessCandidateStarterUserEntity(processDefinitionId, userId);
+        ProcessCandidateStarterUserEntity processCandidateStarterUserEntity = new ProcessCandidateStarterUserEntity(
+            processDefinitionId,
+            userId
+        );
 
         //when
-        when(entityManager
-            .find(ProcessCandidateStarterUserEntity.class, new ProcessCandidateStarterUserId(processDefinitionId, userId)))
+        when(
+            entityManager.find(
+                ProcessCandidateStarterUserEntity.class,
+                new ProcessCandidateStarterUserId(processDefinitionId, userId)
+            )
+        )
             .thenReturn(processCandidateStarterUserEntity);
 
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessCandidateStarterUserEntity> captor = ArgumentCaptor.forClass(ProcessCandidateStarterUserEntity.class);
+        ArgumentCaptor<ProcessCandidateStarterUserEntity> captor = ArgumentCaptor.forClass(
+            ProcessCandidateStarterUserEntity.class
+        );
         verify(entityManager).remove(captor.capture());
         assertThat(captor.getValue().getProcessDefinitionId()).isEqualTo(event.getEntity().getProcessDefinitionId());
         assertThat(captor.getValue().getUserId()).isEqualTo(event.getEntity().getUserId());
@@ -75,8 +87,8 @@ public class ProcessCandidateStarterUserRemovedEventHandlerTest {
 
         //then
         assertThat(handledEvent)
-            .isEqualTo(ProcessCandidateStarterUserEvent
-                       .ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name());
+            .isEqualTo(
+                ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents.PROCESS_CANDIDATE_STARTER_USER_REMOVED.name()
+            );
     }
-
 }

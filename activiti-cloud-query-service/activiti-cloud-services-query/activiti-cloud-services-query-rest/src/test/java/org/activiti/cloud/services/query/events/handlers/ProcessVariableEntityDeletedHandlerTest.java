@@ -57,7 +57,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         processInstanceEntity.getVariables().add(variableEntity);
 
         given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-                                 .willReturn(Optional.of(processInstanceEntity));
+            .willReturn(Optional.of(processInstanceEntity));
 
         //when
         handler.handle(event);
@@ -65,11 +65,11 @@ public class ProcessVariableEntityDeletedHandlerTest {
         //then
         verify(entityManager).remove(variableEntity);
         assertThat(processInstanceEntity.getVariables()).isEmpty();
-
     }
 
     private static CloudVariableDeletedEvent buildVariableDeletedEvent() {
-        return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test", "procInstId", null));
+        return new CloudVariableDeletedEventImpl(
+            new VariableInstanceImpl<>("var", "string", "test", "procInstId", null)
+        );
     }
-
 }

@@ -65,7 +65,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(TaskAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         TaskSamples.class,
@@ -73,7 +75,9 @@ import org.springframework.test.web.servlet.MockMvc;
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class})
+        StreamConfig.class,
+    }
+)
 public class TaskAdminControllerImplIT {
 
     @Autowired
@@ -106,87 +110,81 @@ public class TaskAdminControllerImplIT {
 
     @Test
     public void getTasks() throws Exception {
-
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<Task> tasks = new PageImpl<>(taskList,
-                                          taskList.size());
+        Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
 
         this.mockMvc.perform(get("/admin/v1/tasks?page=0&size=10").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
-
 
     @Test
     public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
-        Page<Task> taskPage = new PageImpl<>(taskList,
-                                             taskList.size());
+        Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
 
         this.mockMvc.perform(get("/admin/v1/tasks?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 
     @Test
     public void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}",
-                                    1))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
-
 
     @Test
     public void updateTask() throws Exception {
         given(taskAdminRuntime.update(any())).willReturn(buildDefaultAssignedTask());
-        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder.update()
-                .withTaskId("1")
-                .withName("update-task")
-                .withDescription("update-description")
-                .build();
+        UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
+            .update()
+            .withTaskId("1")
+            .withName("update-task")
+            .withDescription("update-description")
+            .build();
 
-        this.mockMvc.perform(put("/admin/v1/tasks/{taskId}",
-                                 1).contentType(MediaType.APPLICATION_JSON)
-                                 .content(mapper.writeValueAsString(updateTaskCmd)))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                put("/admin/v1/tasks/{taskId}", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(updateTaskCmd))
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
     public void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete",
-                                  1))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
     }
 
     @Test
     public void assignTask() throws Exception {
         given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
-        AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign()
-                .withTaskId("1")
-                .withAssignee("assignee")
-                .build();
+        AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
-        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/assign",
-                1).contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(assignTaskCmd)))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                post("/admin/v1/tasks/{taskId}/assign", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTaskCmd))
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
     public void assignMultipleTasks() throws Exception {
-        given(taskAdminRuntime.assignMultiple(any()))
-                .willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
-        AssignTasksPayload assignTasksCmd = TaskPayloadBuilder.assignMultiple()
-                .withTaskId("1")
-                .withAssignee("assignee")
-                .build();
+        given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
+        AssignTasksPayload assignTasksCmd = TaskPayloadBuilder
+            .assignMultiple()
+            .withTaskId("1")
+            .withAssignee("assignee")
+            .build();
 
-        this.mockMvc.perform(post("/admin/v1/tasks/assign")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(assignTasksCmd)))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                post("/admin/v1/tasks/assign")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(assignTasksCmd))
+            )
+            .andExpect(status().isOk());
     }
-
 }

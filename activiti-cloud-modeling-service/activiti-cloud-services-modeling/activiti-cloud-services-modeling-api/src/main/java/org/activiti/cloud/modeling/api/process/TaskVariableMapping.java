@@ -16,11 +16,12 @@
 package org.activiti.cloud.modeling.api.process;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import java.util.HashMap;
-import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Task Variable Mapping representation
@@ -83,6 +84,6 @@ public class TaskVariableMapping {
     public enum MappingType {
         MAP_ALL,
         MAP_ALL_INPUTS,
-        MAP_ALL_OUTPUTS
+        MAP_ALL_OUTPUTS,
     }
 }

@@ -37,7 +37,6 @@ public class IntegrationResultChannelResolverImplTest {
 
     private IntegrationResultDestinationBuilder builder;
 
-
     @Mock
     private ConnectorProperties connectorProperties;
 
@@ -69,5 +68,4 @@ public class IntegrationResultChannelResolverImplTest {
 
         verify(builder).buildDestination(integrationRequest);
     }
-
 }

@@ -24,8 +24,10 @@ public class CloudMessageReceivedProducer implements BPMNElementEventListener<BP
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudMessageReceivedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                        ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudMessageReceivedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

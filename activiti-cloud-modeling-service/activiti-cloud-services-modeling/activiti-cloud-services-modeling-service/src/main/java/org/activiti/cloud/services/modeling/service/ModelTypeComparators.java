@@ -26,6 +26,5 @@ public abstract class ModelTypeComparators {
     public static final Comparator<ProjectHolder.ModelJsonFile> MODEL_JSON_FILE_TYPE_COMPARATOR = new ModelJsonFileTypeComparator();
     public static final Comparator<Model> MODEL_TYPE_COMPARATOR = new ModelTypeComparator();
 
-    private ModelTypeComparators() {
-    }
+    private ModelTypeComparators() {}
 }

@@ -33,5 +33,4 @@ public class ToCloudTaskConverter {
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudTask);
         return cloudTask;
     }
-
 }

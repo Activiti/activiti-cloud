@@ -69,7 +69,7 @@ public class KeycloakManagementService implements IdentityManagementService {
             ? searchUsers(userSearchParams.getSearchKey())
             : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
-        if(!StringUtils.isEmpty(userSearchParams.getApplication())) {
+        if (!StringUtils.isEmpty(userSearchParams.getApplication())) {
             return filterUsersInApplicationsScope(users, userSearchParams);
         } else {
             return filterUsersInRealmScope(users, userSearchParams);
@@ -85,9 +85,11 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private List<User> searchUsers(Set<String> groups, String searchKey) {
-        Predicate<User> maybeMatchSearchKey = user -> !StringUtils.isEmpty(searchKey)
-            ? StringUtils.contains(user.getUsername(), searchKey) || StringUtils.contains(user.getEmail(), searchKey)
-            : true;
+        Predicate<User> maybeMatchSearchKey = user ->
+            !StringUtils.isEmpty(searchKey)
+                ? StringUtils.contains(user.getUsername(), searchKey) ||
+                StringUtils.contains(user.getEmail(), searchKey)
+                : true;
         try {
             List<User> users = new ArrayList<>();
             String firstGroup = groups.iterator().next();
@@ -99,9 +101,7 @@ public class KeycloakManagementService implements IdentityManagementService {
         }
     }
 
-    private List<User> filterUsersInRealmScope(List<User> users,
-        UserSearchParams userSearchParams) {
-
+    private List<User> filterUsersInRealmScope(List<User> users, UserSearchParams userSearchParams) {
         Map<String, List<Role>> usersRolesMapping = new HashMap<>();
         if (!CollectionUtils.isEmpty(userSearchParams.getRoles())) {
             mapUserWithRealmRoles(users, usersRolesMapping);
@@ -113,23 +113,20 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private void mapUserWithRealmRoles(List<User> users, Map<String, List<Role>> usersRolesMapping) {
-        users.forEach(user ->
-            usersRolesMapping.put(user.getId(),
-                getUserRealmRoles(user.getId())));
+        users.forEach(user -> usersRolesMapping.put(user.getId(), getUserRealmRoles(user.getId())));
     }
 
     private List<Role> getUserRealmRoles(String userId) {
-        return KeycloakRoleMappingToRole.toRoles(
-                    keycloakClient.getUserRoleMapping(userId));
+        return KeycloakRoleMappingToRole.toRoles(keycloakClient.getUserRoleMapping(userId));
     }
 
-    private List<User> filterUsersInApplicationsScope(List<User> users ,UserSearchParams userSearchParams) {
+    private List<User> filterUsersInApplicationsScope(List<User> users, UserSearchParams userSearchParams) {
         String application = userSearchParams.getApplication();
         String kClientId = getKeycloakClientId(application);
-        if(StringUtils.isEmpty(kClientId)) {
+        if (StringUtils.isEmpty(kClientId)) {
             return Collections.emptyList();
         }
-        Map<String, List<Role>> userAppRoles= mapUsersWithApplicationRoles(users, kClientId);
+        Map<String, List<Role>> userAppRoles = mapUsersWithApplicationRoles(users, kClientId);
 
         return users
             .stream()
@@ -138,18 +135,17 @@ public class KeycloakManagementService implements IdentityManagementService {
             .collect(Collectors.toList());
     }
 
-    private Map<String, List<Role>>  mapUsersWithApplicationRoles(List<User> users, String kClientId) {
-        return users.stream()
-            .collect(Collectors.toMap(
-                User::getId,
-                user -> getUserApplicationRoles(user.getId(), kClientId)));
+    private Map<String, List<Role>> mapUsersWithApplicationRoles(List<User> users, String kClientId) {
+        return users
+            .stream()
+            .collect(Collectors.toMap(User::getId, user -> getUserApplicationRoles(user.getId(), kClientId)));
     }
 
     @Override
     public List<Group> findGroups(GroupSearchParams groupSearchParams) {
         List<Group> groups = searchGroups(groupSearchParams.getSearch());
 
-        if(!StringUtils.isEmpty(groupSearchParams.getApplication())) {
+        if (!StringUtils.isEmpty(groupSearchParams.getApplication())) {
             return filterGroupsInApplicationsScope(groups, groupSearchParams);
         } else {
             return filterGroupsInRealmScope(groups, groupSearchParams);
@@ -166,34 +162,30 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     private List<Group> filterGroupsInRealmScope(List<Group> groups, GroupSearchParams groupSearchParams) {
         Map<String, List<Role>> groupsRolesMapping = new HashMap<>();
-        if(!CollectionUtils.isEmpty(groupSearchParams.getRoles())) {
+        if (!CollectionUtils.isEmpty(groupSearchParams.getRoles())) {
             mapGroupsWithRealmRoles(groups, groupsRolesMapping);
         }
         return groups
             .stream()
-            .filter(group -> filterByRoles(groupsRolesMapping.get(group.getId()),
-                groupSearchParams.getRoles()))
+            .filter(group -> filterByRoles(groupsRolesMapping.get(group.getId()), groupSearchParams.getRoles()))
             .collect(Collectors.toList());
     }
 
     private void mapGroupsWithRealmRoles(List<Group> groups, Map<String, List<Role>> groupsRolesMapping) {
-        groups.forEach(group ->
-            groupsRolesMapping.put(group.getId(),
-                getGroupRealmRoles(group.getId())));
+        groups.forEach(group -> groupsRolesMapping.put(group.getId(), getGroupRealmRoles(group.getId())));
     }
 
     private List<Role> getGroupRealmRoles(String groupId) {
-        return KeycloakRoleMappingToRole.toRoles(
-            keycloakClient.getGroupRoleMapping(groupId));
+        return KeycloakRoleMappingToRole.toRoles(keycloakClient.getGroupRoleMapping(groupId));
     }
 
-    private List<Group> filterGroupsInApplicationsScope(List<Group> groups ,GroupSearchParams userSearchParams) {
+    private List<Group> filterGroupsInApplicationsScope(List<Group> groups, GroupSearchParams userSearchParams) {
         String application = userSearchParams.getApplication();
         String kClientId = getKeycloakClientId(application);
-        if(StringUtils.isEmpty(kClientId)) {
+        if (StringUtils.isEmpty(kClientId)) {
             return Collections.emptyList();
         }
-        Map<String, List<Role>> groupAppRoles =  mapGroupsWithApplicationRoles(groups, kClientId);
+        Map<String, List<Role>> groupAppRoles = mapGroupsWithApplicationRoles(groups, kClientId);
 
         return groups
             .stream()
@@ -205,18 +197,15 @@ public class KeycloakManagementService implements IdentityManagementService {
     private Map<String, List<Role>> mapGroupsWithApplicationRoles(List<Group> groups, String kClientId) {
         return groups
             .stream()
-            .collect(Collectors.toMap(
-                Group::getId,
-                group -> getGroupApplicationRoles(group.getId(), kClientId)));
+            .collect(Collectors.toMap(Group::getId, group -> getGroupApplicationRoles(group.getId(), kClientId)));
     }
 
     private boolean filterByRoles(List<Role> currentRoles, Set<String> filterRoles) {
-        return CollectionUtils.isEmpty(filterRoles) ||
-            currentRoles != null && currentRoles
-                .stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet())
-                .containsAll(filterRoles);
+        return (
+            CollectionUtils.isEmpty(filterRoles) ||
+            currentRoles != null &&
+            currentRoles.stream().map(Role::getName).collect(Collectors.toSet()).containsAll(filterRoles)
+        );
     }
 
     @Override
@@ -230,7 +219,7 @@ public class KeycloakManagementService implements IdentityManagementService {
         Set<String> applicationRolesFilter = getApplicationRolesToSearch(roles, clientId);
         List<SecurityResponseRepresentation> applicationPermissions = new ArrayList<>();
 
-        applicationRolesFilter.forEach( role -> {
+        applicationRolesFilter.forEach(role -> {
             SecurityResponseRepresentation securityResponseRepresentation = new SecurityResponseRepresentation();
             securityResponseRepresentation.setRole(role);
             securityResponseRepresentation.setUsers(getUsersClientRoleMapping(clientId, role));
@@ -243,9 +232,10 @@ public class KeycloakManagementService implements IdentityManagementService {
 
     @Override
     public User findUserById(String userId) {
-        return Optional.of(keycloakClient.getUserById(userId))
-             .map(KeycloakUserToUser::toUser)
-             .orElseThrow(() -> new IdentityInvalidUserException(userId));
+        return Optional
+            .of(keycloakClient.getUserById(userId))
+            .map(KeycloakUserToUser::toUser)
+            .orElseThrow(() -> new IdentityInvalidUserException(userId));
     }
 
     @Override
@@ -255,14 +245,14 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private Group findGroupStrictlyEqualToGroupName(String groupName) {
-        return
-            Optional.ofNullable(groupName)
-                .filter(Predicate.not(String::isEmpty))
-                .map(g -> searchGroups(g).stream())
-                .orElse(Stream.empty())
-                .filter(group -> group.getName().equals(groupName))
-                .findFirst()
-                .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
+        return Optional
+            .ofNullable(groupName)
+            .filter(Predicate.not(String::isEmpty))
+            .map(g -> searchGroups(g).stream())
+            .orElse(Stream.empty())
+            .filter(group -> group.getName().equals(groupName))
+            .findFirst()
+            .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
     }
 
     @Override
@@ -287,22 +277,24 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     private List<User> getUsersByGroupId(String groupID) {
-        return
-            keycloakClient.getUsersByGroupId(groupID)
-                .stream()
-                .map(KeycloakUserToUser::toUser)
-                .collect(Collectors.toList());
+        return keycloakClient
+            .getUsersByGroupId(groupID)
+            .stream()
+            .map(KeycloakUserToUser::toUser)
+            .collect(Collectors.toList());
     }
 
     private List<User> getUsersClientRoleMapping(String clientId, String role) {
-        return keycloakClient.getUsersClientRoleMapping(clientId, role)
+        return keycloakClient
+            .getUsersClientRoleMapping(clientId, role)
             .stream()
             .map(KeycloakUserToUser::toUser)
             .collect(Collectors.toList());
     }
 
     private List<Group> getGroupsClientRoleMapping(String clientId, String role) {
-        return keycloakClient.getGroupsClientRoleMapping(clientId, role)
+        return keycloakClient
+            .getGroupsClientRoleMapping(clientId, role)
             .stream()
             .map(KeycloakGroupToGroup::toGroup)
             .collect(Collectors.toList());
@@ -318,9 +310,12 @@ public class KeycloakManagementService implements IdentityManagementService {
     }
 
     @Override
-    public void addApplicationPermissions(String application, List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations) {
+    public void addApplicationPermissions(
+        String application,
+        List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations
+    ) {
         String clientId = getKeycloakClientId(application);
-        if(StringUtils.isEmpty(clientId)) {
+        if (StringUtils.isEmpty(clientId)) {
             throw new IdentityInvalidApplicationException(application);
         }
         securityRequestBodyRepresentations.forEach(securityRepresentation -> {
@@ -330,44 +325,51 @@ public class KeycloakManagementService implements IdentityManagementService {
             List<String> validatedUsers = new ArrayList<>();
             List<String> validatedGroups = new ArrayList<>();
 
-            if(securityRepresentation.getUsers() != null) {
-                securityRepresentation.getUsers().forEach(
-                    username -> validatedUsers.add(validateUserApplicationPermissions(username, roleName)));
+            if (securityRepresentation.getUsers() != null) {
+                securityRepresentation
+                    .getUsers()
+                    .forEach(username -> validatedUsers.add(validateUserApplicationPermissions(username, roleName)));
             }
-            if(securityRepresentation.getGroups() != null) {
-                securityRepresentation.getGroups().forEach(
-                    groupName -> validatedGroups
-                        .add(validateGroupApplicationPermissions(groupName, roleName)));
+            if (securityRepresentation.getGroups() != null) {
+                securityRepresentation
+                    .getGroups()
+                    .forEach(groupName -> validatedGroups.add(validateGroupApplicationPermissions(groupName, roleName))
+                    );
             }
             addApplicationRolePermissions(keycloakRoleMapping, validatedUsers, validatedGroups, clientId);
         });
     }
 
-    private void addApplicationRolePermissions(KeycloakRoleMapping keycloakRoleMapping, List<String> usersId,
-        List<String> groupsId, String clientId) {
-
+    private void addApplicationRolePermissions(
+        KeycloakRoleMapping keycloakRoleMapping,
+        List<String> usersId,
+        List<String> groupsId,
+        String clientId
+    ) {
         usersId.forEach(userId ->
-            keycloakClient.addUserClientRoleMapping(userId, clientId,List.of(keycloakRoleMapping)));
+            keycloakClient.addUserClientRoleMapping(userId, clientId, List.of(keycloakRoleMapping))
+        );
 
         groupsId.forEach(groupId ->
-            keycloakClient.addGroupClientRoleMapping(groupId, clientId,List.of(keycloakRoleMapping)));
+            keycloakClient.addGroupClientRoleMapping(groupId, clientId, List.of(keycloakRoleMapping))
+        );
     }
 
     private KeycloakRoleMapping getKeyCloakRoleFromRoleName(String roleName, String clientId) {
-        if(roleName == null ) {
+        if (roleName == null) {
             throw new IdentityInvalidRoleException();
         }
-        return keycloakClient.getClientRoles(clientId)
+        return keycloakClient
+            .getClientRoles(clientId)
             .stream()
             .filter(kRole -> kRole.getName().equals(roleName))
             .findFirst()
-            .orElseThrow(
-                () -> new IdentityInvalidRoleException(roleName));
+            .orElseThrow(() -> new IdentityInvalidRoleException(roleName));
     }
 
     private String validateUserApplicationPermissions(String username, String roleName) {
         User user = getUserFromUsername(username);
-        if(!userHasRole(user.getId(), roleName)) {
+        if (!userHasRole(user.getId(), roleName)) {
             throw new IdentityInvalidUserRoleException(username, roleName);
         }
         return user.getId();
@@ -381,16 +383,14 @@ public class KeycloakManagementService implements IdentityManagementService {
             .orElseThrow(() -> new IdentityInvalidUserException(username));
     }
 
-    private boolean userHasRole (String userId, String role) {
-        return getUserRealmRoles(userId)
-            .stream()
-            .anyMatch(userRole -> userRole.getName().equals(role));
+    private boolean userHasRole(String userId, String role) {
+        return getUserRealmRoles(userId).stream().anyMatch(userRole -> userRole.getName().equals(role));
     }
 
-    private String validateGroupApplicationPermissions(String groupName, String roleName ) {
+    private String validateGroupApplicationPermissions(String groupName, String roleName) {
         Group group = getGroupFromGroupName(groupName);
 
-        if(!groupHasRole(group.getId(), roleName)) {
+        if (!groupHasRole(group.getId(), roleName)) {
             throw new IdentityInvalidGroupRoleException(groupName, roleName);
         }
         return group.getId();
@@ -401,35 +401,27 @@ public class KeycloakManagementService implements IdentityManagementService {
             .stream()
             .filter(g -> g.getName().equals(groupName))
             .findFirst()
-            .orElseThrow(
-                () -> new IdentityInvalidGroupException(groupName));
+            .orElseThrow(() -> new IdentityInvalidGroupException(groupName));
     }
 
-    private boolean groupHasRole (String groupId, String role) {
-        return getGroupRealmRoles(groupId)
-            .stream()
-            .anyMatch(groupRole -> groupRole.getName().equals(role));
+    private boolean groupHasRole(String groupId, String role) {
+        return getGroupRealmRoles(groupId).stream().anyMatch(groupRole -> groupRole.getName().equals(role));
     }
 
     private boolean filterByApplication(List<Role> applicationRoles) {
-        return applicationRoles
-            .stream()
-            .findAny()
-            .isPresent();
+        return applicationRoles.stream().findAny().isPresent();
     }
 
     private List<Role> getUserApplicationRoles(String userId, String clientId) {
         if (!clientId.isEmpty()) {
-            return KeycloakRoleMappingToRole
-                .toRoles(keycloakClient.getUserClientRoleMapping(userId, clientId));
+            return KeycloakRoleMappingToRole.toRoles(keycloakClient.getUserClientRoleMapping(userId, clientId));
         }
         return Collections.emptyList();
     }
 
     private List<Role> getGroupApplicationRoles(String groupId, String clientId) {
         if (!clientId.isEmpty()) {
-            return KeycloakRoleMappingToRole
-                .toRoles(keycloakClient.getGroupClientRoleMapping(groupId, clientId));
+            return KeycloakRoleMappingToRole.toRoles(keycloakClient.getGroupClientRoleMapping(groupId, clientId));
         }
         return Collections.emptyList();
     }

@@ -24,5 +24,4 @@ public class StreamConfig {
 
     @MockBean
     public StreamBridge streamBridge;
-
 }

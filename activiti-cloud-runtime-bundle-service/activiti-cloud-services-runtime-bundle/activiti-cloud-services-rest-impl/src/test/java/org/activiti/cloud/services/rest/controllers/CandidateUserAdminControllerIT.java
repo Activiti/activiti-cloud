@@ -53,7 +53,9 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(CandidateUserAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
         ProcessEngineChannelsConfiguration.class,
         TaskSamples.class,
@@ -61,7 +63,9 @@ import org.springframework.test.web.servlet.MvcResult;
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
-        StreamConfig.class})
+        StreamConfig.class,
+    }
+)
 public class CandidateUserAdminControllerIT {
 
     @Autowired
@@ -91,42 +95,37 @@ public class CandidateUserAdminControllerIT {
 
     @Test
     public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaType.APPLICATION_JSON))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[0].entry.user")
-                .isEqualTo("hruser");
+            .node("list.entries[0].entry.user")
+            .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[1].entry.user")
-                .isEqualTo("testuser");
+            .node("list.entries[1].entry.user")
+            .isEqualTo("testuser");
     }
 
     @Test
     public void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
-
-        List<String> stringList = Arrays.asList("hruser",
-                                                "testuser");
+        List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users",
-                                                    1).accept(MediaTypes.HAL_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-users", 1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateUsers[0].user")
-                .isEqualTo("hruser");
+            .node("_embedded.candidateUsers[0].user")
+            .isEqualTo("hruser");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateUsers[1].user")
-                .isEqualTo("testuser");
+            .node("_embedded.candidateUsers[1].user")
+            .isEqualTo("testuser");
     }
-
 }

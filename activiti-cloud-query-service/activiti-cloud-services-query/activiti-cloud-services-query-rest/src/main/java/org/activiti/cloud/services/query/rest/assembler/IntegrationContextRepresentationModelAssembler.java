@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest.assembler;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.rest.ServiceTaskIntegrationContextAdminController;
@@ -22,17 +25,14 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-public class IntegrationContextRepresentationModelAssembler implements RepresentationModelAssembler<IntegrationContextEntity, EntityModel<CloudIntegrationContext>> {
+public class IntegrationContextRepresentationModelAssembler
+    implements RepresentationModelAssembler<IntegrationContextEntity, EntityModel<CloudIntegrationContext>> {
 
     @Override
     public EntityModel<CloudIntegrationContext> toModel(IntegrationContextEntity entity) {
-        Link selfRel = linkTo(methodOn(ServiceTaskIntegrationContextAdminController.class).findById(entity.getId())).withSelfRel();
+        Link selfRel = linkTo(methodOn(ServiceTaskIntegrationContextAdminController.class).findById(entity.getId()))
+            .withSelfRel();
 
-        return EntityModel.of(entity,
-                              selfRel);
+        return EntityModel.of(entity, selfRel);
     }
-
 }

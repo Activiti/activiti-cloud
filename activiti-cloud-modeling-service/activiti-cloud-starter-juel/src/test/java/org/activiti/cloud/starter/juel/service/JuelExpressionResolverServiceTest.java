@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.juel.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.activiti.cloud.starter.juel.exception.JuelRuntimeException;

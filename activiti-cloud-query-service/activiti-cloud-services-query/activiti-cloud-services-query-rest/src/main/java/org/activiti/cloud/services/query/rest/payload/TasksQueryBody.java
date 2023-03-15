@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest.payload;
 
 public class TasksQueryBody extends VariableKeysQueryBody {
+
     private boolean standalone;
     private boolean rootTasksOnly;
 

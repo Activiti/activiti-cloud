@@ -55,12 +55,12 @@ import org.springframework.context.annotation.Configuration;
 public class ModelingServiceAutoConfiguration {
 
     @Bean
-    public ModelContentService modelContentService(Set<ModelContentValidator> modelValidators,
-                                                   Set<ModelContentConverter<? extends ModelContent>> modelConverters,
-                                                   Set<ContentUpdateListener> contentUpdateListeners) {
-        return new ModelContentService(modelValidators,
-                                       modelConverters,
-                                       contentUpdateListeners);
+    public ModelContentService modelContentService(
+        Set<ModelContentValidator> modelValidators,
+        Set<ModelContentConverter<? extends ModelContent>> modelConverters,
+        Set<ContentUpdateListener> contentUpdateListeners
+    ) {
+        return new ModelContentService(modelValidators, modelConverters, contentUpdateListeners);
     }
 
     @Bean
@@ -70,12 +70,12 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public ModelExtensionsService modelExtensionsService(Set<ModelExtensionsValidator> metadataValidators,
-                                                         ExtensionsModelValidator extensionsModelValidator,
-                                                         ModelTypeService modelTypeService) {
-        return new ModelExtensionsService(metadataValidators,
-                                          extensionsModelValidator,
-                                          modelTypeService);
+    public ModelExtensionsService modelExtensionsService(
+        Set<ModelExtensionsValidator> metadataValidators,
+        ExtensionsModelValidator extensionsModelValidator,
+        ModelTypeService modelTypeService
+    ) {
+        return new ModelExtensionsService(metadataValidators, extensionsModelValidator, modelTypeService);
     }
 
     @Bean
@@ -84,29 +84,32 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public ModelService modelService(ModelRepository modelRepository,
-                                     ModelTypeService modelTypeService,
-                                     ModelContentService modelContentService,
-                                     ModelExtensionsService modelExtensionsService,
-                                     JsonConverter<Model> jsonConverter,
-                                     ProcessModelContentConverter processModelContentConverter,
-                                     Set<ModelUpdateListener> modelUpdateListeners,
-                                     FileMagicNumberValidator fileContentValidator,
-                                     ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
-                                     ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
-                                     FileContentSanitizer fileContentSanitizer) {
-        return new ModelServiceImpl(modelRepository,
-                                    modelTypeService,
-                                    modelContentService,
-                                    modelExtensionsService,
-                                    jsonConverter,
-                                    processModelContentConverter,
-                                    modelUpdateListeners,
-                                    fileContentValidator,
-                                    modelContentValidationStrategy,
-                                    modelExtensionsValidationStrategy,
-                                    fileContentSanitizer);
-
+    public ModelService modelService(
+        ModelRepository modelRepository,
+        ModelTypeService modelTypeService,
+        ModelContentService modelContentService,
+        ModelExtensionsService modelExtensionsService,
+        JsonConverter<Model> jsonConverter,
+        ProcessModelContentConverter processModelContentConverter,
+        Set<ModelUpdateListener> modelUpdateListeners,
+        FileMagicNumberValidator fileContentValidator,
+        ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
+        ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
+        FileContentSanitizer fileContentSanitizer
+    ) {
+        return new ModelServiceImpl(
+            modelRepository,
+            modelTypeService,
+            modelContentService,
+            modelExtensionsService,
+            jsonConverter,
+            processModelContentConverter,
+            modelUpdateListeners,
+            fileContentValidator,
+            modelContentValidationStrategy,
+            modelExtensionsValidationStrategy,
+            fileContentSanitizer
+        );
     }
 
     @Bean
@@ -115,37 +118,43 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public ProjectService projectService(ProjectRepository projectRepository,
-                                         ModelService modelService,
-                                         ModelTypeService modelTypeService,
-                                         JsonConverter<Project> jsonConverter,
-                                         JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
-                                         JsonConverter<Map> jsonMetadataConverter,
-                                         Set<ProjectValidator> projectValidators,
-                                         ProjectFilterService projectFilterService,
-                                         ProjectDecoratorService projectDecoratorService) {
-
-        return new ProjectServiceImpl(projectRepository,
-                                      modelService,
-                                      modelTypeService,
-                                      projectDescriptorJsonConverter,
-                                      jsonConverter,
-                                      jsonMetadataConverter,
-                                      projectValidators,
-                                      projectFilterService,
-                                      projectDecoratorService);
-
+    public ProjectService projectService(
+        ProjectRepository projectRepository,
+        ModelService modelService,
+        ModelTypeService modelTypeService,
+        JsonConverter<Project> jsonConverter,
+        JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
+        JsonConverter<Map> jsonMetadataConverter,
+        Set<ProjectValidator> projectValidators,
+        ProjectFilterService projectFilterService,
+        ProjectDecoratorService projectDecoratorService
+    ) {
+        return new ProjectServiceImpl(
+            projectRepository,
+            modelService,
+            modelTypeService,
+            projectDescriptorJsonConverter,
+            jsonConverter,
+            jsonMetadataConverter,
+            projectValidators,
+            projectFilterService,
+            projectDecoratorService
+        );
     }
 
     @Bean
     public SchemaProvider processExtensionModelSchemaProvider(
-        @Value("${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}") String processExtensionSchemaFileName) {
+        @Value(
+            "${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}"
+        ) String processExtensionSchemaFileName
+    ) {
         return new SchemaProvider(SchemaService.PROCESS_EXTENSION, processExtensionSchemaFileName);
     }
 
     @Bean
     public SchemaProvider connectorModelSchemaProvider(
-        @Value("${activiti.validation.connector-schema:schema/connector-schema.json}") String connectorSchemaFileName) {
+        @Value("${activiti.validation.connector-schema:schema/connector-schema.json}") String connectorSchemaFileName
+    ) {
         return new SchemaProvider(ConnectorModelType.NAME, connectorSchemaFileName);
     }
 

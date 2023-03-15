@@ -43,8 +43,10 @@ public class TaskCompletedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCompletedEventEntity taskCompletedEventEntity = (TaskCompletedEventEntity) auditEventEntity;
 
-        return new CloudTaskCompletedEventImpl(taskCompletedEventEntity.getEventId(),
-                                               taskCompletedEventEntity.getTimestamp(),
-                                               taskCompletedEventEntity.getTask());
+        return new CloudTaskCompletedEventImpl(
+            taskCompletedEventEntity.getEventId(),
+            taskCompletedEventEntity.getTimestamp(),
+            taskCompletedEventEntity.getTask()
+        );
     }
 }

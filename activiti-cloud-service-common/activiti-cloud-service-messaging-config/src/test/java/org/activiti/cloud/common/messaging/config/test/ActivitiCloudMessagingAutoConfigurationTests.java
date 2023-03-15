@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.common.messaging.config.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.LinkedCaseInsensitiveMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @SpringBootApplication
@@ -35,6 +35,5 @@ public class ActivitiCloudMessagingAutoConfigurationTests {
     @Test
     public void contextLoads() {
         assertThat(messagingProperties.getDestinations()).isInstanceOf(LinkedCaseInsensitiveMap.class);
-
     }
 }

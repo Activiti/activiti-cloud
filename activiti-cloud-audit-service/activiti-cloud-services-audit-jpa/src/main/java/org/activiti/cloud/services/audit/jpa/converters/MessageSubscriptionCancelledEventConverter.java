@@ -36,15 +36,18 @@ public class MessageSubscriptionCancelledEventConverter extends BaseEventToEntit
 
     @Override
     protected MessageSubscriptionCancelledAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        return new MessageSubscriptionCancelledAuditEventEntity((CloudMessageSubscriptionCancelledEvent) cloudRuntimeEvent);
+        return new MessageSubscriptionCancelledAuditEventEntity(
+            (CloudMessageSubscriptionCancelledEvent) cloudRuntimeEvent
+        );
     }
 
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         MessageSubscriptionCancelledAuditEventEntity messageSubscriptionCancelledAuditEventEntity = (MessageSubscriptionCancelledAuditEventEntity) auditEventEntity;
 
-        return CloudMessageSubscriptionCancelledEventImpl.builder()
-                .withEntity(messageSubscriptionCancelledAuditEventEntity.getMessageSubscription())
-                .build();
+        return CloudMessageSubscriptionCancelledEventImpl
+            .builder()
+            .withEntity(messageSubscriptionCancelledAuditEventEntity.getMessageSubscription())
+            .build();
     }
 }

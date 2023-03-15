@@ -77,8 +77,7 @@ public class ProjectDescriptor {
         return project.getLastModifiedDate();
     }
 
-    public Project toProject(){
+    public Project toProject() {
         return this.project;
     }
-
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.core.pageable;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.api.runtime.shared.query.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,20 +27,23 @@ public class SpringPageConverter {
 
     private static String DEFAULT_ORDER_ATTRIBUTE = "id";
 
-    public <BASIC_TYPE, FLUENT_TYPE extends BASIC_TYPE> Page<BASIC_TYPE> toSpringPage(Pageable pageable, org.activiti.api.runtime.shared.query.Page<FLUENT_TYPE> apiPage) {
+    public <BASIC_TYPE, FLUENT_TYPE extends BASIC_TYPE> Page<BASIC_TYPE> toSpringPage(
+        Pageable pageable,
+        org.activiti.api.runtime.shared.query.Page<FLUENT_TYPE> apiPage
+    ) {
         List<BASIC_TYPE> list = new ArrayList<>(apiPage.getContent());
-        return new PageImpl<>(list,
-                              pageable,
-                              apiPage.getTotalItems());
+        return new PageImpl<>(list, pageable, apiPage.getTotalItems());
     }
 
-    public org.activiti.api.runtime.shared.query.Pageable toAPIPageable(org.springframework.data.domain.Pageable springPageable) {
+    public org.activiti.api.runtime.shared.query.Pageable toAPIPageable(
+        org.springframework.data.domain.Pageable springPageable
+    ) {
         Sort.Order order = springPageable.getSort().stream().findFirst().orElse(Sort.Order.by(DEFAULT_ORDER_ATTRIBUTE));
 
-        return org.activiti.api.runtime.shared.query.Pageable.of(Math.toIntExact(springPageable.getOffset()),
-                                                                 springPageable.getPageSize(),
-                                                                 Order.by(order.getProperty(),
-                                                                   Order.Direction.valueOf(order.getDirection().name())));
+        return org.activiti.api.runtime.shared.query.Pageable.of(
+            Math.toIntExact(springPageable.getOffset()),
+            springPageable.getPageSize(),
+            Order.by(order.getProperty(), Order.Direction.valueOf(order.getDirection().name()))
+        );
     }
-
 }

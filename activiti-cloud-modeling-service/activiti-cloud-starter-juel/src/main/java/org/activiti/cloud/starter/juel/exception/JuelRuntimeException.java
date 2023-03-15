@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
 public class JuelRuntimeException extends RuntimeException {
+
     public JuelRuntimeException() {
         super();
     }

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.modeling.repository;
 
+import java.util.Optional;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.Project;
@@ -22,16 +23,11 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
-
 /**
  * Interface for {@link Model} entities repository
  */
 public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
-
-    Page<M> getModels(P project,
-                      ModelType modelTypeFilter,
-                      Pageable pageable);
+    Page<M> getModels(P project, ModelType modelTypeFilter, Pageable pageable);
 
     Page<M> getModelsByName(P project, String name, Pageable pageable);
 
@@ -47,13 +43,11 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
 
     M createModel(M model);
 
-    M updateModel(M modelToUpdate,
-                  M newModel);
+    M updateModel(M modelToUpdate, M newModel);
 
     M copyModel(M model, P project);
 
-    M updateModelContent(M modelToBeUpdate,
-                         FileContent fileContent);
+    M updateModelContent(M modelToBeUpdate, FileContent fileContent);
 
     void deleteModel(M model);
 

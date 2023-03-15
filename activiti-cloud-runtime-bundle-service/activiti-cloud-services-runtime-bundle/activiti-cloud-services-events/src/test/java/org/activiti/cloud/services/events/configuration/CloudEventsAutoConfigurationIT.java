@@ -60,5 +60,4 @@ public class CloudEventsAutoConfigurationIT {
     public void contextLoads() {
         // success
     }
-
 }

@@ -46,15 +46,20 @@ import reactor.core.scheduler.Schedulers;
  */
 @Configuration
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
-@ConditionalOnProperty(name = "spring.activiti.cloud.services.notifications.graphql.events.enabled", matchIfMissing = true)
-@PropertySources({
-    @PropertySource(value = "classpath:META-INF/graphql-events.properties"),
-    @PropertySource(value = "classpath:graphql-events.properties", ignoreResourceNotFound = true)
-})
+@ConditionalOnProperty(
+    name = "spring.activiti.cloud.services.notifications.graphql.events.enabled",
+    matchIfMissing = true
+)
+@PropertySources(
+    {
+        @PropertySource(value = "classpath:META-INF/graphql-events.properties"),
+        @PropertySource(value = "classpath:graphql-events.properties", ignoreResourceNotFound = true),
+    }
+)
 public class EngineEventsConsumerAutoConfiguration {
 
     @Configuration
-    public static class DefaultEngineEventsConsumerConfiguration  implements EngineEventsConsumerChannels {
+    public static class DefaultEngineEventsConsumerConfiguration implements EngineEventsConsumerChannels {
 
         public static final String ENGINE_EVENTS_FLUX_SCHEDULER = "engineEventsScheduler";
         private final EngineEventsConsumerProperties properties;
@@ -73,9 +78,10 @@ public class EngineEventsConsumerAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean
         public Transformer engineEventsTransformer() {
-            return new EngineEventsTransformer(Arrays.asList(properties.getProcessEngineEventAttributeKeys()
-                                                                       .split(",")),
-                                               properties.getProcessEngineEventTypeKey());
+            return new EngineEventsTransformer(
+                Arrays.asList(properties.getProcessEngineEventAttributeKeys().split(",")),
+                properties.getProcessEngineEventTypeKey()
+            );
         }
 
         @Bean
@@ -86,24 +92,24 @@ public class EngineEventsConsumerAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(EngineEventsConsumerMessageHandler engineEventsMessageHandler,
-                @Qualifier(SOURCE) SubscribableChannel source) {
-
-            return IntegrationFlows.from(source)
-                                   .log(LoggingHandler.Level.DEBUG)
-                                   .transform(engineEventsMessageHandler)
-                                   .toReactivePublisher();
+        public Publisher<Message<List<EngineEvent>>> engineEventsPublisher(
+            EngineEventsConsumerMessageHandler engineEventsMessageHandler,
+            @Qualifier(SOURCE) SubscribableChannel source
+        ) {
+            return IntegrationFlows
+                .from(source)
+                .log(LoggingHandler.Level.DEBUG)
+                .transform(engineEventsMessageHandler)
+                .toReactivePublisher();
         }
 
         @Bean
         @ConditionalOnMissingBean
-        public Flux<Message<List<EngineEvent>>> engineEventsFlux(Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
-                                                                 Scheduler engineEventsScheduler) {
-            return Flux.from(engineEventsPublisher)
-                       .publish()
-                       .autoConnect(0)
-                       .share()
-                       .publishOn(engineEventsScheduler);
+        public Flux<Message<List<EngineEvent>>> engineEventsFlux(
+            Publisher<Message<List<EngineEvent>>> engineEventsPublisher,
+            Scheduler engineEventsScheduler
+        ) {
+            return Flux.from(engineEventsPublisher).publish().autoConnect(0).share().publishOn(engineEventsScheduler);
         }
 
         @Bean

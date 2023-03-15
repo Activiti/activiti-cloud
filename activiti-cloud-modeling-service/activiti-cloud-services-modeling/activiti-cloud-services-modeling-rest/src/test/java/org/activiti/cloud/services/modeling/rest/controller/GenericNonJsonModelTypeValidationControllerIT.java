@@ -94,216 +94,216 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
-        genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                          genericNonJsonModelType.getName()));
+        genericNonJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
     }
 
     private void validateInvalidContent() {
-      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(
-                    new ModelValidationError("Content invalid", "The content is invalid!!")));
+        SemanticModelValidationException exception = new SemanticModelValidationException(
+            Collections.singletonList(new ModelValidationError("Content invalid", "The content is invalid!!"))
+        );
 
-        doThrow(exception).when(genericNonJsonContentValidator).validateModelContent(any(), any(byte[].class),
-            any(ValidationContext.class), anyBoolean());
+        doThrow(exception)
+            .when(genericNonJsonContentValidator)
+            .validateModelContent(any(), any(byte[].class), any(ValidationContext.class), anyBoolean());
     }
 
     private void validateInvalidExtensions() {
-      SemanticModelValidationException exception = new SemanticModelValidationException(Collections
-                .singletonList(
-                    new ModelValidationError("Extensions invalid", "The extensions are invalid!!")));
+        SemanticModelValidationException exception = new SemanticModelValidationException(
+            Collections.singletonList(new ModelValidationError("Extensions invalid", "The extensions are invalid!!"))
+        );
 
-        doThrow(exception).when(genericNonJsonExtensionsValidator).validateModelExtensions(any(byte[].class),
-                                                                                           any(ValidationContext.class));
+        doThrow(exception)
+            .when(genericNonJsonExtensionsValidator)
+            .validateModelExtensions(any(byte[].class), any(ValidationContext.class));
     }
 
     @Test
     public void testValidateModelContent() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        given().multiPart("file",
-                          "simple-model.bin",
-                          fileContent,
-                          APPLICATION_OCTET_STREAM_VALUE)
-                .post("/v1/models/{modelId}/validate",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isNoContent()).body(isEmptyString());
+        given()
+            .multiPart("file", "simple-model.bin", fileContent, APPLICATION_OCTET_STREAM_VALUE)
+            .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(0))
-                .validateModelExtensions(any(),
-                                         any());
+        verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
-        verify(genericNonJsonContentValidator,
-                       times(1))
-            .validateModelContent(any(),
+        verify(genericNonJsonContentValidator, times(1))
+            .validateModelContent(
+                any(),
                 argThat(content -> new String(content).equals(new String(fileContent))),
-                argThat(context -> !context.isEmpty()), eq(false));
+                argThat(context -> !context.isEmpty()),
+                eq(false)
+            );
     }
 
     @Test
-    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentTextContentType() throws IOException {
+    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentTextContentType()
+        throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        given().multiPart("file",
-                          "simple-model.bin",
-                          fileContent,
-                          "text/plain")
-                .post("/v1/models/{modelId}/validate",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isNoContent()).body(isEmptyString());
+        given()
+            .multiPart("file", "simple-model.bin", fileContent, "text/plain")
+            .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(0))
-                .validateModelExtensions(any(),
-                                         any());
+        verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
-        verify(genericNonJsonContentValidator,
-                       times(1))
-            .validateModelContent(any(),
+        verify(genericNonJsonContentValidator, times(1))
+            .validateModelContent(
+                any(),
                 argThat(content -> new String(content).equals(new String(fileContent))),
-                argThat(context -> !context.isEmpty()), eq(false));
+                argThat(context -> !context.isEmpty()),
+                eq(false)
+            );
     }
 
     @Test
-    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentJsonContentType() throws IOException {
+    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentJsonContentType()
+        throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
-        given().multiPart("file",
-                          "simple-model.json",
-                          fileContent,
-                          "application/json")
-                .post("/v1/models/{modelId}/validate",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isNoContent()).body(isEmptyString());
+        given()
+            .multiPart("file", "simple-model.json", fileContent, "application/json")
+            .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(0))
-                .validateModelExtensions(any(),
-                                         any());
+        verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
-        verify(genericNonJsonContentValidator,
-                       times(1))
-            .validateModelContent(any(),
+        verify(genericNonJsonContentValidator, times(1))
+            .validateModelContent(
+                any(),
                 argThat(content -> new String(content).equals(new String(fileContent))),
-                argThat(context -> context.isEmpty()), eq(false));
+                argThat(context -> context.isEmpty()),
+                eq(false)
+            );
     }
 
     @Test
-    public void sholud_throwExceptionAndCallGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingInvalidModelContent() throws IOException {
+    public void sholud_throwExceptionAndCallGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingInvalidModelContent()
+        throws IOException {
         this.validateInvalidContent();
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        assertThatResponse(given().multiPart("file",
-                                             "invalid-simple-model.json",
-                                             fileContent,
-                                             APPLICATION_OCTET_STREAM_VALUE)
-                .post("/v1/models/{modelId}/validate",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Content invalid");
+        assertThatResponse(
+            given()
+                .multiPart("file", "invalid-simple-model.json", fileContent, APPLICATION_OCTET_STREAM_VALUE)
+                .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("Content invalid");
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(0))
-                .validateModelExtensions(any(),
-                                         any());
+        verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
-        verify(genericNonJsonContentValidator,
-                       times(1))
-            .validateModelContent(any(),
+        verify(genericNonJsonContentValidator, times(1))
+            .validateModelContent(
+                any(),
                 argThat(content -> new String(content).equals(new String(fileContent))),
-                argThat(context -> !context.isEmpty()), eq(false));
+                argThat(context -> !context.isEmpty()),
+                eq(false)
+            );
     }
 
     @Test
-    public void sholud_notCallGnericNonJsonContentValidatorAndCallGnericNonJsonExtensionsValidator_when_validatingModelValidExtensions() throws IOException {
+    public void sholud_notCallGnericNonJsonContentValidatorAndCallGnericNonJsonExtensionsValidator_when_validatingModelValidExtensions()
+        throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
-        given().multiPart("file",
-                          "simple-model-extensions.json",
-                          fileContent,
-                          "application/json")
-                .post("/v1/models/{modelId}/validate/extensions",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isNoContent()).body(isEmptyString());
+        given()
+            .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
+            .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
+            .then()
+            .expect(status().isNoContent())
+            .body(isEmptyString());
 
-        verify(genericNonJsonContentValidator,
-                       times(0))
-                .validateModelContent(any(),
-                                      any());
+        verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(1))
-                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
-                                         argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty())
+            );
     }
 
     @Test
     public void sholud_throwSemanticValidationException_when_validatingModelInvalidExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-extensions.json");
 
-        assertThatResponse(given().multiPart("file",
-                                             "simple-model-extensions.json",
-                                             fileContent,
-                                             "application/json")
-                .post("/v1/models/{modelId}/validate/extensions",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("required key [id] not found");
+        assertThatResponse(
+            given()
+                .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
+                .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("required key [id] not found");
 
-        verify(genericNonJsonContentValidator,
-                       times(0))
-                .validateModelContent(any(),
-                                      any());
+        verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(1))
-                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
-                                         argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty())
+            );
     }
 
     @Test
     public void sholud_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-json-extensions.json");
 
-        assertThatResponse(given().multiPart("file",
-                                             "simple-model-extensions.json",
-                                             fileContent,
-                                             "application/json")
-                .post("/v1/models/{modelId}/validate/extensions",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isBadRequest())).isSyntacticValidationException().hasValidationErrors("org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]");
+        assertThatResponse(
+            given()
+                .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
+                .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSyntacticValidationException()
+            .hasValidationErrors(
+                "org.json.JSONException: A JSONObject text must begin with '{' at 1 [character 2 line 1]"
+            );
 
-        verify(genericNonJsonContentValidator,
-                       times(0))
-                .validateModelContent(any(),
-                                      any());
+        verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(1))
-                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
-                                         argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty())
+            );
     }
 
     @Test
     public void sholud_throwSemanticValidationException_when_validatingModelInvalidTypeExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-type-extensions.json");
 
-        assertThatResponse(given().multiPart("file",
-                                             "simple-model-extensions.json",
-                                             fileContent,
-                                             "application/json")
-                .post("/v1/models/{modelId}/validate/extensions",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("expected type: String, found: Boolean");
+        assertThatResponse(
+            given()
+                .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
+                .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("expected type: String, found: Boolean");
 
-        verify(genericNonJsonContentValidator,
-                       times(0))
-                .validateModelContent(any(),
-                                      any());
+        verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(1))
-                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
-                                         argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty())
+            );
     }
 
     @Test
@@ -312,23 +312,22 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
-        assertThatResponse(given().multiPart("file",
-                                             "simple-model-extensions.json",
-                                             fileContent,
-                                             "application/json")
-                .post("/v1/models/{modelId}/validate/extensions",
-                      genericNonJsonModel.getId())
-                .then().expect(status().isBadRequest())).isSemanticValidationException().hasValidationErrors("Extensions invalid");
+        assertThatResponse(
+            given()
+                .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
+                .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors("Extensions invalid");
 
-        verify(genericNonJsonContentValidator,
-                       times(0))
-                .validateModelContent(any(),
-                                      any());
+        verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
-        verify(genericNonJsonExtensionsValidator,
-                       times(1))
-                .validateModelExtensions(argThat(content -> new String(content).equals(new String(fileContent))),
-                                         argThat(context -> context.isEmpty()));
+        verify(genericNonJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> context.isEmpty())
+            );
     }
-
 }

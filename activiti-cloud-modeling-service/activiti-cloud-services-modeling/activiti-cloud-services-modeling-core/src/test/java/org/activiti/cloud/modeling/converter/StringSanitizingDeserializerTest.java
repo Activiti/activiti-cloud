@@ -28,19 +28,21 @@ import org.junit.jupiter.api.Test;
 
 class StringSanitizingDeserializerTest {
 
-    private final static String SVG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmci" +
-            "IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNh" +
-            "dmUtMjRweCAoMSkiIG9wYWNpdHk9IjEiPjxwYXRoIGlkPSJQYXRoXzE3OTY1IiBkYXRhLW5hbWU9IlBhdGggMTc5NjUiIGQ9Ik0wLDBI" +
-            "MjRWMjRIMFoiIGZpbGw9Im5vbmUiLz48cGF0aCBpZD0iUGF0aF8xNzk2NiIgZGF0YS1uYW1lPSJQYXRoIDE3OTY2IiBkPSJNMTcsM0g1" +
-            "QTIsMiwwLDAsMCwzLDVWMTlhMiwyLDAsMCwwLDIsMkgxOWEyLjAwNiwyLjAwNiwwLDAsMCwyLTJWN1ptMiwxNkg1VjVIMTYuMTdMMTks" +
-            "Ny44M1ptLTctN2EzLDMsMCwxLDAsMywzQTMsMywwLDAsMCwxMiwxMlpNNiw2aDl2NEg2WiIvPjwvZz48L3N2Zz4K";
+    private static final String SVG =
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmci" +
+        "IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNh" +
+        "dmUtMjRweCAoMSkiIG9wYWNpdHk9IjEiPjxwYXRoIGlkPSJQYXRoXzE3OTY1IiBkYXRhLW5hbWU9IlBhdGggMTc5NjUiIGQ9Ik0wLDBI" +
+        "MjRWMjRIMFoiIGZpbGw9Im5vbmUiLz48cGF0aCBpZD0iUGF0aF8xNzk2NiIgZGF0YS1uYW1lPSJQYXRoIDE3OTY2IiBkPSJNMTcsM0g1" +
+        "QTIsMiwwLDAsMCwzLDVWMTlhMiwyLDAsMCwwLDIsMkgxOWEyLjAwNiwyLjAwNiwwLDAsMCwyLTJWN1ptMiwxNkg1VjVIMTYuMTdMMTks" +
+        "Ny44M1ptLTctN2EzLDMsMCwxLDAsMywzQTMsMywwLDAsMCwxMiwxMlpNNiw2aDl2NEg2WiIvPjwvZz48L3N2Zz4K";
 
-    private static final String PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0A" +
-            "AHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/" +
-            "oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAMVJREFUeNpjYBgFBAAjGt8TiGcBsQyJ5jQAcSM2CWY0/j4gliXDoQ5Q+iC6BAsaXxaH" +
-            "z/CBcCBeAvUFA7pPWPBo/E9kEK+EsrFawkSluARZEoMUHwzUtoAByScMtLIAK2AhIQmTBQbUB8iADZoy4qH8hUBcD8S/qGVBExCXI/Er" +
-            "oEFYQa0giiVSjP5xQKwFi4kUIzsO6qBFB3okU80CUGqphGKKkuljaIn6n4Jgf4yvPrgBxPZAzEem4U+AOA2I74zW5UQDACHHHaj63Wy2" +
-            "AAAAAElFTkSuQmCC";
+    private static final String PNG =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0A" +
+        "AHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/" +
+        "oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAMVJREFUeNpjYBgFBAAjGt8TiGcBsQyJ5jQAcSM2CWY0/j4gliXDoQ5Q+iC6BAsaXxaH" +
+        "z/CBcCBeAvUFA7pPWPBo/E9kEK+EsrFawkSluARZEoMUHwzUtoAByScMtLIAK2AhIQmTBQbUB8iADZoy4qH8hUBcD8S/qGVBExCXI/Er" +
+        "oEFYQa0giiVSjP5xQKwFi4kUIzsO6qBFB3okU80CUGqphGKKkuljaIn6n4Jgf4yvPrgBxPZAzEem4U+AOA2I74zW5UQDACHHHaj63Wy2" +
+        "AAAAAElFTkSuQmCC";
 
     private static final String SIMPLE_TEXT = "simple text";
 

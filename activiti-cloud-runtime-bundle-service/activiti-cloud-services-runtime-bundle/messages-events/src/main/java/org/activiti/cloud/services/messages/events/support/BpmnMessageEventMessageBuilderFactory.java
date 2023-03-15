@@ -29,7 +29,8 @@ public class BpmnMessageEventMessageBuilderFactory {
     }
 
     public MessageBuilderAppenderChain create(BPMNMessage bpmnMessage) {
-        return new MessageBuilderAppenderChain().chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
-                                                .chain(new MessageEventPayloadMessageBuilderAppender(bpmnMessage.getMessagePayload()));
+        return new MessageBuilderAppenderChain()
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties))
+            .chain(new MessageEventPayloadMessageBuilderAppender(bpmnMessage.getMessagePayload()));
     }
 }

@@ -24,13 +24,11 @@ import org.junit.jupiter.api.Test;
 
 public class RootTasksFilterTest {
 
-
     @Test
     public void should_addPredicateParentTaskIdIsNull_when_isRootTaskOnly() {
         //given
         RootTasksFilter rootTasksFilter = new RootTasksFilter(true);
         Predicate initialPredicate = QTaskEntity.taskEntity.name.eq("Task1");
-
 
         //when
         Predicate extendedPredicate = rootTasksFilter.extend(initialPredicate);
@@ -44,7 +42,6 @@ public class RootTasksFilterTest {
         //given
         RootTasksFilter rootTasksFilter = new RootTasksFilter(false);
         Predicate initialPredicate = QTaskEntity.taskEntity.name.eq("Task1");
-
 
         //when
         Predicate extendedPredicate = rootTasksFilter.extend(initialPredicate);

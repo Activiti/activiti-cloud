@@ -20,8 +20,6 @@ import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsCon
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication(exclude = {ProcessEngineChannelsConfiguration.class})
+@SpringBootApplication(exclude = { ProcessEngineChannelsConfiguration.class })
 @Import(TestProcessEngineConfiguration.class)
-public class TestApplication {
-
-}
+public class TestApplication {}

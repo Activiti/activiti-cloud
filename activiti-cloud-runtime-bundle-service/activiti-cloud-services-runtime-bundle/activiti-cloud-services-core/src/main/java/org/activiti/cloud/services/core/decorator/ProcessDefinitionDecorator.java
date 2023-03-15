@@ -19,13 +19,11 @@ import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.apache.commons.lang3.StringUtils;
 
 public interface ProcessDefinitionDecorator {
-
     String getHandledValue();
 
     ExtendedCloudProcessDefinition decorate(ExtendedCloudProcessDefinition processDefinition);
 
-    default boolean applies(String include){
+    default boolean applies(String include) {
         return StringUtils.equalsIgnoreCase(getHandledValue(), include);
     }
-
 }

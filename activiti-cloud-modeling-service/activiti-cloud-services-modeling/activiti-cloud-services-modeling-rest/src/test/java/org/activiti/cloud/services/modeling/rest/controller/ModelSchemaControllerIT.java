@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.SchemaService;
@@ -42,6 +43,7 @@ public class ModelSchemaControllerIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
     @Autowired
     private SchemaService schemaService;
 
@@ -59,7 +61,8 @@ public class ModelSchemaControllerIT {
     }
 
     @Test
-    public void should_return200andAExtensionProcessJsonSchema_when_extensionProcessSchemaIsRequested() throws Exception {
+    public void should_return200andAExtensionProcessJsonSchema_when_extensionProcessSchemaIsRequested()
+        throws Exception {
         mockMvc
             .perform(get("/v1/schemas/PROCESS-EXTENSION"))
             .andExpect(status().isOk())
@@ -68,9 +71,6 @@ public class ModelSchemaControllerIT {
 
     @Test
     public void should_return404_when_isRequestedAnonDefinedSchema() throws Exception {
-        mockMvc
-            .perform(get("/v1/schemas/test"))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/v1/schemas/test")).andExpect(status().isNotFound());
     }
-
 }

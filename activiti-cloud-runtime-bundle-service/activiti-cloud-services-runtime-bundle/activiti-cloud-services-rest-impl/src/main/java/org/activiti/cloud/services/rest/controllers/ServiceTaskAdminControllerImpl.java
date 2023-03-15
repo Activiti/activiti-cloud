@@ -33,7 +33,10 @@ public class ServiceTaskAdminControllerImpl implements ServiceTaskAdminControlle
     }
 
     @Override
-    public ResponseEntity<Void> replayServiceTask(String executionId, ReplayServiceTaskRequest replayServiceTaskRequest) {
+    public ResponseEntity<Void> replayServiceTask(
+        String executionId,
+        ReplayServiceTaskRequest replayServiceTaskRequest
+    ) {
         integrationRequestReplayer.replay(executionId, replayServiceTaskRequest.getFlowNodeId());
         return new ResponseEntity<>(HttpStatus.OK);
     }

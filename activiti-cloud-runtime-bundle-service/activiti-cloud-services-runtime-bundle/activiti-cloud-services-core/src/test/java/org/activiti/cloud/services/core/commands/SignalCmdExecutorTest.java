@@ -37,8 +37,7 @@ public class SignalCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        SignalPayload signalPayload = new SignalPayload("x",
-                                                        null);
+        SignalPayload signalPayload = new SignalPayload("x", null);
 
         assertThat(signalCmdExecutor.getHandledType()).isEqualTo(SignalPayload.class.getName());
 

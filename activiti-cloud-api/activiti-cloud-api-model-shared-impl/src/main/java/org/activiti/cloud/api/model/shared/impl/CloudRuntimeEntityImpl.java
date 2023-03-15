@@ -16,7 +16,6 @@
 package org.activiti.cloud.api.model.shared.impl;
 
 import java.util.Objects;
-
 import org.activiti.api.model.shared.model.ApplicationElement;
 import org.activiti.api.runtime.model.impl.ApplicationElementImpl;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
@@ -29,8 +28,7 @@ public class CloudRuntimeEntityImpl extends ApplicationElementImpl implements Cl
     private String serviceType;
     private String serviceVersion;
 
-    public CloudRuntimeEntityImpl() {
-    }
+    public CloudRuntimeEntityImpl() {}
 
     public CloudRuntimeEntityImpl(ApplicationElement applicationElement) {
         setAppVersion(applicationElement.getAppVersion());
@@ -101,29 +99,32 @@ public class CloudRuntimeEntityImpl extends ApplicationElementImpl implements Cl
             return false;
         }
         CloudRuntimeEntityImpl other = (CloudRuntimeEntityImpl) obj;
-        return Objects.equals(appName, other.appName) &&
-               Objects.equals(serviceFullName, other.serviceFullName) &&
-               Objects.equals(serviceName, other.serviceName) &&
-               Objects.equals(serviceType, other.serviceType) &&
-               Objects.equals(serviceVersion, other.serviceVersion);
+        return (
+            Objects.equals(appName, other.appName) &&
+            Objects.equals(serviceFullName, other.serviceFullName) &&
+            Objects.equals(serviceName, other.serviceName) &&
+            Objects.equals(serviceType, other.serviceType) &&
+            Objects.equals(serviceVersion, other.serviceVersion)
+        );
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudRuntimeEntityImpl [appName=")
-               .append(appName)
-               .append(", serviceName=")
-               .append(serviceName)
-               .append(", serviceFullName=")
-               .append(serviceFullName)
-               .append(", serviceType=")
-               .append(serviceType)
-               .append(", serviceVersion=")
-               .append(serviceVersion)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("CloudRuntimeEntityImpl [appName=")
+            .append(appName)
+            .append(", serviceName=")
+            .append(serviceName)
+            .append(", serviceFullName=")
+            .append(serviceFullName)
+            .append(", serviceType=")
+            .append(serviceType)
+            .append(", serviceVersion=")
+            .append(serviceVersion)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

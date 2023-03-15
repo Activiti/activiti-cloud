@@ -15,30 +15,29 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import org.activiti.api.process.model.ProcessCandidateStarterGroup;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterGroupJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
 @Entity(name = ProcessCandidateStarterGroupAddedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT)
 @DiscriminatorValue(value = ProcessCandidateStarterGroupAddedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT)
 @DynamicInsert
 public class ProcessCandidateStarterGroupAddedEventEntity extends AuditEventEntity {
 
-    protected static final String PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT = "ProcessCandidateStarterGroupAddedEvent";
+    protected static final String PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT =
+        "ProcessCandidateStarterGroupAddedEvent";
 
     @Convert(converter = ProcessCandidateStarterGroupJpaJsonConverter.class)
     @Column(columnDefinition = "text")
     private ProcessCandidateStarterGroupImpl candidateStarterGroup;
 
-    public ProcessCandidateStarterGroupAddedEventEntity() {
-    }
+    public ProcessCandidateStarterGroupAddedEventEntity() {}
 
     public ProcessCandidateStarterGroupAddedEventEntity(CloudProcessCandidateStarterGroupAddedEvent cloudEvent) {
         super(cloudEvent);
@@ -50,18 +49,19 @@ public class ProcessCandidateStarterGroupAddedEventEntity extends AuditEventEnti
     }
 
     public void setCandidateStarterGroup(ProcessCandidateStarterGroup candidateGroup) {
-        this.candidateStarterGroup = new ProcessCandidateStarterGroupImpl(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId());
+        this.candidateStarterGroup =
+            new ProcessCandidateStarterGroupImpl(candidateGroup.getProcessDefinitionId(), candidateGroup.getGroupId());
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ProcessCandidateStarterGroupAddedEventEntity [candidateStarterGroup=")
-               .append(candidateStarterGroup)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("ProcessCandidateStarterGroupAddedEventEntity [candidateStarterGroup=")
+            .append(candidateStarterGroup)
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
-
 }

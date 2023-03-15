@@ -15,17 +15,18 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import java.util.Objects;
+import javax.persistence.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
-import java.util.Objects;
-
-@Entity(name="TaskCandidateGroup")
-@Table(name="TASK_CANDIDATE_GROUP", indexes= {
-		@Index(name="tcg_groupId_idx", columnList="groupId", unique=false),
-		@Index(name="tcg_taskId_idx", columnList="taskId", unique=false)
-	}
+@Entity(name = "TaskCandidateGroup")
+@Table(
+    name = "TASK_CANDIDATE_GROUP",
+    indexes = {
+        @Index(name = "tcg_groupId_idx", columnList = "groupId", unique = false),
+        @Index(name = "tcg_taskId_idx", columnList = "taskId", unique = false),
+    }
 )
 @IdClass(TaskCandidateGroupId.class)
 @DynamicInsert
@@ -39,16 +40,19 @@ public class TaskCandidateGroupEntity {
     private String groupId;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+        name = "taskId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        nullable = true,
+        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private TaskEntity task;
 
-    public TaskCandidateGroupEntity() {
+    public TaskCandidateGroupEntity() {}
 
-    }
-
-    public TaskCandidateGroupEntity(String taskid,
-                                    String groupId) {
+    public TaskCandidateGroupEntity(String taskid, String groupId) {
         this.taskId = taskid;
         this.groupId = groupId;
     }
@@ -94,8 +98,11 @@ public class TaskCandidateGroupEntity {
             return false;
         }
         TaskCandidateGroupEntity other = (TaskCandidateGroupEntity) obj;
-        return this.groupId != null &&
+        return (
+            this.groupId != null &&
             this.taskId != null &&
-            Objects.equals(groupId, other.groupId) && Objects.equals(taskId, other.taskId);
+            Objects.equals(groupId, other.groupId) &&
+            Objects.equals(taskId, other.taskId)
+        );
     }
 }

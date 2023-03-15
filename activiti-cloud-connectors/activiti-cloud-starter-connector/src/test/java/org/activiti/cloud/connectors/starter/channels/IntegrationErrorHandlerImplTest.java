@@ -43,19 +43,21 @@ public class IntegrationErrorHandlerImplTest {
 
     @BeforeEach
     public void setUp() {
-        integrationErrorHandler = new IntegrationErrorHandlerImpl(integrationErrorSender,
-            connectorProperties, new ObjectMapper());
+        integrationErrorHandler =
+            new IntegrationErrorHandlerImpl(integrationErrorSender, connectorProperties, new ObjectMapper());
     }
-
 
     @Test
     public void handleErrorMessage_should_notThrowExceptionWhenOriginalMessageIsNotIntegrationRequest() {
         //given
-        ErrorMessage errorMessage = new ErrorMessage(new MessagingException(
-            MessageBuilder
-                .withPayload("This is not an integration request".getBytes())
-                .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
-                .build()));
+        ErrorMessage errorMessage = new ErrorMessage(
+            new MessagingException(
+                MessageBuilder
+                    .withPayload("This is not an integration request".getBytes())
+                    .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                    .build()
+            )
+        );
 
         //when
         integrationErrorHandler.handleErrorMessage(errorMessage);

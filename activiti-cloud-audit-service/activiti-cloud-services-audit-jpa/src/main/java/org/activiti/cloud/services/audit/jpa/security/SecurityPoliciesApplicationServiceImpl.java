@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.audit.jpa.security;
 
+import java.util.Map;
+import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.core.common.spring.security.policies.BaseSecurityPoliciesManagerImpl;
@@ -23,18 +25,18 @@ import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Applies security policies (defined into the application.properties file) to event data
  */
-public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPoliciesManagerImpl implements SecurityPoliciesManager {
+public class SecurityPoliciesApplicationServiceImpl
+    extends BaseSecurityPoliciesManagerImpl
+    implements SecurityPoliciesManager {
 
-    public SecurityPoliciesApplicationServiceImpl(SecurityManager securityManager,
-                                                  SecurityPoliciesProperties securityPoliciesProperties) {
-        super(securityManager,
-              securityPoliciesProperties);
+    public SecurityPoliciesApplicationServiceImpl(
+        SecurityManager securityManager,
+        SecurityPoliciesProperties securityPoliciesProperties
+    ) {
+        super(securityManager, securityPoliciesProperties);
     }
 
     /*
@@ -50,8 +52,10 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
      *  - If no other policies applied
      *    - Add Impossible filter so the user doesn't get any data
      */
-    public Specification<AuditEventEntity> createSpecWithSecurity(Specification<AuditEventEntity> spec,
-                                                                  SecurityPolicyAccess securityPolicy) {
+    public Specification<AuditEventEntity> createSpecWithSecurity(
+        Specification<AuditEventEntity> spec,
+        SecurityPolicyAccess securityPolicy
+    ) {
         if (spec == null) {
             spec = new AlwaysTrueSpecification();
         }
@@ -61,13 +65,11 @@ public class SecurityPoliciesApplicationServiceImpl extends BaseSecurityPolicies
         Map<String, Set<String>> restrictions = getAllowedKeys(securityPolicy);
 
         for (String serviceName : restrictions.keySet()) {
-
             Set<String> defKeys = restrictions.get(serviceName);
             //will filter by app name and will also filter by definition keys if no wildcard,
             if (defKeys != null && defKeys.size() > 0 && !defKeys.contains(securityPoliciesProperties.getWildcard())) {
-                return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName,
-                                                                               defKeys));
-            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) {  //will filter by app name if wildcard is set
+                return spec.and(new ApplicationProcessDefSecuritySpecification(serviceName, defKeys));
+            } else if (defKeys != null && defKeys.contains(securityPoliciesProperties.getWildcard())) { //will filter by app name if wildcard is set
                 return spec.and(new ApplicationSecuritySpecification(serviceName));
             }
         }
