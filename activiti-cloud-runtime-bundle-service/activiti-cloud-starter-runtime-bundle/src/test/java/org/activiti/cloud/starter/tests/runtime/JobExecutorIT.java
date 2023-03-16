@@ -99,9 +99,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = {RuntimeITConfiguration.class,
-    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { RuntimeITConfiguration.class, JobExecutorIT.JobExecutorITProcessEngineConfigurer.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class JobExecutorIT {
