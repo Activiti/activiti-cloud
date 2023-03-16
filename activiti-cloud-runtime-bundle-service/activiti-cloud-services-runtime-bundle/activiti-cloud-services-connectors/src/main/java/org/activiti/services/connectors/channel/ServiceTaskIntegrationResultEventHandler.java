@@ -71,9 +71,7 @@ public class ServiceTaskIntegrationResultEventHandler {
         );
 
         String executionId = integrationContext.getExecutionId();
-        List<Execution> executions = runtimeService.createExecutionQuery()
-                                                   .executionId(executionId)
-                                                   .list();
+        List<Execution> executions = runtimeService.createExecutionQuery().executionId(executionId).list();
 
         if (integrationContextEntity != null) {
             List<Command<?>> commands = new ArrayList<>();
@@ -83,11 +81,14 @@ public class ServiceTaskIntegrationResultEventHandler {
             if (executions.size() > 0) {
                 Execution execution = executions.get(0);
 
-                if (execution.getActivityId()
-                             .equals(integrationContext.getClientId())) {
-                    commands.add(new TriggerCmd(integrationContext.getExecutionId(),
-                                                integrationContext.getOutBoundVariables(),
-                                                variablesPropagator));
+                if (execution.getActivityId().equals(integrationContext.getClientId())) {
+                    commands.add(
+                        new TriggerCmd(
+                            integrationContext.getExecutionId(),
+                            integrationContext.getOutBoundVariables(),
+                            variablesPropagator
+                        )
+                    );
                 } else {
                     LOGGER.warn(
                         "Could not find matching activityId '{}' for integration result '{}' with executionId '{}'",
@@ -108,8 +109,13 @@ public class ServiceTaskIntegrationResultEventHandler {
                 LOGGER.warn(message);
             }
 
-            commands.add(new AggregateIntegrationResultReceivedEventCmd(
-                    integrationContext, runtimeBundleProperties, processEngineEventsAggregator));
+            commands.add(
+                new AggregateIntegrationResultReceivedEventCmd(
+                    integrationContext,
+                    runtimeBundleProperties,
+                    processEngineEventsAggregator
+                )
+            );
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }

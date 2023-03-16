@@ -122,8 +122,13 @@ public class ServiceTaskIntegrationErrorEventHandler {
                 LOGGER.warn(message);
             }
 
-            commands.add(new AggregateIntegrationErrorReceivedEventCmd(
-                    integrationError, runtimeBundleProperties, processEngineEventsAggregator));
+            commands.add(
+                new AggregateIntegrationErrorReceivedEventCmd(
+                    integrationError,
+                    runtimeBundleProperties,
+                    processEngineEventsAggregator
+                )
+            );
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }
