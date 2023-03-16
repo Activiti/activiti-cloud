@@ -21,7 +21,6 @@ import static org.apache.commons.lang3.StringUtils.removeStart;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -139,8 +138,10 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     }
 
     @Override
-    public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                 ValidationContext validationContext) {
+    public Collection<ModelingException> validateAndReturnErrors(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
         return null;
     }
 

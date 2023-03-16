@@ -41,8 +41,10 @@ public class ConnectorModelValidator extends JsonSchemaModelValidator implements
     }
 
     @Override
-    public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                 ValidationContext validationContext) {
+    public Collection<ModelingException> validateAndReturnErrors(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
         return null;
     }
 
