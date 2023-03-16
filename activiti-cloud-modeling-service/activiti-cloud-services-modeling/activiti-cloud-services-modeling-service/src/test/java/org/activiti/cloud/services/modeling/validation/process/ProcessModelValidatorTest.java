@@ -26,7 +26,6 @@ import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.assertj.core.api.Condition;
@@ -71,12 +70,6 @@ class ProcessModelValidatorTest {
 
         assertThat(exception).isNull();
     }
-
-    @Test
-    void should_validateWithAndReturnNoErrors_when_categoryIsSet() {
-        BpmnModel bpmnModel = new BpmnModel();
-        byte[] bytesFromModel = bpmnModel.toString().getBytes();
-        bpmnModel.setTargetNamespace("test-category");
 
     @Test
     void should_validateWithAndReturnNoErrors_when_categoryIsSet() {

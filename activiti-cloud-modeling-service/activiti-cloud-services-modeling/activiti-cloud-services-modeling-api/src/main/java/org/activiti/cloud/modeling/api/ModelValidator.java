@@ -21,13 +21,6 @@ import java.util.Collection;
  * Business logic related with validation of a model
  */
 public interface ModelValidator extends ModelValidationErrorProducer {
-    /**
-     * Validate the given model.
-     *
-     * @param modelContent      content of the model to validate
-     * @param validationContext the validation context
-     */
-    void validate(byte[] modelContent, ValidationContext validationContext);
 
     /**
      * Validate the given model.
