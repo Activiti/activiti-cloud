@@ -49,31 +49,32 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public Collection<ModelValidationError> validate(byte[] bytes,
-                                                     ValidationContext validationContext) {
+    public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
         JSONObject processExtensionJson = null;
         try {
             log.debug("Validating json model content: " + new String(bytes));
             processExtensionJson = new JSONObject(new JSONTokener(new String(bytes)));
-            schemaLoader()
-                .load()
-                .build()
-                .validate(processExtensionJson);
+            schemaLoader().load().build().validate(processExtensionJson);
         } catch (JSONException jsonException) {
-            log.debug("Syntactic model JSON validation errors encountered",
-                      jsonException);
+            log.debug("Syntactic model JSON validation errors encountered", jsonException);
             throw new SyntacticModelValidationException(jsonException);
         } catch (ValidationException validationException) {
-            log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
-                      validationException);
-            throw new SemanticModelValidationException(validationException.getMessage(),
-                                                       getValidationErrors(validationException, processExtensionJson));
+            log.debug(
+                "Semantic model validation errors encountered: " + validationException.toJSON(),
+                validationException
+            );
+            throw new SemanticModelValidationException(
+                validationException.getMessage(),
+                getValidationErrors(validationException, processExtensionJson)
+            );
         }
         return Collections.emptyList();
     }
 
-    private List<ModelValidationError> getValidationErrors(ValidationException validationException,
-                                                           JSONObject prcessExtenstionJson) {
+    private List<ModelValidationError> getValidationErrors(
+        ValidationException validationException,
+        JSONObject prcessExtenstionJson
+    ) {
         return getValidationExceptions(validationException)
             .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
             .distinct()

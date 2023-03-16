@@ -41,27 +41,29 @@ public abstract class ExtensionsJsonSchemaValidator
     private JsonConverter<Model> extensionsConverter;
 
     @Override
-    public Collection<ModelValidationError> validate(byte[] bytes,
-                                                     ValidationContext validationContext) {
-        super.validate(bytes,
-                       validationContext);
+    public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
+        super.validate(bytes, validationContext);
 
         if (!validationContext.isEmpty()) {
-            validateExtensionsInContext(bytes,
-                                        validationContext);
+            validateExtensionsInContext(bytes, validationContext);
         }
         return Collections.emptyList();
     }
 
-    private void validateExtensionsInContext(byte[] bytes,
-                                             ValidationContext validationContext) {
-        List<ModelValidationError> validationExceptions = getValidationErrors(convertBytesToModel(bytes),
-                                                                              validationContext);
+    private void validateExtensionsInContext(byte[] bytes, ValidationContext validationContext) {
+        List<ModelValidationError> validationExceptions = getValidationErrors(
+            convertBytesToModel(bytes),
+            validationContext
+        );
         if (!validationExceptions.isEmpty()) {
-            throw new SemanticModelValidationException("Semantic model validation errors encountered: "
-                                                           + validationExceptions.stream()
-                .map(ModelValidationError::getDescription).collect(Collectors.joining(",")),
-                                                       validationExceptions);
+            throw new SemanticModelValidationException(
+                "Semantic model validation errors encountered: " +
+                validationExceptions
+                    .stream()
+                    .map(ModelValidationError::getDescription)
+                    .collect(Collectors.joining(",")),
+                validationExceptions
+            );
         }
     }
 
