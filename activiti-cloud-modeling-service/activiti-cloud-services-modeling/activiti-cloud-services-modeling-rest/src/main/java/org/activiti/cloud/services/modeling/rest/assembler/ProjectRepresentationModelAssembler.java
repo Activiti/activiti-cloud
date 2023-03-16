@@ -62,11 +62,11 @@ public class ProjectRepresentationModelAssembler
             return linkTo(
                 ProjectController.class,
                 ProjectController.class.getMethod(
-                    "exportProject",
-                    HttpServletResponse.class,
-                    String.class,
-                    boolean.class
-                ),
+                        "exportProject",
+                        HttpServletResponse.class,
+                        String.class,
+                        boolean.class
+                    ),
                 null,
                 projectId,
                 true
