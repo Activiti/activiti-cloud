@@ -98,11 +98,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(value = { "classpath:application-test.properties", "classpath:async-executor.properties" })
-@ContextConfiguration(
-    classes = { RuntimeITConfiguration.class, JobExecutorIT.JobExecutorITProcessEngineConfigurer.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@TestPropertySource("classpath:application-test.properties")
+@ContextConfiguration(classes = {RuntimeITConfiguration.class,
+    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class JobExecutorIT {
@@ -181,8 +180,8 @@ public class JobExecutorIT {
 
     @DynamicPropertySource
     public static void signalProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.activiti.process-definition-location-prefix", () -> "classpath*:/invalid-processes/");
-        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:test-never-fail");
+        registry.add("spring.activiti.asyncExecutorActivate", () -> true);
+        registry.add("spring.cloud.stream.bindings.asyncExecutorJobsInput.consumer.max-attempts", () -> 4);
     }
 
     @BeforeEach
