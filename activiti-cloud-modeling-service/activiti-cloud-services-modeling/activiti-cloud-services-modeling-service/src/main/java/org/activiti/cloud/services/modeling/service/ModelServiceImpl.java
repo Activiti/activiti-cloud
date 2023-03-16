@@ -109,15 +109,17 @@ public class ModelServiceImpl implements ModelService {
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
     @Autowired
-    public ModelServiceImpl(ModelRepository modelRepository,
-                            ModelTypeService modelTypeService,
-                            ModelContentService modelContentService,
-                            ModelExtensionsService modelExtensionsService,
-                            JsonConverter<Model> jsonConverter,
-                            ProcessModelContentConverter processModelContentConverter,
-                            Set<ModelUpdateListener> modelUpdateListeners,
-                            FileMagicNumberValidator fileContentValidator,
-                            FileContentSanitizer fileContentSanitizer) {
+    public ModelServiceImpl(
+        ModelRepository modelRepository,
+        ModelTypeService modelTypeService,
+        ModelContentService modelContentService,
+        ModelExtensionsService modelExtensionsService,
+        JsonConverter<Model> jsonConverter,
+        ProcessModelContentConverter processModelContentConverter,
+        Set<ModelUpdateListener> modelUpdateListeners,
+        FileMagicNumberValidator fileContentValidator,
+        FileContentSanitizer fileContentSanitizer
+    ) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
         this.modelContentService = modelContentService;
@@ -165,16 +167,15 @@ public class ModelServiceImpl implements ModelService {
             model.setType(type);
             model.setName(name);
             return model;
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
-                 InvocationTargetException e) {
+        } catch (
+            InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e
+        ) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Model createModel(Project project,
-        Model model) {
-
+    public Model createModel(Project project, Model model) {
         checkIfModelNameExistsInProject(project, model);
         checkModelScopeIntegrity(model);
         model.setId(null);
@@ -199,14 +200,16 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        Optional<Model> existingModel = modelRepository.findModelByNameInProject(project,
-                                                                                 model.getName(),
-                                                                                 model.getType());
+        Optional<Model> existingModel = modelRepository.findModelByNameInProject(
+            project,
+            model.getName(),
+            model.getType()
+        );
         if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
-                "A model with the same type already exists within the project with id: " + (project != null
-                    ? project.getId()
-                    : "null"));
+                "A model with the same type already exists within the project with id: " +
+                (project != null ? project.getId() : "null")
+            );
         }
     }
 
@@ -406,10 +409,11 @@ public class ModelServiceImpl implements ModelService {
         }
         String convertedId = model.getId();
 
-        if (model.getId() == null && (modelTypeService.isJson(modelType)
-            == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))) {
-            convertedId = retrieveModelIdFromModelContent(model,
-                                            fileContent);
+        if (
+            model.getId() == null &&
+            (modelTypeService.isJson(modelType) == ContentTypeUtils.isJsonContentType(fileContent.getContentType()))
+        ) {
+            convertedId = retrieveModelIdFromModelContent(model, fileContent);
         }
 
         model.setScope(ModelScope.PROJECT);
@@ -490,21 +494,24 @@ public class ModelServiceImpl implements ModelService {
     public Model createModelFromContent(ModelType modelType, FileContent fileContent) {
         return contentFilenameToModelName(fileContent.getFilename(), modelType)
             .map(modelName -> buildModel(modelType.getName(), modelName))
-            .orElseThrow(() -> new ImportModelException(MessageFormat
-                                                            .format(
-                                                                "Unexpected extension was found for file to import "
-                                                                    + "model "
-                                                                    + "of type {0}: {1}",
-                                                                modelType.getName(),
-                                                                fileContent.getFilename())));
+            .orElseThrow(() ->
+                new ImportModelException(
+                    MessageFormat.format(
+                        "Unexpected extension was found for file to import " + "model " + "of type {0}: {1}",
+                        modelType.getName(),
+                        fileContent.getFilename()
+                    )
+                )
+            );
     }
 
     @Override
-    public Optional<String> contentFilenameToModelName(String filename,
-                                                       ModelType modelType) {
-        return Arrays.stream(modelType.getAllowedContentFileExtension()).filter(filename::endsWith).findFirst()
-            .map(extension -> removeExtension(filename,
-                                              extension));
+    public Optional<String> contentFilenameToModelName(String filename, ModelType modelType) {
+        return Arrays
+            .stream(modelType.getAllowedContentFileExtension())
+            .filter(filename::endsWith)
+            .findFirst()
+            .map(extension -> removeExtension(filename, extension));
     }
 
     @Override
@@ -523,14 +530,15 @@ public class ModelServiceImpl implements ModelService {
         validateModelContent(model, fileContent.getFileContent(), validationContext);
     }
 
-
     private ValidationContext getValidationContext(Model model, FileContent fileContent, @Nullable Project project) {
         if (!modelTypeService.isJson(findModelType(model)) && fileContent.getContentType().equals(CONTENT_TYPE_JSON)) {
             return EMPTY_CONTEXT;
         }
 
         if (project != null) {
-            return Optional.ofNullable(project).map(this::createValidationContext)
+            return Optional
+                .ofNullable(project)
+                .map(this::createValidationContext)
                 .orElseGet(() -> createValidationContext(model));
         }
 
@@ -558,14 +566,13 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public void validateModelContent(Model model,
-                                     FileContent fileContent,
-                                     Project project,
-                                     boolean validateUsage) {
+    public void validateModelContent(Model model, FileContent fileContent, Project project, boolean validateUsage) {
         if (validateUsage) {
-            validateModelContentAndUsage(model,
-                                         fileContent.getFileContent(),
-                                         getValidationContext(model, fileContent, project));
+            validateModelContentAndUsage(
+                model,
+                fileContent.getFileContent(),
+                getValidationContext(model, fileContent, project)
+            );
         } else {
             validateModelContent(model, fileContent, project);
         }
@@ -574,39 +581,38 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public void validateModelContent(Model model, FileContent fileContent, boolean validateUsage) {
         if (validateUsage) {
-            validateModelContentAndUsage(model,
-                                         fileContent.getFileContent(),
-                                         getValidationContext(model, fileContent, null));
+            validateModelContentAndUsage(
+                model,
+                fileContent.getFileContent(),
+                getValidationContext(model, fileContent, null)
+            );
         } else {
             validateModelContent(model, fileContent);
         }
     }
 
-    private void validateModelContentAndUsage(Model model,
-                                              byte[] modelContent,
-                                              ValidationContext validationContext) {
-        modelContentService.findModelValidators(model.getType())
-            .forEach(validator -> validator.validateModelContent(model,
-                                                                 modelContent,
-                                                                 validationContext,
-                                                                 true));
+    private void validateModelContentAndUsage(Model model, byte[] modelContent, ValidationContext validationContext) {
+        modelContentService
+            .findModelValidators(model.getType())
+            .forEach(validator -> validator.validateModelContent(model, modelContent, validationContext, true));
     }
 
-    private void validateModelContent(Model model,
-                                      byte[] modelContent,
-                                      ValidationContext validationContext) {
-        modelContentService.findModelValidators(model.getType())
+    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
+        modelContentService
+            .findModelValidators(model.getType())
             .forEach(modelValidator -> modelValidator.validateModelContent(modelContent, validationContext));
     }
 
     private List<ModelValidationError> getModelContentValidationErrors(
         Model model,
         byte[] modelContent,
-        ValidationContext validationContext) {
-        return modelContentService.findModelValidators(model.getType())
+        ValidationContext validationContext
+    ) {
+        return modelContentService
+            .findModelValidators(model.getType())
             .stream()
-            .map(modelValidator -> modelValidator
-                .validateAndReturnErrors(model, modelContent, validationContext, false))
+            .map(modelValidator -> modelValidator.validateAndReturnErrors(model, modelContent, validationContext, false)
+            )
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
     }
@@ -648,22 +654,23 @@ public class ModelServiceImpl implements ModelService {
         return modelRepository.getGlobalModels(modelType, includeOrphans, pageable);
     }
 
-    private void validateModelExtensions(String modelType,
-                                         byte[] modelContent,
-                                         ValidationContext validationContext) {
-        modelExtensionsService.findExtensionsValidators(modelType)
+    private void validateModelExtensions(String modelType, byte[] modelContent, ValidationContext validationContext) {
+        modelExtensionsService
+            .findExtensionsValidators(modelType)
             .forEach(modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
-
     }
 
     private List<ModelValidationError> getModelExtensionsValidationErrors(
         String modelType,
         byte[] modelContent,
-        ValidationContext validationContext) {
-        return modelExtensionsService.findExtensionsValidators(modelType)
+        ValidationContext validationContext
+    ) {
+        return modelExtensionsService
+            .findExtensionsValidators(modelType)
             .stream()
             .map(modelValidator -> modelValidator.validateAndReturnErrors(modelContent, validationContext))
-            .flatMap(Collection::stream).collect(Collectors.toList());
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     }
 
     private ModelType findModelType(Model model) {
@@ -684,10 +691,12 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public List<ModelValidationError> getModelExtensionValidationErrors(Model model,
-            ValidationContext validationContext) {
-
-        return getModelExtensionsFileContent(model).filter(Objects::nonNull)
+    public List<ModelValidationError> getModelExtensionValidationErrors(
+        Model model,
+        ValidationContext validationContext
+    ) {
+        return getModelExtensionsFileContent(model)
+            .filter(Objects::nonNull)
             .map(extensionsFileContent ->
                 getModelExtensionsValidationErrors(
                     model.getType(),

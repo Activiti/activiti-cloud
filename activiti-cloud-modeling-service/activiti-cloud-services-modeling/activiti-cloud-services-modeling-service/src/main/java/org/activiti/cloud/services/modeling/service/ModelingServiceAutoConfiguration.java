@@ -76,25 +76,28 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public ModelService modelService(ModelRepository modelRepository,
-                                     ModelTypeService modelTypeService,
-                                     ModelContentService modelContentService,
-                                     ModelExtensionsService modelExtensionsService,
-                                     JsonConverter<Model> jsonConverter,
-                                     ProcessModelContentConverter processModelContentConverter,
-                                     Set<ModelUpdateListener> modelUpdateListeners,
-                                     FileMagicNumberValidator fileContentValidator,
-                                     FileContentSanitizer fileContentSanitizer) {
-        return new ModelServiceImpl(modelRepository,
-                                    modelTypeService,
-                                    modelContentService,
-                                    modelExtensionsService,
-                                    jsonConverter,
-                                    processModelContentConverter,
-                                    modelUpdateListeners,
-                                    fileContentValidator,
-                                    fileContentSanitizer);
-
+    public ModelService modelService(
+        ModelRepository modelRepository,
+        ModelTypeService modelTypeService,
+        ModelContentService modelContentService,
+        ModelExtensionsService modelExtensionsService,
+        JsonConverter<Model> jsonConverter,
+        ProcessModelContentConverter processModelContentConverter,
+        Set<ModelUpdateListener> modelUpdateListeners,
+        FileMagicNumberValidator fileContentValidator,
+        FileContentSanitizer fileContentSanitizer
+    ) {
+        return new ModelServiceImpl(
+            modelRepository,
+            modelTypeService,
+            modelContentService,
+            modelExtensionsService,
+            jsonConverter,
+            processModelContentConverter,
+            modelUpdateListeners,
+            fileContentValidator,
+            fileContentSanitizer
+        );
     }
 
     @Bean
