@@ -594,24 +594,22 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    private void validateModelContentAndUsage(Model model,
-                                              byte[] modelContent,
-                                              ValidationContext validationContext) {
-        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction =
-            validator -> validator.validateModelContent(
-                model,
-                modelContent,
-                validationContext,
-                true);
+    private void validateModelContentAndUsage(Model model, byte[] modelContent, ValidationContext validationContext) {
+        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction = validator ->
+            validator.validateModelContent(model, modelContent, validationContext, true);
 
         validate(model.getType(), validationFunction);
     }
 
-    private void validate(String model,
-                          Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction) {
-        List<ModelValidationError> validationErrors = modelContentService.findModelValidators(model)
+    private void validate(
+        String model,
+        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction
+    ) {
+        List<ModelValidationError> validationErrors = modelContentService
+            .findModelValidators(model)
             .stream()
-            .map(validationFunction).flatMap(Collection::stream)
+            .map(validationFunction)
+            .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
         if (!validationErrors.isEmpty()) {
@@ -620,13 +618,9 @@ public class ModelServiceImpl implements ModelService {
         }
     }
 
-    private void validateModelContent(Model model,
-                                      byte[] modelContent,
-                                      ValidationContext validationContext) {
-        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction =
-            modelValidator -> modelValidator.validateModelContent(
-                modelContent,
-                validationContext);
+    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
+        Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction = modelValidator ->
+            modelValidator.validateModelContent(modelContent, validationContext);
 
         validate(model.getType(), validationFunction);
     }
