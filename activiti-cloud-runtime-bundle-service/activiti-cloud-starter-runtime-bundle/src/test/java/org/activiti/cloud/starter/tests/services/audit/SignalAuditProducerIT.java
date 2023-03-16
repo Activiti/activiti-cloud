@@ -60,11 +60,13 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles({AuditProducerIT.AUDIT_PRODUCER_IT})
+@ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @DirtiesContext
 @Import(TestChannelBinderConfiguration.class)
 public class SignalAuditProducerIT {
@@ -285,5 +287,4 @@ public class SignalAuditProducerIT {
                     );
             });
     }
-
 }
