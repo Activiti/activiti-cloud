@@ -29,9 +29,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,7 +45,6 @@ import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,8 +85,6 @@ public class SignalAuditProducerIT {
 
     @Autowired
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
-
-    private Map<String, String> processDefinitionIds = new HashMap<>();
 
     @DynamicPropertySource
     public static void signalProperties(DynamicPropertyRegistry registry) {
@@ -154,71 +149,15 @@ public class SignalAuditProducerIT {
                 assertThat(streamHandler.getReceivedHeaders()).containsKeys(ALL_REQUIRED_HEADERS);
                 List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getLatestReceivedEvents();
 
-            List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
-                .processDefinitionKey("processWithSignalStart1")
-                .list();
-
-            String startedBySignalProcessInstanceId = Optional
-                .ofNullable(runtimeService.createProcessInstanceQuery()
-                    .processDefinitionKey("processWithSignalStart1")
-                    .singleResult()
-                    .getId())
-                .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
-
-            List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
-                .stream()
-                .filter(CloudBPMNSignalReceivedEvent.class::isInstance)
-                .map(CloudBPMNSignalReceivedEvent.class::cast)
-                .collect(Collectors.toList());
-
-            assertThat(signalReceivedEvents)
-                .filteredOn(event -> SIGNAL_RECEIVED.name().equals(event.getEventType().name()))
-                .extracting(CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionKey,
-                    CloudRuntimeEvent::getProcessDefinitionVersion,
-                    event -> event.getEntity().getProcessDefinitionId(),
-                    event -> event.getEntity().getProcessInstanceId(),
-                    event -> event.getEntity().getElementId(),
-                    event -> event.getEntity().getSignalPayload().getName(),
-                    event -> event.getEntity().getSignalPayload().getVariables()
-                )
-                .contains(
-                    tuple(SIGNAL_RECEIVED,
-                        processWithSignalStart.getId(),
-                        startedBySignalProcessInstanceId,
-                        processWithSignalStart.getKey(),
-                        processWithSignalStart.getVersion(),
-                        processWithSignalStart.getId(),
-                        startedBySignalProcessInstanceId,
-                        "theStart",
-                        "Test",
-                        Collections.singletonMap("signalVar", "timeToGo")
-                    ),
-                    tuple(SIGNAL_RECEIVED,
-                        startProcessEntity1.getBody().getProcessDefinitionId(),
-                        startProcessEntity1.getBody().getId(),
-                        startProcessEntity1.getBody().getProcessDefinitionKey(),
-                        1, // version
-                        startProcessEntity1.getBody().getProcessDefinitionId(),
-                        startProcessEntity1.getBody().getId(),
-                        "signalintermediatecatchevent1",
-                        "Test",
-                        Collections.singletonMap("signalVar", "timeToGo")
-                    ),
-                    tuple(SIGNAL_RECEIVED,
-                        startProcessEntity2.getBody().getProcessDefinitionId(),
-                        startProcessEntity2.getBody().getId(),
-                        startProcessEntity2.getBody().getProcessDefinitionKey(),
-                        1, // version
-                        startProcessEntity2.getBody().getProcessDefinitionId(),
-                        startProcessEntity2.getBody().getId(),
-                        "signalintermediatecatchevent1",
-                        "Test",
-                        Collections.singletonMap("signalVar", "timeToGo")
+                String startedBySignalProcessInstanceId = Optional
+                    .ofNullable(
+                        runtimeService
+                            .createProcessInstanceQuery()
+                            .processDefinitionKey("processWithSignalStart1")
+                            .singleResult()
+                            .getId()
                     )
-                    .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1")));
+                    .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
 
                 List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
                     .stream()
