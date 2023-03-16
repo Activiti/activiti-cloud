@@ -50,9 +50,9 @@ import org.springframework.test.context.TestPropertySource;
     properties = { "spring.activiti.asyncExecutorActivate=true" }
 )
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
-                      initializers = {RabbitMQContainerApplicationInitializer.class,
-                          KeycloakContainerApplicationInitializer.class}
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class },
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
 @DirtiesContext
 public class MessageProducerCommandContextCloseListenerIT {

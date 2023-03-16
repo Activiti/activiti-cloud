@@ -103,9 +103,10 @@ import org.springframework.transaction.support.TransactionTemplate;
     }
 )
 @DirtiesContext
-@ContextConfiguration(classes = {RuntimeITConfiguration.class,
-    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { RuntimeITConfiguration.class, JobExecutorIT.JobExecutorITProcessEngineConfigurer.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 public class JobExecutorIT {
 
