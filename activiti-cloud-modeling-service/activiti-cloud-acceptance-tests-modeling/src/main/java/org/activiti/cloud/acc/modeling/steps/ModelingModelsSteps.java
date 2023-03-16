@@ -28,6 +28,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJ
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.IanaLinkRelations.SELF;
@@ -233,7 +234,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
                     try {
                         return StreamUtils.copyToString(response.body().asInputStream(), StandardCharsets.UTF_8);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        fail("failed to read response", e);
+                        return "";
                     }
                 })
                 .findFirst()
