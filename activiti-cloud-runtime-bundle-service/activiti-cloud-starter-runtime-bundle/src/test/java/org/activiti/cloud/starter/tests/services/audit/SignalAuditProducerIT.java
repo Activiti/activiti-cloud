@@ -218,7 +218,7 @@ public class SignalAuditProducerIT {
                         "Test",
                         Collections.singletonMap("signalVar", "timeToGo")
                     )
-                    .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1"));
+                    .orElseThrow(() -> new NoSuchElementException("processWithSignalStart1")));
 
                 List<CloudBPMNSignalReceivedEvent> signalReceivedEvents = receivedEvents
                     .stream()

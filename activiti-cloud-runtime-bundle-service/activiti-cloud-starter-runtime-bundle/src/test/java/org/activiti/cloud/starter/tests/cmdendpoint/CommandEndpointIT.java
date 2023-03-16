@@ -68,12 +68,16 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@Import({CommandEndPointITStreamHandler.class,
-    ProcessInstanceRestTemplate.class,
-    TaskRestTemplate.class,
-    MessageClientStreamConfiguration.class,
-    TestChannelBinderConfiguration.class})
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(
+    {
+        CommandEndPointITStreamHandler.class,
+        ProcessInstanceRestTemplate.class,
+        TaskRestTemplate.class,
+        MessageClientStreamConfiguration.class,
+        TestChannelBinderConfiguration.class,
+    }
+)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class CommandEndpointIT {
 
     @Autowired

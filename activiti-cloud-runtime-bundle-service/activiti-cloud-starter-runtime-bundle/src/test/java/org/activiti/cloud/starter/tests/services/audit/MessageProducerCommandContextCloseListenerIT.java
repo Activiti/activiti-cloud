@@ -47,7 +47,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles({AuditProducerIT.AUDIT_PRODUCER_IT})
+@ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(
@@ -70,7 +70,6 @@ public class MessageProducerCommandContextCloseListenerIT {
     public static void asyncProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.activiti.asyncExecutorActivate", () -> true);
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:msg-producer-test");
-
     }
 
     @BeforeEach
@@ -129,12 +128,12 @@ public class MessageProducerCommandContextCloseListenerIT {
             .when(subject)
             .closed(any(CommandContext.class));
 
-
         // when
         Throwable thrown = catchThrowable(() -> {
-            ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionKey(processDefinitionKey)
-                          .start();
+            ProcessInstance processInstance = runtimeService
+                .createProcessInstanceBuilder()
+                .processDefinitionKey(processDefinitionKey)
+                .start();
         });
 
         // then

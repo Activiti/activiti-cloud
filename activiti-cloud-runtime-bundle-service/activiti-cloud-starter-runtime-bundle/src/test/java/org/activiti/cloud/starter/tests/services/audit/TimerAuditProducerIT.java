@@ -65,9 +65,10 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT, TimerAuditProducerIT.TIMER_AUDIT_PRODUCER_IT })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class,
-    TimerAuditProducerIT.JobExecutorITProcessEngineConfigurer.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class, TimerAuditProducerIT.JobExecutorITProcessEngineConfigurer.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
 public class TimerAuditProducerIT {

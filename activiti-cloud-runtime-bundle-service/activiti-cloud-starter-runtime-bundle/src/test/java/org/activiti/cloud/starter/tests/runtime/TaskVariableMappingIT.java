@@ -49,8 +49,10 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(classes = {RuntimeITConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { RuntimeITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 public class TaskVariableMappingIT {
 
