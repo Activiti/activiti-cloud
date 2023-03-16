@@ -38,62 +38,60 @@ import org.slf4j.LoggerFactory;
  */
 public class ProcessModelValidator implements ModelContentValidator {
 
-  private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
+    private final Logger log = LoggerFactory.getLogger(ProcessModelValidator.class);
 
-  private final ProcessModelType processModelType;
+    private final ProcessModelType processModelType;
 
-  private final Set<BpmnCommonModelValidator> bpmnCommonModelValidators;
+    private final Set<BpmnCommonModelValidator> bpmnCommonModelValidators;
 
-  private final ProcessModelContentConverter processModelContentConverter;
+    private final ProcessModelContentConverter processModelContentConverter;
 
-  public ProcessModelValidator(ProcessModelType processModelType,
-                               Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
-                               ProcessModelContentConverter processModelContentConverter) {
-    this.processModelType = processModelType;
-    this.bpmnCommonModelValidators = bpmnCommonModelValidators;
-    this.processModelContentConverter = processModelContentConverter;
-  }
-
-  @Override
-  public void validate(byte[] bytes,
-                       ValidationContext validationContext) {
-
-    List<ModelValidationError> validationErrors = getModelValidationErrors(bytes,
-                                                                           validationContext);
-
-    if (!validationErrors.isEmpty()) {
-      String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-      log.debug(messageError);
-      throw new SemanticModelValidationException(messageError,
-                                                 validationErrors);
+    public ProcessModelValidator(
+        ProcessModelType processModelType,
+        Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
+        this.processModelType = processModelType;
+        this.bpmnCommonModelValidators = bpmnCommonModelValidators;
+        this.processModelContentConverter = processModelContentConverter;
     }
-  }
 
-  private List<ModelValidationError> getModelValidationErrors(byte[] bytes, ValidationContext validationContext) {
-    BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
+    @Override
+    public void validate(byte[] bytes, ValidationContext validationContext) {
+        List<ModelValidationError> validationErrors = getModelValidationErrors(bytes, validationContext);
 
-    List<ModelValidationError> validationErrors = bpmnCommonModelValidators
-        .stream()
-        .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
-                                                                               validationContext))
-        .collect(Collectors.toList());
-    return validationErrors;
-  }
+        if (!validationErrors.isEmpty()) {
+            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
+            log.debug(messageError);
+            throw new SemanticModelValidationException(messageError, validationErrors);
+        }
+    }
 
-  @Override
-  public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                  ValidationContext validationContext) {
-    return getModelValidationErrors(modelContent,
-                                    validationContext);
-  }
+    private List<ModelValidationError> getModelValidationErrors(byte[] bytes, ValidationContext validationContext) {
+        BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
-  @Override
-  public ModelType getHandledModelType() {
-    return processModelType;
-  }
+        List<ModelValidationError> validationErrors = bpmnCommonModelValidators
+            .stream()
+            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel, validationContext))
+            .collect(Collectors.toList());
+        return validationErrors;
+    }
 
-  @Override
-  public String getHandledContentType() {
-    return CONTENT_TYPE_XML;
-  }
+    @Override
+    public Collection<ModelValidationError> validateAndReturnErrors(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
+        return getModelValidationErrors(modelContent, validationContext);
+    }
+
+    @Override
+    public ModelType getHandledModelType() {
+        return processModelType;
+    }
+
+    @Override
+    public String getHandledContentType() {
+        return CONTENT_TYPE_XML;
+    }
 }

@@ -21,8 +21,6 @@ import static org.apache.commons.lang3.StringUtils.removeStart;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -30,6 +28,7 @@ import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
