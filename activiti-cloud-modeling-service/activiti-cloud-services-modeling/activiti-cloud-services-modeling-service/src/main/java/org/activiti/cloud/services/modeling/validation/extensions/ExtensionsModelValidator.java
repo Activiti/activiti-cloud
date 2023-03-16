@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.activiti.cloud.api.error.ModelingException;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -41,8 +40,10 @@ public class ExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
     }
 
     @Override
-    public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                 ValidationContext validationContext) {
+    public Collection<ModelingException> validateAndReturnErrors(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
         return null;
     }
 
