@@ -102,7 +102,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -133,8 +133,8 @@ public class AuditServiceIT {
     @Autowired
     private MyProducer producer;
 
-    @BeforeEach
-    public void setUp() {
+    @AfterEach
+    public void cleanUp() {
         repository.deleteAll();
     }
 
