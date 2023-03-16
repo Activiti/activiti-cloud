@@ -82,16 +82,20 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelingException> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
         @Override
-        public void validate(Model model,
-                             byte[] modelContent,
-                             ValidationContext validationContext,
-                             boolean validateUsage) {
+        public void validate(
+            Model model,
+            byte[] modelContent,
+            ValidationContext validationContext,
+            boolean validateUsage
+        ) {
             LOGGER.info("usage of json");
         }
 
@@ -113,8 +117,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelingException> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
@@ -131,8 +137,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelingException> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
@@ -154,8 +162,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelingException> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelingException> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
