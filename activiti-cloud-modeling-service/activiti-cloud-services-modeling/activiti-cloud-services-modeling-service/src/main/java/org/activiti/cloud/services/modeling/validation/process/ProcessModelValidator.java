@@ -28,7 +28,6 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,43 +45,29 @@ public class ProcessModelValidator implements ModelContentValidator {
 
     private final ProcessModelContentConverter processModelContentConverter;
 
-    public ProcessModelValidator(
-        ProcessModelType processModelType,
-        Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
-        ProcessModelContentConverter processModelContentConverter
-    ) {
+    public ProcessModelValidator(ProcessModelType processModelType,
+                                 Set<BpmnCommonModelValidator> bpmnCommonModelValidators,
+                                 ProcessModelContentConverter processModelContentConverter) {
         this.processModelType = processModelType;
         this.bpmnCommonModelValidators = bpmnCommonModelValidators;
         this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
-    public void validate(byte[] bytes, ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = getModelValidationErrors(bytes, validationContext);
+    public Collection<ModelValidationError> validate(byte[] bytes,
+                                                     ValidationContext validationContext) {
 
-        if (!validationErrors.isEmpty()) {
-            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-            log.debug(messageError);
-            throw new SemanticModelValidationException(messageError, validationErrors);
-        }
-    }
-
-    private List<ModelValidationError> getModelValidationErrors(byte[] bytes, ValidationContext validationContext) {
         BpmnModel bpmnModel = processModelContentConverter.convertToBpmnModel(bytes);
 
         List<ModelValidationError> validationErrors = bpmnCommonModelValidators
             .stream()
-            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel, validationContext))
+            .flatMap(bpmnCommonModelValidator -> bpmnCommonModelValidator.validate(bpmnModel,
+                                                                                   validationContext))
             .collect(Collectors.toList());
-        return validationErrors;
-    }
 
-    @Override
-    public Collection<ModelValidationError> validateAndReturnErrors(
-        byte[] modelContent,
-        ValidationContext validationContext
-    ) {
-        return getModelValidationErrors(modelContent, validationContext);
+        String messageError = "Semantic process model validation errors encountered: " + validationErrors;
+        log.debug(messageError);
+        return validationErrors;
     }
 
     @Override

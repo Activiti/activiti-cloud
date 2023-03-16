@@ -50,12 +50,11 @@ class ProcessModelValidatorTest {
     private ProcessModelContentConverter processModelContentConverter;
 
     @Spy
-    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators = new HashSet<>(
-        Arrays.asList(
-            new BpmnModelValidator(),
-            new BpmnModelUniqueIdValidator(processModelType, processModelContentConverter)
-        )
-    );
+    private Set<BpmnCommonModelValidator> bpmnCommonModelValidators =
+        new HashSet<>(Arrays.asList(new BpmnModelValidator(),
+                                    new BpmnModelUniqueIdValidator(
+                                        processModelType,
+                                        processModelContentConverter)));
 
     @Test
     void should_validateWithNoErrors_when_categoryIsSet() {
@@ -63,11 +62,12 @@ class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("test-category");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
 
         Throwable exception = catchThrowable(() ->
-            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
-        );
+                                                 processModelValidator.validate(bytesFromModel,
+                                                                                new ProjectValidationContext()));
 
         assertThat(exception).isNull();
     }
@@ -78,12 +78,18 @@ class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("test-category");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+    @Test
+    void should_validateWithAndReturnNoErrors_when_categoryIsSet() {
+        BpmnModel bpmnModel = new BpmnModel();
+        byte[] bytesFromModel = bpmnModel.toString().getBytes();
+        bpmnModel.setTargetNamespace("test-category");
 
-        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validateAndReturnErrors(
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
+
+        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validate(
             bytesFromModel,
-            new ProjectValidationContext()
-        );
+            new ProjectValidationContext());
 
         assertThat(modelValidationErrors).isEmpty();
     }
@@ -94,11 +100,12 @@ class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
 
         Throwable exception = catchThrowable(() ->
-            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
-        );
+                                                 processModelValidator.validate(bytesFromModel,
+                                                                                new ProjectValidationContext()));
 
         assertThat(exception).isNull();
     }
@@ -109,12 +116,12 @@ class ProcessModelValidatorTest {
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
         bpmnModel.setTargetNamespace("");
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
 
-        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validateAndReturnErrors(
+        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validate(
             bytesFromModel,
-            new ProjectValidationContext()
-        );
+            new ProjectValidationContext());
 
         assertThat(modelValidationErrors).isEmpty();
     }
@@ -124,15 +131,16 @@ class ProcessModelValidatorTest {
         BpmnModel bpmnModel = new BpmnModel();
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
 
-        Throwable exception = catchThrowable(() ->
-            processModelValidator.validate(bytesFromModel, new ProjectValidationContext())
-        );
+        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validate(bytesFromModel,
+                                                                                                new ProjectValidationContext());
 
-        assertThat(exception)
-            .isInstanceOf(SemanticModelValidationException.class)
-            .hasMessage("Semantic process model validation errors encountered: [The process category needs to be set]");
+        assertThat(modelValidationErrors).hasSize(1);
+        ModelValidationError validationError = modelValidationErrors.iterator().next();
+        assertThat(validationError.getProblem()).isEqualTo("Missing process category");
+        assertThat(validationError.getDescription()).isEqualTo("The process category needs to be set");
     }
 
     @Test
@@ -140,23 +148,17 @@ class ProcessModelValidatorTest {
         BpmnModel bpmnModel = new BpmnModel();
         byte[] bytesFromModel = bpmnModel.toString().getBytes();
 
-        given(processModelContentConverter.convertToBpmnModel(bytesFromModel)).willReturn(bpmnModel);
+        given(processModelContentConverter.convertToBpmnModel(bytesFromModel))
+            .willReturn(bpmnModel);
 
-        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validateAndReturnErrors(
+        Collection<ModelValidationError> modelValidationErrors = processModelValidator.validate(
             bytesFromModel,
-            new ProjectValidationContext()
-        );
+            new ProjectValidationContext());
 
         assertThat(modelValidationErrors)
             .hasSize(1)
             .element(0)
-            .has(
-                new Condition<>(
-                    error ->
-                        "The process category needs to be set".equals(error.getDescription()) &&
-                        "Missing process category".equals(error.getProblem()),
-                    "Error assertions"
-                )
-            );
+            .has(new Condition<>(error -> "The process category needs to be set".equals(error.getDescription())
+                && "Missing process category".equals(error.getProblem()), "Error assertions"));
     }
 }

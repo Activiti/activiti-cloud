@@ -78,15 +78,8 @@ public class GenericModelsConfiguration {
 
     ModelContentValidator genericJsonContentValidator = new ModelContentValidator() {
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
-            LOGGER.info("validate generic json content");
-        }
-
-        @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validate(byte[] modelFile,
+                                                         ValidationContext validationContext) {
             LOGGER.info("validate generic json content");
             return Collections.emptyList();
         }
@@ -114,15 +107,8 @@ public class GenericModelsConfiguration {
 
     private ModelExtensionsValidator genericJsonExtensionsValidator = new ModelExtensionsValidator() {
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
-            LOGGER.info("validate generic json extensions");
-        }
-
-        @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validate(byte[] modelFile,
+                                                         ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
             return Collections.emptyList();
         }
@@ -135,16 +121,9 @@ public class GenericModelsConfiguration {
 
     ModelContentValidator genericNonJsonContentValidator = new ModelContentValidator() {
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
+        public Collection<ModelValidationError> validate(byte[] modelFile,
+                                                         ValidationContext validationContext) {
             LOGGER.info("validate generic non json content");
-        }
-
-        @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
-            LOGGER.info("validate generic json extensions");
             return Collections.emptyList();
         }
 
@@ -161,15 +140,8 @@ public class GenericModelsConfiguration {
 
     private ModelExtensionsValidator genericNonJsonExtensionsValidator = new ModelExtensionsValidator() {
         @Override
-        public void validate(byte[] modelFile, ValidationContext validationContext) {
-            LOGGER.info("validate generic non json extensions");
-        }
-
-        @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(
-            byte[] modelContent,
-            ValidationContext validationContext
-        ) {
+        public Collection<ModelValidationError> validate(byte[] modelFile,
+                                                         ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
             return Collections.emptyList();
         }

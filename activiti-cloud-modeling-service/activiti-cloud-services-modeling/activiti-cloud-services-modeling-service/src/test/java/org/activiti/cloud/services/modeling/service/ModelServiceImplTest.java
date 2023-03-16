@@ -340,7 +340,7 @@ public class ModelServiceImplTest {
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
         doReturn(validationErrors)
             .when(modelContentValidator)
-            .validateAndReturnErrors(any(), any(), any(), anyBoolean());
+            .validate(any(), any(), any(), anyBoolean());
 
         assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
             .isNotEmpty()
@@ -374,9 +374,11 @@ public class ModelServiceImplTest {
             new ModelValidationError("Problem 2", "Problem Description 2")
         );
 
-        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
-            .thenReturn(List.of(modelExtensionsValidator));
-        doReturn(validationErrors).when(modelExtensionsValidator).validateAndReturnErrors(any(), any());
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(
+            modelExtensionsValidator));
+        doReturn(validationErrors)
+            .when(modelExtensionsValidator)
+            .validate(any(), any());
 
         assertThat(modelService.getModelExtensionValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
             .isNotEmpty()
