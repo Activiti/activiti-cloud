@@ -51,8 +51,9 @@ import org.springframework.test.context.TestPropertySource;
     properties = { "spring.activiti.asyncExecutorActivate=true" }
 )
 @TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
-                      initializers = {KeycloakContainerApplicationInitializer.class}
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
