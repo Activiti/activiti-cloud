@@ -61,7 +61,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
         this.processEngineEventsAggregator = processEngineEventsAggregator;
     }
 
-    @Retryable(value = ActivitiOptimisticLockingException.class,
+    @Retryable(
+        value = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.error.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:0}")
     )

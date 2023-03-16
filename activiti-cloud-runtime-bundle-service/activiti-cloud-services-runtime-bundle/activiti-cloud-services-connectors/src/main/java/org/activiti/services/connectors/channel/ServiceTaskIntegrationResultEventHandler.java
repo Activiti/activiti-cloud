@@ -64,7 +64,8 @@ public class ServiceTaskIntegrationResultEventHandler {
         this.variablesPropagator = variablesPropagator;
     }
 
-    @Retryable(value = ActivitiOptimisticLockingException.class,
+    @Retryable(
+        value = ActivitiOptimisticLockingException.class,
         maxAttemptsExpression = "${activiti.cloud.integration.result.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.result.retry.backoff.delay:0}")
     )
