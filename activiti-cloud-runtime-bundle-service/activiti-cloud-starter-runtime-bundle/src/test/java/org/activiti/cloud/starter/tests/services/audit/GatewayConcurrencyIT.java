@@ -60,12 +60,15 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({HelperConfiguration.class,
-    ServiceTaskConsumerHandler.class,
-    IntegrationResultSender.class,
-    TestChannelBinderConfiguration.class})
-@ContextConfiguration(
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(
+    {
+        HelperConfiguration.class,
+        ServiceTaskConsumerHandler.class,
+        IntegrationResultSender.class,
+        TestChannelBinderConfiguration.class,
+    }
+)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class GatewayConcurrencyIT {
 
     private static final String PROCESS_ID = "gateway_concurrency";
@@ -92,7 +95,6 @@ public class GatewayConcurrencyIT {
 
     private ExecutorService executorService;
 
-
     @BeforeEach
     public void setUp() {
         identityTokenProducer.withTestUser("testuser");
@@ -100,14 +102,17 @@ public class GatewayConcurrencyIT {
     }
 
     @AfterEach
-    public void cleanUp(){
+    public void cleanUp() {
         executorService.shutdown();
     }
 
     @Test
     public void shouldExecuteWithoutConcurrencyException() throws IOException, InterruptedException {
-        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(PROCESS_ID,
-            Map.of("signal", SIGNAL_NAME),null);
+        ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
+            PROCESS_ID,
+            Map.of("signal", SIGNAL_NAME),
+            null
+        );
         final String processInstanceId = processInstance.getBody().getId();
 
         IntegrationRequest integrationRequest = getIntegrationRequest();
@@ -128,13 +133,15 @@ public class GatewayConcurrencyIT {
 
         executorService.invokeAll(tasks);
 
+        await()
+            .atMost(Duration.ofMinutes(10))
+            .untilAsserted(() -> {
+                ResponseEntity<CloudProcessInstance> completedProcessInstance = processInstanceRestTemplate.getProcessInstance(
+                    processInstanceId
+                );
 
-        await().atMost(Duration.ofMinutes(10)).untilAsserted(() -> {
-            ResponseEntity<CloudProcessInstance> completedProcessInstance = processInstanceRestTemplate.getProcessInstance(processInstanceId);
-
-            assertThat(completedProcessInstance.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.COMPLETED);
-        });
-
+                assertThat(completedProcessInstance.getBody().getStatus()).isEqualTo(ProcessInstanceStatus.COMPLETED);
+            });
     }
 
     private IntegrationRequest getIntegrationRequest() throws IOException {
