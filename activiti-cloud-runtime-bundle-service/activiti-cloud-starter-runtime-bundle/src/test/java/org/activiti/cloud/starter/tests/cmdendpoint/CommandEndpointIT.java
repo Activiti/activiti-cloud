@@ -61,7 +61,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -69,17 +68,12 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(CommandEndPointITStreamHandler.COMMAND_ENDPOINT_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
-@Import(
-    {
-        CommandEndPointITStreamHandler.class,
-        ProcessInstanceRestTemplate.class,
-        TaskRestTemplate.class,
-        MessageClientStreamConfiguration.class,
-        TestChannelBinderConfiguration.class,
-    }
-)
-@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Import({CommandEndPointITStreamHandler.class,
+    ProcessInstanceRestTemplate.class,
+    TaskRestTemplate.class,
+    MessageClientStreamConfiguration.class,
+    TestChannelBinderConfiguration.class})
+@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
 public class CommandEndpointIT {
 
     @Autowired

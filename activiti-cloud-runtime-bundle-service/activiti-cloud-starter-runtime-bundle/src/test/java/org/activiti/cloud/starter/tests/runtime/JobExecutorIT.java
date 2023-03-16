@@ -85,8 +85,11 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -94,20 +97,13 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ActiveProfiles(JobExecutorIT.JOB_EXECUTOR_IT)
-@TestPropertySource("classpath:application-test.properties")
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        "spring.activiti.asyncExecutorActivate=true",
-        "spring.cloud.stream.bindings.asyncExecutorJobsInput.consumer.max-attempts=4", // customized
-    }
-)
-@DirtiesContext
-@ContextConfiguration(
-    classes = { RuntimeITConfiguration.class, JobExecutorIT.JobExecutorITProcessEngineConfigurer.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(value = {"classpath:application-test.properties", "classpath:async-executor.properties"})
+@ContextConfiguration(classes = {RuntimeITConfiguration.class,
+    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
@@ -138,7 +134,7 @@ public class JobExecutorIT {
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @SpyBean
+    @SpyBean()
     private JobMessageProducer jobMessageProducer;
 
     private ProcessEngineConfiguration processEngineConfiguration;
@@ -180,6 +176,12 @@ public class JobExecutorIT {
                 }
             };
         }
+    }
+
+    @DynamicPropertySource
+    public static void signalProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.activiti.process-definition-location-prefix", () -> "classpath*:/invalid-processes/");
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:test-never-fail");
     }
 
     @BeforeEach

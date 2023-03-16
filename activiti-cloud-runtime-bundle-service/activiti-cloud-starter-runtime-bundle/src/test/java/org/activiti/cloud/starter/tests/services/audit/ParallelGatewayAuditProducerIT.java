@@ -39,7 +39,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -47,11 +46,8 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
-@ContextConfiguration(
-    classes = ServicesAuditITConfiguration.class,
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
+    initializers = {KeycloakContainerApplicationInitializer.class})
 @Import(TestChannelBinderConfiguration.class)
 public class ParallelGatewayAuditProducerIT {
 

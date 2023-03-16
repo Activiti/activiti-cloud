@@ -64,7 +64,6 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -72,11 +71,8 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(ConnectorAuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(
-    classes = { ServicesAuditITConfiguration.class },
-    initializers = { KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(classes = {ServicesAuditITConfiguration.class},
+    initializers = {KeycloakContainerApplicationInitializer.class})
 @Import(TestChannelBinderConfiguration.class)
 public class ConnectorAuditProducerIT {
 
