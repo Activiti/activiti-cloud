@@ -28,7 +28,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
@@ -49,9 +48,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -59,8 +58,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class GenericNonJsonModelTypeValidationControllerIT {
 

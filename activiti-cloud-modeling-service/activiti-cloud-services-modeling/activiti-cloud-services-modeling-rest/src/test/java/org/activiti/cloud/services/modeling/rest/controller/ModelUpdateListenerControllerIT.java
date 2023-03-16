@@ -32,6 +32,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -48,6 +50,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
 @WithMockModelerUser
 public class ModelUpdateListenerControllerIT {
@@ -72,20 +75,25 @@ public class ModelUpdateListenerControllerIT {
 
     private MockMvc mockMvc;
 
+    private Model genericJsonModel;
+
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(context).build();
+        genericJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        modelRepository.deleteModel(genericJsonModel);
     }
 
     @Test
     public void should_callUpdateListenerMatchingWithModelType_when_updatingModelContent() throws Exception {
         String name = "updated-model-name";
-        Model genericJsonModel = modelRepository.createModel(
-            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
-        );
-
         Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
 
         mockMvc

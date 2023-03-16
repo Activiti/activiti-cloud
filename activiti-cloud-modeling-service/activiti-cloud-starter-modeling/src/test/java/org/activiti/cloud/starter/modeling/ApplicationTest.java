@@ -17,10 +17,8 @@ package org.activiti.cloud.starter.modeling;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(classes = Application.class)
-@DirtiesContext
 public class ApplicationTest {
 
     @Test

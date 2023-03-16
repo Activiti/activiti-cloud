@@ -68,6 +68,7 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -85,7 +85,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext
 @WithMockModelerUser
 @Transactional
 public class ProjectControllerIT {
@@ -116,6 +115,10 @@ public class ProjectControllerIT {
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @AfterEach
+    public void cleanUp() {
         modelJpaRepository.deleteAll();
         ((JpaRepository) projectRepository).deleteAll();
     }

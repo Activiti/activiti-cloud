@@ -65,14 +65,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @EnableAutoConfiguration(exclude = { WebMvcAutoConfiguration.class })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 public class QueryBPMNActivityIT {

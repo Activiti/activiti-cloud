@@ -130,10 +130,7 @@ public class MessageProducerCommandContextCloseListenerIT {
 
         // when
         Throwable thrown = catchThrowable(() -> {
-            ProcessInstance processInstance = runtimeService
-                .createProcessInstanceBuilder()
-                .processDefinitionKey(processDefinitionKey)
-                .start();
+            runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start();
         });
 
         // then
