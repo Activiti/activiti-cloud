@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.rest.assembler;
 
+import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.io.IOException;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
@@ -55,11 +62,11 @@ public class ProjectRepresentationModelAssembler
             return linkTo(
                 ProjectController.class,
                 ProjectController.class.getMethod(
-                        "exportProject",
-                        HttpServletResponse.class,
-                        String.class,
-                        boolean.class
-                    ),
+                    "exportProject",
+                    HttpServletResponse.class,
+                    String.class,
+                    boolean.class
+                ),
                 null,
                 projectId,
                 true
