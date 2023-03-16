@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import org.activiti.cloud.modeling.api.JsonModelType;
@@ -41,7 +40,6 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
@@ -69,22 +67,16 @@ public class GenericJsonModelTypeValidationControllerIT {
     private WebApplicationContext context;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
     private ModelRepository modelRepository;
 
     @SpyBean(name = "genericJsonExtensionsValidator")
-    ModelExtensionsValidator genericJsonExtensionsValidator;
+    private ModelExtensionsValidator genericJsonExtensionsValidator;
 
     @SpyBean(name = "genericJsonContentValidator")
-    ModelContentValidator genericJsonContentValidator;
+    private ModelContentValidator genericJsonContentValidator;
 
     @Autowired
-    JsonModelType genericJsonModelType;
+    private JsonModelType genericJsonModelType;
 
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
@@ -99,7 +91,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     private void validateInvalidContent() {
         SemanticModelValidationException exception = new SemanticModelValidationException(
-            Collections.singletonList(new ModelValidationError("Content invalid", "The content is invalid!!"))
+            Collections.singletonList(new ModelValidationError("Content invalid", "The content is" + " invalid" + "!!"))
         );
 
         doThrow(exception)
@@ -109,7 +101,9 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     private void validateInvalidExtensions() {
         SemanticModelValidationException exception = new SemanticModelValidationException(
-            Collections.singletonList(new ModelValidationError("Extensions invalid", "The extensions are invalid!!"))
+            Collections.singletonList(
+                new ModelValidationError("Extensions " + "invalid", "The extensions" + " are " + "invalid" + "!!")
+            )
         );
 
         doThrow(exception)
@@ -118,7 +112,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_callGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingModelContentJsonContentType()
+    public void should_callGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingModelContentJsonContentType()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
@@ -141,7 +135,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_callGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingModelContentTextContentType()
+    public void should_callGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingModelContentTextContentType()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
@@ -164,7 +158,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwExceptionAndCallGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingInvalidModelContent()
+    public void should_throwExceptionAndCallGenericJsonContentValidatorAndNotCallGenericJsonExtensionsValidator_when_validatingInvalidModelContent()
         throws IOException {
         this.validateInvalidContent();
 
@@ -192,7 +186,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_notCallGenericJsonContentValidatorAndCallGenericJsonExtensionsValidator_when_validatingModelValidExtensions()
+    public void should_notCallGenericJsonContentValidatorAndCallGenericJsonExtensionsValidator_when_validatingModelValidExtensions()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
@@ -213,7 +207,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelInvalidExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelInvalidExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-extensions.json");
 
         assertThatResponse(
@@ -236,7 +230,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelInvalidNameExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelInvalidNameExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-name-extensions.json");
 
         assertThatResponse(
@@ -259,7 +253,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelMismatchNameExtensions()
+    public void should_throwSemanticValidationException_when_validatingModelMismatchNameExtensions()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-mismatch-name-extensions.json");
 
@@ -283,7 +277,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelLongNameExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelLongNameExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-long-name-extensions.json");
 
         assertThatResponse(
@@ -296,7 +290,8 @@ public class GenericJsonModelTypeValidationControllerIT {
             .isSemanticValidationException()
             .hasValidationErrors(
                 "expected maxLength: 26, actual: 35",
-                "string [alfresco-adf-app-deployment-develop] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$"
+                "string [alfresco-adf-app-deployment-develop] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])" +
+                "?$"
             );
 
         verify(genericJsonContentValidator, times(0)).validateModelContent(any(), any());
@@ -309,7 +304,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelEmptyNameExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelEmptyNameExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-empty-name-extensions.json");
 
         assertThatResponse(
@@ -335,7 +330,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
+    public void should_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-json-extensions.json");
 
         assertThatResponse(
@@ -360,7 +355,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelInvalidTypeExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelInvalidTypeExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-type-extensions.json");
 
         assertThatResponse(
@@ -383,7 +378,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwException_when_validatingModelInvalidSemanticExtensions() throws IOException {
+    public void should_throwException_when_validatingModelInvalidSemanticExtensions() throws IOException {
         this.validateInvalidExtensions();
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
@@ -411,7 +406,7 @@ public class GenericJsonModelTypeValidationControllerIT {
     public void should_throwExceptionAndCallGenericJsonContentUsageValidatorA_when_validatingInvalidModelContent()
         throws IOException {
         SemanticModelValidationException exception = new SemanticModelValidationException(
-            Collections.singletonList(new ModelValidationError("Content invalid", "The content is invalid!!"))
+            Collections.singletonList(new ModelValidationError("Content invalid", "The content is " + "invalid!!"))
         );
 
         doThrow(exception)

@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.everit.json.schema.Schema;
@@ -62,20 +61,17 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                 "Semantic model validation errors encountered: " + validationException.toJSON(),
                 validationException
             );
-            throw new SemanticModelValidationException(
-                validationException.getMessage(),
-                getValidationErrors(validationException, processExtensionJson)
-            );
+            return getValidationErrors(validationException, processExtensionJson);
         }
         return Collections.emptyList();
     }
 
     private List<ModelValidationError> getValidationErrors(
         ValidationException validationException,
-        JSONObject prcessExtenstionJson
+        JSONObject processExtensionJson
     ) {
         return getValidationExceptions(validationException)
-            .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
+            .map(exception -> toModelValidationError(exception, processExtensionJson))
             .distinct()
             .collect(Collectors.toList());
     }
@@ -90,7 +86,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
 
     private ModelValidationError toModelValidationError(
         ValidationException validationException,
-        JSONObject prcessExtenstionJson
+        JSONObject processExtensionJson
     ) {
         String description = null;
 
@@ -107,7 +103,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                     resolveExpression(
                         errorMessages.get(validationException.getKeyword()),
                         validationException.getPointerToViolation(),
-                        prcessExtenstionJson
+                        processExtensionJson
                     );
             }
         }

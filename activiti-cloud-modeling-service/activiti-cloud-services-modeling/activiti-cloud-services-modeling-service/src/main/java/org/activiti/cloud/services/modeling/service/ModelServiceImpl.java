@@ -110,6 +110,11 @@ public class ModelServiceImpl implements ModelService {
 
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
+    private static final String ERROR_MESSAGE =
+        "Semantic model validation errors encountered: %d schema violations " + "found";
+
+    private static final String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
+
     @Autowired
     public ModelServiceImpl(
         ModelRepository modelRepository,
@@ -405,17 +410,17 @@ public class ModelServiceImpl implements ModelService {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = null;
         if (modelTypeService.isJson(modelType) || isJsonContentType(fileContent.getContentType())) {
-            model = convertContentToModel(modelType,
-                                          fileContent);
+            model = convertContentToModel(modelType, fileContent);
         } else {
             model = createModelFromContent(modelType, fileContent);
         }
         String convertedId = model.getId();
 
-        if (model.getId() == null && (modelTypeService.isJson(modelType)
-            == isJsonContentType(fileContent.getContentType()))) {
-            convertedId = retrieveModelIdFromModelContent(model,
-                                            fileContent);
+        if (
+            model.getId() == null &&
+            (modelTypeService.isJson(modelType) == isJsonContentType(fileContent.getContentType()))
+        ) {
+            convertedId = retrieveModelIdFromModelContent(model, fileContent);
         }
 
         model.setScope(ModelScope.PROJECT);
@@ -611,15 +616,12 @@ public class ModelServiceImpl implements ModelService {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-        if (!validationErrors.isEmpty()) {
-            String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-            throw new SemanticModelValidationException(messageError, validationErrors);
-        }
+        throwExceptionIfNeeded(validationErrors);
     }
 
     private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
         Function<ModelContentValidator, Collection<ModelValidationError>> validationFunction = modelValidator ->
-            modelValidator.validateModelContent(modelContent, validationContext);
+            modelValidator.validateModelContent(model, modelContent, validationContext, false);
 
         validate(model.getType(), validationFunction);
     }
@@ -675,9 +677,14 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void validateModelExtensions(String modelType, byte[] modelContent, ValidationContext validationContext) {
-        modelExtensionsService
+        List<ModelValidationError> validationErrors = modelExtensionsService
             .findExtensionsValidators(modelType)
-            .forEach(modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext));
+            .stream()
+            .map(modelValidator -> modelValidator.validateModelExtensions(modelContent, validationContext))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        throwExceptionIfNeeded(validationErrors);
     }
 
     private List<ModelValidationError> getModelExtensionsValidationErrors(
@@ -725,5 +732,27 @@ public class ModelServiceImpl implements ModelService {
                 )
             )
             .orElse(Collections.emptyList());
+    }
+
+    private void throwExceptionIfNeeded(@NonNull List<ModelValidationError> modelValidationErrors) {
+        if (!modelValidationErrors.isEmpty()) {
+            if (modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())) {
+                throw new SemanticModelValidationException(
+                    String.format(
+                        ERROR_MESSAGE,
+                        modelValidationErrors
+                            .stream()
+                            .filter(modelValidationError -> !modelValidationError.isWarning())
+                            .count()
+                    ),
+                    modelValidationErrors
+                );
+            }
+
+            throw new SemanticModelValidationException(
+                String.format(WARNING_MESSAGE, modelValidationErrors.size()),
+                modelValidationErrors
+            );
+        }
     }
 }

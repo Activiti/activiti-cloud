@@ -31,7 +31,6 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import org.activiti.cloud.modeling.api.Model;
@@ -42,7 +41,6 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
-import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
@@ -70,22 +68,16 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     private WebApplicationContext context;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
     private ModelRepository modelRepository;
 
     @SpyBean(name = "genericNonJsonExtensionsValidator")
-    ModelExtensionsValidator genericNonJsonExtensionsValidator;
+    private ModelExtensionsValidator genericNonJsonExtensionsValidator;
 
     @SpyBean(name = "genericNonJsonContentValidator")
-    ModelContentValidator genericNonJsonContentValidator;
+    private ModelContentValidator genericNonJsonContentValidator;
 
     @Autowired
-    ModelType genericNonJsonModelType;
+    private ModelType genericNonJsonModelType;
 
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
@@ -100,7 +92,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
     private void validateInvalidContent() {
         SemanticModelValidationException exception = new SemanticModelValidationException(
-            Collections.singletonList(new ModelValidationError("Content invalid", "The content is invalid!!"))
+            Collections.singletonList(new ModelValidationError("Content invalid", "The content is" + " invalid" + "!!"))
         );
 
         doThrow(exception)
@@ -110,7 +102,9 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
     private void validateInvalidExtensions() {
         SemanticModelValidationException exception = new SemanticModelValidationException(
-            Collections.singletonList(new ModelValidationError("Extensions invalid", "The extensions are invalid!!"))
+            Collections.singletonList(
+                new ModelValidationError("Extensions " + "invalid", "The extensions" + " are " + "invalid" + "!!")
+            )
         );
 
         doThrow(exception)
@@ -141,7 +135,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentTextContentType()
+    public void should_callGenericNonJsonContentValidatorAndNotCallGenericNonJsonExtensionsValidator_when_validatingModelContentTextContentType()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
@@ -164,7 +158,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_callGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentJsonContentType()
+    public void should_callGenericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingModelContentJsonContentType()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
@@ -187,7 +181,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwExceptionAndCallGnericNonJsonContentValidatorAndNotCallGnericNonJsonExtensionsValidator_when_validatingInvalidModelContent()
+    public void should_throwExceptionAndCallGenericNonJsonContentValidatorAndNotCallGenericNonJsonExtensionsValidator_when_validatingInvalidModelContent()
         throws IOException {
         this.validateInvalidContent();
 
@@ -215,7 +209,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_notCallGnericNonJsonContentValidatorAndCallGnericNonJsonExtensionsValidator_when_validatingModelValidExtensions()
+    public void should_notCallGenericNonJsonContentValidatorAndCallGenericNonJsonExtensionsValidator_when_validatingModelValidExtensions()
         throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
@@ -236,7 +230,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelInvalidExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelInvalidExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-extensions.json");
 
         assertThatResponse(
@@ -259,7 +253,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
+    public void should_throwSyntacticValidationException_when_validatingInvalidJsonExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-json-extensions.json");
 
         assertThatResponse(
@@ -284,7 +278,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwSemanticValidationException_when_validatingModelInvalidTypeExtensions() throws IOException {
+    public void should_throwSemanticValidationException_when_validatingModelInvalidTypeExtensions() throws IOException {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-type-extensions.json");
 
         assertThatResponse(
@@ -307,7 +301,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void sholud_throwException_when_validatingModelInvalidSemanticExtensions() throws IOException {
+    public void should_throwException_when_validatingModelInvalidSemanticExtensions() throws IOException {
         this.validateInvalidExtensions();
 
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");

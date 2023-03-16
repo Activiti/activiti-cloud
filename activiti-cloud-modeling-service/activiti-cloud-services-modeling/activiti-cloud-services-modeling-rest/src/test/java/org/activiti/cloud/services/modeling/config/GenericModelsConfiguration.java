@@ -18,8 +18,8 @@ package org.activiti.cloud.services.modeling.config;
 import static org.springframework.http.MediaType.ALL_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -80,17 +80,18 @@ public class GenericModelsConfiguration {
         @Override
         public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic json content");
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         @Override
-        public void validate(
+        public Collection<ModelValidationError> validate(
             Model model,
             byte[] modelContent,
             ValidationContext validationContext,
             boolean validateUsage
         ) {
             LOGGER.info("usage of json");
+            return new ArrayList<>();
         }
 
         @Override
@@ -108,7 +109,7 @@ public class GenericModelsConfiguration {
         @Override
         public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         @Override
@@ -121,7 +122,7 @@ public class GenericModelsConfiguration {
         @Override
         public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json content");
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         @Override
@@ -139,7 +140,7 @@ public class GenericModelsConfiguration {
         @Override
         public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
 
         @Override

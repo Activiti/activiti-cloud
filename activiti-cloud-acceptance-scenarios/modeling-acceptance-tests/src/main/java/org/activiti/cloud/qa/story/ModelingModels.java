@@ -114,8 +114,6 @@ public class ModelingModels {
 
     @Then("$propertySchema not valid find in extensions")
     public void checkCurrentModelValidationSchemaMatchesForExtensions(String propertySchema) throws IOException {
-        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions(
-            "#/extensions: extraneous key [" + propertySchema + "] is not permitted"
-        );
+        modelingModelsSteps.checkCurrentModelValidationFailureMessage(propertySchema);
     }
 }

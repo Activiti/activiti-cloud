@@ -26,6 +26,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -37,6 +38,7 @@ import feign.Response;
 import feign.form.FormData;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +61,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.util.StreamUtils;
 
 /**
  * Modeling steps for models
@@ -220,6 +223,24 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
             .hasValueSatisfying(message -> assertThat(message).contains(errorMessage));
     }
 
+    @Step
+    public void checkCurrentModelValidationFailureMessage(String errorMessage) throws IOException {
+        assertThat(
+            validateCurrentModel()
+                .stream()
+                .filter(response -> response.status() == SC_BAD_REQUEST)
+                .map(response -> {
+                    try {
+                        return StreamUtils.copyToString(response.body().asInputStream(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .findFirst()
+        )
+            .hasValueSatisfying(message -> assertThat(message).contains(errorMessage));
+    }
+
     private JsonNode convertResponseBodyAsJsonNode(Response response) {
         try (InputStream in = response.body().asInputStream()) {
             return new ObjectMapper().readTree(in);
@@ -293,13 +314,13 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Arrays
             .stream(processVariables)
             .forEach(processVariable ->
-                assertThat(Optional.ofNullable(outputsMappings.get(processVariable)))
-                    .hasValueSatisfying(processVariableMapping -> {
-                        assertThat(processVariableMapping.getType())
-                            .isEqualTo(serviceTaskActionType == INPUTS ? VALUE : VARIABLE);
-                        assertThat(processVariableMapping.getValue())
-                            .isEqualTo(serviceTaskActionType == INPUTS ? processVariable : HOST_VALUE);
-                    })
+                         assertThat(Optional.ofNullable(outputsMappings.get(processVariable)))
+                             .hasValueSatisfying(processVariableMapping -> {
+                                 assertThat(processVariableMapping.getType())
+                                     .isEqualTo(serviceTaskActionType == INPUTS ? VALUE : VARIABLE);
+                                 assertThat(processVariableMapping.getValue())
+                                     .isEqualTo(serviceTaskActionType == INPUTS ? processVariable : HOST_VALUE);
+                             })
             );
     }
 

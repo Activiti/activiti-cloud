@@ -16,14 +16,12 @@
 package org.activiti.cloud.services.modeling.validation.extensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.services.common.util.FileUtils;
 import org.activiti.cloud.services.modeling.TestConfiguration;
 import org.activiti.cloud.services.modeling.converter.ProcessModelConverterConfiguration;
@@ -52,22 +50,22 @@ public class ProcessExtensionsValidatorTest {
     private ProcessExtensionsModelValidator processExtensionsValidator;
 
     @Test
-    public void shouldNotBeValidWhenDisplayIsTrueAndDiplayNameIsAbsent() throws IOException {
+    public void shouldNotBeValidWhenDisplayIsTrueAndDisplayNameIsAbsent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray(
             "extensions/process-with-displayable-variable-without-name.json"
         );
 
-        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
-            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
-            SemanticModelValidationException.class
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
         );
 
-        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
         assertThat(validationErrors).hasSize(2);
         assertThat(validationErrors)
             .extracting("problem")
             .containsOnly(
-                "subject must not be valid against schema {\"required\":[\"display\"],\"properties\":{\"display\":{\"const\":true}}}",
+                "subject must not be valid against schema {\"required\":[\"display\"]," +
+                "\"properties\":{\"display\":{\"const\":true}}}",
                 "required key [displayName] not found"
             );
     }
@@ -75,7 +73,7 @@ public class ProcessExtensionsValidatorTest {
     @Test
     public void shouldBeValidWhenDisplayIsTrueAndDiplayNameIsPresent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray(
-            "extensions/process-with-displayable-variable-with-name.json"
+            "extensions/process-with-displayable-variable-with-name" + ".json"
         );
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
@@ -83,7 +81,7 @@ public class ProcessExtensionsValidatorTest {
     @Test
     public void shouldBeValidWhenDisplayIsFalse() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray(
-            "extensions/process-with-display-process-variable-false.json"
+            "extensions/process-with-display-process-variable-false" + ".json"
         );
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
@@ -104,12 +102,11 @@ public class ProcessExtensionsValidatorTest {
     public void shouldBeInvalidWhenAnalyticsIsPresent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-analytics-variable.json");
 
-        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
-            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
-            SemanticModelValidationException.class
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
         );
 
-        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
         assertThat(validationErrors).hasSize(4);
         assertThat(validationErrors)
             .extracting("problem")
@@ -131,12 +128,11 @@ public class ProcessExtensionsValidatorTest {
     public void shouldBeInvalidTaskAssignments() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-assignments.json");
 
-        SemanticModelValidationException semanticModelValidationException = catchThrowableOfType(
-            () -> processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT),
-            SemanticModelValidationException.class
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
         );
 
-        List<ModelValidationError> validationErrors = semanticModelValidationException.getValidationErrors();
         assertThat(validationErrors).hasSize(2);
         assertThat(validationErrors)
             .extracting("problem")

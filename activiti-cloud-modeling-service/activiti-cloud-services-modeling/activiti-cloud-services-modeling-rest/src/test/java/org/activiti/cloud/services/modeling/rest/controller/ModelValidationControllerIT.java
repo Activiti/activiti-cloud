@@ -133,7 +133,8 @@ public class ModelValidationControllerIT {
             .extracting(ModelValidationError::getDescription, ModelValidationError::getValidatorSetName)
             .contains(
                 tuple(
-                    "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
+                    "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or " +
+                    "'expression' is mandatory on serviceTask.",
                     "activiti-executable-process"
                 )
             );
@@ -292,7 +293,8 @@ public class ModelValidationControllerIT {
                     "Invalid call activity reference validator."
                 ),
                 tuple(
-                    "No call element found for call activity 'Task_1mbp1v0' in process 'process-1722e83c-8f2f-4ddb-85bd-563ef87d279e'",
+                    "No call element found for call activity 'Task_1mbp1v0' in process " +
+                    "'process-1722e83c-8f2f-4ddb-85bd-563ef87d279e'",
                     "Call activity must have a call element validator."
                 )
             );
@@ -408,7 +410,7 @@ public class ModelValidationControllerIT {
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(
             processModel,
-            resourceAsByteArray("process/process-without-end-event.bpmn20.xml")
+            resourceAsByteArray("process/process-without-end-event.bpmn20" + ".xml")
         );
 
         final ResultActions resultActions = mockMvc.perform(
@@ -442,7 +444,7 @@ public class ModelValidationControllerIT {
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(
             processModel,
-            resourceAsByteArray("process/call-activity-with-invalid-variable-reference.bpmn20.xml")
+            resourceAsByteArray("process/call-activity-with-invalid-variable-reference" + ".bpmn20.xml")
         );
 
         final ResultActions resultActions = mockMvc.perform(
@@ -486,7 +488,7 @@ public class ModelValidationControllerIT {
         Model processModel = createModel(validContent);
         MockMultipartFile file = multipartProcessFile(
             processModel,
-            resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20.xml")
+            resourceAsByteArray("process/call-activity-with-valid-variable-reference.bpmn20" + ".xml")
         );
 
         final ResultActions resultActions = mockMvc.perform(
@@ -511,7 +513,7 @@ public class ModelValidationControllerIT {
         );
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: 2 schema violations found");
+            .isEqualTo("Semantic model validation errors encountered: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -523,11 +525,13 @@ public class ModelValidationControllerIT {
             .containsOnly(
                 tuple(
                     "extraneous key [inputds] is not permitted",
-                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"
+                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is " +
+                    "not permitted"
                 ),
                 tuple(
                     "extraneous key [outputss] is not permitted",
-                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"
+                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is" +
+                    " not permitted"
                 )
             );
     }
@@ -556,7 +560,8 @@ public class ModelValidationControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: String, found: Integer",
-                    "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is string"
+                    "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is string"
                 )
             );
     }
@@ -585,11 +590,13 @@ public class ModelValidationControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: Integer, found: String",
-                    "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"
+                    "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is integer"
                 ),
                 tuple(
                     "string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
-                    "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
+                    "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
+                    "valid expression"
                 )
             );
     }
@@ -618,11 +625,13 @@ public class ModelValidationControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: Boolean, found: Integer",
-                    "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"
+                    "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is boolean"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
-                    "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
+                    "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
+                    "valid expression"
                 )
             );
     }
@@ -667,14 +676,16 @@ public class ModelValidationControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: String, found: Integer",
-                    "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"
+                    "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is " +
+                    "date"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
                     "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
                 ),
                 tuple(
-                    "string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                    "string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))" +
+                    "|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
                     "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"
                 ),
                 tuple(
@@ -704,6 +715,11 @@ public class ModelValidationControllerIT {
 
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
         Model processModel = modelRepository.createModel(processModel(project, "process-model"));
+
+        mockMvc
+            .perform(multipart("/v1/models/{model_id}/validate", processModel.getId()).file(file))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Xml content for the model is not valid."));
 
         mockMvc
             .perform(multipart("/v1/models/{model_id}/validate", processModel.getId()).file(file))
@@ -811,7 +827,7 @@ public class ModelValidationControllerIT {
             multipart("/v1/models/{model_id}/validate", processModel.getId()).file(file)
         );
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .contains("The service implementation on service 'ServiceTask_1qr4ad0' might fail silently");
+            .contains("Semantic model validation warnings encountered: 1 warnings found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -827,7 +843,8 @@ public class ModelValidationControllerIT {
             .containsOnly(
                 tuple(
                     "Missing Catch Error boundary event",
-                    "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently. Consider adding an Error boundary event to handle failures.",
+                    "The service implementation on service 'ServiceTask_1qr4ad0' might fail silently. " +
+                    "Consider adding an Error boundary event to handle failures.",
                     true
                 )
             );
@@ -935,8 +952,10 @@ public class ModelValidationControllerIT {
             .hasSize(2)
             .extracting(ModelValidationError::getDescription)
             .contains(
-                "The extensions for process 'Process_RankMovieId' contains INPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'",
-                "The extensions for process 'Process_RankMovieId' contains OUTPUTS mappings to task 'Task_1spvopd' referencing an unknown connector action 'movies.getMovieDesc'"
+                "The extensions for process 'Process_RankMovieId' contains INPUTS mappings to task 'Task_1spvopd' " +
+                "referencing an unknown connector action 'movies.getMovieDesc'",
+                "The extensions for process 'Process_RankMovieId' contains OUTPUTS mappings to task 'Task_1spvopd' " +
+                "referencing an unknown connector action 'movies.getMovieDesc'"
             );
     }
 
@@ -977,7 +996,7 @@ public class ModelValidationControllerIT {
         );
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("#/extensions/Process_test/templates/tasks: 2 schema violations found");
+            .isEqualTo("Semantic model validation errors encountered: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -989,11 +1008,13 @@ public class ModelValidationControllerIT {
             .containsOnly(
                 tuple(
                     "something is not a valid enum value",
-                    "#/extensions/Process_test/templates/tasks/Task2/assignee/type: something is not a valid enum value"
+                    "#/extensions/Process_test/templates/tasks/Task2/assignee/type: something is not a " +
+                    "valid enum value"
                 ),
                 tuple(
                     "expected type: String, found: Null",
-                    "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: String, found: Null"
+                    "#/extensions/Process_test/templates/tasks/Task1/assignee/value: expected type: " +
+                    "String, found: Null"
                 )
             );
     }
@@ -1033,9 +1054,7 @@ public class ModelValidationControllerIT {
         );
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo(
-                "#/extensions/Process_test/properties/8b9ac008-8a76-4ebd-8221-04452add5f22: #: only 1 subschema matches out of 2"
-            );
+            .isEqualTo("Semantic model validation errors encountered: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -1051,7 +1070,7 @@ public class ModelValidationControllerIT {
                 ),
                 tuple(
                     "expected type: Integer, found: String",
-                    "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is integer"
+                    "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is " + "integer"
                 )
             );
     }

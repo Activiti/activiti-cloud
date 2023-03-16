@@ -15,17 +15,15 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ModelingException;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.validation.JsonSchemaModelValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,29 +40,12 @@ public abstract class ExtensionsJsonSchemaValidator
 
     @Override
     public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
-        super.validate(bytes, validationContext);
+        Collection<ModelValidationError> parentErrors = new ArrayList<>(super.validate(bytes, validationContext));
 
         if (!validationContext.isEmpty()) {
-            validateExtensionsInContext(bytes, validationContext);
+            parentErrors.addAll(getValidationErrors(convertBytesToModel(bytes), validationContext));
         }
-        return Collections.emptyList();
-    }
-
-    private void validateExtensionsInContext(byte[] bytes, ValidationContext validationContext) {
-        List<ModelValidationError> validationExceptions = getValidationErrors(
-            convertBytesToModel(bytes),
-            validationContext
-        );
-        if (!validationExceptions.isEmpty()) {
-            throw new SemanticModelValidationException(
-                "Semantic model validation errors encountered: " +
-                validationExceptions
-                    .stream()
-                    .map(ModelValidationError::getDescription)
-                    .collect(Collectors.joining(",")),
-                validationExceptions
-            );
-        }
+        return parentErrors;
     }
 
     protected abstract List<ModelValidationError> getValidationErrors(Model model, ValidationContext validationContext);
