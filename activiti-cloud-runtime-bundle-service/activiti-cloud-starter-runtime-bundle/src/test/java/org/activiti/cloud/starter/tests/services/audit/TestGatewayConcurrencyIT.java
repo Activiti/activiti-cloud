@@ -70,7 +70,7 @@ import org.springframework.test.context.TestPropertySource;
     classes = ServicesAuditITConfiguration.class,
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
-public class GatewayConcurrencyIT {
+public class TestGatewayConcurrencyIT {
 
     private static final String PROCESS_ID = "gateway_concurrency";
 
