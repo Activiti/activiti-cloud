@@ -83,8 +83,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                        ValidationContext validationContext) {
+        public Collection<ModelValidationError> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
@@ -116,8 +118,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelValidationError> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
@@ -134,8 +138,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelValidationError> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 
@@ -157,8 +163,10 @@ public class GenericModelsConfiguration {
         }
 
         @Override
-        public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
+        public Collection<ModelValidationError> validateAndReturnErrors(
+            byte[] modelContent,
+            ValidationContext validationContext
+        ) {
             return null;
         }
 

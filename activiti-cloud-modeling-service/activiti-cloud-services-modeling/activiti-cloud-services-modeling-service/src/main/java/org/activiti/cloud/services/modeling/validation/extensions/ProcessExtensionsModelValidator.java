@@ -138,8 +138,10 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     }
 
     @Override
-    public Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                                 ValidationContext validationContext) {
+    public Collection<ModelValidationError> validateAndReturnErrors(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
         return null;
     }
 

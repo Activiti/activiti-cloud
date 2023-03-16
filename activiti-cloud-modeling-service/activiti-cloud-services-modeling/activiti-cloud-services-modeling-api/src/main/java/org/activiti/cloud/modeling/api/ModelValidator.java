@@ -38,14 +38,13 @@ public interface ModelValidator extends ModelValidationErrorProducer {
      */
     Collection<ModelingException> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
 
-  /**
-   * Validate the given model and return exceptions
-   *
-   * @param modelContent      content of the model to validate
-   * @param validationContext the validation context
-   */
-  Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent,
-                                                        ValidationContext validationContext);
+    /**
+     * Validate the given model and return exceptions
+     *
+     * @param modelContent      content of the model to validate
+     * @param validationContext the validation context
+     */
+    Collection<ModelValidationError> validateAndReturnErrors(byte[] modelContent, ValidationContext validationContext);
 
     /**
      * Get handled model type by this validator.
