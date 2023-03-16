@@ -50,8 +50,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public Collection<ModelValidationError> validate(byte[] modelContent,
-                                                     ValidationContext validationContext) {
+    public Collection<ModelValidationError> validate(byte[] modelContent, ValidationContext validationContext) {
         JSONObject processExtensionJson = null;
         String jsonContent = new String(modelContent);
         try {
@@ -59,16 +58,16 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
             processExtensionJson = extractJsonObject(modelContent);
             validateJson(processExtensionJson);
         } catch (JSONException jsonException) {
-            log.debug("Syntactic model JSON validation errors encountered",
-                      jsonException);
+            log.debug("Syntactic model JSON validation errors encountered", jsonException);
 
             throw new SyntacticModelValidationException(jsonException);
         } catch (ValidationException validationException) {
-            log.debug("Semantic model validation errors encountered: " + validationException.toJSON(),
-                      validationException);
+            log.debug(
+                "Semantic model validation errors encountered: " + validationException.toJSON(),
+                validationException
+            );
 
             return getSemanticValidationErrors(validationException, processExtensionJson);
-
         }
         return Collections.emptyList();
     }
@@ -78,14 +77,13 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     }
 
     private void validateJson(JSONObject processExtensionJson) {
-        schemaLoader()
-            .load()
-            .build()
-            .validate(processExtensionJson);
+        schemaLoader().load().build().validate(processExtensionJson);
     }
 
-    private List<ModelValidationError> getSemanticValidationErrors(ValidationException validationException,
-                                                                   JSONObject processExtensionJson) {
+    private List<ModelValidationError> getSemanticValidationErrors(
+        ValidationException validationException,
+        JSONObject processExtensionJson
+    ) {
         return getValidationExceptions(validationException)
             .map(exception -> toModelValidationError(exception, processExtensionJson))
             .distinct()
@@ -93,28 +91,34 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     }
 
     private Stream<ValidationException> getValidationExceptions(ValidationException validationException) {
-        return Optional.ofNullable(validationException.getCausingExceptions())
+        return Optional
+            .ofNullable(validationException.getCausingExceptions())
             .filter(CollectionUtils::isNotEmpty)
-            .map(exceptions -> exceptions
-                .stream()
-                .flatMap(this::getValidationExceptions))
+            .map(exceptions -> exceptions.stream().flatMap(this::getValidationExceptions))
             .orElseGet(() -> Stream.of(validationException));
     }
 
-    private ModelValidationError toModelValidationError(ValidationException validationException,
-                                                        JSONObject prcessExtenstionJson) {
+    private ModelValidationError toModelValidationError(
+        ValidationException validationException,
+        JSONObject prcessExtenstionJson
+    ) {
         String description = null;
 
-        Map<String, Object> unProcessedProperties = Optional.ofNullable(validationException.getViolatedSchema())
-            .map(Schema::getUnprocessedProperties).orElse(null);
+        Map<String, Object> unProcessedProperties = Optional
+            .ofNullable(validationException.getViolatedSchema())
+            .map(Schema::getUnprocessedProperties)
+            .orElse(null);
 
         if (unProcessedProperties != null && unProcessedProperties.get("message") != null) {
             HashMap<String, String> errorMessages = (HashMap<String, String>) unProcessedProperties.get("message");
             String errorMessage = errorMessages.get(validationException.getKeyword());
             if (errorMessage != null) {
-                description = resolveExpression(errorMessages.get(validationException.getKeyword()),
-                                                validationException.getPointerToViolation(),
-                                                prcessExtenstionJson);
+                description =
+                    resolveExpression(
+                        errorMessages.get(validationException.getKeyword()),
+                        validationException.getPointerToViolation(),
+                        prcessExtenstionJson
+                    );
             }
         }
 
@@ -123,7 +127,8 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
             description = validationException.getMessage();
         }
 
-        String schema = Optional.ofNullable(validationException.getViolatedSchema())
+        String schema = Optional
+            .ofNullable(validationException.getViolatedSchema())
             .map(Schema::getSchemaLocation)
             .orElse(null);
         return new SemanticModelError(validationException.getErrorMessage(), description, schema);
