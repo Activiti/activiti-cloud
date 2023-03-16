@@ -29,9 +29,11 @@ public interface ModelExtensionsValidator extends ModelValidator {
      * @param modelContent      the model content to validate
      * @param validationContext the validation context
      */
-    default Collection<ModelValidationError> validateModelExtensions(byte[] modelContent,
-                                                                     ValidationContext validationContext) {
-        return validate(modelContent,validationContext);
+    default Collection<ModelValidationError> validateModelExtensions(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
+        return validate(modelContent, validationContext);
     }
 
     /**

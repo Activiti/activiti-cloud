@@ -39,33 +39,29 @@ public abstract class ExtensionsJsonSchemaValidator
     private JsonConverter<Model> extensionsConverter;
 
     @Override
-    public Collection<ModelValidationError> validate(byte[] bytes,
-                                                     ValidationContext validationContext) {
-        ArrayList<ModelValidationError> errors = new ArrayList<>(super.validate(bytes,
-                                                                                validationContext));
+    public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
+        ArrayList<ModelValidationError> errors = new ArrayList<>(super.validate(bytes, validationContext));
 
         if (!validationContext.isEmpty()) {
-            errors.addAll(validateExtensionsInContext(bytes,
-                                                      validationContext));
+            errors.addAll(validateExtensionsInContext(bytes, validationContext));
         }
         return errors;
     }
 
-    private Collection<ModelValidationError> validateExtensionsInContext(byte[] bytes,
-                                                                         ValidationContext validationContext) {
-        return getValidationErrors(convertBytesToModel(bytes),
-                                   validationContext);
+    private Collection<ModelValidationError> validateExtensionsInContext(
+        byte[] bytes,
+        ValidationContext validationContext
+    ) {
+        return getValidationErrors(convertBytesToModel(bytes), validationContext);
     }
 
-    protected abstract List<ModelValidationError> getValidationErrors(Model model,
-                                                                      ValidationContext validationContext);
+    protected abstract List<ModelValidationError> getValidationErrors(Model model, ValidationContext validationContext);
 
     protected Model convertBytesToModel(byte[] bytes) {
         try {
             return extensionsConverter.convertToEntity(bytes);
         } catch (ModelingException ex) {
-            throw new SyntacticModelValidationException("Cannot convert json extensions to a model",
-                                                        ex);
+            throw new SyntacticModelValidationException("Cannot convert json extensions to a model", ex);
         }
     }
 }

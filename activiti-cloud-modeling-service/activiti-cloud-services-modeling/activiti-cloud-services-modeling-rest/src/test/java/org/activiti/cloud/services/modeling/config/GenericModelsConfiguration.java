@@ -78,8 +78,7 @@ public class GenericModelsConfiguration {
 
     ModelContentValidator genericJsonContentValidator = new ModelContentValidator() {
         @Override
-        public Collection<ModelValidationError> validate(byte[] modelFile,
-                                                         ValidationContext validationContext) {
+        public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic json content");
             return Collections.emptyList();
         }
@@ -107,8 +106,7 @@ public class GenericModelsConfiguration {
 
     private ModelExtensionsValidator genericJsonExtensionsValidator = new ModelExtensionsValidator() {
         @Override
-        public Collection<ModelValidationError> validate(byte[] modelFile,
-                                                         ValidationContext validationContext) {
+        public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic json extensions");
             return Collections.emptyList();
         }
@@ -121,8 +119,7 @@ public class GenericModelsConfiguration {
 
     ModelContentValidator genericNonJsonContentValidator = new ModelContentValidator() {
         @Override
-        public Collection<ModelValidationError> validate(byte[] modelFile,
-                                                         ValidationContext validationContext) {
+        public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json content");
             return Collections.emptyList();
         }
@@ -140,8 +137,7 @@ public class GenericModelsConfiguration {
 
     private ModelExtensionsValidator genericNonJsonExtensionsValidator = new ModelExtensionsValidator() {
         @Override
-        public Collection<ModelValidationError> validate(byte[] modelFile,
-                                                         ValidationContext validationContext) {
+        public Collection<ModelValidationError> validate(byte[] modelFile, ValidationContext validationContext) {
             LOGGER.info("validate generic non json extensions");
             return Collections.emptyList();
         }

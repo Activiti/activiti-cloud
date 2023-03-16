@@ -611,8 +611,7 @@ public class ModelServiceImpl implements ModelService {
         return modelContentService
             .findModelValidators(model.getType())
             .stream()
-            .map(modelValidator -> modelValidator
-                .validate(model, modelContent, validationContext, false))
+            .map(modelValidator -> modelValidator.validate(model, modelContent, validationContext, false))
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
     }
@@ -669,7 +668,8 @@ public class ModelServiceImpl implements ModelService {
             .findExtensionsValidators(modelType)
             .stream()
             .map(modelValidator -> modelValidator.validate(modelContent, validationContext))
-            .flatMap(Collection::stream).collect(Collectors.toList());
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     }
 
     private ModelType findModelType(Model model) {

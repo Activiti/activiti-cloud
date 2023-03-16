@@ -53,34 +53,39 @@ public class ProcessExtensionsValidatorTest {
     public void shouldNotBeValidWhenDisplayIsTrueAndDisplayNameIsAbsent() throws IOException {
         //given
         byte[] fileContent = FileUtils.resourceAsByteArray(
-            "extensions/process-with-displayable-variable-without-name.json");
+            "extensions/process-with-displayable-variable-without-name.json"
+        );
 
         //when
         Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
             fileContent,
-            ValidationContext.EMPTY_CONTEXT);
+            ValidationContext.EMPTY_CONTEXT
+        );
 
         //then
         assertThat(validationErrors).hasSize(2);
-        assertThat(validationErrors).
-            extracting("problem")
+        assertThat(validationErrors)
+            .extracting("problem")
             .containsOnly(
-                "subject must not be valid against schema {\"required\":[\"display\"],"
-                    + "\"properties\":{\"display\":{\"const\":true}}}",
-                "required key [displayName] not found");
+                "subject must not be valid against schema {\"required\":[\"display\"]," +
+                "\"properties\":{\"display\":{\"const\":true}}}",
+                "required key [displayName] not found"
+            );
     }
 
     @Test
     public void shouldBeValidWhenDisplayIsTrueAndDisplayNameIsPresent() throws IOException {
-        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-displayable-variable-with-name"
-                                                               + ".json");
+        byte[] fileContent = FileUtils.resourceAsByteArray(
+            "extensions/process-with-displayable-variable-with-name" + ".json"
+        );
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
 
     @Test
     public void shouldBeValidWhenDisplayIsFalse() throws IOException {
-        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-display-process-variable-false"
-                                                               + ".json");
+        byte[] fileContent = FileUtils.resourceAsByteArray(
+            "extensions/process-with-display-process-variable-false" + ".json"
+        );
         processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
     }
 
@@ -104,7 +109,8 @@ public class ProcessExtensionsValidatorTest {
         //when
         Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
             fileContent,
-            ValidationContext.EMPTY_CONTEXT);
+            ValidationContext.EMPTY_CONTEXT
+        );
 
         //then
         assertThat(validationErrors).hasSize(4);
@@ -130,7 +136,10 @@ public class ProcessExtensionsValidatorTest {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-assignments.json");
 
         //when
-        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
 
         //then
         assertThat(validationErrors).hasSize(2);
