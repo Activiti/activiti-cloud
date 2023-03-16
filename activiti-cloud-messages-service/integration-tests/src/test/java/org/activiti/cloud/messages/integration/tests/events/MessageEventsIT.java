@@ -66,13 +66,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "spring.datasource.platform=postgresql",
-                "activiti.cloud.application.name=messages-app",
-                "spring.application.name=rb",
-                "spring.jmx.enabled=false",
-        })
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "spring.datasource.platform=postgresql",
+        "activiti.cloud.application.name=messages-app",
+        "spring.application.name=rb",
+        "spring.jmx.enabled=false",
+    }
+)
 @DirtiesContext
 @Testcontainers
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
