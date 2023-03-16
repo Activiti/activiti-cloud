@@ -24,12 +24,15 @@ import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
@@ -39,19 +42,20 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
-import org.activiti.engine.RuntimeService;
-import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,9 +65,11 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({TestChannelBinderConfiguration.class})
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@Import({ TestChannelBinderConfiguration.class })
+@ContextConfiguration(
+    classes = ServicesAuditITConfiguration.class,
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 public class GatewayConcurrencyIT {
 
     private static final String PROCESS_ID = "gateway_concurrency";
@@ -77,13 +83,13 @@ public class GatewayConcurrencyIT {
     private IdentityTokenProducer identityTokenProducer;
 
     @Autowired
-    private ServiceTaskIntegrationResultEventHandler serviceTaskIntegrationResultEventHandler;
+    private BindingServiceProperties bindingServiceProperties;
 
     @Autowired
     private OutputDestination outputDestination;
 
     @Autowired
-    private RuntimeService runtimeService;
+    private InputDestination inputDestination;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -118,45 +124,44 @@ public class GatewayConcurrencyIT {
 
         final IntegrationResult integrationResult = createIntegrationResult(integrationRequest);
 
-        List<Callable<Void>> tasks = new ArrayList<>();
+        Set<Callable<Void>> tasks = new LinkedHashSet<>();
 
         tasks.add(() -> {
-            serviceTaskIntegrationResultEventHandler.receive(integrationResult);
+            Message message = MessageBuilder
+                .withPayload(new SignalPayload(SIGNAL_NAME, Collections.emptyMap()))
+                .build();
+            String destination = bindingServiceProperties.getBindingDestination("signalConsumer");
+
+            inputDestination.send(message, destination);
             return null;
         });
 
         tasks.add(() -> {
-            runtimeService.signalEventReceived(SIGNAL_NAME);
+            Message message = MessageBuilder.withPayload(integrationResult).build();
+            String destination = bindingServiceProperties.getBindingDestination("integrationResultsConsumer");
+
+            inputDestination.send(message, destination);
             return null;
         });
-
         executorService.invokeAll(tasks);
 
         await()
-            .atMost(Duration.ofMinutes(10))
             .untilAsserted(() -> {
-                ResponseEntity<CloudProcessInstance> completedProcessInstance = processInstanceRestTemplate.getProcessInstance(
-                    processInstanceId
-                );
+                List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
-        await().untilAsserted(() -> {
-            List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
-
-            Assertions.assertThat(receivedEvents)
-                .extracting(CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getEntityId)
-                .contains(tuple(PROCESS_CREATED,
-                        processInstanceId,
-                        processInstanceId),
-                    tuple(PROCESS_STARTED,
-                        processInstanceId,
-                        processInstanceId),
-                    tuple(PROCESS_COMPLETED,
-                        processInstanceId,
-                        processInstanceId));
-        });
-
+                Assertions
+                    .assertThat(receivedEvents)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getEntityId
+                    )
+                    .contains(
+                        tuple(PROCESS_CREATED, processInstanceId, processInstanceId),
+                        tuple(PROCESS_STARTED, processInstanceId, processInstanceId),
+                        tuple(PROCESS_COMPLETED, processInstanceId, processInstanceId)
+                    );
+            });
     }
 
     private IntegrationRequest getIntegrationRequest() throws IOException {
