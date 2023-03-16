@@ -21,17 +21,18 @@ import java.util.Collection;
  * Business logic related with validation of a model content
  */
 public interface ModelContentValidator extends ModelValidator {
-
-   /**
-    * Validate the given model content.
-    *
-    * @param modelContent      the model content to validate
-    * @param validationContext the validation context
-    * @return
-    */
-    default Collection<ModelValidationError> validateModelContent(byte[] modelContent,
-                                                                  ValidationContext validationContext) {
-        return validate(modelContent,validationContext);
+    /**
+     * Validate the given model content.
+     *
+     * @param modelContent      the model content to validate
+     * @param validationContext the validation context
+     * @return
+     */
+    default Collection<ModelValidationError> validateModelContent(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
+        return validate(modelContent, validationContext);
     }
 
     /**

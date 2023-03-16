@@ -598,10 +598,9 @@ public class ModelServiceImpl implements ModelService {
             .forEach(validator -> validator.validateModelContent(model, modelContent, validationContext, true));
     }
 
-    private void validateModelContent(Model model,
-                                      byte[] modelContent,
-                                      ValidationContext validationContext) {
-        List<ModelValidationError> validationErrors = modelContentService.findModelValidators(model.getType())
+    private void validateModelContent(Model model, byte[] modelContent, ValidationContext validationContext) {
+        List<ModelValidationError> validationErrors = modelContentService
+            .findModelValidators(model.getType())
             .stream()
             .map(modelValidator -> modelValidator.validateModelContent(modelContent, validationContext))
             .flatMap(Collection::stream)
@@ -609,8 +608,7 @@ public class ModelServiceImpl implements ModelService {
 
         if (!validationErrors.isEmpty()) {
             String messageError = "Semantic process model validation errors encountered: " + validationErrors;
-            throw new SemanticModelValidationException(messageError,
-                                                       validationErrors);
+            throw new SemanticModelValidationException(messageError, validationErrors);
         }
     }
 
