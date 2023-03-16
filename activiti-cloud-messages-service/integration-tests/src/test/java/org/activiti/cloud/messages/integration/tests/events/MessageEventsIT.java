@@ -76,8 +76,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @DirtiesContext
 @Testcontainers
-@ContextConfiguration(initializers = {RabbitMQContainerApplicationInitializer.class,
-                                      KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
 class MessageEventsIT {
 
     @Container
