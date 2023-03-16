@@ -66,8 +66,10 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 public class InclusiveGatewayAuditProducerIT {
 
     private static final String INCLUSIVE_GATEWAY_PROCESS = "basicInclusiveGateway";

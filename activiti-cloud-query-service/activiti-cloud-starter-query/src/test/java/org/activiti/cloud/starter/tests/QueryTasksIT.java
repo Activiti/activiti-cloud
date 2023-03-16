@@ -83,7 +83,7 @@ import org.springframework.util.CollectionUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 public class QueryTasksIT {
 

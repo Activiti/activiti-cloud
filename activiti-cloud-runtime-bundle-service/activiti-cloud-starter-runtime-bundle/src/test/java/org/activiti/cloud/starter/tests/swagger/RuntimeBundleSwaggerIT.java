@@ -43,7 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 public class RuntimeBundleSwaggerIT {
 

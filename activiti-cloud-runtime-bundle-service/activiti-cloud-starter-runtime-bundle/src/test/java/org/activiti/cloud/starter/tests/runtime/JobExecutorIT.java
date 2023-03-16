@@ -102,10 +102,14 @@ import org.springframework.transaction.support.TransactionTemplate;
     }
 )
 @DirtiesContext
-@ContextConfiguration(classes = {RuntimeITConfiguration.class,
-    JobExecutorIT.JobExecutorITProcessEngineConfigurer.class,
-    TestChannelBinderConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = {
+        RuntimeITConfiguration.class,
+        JobExecutorIT.JobExecutorITProcessEngineConfigurer.class,
+        TestChannelBinderConfiguration.class,
+    },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);

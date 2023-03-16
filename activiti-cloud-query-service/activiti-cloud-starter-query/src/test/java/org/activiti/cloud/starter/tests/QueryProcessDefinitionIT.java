@@ -50,11 +50,8 @@ import org.springframework.util.StreamUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({
-    ProcessDefinitionRestTemplate.class,
-    TestChannelBinderConfiguration.class
-})
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@Import({ ProcessDefinitionRestTemplate.class, TestChannelBinderConfiguration.class })
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryProcessDefinitionIT {
 
     public static final String TEST_CATEGORY = "Test category";

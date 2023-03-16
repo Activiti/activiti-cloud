@@ -56,10 +56,10 @@ class AuditVariableEventsIT {
     @Autowired
     private MyProducer producer;
 
-//    @BeforeEach
-//    public void setUp() {
-//        repository.deleteAll();
-//    }
+    //    @BeforeEach
+    //    public void setUp() {
+    //        repository.deleteAll();
+    //    }
 
     @AfterEach
     public void cleanUp() {

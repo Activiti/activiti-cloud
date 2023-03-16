@@ -117,7 +117,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
-@Import({EventsRestTemplate.class, TestChannelBinderConfiguration.class})
+@Import({ EventsRestTemplate.class, TestChannelBinderConfiguration.class })
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class AuditServiceIT {
 

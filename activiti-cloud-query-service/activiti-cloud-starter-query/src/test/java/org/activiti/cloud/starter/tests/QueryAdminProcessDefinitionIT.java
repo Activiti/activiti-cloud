@@ -48,11 +48,8 @@ import org.springframework.util.StreamUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({
-    ProcessDefinitionAdminRestTemplate.class,
-    TestChannelBinderConfiguration.class
-})
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@Import({ ProcessDefinitionAdminRestTemplate.class, TestChannelBinderConfiguration.class })
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryAdminProcessDefinitionIT {
 
     @Autowired

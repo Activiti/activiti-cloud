@@ -72,8 +72,10 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 public class ConnectorAuditProducerIT {
 
     private static final String ROUTING_KEY_HEADER = "routingKey";

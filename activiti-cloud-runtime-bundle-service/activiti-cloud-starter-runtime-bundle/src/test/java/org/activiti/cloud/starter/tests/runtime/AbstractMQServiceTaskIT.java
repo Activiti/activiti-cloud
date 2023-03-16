@@ -57,8 +57,10 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = RuntimeITConfiguration.class,
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 public abstract class AbstractMQServiceTaskIT {
 

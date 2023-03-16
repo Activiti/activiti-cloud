@@ -90,9 +90,11 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = {GrapqhQLApplication.class})
-@ContextConfiguration(classes = EngineEventsConfiguration.class,
-        initializers = { KeycloakContainerApplicationInitializer.class})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
+@ContextConfiguration(
+    classes = EngineEventsConfiguration.class,
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 @Import(TestChannelBinderConfiguration.class)
 public class ActivitiGraphQLStarterIT {
 

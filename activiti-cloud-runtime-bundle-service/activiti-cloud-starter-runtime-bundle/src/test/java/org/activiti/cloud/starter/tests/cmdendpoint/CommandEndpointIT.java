@@ -70,12 +70,16 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@Import({CommandEndPointITStreamHandler.class,
-    ProcessInstanceRestTemplate.class,
-    TaskRestTemplate.class,
-    MessageClientStreamConfiguration.class,
-    TestChannelBinderConfiguration.class})
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@Import(
+    {
+        CommandEndPointITStreamHandler.class,
+        ProcessInstanceRestTemplate.class,
+        TaskRestTemplate.class,
+        MessageClientStreamConfiguration.class,
+        TestChannelBinderConfiguration.class,
+    }
+)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class CommandEndpointIT {
 
     @Autowired

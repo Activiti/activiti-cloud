@@ -49,8 +49,10 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@ContextConfiguration(classes = {ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class},
-    initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(
+    classes = { ServicesAuditITConfiguration.class, TestChannelBinderConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
 public class ErrorAuditProducerIT {
 
     private static final String ERROR_START_EVENT_SUBPROCESS = "errorStartEventSubProcess";
