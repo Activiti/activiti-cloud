@@ -316,13 +316,13 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
         Arrays
             .stream(processVariables)
             .forEach(processVariable ->
-                         assertThat(Optional.ofNullable(outputsMappings.get(processVariable)))
-                             .hasValueSatisfying(processVariableMapping -> {
-                                 assertThat(processVariableMapping.getType())
-                                     .isEqualTo(serviceTaskActionType == INPUTS ? VALUE : VARIABLE);
-                                 assertThat(processVariableMapping.getValue())
-                                     .isEqualTo(serviceTaskActionType == INPUTS ? processVariable : HOST_VALUE);
-                             })
+                assertThat(Optional.ofNullable(outputsMappings.get(processVariable)))
+                    .hasValueSatisfying(processVariableMapping -> {
+                        assertThat(processVariableMapping.getType())
+                            .isEqualTo(serviceTaskActionType == INPUTS ? VALUE : VARIABLE);
+                        assertThat(processVariableMapping.getValue())
+                            .isEqualTo(serviceTaskActionType == INPUTS ? processVariable : HOST_VALUE);
+                    })
             );
     }
 
