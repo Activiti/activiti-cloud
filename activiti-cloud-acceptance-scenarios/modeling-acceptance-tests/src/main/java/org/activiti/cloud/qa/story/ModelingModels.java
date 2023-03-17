@@ -115,5 +115,8 @@ public class ModelingModels {
     @Then("$propertySchema not valid find in extensions")
     public void checkCurrentModelValidationSchemaMatchesForExtensions(String propertySchema) throws IOException {
         modelingModelsSteps.checkCurrentModelValidationFailureMessage(propertySchema);
+        modelingModelsSteps.checkCurrentModelValidationFailureForExtensions(
+            "Semantic model validation errors encountered: 1 schema violations found"
+        );
     }
 }
