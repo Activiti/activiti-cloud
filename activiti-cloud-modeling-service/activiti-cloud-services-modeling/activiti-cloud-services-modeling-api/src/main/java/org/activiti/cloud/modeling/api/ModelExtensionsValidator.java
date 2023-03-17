@@ -17,6 +17,8 @@ package org.activiti.cloud.modeling.api;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 
+import java.util.Collection;
+
 /**
  * Business logic related with validation of the extensions of a model
  */
@@ -27,8 +29,11 @@ public interface ModelExtensionsValidator extends ModelValidator {
      * @param modelContent      the model content to validate
      * @param validationContext the validation context
      */
-    default void validateModelExtensions(byte[] modelContent, ValidationContext validationContext) {
-        validate(modelContent, validationContext);
+    default Collection<ModelValidationError> validateModelExtensions(
+        byte[] modelContent,
+        ValidationContext validationContext
+    ) {
+        return validate(modelContent, validationContext);
     }
 
     /**

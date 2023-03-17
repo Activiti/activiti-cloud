@@ -621,7 +621,7 @@ public class ModelControllerIT {
 
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("#/extensions/Process_test/mappings: 2 schema violations found");
+            .isEqualTo("Semantic model validation errors encountered: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -633,11 +633,13 @@ public class ModelControllerIT {
             .containsOnly(
                 tuple(
                     "WRONG_MAPPING_TYPE is not a valid enum value",
-                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: WRONG_MAPPING_TYPE is not a valid enum value"
+                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: " +
+                    "WRONG_MAPPING_TYPE is not a valid enum value"
                 ),
                 tuple(
                     "extraneous key [mappingTypo] is not permitted",
-                    "#/extensions/Process_test/mappings/ServiceTask_07fergb: extraneous key [mappingTypo] is not permitted"
+                    "#/extensions/Process_test/mappings/ServiceTask_07fergb: extraneous key [mappingTypo]" +
+                    " is not permitted"
                 )
             );
     }
@@ -664,7 +666,7 @@ public class ModelControllerIT {
         );
         resultActions.andExpect(status().isBadRequest());
         assertThat(resultActions.andReturn().getResponse().getErrorMessage())
-            .isEqualTo("#/extensions/Process_test/mappings/ServiceTask_06crg3b: 2 schema violations found");
+            .isEqualTo("Semantic model validation errors encountered: 2 schema violations found");
 
         final Exception resolvedException = resultActions.andReturn().getResolvedException();
         assertThat(resolvedException).isInstanceOf(SemanticModelValidationException.class);
@@ -676,11 +678,13 @@ public class ModelControllerIT {
             .containsOnly(
                 tuple(
                     "extraneous key [inputds] is not permitted",
-                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is not permitted"
+                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is " +
+                    "not permitted"
                 ),
                 tuple(
                     "extraneous key [outputss] is not permitted",
-                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is not permitted"
+                    "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is" +
+                    " not permitted"
                 )
             );
     }
@@ -709,7 +713,8 @@ public class ModelControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: String, found: Integer",
-                    "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is string"
+                    "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is string"
                 )
             );
     }
@@ -738,11 +743,13 @@ public class ModelControllerIT {
             .containsExactlyInAnyOrder(
                 tuple(
                     "expected type: Integer, found: String",
-                    "Mismatch value type - integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"
+                    "Mismatch value type - integerVariable" +
+                    "(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"
                 ),
                 tuple(
                     "string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
-                    "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
+                    "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) " +
+                    "is not a valid expression"
                 )
             );
     }
@@ -771,11 +778,13 @@ public class ModelControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: Boolean, found: Integer",
-                    "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is boolean"
+                    "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is boolean"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
-                    "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
+                    "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
+                    "valid expression"
                 )
             );
     }
@@ -820,14 +829,16 @@ public class ModelControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: String, found: Integer",
-                    "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is date"
+                    "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is " +
+                    "date"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
                     "Value format in dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a valid expression"
                 ),
                 tuple(
-                    "string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                    "string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))" +
+                    "|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
                     "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"
                 ),
                 tuple(
@@ -865,15 +876,21 @@ public class ModelControllerIT {
                     "Mismatch value type - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47k). Expected type is datetime"
                 ),
                 tuple(
-                    "string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
+                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g)"
                 ),
                 tuple(
-                    "string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
+                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f)"
                 ),
                 tuple(
-                    "string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                    "string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
+                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e)"
                 ),
                 tuple(

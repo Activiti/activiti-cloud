@@ -15,41 +15,47 @@
  */
 package org.activiti.cloud.modeling.api;
 
+import java.util.Collection;
+
 /**
  * Business logic related with validation of a model
  */
 public interface ModelValidator extends ModelValidationErrorProducer {
     /**
      * Validate the given model.
-     * @param modelContent content of the model to validate
+     *
+     * @param modelContent      content of the model to validate
      * @param validationContext the validation context
      */
-    void validate(byte[] modelContent, ValidationContext validationContext);
+    Collection<ModelValidationError> validate(byte[] modelContent, ValidationContext validationContext);
 
     /**
      * Validate the given model and its usage
-     * @param model the model to validate
-     * @param modelContent content of the model to validate
+     *
+     * @param model             the model to validate
+     * @param modelContent      content of the model to validate
      * @param validationContext the validation context
-     * @param validateUsage validate the usage of a model
+     * @param validateUsage     validate the usage of a model
      */
-    default void validate(
+    default Collection<ModelValidationError> validate(
         Model model,
         byte[] modelContent,
         ValidationContext validationContext,
         boolean validateUsage
     ) {
-        validate(modelContent, validationContext);
+        return validate(modelContent, validationContext);
     }
 
     /**
      * Get handled model type by this validator.
+     *
      * @return handled model type
      */
     ModelType getHandledModelType();
 
     /**
      * Get handled content type by this validator.
+     *
      * @return handled content type
      */
     String getHandledContentType();

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.validation;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,6 @@ import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.everit.json.schema.Schema;
@@ -46,7 +47,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
     protected abstract SchemaLoader schemaLoader();
 
     @Override
-    public void validate(byte[] bytes, ValidationContext validationContext) {
+    public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
         JSONObject processExtensionJson = null;
         try {
             log.debug("Validating json model content: " + new String(bytes));
@@ -60,19 +61,17 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                 "Semantic model validation errors encountered: " + validationException.toJSON(),
                 validationException
             );
-            throw new SemanticModelValidationException(
-                validationException.getMessage(),
-                getValidationErrors(validationException, processExtensionJson)
-            );
+            return getValidationErrors(validationException, processExtensionJson);
         }
+        return Collections.emptyList();
     }
 
     private List<ModelValidationError> getValidationErrors(
         ValidationException validationException,
-        JSONObject prcessExtenstionJson
+        JSONObject processExtensionJson
     ) {
         return getValidationExceptions(validationException)
-            .map(exception -> toModelValidationError(exception, prcessExtenstionJson))
+            .map(exception -> toModelValidationError(exception, processExtensionJson))
             .distinct()
             .collect(Collectors.toList());
     }
@@ -87,7 +86,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
 
     private ModelValidationError toModelValidationError(
         ValidationException validationException,
-        JSONObject prcessExtenstionJson
+        JSONObject processExtensionJson
     ) {
         String description = null;
 
@@ -104,7 +103,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
                     resolveExpression(
                         errorMessages.get(validationException.getKeyword()),
                         validationException.getPointerToViolation(),
-                        prcessExtenstionJson
+                        processExtensionJson
                     );
             }
         }

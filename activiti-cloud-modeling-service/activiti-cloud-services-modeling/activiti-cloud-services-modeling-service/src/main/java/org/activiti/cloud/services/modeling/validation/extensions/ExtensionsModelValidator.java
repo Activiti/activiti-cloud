@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.validation.extensions;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -23,7 +23,6 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Implementation of {@link ExtensionsJsonSchemaValidator} for validating the common extensions schema
@@ -50,6 +49,6 @@ public class ExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
     @Override
     protected List<ModelValidationError> getValidationErrors(Model model, ValidationContext validationContext) {
         // No further validation needed
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 }

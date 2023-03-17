@@ -26,7 +26,9 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_T
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeExtension;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.changeToJsonFilename;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.springframework.hateoas.IanaLinkRelations.SELF;
@@ -37,6 +39,7 @@ import feign.Response;
 import feign.form.FormData;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +62,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.util.StreamUtils;
 
 /**
  * Modeling steps for models
@@ -215,6 +219,25 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
                 .map(this::convertResponseBodyAsJsonNode)
                 .map(node -> node.get("message"))
                 .map(JsonNode::asText)
+                .findFirst()
+        )
+            .hasValueSatisfying(message -> assertThat(message).contains(errorMessage));
+    }
+
+    @Step
+    public void checkCurrentModelValidationFailureMessage(String errorMessage) throws IOException {
+        assertThat(
+            validateCurrentModel()
+                .stream()
+                .filter(response -> response.status() == SC_BAD_REQUEST)
+                .map(response -> {
+                    try {
+                        return StreamUtils.copyToString(response.body().asInputStream(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        fail("failed to read response", e);
+                        return "";
+                    }
+                })
                 .findFirst()
         )
             .hasValueSatisfying(message -> assertThat(message).contains(errorMessage));

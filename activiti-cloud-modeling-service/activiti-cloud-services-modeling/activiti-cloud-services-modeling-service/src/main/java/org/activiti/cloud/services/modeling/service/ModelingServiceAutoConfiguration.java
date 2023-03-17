@@ -27,7 +27,6 @@ import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
-import org.activiti.cloud.modeling.api.ModelValidator;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -39,9 +38,7 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
-import org.activiti.cloud.services.modeling.service.utils.AggregateErrorValidationStrategy;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
-import org.activiti.cloud.services.modeling.service.utils.ValidationStrategy;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -79,11 +76,6 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public <V extends ModelValidator> ValidationStrategy<V> modelContentValidationStrategy() {
-        return new AggregateErrorValidationStrategy<V>();
-    }
-
-    @Bean
     public ModelService modelService(
         ModelRepository modelRepository,
         ModelTypeService modelTypeService,
@@ -93,8 +85,6 @@ public class ModelingServiceAutoConfiguration {
         ProcessModelContentConverter processModelContentConverter,
         Set<ModelUpdateListener> modelUpdateListeners,
         FileMagicNumberValidator fileContentValidator,
-        ValidationStrategy<ModelContentValidator> modelContentValidationStrategy,
-        ValidationStrategy<ModelExtensionsValidator> modelExtensionsValidationStrategy,
         FileContentSanitizer fileContentSanitizer
     ) {
         return new ModelServiceImpl(
@@ -106,8 +96,6 @@ public class ModelingServiceAutoConfiguration {
             processModelContentConverter,
             modelUpdateListeners,
             fileContentValidator,
-            modelContentValidationStrategy,
-            modelExtensionsValidationStrategy,
             fileContentSanitizer
         );
     }
