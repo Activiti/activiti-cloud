@@ -1,0 +1,33 @@
+{
+  "name": "generate-signal-connector",
+  "description": "",
+  "actions": {
+    "generate-signal": {
+      "id": "generate-signal",
+      "name": "GENERATE",
+      "description": "Generate Signal",
+      "inputs": [
+        {
+          "id": "input-variable-1",
+          "name": "signal",
+          "description": "",
+          "type": "string",
+          "model": {
+            "$ref": "#/$defs/primitive/string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output-variable-1",
+          "name": "status",
+          "description": "",
+          "type": "boolean",
+          "model": {
+            "$ref": "#/$defs/primitive/boolean"
+          }
+        }
+      ]
+    }
+  }
+}

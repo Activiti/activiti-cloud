@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="model-5515ac93-2187-4e80-98fb-5da2fc359d66" name="test" targetNamespace="" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="gateway_concurrency" name="GatewayConcurrencyTest" isExecutable="true">
+    <bpmn2:documentation />
+    <bpmn2:startEvent id="startEvent">
+      <bpmn2:outgoing>flow1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:parallelGateway id="parallelGateway1">
+      <bpmn2:incoming>flow1</bpmn2:incoming>
+      <bpmn2:outgoing>flow2</bpmn2:outgoing>
+      <bpmn2:outgoing>flow3</bpmn2:outgoing>
+    </bpmn2:parallelGateway>
+    <bpmn2:sequenceFlow id="flow1" sourceRef="startEvent" targetRef="parallelGateway1" />
+    <bpmn2:serviceTask id="serviceTask1" implementation="generate-signal-connector.GENERATE">
+      <bpmn2:incoming>flow2</bpmn2:incoming>
+      <bpmn2:outgoing>flow4</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:sequenceFlow id="flow2" sourceRef="parallelGateway1" targetRef="serviceTask1" />
+    <bpmn2:sequenceFlow id="flow3" sourceRef="parallelGateway1" targetRef="intermediateCatchEvent1" />
+    <bpmn2:intermediateCatchEvent id="intermediateCatchEvent1">
+      <bpmn2:incoming>flow3</bpmn2:incoming>
+      <bpmn2:outgoing>flow5</bpmn2:outgoing>
+      <bpmn2:signalEventDefinition id="signalEventDefinition1" signalRef="signal1" />
+    </bpmn2:intermediateCatchEvent>
+    <bpmn2:inclusiveGateway id="inclusiveGateway1">
+      <bpmn2:incoming>flow4</bpmn2:incoming>
+      <bpmn2:incoming>flow5</bpmn2:incoming>
+      <bpmn2:outgoing>flow6</bpmn2:outgoing>
+    </bpmn2:inclusiveGateway>
+    <bpmn2:sequenceFlow id="flow4" sourceRef="serviceTask1" targetRef="inclusiveGateway1" />
+    <bpmn2:sequenceFlow id="flow5" sourceRef="intermediateCatchEvent1" targetRef="inclusiveGateway1" />
+    <bpmn2:endEvent id="endEvent1">
+      <bpmn2:incoming>flow6</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="flow6" sourceRef="inclusiveGateway1" targetRef="endEvent1" />
+  </bpmn2:process>
+  <bpmn2:signal id="signal1" name="concurrentSignal" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="gateway_concurrency">
+      <bpmndi:BPMNShape id="_BPMNShape_Event_2" bpmnElement="startEvent">
+        <dc:Bounds x="412" y="240" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_04orngz_di" bpmnElement="parallelGateway1">
+        <dc:Bounds x="515" y="233" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0jdm0q3_di" bpmnElement="flow1">
+        <di:waypoint x="448" y="258" />
+        <di:waypoint x="515" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_06jsx84_di" bpmnElement="serviceTask1">
+        <dc:Bounds x="650" y="218" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ze1myn_di" bpmnElement="flow2">
+        <di:waypoint x="565" y="258" />
+        <di:waypoint x="650" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1cste0x_di" bpmnElement="flow3">
+        <di:waypoint x="540" y="283" />
+        <di:waypoint x="540" y="360" />
+        <di:waypoint x="682" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1q8716d_di" bpmnElement="intermediateCatchEvent1">
+        <dc:Bounds x="682" y="342" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InclusiveGateway_12ev0bx_di" bpmnElement="inclusiveGateway1">
+        <dc:Bounds x="845" y="233" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ddvo45_di" bpmnElement="flow4">
+        <di:waypoint x="750" y="258" />
+        <di:waypoint x="845" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ozqszf_di" bpmnElement="flow5">
+        <di:waypoint x="718" y="360" />
+        <di:waypoint x="870" y="360" />
+        <di:waypoint x="870" y="283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0v3wj4q_di" bpmnElement="endEvent1">
+        <dc:Bounds x="972" y="240" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1rhryci_di" bpmnElement="flow6">
+        <di:waypoint x="895" y="258" />
+        <di:waypoint x="972" y="258" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

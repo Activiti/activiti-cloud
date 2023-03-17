@@ -29,7 +29,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -60,7 +60,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
     private IntegrationContextService integrationContextService;
 
     @Captor
-    private ArgumentCaptor<Command<?>> commandArgumentCaptor;
+    private ArgumentCaptor<CompositeCommand> commandArgumentCaptor;
 
     @Mock
     private ExecutionQuery executionQuery;
@@ -97,13 +97,12 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         handler.receive(integrationErrorEvent);
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
-        final Command<?> command = commandArgumentCaptor.getValue();
-        assertThat(command).isExactlyInstanceOf(CompositeCommand.class);
-        CompositeCommand compositeCommand = (CompositeCommand) command;
-        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
-        assertThat(compositeCommand.getCommands().get(1))
+        final CompositeCommand compositeCommand = commandArgumentCaptor.getValue();
+        assertThat(compositeCommand.getCommands()).hasSize(3);
+        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(PropagateCloudBpmnErrorCmd.class);
+        assertThat(compositeCommand.getCommands().get(2))
             .isInstanceOf(AggregateIntegrationErrorReceivedClosingEventCmd.class);
     }
 
@@ -130,10 +129,11 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         handler.receive(integrationErrorEvent);
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
-        final Command<?> command = commandArgumentCaptor.getValue();
-        assertThat(command).isExactlyInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
+        final CompositeCommand compositeCommand = commandArgumentCaptor.getValue();
+        assertThat(compositeCommand.getCommands()).hasSize(2);
+        assertThat(compositeCommand.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(compositeCommand.getCommands().get(1)).isInstanceOf(AggregateIntegrationErrorReceivedEventCmd.class);
     }
 
     private IntegrationContextEntityImpl buildIntegrationContextEntity() {
