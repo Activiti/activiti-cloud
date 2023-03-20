@@ -63,7 +63,6 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings")
     @Headers("Content-Type: application/json")
-    @Cacheable("userGroups")
     KeycloakMappingsRepresentation getUserRoles(@PathVariable("id") String userId);
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
