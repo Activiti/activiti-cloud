@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -287,8 +286,9 @@ public class ModelServiceImplTest {
     public void should_throwException_when_validatingAnInvalidModelContentInProjectContext() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        when(modelContentService.findModelValidators(modelType.getName()))
+            .thenReturn(List.of(modelContentValidator, modelContentValidator));
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
             .validateModelContent(any(), any(), any(), anyBoolean());
 
@@ -304,7 +304,7 @@ public class ModelServiceImplTest {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
             .validateModelContent(any(), any(), any(), anyBoolean());
 
@@ -320,7 +320,7 @@ public class ModelServiceImplTest {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
             .validateModelContent(any(), any(), any(), anyBoolean());
 
@@ -351,7 +351,7 @@ public class ModelServiceImplTest {
 
         when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
             .thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
@@ -391,7 +391,7 @@ public class ModelServiceImplTest {
 
         when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
             .thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
@@ -408,7 +408,7 @@ public class ModelServiceImplTest {
 
         when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
             .thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
@@ -539,6 +539,42 @@ public class ModelServiceImplTest {
         assertThat(models.getContent()).hasSize(0);
 
         verify(modelRepository, never()).getModelsByName(any(), any(), any());
+    }
+
+    @Test
+    public void should_not_return_duplicated_Errors_when_having_more_validators_registered() {
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
+        when(modelContentService.findModelValidators(modelType.getName()))
+            .thenReturn(List.of(modelContentValidator, modelContentValidator));
+        doReturn(validationErrors).when(modelContentValidator).validate(any(), any(), any(), anyBoolean());
+
+        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
+    }
+
+    @Test
+    public void should_throwException_with_single_validation_issue_when_havingMoreValidatorsRegistered() {
+        FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
+
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator, modelExtensionsValidator));
+        doReturn(List.of(new ModelValidationError()))
+            .when(modelExtensionsValidator)
+            .validateModelExtensions(any(), any());
+
+        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class)
+            .hasMessage("Semantic model validation errors encountered: 1 schema violations found");
     }
 
     private ModelImpl createModelImpl() {

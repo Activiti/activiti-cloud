@@ -636,6 +636,7 @@ public class ModelServiceImpl implements ModelService {
             .stream()
             .map(modelValidator -> modelValidator.validate(model, modelContent, validationContext, false))
             .flatMap(Collection::stream)
+            .distinct()
             .collect(Collectors.toList());
     }
 
@@ -736,6 +737,8 @@ public class ModelServiceImpl implements ModelService {
 
     private void throwExceptionIfNeeded(@NonNull List<ModelValidationError> modelValidationErrors) {
         if (!modelValidationErrors.isEmpty()) {
+            modelValidationErrors = modelValidationErrors.stream().distinct().collect(Collectors.toList());
+
             if (modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())) {
                 throw new SemanticModelValidationException(
                     String.format(
