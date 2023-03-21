@@ -735,9 +735,12 @@ public class ModelServiceImpl implements ModelService {
             .orElse(Collections.emptyList());
     }
 
-    private void throwExceptionIfNeeded(@NonNull List<ModelValidationError> modelValidationErrors) {
-        if (!modelValidationErrors.isEmpty()) {
-            modelValidationErrors = modelValidationErrors.stream().distinct().collect(Collectors.toList());
+    private void throwExceptionIfNeeded(@NonNull List<ModelValidationError> allModelValidationErrors) {
+        if (!allModelValidationErrors.isEmpty()) {
+            List<ModelValidationError> modelValidationErrors = allModelValidationErrors
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
 
             if (modelValidationErrors.stream().anyMatch(modelValidationError -> !modelValidationError.isWarning())) {
                 throw new SemanticModelValidationException(
