@@ -23,12 +23,17 @@ import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import({ IdentitySearchCacheConfiguration.class, ActivitiKeycloakAutoConfiguration.class })
 public class KeycloakClientApplication {
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @Bean
     public SecurityContextTokenProvider securityContextTokenProvider(

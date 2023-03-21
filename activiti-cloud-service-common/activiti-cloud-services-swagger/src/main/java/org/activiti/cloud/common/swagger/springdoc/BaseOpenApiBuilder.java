@@ -23,14 +23,8 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
-import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.CollectionModelConverter;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.EntityModelConverter;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.IgnoredTypesModelConverter;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.PageableMixin;
-import org.activiti.cloud.common.swagger.springdoc.modelconverter.PagedModelConverter;
-import org.springframework.beans.factory.annotation.Value;
+import org.activiti.cloud.common.swagger.springdoc.modelconverter.*;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Pageable;
 
@@ -40,14 +34,11 @@ public class BaseOpenApiBuilder {
 
     private final BuildProperties buildProperties;
 
-    @Value("${keycloak.auth-server-url:}")
-    private String authServer;
+    private final OAuthFlow swaggerOAuthFlow;
 
-    @Value("${keycloak.realm:activiti}")
-    private String realm;
-
-    public BaseOpenApiBuilder(BuildProperties buildProperties) {
+    public BaseOpenApiBuilder(BuildProperties buildProperties, OAuthFlow swaggerOAuthFlow) {
         this.buildProperties = buildProperties;
+        this.swaggerOAuthFlow = swaggerOAuthFlow;
         ModelConverters.getInstance().addConverter(new EntityModelConverter());
         ModelConverters.getInstance().addConverter(new CollectionModelConverter());
         ModelConverters.getInstance().addConverter(new PagedModelConverter());
@@ -86,13 +77,6 @@ public class BaseOpenApiBuilder {
             .bearerFormat("jwt")
             .in(SecurityScheme.In.HEADER)
             .description("Authorizing with SSO")
-            .flows(
-                new OAuthFlows()
-                    .implicit(
-                        new OAuthFlow()
-                            .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
-                            .scopes(new Scopes())
-                    )
-            );
+            .flows(new OAuthFlows().implicit(swaggerOAuthFlow));
     }
 }

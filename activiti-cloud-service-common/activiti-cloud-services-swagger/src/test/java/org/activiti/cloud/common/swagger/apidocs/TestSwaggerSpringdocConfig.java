@@ -16,15 +16,27 @@
 package org.activiti.cloud.common.swagger.apidocs;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.Scopes;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
 public class TestSwaggerSpringdocConfig {
 
+    private String AUTH_URL = "http://dummy/token/url";
+
     @Bean(name = "baseOpenApi")
     public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder) {
         return baseOpenApiBuilder.build("Test ReST API", "/test");
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuthFlow swaggerOAuthFlow() {
+        return new OAuthFlow().authorizationUrl(AUTH_URL).scopes(new Scopes());
     }
 }
