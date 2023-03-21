@@ -52,6 +52,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Configuration
 @PropertySource("classpath:keycloak-client.properties")
@@ -68,12 +70,6 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
-
-    @Value("${keycloak.auth-server-url}")
-    private String authServerUrl;
-
-    @Value("${keycloak.realm}")
-    private String realm;
 
     @Autowired
     private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
@@ -145,16 +141,16 @@ public class ActivitiKeycloakAutoConfiguration {
     }
 
     @Bean
-    public PublicKeyValidationCheck publicKeyValidationCheck(ObjectMapper objectMapper) {
-        return new PublicKeyValidationCheck(getRealmCertsUrl(), objectMapper);
-    }
-
-    private String getRealmCertsUrl() {
-        return getRealmUrl() + "/protocol/openid-connect/certs";
-    }
-
-    private String getRealmUrl() {
-        return String.format("%s/realms/%s", authServerUrl, realm);
+    public PublicKeyValidationCheck publicKeyValidationCheck(
+        ObjectMapper objectMapper,
+        @Value("${keycloak.auth-server-url}") String authServerUrl,
+        @Value("${keycloak.realm}") String realm
+    ) {
+        UriComponents uriComponents = UriComponentsBuilder
+            .fromHttpUrl(authServerUrl)
+            .pathSegment("realms", realm, "protocol/openid-connect/certs")
+            .build();
+        return new PublicKeyValidationCheck(uriComponents.toUriString(), objectMapper);
     }
 
     @Bean
