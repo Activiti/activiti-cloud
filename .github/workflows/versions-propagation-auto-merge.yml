@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [labeled]
     branches:
-      - develop
+      - 7.9.x
 
 jobs:
   versions-propagation-auto-merge:

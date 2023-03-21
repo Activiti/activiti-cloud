@@ -2,7 +2,7 @@ name: Dependabot auto-merge
 on:
   pull_request:
     branches:
-      - develop
+      - 7.9.x
 
 jobs:
   dependabot-auto-merge:
