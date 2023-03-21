@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.identity.keycloak.validator;
+package org.activiti.cloud.services.common.security.jwt.validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
@@ -33,7 +33,6 @@ import java.util.Base64.Decoder;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -41,15 +40,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public class PublicKeyValidationCheck implements ValidationCheck {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(PublicKeyValidationCheck.class);
-    private final String authServerUrl;
-    private final String realm;
+    private final String certURL;
     private final ObjectMapper objectMapper;
 
     private final ConcurrentHashMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
 
-    public PublicKeyValidationCheck(String authServerUrl, String realm, ObjectMapper objectMapper) {
-        this.authServerUrl = authServerUrl;
-        this.realm = realm;
+    public PublicKeyValidationCheck(String certURL, ObjectMapper objectMapper) {
+        this.certURL = certURL;
         this.objectMapper = objectMapper;
     }
 
@@ -93,7 +90,7 @@ public class PublicKeyValidationCheck implements ValidationCheck {
 
     private PublicKey getPublicKey(JWSHeader jwsHeader) {
         return publicKeys.computeIfAbsent(
-            getRealmCertsUrl(),
+            certURL,
             url -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader)
         );
     }
@@ -130,11 +127,4 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         return null;
     }
 
-    private String getRealmCertsUrl() {
-        return getRealmUrl() + "/protocol/openid-connect/certs";
-    }
-
-    private String getRealmUrl() {
-        return String.format("%s/realms/%s", authServerUrl, realm);
-    }
 }

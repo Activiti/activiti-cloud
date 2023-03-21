@@ -20,7 +20,7 @@ import static io.smallrye.common.constraint.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
-import org.activiti.cloud.services.identity.keycloak.validator.PublicKeyValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.PublicKeyValidationCheck;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

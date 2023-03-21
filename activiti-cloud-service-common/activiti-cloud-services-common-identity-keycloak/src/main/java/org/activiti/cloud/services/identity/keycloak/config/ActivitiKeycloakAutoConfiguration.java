@@ -29,7 +29,7 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.identity.keycloak.validator.PublicKeyValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.PublicKeyValidationCheck;
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -68,6 +68,11 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheMaxSize:1000}")
     private int cacheMaxSize;
+
+    @Value("${keycloak.auth-server-url}")
+    private String authServerUrl;
+    @Value("${keycloak.realm}")
+    private String realm;
 
     @Autowired
     private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
@@ -140,11 +145,17 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     public PublicKeyValidationCheck publicKeyValidationCheck(
-        @Value("${keycloak.auth-server-url}") String authServerUrl,
-        @Value("${keycloak.realm}") String realm,
         ObjectMapper objectMapper
     ) {
-        return new PublicKeyValidationCheck(authServerUrl, realm, objectMapper);
+        return new PublicKeyValidationCheck(getRealmCertsUrl(), objectMapper);
+    }
+
+    private String getRealmCertsUrl() {
+        return getRealmUrl() + "/protocol/openid-connect/certs";
+    }
+
+    private String getRealmUrl() {
+        return String.format("%s/realms/%s", authServerUrl, realm);
     }
 
     @Bean
