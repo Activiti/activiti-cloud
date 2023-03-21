@@ -22,6 +22,7 @@ import java.time.Duration;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
+import org.activiti.cloud.services.common.security.jwt.validator.PublicKeyValidationCheck;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakClientPrincipalDetailsProvider;
 import org.activiti.cloud.services.identity.keycloak.KeycloakHealthService;
@@ -29,7 +30,6 @@ import org.activiti.cloud.services.identity.keycloak.KeycloakManagementService;
 import org.activiti.cloud.services.identity.keycloak.KeycloakProperties;
 import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
-import org.activiti.cloud.services.common.security.jwt.validator.PublicKeyValidationCheck;
 import org.activiti.cloud.services.identity.keycloak.validator.RealmValidationCheck;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -71,6 +71,7 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${keycloak.auth-server-url}")
     private String authServerUrl;
+
     @Value("${keycloak.realm}")
     private String realm;
 
@@ -144,9 +145,7 @@ public class ActivitiKeycloakAutoConfiguration {
     }
 
     @Bean
-    public PublicKeyValidationCheck publicKeyValidationCheck(
-        ObjectMapper objectMapper
-    ) {
+    public PublicKeyValidationCheck publicKeyValidationCheck(ObjectMapper objectMapper) {
         return new PublicKeyValidationCheck(getRealmCertsUrl(), objectMapper);
     }
 

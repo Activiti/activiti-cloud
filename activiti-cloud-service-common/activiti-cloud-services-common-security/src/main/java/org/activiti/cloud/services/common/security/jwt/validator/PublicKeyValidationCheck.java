@@ -89,10 +89,7 @@ public class PublicKeyValidationCheck implements ValidationCheck {
     }
 
     private PublicKey getPublicKey(JWSHeader jwsHeader) {
-        return publicKeys.computeIfAbsent(
-            certURL,
-            url -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader)
-        );
+        return publicKeys.computeIfAbsent(certURL, url -> retrievePublicKeyFromCertsEndpoint(url, jwsHeader));
     }
 
     private PublicKey retrievePublicKeyFromCertsEndpoint(String realmCertsUrl, JWSHeader jwsHeader) {
@@ -126,5 +123,4 @@ public class PublicKeyValidationCheck implements ValidationCheck {
         }
         return null;
     }
-
 }
