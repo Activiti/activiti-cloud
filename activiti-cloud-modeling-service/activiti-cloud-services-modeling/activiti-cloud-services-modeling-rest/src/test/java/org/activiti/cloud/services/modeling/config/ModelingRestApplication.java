@@ -18,11 +18,16 @@ package org.activiti.cloud.services.modeling.config;
 import org.activiti.cloud.services.test.TestProducerAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication(exclude = TestProducerAutoConfiguration.class)
 @EnableMethodSecurity
 public class ModelingRestApplication {
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     public static void main(String[] args) {
         SpringApplication.run(ModelingRestApplication.class, args);
