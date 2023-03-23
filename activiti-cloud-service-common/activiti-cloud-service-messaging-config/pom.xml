@@ -5,7 +5,7 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>7.9.1-alpha.2</version>
+    <version>7.9.1</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
