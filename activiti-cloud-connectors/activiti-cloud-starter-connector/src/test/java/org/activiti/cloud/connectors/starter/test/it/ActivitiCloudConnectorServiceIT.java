@@ -27,23 +27,21 @@ import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ActivitiCloudConnectorApp.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
-@ContextConfiguration(initializers = RabbitMQContainerApplicationInitializer.class)
+@Import(TestChannelBinderConfiguration.class)
 public class ActivitiCloudConnectorServiceIT {
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";

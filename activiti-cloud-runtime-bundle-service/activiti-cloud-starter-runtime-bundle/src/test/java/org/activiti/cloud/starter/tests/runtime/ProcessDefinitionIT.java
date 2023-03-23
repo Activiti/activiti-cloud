@@ -22,13 +22,14 @@ import java.util.Map;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +41,10 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource({ "classpath:application-test.properties", "classpath:access-control.properties" })
 @DirtiesContext
 @ContextConfiguration(
-    classes = RuntimeITConfiguration.class,
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+    classes = { RuntimeITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
 )
+@Import(TestChannelBinderConfiguration.class)
 public class ProcessDefinitionIT {
 
     @Autowired

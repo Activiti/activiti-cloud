@@ -22,13 +22,14 @@ import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -39,9 +40,10 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 @ContextConfiguration(
-    classes = RuntimeITConfiguration.class,
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+    classes = { RuntimeITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
 )
+@Import(TestChannelBinderConfiguration.class)
 public class MessageIT {
 
     @Autowired

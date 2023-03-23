@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,7 +33,6 @@ import org.springframework.web.context.WebApplicationContext;
  * Test for modeling rest services
  */
 @SpringBootTest(classes = ModelingApplication.class)
-@DirtiesContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class ModelingApplicationIT {
 

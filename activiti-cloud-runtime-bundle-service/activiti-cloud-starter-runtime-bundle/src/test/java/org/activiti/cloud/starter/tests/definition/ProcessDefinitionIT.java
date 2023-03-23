@@ -28,7 +28,6 @@ import org.activiti.bpmn.model.FlowElement;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
@@ -38,6 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
@@ -52,9 +53,8 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource({ "classpath:application-test.properties", "classpath:access-control.properties" })
 @DirtiesContext
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Import(TestChannelBinderConfiguration.class)
 public class ProcessDefinitionIT {
 
     @Autowired

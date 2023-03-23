@@ -15,20 +15,22 @@
  */
 package org.activiti.cloud.starter.tests.conf;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.util.AbstractMap;
 import java.util.Map;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.rb.behavior.CloudActivityBehaviorFactory;
 import org.activiti.runtime.api.impl.MappingAwareActivityBehaviorFactory;
 import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -49,9 +51,8 @@ import org.springframework.test.context.ContextConfiguration;
     }
 )
 @DirtiesContext
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Import(TestChannelBinderConfiguration.class)
 public class EngineConfigurationIT {
 
     @Autowired

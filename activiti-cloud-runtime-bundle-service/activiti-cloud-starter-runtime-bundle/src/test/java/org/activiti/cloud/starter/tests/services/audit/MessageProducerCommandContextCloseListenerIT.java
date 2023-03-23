@@ -51,7 +51,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(
-    classes = ServicesAuditITConfiguration.class,
+    classes = { ServicesAuditITConfiguration.class },
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
 @DirtiesContext
@@ -96,6 +96,10 @@ public class MessageProducerCommandContextCloseListenerIT {
         verify(subject, never()).closed(any(CommandContext.class));
     }
 
+    /*
+     * This test case works just when using RabbitMQ due to the usage of the 'transacted' property
+     * of its binder. So, RabbitMQ container is required.
+     */
     @Test
     public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given

@@ -37,7 +37,6 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerExecutedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerScheduledEvent;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ProcessEngineConfiguration;
@@ -54,6 +53,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -67,8 +68,9 @@ import org.springframework.test.context.TestPropertySource;
 @DirtiesContext
 @ContextConfiguration(
     classes = { ServicesAuditITConfiguration.class, TimerAuditProducerIT.JobExecutorITProcessEngineConfigurer.class },
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+    initializers = { KeycloakContainerApplicationInitializer.class }
 )
+@Import(TestChannelBinderConfiguration.class)
 public class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";

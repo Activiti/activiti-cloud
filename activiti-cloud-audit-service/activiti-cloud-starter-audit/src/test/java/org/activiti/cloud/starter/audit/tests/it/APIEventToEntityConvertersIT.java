@@ -72,20 +72,18 @@ import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConv
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
 @TestPropertySource("classpath:application.properties")
-@ContextConfiguration(
-    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
-)
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Import(TestChannelBinderConfiguration.class)
 public class APIEventToEntityConvertersIT {
 
     @Autowired
