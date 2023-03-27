@@ -59,13 +59,15 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 @Import({ TestChannelBinderConfiguration.class })
+@DirtiesContext
 @ContextConfiguration(
     classes = ServicesAuditITConfiguration.class,
     initializers = { KeycloakContainerApplicationInitializer.class }
@@ -99,6 +101,11 @@ public class TestGatewayConcurrencyIT {
 
     private ExecutorService executorService;
 
+    @DynamicPropertySource
+    public static void concurrencyProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:concurrency-test");
+    }
+
     @BeforeEach
     public void setUp() {
         identityTokenProducer.withTestUser("testuser");
@@ -109,6 +116,7 @@ public class TestGatewayConcurrencyIT {
     @AfterEach
     public void cleanUp() {
         executorService.shutdown();
+        streamHandler.clear();
     }
 
     @Test

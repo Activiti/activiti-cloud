@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -70,7 +71,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-@DirtiesContext
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";
@@ -106,6 +107,7 @@ public class TimerAuditProducerIT {
 
     @BeforeEach
     public void setUp() {
+        asyncExecutor.start();
         streamHandler.clear();
         processEngineConfiguration.getClock().reset();
     }
@@ -113,6 +115,7 @@ public class TimerAuditProducerIT {
     @AfterEach
     public void tearDown() {
         processEngineConfiguration.getClock().reset();
+        asyncExecutor.shutdown();
     }
 
     @Test
