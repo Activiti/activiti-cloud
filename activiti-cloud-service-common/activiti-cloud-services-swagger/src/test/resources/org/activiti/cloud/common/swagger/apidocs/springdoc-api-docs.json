@@ -424,7 +424,7 @@
         "description": "Authorizing with SSO",
         "flows": {
           "implicit": {
-            "authorizationUrl": "http://authserver.mock/realms/activiti/protocol/openid-connect/auth",
+            "authorizationUrl": "http://dummy/token/url",
             "scopes": {}
           }
         }

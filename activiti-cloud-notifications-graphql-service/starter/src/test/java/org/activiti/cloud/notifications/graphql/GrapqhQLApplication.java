@@ -17,11 +17,16 @@ package org.activiti.cloud.notifications.graphql;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootApplication
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class GrapqhQLApplication {
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     public static void main(String[] args) {
         SpringApplication.run(GrapqhQLApplication.class, args);

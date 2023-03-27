@@ -15,12 +15,16 @@
  */
 package org.activiti.cloud.services.common.security.keycloak.config;
 
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.Scopes;
 import java.util.function.Function;
+import org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +34,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 @Configuration
 @PropertySource("classpath:keycloak-configuration.properties")
+@AutoConfigureBefore(SwaggerAutoConfiguration.class)
 @ConditionalOnProperty(
     value = "activiti.cloud.services.oauth2.iam-name",
     havingValue = "keycloak",
@@ -53,5 +58,16 @@ public class KeycloakSecurityConfiguration {
     @ConditionalOnMissingBean
     public JwtAccessTokenProvider jwtAccessTokenProvider(Function<Jwt, JwtAdapter> jwtAdapterSupplier) {
         return new JwtAccessTokenProvider(jwtAdapterSupplier);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuthFlow swaggerOAuthFlow(
+        @Value("${keycloak.auth-server-url}") String authServer,
+        @Value("${keycloak.realm}") String realm
+    ) {
+        return new OAuthFlow()
+            .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
+            .scopes(new Scopes());
     }
 }

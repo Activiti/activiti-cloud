@@ -22,6 +22,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.modeling.jpa.config.ModelingJpaApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.AuditorAware;
@@ -36,6 +37,9 @@ public class AuditorAwareIT {
 
     @MockBean
     private SecurityManager securityManager;
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @Test
     public void testCurrentAuditor() {
