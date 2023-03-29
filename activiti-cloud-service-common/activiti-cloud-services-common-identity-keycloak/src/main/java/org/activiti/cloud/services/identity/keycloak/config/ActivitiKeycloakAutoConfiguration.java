@@ -94,7 +94,7 @@ public class ActivitiKeycloakAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IdentityManagementService identityManagementService(KeycloakClient keycloakClient) {
+    public KeycloakManagementService identityManagementService(KeycloakClient keycloakClient) {
         return new KeycloakManagementService(keycloakClient);
     }
 

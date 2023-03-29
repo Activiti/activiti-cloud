@@ -30,7 +30,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
  * <p>For general purpose you should use {@link org.activiti.cloud.identity.IdentityService}
  *
  */
-public interface IdentityManagementService extends IdentityService {
+public interface IdentityManagementService {
     List<User> findUsers(UserSearchParams userSearchParams);
 
     List<Group> findGroups(GroupSearchParams groupSearchParams);

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.identity.UserSearchParams;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
@@ -52,7 +53,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-public class KeycloakManagementService implements IdentityManagementService {
+public class KeycloakManagementService implements IdentityManagementService, IdentityService {
 
     public static final int PAGE_START = 0;
     public static final int PAGE_SIZE = 50;
