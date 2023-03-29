@@ -66,10 +66,9 @@ create-pr: update-chart
 		gh pr create --fill --head $(ACTIVITI_CLOUD_FULL_CHART_BRANCH) --label updatebot ${GH_PR_CREATE_OPTS}
 
 update-chart: clone-chart
-	$(eval FRONTEND_VERSION ?= master)
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		env VERSION=$(RELEASE_VERSION) make version && \
-		env BACKEND_VERSION=$(RELEASE_VERSION) FRONTEND_VERSION=$(FRONTEND_VERSION) make update-docker-images
+		env BACKEND_VERSION=$(RELEASE_VERSION) make update-docker-images
 
 release: update-chart
 	echo "RELEASE_VERSION: $(RELEASE_VERSION)"
