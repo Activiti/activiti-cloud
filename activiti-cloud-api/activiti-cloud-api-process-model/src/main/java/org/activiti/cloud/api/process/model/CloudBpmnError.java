@@ -39,10 +39,8 @@ public class CloudBpmnError extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-
     public CloudBpmnError(String errorCode, String message, Throwable cause) {
         super(message, cause);
-
         requireValidErrorCode(errorCode);
 
         this.errorCode = errorCode;
