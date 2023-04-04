@@ -29,22 +29,18 @@ public class JwtAccessTokenValidator {
 
     private final List<ValidationCheck> validationChecks;
 
-    public JwtAccessTokenValidator(List<ValidationCheck> validationChecks) {
+    public JwtAccessTokenValidator(List<ValidationCheck> validationChecks)  {
         this.validationChecks = validationChecks;
     }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
-        return Optional
-            .ofNullable(jwtAdapter)
+        return Optional.ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
             .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     }
 
     public boolean isValid(Jwt accessToken) {
-<<<<<<< Updated upstream
-        return !validationChecks.stream().map(check -> check.isValid(accessToken)).anyMatch(b -> b.equals(false));
-=======
         return !validationChecks
             .stream()
             .map(check -> {
@@ -55,6 +51,6 @@ public class JwtAccessTokenValidator {
                 return result;
             })
             .anyMatch(b -> b.equals(false));
->>>>>>> Stashed changes
     }
+
 }
