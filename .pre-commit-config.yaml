@@ -18,6 +18,7 @@ repos:
       - id: prettier
         types_or:
           - java
+          - markdown
         additional_dependencies:
           - prettier@2.7.1
           - prettier-plugin-java@1.4.0

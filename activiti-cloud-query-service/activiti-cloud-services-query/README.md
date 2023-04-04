@@ -8,7 +8,7 @@ The service provides query endpoints with paging and sorting. So an example quer
 
 The approach is based upon https://github.com/spring-projects/spring-data-examples/tree/master/web/querydsl . It supports querying for nested objects and nested collections by specifying the path with '.'
 
-If the Q* classes aren't present in the /target/generated-sources directory then run mvn generate-sources from this project directory
+If the Q\* classes aren't present in the /target/generated-sources directory then run mvn generate-sources from this project directory
 
 ## Database Support
 
