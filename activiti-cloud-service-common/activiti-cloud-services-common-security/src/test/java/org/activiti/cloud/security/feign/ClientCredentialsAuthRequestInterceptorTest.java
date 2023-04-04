@@ -52,7 +52,6 @@ class ClientCredentialsAuthRequestInterceptorTest {
 
     @Test
     public void shouldSetAuthorizationHeader_whenClientCredentials() {
-        when(clientRegistration.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
         when(clientRegistration.getRegistrationId()).thenReturn("keycloak");
         when(authorizedClientManager.authorize(any())).thenReturn(authorizedClient);
         when(authorizedClient.getAccessToken()).thenReturn(accessToken);
@@ -65,7 +64,6 @@ class ClientCredentialsAuthRequestInterceptorTest {
 
     @Test
     public void shouldSetOnlyOneAuthorizationHeader_whenClientCredentials() {
-        when(clientRegistration.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
         when(clientRegistration.getRegistrationId()).thenReturn("keycloak");
         when(authorizedClientManager.authorize(any())).thenReturn(authorizedClient);
         when(authorizedClient.getAccessToken()).thenReturn(accessToken);
@@ -77,14 +75,5 @@ class ClientCredentialsAuthRequestInterceptorTest {
         clientCredentialsAuthRequestInterceptor.apply(requestTemplate);
         assertThat(requestTemplate.headers()).hasSize(1);
         assertThat(requestTemplate.headers()).containsEntry("Authorization", List.of("Bearer 123"));
-    }
-
-    @Test
-    public void shouldNotSetAnyHeader_whenIsNotClientCredentials() {
-        when(clientRegistration.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.PASSWORD);
-
-        RequestTemplate requestTemplate = new RequestTemplate();
-        clientCredentialsAuthRequestInterceptor.apply(requestTemplate);
-        assertThat(requestTemplate.headers()).isEmpty();
     }
 }
