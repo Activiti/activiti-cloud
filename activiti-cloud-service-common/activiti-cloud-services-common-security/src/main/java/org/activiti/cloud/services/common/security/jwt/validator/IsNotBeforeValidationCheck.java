@@ -38,10 +38,9 @@ public class IsNotBeforeValidationCheck implements AbastractTimeValidationCheck 
      */
     public boolean isValid(Jwt accessToken) {
         long currentTime = currentTime(offset);
-        boolean result =
-            accessToken.getNotBefore() == null || currentTime >= accessToken.getNotBefore().toEpochMilli();
+        boolean result = accessToken.getNotBefore() == null || currentTime >= accessToken.getNotBefore().toEpochMilli();
 
-        if(!result) {
+        if (!result) {
             LOGGER.error("Current time {} is before {}", currentTime, accessToken.getNotBefore());
         }
 
