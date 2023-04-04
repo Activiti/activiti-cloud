@@ -46,7 +46,9 @@ public class JwtAccessTokenValidator {
             .map(check -> {
                 boolean result = check.isValid(accessToken);
                 if(!result) {
-                    LOGGER.info("OAUTH2 token validation \"" + check.getClass() + "\" failed.");
+                    LOGGER.info("OAUTH2 token validation \"" + check.getClass() + "\" failed. "
+                                    + "Token must not before " + accessToken.getNotBefore() + " "
+                                    + "and expired at " + accessToken.getExpiresAt() + ".");
                 }
                 return result;
             })
