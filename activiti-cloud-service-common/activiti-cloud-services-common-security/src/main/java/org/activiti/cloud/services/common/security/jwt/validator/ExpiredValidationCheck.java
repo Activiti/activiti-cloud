@@ -38,7 +38,7 @@ public class ExpiredValidationCheck implements AbastractTimeValidationCheck {
                 currentTime > accessToken.getExpiresAt().toEpochMilli()
         );
         if(!result) {
-            LOGGER.error("Current time {} is greater than expiration time {}", currentTime, accessToken.getExpiresAt().toEpochMilli());
+            LOGGER.error("Current time {} is greater than expiration time {}", currentTime, accessToken.getExpiresAt());
         }
         return result;
     }
