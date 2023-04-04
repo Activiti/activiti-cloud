@@ -26,42 +26,47 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 
 public class ClientCredentialsAuthConfiguration {
 
-    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
+    public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(
+        OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
         ClientRegistrationRepository clientRegistrationRepository,
-        ClientRegistration clientRegistration) {
-
+        ClientRegistration clientRegistration
+    ) {
         return clientCredentialsAuthRequestInterceptor(
             oAuth2AuthorizedClientService,
             clientRegistrationRepository,
             clientRegistration,
-            null);
+            null
+        );
     }
 
     public ClientCredentialsAuthRequestInterceptor clientCredentialsAuthRequestInterceptor(
         OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
         ClientRegistrationRepository clientRegistrationRepository,
         ClientRegistration clientRegistration,
-        OAuth2AuthorizedClientProvider provider) {
+        OAuth2AuthorizedClientProvider provider
+    ) {
+        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+            clientRegistrationRepository,
+            oAuth2AuthorizedClientService
+        );
 
-        AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
-            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
-
-        OAuth2AuthorizedClientProviderBuilder oAuth2AuthorizedClientProviderBuilder = OAuth2AuthorizedClientProviderBuilder.builder()
+        OAuth2AuthorizedClientProviderBuilder oAuth2AuthorizedClientProviderBuilder = OAuth2AuthorizedClientProviderBuilder
+            .builder()
             .refreshToken()
             .clientCredentials();
-        OAuth2AuthorizedClientProvider authorizedClientProvider =
-            provider == null
-                ? oAuth2AuthorizedClientProviderBuilder.build()
-                : oAuth2AuthorizedClientProviderBuilder.provider(provider).build();
+        OAuth2AuthorizedClientProvider authorizedClientProvider = provider == null
+            ? oAuth2AuthorizedClientProviderBuilder.build()
+            : oAuth2AuthorizedClientProviderBuilder.provider(provider).build();
 
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
         return new ClientCredentialsAuthRequestInterceptor(authorizedClientManager, clientRegistration);
     }
 
-    public ClientRegistration clientRegistration(ClientRegistrationRepository clientRegistrationRepository,
-        @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName) {
+    public ClientRegistration clientRegistration(
+        ClientRegistrationRepository clientRegistrationRepository,
+        @Value("${activiti.cloud.services.oauth2.iam-name:keycloak}") String clientName
+    ) {
         return clientRegistrationRepository.findByRegistrationId(clientName);
     }
-
 }
