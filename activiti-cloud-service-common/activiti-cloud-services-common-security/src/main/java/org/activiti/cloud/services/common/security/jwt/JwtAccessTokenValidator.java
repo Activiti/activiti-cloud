@@ -18,41 +18,26 @@ package org.activiti.cloud.services.common.security.jwt;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JwtAccessTokenValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAccessTokenValidator.class);
-
     private final List<ValidationCheck> validationChecks;
 
-    public JwtAccessTokenValidator(List<ValidationCheck> validationChecks)  {
+    public JwtAccessTokenValidator(List<ValidationCheck> validationChecks) {
         this.validationChecks = validationChecks;
     }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
-        return Optional.ofNullable(jwtAdapter)
+        return Optional
+            .ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
             .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     }
 
     public boolean isValid(Jwt accessToken) {
-        return !validationChecks
-            .stream()
-            .map(check -> {
-                boolean result = check.isValid(accessToken);
-                if(!result) {
-                    LOGGER.info("OAUTH2 token validation \"" + check.getClass() + "\" failed. "
-                                    + "Token must not before " + accessToken.getNotBefore() + " "
-                                    + "and expired at " + accessToken.getExpiresAt() + ".");
-                }
-                return result;
-            })
-            .anyMatch(b -> b.equals(false));
+        return !validationChecks.stream().map(check -> check.isValid(accessToken)).anyMatch(b -> b.equals(false));
     }
-
 }

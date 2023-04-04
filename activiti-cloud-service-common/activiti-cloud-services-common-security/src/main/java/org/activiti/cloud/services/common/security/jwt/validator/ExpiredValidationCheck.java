@@ -15,9 +15,13 @@
  */
 package org.activiti.cloud.services.common.security.jwt.validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class ExpiredValidationCheck implements AbastractTimeValidationCheck {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpiredValidationCheck.class);
 
     private final long offset;
 
@@ -27,10 +31,15 @@ public class ExpiredValidationCheck implements AbastractTimeValidationCheck {
 
     @Override
     public boolean isValid(Jwt accessToken) {
-        return !(
+        long currentTime = currentTime(offset);
+        boolean result = !(
             accessToken.getExpiresAt() != null &&
-            accessToken.getExpiresAt().toEpochMilli() != 0 &&
-            currentTime(offset) > accessToken.getExpiresAt().toEpochMilli()
+                accessToken.getExpiresAt().toEpochMilli() != 0 &&
+                currentTime > accessToken.getExpiresAt().toEpochMilli()
         );
+        if(!result) {
+            LOGGER.error("Current time {} is greater than expiration time {}", currentTime, accessToken.getExpiresAt().toEpochMilli());
+        }
+        return result;
     }
 }

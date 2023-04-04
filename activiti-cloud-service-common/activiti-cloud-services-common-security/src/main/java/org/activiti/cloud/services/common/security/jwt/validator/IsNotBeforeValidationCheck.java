@@ -15,10 +15,13 @@
  */
 package org.activiti.cloud.services.common.security.jwt.validator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class IsNotBeforeValidationCheck implements AbastractTimeValidationCheck {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IsNotBeforeValidationCheck.class);
     private final long offset;
 
     public IsNotBeforeValidationCheck(long offset) {
@@ -34,6 +37,14 @@ public class IsNotBeforeValidationCheck implements AbastractTimeValidationCheck 
      * @return if the nbf claim is either in the past or the future
      */
     public boolean isValid(Jwt accessToken) {
-        return accessToken.getNotBefore() == null || currentTime(offset) >= accessToken.getNotBefore().toEpochMilli();
+        long currentTime = currentTime(offset);
+        boolean result =
+            accessToken.getNotBefore() == null || currentTime >= accessToken.getNotBefore().toEpochMilli();
+
+        if(!result) {
+            LOGGER.error("Current time {} is before {}", currentTime, accessToken.getNotBefore());
+        }
+
+        return result;
     }
 }
