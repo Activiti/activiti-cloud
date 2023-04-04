@@ -23,7 +23,7 @@ repos:
           - prettier@2.7.1
           - prettier-plugin-java@1.4.0
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.21.0
+    rev: 0.22.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
