@@ -40,21 +40,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = { "spring.activiti.asyncExecutorActivate=true" }
-)
+@ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(
-    classes = { ServicesAuditITConfiguration.class },
+    classes = ServicesAuditITConfiguration.class,
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
-@DirtiesContext
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class MessageProducerCommandContextCloseListenerIT {
 
     @Autowired
@@ -65,6 +65,12 @@ public class MessageProducerCommandContextCloseListenerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @DynamicPropertySource
+    public static void asyncProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.activiti.asyncExecutorActivate", () -> true);
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:msg-producer-test");
+    }
 
     @BeforeEach
     public void setUp() {

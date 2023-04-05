@@ -31,26 +31,11 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.cloud.stream.config.BindingProperties;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {
-        "ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
-        "ACT_MESSAGING_DEST_SEPARATOR=.",
-        "ACT_MESSAGING_DEST_PREFIX=namespace",
-        "ACT_RB_ENG_EVT_DEST=engine-events",
-        "ACT_RB_SIG_EVT_DEST=signal-event",
-        "ACT_RB_CMD_CONSUMER_DEST=command-consumer",
-        "ACT_RB_ASYNC_JOB_EXEC_DEST=async-executor-jobs",
-        "ACT_RB_MSG_EVT_DEST=message-events",
-        "ACT_RB_CMD_RES_DEST=command-results",
-        "ACT_INT_RES_CONSUMER=integration-result",
-        "ACT_INT_ERR_CONSUMER:integration-error",
-    }
-)
-@DirtiesContext
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("classpath:engine.properties")
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
 public class EngineConfigurationIT {

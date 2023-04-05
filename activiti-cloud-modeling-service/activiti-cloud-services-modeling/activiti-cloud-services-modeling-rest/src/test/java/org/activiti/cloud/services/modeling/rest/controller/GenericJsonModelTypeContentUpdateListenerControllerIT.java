@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -34,15 +33,16 @@ import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.utils.ModelExtensionsPrettyPrinter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -50,8 +50,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
@@ -79,16 +79,24 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
+    private Model genericJsonModel;
+
     @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(context).build();
+        genericJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        modelRepository.deleteModel(genericJsonModel);
     }
 
     @Test
     public void should_callJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(
-            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
-        );
+        genericJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
 
         String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
@@ -108,10 +116,6 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
 
     @Test
     public void should_notCallNonJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericJsonModel = modelRepository.createModel(
-            new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName())
-        );
-
         String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 
         mockMvc

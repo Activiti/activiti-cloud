@@ -19,7 +19,6 @@ import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assert
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,17 +31,18 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -50,8 +50,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles("test")
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class ConnectorModelControllerIT {
 
@@ -72,14 +72,30 @@ public class ConnectorModelControllerIT {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    private Project project;
+    private Model connectorModel;
+
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        project = null;
+        connectorModel = null;
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        if (connectorModel != null) {
+            modelRepository.deleteModel(connectorModel);
+        }
+
+        if (project != null) {
+            projectRepository.deleteProject(project);
+        }
     }
 
     @Test
     public void should_returnStatusCreatedAndConnectorName_when_creatingConnectorModel() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         mockMvc
             .perform(
@@ -93,7 +109,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_throwRequiredFieldException_when_creatingConnectorWithNameNull() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
@@ -110,7 +126,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_throwEmptyFieldException_when_creatingConnectorModelWithNameEmpty() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
@@ -127,7 +143,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_throwTooLongNameException_when_createConnectorModelWithNameTooLong() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
@@ -146,7 +162,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_create_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
@@ -159,7 +175,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_create_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
-        Project project = projectRepository.createProject(project("project-with-connectors"));
+        project = projectRepository.createProject(project("project-with-connectors"));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
@@ -172,7 +188,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModel() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         mockMvc
             .perform(
@@ -186,7 +202,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModelWithNameNull() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         mockMvc
             .perform(
@@ -200,7 +216,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_throwEmptyNameException_when_updatingConnectorModelWithNameEmpty() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", connectorModel.getId())
@@ -217,7 +233,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_throwBadNameException_when_updatingConnectorModelWithNameTooLong() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", connectorModel.getId())
@@ -236,7 +252,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_update_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", connectorModel.getId())
@@ -249,7 +265,7 @@ public class ConnectorModelControllerIT {
 
     @Test
     public void should_update_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
-        Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", connectorModel.getId())

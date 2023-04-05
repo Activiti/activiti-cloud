@@ -23,7 +23,6 @@ import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assert
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.validation.DNSNameValidator.DNS_LABEL_REGEX;
 import static org.hamcrest.Matchers.isEmptyString;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
@@ -31,13 +30,14 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -45,8 +45,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles("test")
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class ConnectorValidationControllerIT {
 
@@ -56,15 +56,21 @@ public class ConnectorValidationControllerIT {
     @Autowired
     private ModelRepository modelRepository;
 
+    private Model connectorModel;
+
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
+        connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        modelRepository.deleteModel(connectorModel);
     }
 
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",
@@ -80,8 +86,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",
@@ -97,8 +101,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",
@@ -114,8 +116,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -140,8 +140,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -163,8 +161,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_throwSyntacticValidationException_when_validatingInvalidConnectorTextContentType()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -186,8 +182,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameTooLong()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -209,8 +203,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -233,8 +225,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -254,8 +244,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -275,8 +263,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",
@@ -292,8 +278,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",
@@ -310,8 +294,6 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorErrorInvalidProperty()
         throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         assertThatResponse(
             given()
                 .multiPart(
@@ -330,8 +312,6 @@ public class ConnectorValidationControllerIT {
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
-        final Model connectorModel = modelRepository.createModel(connectorModel("connector-name"));
-
         given()
             .multiPart(
                 "file",

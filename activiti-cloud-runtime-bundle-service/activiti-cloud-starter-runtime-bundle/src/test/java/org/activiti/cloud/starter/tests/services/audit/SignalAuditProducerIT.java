@@ -46,6 +46,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.SignalRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,16 +56,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
+@ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 @ContextConfiguration(
     classes = { ServicesAuditITConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
+@DirtiesContext
 @Import(TestChannelBinderConfiguration.class)
 public class SignalAuditProducerIT {
 
@@ -84,6 +87,16 @@ public class SignalAuditProducerIT {
 
     @Autowired
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
+
+    @DynamicPropertySource
+    public static void signalProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:signal-test");
+    }
+
+    @BeforeEach
+    public void setUp() {
+        streamHandler.clear();
+    }
 
     @AfterEach
     public void cleanUp() {

@@ -40,14 +40,12 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.StreamUtils;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext
 @Import({ ProcessDefinitionAdminRestTemplate.class, TestChannelBinderConfiguration.class })
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class QueryAdminProcessDefinitionIT {

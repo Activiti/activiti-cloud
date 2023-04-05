@@ -45,6 +45,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Propagation;
@@ -53,7 +54,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProjectControllerExistingNameIT {
