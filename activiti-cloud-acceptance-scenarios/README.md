@@ -2,7 +2,7 @@
 
 This repo now includes a set of modules which contains different acceptances tests. This acceptance tests rely on having an environment to run against.
 
-In order to point to an environment you can export the following *ENVIRONMENT VARIABLES*
+In order to point to an environment you can export the following _ENVIRONMENT VARIABLES_
 
 ```
 > export GATEWAY_HOST=<custom-gateway-host>:<custom-gateway-port>
@@ -10,13 +10,15 @@ In order to point to an environment you can export the following *ENVIRONMENT VA
 > export REALM=activiti
 ```
 
-to use *https* rather than *http*:
+to use _https_ rather than _http_:
+
 ```
 > export GATEWAY_PROTOCOL=https
 > export SSO_PROTOCOL=https
 ```
 
 or specify the full URL:
+
 ```
 > export GATEWAY_URL=<custom-gateway-url>
 > export SSO_URL=<custom-sso-url>
@@ -24,7 +26,6 @@ or specify the full URL:
 
 You can use our HELM charts hosted here: [Activiti Cloud HELM Charts](https://github.com/Activiti/activiti-cloud-charts/tree/master/activiti-cloud-full-example) to create these environments
 with all the services that are tested by these acceptance tests.
-
 
 In order to run these acceptance tests you can run:
 

@@ -4,15 +4,16 @@ This module provides base springdoc configuration for swagger auto-generated spe
 
 It provides swagger specification files:
 
--   for springdoc available under `v3/api-docs` or `v3/api-docs/[groupName]`;
-    provides specification for Alfresco MediaType format
+- for springdoc available under `v3/api-docs` or `v3/api-docs/[groupName]`;
+  provides specification for Alfresco MediaType format
 
-*Note:* make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`,
+_Note:_ make sure the controllers are returning Spring objects only (`PagedModel<EntityModel<DomainObject>>`,
 `CollectionModel<EntityModel<DomainObject>>`, `EntityModel<DomainObject>`); the mapping will not work if custom `*Model`
 are used.
 
 ## How to use it
--   Add a Maven dependency to this project:
+
+- Add a Maven dependency to this project:
 
 ```xml
 <dependency>
@@ -22,23 +23,31 @@ are used.
 ```
 
 ### Springdoc
+
 When adding this as dependency provide
 
 #### for base OpenApi
+
 the following properties
+
 ```
     springdoc.packages-to-scan=[base-package-to-scan]
     springdoc.api-docs.path=[path-to-custom-api-docs]
 ```
+
 and a bean for OpenApi:
+
 ```
     @Bean
     public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder) {
         return baseOpenApiBuilder.build("title", "service-url-prefix");
     }
 ```
+
 #### for group OpenApi
+
 a bean for GroupedOpenApi:
+
 ```
     @Bean
     public GroupedOpenApi groupedOpenApi() {
