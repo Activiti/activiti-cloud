@@ -195,7 +195,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>2.7.7</spring-boot.version>
+    <spring-boot.version>2.7.10</spring-boot.version>
     <spring-web.version>5.3.25</spring-web.version>
 
     <!-- configuration properties for tests-->
