@@ -21,7 +21,7 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import java.io.IOException;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,8 +33,8 @@ import org.springframework.test.context.ContextConfiguration;
 public class ConnectorModelValidatorIT {
 
     @Autowired
-    @Qualifier("connectorSchemaLoader")
-    public SchemaLoader connectorSchemaLoader;
+    @Qualifier("connectorSchema")
+    public Schema connectorSchema;
 
     @Autowired
     public ConnectorModelType connectorModelType;
@@ -42,7 +42,7 @@ public class ConnectorModelValidatorIT {
     @Test
     public void should_notThrowException_when_validatingAValidConnectorWithExtendedProperties() throws IOException {
         ConnectorModelValidator connectorModelValidator = new ConnectorModelValidator(
-            connectorSchemaLoader,
+            connectorSchema,
             connectorModelType
         );
 

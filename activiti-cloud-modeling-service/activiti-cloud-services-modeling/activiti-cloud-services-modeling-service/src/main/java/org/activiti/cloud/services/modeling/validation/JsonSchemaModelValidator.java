@@ -30,7 +30,6 @@ import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -44,7 +43,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
 
     private final Logger log = LoggerFactory.getLogger(JsonSchemaModelValidator.class);
 
-    protected abstract SchemaLoader schemaLoader();
+    protected abstract Schema schema();
 
     @Override
     public Collection<ModelValidationError> validate(byte[] bytes, ValidationContext validationContext) {
@@ -52,7 +51,7 @@ public abstract class JsonSchemaModelValidator implements ModelValidator {
         try {
             log.debug("Validating json model content: " + new String(bytes));
             processExtensionJson = new JSONObject(new JSONTokener(new String(bytes)));
-            schemaLoader().load().build().validate(processExtensionJson);
+            schema().validate(processExtensionJson);
         } catch (JSONException jsonException) {
             log.debug("Syntactic model JSON validation errors encountered", jsonException);
             throw new SyntacticModelValidationException(jsonException);

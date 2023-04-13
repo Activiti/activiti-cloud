@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.config.ModelingApiAutoConfiguration;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,8 +48,8 @@ public class ValidatorConcurrencyIT {
     private static final int THREADS = 2;
 
     @Autowired
-    @Qualifier("connectorSchemaLoader")
-    public SchemaLoader connectorSchemaLoader;
+    @Qualifier("connectorSchema")
+    public Schema connectorSchema;
 
     @Autowired
     public ConnectorModelType connectorModelType;
@@ -70,7 +70,7 @@ public class ValidatorConcurrencyIT {
     public void should_notThrowException_when_validatingAValidConnectorConcurrently() throws InterruptedException {
         // given
         ConnectorModelValidator connectorModelValidator = new ConnectorModelValidator(
-            connectorSchemaLoader,
+            connectorSchema,
             connectorModelType
         );
 

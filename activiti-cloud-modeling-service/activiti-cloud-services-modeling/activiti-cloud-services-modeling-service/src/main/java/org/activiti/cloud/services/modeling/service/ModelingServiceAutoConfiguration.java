@@ -42,7 +42,7 @@ import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -62,8 +62,8 @@ public class ModelingServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ExtensionsModelValidator extensionsModelValidator(SchemaLoader modelExtensionsSchemaLoader) {
-        return new ExtensionsModelValidator(modelExtensionsSchemaLoader);
+    public ExtensionsModelValidator extensionsModelValidator(Schema modelExtensionsSchema) {
+        return new ExtensionsModelValidator(modelExtensionsSchema);
     }
 
     @Bean

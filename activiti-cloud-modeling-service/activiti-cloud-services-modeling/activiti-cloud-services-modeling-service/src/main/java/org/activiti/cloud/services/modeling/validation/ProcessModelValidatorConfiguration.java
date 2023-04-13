@@ -54,7 +54,7 @@ import org.activiti.cloud.services.modeling.validation.project.ProjectNameValida
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,14 +82,14 @@ public class ProcessModelValidatorConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ProcessExtensionsModelValidator processExtensionsModelValidator(
-        SchemaLoader processExtensionsSchemaLoader,
+        Schema processExtensionsSchema,
         Set<ProcessExtensionsValidator> processExtensionsValidators,
         ProcessModelType processModelType,
         JsonConverter<Extensions> jsonExtensionsConverter,
         ProcessModelContentConverter processModelContentConverter
     ) {
         return new ProcessExtensionsModelValidator(
-            processExtensionsSchemaLoader,
+            processExtensionsSchema,
             processExtensionsValidators,
             processModelType,
             jsonExtensionsConverter,
@@ -141,10 +141,10 @@ public class ProcessModelValidatorConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ConnectorModelValidator connectorModelValidator(
-        SchemaLoader connectorSchemaLoader,
+        Schema connectorSchema,
         ConnectorModelType connectorModelType
     ) {
-        return new ConnectorModelValidator(connectorSchemaLoader, connectorModelType);
+        return new ConnectorModelValidator(connectorSchema, connectorModelType);
     }
 
     @Bean
