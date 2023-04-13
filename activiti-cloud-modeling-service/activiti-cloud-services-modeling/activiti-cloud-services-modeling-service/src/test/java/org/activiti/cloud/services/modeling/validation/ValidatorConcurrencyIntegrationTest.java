@@ -19,6 +19,7 @@ import static org.activiti.cloud.modeling.api.ValidationContext.EMPTY_CONTEXT;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.awaitility.Awaitility.await;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,7 +44,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
 @ContextConfiguration(classes = { JsonSchemaModelValidatorConfiguration.class, ModelingApiAutoConfiguration.class })
-public class ValidatorConcurrencyIT {
+public class ValidatorConcurrencyIntegrationTest {
 
     private static final int THREADS = 2;
 
@@ -89,7 +90,7 @@ public class ValidatorConcurrencyIT {
                             try {
                                 return f.get();
                             } catch (Exception e) {
-                                throw new RuntimeException(e);
+                                throw new UndeclaredThrowableException(e);
                             }
                         })
                         .filter(Objects::nonNull)
