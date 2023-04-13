@@ -46,5 +46,10 @@
       <groupId>io.github.openfeign</groupId>
       <artifactId>feign-slf4j</artifactId>
     </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>${commons-fileupload.version}</version>
+    </dependency>
   </dependencies>
 </project>

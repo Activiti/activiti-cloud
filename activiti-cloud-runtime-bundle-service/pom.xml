@@ -19,6 +19,7 @@
   </modules>
   <properties>
     <activiti.version>7.10.0-alpha.5</activiti.version>
+    <commons-fileupload.version>1.5</commons-fileupload.version>
   </properties>
   <dependencyManagement>
     <dependencies>
