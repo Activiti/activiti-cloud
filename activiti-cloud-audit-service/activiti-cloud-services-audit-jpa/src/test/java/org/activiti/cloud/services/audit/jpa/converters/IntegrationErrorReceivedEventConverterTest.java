@@ -20,19 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
+import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationErrorReceivedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.IntegrationErrorReceivedEventEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 public class IntegrationErrorReceivedEventConverterTest {
 
-    @InjectMocks
-    private IntegrationErrorReceivedEventConverter converter;
+    private final IntegrationErrorReceivedEventConverter converter =
+            new IntegrationErrorReceivedEventConverter(new EventContextInfoAppender());
 
     @Test
     public void createEventEntity_should_setErrorRelatedProperties() {
@@ -57,5 +53,21 @@ public class IntegrationErrorReceivedEventConverterTest {
             .isEqualTo(errorReceivedEventEntity.getErrorClassName());
         assertThat(errorReceivedEventEntity.getStackTraceElements())
             .isEqualTo(errorReceivedEventEntity.getStackTraceElements());
+    }
+
+    @Test
+    void shouldConvertToAPIEvent() throws InterruptedException {
+        CloudIntegrationErrorReceivedEventImpl event = new CloudIntegrationErrorReceivedEventImpl(
+                new IntegrationContextImpl(),
+                "errorCode",
+                "Something went wrong",
+                RuntimeException.class.getName(),
+                Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
+        );
+        event.setSequenceNumber(1);
+        IntegrationErrorReceivedEventEntity eventEntity = new IntegrationErrorReceivedEventEntity(event);
+        Thread.sleep(1);
+        CloudRuntimeEventImpl<?, ?> apiEvent = converter.createAPIEvent(eventEntity);
+        assertThat(apiEvent.getTimestamp()).isEqualTo(event.getTimestamp());
     }
 }
