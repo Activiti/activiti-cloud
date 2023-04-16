@@ -19,12 +19,12 @@ import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
-public abstract class CloudIntegrationEventImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents> {
+public abstract class CloudIntegrationEventImpl
+        extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents> {
 
     protected static final long serialVersionUID = 1L;
 
-    protected CloudIntegrationEventImpl() {
-    }
+    protected CloudIntegrationEventImpl() {}
 
     protected CloudIntegrationEventImpl(IntegrationContext integrationContext) {
         super(integrationContext);

@@ -45,6 +45,10 @@ public class IntegrationResultReceivedEventConverter extends BaseEventToEntityCo
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         IntegrationResultReceivedEventEntity entity = IntegrationResultReceivedEventEntity.class.cast(auditEventEntity);
 
-        return new CloudIntegrationResultReceivedEventImpl(entity.getEventId(), entity.getTimestamp(), entity.getIntegrationContext());
+        return new CloudIntegrationResultReceivedEventImpl(
+                entity.getEventId(),
+                entity.getTimestamp(),
+                entity.getIntegrationContext()
+        );
     }
 }
