@@ -154,7 +154,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         }
     }
 
-    private static List<Command<?>> restoreCommandList(List<Command<?>> commands) {
+    private List<Command<?>> restoreCommandList(List<Command<?>> commands) {
         return commands
             .stream()
             .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
