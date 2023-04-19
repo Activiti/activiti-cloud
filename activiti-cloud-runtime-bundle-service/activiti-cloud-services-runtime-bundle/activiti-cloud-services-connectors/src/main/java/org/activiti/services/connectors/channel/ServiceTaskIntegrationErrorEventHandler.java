@@ -18,6 +18,7 @@ package org.activiti.services.connectors.channel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
@@ -117,6 +118,8 @@ public class ServiceTaskIntegrationErrorEventHandler {
                             return;
                         } catch (Throwable cause) {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
+                            commands = restoreCommandList(commands);
                         }
                     } else {
                         LOGGER.warn(
@@ -149,5 +152,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }
+    }
+
+    private List<Command<?>> restoreCommandList(List<Command<?>> commands) {
+        return commands
+            .stream()
+            .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
+            .collect(Collectors.toList());
     }
 }
