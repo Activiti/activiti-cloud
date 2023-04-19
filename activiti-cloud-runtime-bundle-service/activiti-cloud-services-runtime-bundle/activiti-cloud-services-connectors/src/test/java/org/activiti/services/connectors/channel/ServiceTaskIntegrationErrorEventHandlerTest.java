@@ -32,6 +32,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.delegate.BpmnError;
 import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
@@ -162,7 +163,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             .thenAnswer(invocation -> {
                 CompositeCommand arg = invocation.getArgument(0);
                 if (arg.getCommands().stream().anyMatch(c -> c instanceof PropagateCloudBpmnErrorCmd)) {
-                    throw new Exception("some exception");
+                    throw new BpmnError("some exception");
                 }
                 return arg;
             });
