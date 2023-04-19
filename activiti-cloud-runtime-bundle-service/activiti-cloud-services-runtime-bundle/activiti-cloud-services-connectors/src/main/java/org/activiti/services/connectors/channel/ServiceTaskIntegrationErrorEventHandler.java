@@ -119,11 +119,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
                         } catch (Throwable cause) {
                             LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
                             // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
-                            commands =
-                                commands
-                                    .stream()
-                                    .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
-                                    .collect(Collectors.toList());
+                            commands = restoreCommandList(commands);
                         }
                     } else {
                         LOGGER.warn(
@@ -156,5 +152,12 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
         }
+    }
+
+    private static List<Command<?>> restoreCommandList(List<Command<?>> commands) {
+        return commands
+            .stream()
+            .filter(command -> command.getClass().equals(DeleteIntegrationContextCmd.class))
+            .collect(Collectors.toList());
     }
 }

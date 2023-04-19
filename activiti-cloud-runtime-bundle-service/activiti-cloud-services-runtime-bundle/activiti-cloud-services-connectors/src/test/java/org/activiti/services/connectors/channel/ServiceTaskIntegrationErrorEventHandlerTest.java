@@ -162,7 +162,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             .thenAnswer(invocation -> {
                 CompositeCommand arg = invocation.getArgument(0);
                 if (arg.getCommands().stream().anyMatch(c -> c instanceof PropagateCloudBpmnErrorCmd)) {
-                    throw new RuntimeException("some exception");
+                    throw new Exception("some exception");
                 }
                 return arg;
             });
