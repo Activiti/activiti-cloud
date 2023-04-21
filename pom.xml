@@ -222,6 +222,11 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+    <!-- Test configuration properties -->
+    <tests.parallel>classes</tests.parallel>
+    <tests.perCoreThreadCount>true</tests.perCoreThreadCount>
+    <tests.threads>4</tests.threads>
   </properties>
   <repositories>
     <repository>
@@ -283,6 +288,11 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
+            <parallel>${tests.parallel}</parallel>
+            <parallelMavenExecution>true</parallelMavenExecution>
+            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
+            <parallelOptimized>true</parallelOptimized>
+            <threadCountClasses>${tests.threads}</threadCountClasses>
             <excludes>
               <exclude>**/*TestCase.java</exclude>
               <exclude>**/*IT.java</exclude>
@@ -478,6 +488,11 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <parallel>${tests.parallel}</parallel>
+          <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
+          <threadCountClasses>${tests.threads}</threadCountClasses>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -616,6 +631,11 @@ limitations under the License.]]>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <parallel>${tests.parallel}</parallel>
+              <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
+              <threadCountClasses>${tests.threads}</threadCountClasses>
+            </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
