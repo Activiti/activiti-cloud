@@ -17,11 +17,12 @@
     <module>activiti-cloud-acceptance-tests-core</module>
   </modules>
   <properties>
-    <serenity.version>2.3.31</serenity.version>
+    <serenity.version>3.6.12</serenity.version>
     <serenity-jbehave.version>1.46.0</serenity-jbehave.version>
     <feign-form.version>3.8.0</feign-form.version>
     <batik.version>1.16</batik.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
+    <httpclient.version>4.5.14</httpclient.version>
     <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencyManagement>
