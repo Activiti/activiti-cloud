@@ -633,6 +633,8 @@ limitations under the License.]]>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <parallel>${tests.parallel}</parallel>
+              <parallelMavenExecution>true</parallelMavenExecution>
+              <parallelOptimized>true</parallelOptimized>
               <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
               <threadCountClasses>${tests.threads}</threadCountClasses>
             </configuration>
