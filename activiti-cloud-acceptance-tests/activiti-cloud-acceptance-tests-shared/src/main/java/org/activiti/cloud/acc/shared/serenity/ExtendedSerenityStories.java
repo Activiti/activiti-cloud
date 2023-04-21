@@ -23,6 +23,10 @@ import org.jbehave.core.steps.InjectableStepsFactory;
  */
 public class ExtendedSerenityStories extends SerenityStories {
 
+    public ExtendedSerenityStories() {
+        configuredEmbedder().embedderControls().doGenerateViewAfterStories(false);
+    }
+
     @Override
     public InjectableStepsFactory stepsFactory() {
         return new ExtendedSerenityStepsFactory(configuration(), getRootPackage(), getClassLoader());
