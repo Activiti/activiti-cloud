@@ -290,6 +290,7 @@
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
             <parallel>${tests.parallel}</parallel>
+            <parallelMavenExecution>true</parallelMavenExecution>
             <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
             <parallelOptimized>true</parallelOptimized>
             <threadCountClasses>${tests.threads}</threadCountClasses>
@@ -306,6 +307,7 @@
           <version>${maven-failsafe-plugin.version}</version>
           <configuration>
             <parallel>${tests.itParallel}</parallel>
+            <parallelMavenExecution>true</parallelMavenExecution>
             <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
             <parallelOptimized>true</parallelOptimized>
             <threadCountClasses>${tests.threads}</threadCountClasses>
@@ -639,6 +641,7 @@ limitations under the License.]]>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
               <parallel>${tests.itParallel}</parallel>
+              <parallelMavenExecution>true</parallelMavenExecution>
               <parallelOptimized>true</parallelOptimized>
               <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
               <threadCountClasses>${tests.threads}</threadCountClasses>
