@@ -500,6 +500,7 @@ limitations under the License.]]>
           <parallel>${tests.parallel}</parallel>
           <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
           <threadCountClasses>${tests.threads}</threadCountClasses>
+          <parallelMavenExecution>true</parallelMavenExecution>
         </configuration>
       </plugin>
       <plugin>
