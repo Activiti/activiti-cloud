@@ -304,6 +304,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
+          <configuration>
+            <parallel>${tests.parallel}</parallel>
+            <parallelMavenExecution>true</parallelMavenExecution>
+            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
+            <parallelOptimized>true</parallelOptimized>
+            <threadCountClasses>${tests.threads}</threadCountClasses>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.mysema.maven</groupId>
