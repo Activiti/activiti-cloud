@@ -13,7 +13,7 @@
 
   <properties>
     <start-class>org.activiti.cloud.query.QueryApplication</start-class>
-    <graphql-java.version>19.2</graphql-java.version>
+    <graphql-java.version>19.4</graphql-java.version>
   </properties>
 
   <modules>
