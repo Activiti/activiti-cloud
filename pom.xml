@@ -224,7 +224,8 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
     <!-- Test configuration properties -->
-    <tests.parallel>classes</tests.parallel>
+    <tests.parallel>both</tests.parallel>
+    <tests.itParallel>classes</tests.itParallel>
     <tests.perCoreThreadCount>true</tests.perCoreThreadCount>
     <tests.threads>4</tests.threads>
   </properties>
@@ -305,7 +306,7 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
           <configuration>
-            <parallel>${tests.parallel}</parallel>
+            <parallel>${tests.itParallel}</parallel>
             <parallelMavenExecution>true</parallelMavenExecution>
             <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
             <parallelOptimized>true</parallelOptimized>
@@ -639,7 +640,7 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <parallel>${tests.parallel}</parallel>
+              <parallel>${tests.itParallel}</parallel>
               <parallelMavenExecution>true</parallelMavenExecution>
               <parallelOptimized>true</parallelOptimized>
               <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
