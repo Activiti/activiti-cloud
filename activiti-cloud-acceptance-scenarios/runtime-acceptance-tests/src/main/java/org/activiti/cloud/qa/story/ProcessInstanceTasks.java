@@ -451,7 +451,7 @@ public class ProcessInstanceTasks {
     public void queryProcessInstanceDiagramAdminUnauthorized() {
         try {
             processInstanceAdminDiagram = processQueryAdminSteps.getProcessInstanceDiagram(processInstance.getId());
-        } catch (FeignException expected) {
+        } catch (FeignException.Forbidden expected) {
             assertThat(expected.status()).isEqualTo(403);
             return;
         }
