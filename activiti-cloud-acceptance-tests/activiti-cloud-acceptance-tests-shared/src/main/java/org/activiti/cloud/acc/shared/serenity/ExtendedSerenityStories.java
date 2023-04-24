@@ -24,6 +24,7 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 public class ExtendedSerenityStories extends SerenityStories {
 
     public ExtendedSerenityStories() {
+        // to fix JDK 17 reflective illegal access exception
         configuredEmbedder().embedderControls().doGenerateViewAfterStories(false);
     }
 
