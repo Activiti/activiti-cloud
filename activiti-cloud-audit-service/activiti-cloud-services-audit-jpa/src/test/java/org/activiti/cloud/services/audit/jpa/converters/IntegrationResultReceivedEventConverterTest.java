@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 class IntegrationResultReceivedEventConverterTest {
 
     private final IntegrationResultReceivedEventConverter integrationResultReceivedEventConverter = new IntegrationResultReceivedEventConverter(
-            new EventContextInfoAppender()
+        new EventContextInfoAppender()
     );
 
     @Test
