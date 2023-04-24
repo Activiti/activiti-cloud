@@ -311,7 +311,7 @@ jobs:
     needs:
       - build
       - delete-test-images
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.head_ref, 'preview')) }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && (contains(github.head_ref, 'preview') || contains(github.event.pull_request.labels.*.name, 'preview'))) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
 
