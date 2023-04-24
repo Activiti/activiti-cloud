@@ -20,7 +20,7 @@ import org.activiti.api.process.model.events.IntegrationEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudIntegrationEventImpl
-        extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents> {
+    extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents> {
 
     protected static final long serialVersionUID = 1L;
 

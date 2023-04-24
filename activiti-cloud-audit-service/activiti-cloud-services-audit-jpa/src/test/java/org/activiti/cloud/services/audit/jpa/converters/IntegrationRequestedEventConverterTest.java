@@ -26,9 +26,8 @@ import org.junit.jupiter.api.Test;
 
 class IntegrationRequestedEventConverterTest {
 
-    private final IntegrationRequestedEventConverter integrationRequestedEventConverter = new IntegrationRequestedEventConverter(
-            new EventContextInfoAppender()
-    );
+    private final IntegrationRequestedEventConverter integrationRequestedEventConverter =
+        new IntegrationRequestedEventConverter(new EventContextInfoAppender());
 
     @Test
     void shouldConvertToAPIEvent() throws InterruptedException {

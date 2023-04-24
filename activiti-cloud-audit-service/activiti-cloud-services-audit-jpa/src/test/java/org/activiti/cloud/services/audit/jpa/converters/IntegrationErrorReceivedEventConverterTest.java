@@ -28,18 +28,18 @@ import org.junit.jupiter.api.Test;
 public class IntegrationErrorReceivedEventConverterTest {
 
     private final IntegrationErrorReceivedEventConverter converter = new IntegrationErrorReceivedEventConverter(
-                    new EventContextInfoAppender()
-            );
+        new EventContextInfoAppender()
+    );
 
     @Test
     public void createEventEntity_should_setErrorRelatedProperties() {
         //given
         CloudIntegrationErrorReceivedEventImpl errorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(
-          new IntegrationContextImpl(),
-          "errorCode",
-          "Something went wrong",
-          RuntimeException.class.getName(),
-          Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
+            new IntegrationContextImpl(),
+            "errorCode",
+            "Something went wrong",
+            RuntimeException.class.getName(),
+            Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
         );
         errorReceivedEvent.setSequenceNumber(1);
 
@@ -59,11 +59,11 @@ public class IntegrationErrorReceivedEventConverterTest {
     @Test
     void shouldConvertToAPIEvent() throws InterruptedException {
         CloudIntegrationErrorReceivedEventImpl event = new CloudIntegrationErrorReceivedEventImpl(
-                new IntegrationContextImpl(),
-                "errorCode",
-                "Something went wrong",
-                RuntimeException.class.getName(),
-                Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
+            new IntegrationContextImpl(),
+            "errorCode",
+            "Something went wrong",
+            RuntimeException.class.getName(),
+            Collections.singletonList(new StackTraceElement("any", "any", "any", 1))
         );
         event.setSequenceNumber(1);
         IntegrationErrorReceivedEventEntity eventEntity = new IntegrationErrorReceivedEventEntity(event);
