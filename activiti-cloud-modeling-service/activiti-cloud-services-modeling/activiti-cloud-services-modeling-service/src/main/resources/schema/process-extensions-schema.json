@@ -102,6 +102,7 @@
             "json",
             "file",
             "folder",
+            "content",
             "array"
           ]
         },
