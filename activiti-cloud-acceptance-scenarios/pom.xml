@@ -21,7 +21,7 @@
   <properties>
     <skipTests>${noAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <java.release>11</java.release>
+    <java.release>17</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
