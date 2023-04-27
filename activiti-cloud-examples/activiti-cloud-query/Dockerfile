@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.2.7-slim
+FROM eclipse-temurin:17-jdk-focal
 
 # install missing fontconfig package
 RUN apt-get update && apt-get install -y --no-install-recommends fontconfig

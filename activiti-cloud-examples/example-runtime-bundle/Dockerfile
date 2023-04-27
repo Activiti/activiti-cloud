@@ -8,8 +8,8 @@
 # WORKDIR /opt
 # ENTRYPOINT ["sh","-c", "java $JAVA_OPTS -jar app.jar"]
 
-FROM adoptopenjdk/openjdk11:jdk-11.0.2.9-slim
-RUN  apt update
+FROM eclipse-temurin:17-jdk-focal
+RUN apt update
 RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 RUN apt -y install ttf-mscorefonts-installer fontconfig
 RUN fc-cache -f -v
