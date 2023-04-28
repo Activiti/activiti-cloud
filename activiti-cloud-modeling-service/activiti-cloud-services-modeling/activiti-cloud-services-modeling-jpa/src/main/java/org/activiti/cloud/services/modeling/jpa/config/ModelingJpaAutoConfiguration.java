@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.jpa.config;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
@@ -22,9 +25,11 @@ import org.activiti.cloud.services.modeling.jpa.ModelRepositoryImpl;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditorAwareImpl;
 import org.activiti.cloud.services.modeling.jpa.version.ExtendedJpaRepositoryFactoryBean;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -34,9 +39,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     basePackages = { "org.activiti.cloud.services.modeling.jpa" },
     repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class
 )
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+@EnableJpaAuditing(auditorAwareRef = "auditorAware", dateTimeProviderRef = "localDateTimeProvider")
 @EntityScan("org.activiti.cloud.services.modeling.entity")
 public class ModelingJpaAutoConfiguration {
+
+    @Bean("localDateTimeProvider")
+    @ConditionalOnMissingBean(DateTimeProvider.class)
+    public DateTimeProvider localDateTimeProvider() {
+        return () -> Optional.of(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+    }
 
     @Bean("auditorAware")
     public AuditorAware<String> auditorAware(SecurityManager securityManager) {
