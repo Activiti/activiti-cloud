@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.jpa.audit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.modeling.jpa.config.ModelingJpaApplication;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 
 @SpringBootTest(classes = ModelingJpaApplication.class)
@@ -32,6 +34,9 @@ public class AuditorAwareIT {
 
     @Autowired
     private AuditorAware<String> auditorAware;
+
+    @Autowired
+    private DateTimeProvider localDateTimeProvider;
 
     @MockBean
     private SecurityManager securityManager;
@@ -50,5 +55,15 @@ public class AuditorAwareIT {
                 // THEN
                 assertThat(currentUser).isEqualTo("test_user")
             );
+    }
+
+    @Test
+    public void testLocalDateTimeProvider() {
+        // WHEN
+        assertThat(localDateTimeProvider.getNow())
+            .hasValueSatisfying(now -> {
+                // THEN
+                assertThat(LocalDateTime.from(now).getNano()).isLessThanOrEqualTo(999_999_000);
+            });
     }
 }
