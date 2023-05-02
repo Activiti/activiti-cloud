@@ -52,8 +52,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <forkCount>1</forkCount>
-          <reuseForks>false</reuseForks>
+          <forkMode>never</forkMode>
           <skip>true</skip>
           <skipTests>${skipTests}</skipTests>
         </configuration>
@@ -67,8 +66,7 @@
             <include>**/*Tests.java</include>
             <include>**/*TestSuite.java</include>
           </includes>
-          <forkCount>1</forkCount>
-          <reuseForks>false</reuseForks>
+          <forkMode>never</forkMode>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>
