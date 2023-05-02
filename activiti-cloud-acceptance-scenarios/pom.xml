@@ -52,6 +52,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <forkCount>0</forkCount>
+          <parallelMavenExecution>false</parallelMavenExecution>
           <skip>true</skip>
           <skipTests>${skipTests}</skipTests>
         </configuration>
@@ -65,7 +67,7 @@
             <include>**/*Tests.java</include>
             <include>**/*TestSuite.java</include>
           </includes>
-          <forkCount>1</forkCount>
+          <parallelMavenExecution>false</parallelMavenExecution>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>
