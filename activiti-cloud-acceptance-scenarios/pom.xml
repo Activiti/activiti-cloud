@@ -66,6 +66,7 @@
             <include>**/*Tests.java</include>
             <include>**/*TestSuite.java</include>
           </includes>
+          <forkMode>none</forkMode>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>
