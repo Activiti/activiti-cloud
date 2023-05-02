@@ -224,10 +224,8 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
     <!-- Test configuration properties -->
-    <tests.parallel>both</tests.parallel>
-    <tests.itParallel>classes</tests.itParallel>
-    <tests.perCoreThreadCount>true</tests.perCoreThreadCount>
-    <tests.threads>4</tests.threads>
+    <tests.forks>4C</tests.forks>
+    <tests.reuseForks>true</tests.reuseForks>
   </properties>
   <repositories>
     <repository>
@@ -289,11 +287,8 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
-            <parallel>${tests.parallel}</parallel>
-            <parallelMavenExecution>true</parallelMavenExecution>
-            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-            <parallelOptimized>true</parallelOptimized>
-            <threadCountClasses>${tests.threads}</threadCountClasses>
+            <forkCount>${tests.forks}</forkCount>
+            <reuseForks>${tests.reuseForks}</reuseForks>
             <excludes>
               <exclude>**/*TestCase.java</exclude>
               <exclude>**/*IT.java</exclude>
@@ -306,11 +301,8 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
           <configuration>
-            <parallel>${tests.itParallel}</parallel>
-            <parallelMavenExecution>true</parallelMavenExecution>
-            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-            <parallelOptimized>true</parallelOptimized>
-            <threadCountClasses>${tests.threads}</threadCountClasses>
+            <forkCount>${tests.forks}</forkCount>
+            <reuseForks>${tests.reuseForks}</reuseForks>
           </configuration>
         </plugin>
         <plugin>
@@ -497,10 +489,8 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <parallel>${tests.parallel}</parallel>
-          <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-          <threadCountClasses>${tests.threads}</threadCountClasses>
-          <parallelMavenExecution>true</parallelMavenExecution>
+          <forkCount>${tests.forks}</forkCount>
+          <reuseForks>${tests.reuseForks}</reuseForks>
         </configuration>
       </plugin>
       <plugin>
@@ -641,11 +631,8 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <parallel>${tests.itParallel}</parallel>
-              <parallelMavenExecution>true</parallelMavenExecution>
-              <parallelOptimized>true</parallelOptimized>
-              <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-              <threadCountClasses>${tests.threads}</threadCountClasses>
+              <forkCount>${tests.forks}</forkCount>
+              <reuseForks>${tests.reuseForks}</reuseForks>
             </configuration>
             <executions>
               <execution>
