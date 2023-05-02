@@ -22,7 +22,8 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.validation.DNSNameValidator.DNS_LABEL_REGEX;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -96,7 +97,7 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -111,7 +112,7 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -273,7 +274,7 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -288,7 +289,7 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -322,6 +323,6 @@ public class ConnectorValidationControllerIT {
             .post("/v1/models/{modelId}/validate", connectorModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 }

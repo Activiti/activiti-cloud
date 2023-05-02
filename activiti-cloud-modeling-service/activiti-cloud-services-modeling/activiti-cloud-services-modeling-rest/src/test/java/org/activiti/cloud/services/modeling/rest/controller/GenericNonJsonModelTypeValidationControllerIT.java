@@ -19,7 +19,8 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -120,7 +121,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
             .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
 
         verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
@@ -143,7 +144,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
             .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
 
         verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
@@ -166,7 +167,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
             .post("/v1/models/{modelId}/validate", genericNonJsonModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
 
         verify(genericNonJsonExtensionsValidator, times(0)).validateModelExtensions(any(), any());
 
@@ -217,7 +218,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
             .post("/v1/models/{modelId}/validate/extensions", genericNonJsonModel.getId())
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
 
         verify(genericNonJsonContentValidator, times(0)).validateModelContent(any(), any());
 
