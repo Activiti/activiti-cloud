@@ -294,6 +294,8 @@
             <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
             <parallelOptimized>true</parallelOptimized>
             <threadCountClasses>${tests.threads}</threadCountClasses>
+            <forkCount>1</forkCount>
+            <reuseForks>true</reuseForks>
             <excludes>
               <exclude>**/*TestCase.java</exclude>
               <exclude>**/*IT.java</exclude>
@@ -311,6 +313,8 @@
             <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
             <parallelOptimized>true</parallelOptimized>
             <threadCountClasses>${tests.threads}</threadCountClasses>
+            <forkCount>1</forkCount>
+            <reuseForks>true</reuseForks>
           </configuration>
         </plugin>
         <plugin>
@@ -501,6 +505,8 @@ limitations under the License.]]>
           <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
           <threadCountClasses>${tests.threads}</threadCountClasses>
           <parallelMavenExecution>true</parallelMavenExecution>
+          <forkCount>1</forkCount>
+          <reuseForks>true</reuseForks>
         </configuration>
       </plugin>
       <plugin>
@@ -646,6 +652,8 @@ limitations under the License.]]>
               <parallelOptimized>true</parallelOptimized>
               <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
               <threadCountClasses>${tests.threads}</threadCountClasses>
+              <forkCount>1</forkCount>
+              <reuseForks>true</reuseForks>
             </configuration>
             <executions>
               <execution>
