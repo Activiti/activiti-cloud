@@ -18,6 +18,8 @@ package org.activiti.cloud.services.modeling.rest.controller;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
+import static org.activiti.cloud.services.modeling.Resources.PROJECT_REPOSITORY;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorFileContent;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.multipartExtensionsFile;
@@ -51,6 +53,9 @@ import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -67,6 +72,12 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @WithMockModelerUser
 @Transactional
+@ResourceLocks(
+    {
+        @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = PROJECT_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+    }
+)
 public class ModelValidationControllerIT {
 
     @Autowired

@@ -30,6 +30,7 @@ import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = ActivitiCloudConnectorApp.class)
 @ActiveProfiles(ConnectorsITStreamHandlers.CONNECTOR_IT)
 @Import(TestChannelBinderConfiguration.class)
+@Isolated
 public class ActivitiCloudConnectorServiceIT {
 
     private static final String INTEGRATION_CONTEXT_ID = "integrationContextId";

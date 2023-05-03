@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.Resources.TASK_CANDIDATE_GROUP_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.TASK_CANDIDATE_USER_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.TASK_REPOSITORY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +36,9 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +46,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(properties = "spring.main.banner-mode=off")
 @EnableAutoConfiguration
+@ResourceLocks(
+    {
+        @ResourceLock(value = TASK_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = TASK_CANDIDATE_USER_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = TASK_CANDIDATE_GROUP_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+    }
+)
 public class RestrictTaskEntityQueryIT {
 
     @Autowired

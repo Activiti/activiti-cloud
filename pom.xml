@@ -222,12 +222,6 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-
-    <!-- Test configuration properties -->
-    <tests.parallel>both</tests.parallel>
-    <tests.itParallel>classes</tests.itParallel>
-    <tests.perCoreThreadCount>true</tests.perCoreThreadCount>
-    <tests.threads>4</tests.threads>
   </properties>
   <repositories>
     <repository>
@@ -289,13 +283,14 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
-            <parallel>${tests.parallel}</parallel>
-            <parallelMavenExecution>true</parallelMavenExecution>
-            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-            <parallelOptimized>true</parallelOptimized>
-            <threadCountClasses>${tests.threads}</threadCountClasses>
-            <forkCount>1</forkCount>
-            <reuseForks>true</reuseForks>
+            <properties>
+              <configurationParameters>
+                junit.jupiter.execution.parallel.enabled=true
+                junit.jupiter.execution.parallel.config.strategy=dynamic
+                junit.jupiter.execution.parallel.mode.default=same_thread
+                junit.jupiter.execution.parallel.mode.classes.default=concurrent
+              </configurationParameters>
+            </properties>
             <excludes>
               <exclude>**/*TestCase.java</exclude>
               <exclude>**/*IT.java</exclude>
@@ -308,13 +303,14 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
           <configuration>
-            <parallel>${tests.itParallel}</parallel>
-            <parallelMavenExecution>true</parallelMavenExecution>
-            <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-            <parallelOptimized>true</parallelOptimized>
-            <threadCountClasses>${tests.threads}</threadCountClasses>
-            <forkCount>1</forkCount>
-            <reuseForks>true</reuseForks>
+            <properties>
+              <configurationParameters>
+                junit.jupiter.execution.parallel.enabled=true
+                junit.jupiter.execution.parallel.config.strategy=dynamic
+                junit.jupiter.execution.parallel.mode.default=same_thread
+                junit.jupiter.execution.parallel.mode.classes.default=concurrent
+              </configurationParameters>
+            </properties>
           </configuration>
         </plugin>
         <plugin>
@@ -501,12 +497,14 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <parallel>${tests.parallel}</parallel>
-          <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-          <threadCountClasses>${tests.threads}</threadCountClasses>
-          <parallelMavenExecution>true</parallelMavenExecution>
-          <forkCount>1</forkCount>
-          <reuseForks>true</reuseForks>
+          <properties>
+            <configurationParameters>
+              junit.jupiter.execution.parallel.enabled=true
+              junit.jupiter.execution.parallel.config.strategy=dynamic
+              junit.jupiter.execution.parallel.mode.default=same_thread
+              junit.jupiter.execution.parallel.mode.classes.default=concurrent
+            </configurationParameters>
+          </properties>
         </configuration>
       </plugin>
       <plugin>
@@ -647,13 +645,14 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
-              <parallel>${tests.itParallel}</parallel>
-              <parallelMavenExecution>true</parallelMavenExecution>
-              <parallelOptimized>true</parallelOptimized>
-              <perCoreThreadCount>${tests.perCoreThreadCount}</perCoreThreadCount>
-              <threadCountClasses>${tests.threads}</threadCountClasses>
-              <forkCount>1</forkCount>
-              <reuseForks>true</reuseForks>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled=true
+                  junit.jupiter.execution.parallel.config.strategy=dynamic
+                  junit.jupiter.execution.parallel.mode.default=same_thread
+                  junit.jupiter.execution.parallel.mode.classes.default=concurrent
+                </configurationParameters>
+              </properties>
             </configuration>
             <executions>
               <execution>

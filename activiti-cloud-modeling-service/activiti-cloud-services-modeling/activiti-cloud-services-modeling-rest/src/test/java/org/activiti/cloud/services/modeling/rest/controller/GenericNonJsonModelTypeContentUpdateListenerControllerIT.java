@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
 import static org.activiti.cloud.services.modeling.mock.MockMultipartRequestBuilder.putMultipart;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -35,6 +36,9 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -52,6 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@ResourceLocks({ @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE) })
 public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
 
     @Autowired

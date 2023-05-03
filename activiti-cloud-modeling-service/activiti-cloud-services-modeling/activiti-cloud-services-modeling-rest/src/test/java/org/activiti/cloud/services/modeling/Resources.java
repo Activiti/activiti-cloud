@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.tests;
+package org.activiti.cloud.services.modeling;
 
-import org.junit.jupiter.api.parallel.Isolated;
-import org.springframework.test.context.TestPropertySource;
+public class Resources {
 
-@TestPropertySource(locations = "classpath:application-test.properties", properties = "spring.jpa.open-in-view=false")
-@Isolated
-public class QueryProcessInstancesEntityDisabledOpenInViewIT extends QueryProcessInstancesEntityIT {}
+    public static final String MODEL_REPOSITORY = "ModelRepository";
+    public static final String PROJECT_REPOSITORY = "ProjectRepository";
+}

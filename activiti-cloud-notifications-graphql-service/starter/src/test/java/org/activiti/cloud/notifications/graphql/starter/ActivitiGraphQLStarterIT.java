@@ -68,6 +68,7 @@ import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -96,6 +97,7 @@ import reactor.test.StepVerifier;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@Isolated
 public class ActivitiGraphQLStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(classes = RuntimeBundleApplication.class)
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@Isolated
 public class RuntimeBundleApplicationIT {
 
     @Autowired

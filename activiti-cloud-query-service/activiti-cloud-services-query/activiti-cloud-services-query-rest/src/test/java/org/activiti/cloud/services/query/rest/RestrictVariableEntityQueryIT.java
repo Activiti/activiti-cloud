@@ -15,6 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.Resources.PROCESS_INSTANCE_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.TASK_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.TASK_VARIABLE_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.VARIABLE_REPOSITORY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +40,9 @@ import org.activiti.cloud.services.security.ProcessVariableLookupRestrictionServ
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +55,14 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
+@ResourceLocks(
+    {
+        @ResourceLock(value = TASK_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = PROCESS_INSTANCE_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = VARIABLE_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = TASK_VARIABLE_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+    }
+)
 public class RestrictVariableEntityQueryIT {
 
     @Autowired

@@ -63,6 +63,7 @@ import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.slf4j.Logger;
@@ -104,6 +105,7 @@ import org.springframework.transaction.support.TransactionTemplate;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@Isolated
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class JobExecutorIT {
 

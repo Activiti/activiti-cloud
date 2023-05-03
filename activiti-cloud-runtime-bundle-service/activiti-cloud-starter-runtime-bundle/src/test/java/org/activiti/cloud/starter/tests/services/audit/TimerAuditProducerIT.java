@@ -48,6 +48,7 @@ import org.activiti.spring.boot.ProcessEngineConfigurationConfigurer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@Isolated
 public class TimerAuditProducerIT {
 
     public static final String TIMER_AUDIT_PRODUCER_IT = "TimerAuditProducerIT";

@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.rest.controller;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
+import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
@@ -46,6 +47,9 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -62,6 +66,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@ResourceLocks({ @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE) })
 public class GenericJsonModelTypeValidationControllerIT {
 
     @Autowired

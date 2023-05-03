@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.entry;
 import java.util.AbstractMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
 
@@ -39,6 +40,7 @@ import org.springframework.cloud.stream.config.BindingProperties;
         "activiti.cloud.messaging.destinations.[Constants\\ Connector.constantsActionName].name=constants_connector.constants_action_name",
     }
 )
+@Isolated
 public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
     @Test

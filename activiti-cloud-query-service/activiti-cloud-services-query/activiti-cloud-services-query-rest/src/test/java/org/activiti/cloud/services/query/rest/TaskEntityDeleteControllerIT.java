@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.Resources.PROCESS_DEFINITION_REPOSITORY;
+import static org.activiti.cloud.services.query.Resources.TASK_REPOSITORY;
 import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +43,9 @@ import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -60,6 +65,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser("admin")
+@ResourceLocks(
+    {
+        @ResourceLock(value = TASK_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+        @ResourceLock(value = PROCESS_DEFINITION_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
+    }
+)
 public class TaskEntityDeleteControllerIT {
 
     private static final String TASK_ADMIN_ALFRESCO_IDENTIFIER = "task-admin-alfresco";
