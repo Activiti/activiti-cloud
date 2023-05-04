@@ -3,13 +3,12 @@ on:
   pull_request:
     types: [labeled]
     branches:
-      - develop
-
+      - 7.10.x
 jobs:
   versions-propagation-auto-merge:
     runs-on: ubuntu-latest
     steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v1.36.0
-      with:
-        auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-        approval-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v1.36.0
+        with:
+          auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          approval-token: ${{ secrets.GITHUB_TOKEN }}
