@@ -21,7 +21,7 @@ import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ValidationContext;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -29,11 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
 
-    private final SchemaLoader modelExtensionsSchemaLoader;
+    private final Schema modelExtensionsSchema;
 
     @Autowired
-    public ExtensionsModelValidator(SchemaLoader modelExtensionsSchemaLoader) {
-        this.modelExtensionsSchemaLoader = modelExtensionsSchemaLoader;
+    public ExtensionsModelValidator(Schema modelExtensionsSchema) {
+        this.modelExtensionsSchema = modelExtensionsSchema;
     }
 
     @Override
@@ -42,8 +42,8 @@ public class ExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
     }
 
     @Override
-    protected SchemaLoader schemaLoader() {
-        return modelExtensionsSchemaLoader;
+    protected Schema schema() {
+        return modelExtensionsSchema;
     }
 
     @Override

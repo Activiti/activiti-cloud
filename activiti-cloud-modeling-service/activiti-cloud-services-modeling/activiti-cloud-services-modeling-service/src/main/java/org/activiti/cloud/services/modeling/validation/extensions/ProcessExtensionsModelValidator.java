@@ -18,7 +18,11 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.Model;
@@ -32,7 +36,7 @@ import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
 import org.activiti.cloud.services.modeling.converter.BpmnProcessModelContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidator {
@@ -42,7 +46,7 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     public static final String UNKNOWN_PROCESS_ID_VALIDATION_ERROR_DESCRIPTION =
         "The process extensions are bound to an unknown process id '%s'";
 
-    private final SchemaLoader processExtensionsSchemaLoader;
+    private final Schema processExtensionsSchema;
 
     private final Set<ProcessExtensionsValidator> processExtensionsValidators;
 
@@ -54,13 +58,13 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
 
     @Autowired
     public ProcessExtensionsModelValidator(
-        SchemaLoader processExtensionsSchemaLoader,
+        Schema processExtensionsSchema,
         Set<ProcessExtensionsValidator> processExtensionsValidators,
         ProcessModelType processModelType,
         JsonConverter<Extensions> jsonExtensionsConverter,
         ProcessModelContentConverter processModelContentConverter
     ) {
-        this.processExtensionsSchemaLoader = processExtensionsSchemaLoader;
+        this.processExtensionsSchema = processExtensionsSchema;
         this.processExtensionsValidators = processExtensionsValidators;
         this.processModelType = processModelType;
         this.jsonExtensionsConverter = jsonExtensionsConverter;
@@ -143,7 +147,7 @@ public class ProcessExtensionsModelValidator extends ExtensionsJsonSchemaValidat
     }
 
     @Override
-    public SchemaLoader schemaLoader() {
-        return processExtensionsSchemaLoader;
+    public Schema schema() {
+        return processExtensionsSchema;
     }
 }
