@@ -19,11 +19,10 @@ import java.util.List;
 import java.util.Objects;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 
 public class CloudIntegrationErrorReceivedEventImpl
-    extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
+    extends CloudIntegrationEventImpl
     implements CloudIntegrationErrorReceivedEvent {
 
     private static final long serialVersionUID = 1L;
@@ -43,16 +42,22 @@ public class CloudIntegrationErrorReceivedEventImpl
         List<StackTraceElement> stackTraceElements
     ) {
         super(integrationContext);
-        if (getEntity() != null) {
-            setEntityId(getEntity().getId());
-        }
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.errorClassName = errorClassName;
+        this.stackTraceElements = stackTraceElements;
+    }
 
-        setProcessInstanceId(integrationContext.getProcessInstanceId());
-        setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-        setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-        setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-        setBusinessKey(integrationContext.getBusinessKey());
-
+    public CloudIntegrationErrorReceivedEventImpl(
+        String id,
+        Long timestamp,
+        IntegrationContext integrationContext,
+        String errorCode,
+        String errorMessage,
+        String errorClassName,
+        List<StackTraceElement> stackTraceElements
+    ) {
+        super(id, timestamp, integrationContext);
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.errorClassName = errorClassName;
