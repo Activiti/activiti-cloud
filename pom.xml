@@ -184,8 +184,8 @@
     <url>https://travis-ci.com/${project.scm.organization}/${project.scm.repository}</url>
   </ciManagement>
   <properties>
-    <java.release>17</java.release>
-    <java.version>1.${java.release}</java.version>
+    <java.release>${java.version}</java.release>
+    <java.version>17</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
