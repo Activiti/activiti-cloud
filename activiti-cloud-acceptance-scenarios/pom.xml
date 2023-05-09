@@ -21,8 +21,8 @@
   <properties>
     <skipTests>${noAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <java.release>17</java.release>
-    <java.version>1.${java.release}</java.version>
+    <java.release>${java.version}</java.release>
+    <java.version>17</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
     <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
