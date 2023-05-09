@@ -67,7 +67,7 @@ public class IntegrationErrorReceivedEventConverterTest {
         );
         event.setSequenceNumber(1);
         IntegrationErrorReceivedEventEntity eventEntity = new IntegrationErrorReceivedEventEntity(event);
-        Thread.sleep(1);
+        Thread.sleep(1); // sleep to make sure the timestamp is retrieved from the db and is not current time
         CloudRuntimeEventImpl<?, ?> apiEvent = converter.createAPIEvent(eventEntity);
         assertThat(apiEvent.getTimestamp()).isEqualTo(event.getTimestamp());
     }
