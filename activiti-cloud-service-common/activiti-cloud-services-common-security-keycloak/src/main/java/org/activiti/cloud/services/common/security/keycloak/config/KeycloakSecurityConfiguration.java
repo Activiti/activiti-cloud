@@ -24,21 +24,21 @@ import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:keycloak-configuration.properties")
 @AutoConfigureBefore(SwaggerAutoConfiguration.class)
 @ConditionalOnProperty(
-    value = "activiti.cloud.services.oauth2.iam-name",
-    havingValue = "keycloak",
-    matchIfMissing = true
+value = "activiti.cloud.services.oauth2.iam-name",
+havingValue = "keycloak",
+matchIfMissing = true
 )
 public class KeycloakSecurityConfiguration {
 

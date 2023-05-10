@@ -23,10 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.dsl.IntegrationFlow;
 
 @SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
+@Import(TestChannelBinderConfiguration.class)
 public class MessageCoreAutoConfigurationTest {
 
     @Autowired

@@ -12,6 +12,11 @@
   <name>Activiti Cloud API :: Model Shared Implementation</name>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared</artifactId>
     </dependency>

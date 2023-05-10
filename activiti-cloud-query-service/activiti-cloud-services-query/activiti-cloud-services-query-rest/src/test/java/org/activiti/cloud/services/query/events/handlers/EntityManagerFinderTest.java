@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.jupiter.api.Test;

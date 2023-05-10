@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.events;
 
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.hibernate.annotations.Immutable;
 

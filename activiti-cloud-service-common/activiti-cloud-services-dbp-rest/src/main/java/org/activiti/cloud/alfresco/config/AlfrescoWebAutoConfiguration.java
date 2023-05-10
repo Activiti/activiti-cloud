@@ -31,8 +31,8 @@ import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
@@ -44,7 +44,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/alfresco-rest-config.properties")
 public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 

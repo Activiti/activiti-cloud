@@ -21,6 +21,7 @@ import org.activiti.cloud.services.query.model.QIntegrationContextEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
@@ -29,7 +30,8 @@ public interface IntegrationContextRepository
     extends
         PagingAndSortingRepository<IntegrationContextEntity, String>,
         QuerydslPredicateExecutor<IntegrationContextEntity>,
-        QuerydslBinderCustomizer<QIntegrationContextEntity> {
+        QuerydslBinderCustomizer<QIntegrationContextEntity>,
+        CrudRepository<IntegrationContextEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QIntegrationContextEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;

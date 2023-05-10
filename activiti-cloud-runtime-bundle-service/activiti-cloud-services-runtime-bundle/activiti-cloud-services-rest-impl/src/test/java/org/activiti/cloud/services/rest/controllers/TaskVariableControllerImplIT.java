@@ -143,7 +143,7 @@ public class TaskVariableControllerImplIT {
     @Test
     public void createVariable() throws Exception {
         this.mockMvc.perform(
-                post("/v1/tasks/{taskId}/variables/", TASK_ID)
+                post("/v1/tasks/{taskId}/variables", TASK_ID)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         mapper.writeValueAsString(

@@ -25,12 +25,12 @@ import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.converter.StringSanitizingDeserializer;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore(JacksonAutoConfiguration.class)
 public class ObjectMapperJpaConfiguration {
 

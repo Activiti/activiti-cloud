@@ -20,8 +20,8 @@ import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToRespo
 import io.swagger.v3.oas.annotations.Parameter;
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;

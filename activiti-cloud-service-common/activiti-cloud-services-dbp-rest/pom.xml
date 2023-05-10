@@ -13,6 +13,11 @@
   <description>Activiti Cloud Services Digital Business Platform REST</description>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.hateoas</groupId>
       <artifactId>spring-hateoas</artifactId>
     </dependency>

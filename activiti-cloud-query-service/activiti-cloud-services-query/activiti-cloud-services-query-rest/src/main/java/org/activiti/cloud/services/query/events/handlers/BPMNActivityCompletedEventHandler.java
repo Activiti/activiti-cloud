@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Date;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;

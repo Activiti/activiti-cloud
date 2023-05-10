@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.Principal;
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;

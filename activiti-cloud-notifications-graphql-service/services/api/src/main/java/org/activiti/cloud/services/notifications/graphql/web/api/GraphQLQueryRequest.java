@@ -17,7 +17,7 @@ package org.activiti.cloud.services.notifications.graphql.web.api;
 
 import java.util.Collections;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * GraphQL JSON HTTP Request Wrapper Class

@@ -15,12 +15,13 @@
  */
 package org.activiti.cloud.services.notifications.graphql.graphiql;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
 public class GraphiQLAutoConfiguration {
 

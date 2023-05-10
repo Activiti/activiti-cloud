@@ -80,10 +80,8 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream</artifactId>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
       <scope>test</scope>
-      <classifier>test-binder</classifier>
-      <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

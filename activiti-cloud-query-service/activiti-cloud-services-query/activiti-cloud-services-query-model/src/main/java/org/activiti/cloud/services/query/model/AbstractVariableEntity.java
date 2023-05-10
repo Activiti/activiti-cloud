@@ -18,7 +18,7 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -52,7 +52,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private ProcessInstanceEntity processInstance;
 

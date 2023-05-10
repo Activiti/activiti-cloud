@@ -35,12 +35,12 @@ import org.activiti.cloud.services.rest.controllers.TaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskVariableAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskVariableControllerImpl;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(ServicesRestWebMvcAutoConfiguration.class)
 @Import(

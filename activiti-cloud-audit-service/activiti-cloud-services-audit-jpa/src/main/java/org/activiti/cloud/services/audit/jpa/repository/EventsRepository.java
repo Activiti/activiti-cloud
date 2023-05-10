@@ -19,12 +19,13 @@ import java.util.Collection;
 import java.util.Optional;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
 public interface EventsRepository<T extends AuditEventEntity>
-    extends PagingAndSortingRepository<T, Long>, JpaSpecificationExecutor<T> {
+    extends PagingAndSortingRepository<T, Long>, JpaSpecificationExecutor<T>, CrudRepository<T, Long> {
     Optional<T> findByEventId(String eventId);
 
     Collection<T> findAllByOrderByTimestampDesc();

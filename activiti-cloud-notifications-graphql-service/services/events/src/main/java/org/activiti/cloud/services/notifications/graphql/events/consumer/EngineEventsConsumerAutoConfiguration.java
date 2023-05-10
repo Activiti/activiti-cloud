@@ -25,6 +25,7 @@ import org.activiti.cloud.services.notifications.graphql.events.transformer.Tran
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,7 +45,7 @@ import reactor.core.scheduler.Schedulers;
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.events.enabled",

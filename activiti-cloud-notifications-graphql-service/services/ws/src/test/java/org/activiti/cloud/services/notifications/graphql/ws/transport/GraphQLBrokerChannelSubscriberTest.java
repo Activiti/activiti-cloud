@@ -27,7 +27,7 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;

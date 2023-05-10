@@ -22,7 +22,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;

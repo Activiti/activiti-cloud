@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Bean;
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
 @AutoConfiguration(before = GraphQLSchemaBuilderAutoConfiguration.class)
-@ConditionalOnClass({ GraphQL.class, ProcessInstanceEntity.class })
+@ConditionalOnClass({GraphQL.class, ProcessInstanceEntity.class})
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.jpa-query.enabled",
     matchIfMissing = true

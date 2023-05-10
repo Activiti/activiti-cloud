@@ -1,5 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.activiti.cloud.services.common.security.test.support.keycloak.KeycloakRolesClaimProvider
-
-org.springframework.test.context.TestExecutionListener=\
-org.activiti.cloud.services.test.identity.listener.KeycloakTokenProducerCleanListener

@@ -19,7 +19,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;

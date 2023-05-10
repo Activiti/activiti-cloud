@@ -17,13 +17,13 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
@@ -31,7 +31,7 @@ import org.hibernate.annotations.ParamDef;
 
 @FilterDef(
     name = "variablesFilter",
-    parameters = { @ParamDef(name = "variableKeys", type = "string") },
+    parameters = { @ParamDef(name = "variableKeys", type = String.class) },
     defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)"
 )
 @Entity(name = "ProcessVariable")

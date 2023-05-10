@@ -32,7 +32,7 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -49,7 +49,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
             .builder()
             .group("Runtime Bundle")
             .packagesToScan("org.activiti.cloud.services.rest")
-            .addOpenApiCustomiser(openApi ->
+            .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )
             .build();

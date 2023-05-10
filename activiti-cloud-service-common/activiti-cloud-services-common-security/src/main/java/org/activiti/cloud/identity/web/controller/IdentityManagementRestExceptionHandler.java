@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;

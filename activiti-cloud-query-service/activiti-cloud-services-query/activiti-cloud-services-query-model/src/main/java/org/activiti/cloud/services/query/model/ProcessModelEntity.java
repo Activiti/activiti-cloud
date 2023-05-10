@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

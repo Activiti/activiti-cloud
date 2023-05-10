@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.rest.api;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 public class ReplayServiceTaskRequest {
 

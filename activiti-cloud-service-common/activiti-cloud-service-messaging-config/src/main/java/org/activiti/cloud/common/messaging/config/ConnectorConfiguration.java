@@ -30,19 +30,19 @@ import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
-import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
-    after = { BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class },
+    after = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class},
     before = FunctionConfiguration.class
 )
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {

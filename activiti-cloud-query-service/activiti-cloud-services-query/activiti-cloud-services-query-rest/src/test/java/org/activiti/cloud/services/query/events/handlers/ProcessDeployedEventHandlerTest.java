@@ -19,7 +19,7 @@ import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.util.UUID;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessDefinitionEvent;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;

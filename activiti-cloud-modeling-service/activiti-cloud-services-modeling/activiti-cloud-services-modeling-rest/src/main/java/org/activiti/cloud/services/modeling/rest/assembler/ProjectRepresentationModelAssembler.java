@@ -21,7 +21,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;

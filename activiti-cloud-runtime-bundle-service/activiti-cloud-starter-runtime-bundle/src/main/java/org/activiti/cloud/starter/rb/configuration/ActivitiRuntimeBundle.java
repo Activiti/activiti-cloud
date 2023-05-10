@@ -26,11 +26,11 @@ import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfigurati
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @EnableDiscoveryClient
 @EnableWebSecurity
-@EnableAutoConfiguration(exclude = { TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = {TaskExecutionAutoConfiguration.class, TaskSchedulingAutoConfiguration.class})
 public @interface ActivitiRuntimeBundle {
 }

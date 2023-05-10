@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
@@ -31,7 +32,8 @@ public interface ServiceTaskRepository
     extends
         PagingAndSortingRepository<ServiceTaskEntity, String>,
         QuerydslPredicateExecutor<ServiceTaskEntity>,
-        QuerydslBinderCustomizer<QServiceTaskEntity> {
+        QuerydslBinderCustomizer<QServiceTaskEntity>,
+        CrudRepository<ServiceTaskEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QServiceTaskEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

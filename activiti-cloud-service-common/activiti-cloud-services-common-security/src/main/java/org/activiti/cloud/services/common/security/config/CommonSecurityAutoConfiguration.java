@@ -44,6 +44,7 @@ import org.activiti.cloud.services.common.security.jwt.validator.IsNotBeforeVali
 import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.cache.Cache;
@@ -51,27 +52,26 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
 
-@Configuration
+@AutoConfiguration
 @EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
-@ConditionalOnMissingBean(value = { SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class })
+@ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
 @Import(CommonJwtAuthenticationConverterConfiguration.class)
-public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+public class CommonSecurityAutoConfiguration {
 
     private final AuthorizationConfigurer authorizationConfigurer;
 
@@ -198,11 +198,11 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
         return new TokenRelayRequestInterceptor(securityContextTokenProvider);
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
-        http
-            .authorizeRequests()
+        return http
+            .authorizeHttpRequests()
             .anyRequest()
             .permitAll()
             .and()
@@ -223,7 +223,10 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .disable()
             .oauth2ResourceServer()
             .jwt()
-            .jwtAuthenticationConverter(jwtAuthenticationConverter);
+            .jwtAuthenticationConverter(jwtAuthenticationConverter)
+            .and()
+            .and()
+            .build();
     }
 
     @Bean

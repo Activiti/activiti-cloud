@@ -213,7 +213,7 @@ public class TaskControllerImplIT {
             .build();
         createTask.setPriority(50);
         this.mockMvc.perform(
-                post("/v1/tasks/", 1)
+                post("/v1/tasks", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTask))
             )
@@ -233,7 +233,7 @@ public class TaskControllerImplIT {
             .build();
         createTaskCmd.setPriority(50);
         this.mockMvc.perform(
-                post("/v1/tasks/", parentTaskId)
+                post("/v1/tasks", parentTaskId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTaskCmd))
             )

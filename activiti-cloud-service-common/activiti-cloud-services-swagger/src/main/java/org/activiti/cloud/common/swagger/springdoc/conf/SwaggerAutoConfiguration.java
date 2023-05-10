@@ -19,10 +19,10 @@ import io.swagger.v3.oas.models.security.OAuthFlow;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.customizer.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 
@@ -43,7 +43,7 @@ import org.springframework.context.annotation.PropertySource;
  *     }
  * </pre>
  */
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:swagger-config.properties")
 public class SwaggerAutoConfiguration {
 

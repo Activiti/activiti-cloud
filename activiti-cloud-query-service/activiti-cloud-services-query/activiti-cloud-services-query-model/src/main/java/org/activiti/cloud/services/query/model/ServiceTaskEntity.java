@@ -17,9 +17,9 @@ package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
-import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.hibernate.annotations.*;
 

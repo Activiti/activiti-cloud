@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;

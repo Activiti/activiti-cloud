@@ -1,0 +1,2 @@
+org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerAutoConfiguration
+org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerConfigurationProperties.AutoConfiguration

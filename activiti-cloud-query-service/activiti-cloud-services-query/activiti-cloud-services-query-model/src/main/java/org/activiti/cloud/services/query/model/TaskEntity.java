@@ -28,22 +28,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -172,7 +172,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private ProcessInstanceEntity processInstance;
 
@@ -183,7 +183,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     @Fetch(FetchMode.SUBSELECT)
     private Set<TaskCandidateUserEntity> taskCandidateUsers = new LinkedHashSet<>();
@@ -195,7 +195,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     @Fetch(FetchMode.SUBSELECT)
     private Set<TaskCandidateGroupEntity> taskCandidateGroups = new LinkedHashSet<>();
@@ -207,7 +207,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 

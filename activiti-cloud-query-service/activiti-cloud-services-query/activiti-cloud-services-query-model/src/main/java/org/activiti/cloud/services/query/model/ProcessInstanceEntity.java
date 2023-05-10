@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -136,7 +136,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
@@ -148,7 +148,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private Set<ProcessVariableEntity> variables = new LinkedHashSet<>();
 
@@ -159,7 +159,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private Set<BPMNActivityEntity> activities = new LinkedHashSet<>();
 
@@ -170,7 +170,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private List<ServiceTaskEntity> serviceTasks = new LinkedList<>();
 
@@ -181,7 +181,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private List<BPMNSequenceFlowEntity> sequenceFlows = new LinkedList<>();
 

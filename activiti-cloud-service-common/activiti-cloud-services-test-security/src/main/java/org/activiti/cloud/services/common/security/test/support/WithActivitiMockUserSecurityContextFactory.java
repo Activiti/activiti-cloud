@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minidev.json.JSONArray;
 import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;

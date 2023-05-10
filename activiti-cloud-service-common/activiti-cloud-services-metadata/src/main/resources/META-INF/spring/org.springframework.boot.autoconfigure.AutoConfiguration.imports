@@ -1,0 +1,2 @@
+org.activiti.cloud.services.metadata.ActivitiMetadataAutoConfiguration
+org.activiti.cloud.services.metadata.eureka.ActivitiEurekaStaticRegAutoConfiguration

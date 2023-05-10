@@ -102,13 +102,20 @@
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.querydsl</groupId>
+      <artifactId>querydsl-apt</artifactId>
+      <version>5.0.0</version>
+      <scope>provided</scope>
+      <classifier>jakarta</classifier>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>com.mysema.maven</groupId>
-        <artifactId>apt-maven-plugin</artifactId>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>com.mysema.maven</groupId>-->
+<!--        <artifactId>apt-maven-plugin</artifactId>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>

@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;

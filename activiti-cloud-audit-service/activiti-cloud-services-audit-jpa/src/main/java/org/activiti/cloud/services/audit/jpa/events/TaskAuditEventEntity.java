@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.MappedSuperclass;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.events.CloudTaskRuntimeEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskJpaJsonConverter;

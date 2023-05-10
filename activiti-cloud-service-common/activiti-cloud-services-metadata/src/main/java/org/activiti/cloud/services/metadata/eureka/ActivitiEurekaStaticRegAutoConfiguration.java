@@ -16,12 +16,12 @@
 package org.activiti.cloud.services.metadata.eureka;
 
 import com.netflix.appinfo.ApplicationInfoManager;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(name = "activiti.cloud.services.metadata.eureka.static.enabled", matchIfMissing = true)
 @ConditionalOnClass(ApplicationInfoManager.class)
 @PropertySource("classpath:metadata-eureka.properties")

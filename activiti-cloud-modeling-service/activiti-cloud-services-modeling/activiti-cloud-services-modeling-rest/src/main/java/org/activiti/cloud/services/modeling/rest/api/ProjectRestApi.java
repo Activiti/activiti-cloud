@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.api.Project;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
