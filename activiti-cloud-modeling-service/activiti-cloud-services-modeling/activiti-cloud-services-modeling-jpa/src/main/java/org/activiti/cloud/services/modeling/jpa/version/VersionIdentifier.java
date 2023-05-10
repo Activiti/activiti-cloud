@@ -17,7 +17,7 @@ package org.activiti.cloud.services.modeling.jpa.version;
 
 import java.io.Serializable;
 import java.util.Objects;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 /**
  * Embeddable version identifier

@@ -25,18 +25,18 @@ import org.activiti.cloud.services.modeling.jpa.ModelRepositoryImpl;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditorAwareImpl;
 import org.activiti.cloud.services.modeling.jpa.version.ExtendedJpaRepositoryFactoryBean;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerator;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@Configuration
+@AutoConfiguration
 @EnableJpaRepositories(
-    basePackages = { "org.activiti.cloud.services.modeling.jpa" },
+    basePackages = {"org.activiti.cloud.services.modeling.jpa"},
     repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class
 )
 @EnableJpaAuditing(auditorAwareRef = "auditorAware", dateTimeProviderRef = "localDateTimeProvider")

@@ -16,9 +16,9 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.hibernate.annotations.DynamicInsert;

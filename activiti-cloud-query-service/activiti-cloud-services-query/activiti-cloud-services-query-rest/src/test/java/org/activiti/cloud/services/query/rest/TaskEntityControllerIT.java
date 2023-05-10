@@ -30,7 +30,7 @@ import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;

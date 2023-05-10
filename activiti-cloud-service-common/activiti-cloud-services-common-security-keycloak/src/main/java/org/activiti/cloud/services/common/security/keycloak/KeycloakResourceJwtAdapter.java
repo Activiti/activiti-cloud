@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.Collections;
 import java.util.List;
+import net.minidev.json.JSONObject;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.springframework.security.oauth2.jwt.Jwt;
 

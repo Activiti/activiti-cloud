@@ -19,6 +19,7 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
+    <noAcceptanceTests>false</noAcceptanceTests>
     <skipTests>${noAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class ListOfStackTraceElementsJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 

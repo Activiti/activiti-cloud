@@ -29,24 +29,23 @@ import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetch
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherDataFetcher;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import reactor.core.publisher.Flux;
 
-@Configuration
-@ConditionalOnClass({ GraphQL.class, ReactorNettyTcpStompClient.class })
+@AutoConfiguration
+@ConditionalOnClass({GraphQL.class, ReactorNettyTcpStompClient.class})
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.subscriptions.enabled",
     matchIfMissing = true
 )
 public class GraphQLSubscriptionsAutoConfiguration {
 
-    @Configuration
     static class DefaultGraphQLSubscriptionsSchemaConfiguration {
 
         @Autowired
@@ -93,7 +92,6 @@ public class GraphQLSubscriptionsAutoConfiguration {
         }
     }
 
-    @Configuration
     static class DefaultGraphQLSubscriptionsConfigurer implements GraphQLSchemaConfigurer {
 
         @Autowired

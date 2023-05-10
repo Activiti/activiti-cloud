@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.monitoring.config;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:activiti-monitoring.properties")
 public class ActivitiMonitoringAutoConfiguration {}

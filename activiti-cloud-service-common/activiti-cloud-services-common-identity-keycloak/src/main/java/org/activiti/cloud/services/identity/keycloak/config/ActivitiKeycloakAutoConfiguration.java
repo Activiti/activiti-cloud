@@ -35,6 +35,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -45,7 +46,6 @@ import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -55,14 +55,14 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(
-    value = "activiti.cloud.services.oauth2.iam-name",
-    havingValue = "keycloak",
-    matchIfMissing = true
+value = "activiti.cloud.services.oauth2.iam-name",
+havingValue = "keycloak",
+matchIfMissing = true
 )
-@EnableConfigurationProperties({ ActivitiKeycloakProperties.class, KeycloakProperties.class })
+@EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
 public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")

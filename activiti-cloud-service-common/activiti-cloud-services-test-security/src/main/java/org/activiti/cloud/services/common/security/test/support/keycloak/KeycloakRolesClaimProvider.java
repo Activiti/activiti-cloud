@@ -15,15 +15,17 @@
  */
 package org.activiti.cloud.services.common.security.test.support.keycloak;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
-import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import org.activiti.cloud.services.common.security.test.support.RolesClaimProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+@AutoConfiguration
 @Component
 @ConditionalOnProperty(
     value = "activiti.cloud.services.oauth2.iam-name",

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -2518,7 +2517,7 @@ public class QueryTasksIT {
                     .containsExactly(tuple("Task", "varAName", "varAValue"));
             });
 
-        BigInteger taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
+        Long taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
         assertThat(taskProcessVariableCount).isEqualTo(2);
 
         processVariablesMigrationHelper.deleteFromTaskProcessVariable(task.getId());

@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.events.configuration;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 
-@Configuration
+@AutoConfiguration
 public class ProcessEngineChannelsConfiguration implements ProcessEngineChannels {}

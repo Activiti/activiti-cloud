@@ -21,8 +21,8 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.ModelConversionException;

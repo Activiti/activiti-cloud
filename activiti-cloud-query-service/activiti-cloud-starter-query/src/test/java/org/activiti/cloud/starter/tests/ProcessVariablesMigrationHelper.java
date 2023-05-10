@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
-import java.math.BigInteger;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -34,8 +33,8 @@ public class ProcessVariablesMigrationHelper {
     private Resource sqlFile;
 
     @Transactional
-    public BigInteger getTaskProcessVariableCount(String taskId) {
-        return (BigInteger) entityManager
+    public Long getTaskProcessVariableCount(String taskId) {
+        return (Long) entityManager
             .createNativeQuery("select count(*) from task_process_variable tpv where tpv.task_id = '" + taskId + "'")
             .getSingleResult();
     }

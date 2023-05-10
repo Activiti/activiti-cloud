@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import java.util.Optional;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.slf4j.Logger;

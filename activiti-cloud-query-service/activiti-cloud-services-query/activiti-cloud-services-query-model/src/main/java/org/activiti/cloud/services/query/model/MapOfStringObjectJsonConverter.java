@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<String, Object>, String> {
 

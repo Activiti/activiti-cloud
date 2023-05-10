@@ -19,15 +19,15 @@ import org.activiti.cloud.common.messaging.config.OutputBindingConfiguration;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.activiti.cloud.starters.test.StreamProducer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 
-@Configuration
-@ConditionalOnClass({ OutputBindingConfiguration.class, BinderFactoryAutoConfiguration.class })
+@AutoConfiguration
+@ConditionalOnClass({OutputBindingConfiguration.class, BinderFactoryAutoConfiguration.class})
 public class TestProducerAutoConfiguration implements StreamProducer {
 
     @Bean

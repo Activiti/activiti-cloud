@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.model;
 
 import java.util.Date;
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.hibernate.annotations.Immutable;
 import org.springframework.format.annotation.DateTimeFormat;

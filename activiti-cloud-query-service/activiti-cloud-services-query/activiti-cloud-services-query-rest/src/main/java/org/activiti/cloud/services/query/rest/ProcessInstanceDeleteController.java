@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;

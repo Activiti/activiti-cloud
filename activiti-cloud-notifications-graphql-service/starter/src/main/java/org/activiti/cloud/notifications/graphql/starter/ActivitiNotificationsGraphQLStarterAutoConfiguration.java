@@ -15,18 +15,17 @@
  */
 package org.activiti.cloud.notifications.graphql.starter;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+@AutoConfiguration
 public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
 
-    @Configuration
     public class DefaultActivitiNotificationsGraphQLStarterConfiguration {
 
         @Bean

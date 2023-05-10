@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import java.util.Objects;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -46,7 +46,7 @@ public class TaskCandidateGroupEntity {
         insertable = false,
         updatable = false,
         nullable = true,
-        foreignKey = @javax.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
     private TaskEntity task;
 
