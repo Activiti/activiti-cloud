@@ -71,6 +71,7 @@ import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
@@ -81,6 +82,7 @@ import org.springframework.context.annotation.PropertySources;
         @PropertySource(value = "classpath:/activiti-audit-producer.properties", ignoreResourceNotFound = true), // optional override
     }
 )
+@Import(ProcessEngineChannelsConfiguration.class)
 public class CloudEventsAutoConfiguration {
 
     @Bean

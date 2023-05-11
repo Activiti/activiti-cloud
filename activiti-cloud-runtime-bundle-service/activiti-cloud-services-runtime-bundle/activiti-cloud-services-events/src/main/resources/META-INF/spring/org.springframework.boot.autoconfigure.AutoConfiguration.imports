@@ -1,3 +1,2 @@
 org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration
-org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration
 org.activiti.cloud.services.events.configuration.RuntimeBundleProperties

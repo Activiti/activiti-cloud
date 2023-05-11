@@ -97,9 +97,9 @@ public class CommandEndpointIT {
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
-    private static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
-    private static final String TASKS_URL = "/v1/tasks/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
+    private static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances";
+    private static final String TASKS_URL = "/v1/tasks";
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String SIGNAL_PROCESS = "ProcessWithBoundarySignal";
@@ -322,7 +322,7 @@ public class CommandEndpointIT {
 
     private ProcessInstance executeGetProcessInstanceRequest(String processInstanceId) {
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = restTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + "{processInstanceId}",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat("{processInstanceId}"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CloudProcessInstance>() {},
@@ -343,7 +343,7 @@ public class CommandEndpointIT {
 
     private ResponseEntity<CloudTask> getTask(String taskId) {
         ResponseEntity<CloudTask> responseEntity = restTemplate.exchange(
-            TASKS_URL + taskId,
+            TASKS_URL.concat("/").concat(taskId),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CloudTask>() {}

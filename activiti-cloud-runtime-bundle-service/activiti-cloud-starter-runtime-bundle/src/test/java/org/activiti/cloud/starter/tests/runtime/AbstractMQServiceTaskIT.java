@@ -387,7 +387,7 @@ public abstract class AbstractMQServiceTaskIT {
     }
 
     @Test
-    public void multiInstance_should_collectSpecifiedVariable_when_dataItemIsSet() {
+    public void multiInstance_should_collectSpecifiedVariable_when_dataItemIsSet() throws InterruptedException {
         //given
         ResponseEntity<CloudProcessInstance> processInstance = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder

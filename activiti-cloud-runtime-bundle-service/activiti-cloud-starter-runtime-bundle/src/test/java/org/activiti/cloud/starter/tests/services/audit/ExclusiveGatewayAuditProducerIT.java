@@ -81,7 +81,7 @@ import org.springframework.test.context.TestPropertySource;
 public class ExclusiveGatewayAuditProducerIT {
 
     private static final String EXCLUSIVE_GATEWAY_PROCESS = "basicExclusiveGateway";
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
     @Autowired
     private TestRestTemplate restTemplate;

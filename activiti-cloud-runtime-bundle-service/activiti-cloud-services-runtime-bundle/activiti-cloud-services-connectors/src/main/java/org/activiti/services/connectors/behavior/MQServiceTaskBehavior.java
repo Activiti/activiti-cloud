@@ -17,11 +17,9 @@ package org.activiti.services.connectors.behavior;
 
 import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
-import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequestedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
@@ -32,24 +30,20 @@ import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
-import org.springframework.cloud.stream.config.BindingServiceProperties;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
 
     private final IntegrationContextManager integrationContextManager;
-    private final ApplicationEventPublisher eventPublisher;
     private final IntegrationContextBuilder integrationContextBuilder;
     private final DefaultServiceTaskBehavior defaultServiceTaskBehavior;
     private final ProcessEngineEventsAggregator processEngineEventsAggregator;
     private final RuntimeBundleProperties runtimeBundleProperties;
     private final IntegrationRequestBuilder integrationRequestBuilder;
+    private final IntegrationRequestSender integrationRequestSender;
 
     public MQServiceTaskBehavior(
         IntegrationContextManager integrationContextManager,
-        ApplicationEventPublisher eventPublisher,
+        IntegrationRequestSender integrationRequestSender,
         IntegrationContextBuilder integrationContextBuilder,
         DefaultServiceTaskBehavior defaultServiceTaskBehavior,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
@@ -57,7 +51,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         IntegrationRequestBuilder integrationRequestBuilder
     ) {
         this.integrationContextManager = integrationContextManager;
-        this.eventPublisher = eventPublisher;
+        this.integrationRequestSender = integrationRequestSender;
         this.integrationContextBuilder = integrationContextBuilder;
         this.integrationRequestBuilder = integrationRequestBuilder;
         this.defaultServiceTaskBehavior = defaultServiceTaskBehavior;
@@ -74,7 +68,7 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
             IntegrationContextEntity integrationContextEntity = storeIntegrationContext(execution);
 
             IntegrationContext integrationContext = integrationContextBuilder.from(integrationContextEntity, execution);
-            publishSpringEvent(integrationContext);
+            sendIntegrationRequest(integrationContext);
 
             aggregateCloudIntegrationRequestedEvent(integrationContext);
         }
@@ -88,17 +82,9 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         }
     }
 
-    /**
-     * Publishes an custom event using the Spring {@link ApplicationEventPublisher}. This event will be caught by
-     * {@link IntegrationRequestSender#sendIntegrationRequest(IntegrationRequest)} which is annotated with
-     * {@link TransactionalEventListener} on phase {@link TransactionPhase#AFTER_COMMIT}.
-     *
-     * @param integrationContext the related integration context
-     */
-    private void publishSpringEvent(IntegrationContext integrationContext) {
+    private void sendIntegrationRequest(IntegrationContext integrationContext) {
         IntegrationRequestImpl integrationRequest = integrationRequestBuilder.build(integrationContext);
-
-        eventPublisher.publishEvent(integrationRequest);
+        integrationRequestSender.sendIntegrationRequest(integrationRequest);
     }
 
     private IntegrationContextEntity storeIntegrationContext(DelegateExecution execution) {
