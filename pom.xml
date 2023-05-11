@@ -213,7 +213,7 @@
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
     <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
-    <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
+    <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
     <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
     <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
     <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
@@ -221,7 +221,11 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+
+    <!-- parallel tests config -->
+    <unit-tests.dynamicFactor>5</unit-tests.dynamicFactor>
+    <int-tests.forks>3</int-tests.forks>
   </properties>
   <repositories>
     <repository>
@@ -302,16 +306,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>${maven-failsafe-plugin.version}</version>
-          <configuration>
-            <properties>
-              <configurationParameters>
-                junit.jupiter.execution.parallel.enabled=true
-                junit.jupiter.execution.parallel.config.strategy=dynamic
-                junit.jupiter.execution.parallel.mode.default=same_thread
-                junit.jupiter.execution.parallel.mode.classes.default=concurrent
-              </configurationParameters>
-            </properties>
-          </configuration>
         </plugin>
         <plugin>
           <groupId>com.mysema.maven</groupId>
@@ -503,6 +497,7 @@ limitations under the License.]]>
               junit.jupiter.execution.parallel.config.strategy=dynamic
               junit.jupiter.execution.parallel.mode.default=same_thread
               junit.jupiter.execution.parallel.mode.classes.default=concurrent
+              junit.jupiter.execution.parallel.config.dynamic.factor=${unit-tests.dynamicFactor}
             </configurationParameters>
           </properties>
         </configuration>
@@ -645,12 +640,11 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <forkCount>${int-tests.forks}</forkCount>
+              <reuseForks>true</reuseForks>
               <properties>
                 <configurationParameters>
-                  junit.jupiter.execution.parallel.enabled=true
-                  junit.jupiter.execution.parallel.config.strategy=dynamic
-                  junit.jupiter.execution.parallel.mode.default=same_thread
-                  junit.jupiter.execution.parallel.mode.classes.default=concurrent
+                  junit.jupiter.execution.parallel.enabled=false
                 </configurationParameters>
               </properties>
             </configuration>

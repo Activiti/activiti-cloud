@@ -32,12 +32,14 @@ public class KeycloakContainerApplicationInitializer
         .waitingFor(Wait.defaultWaitStrategy())
         .withReuse(true);
 
-    @Override
-    public void initialize(ConfigurableApplicationContext context) {
+    {
         if (!keycloakContainer.isRunning()) {
             keycloakContainer.start();
         }
+    }
 
+    @Override
+    public void initialize(ConfigurableApplicationContext context) {
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
     }
 
