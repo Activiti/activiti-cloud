@@ -170,7 +170,7 @@ public class AuditProducerIT {
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String SIMPLE_PROCESS_CATEGORY = "test-category";
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
     @Value("${activiti.identity.test-user}")
     protected String keycloakTestUser;

@@ -18,16 +18,14 @@ package org.activiti.services.connectors.conf;
 
 import org.activiti.engine.RepositoryService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@AutoConfiguration
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class)
 @Import(ProcessEngineIntegrationChannelsConfiguration.class)
-@AutoConfigureAfter(BinderFactoryAutoConfiguration.class)
 public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean

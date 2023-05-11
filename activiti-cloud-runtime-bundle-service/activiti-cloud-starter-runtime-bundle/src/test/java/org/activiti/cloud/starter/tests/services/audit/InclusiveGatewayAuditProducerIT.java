@@ -74,7 +74,7 @@ public class InclusiveGatewayAuditProducerIT {
 
     private static final String INCLUSIVE_GATEWAY_PROCESS = "basicInclusiveGateway";
 
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
     @Autowired
     private TestRestTemplate restTemplate;
