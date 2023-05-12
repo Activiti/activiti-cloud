@@ -78,7 +78,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-simple.json"),
                 "application/json"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
@@ -93,7 +93,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-simple.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
@@ -108,7 +108,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-with-events.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
@@ -124,7 +124,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-simple-connector.json"),
                     "application/json"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -148,7 +148,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-json-connector.json"),
                     "application/json"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -169,7 +169,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-json-connector.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -190,7 +190,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-connector-name-too-long.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -211,7 +211,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-connector-name-empty.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -233,7 +233,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -252,7 +252,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
                     CONTENT_TYPE_JSON
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -270,7 +270,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-with-custom-type.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
@@ -285,7 +285,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-with-errors.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
@@ -302,7 +302,7 @@ public class ConnectorValidationControllerIT {
                     resourceAsByteArray("connector/connector-with-errors-invalid-property.json"),
                     CONTENT_TYPE_JSON
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -319,7 +319,7 @@ public class ConnectorValidationControllerIT {
                 resourceAsByteArray("connector/connector-with-event-model.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
             .body(isEmptyString());
