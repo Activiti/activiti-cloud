@@ -20,8 +20,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Map;
-import java.util.Optional;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.EmbeddedId;
@@ -30,7 +28,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Transient;
-import org.activiti.cloud.modeling.api.process.Extensions;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
@@ -48,7 +47,7 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
     private VersionIdentifier versionIdentifier;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = false)
     @MapsId("versionedEntityId")
     private ModelEntity versionedEntity;
 
