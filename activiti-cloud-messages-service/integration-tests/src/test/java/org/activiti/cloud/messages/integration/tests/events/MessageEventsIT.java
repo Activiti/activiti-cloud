@@ -60,6 +60,7 @@ import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -74,7 +75,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "spring.jmx.enabled=false",
     }
 )
-@DirtiesContext
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Testcontainers
 @ContextConfiguration(
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
