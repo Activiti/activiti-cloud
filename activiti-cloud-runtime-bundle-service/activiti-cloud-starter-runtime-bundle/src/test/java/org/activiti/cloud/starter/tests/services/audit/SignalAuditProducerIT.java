@@ -91,7 +91,7 @@ public class SignalAuditProducerIT {
     private ProcessDefinitionRestTemplate processDefinitionRestTemplate;
 
     @DynamicPropertySource
-    public static void signalProperties(DynamicPropertyRegistry registry) {
+    public static void dynamicProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:signal-test");
     }
 

@@ -30,11 +30,14 @@ import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.test.ProcessDefinitionAdminRestTemplate;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.starter.tests.listeners.CleanUpDatabaseTestExecutionListener;
 import org.activiti.cloud.starters.test.MyProducer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -42,6 +45,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.StreamUtils;
 
@@ -49,7 +53,11 @@ import org.springframework.util.StreamUtils;
 @TestPropertySource("classpath:application-test.properties")
 @Import({ ProcessDefinitionAdminRestTemplate.class, TestChannelBinderConfiguration.class })
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-@Isolated
+@TestExecutionListeners(
+    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS,
+    listeners = { CleanUpDatabaseTestExecutionListener.class }
+)
+@ResourceLocks({ @ResourceLock(value = Resources.CHANNEL_BINDER, mode = ResourceAccessMode.READ_WRITE) })
 public class QueryAdminProcessDefinitionIT {
 
     @Autowired

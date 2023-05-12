@@ -104,7 +104,7 @@ public class TestGatewayConcurrencyIT {
     private ExecutorService executorService;
 
     @DynamicPropertySource
-    public static void concurrencyProperties(DynamicPropertyRegistry registry) {
+    public static void dynamicProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:concurrency-test");
     }
 

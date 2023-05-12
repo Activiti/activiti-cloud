@@ -21,8 +21,6 @@ import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
-import static org.activiti.cloud.services.modeling.Resources.PROJECT_REPOSITORY;
 import static org.activiti.cloud.services.modeling.mock.ConstantsBuilder.constantsFor;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isBooleanEquals;
 import static org.activiti.cloud.services.modeling.mock.IsObjectEquals.isDateEquals;
@@ -83,9 +81,7 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.ResourceAccessMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.ResourceLocks;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -104,12 +100,7 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @WithMockModelerUser
 @Transactional
-@ResourceLocks(
-    {
-        @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-        @ResourceLock(value = PROJECT_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-    }
-)
+@Isolated
 public class ModelControllerIT {
 
     private MockMvc mockMvc;

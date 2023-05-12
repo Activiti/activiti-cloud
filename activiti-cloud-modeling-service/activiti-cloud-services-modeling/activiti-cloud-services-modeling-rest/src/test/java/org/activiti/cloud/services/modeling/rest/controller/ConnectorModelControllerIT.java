@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
-import static org.activiti.cloud.services.modeling.Resources.PROJECT_REPOSITORY;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
@@ -36,7 +34,6 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,12 +55,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
-@ResourceLocks(
-    {
-        @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-        @ResourceLock(value = PROJECT_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-    }
-)
 public class ConnectorModelControllerIT {
 
     @Autowired
@@ -105,6 +96,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_returnStatusCreatedAndConnectorName_when_creatingConnectorModel() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -119,6 +111,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_throwRequiredFieldException_when_creatingConnectorWithNameNull() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -136,6 +129,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_throwEmptyFieldException_when_creatingConnectorModelWithNameEmpty() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -153,6 +147,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_throwTooLongNameException_when_createConnectorModelWithNameTooLong() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -172,6 +167,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_create_when_creatingConnectorModelWithNameWithUnderscore() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -185,6 +181,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "project-with-connectors")
     public void should_create_when_creatingConnectorModelWithNameWithUppercase() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
@@ -198,6 +195,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "connector-name")
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModel() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
@@ -212,6 +210,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "connector-name")
     public void should_returnStatusOKAndConnectorName_when_updatingConnectorModelWithNameNull() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
@@ -226,6 +225,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "connector-name")
     public void should_throwEmptyNameException_when_updatingConnectorModelWithNameEmpty() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
@@ -243,6 +243,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLock(value = "connector-name")
     public void should_throwBadNameException_when_updatingConnectorModelWithNameTooLong() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
@@ -262,6 +263,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = "connector-name"), @ResourceLock(value = "name_with_underscore") })
     public void should_update_when_updatingConnectorModelWithNameWithUnderscore() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
@@ -275,6 +277,7 @@ public class ConnectorModelControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = "connector-name"), @ResourceLock(value = "NameWithUppercase") })
     public void should_update_when_updatingConnectorModelWithNameWithUppercase() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 

@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.starter.tests;
 
-import org.activiti.cloud.starter.tests.listeners.CleanUpDatabaseTestExecutionListener;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.TestPropertySource;
+public class Resources {
 
-@TestPropertySource(locations = "classpath:application-test.properties", properties = "spring.jpa.open-in-view=false")
-@TestExecutionListeners(
-    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS,
-    listeners = { CleanUpDatabaseTestExecutionListener.class }
-)
-public class QueryProcessInstancesEntityDisabledOpenInViewIT extends QueryProcessInstancesEntityIT {}
+    public static final String CHANNEL_BINDER = "TestChannelBinder";
+}

@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
-import static org.activiti.cloud.services.modeling.Resources.MODEL_REPOSITORY;
-import static org.activiti.cloud.services.modeling.Resources.PROJECT_REPOSITORY;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.hamcrest.Matchers.equalTo;
@@ -43,7 +41,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,12 +63,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
-@ResourceLocks(
-    {
-        @ResourceLock(value = MODEL_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-        @ResourceLock(value = PROJECT_REPOSITORY, mode = ResourceAccessMode.READ_WRITE),
-    }
-)
 public class GenericJsonModelTypeControllerIT {
 
     @Autowired
@@ -126,6 +117,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_returnStatusCreatedAndModelName_when_creatingGenericJsonModel() throws Exception {
         String name = GENERIC_MODEL_NAME;
 
@@ -142,6 +134,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwRequiredFieldException_when_creatingGenericJsonModelWithNameNull() throws Exception {
         String name = null;
 
@@ -161,6 +154,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwEmptyNameException_when_creatingGenericJsonModelWithNameEmpty() throws Exception {
         String name = "";
 
@@ -180,6 +174,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwTooLongNameException_when_creatingGenericJsonModelWithNameTooLong() throws Exception {
         String name = "123456789_123456789_1234567";
 
@@ -201,6 +196,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_create_when_creatingGenericJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
@@ -216,6 +212,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_create_when_creatingGenericJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
@@ -231,6 +228,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "updated-connector-name") })
     public void should_returnStatusOKAndModelName_when_updatingGenericJsonModel() throws Exception {
         String name = "updated-connector-name";
 
@@ -248,6 +246,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_MODEL_NAME)
     public void should_returnStatusOKAndModelName_when_updatingGenericJsonModelWithNameNull() throws Exception {
         String name = null;
 
@@ -265,6 +264,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_MODEL_NAME)
     public void should_throwBadNameException_when_updatingGenericJsonModelWithNameEmpty() throws Exception {
         String name = "";
 
@@ -285,6 +285,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLock(value = GENERIC_MODEL_NAME)
     public void should_throwBadNameException_when_updatingGenericJsonModelWithNameTooLong() throws Exception {
         String name = "123456789_123456789_1234567";
 
@@ -307,6 +308,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "name_with_underscore") })
     public void should_update_when_updatingGenericJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
@@ -323,6 +325,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "NameWithUppercase") })
     public void should_update_when_updatingGenericJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
@@ -339,6 +342,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndNullExtensions_when_creatingGenericJsonModelWithNullExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -360,6 +364,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndNotNullExtensions_when_creatingGenericJsonModelWithEmptyExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -381,6 +386,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndExtensions_when_creatingGenericJsonModelWithValidExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));

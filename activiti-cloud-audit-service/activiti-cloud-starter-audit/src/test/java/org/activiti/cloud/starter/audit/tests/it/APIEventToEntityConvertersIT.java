@@ -73,7 +73,9 @@ import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConv
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
@@ -85,7 +87,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application.properties")
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
-@Isolated
+@ResourceLocks({ @ResourceLock(value = Resources.TEST_BINDER, mode = ResourceAccessMode.READ) })
 public class APIEventToEntityConvertersIT {
 
     @Autowired

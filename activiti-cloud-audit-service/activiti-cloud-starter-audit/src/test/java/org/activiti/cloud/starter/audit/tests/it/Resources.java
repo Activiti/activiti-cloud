@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling;
+
+package org.activiti.cloud.starter.audit.tests.it;
 
 public class Resources {
 
-    public static final String MODEL_REPOSITORY = "ModelRepository";
-    public static final String PROJECT_REPOSITORY = "ProjectRepository";
+    public static final String EVENTS_REPOSITORY = "EventsRepository";
+    public static final String TEST_BINDER = "TestChannelBinder";
 }

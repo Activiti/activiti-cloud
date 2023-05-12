@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
-import static org.activiti.cloud.services.modeling.Resources.PROJECT_REPOSITORY;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -39,9 +38,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.parallel.ResourceAccessMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.ResourceLocks;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -61,7 +58,7 @@ import org.springframework.web.context.WebApplicationContext;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ResourceLocks({ @ResourceLock(value = PROJECT_REPOSITORY, mode = ResourceAccessMode.READ_WRITE) })
+@Isolated
 public class ProjectControllerExistingNameIT {
 
     private MockMvc mockMvc;

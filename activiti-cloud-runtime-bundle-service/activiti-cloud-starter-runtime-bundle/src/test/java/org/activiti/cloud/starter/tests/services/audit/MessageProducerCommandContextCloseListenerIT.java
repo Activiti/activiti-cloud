@@ -69,7 +69,7 @@ public class MessageProducerCommandContextCloseListenerIT {
     private AuditConsumerStreamHandler streamHandler;
 
     @DynamicPropertySource
-    public static void asyncProperties(DynamicPropertyRegistry registry) {
+    public static void dynamicProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.activiti.asyncExecutorActivate", () -> true);
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:msg-producer-test");
     }

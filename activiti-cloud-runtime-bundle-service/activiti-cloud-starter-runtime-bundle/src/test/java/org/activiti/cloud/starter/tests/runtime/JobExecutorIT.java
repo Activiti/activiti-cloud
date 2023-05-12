@@ -105,8 +105,8 @@ import org.springframework.transaction.support.TransactionTemplate;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-@Isolated
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@Isolated
 public class JobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(JobExecutorIT.class);
