@@ -237,6 +237,7 @@ public class JobExecutorIT {
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(ASYNC_TASK)
+            .latestVersion()
             .singleResult()
             .getId();
         //when
@@ -349,6 +350,7 @@ public class JobExecutorIT {
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(FAILED_JOB_RETRY)
+            .latestVersion()
             .singleResult()
             .getId();
         //when
@@ -399,6 +401,7 @@ public class JobExecutorIT {
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(FAILED_TIMER_JOB_RETRY)
+            .latestVersion()
             .singleResult()
             .getId();
         //when
@@ -462,6 +465,7 @@ public class JobExecutorIT {
         String processDefinitionId = repositoryService
             .createProcessDefinitionQuery()
             .processDefinitionKey(START_TIMER_EVENT_EXAMPLE)
+            .latestVersion()
             .singleResult()
             .getId();
         // when

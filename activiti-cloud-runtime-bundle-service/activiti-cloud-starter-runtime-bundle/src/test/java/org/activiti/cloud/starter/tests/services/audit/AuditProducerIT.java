@@ -133,7 +133,6 @@ import org.springframework.test.context.TestPropertySource;
 @Import(TestChannelBinderConfiguration.class)
 public class AuditProducerIT {
 
-    private static final int VERSION_1 = 1;
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
     private static final String CALL_TWO_SUB_PROCESSES = "callTwoSubProcesses";
@@ -189,6 +188,8 @@ public class AuditProducerIT {
     private AuditConsumerStreamHandler streamHandler;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
+    private Map<String, Integer> processDefinitionVersions = new HashMap<>();
+    private Map<String, String> processDefinitionAppVersions = new HashMap<>();
 
     @Autowired
     private RuntimeService runtimeService;
@@ -205,6 +206,9 @@ public class AuditProducerIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionVersions.put(pd.getName(), pd.getVersion());
+            processDefinitionAppVersions.put(pd.getName(), pd.getAppVersion());
+            pd.getVersion();
         }
     }
 
@@ -810,6 +814,7 @@ public class AuditProducerIT {
         //given
         String businessKey = "testBusinessKey";
         String processDefinitionId = processDefinitionIds.get(CALL_TWO_SUB_PROCESSES);
+        Integer processDefinitionVersion = processDefinitionVersions.get(CALL_TWO_SUB_PROCESSES);
         String processName = "Test " + CALL_TWO_SUB_PROCESSES;
         StartProcessPayload payload = new StartProcessPayloadBuilder()
             .withProcessDefinitionId(processDefinitionId)
@@ -856,9 +861,9 @@ public class AuditProducerIT {
                         processDefinitionId,
                         CALL_TWO_SUB_PROCESSES,
                         CALL_TWO_SUB_PROCESSES,
-                        VERSION_1,
+                        processDefinitionVersion,
                         "SpringAutoDeployment",
-                        VERSION_1,
+                        processDefinitionVersion,
                         businessKey
                     );
 
@@ -1106,6 +1111,9 @@ public class AuditProducerIT {
 
     @Test
     public void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
+        // given
+        final String appVersion = processDefinitionAppVersions.get(SIMPLE_PROCESS);
+
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -1134,7 +1142,7 @@ public class AuditProducerIT {
                         ApplicationElement::getAppVersion,
                         event -> ((ApplicationElement) event.getEntity()).getAppVersion()
                     )
-                    .containsOnly(tuple("1", "1"));
+                    .containsOnly(tuple(appVersion, appVersion));
             });
 
         runtimeService.deleteProcessInstance(startProcessEntity.getBody().getId(), "Clean up");
