@@ -473,6 +473,9 @@ limitations under the License.]]>
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
           <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
