@@ -45,7 +45,7 @@
     <swagger.version>2.2.9</swagger.version>
     <xstream.version>1.4.20</xstream.version>
     <json-unit.version>2.32.0</json-unit.version>
-    <jsonwebtoken.version>0.9.1</jsonwebtoken.version>
+    <java-jwt.version>4.4.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
     <james.apache-mime4j.version>0.8.9</james.apache-mime4j.version>
     <batik.version>1.16</batik.version>
@@ -166,9 +166,9 @@
         <version>${json-unit.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt</artifactId>
-        <version>${jsonwebtoken.version}</version>
+        <groupId>com.auth0</groupId>
+        <artifactId>java-jwt</artifactId>
+        <version>${java-jwt.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.common.security.test.support;
 
-import com.nimbusds.jose.util.JSONArrayUtils;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.TextCodec;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.nimbusds.jose.util.Base64;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,14 +65,14 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
             grantedAuthorities.add(new SimpleGrantedAuthority(annotation.rolePrefix() + role));
         });
 
-        String token = Jwts
-            .builder()
-            .setIssuer("Activiti Cloud")
-            .setSubject(annotation.username())
-            .setIssuedAt(Date.from(Instant.now()))
-            .setExpiration(Date.from(Instant.now().plusSeconds(600)))
-            .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.decode("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E="))
-            .compact();
+        byte[] secret = new Base64("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=").decode();
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        String token = JWT.create()
+            .withIssuer("Activiti Cloud")
+            .withSubject(annotation.username())
+            .withIssuedAt(Date.from(Instant.now()))
+            .withExpiresAt(Date.from(Instant.now().plusSeconds(600)))
+            .sign(algorithm);
 
         Jwt jwt = new Jwt(token, Instant.now(), Instant.now().plusSeconds(600), headers, claims);
 
