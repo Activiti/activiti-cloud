@@ -144,6 +144,7 @@ public class QueryBPMNActivityIT {
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
         serviceTaskRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

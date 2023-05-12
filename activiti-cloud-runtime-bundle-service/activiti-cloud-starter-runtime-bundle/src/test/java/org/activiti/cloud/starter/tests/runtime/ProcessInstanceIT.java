@@ -43,6 +43,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,11 @@ public class ProcessInstanceIT {
             processDefinitionIds.put(pd.getName(), pd.getId());
             processDefinitionAppVersions.put(pd.getName(), pd.getAppVersion());
         }
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

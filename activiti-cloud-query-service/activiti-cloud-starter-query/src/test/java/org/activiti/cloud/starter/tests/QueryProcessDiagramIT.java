@@ -148,6 +148,7 @@ public class QueryProcessDiagramIT {
         processInstanceRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

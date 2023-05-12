@@ -32,6 +32,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     public static final String TOKEN_FIELD = "access_token";
 
     @Value("${keycloak.resource:}")
+    private String defaultResource;
+
     protected String resource;
 
     @Value("${keycloak.auth-server-url:}")
@@ -41,19 +43,33 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     private String realm;
 
     @Value("${activiti.identity.test-user:}")
+    private String defaultTestUser;
+
     protected String testUser;
 
     @Value("${activiti.identity.test-password:}")
+    private String defaultTestPassword;
+
     protected String testPassword;
 
     public KeycloakTokenProducer(String authServerUrl, String realm) {
         this.authServerUrl = authServerUrl;
         this.realm = realm;
+
+        this.withDefaultValues();
     }
 
     @Override
     public String getTokenString() {
         return "Bearer " + getAccessTokenString();
+    }
+
+    @Override
+    public IdentityTokenProducer withDefaultValues() {
+        this.resource = this.defaultResource;
+        this.testUser = this.defaultTestUser;
+        this.testPassword = this.defaultTestPassword;
+        return this;
     }
 
     @Override

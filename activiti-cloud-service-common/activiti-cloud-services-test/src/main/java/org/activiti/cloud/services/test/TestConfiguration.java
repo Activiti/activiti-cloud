@@ -33,7 +33,6 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
@@ -52,7 +51,6 @@ public class TestConfiguration {
     }
 
     @Bean
-    @Scope("prototype")
     @ConditionalOnMissingBean
     public IdentityTokenProducer keycloakTokenProducer(
         @Value("${keycloak.auth-server-url:}") String authServerUrl,

@@ -117,6 +117,7 @@ public class TestGatewayConcurrencyIT {
     public void cleanUp() {
         executorService.shutdown();
         streamHandler.clear();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

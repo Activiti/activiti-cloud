@@ -155,6 +155,7 @@ public class QueryTasksIT {
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

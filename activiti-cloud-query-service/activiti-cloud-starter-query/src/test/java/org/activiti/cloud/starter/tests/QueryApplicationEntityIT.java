@@ -71,6 +71,7 @@ public class QueryApplicationEntityIT {
     @AfterEach
     public void tearDown() {
         applicationRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

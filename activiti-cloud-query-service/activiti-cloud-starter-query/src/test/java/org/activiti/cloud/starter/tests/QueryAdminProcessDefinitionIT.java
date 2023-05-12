@@ -74,6 +74,7 @@ public class QueryAdminProcessDefinitionIT {
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

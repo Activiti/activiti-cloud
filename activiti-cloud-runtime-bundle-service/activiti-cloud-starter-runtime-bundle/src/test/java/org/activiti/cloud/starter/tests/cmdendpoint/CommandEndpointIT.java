@@ -47,6 +47,7 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,11 @@ public class CommandEndpointIT {
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
         }
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test

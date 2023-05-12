@@ -108,6 +108,7 @@ public class QueryAdminVariablesIT {
         processVariableRepository.deleteAll();
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
+        identityTokenProducer.withDefaultValues();
     }
 
     @Test
