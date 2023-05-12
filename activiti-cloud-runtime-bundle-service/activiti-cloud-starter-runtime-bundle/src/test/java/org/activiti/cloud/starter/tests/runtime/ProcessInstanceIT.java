@@ -85,6 +85,7 @@ public class ProcessInstanceIT {
     protected String keycloakTestUser;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
+    private Map<String, String> processDefinitionAppVersions = new HashMap<>();
 
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
@@ -99,6 +100,7 @@ public class ProcessInstanceIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionAppVersions.put(pd.getName(), pd.getAppVersion());
         }
     }
 
@@ -180,7 +182,7 @@ public class ProcessInstanceIT {
         assertThat(startedProcInst.getInitiator()).isEqualTo(keycloakTestUser); //will only match if using username not id
         assertThat(startedProcInst.getBusinessKey()).isEqualTo("business_key");
         assertThat(startedProcInst.getAppName()).isEqualTo(runtimeBundleProperties.getAppName());
-        assertThat(startedProcInst.getAppVersion()).isEqualTo("1");
+        assertThat(startedProcInst.getAppVersion()).isEqualTo(processDefinitionAppVersions.get(SIMPLE_PROCESS));
         assertThat(startedProcInst.getServiceName()).isEqualTo(runtimeBundleProperties.getServiceName());
         assertThat(startedProcInst.getServiceFullName()).isEqualTo(runtimeBundleProperties.getServiceFullName());
         assertThat(startedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
