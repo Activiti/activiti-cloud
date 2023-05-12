@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
@@ -97,7 +97,7 @@ public class EngineEventsConsumerAutoConfiguration {
             EngineEventsConsumerMessageHandler engineEventsMessageHandler,
             @Qualifier(SOURCE) SubscribableChannel source
         ) {
-            return IntegrationFlows
+            return IntegrationFlow
                 .from(source)
                 .log(LoggingHandler.Level.DEBUG)
                 .transform(engineEventsMessageHandler)

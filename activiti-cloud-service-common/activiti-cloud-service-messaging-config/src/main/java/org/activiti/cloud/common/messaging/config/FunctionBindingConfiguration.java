@@ -39,7 +39,6 @@ import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowBuilder;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.integration.handler.LoggingHandler;
@@ -120,7 +119,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                             if (Supplier.class.isInstance(bean)) {
                                 FunctionInvocationWrapper supplier = functionFromDefinition(beanName);
 
-                                IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlows
+                                IntegrationFlowBuilder supplierFlowBuilder = IntegrationFlow
                                     .fromSupplier(supplier)
                                     .filter(
                                         selector,
@@ -135,7 +134,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                     return function.apply(message);
                                 };
 
-                                IntegrationFlowBuilder functionFlowBuilder = IntegrationFlows
+                                IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
                                     .from(
                                         getGatewayInterface(Function.class.isInstance(bean)),
                                         gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
@@ -153,7 +152,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                         .channel(functionBinding.output());
                                 }
 
-                                IntegrationFlow inputChannelFlow = IntegrationFlows
+                                IntegrationFlow inputChannelFlow = IntegrationFlow
                                     .from(functionBinding.input())
                                     .gateway(
                                         functionFlowBuilder.get(),
