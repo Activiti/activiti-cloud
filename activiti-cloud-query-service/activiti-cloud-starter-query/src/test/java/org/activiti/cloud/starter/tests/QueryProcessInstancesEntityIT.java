@@ -111,7 +111,6 @@ public class QueryProcessInstancesEntityIT {
     @AfterEach
     public void tearDown() {
         processInstanceRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

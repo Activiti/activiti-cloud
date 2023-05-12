@@ -90,7 +90,6 @@ public class QueryProcessInstanceEntityVariablesIT {
     public void tearDown() {
         variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

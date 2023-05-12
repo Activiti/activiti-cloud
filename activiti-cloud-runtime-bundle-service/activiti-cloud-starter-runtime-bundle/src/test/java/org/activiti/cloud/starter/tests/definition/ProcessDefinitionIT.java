@@ -33,7 +33,6 @@ import org.activiti.cloud.starter.tests.util.TestResourceUtil;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -74,11 +73,6 @@ public class ProcessDefinitionIT {
     private static final String PROCESS_POOL_LANE = "process_pool1";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String PROCESS_WITH_BOUNDARY_SIGNAL = "ProcessWithBoundarySignal";
-
-    @AfterEach
-    public void cleanUp() {
-        identityTokenProducer.withDefaultValues();
-    }
 
     @Test
     public void shouldRetrieveListOfProcessDefinition() {

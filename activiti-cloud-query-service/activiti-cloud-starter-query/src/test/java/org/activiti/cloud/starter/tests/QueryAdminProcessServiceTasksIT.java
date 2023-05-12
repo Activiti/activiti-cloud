@@ -167,7 +167,6 @@ public class QueryAdminProcessServiceTasksIT {
         integrationContextRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

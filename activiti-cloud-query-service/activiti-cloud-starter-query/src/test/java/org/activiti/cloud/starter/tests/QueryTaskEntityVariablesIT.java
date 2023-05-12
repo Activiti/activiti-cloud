@@ -120,7 +120,6 @@ public class QueryTaskEntityVariablesIT {
         variableRepository.deleteAll();
         taskRepository.deleteAll();
         processInstanceRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

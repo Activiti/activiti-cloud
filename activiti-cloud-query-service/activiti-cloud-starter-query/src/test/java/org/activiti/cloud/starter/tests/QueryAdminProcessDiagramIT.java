@@ -127,7 +127,6 @@ public class QueryAdminProcessDiagramIT {
         processInstanceRepository.deleteAll();
         bpmnActivityRepository.deleteAll();
         bpmnSequenceFlowRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

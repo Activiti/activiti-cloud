@@ -74,7 +74,6 @@ public class QueryProcessDefinitionCandidateStartersIT {
     public void tearDown() {
         processModelRepository.deleteAll();
         processDefinitionRepository.deleteAll();
-        identityTokenProducer.withDefaultValues();
     }
 
     @Test

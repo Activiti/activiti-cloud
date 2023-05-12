@@ -23,8 +23,6 @@ public interface IdentityTokenProducer {
 
     String getTokenString();
 
-    IdentityTokenProducer withDefaultValues();
-
     IdentityTokenProducer withResource(String resource);
     IdentityTokenProducer withTestPassword(String password);
     IdentityTokenProducer withTestUser(String user);
