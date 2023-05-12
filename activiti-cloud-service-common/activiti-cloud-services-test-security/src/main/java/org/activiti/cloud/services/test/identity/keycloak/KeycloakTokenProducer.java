@@ -46,6 +46,14 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     @Value("${activiti.identity.test-password:}")
     protected String testPassword;
 
+    private KeycloakTokenProducer(KeycloakTokenProducer keycloakTokenProducer) {
+        this.resource = keycloakTokenProducer.resource;
+        this.authServerUrl = keycloakTokenProducer.authServerUrl;
+        this.realm = keycloakTokenProducer.realm;
+        this.testUser = keycloakTokenProducer.testUser;
+        this.testPassword = keycloakTokenProducer.testPassword;
+    }
+
     public KeycloakTokenProducer(String authServerUrl, String realm) {
         this.authServerUrl = authServerUrl;
         this.realm = realm;
@@ -64,19 +72,22 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
 
     @Override
     public IdentityTokenProducer withTestUser(String keycloakTestUser) {
-        this.testUser = keycloakTestUser;
-        return this;
+        KeycloakTokenProducer keycloakTokenProducer = new KeycloakTokenProducer(this);
+        keycloakTokenProducer.testUser = keycloakTestUser;
+        return keycloakTokenProducer;
     }
 
     @Override
     public IdentityTokenProducer withTestPassword(String testPassword) {
-        this.testPassword = testPassword;
-        return this;
+        KeycloakTokenProducer keycloakTokenProducer = new KeycloakTokenProducer(this);
+        keycloakTokenProducer.testPassword = testPassword;
+        return keycloakTokenProducer;
     }
 
     public IdentityTokenProducer withResource(String resource) {
-        this.resource = resource;
-        return this;
+        KeycloakTokenProducer keycloakTokenProducer = new KeycloakTokenProducer(this);
+        keycloakTokenProducer.resource = resource;
+        return keycloakTokenProducer;
     }
 
     @Override
