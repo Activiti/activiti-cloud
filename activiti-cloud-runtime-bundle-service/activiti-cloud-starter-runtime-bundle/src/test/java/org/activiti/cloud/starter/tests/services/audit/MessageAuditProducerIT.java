@@ -153,7 +153,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "startMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -168,7 +168,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "startMessageEventSubprocessEvent",
                             processInstance.getProcessDefinitionId(),
@@ -183,7 +183,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "intermediateThrowMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -198,7 +198,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "boundaryMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -213,7 +213,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "startMessageEventSubprocessEvent",
                             processInstance.getProcessDefinitionId(),
@@ -228,7 +228,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "boundaryMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -243,7 +243,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "intermediateCatchMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -258,7 +258,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "intermediateCatchMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -273,7 +273,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             "throwEndMessageEvent",
                             processInstance.getProcessDefinitionId(),
@@ -337,7 +337,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
@@ -380,7 +380,7 @@ public class MessageAuditProducerIT {
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
                             processInstance.getProcessDefinitionKey(),
-                            1, // version
+                            processInstance.getProcessDefinitionVersion(), // version
                             processInstance.getBusinessKey(),
                             processInstance.getProcessDefinitionId(),
                             processInstance.getId(),
