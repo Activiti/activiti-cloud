@@ -18,9 +18,6 @@ package org.activiti.cloud.services.notifications.graphql.subscriptions;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
@@ -57,14 +54,6 @@ public class GraphQLSubscriptionSchemaProperties {
 
     @NotBlank
     private String clientPasscode;
-
-    @Configuration
-    @PropertySource("classpath:META-INF/graphql-subscriptions.properties")
-    @PropertySource(value = "classpath:graphql-subscriptions.properties", ignoreResourceNotFound = true)
-    @EnableConfigurationProperties(GraphQLSubscriptionSchemaProperties.class)
-    public static class AutoConfiguration {
-        // auto configures parent properties class using spring.factories
-    }
 
     public String getGraphqls() {
         return graphqls;

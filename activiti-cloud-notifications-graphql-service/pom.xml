@@ -12,7 +12,7 @@
   <name>Activiti Cloud Notifications GraphQL Service :: Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <graphql-jpa-query.version>0.5.4</graphql-jpa-query.version>
+    <graphql-jpa-query.version>0.6.0-SNAPSHOT</graphql-jpa-query.version>
   </properties>
   <dependencyManagement>
     <dependencies>

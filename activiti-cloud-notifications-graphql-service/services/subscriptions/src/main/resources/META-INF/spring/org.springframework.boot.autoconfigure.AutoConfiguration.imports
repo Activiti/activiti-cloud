@@ -1,2 +1,1 @@
-org.activiti.cloud.services.notifications.graphql.subscriptions.GraphQLSubscriptionSchemaProperties.AutoConfiguration
 org.activiti.cloud.services.notifications.graphql.subscriptions.config.GraphQLSubscriptionsAutoConfiguration
