@@ -189,6 +189,7 @@ public class AuditProducerIT {
     private AuditConsumerStreamHandler streamHandler;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
+    private Map<String, String> processDefinitionAppVersions = new HashMap<>();
 
     @Autowired
     private RuntimeService runtimeService;
@@ -205,6 +206,7 @@ public class AuditProducerIT {
         assertThat(processDefinitions.getBody().getContent()).isNotNull();
         for (CloudProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionAppVersions.put(pd.getName(), pd.getAppVersion());
         }
     }
 
@@ -1106,6 +1108,9 @@ public class AuditProducerIT {
 
     @Test
     public void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
+        // given
+        final String appVersion = processDefinitionAppVersions.get(SIMPLE_PROCESS);
+
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -1134,7 +1139,7 @@ public class AuditProducerIT {
                         ApplicationElement::getAppVersion,
                         event -> ((ApplicationElement) event.getEntity()).getAppVersion()
                     )
-                    .containsOnly(tuple("1", "1"));
+                    .containsOnly(tuple(appVersion, appVersion));
             });
 
         runtimeService.deleteProcessInstance(startProcessEntity.getBody().getId(), "Clean up");
