@@ -100,7 +100,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
-        return IntegrationFlows.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+        return IntegrationFlow.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
     }
 
     @Bean
