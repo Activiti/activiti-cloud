@@ -16,10 +16,8 @@
 package org.activiti.cloud.services.graphql.autoconfigure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
 import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
 import graphql.GraphQL;
@@ -30,7 +28,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
@@ -38,11 +40,19 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @ConditionalOnClass({GraphQL.class})
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
+@EnableConfigurationProperties(ActivitiGraphQLWebProperties.class)
+@PropertySources(
+    {
+        @PropertySource(value = "classpath:META-INF/graphql.properties"),
+        @PropertySource(value = "classpath:graphql.properties", ignoreResourceNotFound = true),
+    }
+)
 public class ActivitiGraphQLAutoConfiguration {
 
     /**
      * Provides default configuration of Activiti GraphQL JPA Query Components
      */
+    @Configuration
     public static class DefaultActivitiGraphQLJpaConfiguration {
 
         /**

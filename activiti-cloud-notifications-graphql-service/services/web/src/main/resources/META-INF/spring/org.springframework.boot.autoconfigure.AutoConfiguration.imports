@@ -1,2 +1,1 @@
 org.activiti.cloud.services.graphql.autoconfigure.ActivitiGraphQLAutoConfiguration
-org.activiti.cloud.services.graphql.autoconfigure.ActivitiGraphQLWebProperties.AutoConfiguration
