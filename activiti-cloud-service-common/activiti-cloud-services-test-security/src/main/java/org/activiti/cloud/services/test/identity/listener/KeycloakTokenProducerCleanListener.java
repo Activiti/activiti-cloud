@@ -16,7 +16,7 @@
 
 package org.activiti.cloud.services.test.identity.listener;
 
-import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
+import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
 import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -41,9 +41,9 @@ public class KeycloakTokenProducerCleanListener implements TestExecutionListener
     @Override
     public void afterTestMethod(TestContext testContext) throws Exception {
         try {
-            IdentityTokenProducer tokenProducer = testContext
+            KeycloakTokenProducer tokenProducer = testContext
                 .getApplicationContext()
-                .getBean(IdentityTokenProducer.class);
+                .getBean(KeycloakTokenProducer.class);
             Environment env = testContext.getApplicationContext().getEnvironment();
             tokenProducer
                 .withTestUser(env.getProperty(TEST_USER, ""))
