@@ -16,8 +16,8 @@
 package org.activiti.cloud.services.query.rest.config;
 
 import org.activiti.cloud.services.query.model.*;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy.RepositoryDetectionStrategies;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;

@@ -22,6 +22,7 @@ import static org.activiti.cloud.services.common.util.ContentTypeUtils.removeExt
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_JSON_FILE_TYPE_COMPARATOR;
 import static org.activiti.cloud.services.modeling.service.ModelTypeComparators.MODEL_TYPE_COMPARATOR;
 
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -34,7 +35,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import jakarta.transaction.Transactional;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;

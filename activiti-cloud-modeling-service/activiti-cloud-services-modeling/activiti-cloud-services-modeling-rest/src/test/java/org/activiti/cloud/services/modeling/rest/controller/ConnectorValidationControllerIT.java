@@ -80,7 +80,8 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "simple-connector.json",
@@ -97,7 +98,8 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "simple-connector.json",
@@ -114,7 +116,8 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-events.json",
@@ -132,7 +135,8 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-simple-connector.json",
@@ -158,7 +162,8 @@ public class ConnectorValidationControllerIT {
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
@@ -181,7 +186,8 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
@@ -204,7 +210,8 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-too-long.json",
@@ -227,7 +234,8 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-empty.json",
@@ -251,7 +259,8 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-underscore.json",
@@ -272,7 +281,8 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-uppercase.json",
@@ -287,10 +297,12 @@ public class ConnectorValidationControllerIT {
             .isSemanticValidationException()
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
     }
+
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-custom-type.json",
@@ -307,7 +319,8 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-errors.json",
@@ -326,7 +339,8 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "connector-with-errors-invalid-property.json",
@@ -345,7 +359,8 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-event-model.json",

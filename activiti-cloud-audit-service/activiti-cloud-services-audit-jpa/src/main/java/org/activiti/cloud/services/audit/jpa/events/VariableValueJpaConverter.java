@@ -17,8 +17,8 @@ package org.activiti.cloud.services.audit.jpa.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import jakarta.persistence.AttributeConverter;
+import java.io.IOException;
 import org.activiti.cloud.services.audit.api.AuditException;
 
 public class VariableValueJpaConverter implements AttributeConverter<VariableValue<?>, String> {

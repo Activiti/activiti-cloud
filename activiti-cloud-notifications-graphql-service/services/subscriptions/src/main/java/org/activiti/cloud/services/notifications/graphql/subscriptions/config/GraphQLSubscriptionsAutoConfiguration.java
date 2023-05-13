@@ -42,7 +42,7 @@ import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import reactor.core.publisher.Flux;
 
 @AutoConfiguration
-@ConditionalOnClass({GraphQL.class, ReactorNettyTcpStompClient.class})
+@ConditionalOnClass({ GraphQL.class, ReactorNettyTcpStompClient.class })
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.subscriptions.enabled",
     matchIfMissing = true

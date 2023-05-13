@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Scope;
 
 @AutoConfiguration
 @PropertySource("classpath:config/signal-events-channels.properties")
-@AutoConfigureBefore({ProcessRuntimeAutoConfiguration.class})
+@AutoConfigureBefore({ ProcessRuntimeAutoConfiguration.class })
 @Import(ProcessEngineSignalChannelsConfiguration.class)
 public class ActivitiCloudSubscriptionsAutoConfiguration {
 

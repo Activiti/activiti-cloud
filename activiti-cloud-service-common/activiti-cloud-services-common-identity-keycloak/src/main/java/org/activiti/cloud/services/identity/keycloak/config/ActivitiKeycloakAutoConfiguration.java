@@ -58,11 +58,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @AutoConfiguration
 @PropertySource("classpath:keycloak-client.properties")
 @ConditionalOnProperty(
-value = "activiti.cloud.services.oauth2.iam-name",
-havingValue = "keycloak",
-matchIfMissing = true
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
 )
-@EnableConfigurationProperties({ActivitiKeycloakProperties.class, KeycloakProperties.class})
+@EnableConfigurationProperties({ ActivitiKeycloakProperties.class, KeycloakProperties.class })
 public class ActivitiKeycloakAutoConfiguration {
 
     @Value("${identity.client.cache.cacheExpireAfterWrite:PT5m}")

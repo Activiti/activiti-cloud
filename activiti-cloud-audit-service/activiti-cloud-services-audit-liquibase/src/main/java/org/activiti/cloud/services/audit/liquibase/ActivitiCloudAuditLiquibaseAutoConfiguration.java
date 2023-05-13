@@ -34,7 +34,8 @@ public class ActivitiCloudAuditLiquibaseAutoConfiguration extends SpringLiquibas
 
     @Bean
     @ConditionalOnMissingBean(name = "auditLiquibase")
-    public SpringLiquibase auditLiquibase(DataSource dataSource, LiquibaseProperties auditLiquibaseProperties ) throws LiquibaseException {
+    public SpringLiquibase auditLiquibase(DataSource dataSource, LiquibaseProperties auditLiquibaseProperties)
+        throws LiquibaseException {
         return buildSpringLiquibase(dataSource, auditLiquibaseProperties);
     }
 

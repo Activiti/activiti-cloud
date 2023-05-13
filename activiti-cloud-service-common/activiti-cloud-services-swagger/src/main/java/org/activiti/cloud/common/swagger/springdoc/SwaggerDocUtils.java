@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.common.swagger.springdoc;
 
-
 import org.springdoc.core.utils.SpringDocUtils;
 
 public class SwaggerDocUtils {

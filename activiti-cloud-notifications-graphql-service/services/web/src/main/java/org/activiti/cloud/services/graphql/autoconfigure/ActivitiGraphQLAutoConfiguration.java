@@ -38,7 +38,7 @@ import org.springframework.context.annotation.PropertySources;
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
 @AutoConfiguration
-@ConditionalOnClass({GraphQL.class})
+@ConditionalOnClass({ GraphQL.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(ActivitiGraphQLWebProperties.class)
 @PropertySources(

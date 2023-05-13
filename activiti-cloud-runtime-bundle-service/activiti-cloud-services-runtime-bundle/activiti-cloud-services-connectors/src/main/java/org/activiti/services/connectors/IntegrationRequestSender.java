@@ -43,12 +43,17 @@ public class IntegrationRequestSender {
             throw new IllegalTransactionStateException("Transaction synchronization must be active.");
         }
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                streamBridge.send(event.getIntegrationContext().getConnectorType(), buildIntegrationRequestMessage(event));
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    streamBridge.send(
+                        event.getIntegrationContext().getConnectorType(),
+                        buildIntegrationRequestMessage(event)
+                    );
+                }
             }
-        });
+        );
     }
 
     private Message<IntegrationRequest> buildIntegrationRequestMessage(IntegrationRequest event) {

@@ -67,7 +67,8 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
 
         byte[] secret = new Base64("Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=").decode();
         Algorithm algorithm = Algorithm.HMAC256(secret);
-        String token = JWT.create()
+        String token = JWT
+            .create()
             .withIssuer("Activiti Cloud")
             .withSubject(annotation.username())
             .withIssuedAt(Date.from(Instant.now()))

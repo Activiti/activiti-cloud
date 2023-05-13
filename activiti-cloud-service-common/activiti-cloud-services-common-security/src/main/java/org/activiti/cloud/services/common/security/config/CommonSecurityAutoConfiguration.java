@@ -69,7 +69,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @AutoConfiguration
 @EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
-@ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
+@ConditionalOnMissingBean(value = { SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class })
 @Import(CommonJwtAuthenticationConverterConfiguration.class)
 public class CommonSecurityAutoConfiguration {
 

@@ -31,7 +31,7 @@ import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.locks.LockRegistry;
 
-@AutoConfiguration(before = {MessagesCoreAutoConfiguration.class}, after = {RedisAutoConfiguration.class})
+@AutoConfiguration(before = { MessagesCoreAutoConfiguration.class }, after = { RedisAutoConfiguration.class })
 @ConditionalOnClass(RedisMessageStore.class)
 public class RedisMessageStoreAutoConfiguration {
 

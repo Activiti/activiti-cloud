@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task.TaskStatus;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;

@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.jpa.audit;
 
-import java.util.Date;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.util.Date;
 import org.activiti.cloud.services.auditable.Auditable;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;

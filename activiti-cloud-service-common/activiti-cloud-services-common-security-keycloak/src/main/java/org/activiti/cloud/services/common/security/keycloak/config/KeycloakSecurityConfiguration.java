@@ -36,9 +36,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @PropertySource("classpath:keycloak-configuration.properties")
 @AutoConfigureBefore(SwaggerAutoConfiguration.class)
 @ConditionalOnProperty(
-value = "activiti.cloud.services.oauth2.iam-name",
-havingValue = "keycloak",
-matchIfMissing = true
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
 )
 public class KeycloakSecurityConfiguration {
 

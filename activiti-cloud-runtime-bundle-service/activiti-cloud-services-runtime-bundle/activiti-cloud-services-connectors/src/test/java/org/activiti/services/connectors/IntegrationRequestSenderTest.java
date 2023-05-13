@@ -177,8 +177,7 @@ public class IntegrationRequestSenderTest {
         //when
         integrationRequestSender.sendIntegrationRequest(integrationRequest);
 
-        TransactionSynchronizationManager.getSynchronizations()
-            .forEach(TransactionSynchronization::afterCommit);
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
 
         //then
         verify(streamBridge).send(eq(CONNECTOR_TYPE), integrationRequestMessageCaptor.capture());

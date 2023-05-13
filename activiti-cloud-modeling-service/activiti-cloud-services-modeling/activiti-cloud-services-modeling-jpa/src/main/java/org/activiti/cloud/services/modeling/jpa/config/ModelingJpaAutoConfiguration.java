@@ -36,7 +36,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @AutoConfiguration
 @EnableJpaRepositories(
-    basePackages = {"org.activiti.cloud.services.modeling.jpa"},
+    basePackages = { "org.activiti.cloud.services.modeling.jpa" },
     repositoryFactoryBeanClass = ExtendedJpaRepositoryFactoryBean.class
 )
 @EnableJpaAuditing(auditorAwareRef = "auditorAware", dateTimeProviderRef = "localDateTimeProvider")

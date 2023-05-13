@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.MessageChannel;
 
 @AutoConfiguration
-@ConditionalOnClass({OutputBindingConfiguration.class, BinderFactoryAutoConfiguration.class})
+@ConditionalOnClass({ OutputBindingConfiguration.class, BinderFactoryAutoConfiguration.class })
 public class TestProducerAutoConfiguration implements StreamProducer {
 
     @Bean

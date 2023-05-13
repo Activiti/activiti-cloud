@@ -48,13 +48,15 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 @AutoConfiguration
 @ConditionalOnWebApplication
-@ConditionalOnClass({GraphQL.class, EnableWebSocketMessageBroker.class})
+@ConditionalOnClass({ GraphQL.class, EnableWebSocketMessageBroker.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
-@PropertySources({
-    @PropertySource("classpath:META-INF/graphql-ws.properties"),
-    @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true)
-})
+@PropertySources(
+    {
+        @PropertySource("classpath:META-INF/graphql-ws.properties"),
+        @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true),
+    }
+)
 public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
     @EnableWebSocket
