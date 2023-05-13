@@ -10,7 +10,7 @@
   </parent>
   <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
   <packaging>pom</packaging>
-  <name>Activiti Cloud :: Acceptance Tests</name>
+  <name>Activiti Cloud :: Acceptance Scenarios Parent</name>
   <modules>
     <module>modeling-acceptance-tests</module>
     <module>runtime-acceptance-tests</module>

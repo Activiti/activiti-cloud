@@ -9,7 +9,7 @@
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
   <packaging>pom</packaging>
-  <name>Activiti Cloud Acceptance Tests:: Dependencies BOM (Bill Of Materials)</name>
+  <name>Activiti Cloud :: Acceptance Tests Dependencies BOM (Bill Of Materials)</name>
   <dependencyManagement>
     <dependencies>
       <dependency>

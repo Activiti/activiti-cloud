@@ -9,6 +9,7 @@
     <relativePath>../activiti-cloud-acceptance-tests-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-core</artifactId>
+  <name>Activiti Cloud :: Acceptance Tests Core</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

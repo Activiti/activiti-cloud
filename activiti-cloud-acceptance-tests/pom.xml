@@ -9,7 +9,7 @@
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
-  <name>Activiti Cloud :: Acceptance Tests</name>
+  <name>Activiti Cloud :: Acceptance Tests Parent</name>
   <packaging>pom</packaging>
   <modules>
     <module>activiti-cloud-acceptance-tests-dependencies</module>
