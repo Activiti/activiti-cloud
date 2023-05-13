@@ -21,6 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -66,6 +67,9 @@ public class QueryProcessInstanceEntityVariablesIT {
     @Autowired
     private VariableRepository variableRepository;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     private EventsAggregator eventsAggregator;
 
     private VariableEventContainedBuilder variableEventContainedBuilder;
@@ -88,6 +92,7 @@ public class QueryProcessInstanceEntityVariablesIT {
 
     @AfterEach
     public void tearDown() {
+        taskRepository.deleteAll();
         variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
