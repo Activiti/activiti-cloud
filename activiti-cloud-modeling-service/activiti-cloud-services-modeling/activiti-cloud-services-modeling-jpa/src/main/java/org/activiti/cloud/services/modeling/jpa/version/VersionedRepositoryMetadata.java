@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.jpa.version;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.data.repository.core.support.DefaultRepositoryMetadata;
-import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
 
 /**
@@ -85,8 +84,8 @@ public class VersionedRepositoryMetadata extends DefaultRepositoryMetadata {
         int index,
         Supplier<String> exceptionMessage
     ) {
-        List<TypeInformation<?>> arguments = ClassTypeInformation
-            .from(repositoryInterface)
+        List<TypeInformation<?>> arguments = TypeInformation
+            .of(repositoryInterface)
             .getRequiredSuperTypeInformation(VersionedJpaRepository.class)
             .getTypeArguments();
 
