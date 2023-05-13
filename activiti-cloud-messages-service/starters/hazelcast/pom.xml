@@ -8,6 +8,7 @@
     <version>7.12.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-starter-messages-hazelcast</artifactId>
+  <name>Activiti Cloud Starter :: Messages Hazelcast</name>
   <properties>
     <hazelcast.version>5.2.3</hazelcast.version>
   </properties>

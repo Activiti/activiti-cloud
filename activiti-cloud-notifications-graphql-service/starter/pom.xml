@@ -10,7 +10,7 @@
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
-  <name>Activiti Cloud Notifications :: Starter :: GraphQL</name>
+  <name>Activiti Cloud Starter :: Notifications GraphQL</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

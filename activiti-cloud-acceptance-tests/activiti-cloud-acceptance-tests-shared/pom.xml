@@ -9,6 +9,7 @@
     <relativePath>../activiti-cloud-acceptance-tests-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
+  <name>Activiti Cloud :: Acceptance Tests Shared</name>
   <dependencies>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
