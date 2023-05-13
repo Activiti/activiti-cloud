@@ -37,8 +37,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
-    before = {MessagesCoreAutoConfiguration.class},
-    after = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class}
+    before = { MessagesCoreAutoConfiguration.class },
+    after = { DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class }
 )
 @ConditionalOnClass(JdbcMessageStore.class)
 @PropertySource("classpath:config/activiti-cloud-starter-messages-jdbc.properties")

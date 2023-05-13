@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.hibernate.jpa.QueryHints;

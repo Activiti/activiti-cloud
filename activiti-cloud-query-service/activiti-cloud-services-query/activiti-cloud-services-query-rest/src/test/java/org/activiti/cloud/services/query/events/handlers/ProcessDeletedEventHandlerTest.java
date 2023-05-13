@@ -18,8 +18,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.UUID;
 import jakarta.persistence.EntityManager;
+import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;

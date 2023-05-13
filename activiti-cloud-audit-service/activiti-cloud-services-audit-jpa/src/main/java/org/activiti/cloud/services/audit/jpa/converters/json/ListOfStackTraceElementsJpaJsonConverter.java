@@ -18,10 +18,10 @@ package org.activiti.cloud.services.audit.jpa.converters.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import jakarta.persistence.AttributeConverter;
 import org.activiti.cloud.services.audit.api.AuditException;
 
 public class ListOfStackTraceElementsJpaJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {

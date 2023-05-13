@@ -49,32 +49,32 @@ import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
 @Import(
-        {
-                CommonExceptionHandlerQuery.class,
-                ProcessDefinitionAdminController.class,
-                ProcessDefinitionController.class,
-                ProcessInstanceAdminController.class,
-                ProcessInstanceController.class,
-                ProcessInstanceDeleteController.class,
-                ProcessInstanceDiagramAdminController.class,
-                ProcessInstanceDiagramController.class,
-                ProcessInstanceTasksAdminController.class,
-                ProcessInstanceTasksController.class,
-                ProcessInstanceVariableAdminController.class,
-                ProcessInstanceVariableController.class,
-                ProcessModelAdminController.class,
-                ProcessModelController.class,
-                TaskAdminController.class,
-                TaskController.class,
-                TaskDeleteController.class,
-                TaskVariableAdminController.class,
-                TaskVariableController.class,
-                ServiceTaskAdminController.class,
-                ProcessInstanceServiceTasksAdminController.class,
-                ServiceTaskIntegrationContextAdminController.class,
-                ApplicationController.class,
-                ApplicationAdminController.class,
-        }
+    {
+        CommonExceptionHandlerQuery.class,
+        ProcessDefinitionAdminController.class,
+        ProcessDefinitionController.class,
+        ProcessInstanceAdminController.class,
+        ProcessInstanceController.class,
+        ProcessInstanceDeleteController.class,
+        ProcessInstanceDiagramAdminController.class,
+        ProcessInstanceDiagramController.class,
+        ProcessInstanceTasksAdminController.class,
+        ProcessInstanceTasksController.class,
+        ProcessInstanceVariableAdminController.class,
+        ProcessInstanceVariableController.class,
+        ProcessModelAdminController.class,
+        ProcessModelController.class,
+        TaskAdminController.class,
+        TaskController.class,
+        TaskDeleteController.class,
+        TaskVariableAdminController.class,
+        TaskVariableController.class,
+        ServiceTaskAdminController.class,
+        ProcessInstanceServiceTasksAdminController.class,
+        ServiceTaskIntegrationContextAdminController.class,
+        ApplicationController.class,
+        ApplicationAdminController.class,
+    }
 )
 public class QueryRestControllersAutoConfiguration {
 

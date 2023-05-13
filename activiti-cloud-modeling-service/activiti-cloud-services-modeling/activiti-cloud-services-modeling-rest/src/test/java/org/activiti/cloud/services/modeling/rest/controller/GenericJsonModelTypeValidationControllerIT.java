@@ -131,7 +131,8 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart("file", "simple-model.json", fileContent, "application/json")
             .contentType("multipart/form-data")
             .post(String.format("/v1/models/%s/validate", genericJsonModel.getId()))
@@ -156,7 +157,8 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart("file", "simple-model.json", fileContent, "text/plain")
             .contentType("multipart/form-data")
             .post(String.format("/v1/models/%s/validate", genericJsonModel.getId()))
@@ -184,7 +186,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "invalid-simple-model.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate", genericJsonModel.getId()))
@@ -211,7 +214,8 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
         given()
-            .log().everything(true)
+            .log()
+            .everything(true)
             .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
             .contentType("multipart/form-data")
             .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -234,7 +238,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -259,7 +264,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "model-simple-invalid-name-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -285,7 +291,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "model-simple-mismatch-name-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -310,7 +317,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "model-simple-long-name-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -339,7 +347,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "model-simple-empty-name-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -367,7 +376,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -394,7 +404,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -421,7 +432,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
@@ -460,7 +472,8 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
-                .log().everything(true)
+                .log()
+                .everything(true)
                 .multiPart("file", "invalid-simple-model.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate?validateUsage=true", genericJsonModel.getId()))

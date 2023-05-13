@@ -50,7 +50,8 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "spring.cloud.stream.default-binder=rabbit")
+    properties = "spring.cloud.stream.default-binder=rabbit"
+)
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(
     classes = ServicesAuditITConfiguration.class,

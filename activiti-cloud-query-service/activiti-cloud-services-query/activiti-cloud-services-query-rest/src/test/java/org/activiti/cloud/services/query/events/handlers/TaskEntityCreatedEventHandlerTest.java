@@ -18,9 +18,9 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
-import jakarta.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;

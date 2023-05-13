@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
-import java.io.Serializable;
 import jakarta.persistence.EntityManager;
+import java.io.Serializable;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -16,9 +16,9 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Objects;
-import jakarta.persistence.*;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.format.annotation.DateTimeFormat;
 

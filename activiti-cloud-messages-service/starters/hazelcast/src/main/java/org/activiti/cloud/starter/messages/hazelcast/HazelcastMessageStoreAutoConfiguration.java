@@ -31,7 +31,7 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@AutoConfiguration(before = {MessagesCoreAutoConfiguration.class})
+@AutoConfiguration(before = { MessagesCoreAutoConfiguration.class })
 @ConditionalOnClass(HazelcastInstance.class)
 public class HazelcastMessageStoreAutoConfiguration {
 

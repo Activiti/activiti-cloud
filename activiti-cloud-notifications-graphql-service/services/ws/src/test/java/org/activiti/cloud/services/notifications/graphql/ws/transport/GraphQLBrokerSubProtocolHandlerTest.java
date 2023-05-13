@@ -26,9 +26,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.websocket.Session;
 import java.io.IOException;
 import java.security.Principal;
-import jakarta.websocket.Session;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;

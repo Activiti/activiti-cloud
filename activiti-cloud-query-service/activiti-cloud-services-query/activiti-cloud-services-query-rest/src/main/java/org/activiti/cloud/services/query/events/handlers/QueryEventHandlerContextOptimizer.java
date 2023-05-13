@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.AttributeNode;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import jakarta.persistence.AttributeNode;
-import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;

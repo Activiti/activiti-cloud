@@ -62,7 +62,9 @@ public class SpringdocApiDocsIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializer")))
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
-            .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8)))
+            .andExpect(
+                content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8))
+            )
             .andReturn();
     }
 }

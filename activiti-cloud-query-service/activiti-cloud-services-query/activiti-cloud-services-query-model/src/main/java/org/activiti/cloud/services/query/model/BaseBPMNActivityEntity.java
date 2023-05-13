@@ -15,12 +15,12 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Date;
-import java.util.Objects;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import java.util.Date;
+import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 

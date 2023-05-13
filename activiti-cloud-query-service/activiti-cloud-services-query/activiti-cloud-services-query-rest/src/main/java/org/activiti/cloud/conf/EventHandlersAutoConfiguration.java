@@ -15,18 +15,18 @@
  */
 package org.activiti.cloud.conf;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import jakarta.persistence.EntityManager;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
 import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.*;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;

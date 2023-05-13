@@ -142,14 +142,10 @@ public class ModelControllerIT {
     }
 
     @BeforeTransaction
-    void beforeTx() {
-
-    }
+    void beforeTx() {}
 
     @AfterTransaction
-    void afterTx() {
-
-    }
+    void afterTx() {}
 
     @Test
     public void should_returnAllProjectModels_when_gettingProjectModels() throws Exception {

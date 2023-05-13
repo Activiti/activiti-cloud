@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import java.util.List;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
 import org.hibernate.annotations.DynamicInsert;

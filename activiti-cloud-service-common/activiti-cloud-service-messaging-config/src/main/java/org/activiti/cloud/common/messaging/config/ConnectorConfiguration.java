@@ -41,7 +41,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(
-    after = {BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class},
+    after = { BinderFactoryAutoConfiguration.class, FunctionBindingConfiguration.class },
     before = FunctionConfiguration.class
 )
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {

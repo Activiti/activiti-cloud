@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import java.util.Set;
 import jakarta.persistence.EntityManager;
+import java.util.Set;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;

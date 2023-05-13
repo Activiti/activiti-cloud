@@ -17,9 +17,9 @@ package org.activiti.cloud.services.modeling.entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Map;
-import jakarta.persistence.AttributeConverter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.util.StringUtils;

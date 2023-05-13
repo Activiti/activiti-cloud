@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.util.Objects;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.hibernate.annotations.DynamicInsert;
