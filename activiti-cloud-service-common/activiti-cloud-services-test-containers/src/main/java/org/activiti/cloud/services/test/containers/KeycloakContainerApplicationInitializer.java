@@ -33,14 +33,19 @@ public class KeycloakContainerApplicationInitializer
         .withReuse(true);
 
     static {
-        if (!keycloakContainer.isRunning()) {
-            keycloakContainer.start();
-        }
+        start();
     }
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
+        start();
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+    }
+
+    protected static void start() {
+        if (!keycloakContainer.isRunning()) {
+            keycloakContainer.start();
+        }
     }
 
     public static KeycloakContainer getContainer() {
