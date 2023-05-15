@@ -17,6 +17,8 @@
 package org.activiti.cloud.starter.tests.listeners;
 
 import java.util.Map;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.core.Ordered;
 import org.springframework.test.context.TestContext;
@@ -41,8 +43,8 @@ public class CleanUpDatabaseTestExecutionListener extends AbstractTestExecutionL
                 try {
                     springLiquibase.setDropFirst(true);
                     springLiquibase.afterPropertiesSet();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (LiquibaseException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
             });
     }

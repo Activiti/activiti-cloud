@@ -32,7 +32,7 @@ public class KeycloakContainerApplicationInitializer
         .waitingFor(Wait.defaultWaitStrategy())
         .withReuse(true);
 
-    {
+    static {
         if (!keycloakContainer.isRunning()) {
             keycloakContainer.start();
         }
