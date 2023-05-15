@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.emptyString;
@@ -48,12 +47,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models rest api dealing with JSON models
@@ -63,11 +63,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 @ResourceLock(value = GenericJsonModelTypeValidationControllerIT.GENERIC_MODEL_NAME)
 public class GenericJsonModelTypeValidationControllerIT {
 
     @Autowired
-    private WebApplicationContext context;
+    private MockMvc mockMvc;
 
     @Autowired
     private ModelRepository modelRepository;
@@ -87,7 +88,6 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     @BeforeEach
     public void setUp() {
-        webAppContextSetup(context);
         genericJsonModel =
             modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
     }
@@ -125,6 +125,7 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
         given()
+            .mockMvc(mockMvc)
             .multiPart("file", "simple-model.json", fileContent, "application/json")
             .post("/v1/models/{modelId}/validate", genericJsonModel.getId())
             .then()
@@ -148,6 +149,7 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
         given()
+            .mockMvc(mockMvc)
             .multiPart("file", "simple-model.json", fileContent, "text/plain")
             .post("/v1/models/{modelId}/validate", genericJsonModel.getId())
             .then()
@@ -174,6 +176,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "invalid-simple-model.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate", genericJsonModel.getId())
                 .then()
@@ -199,6 +202,7 @@ public class GenericJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
         given()
+            .mockMvc(mockMvc)
             .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
             .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
             .then()
@@ -220,6 +224,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -243,6 +248,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "model-simple-invalid-name-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -267,6 +273,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "model-simple-mismatch-name-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -290,6 +297,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "model-simple-long-name-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -317,6 +325,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "model-simple-empty-name-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -343,6 +352,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -368,6 +378,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -393,6 +404,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate/extensions", genericJsonModel.getId())
                 .then()
@@ -430,6 +442,7 @@ public class GenericJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart("file", "invalid-simple-model.json", fileContent, "application/json")
                 .post("/v1/models/{modelId}/validate?validateUsage=true", genericJsonModel.getId())
                 .then()

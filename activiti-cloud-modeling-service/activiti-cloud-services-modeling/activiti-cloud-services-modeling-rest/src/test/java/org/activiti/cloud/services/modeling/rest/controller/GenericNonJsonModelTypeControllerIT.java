@@ -24,7 +24,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
@@ -44,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -51,7 +51,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models rest api dealing with a non JSON models
@@ -61,10 +60,11 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 public class GenericNonJsonModelTypeControllerIT {
 
     @Autowired
-    private WebApplicationContext context;
+    private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -82,18 +82,12 @@ public class GenericNonJsonModelTypeControllerIT {
 
     private static final String GENERIC_PROJECT_NAME = "project-with-generic-model";
 
-    private MockMvc mockMvc;
-
     private Project project;
 
     private Model genericNonJsonModel;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
     @BeforeEach
     public void setUp() {
-        mockMvc = webAppContextSetup(webApplicationContext).build();
         project = null;
         genericNonJsonModel = null;
     }
@@ -110,7 +104,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_returnStatusCreatedAndModelName_when_creatingGenericNonJsonModel() throws Exception {
         String name = GENERIC_MODEL_NAME;
 
@@ -127,7 +121,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwRequiredFieldException_when_creatingGenericNonJsonModelWithNameNull() throws Exception {
         String name = null;
 
@@ -147,7 +141,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwEmptyNameException_when_creatingGenericNonJsonModelWithNameEmpty() throws Exception {
         String name = "";
 
@@ -167,7 +161,6 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_PROJECT_NAME)
     public void should_throwTooLongNameException_when_creatingGenericNonJsonModelWithNameTooLong() throws Exception {
         String name = "123456789_123456789_1234567";
 
@@ -221,7 +214,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "updated-connector-name") })
     public void should_returnStatusOKAndModelName_when_updatingGenericNonJsonModel() throws Exception {
         String name = "updated-connector-name";
 
@@ -239,7 +232,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME) })
     public void should_returnStatusOKAndModelName_when_updatingGenericNonJsonModelWithNameNull() throws Exception {
         String name = null;
 
@@ -257,7 +250,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME) })
     public void should_throwBadNameException_when_updatingGenericNonJsonModelWithNameEmpty() throws Exception {
         String name = "";
 
@@ -278,7 +271,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME) })
     public void should_throwBadNameException_when_updatingGenericNonJsonModelWithNameTooLong() throws Exception {
         String name = "123456789_123456789_1234567";
 
@@ -301,7 +294,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "name_with_underscore") })
     public void should_update_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
         String name = "name_with_underscore";
 
@@ -318,7 +311,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = "NameWithUppercase") })
     public void should_update_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
         String name = "NameWithUppercase";
 
@@ -335,7 +328,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndNullExtensions_when_creatingGenericNonJsonModelWithNullExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -357,7 +350,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndNotNullExtensions_when_creatingGenericNonJsonModelWithEmptyExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
@@ -379,7 +372,7 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLocks({ @ResourceLock(value = GENERIC_PROJECT_NAME), @ResourceLock(value = GENERIC_MODEL_NAME) })
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME), @ResourceLock(value = GENERIC_PROJECT_NAME) })
     public void should_returnStatusCreatedAndExtensions_when_creatingGenericNonJsonModelWithValidExtensions()
         throws Exception {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));

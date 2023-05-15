@@ -57,8 +57,8 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Transactional
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Isolated
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProjectControllerExistingNameIT {
 
     private MockMvc mockMvc;

@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.ResourceLocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
@@ -51,9 +52,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models rest api dealing with Json models
@@ -63,10 +62,8 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 public class GenericJsonModelTypeControllerIT {
-
-    @Autowired
-    private WebApplicationContext context;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -90,17 +87,14 @@ public class GenericJsonModelTypeControllerIT {
 
     private static final String GENERIC_PROJECT_NAME = "project-with-generic-model";
 
+    @Autowired
     private MockMvc mockMvc;
 
     private Project project;
     private Model genericJsonModel;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
     @BeforeEach
     public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         project = null;
         genericJsonModel = null;
     }
@@ -285,7 +279,7 @@ public class GenericJsonModelTypeControllerIT {
     }
 
     @Test
-    @ResourceLock(value = GENERIC_MODEL_NAME)
+    @ResourceLocks({ @ResourceLock(value = GENERIC_MODEL_NAME) })
     public void should_throwBadNameException_when_updatingGenericJsonModelWithNameTooLong() throws Exception {
         String name = "123456789_123456789_1234567";
 

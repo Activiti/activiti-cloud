@@ -224,6 +224,7 @@
     <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
 
     <!-- parallel tests config -->
+    <tests.parallel>true</tests.parallel>
     <tests.dynamicFactor>.5</tests.dynamicFactor>
   </properties>
   <repositories>
@@ -288,7 +289,7 @@
             <trimStackTrace>false</trimStackTrace>
             <properties>
               <configurationParameters>
-                junit.jupiter.execution.parallel.enabled=true
+                junit.jupiter.execution.parallel.enabled=${tests.parallel}
                 junit.jupiter.execution.parallel.config.strategy=dynamic
                 junit.jupiter.execution.parallel.mode.default=same_thread
                 junit.jupiter.execution.parallel.mode.classes.default=concurrent
@@ -492,7 +493,7 @@ limitations under the License.]]>
         <configuration>
           <properties>
             <configurationParameters>
-              junit.jupiter.execution.parallel.enabled=true
+              junit.jupiter.execution.parallel.enabled=${tests.parallel}
               junit.jupiter.execution.parallel.config.strategy=dynamic
               junit.jupiter.execution.parallel.mode.default=same_thread
               junit.jupiter.execution.parallel.mode.classes.default=concurrent
@@ -641,7 +642,7 @@ limitations under the License.]]>
             <configuration>
               <properties>
                 <configurationParameters>
-                  junit.jupiter.execution.parallel.enabled=true
+                  junit.jupiter.execution.parallel.enabled=${tests.parallel}
                   junit.jupiter.execution.parallel.config.strategy=dynamic
                   junit.jupiter.execution.parallel.mode.default=same_thread
                   junit.jupiter.execution.parallel.mode.classes.default=concurrent

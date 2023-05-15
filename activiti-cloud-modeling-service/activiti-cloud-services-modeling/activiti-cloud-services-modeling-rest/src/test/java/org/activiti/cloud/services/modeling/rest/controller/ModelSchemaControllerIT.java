@@ -18,18 +18,16 @@ package org.activiti.cloud.services.modeling.rest.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.SchemaService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models schema rest api
@@ -37,20 +35,14 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 public class ModelSchemaControllerIT {
 
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
     private SchemaService schemaService;
-
-    @BeforeEach
-    public void setUp() {
-        mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
 
     @Test
     public void should_return200andAConnectorJsonSchema_when_connectorSchemaIsRequested() throws Exception {

@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
@@ -36,11 +35,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for connector models validation rest api
@@ -50,11 +50,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 @ResourceLock(value = "connector-name")
 public class ConnectorValidationControllerIT {
 
     @Autowired
-    private WebApplicationContext context;
+    private MockMvc mockMvc;
 
     @Autowired
     private ModelRepository modelRepository;
@@ -63,7 +64,6 @@ public class ConnectorValidationControllerIT {
 
     @BeforeEach
     public void setUp() {
-        webAppContextSetup(context);
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
     }
 
@@ -75,6 +75,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "simple-connector.json",
@@ -90,6 +91,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "simple-connector.json",
@@ -105,6 +107,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "connector-with-events.json",
@@ -121,6 +124,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-simple-connector.json",
@@ -145,6 +149,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
@@ -166,6 +171,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
@@ -187,6 +193,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-connector-name-too-long.json",
@@ -208,6 +215,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-connector-name-empty.json",
@@ -230,6 +238,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-underscore.json",
@@ -249,6 +258,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-uppercase.json",
@@ -267,6 +277,7 @@ public class ConnectorValidationControllerIT {
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "connector-with-custom-type.json",
@@ -282,6 +293,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "connector-with-errors.json",
@@ -299,6 +311,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .multiPart(
                     "file",
                     "connector-with-errors-invalid-property.json",
@@ -316,6 +329,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .multiPart(
                 "file",
                 "connector-with-event-model.json",

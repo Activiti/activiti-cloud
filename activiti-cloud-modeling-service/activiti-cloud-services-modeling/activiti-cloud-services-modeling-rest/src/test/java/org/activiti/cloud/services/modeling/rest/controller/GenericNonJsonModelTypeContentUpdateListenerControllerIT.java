@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
@@ -37,13 +36,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models rest api dealing with Json models
@@ -53,11 +52,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Transactional
 @WebAppConfiguration
 @WithMockModelerUser
+@AutoConfigureMockMvc
 @ResourceLock(value = GenericNonJsonModelTypeContentUpdateListenerControllerIT.GENERIC_MODEL_NAME)
 public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
-
-    @Autowired
-    private WebApplicationContext context;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -74,14 +71,15 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
     @SpyBean(name = "genericNonJsonContentUpdateListener")
     ContentUpdateListener genericNonJsonContentUpdateListener;
 
+    @Autowired
     private MockMvc mockMvc;
+
     private Model genericNonJsonModel;
 
     protected static final String GENERIC_MODEL_NAME = "simple-model";
 
     @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(context).build();
         genericNonJsonModel =
             modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
     }
