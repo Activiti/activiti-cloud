@@ -640,6 +640,8 @@ limitations under the License.]]>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <configuration>
+              <forkCount>2</forkCount>
+              <reuseForks>true</reuseForks>
               <properties>
                 <configurationParameters>
                   junit.jupiter.execution.parallel.enabled=${tests.parallel}
