@@ -11,6 +11,9 @@
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
   <name>Activiti Cloud Starter :: Runtime Bundle</name>
+  <properties>
+    <tests.forks>2</tests.forks>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti</groupId>

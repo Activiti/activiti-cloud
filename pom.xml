@@ -224,7 +224,7 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
     <!-- Test config -->
-    <tests.forks>2</tests.forks>
+    <tests.forks>0</tests.forks>
   </properties>
   <repositories>
     <repository>

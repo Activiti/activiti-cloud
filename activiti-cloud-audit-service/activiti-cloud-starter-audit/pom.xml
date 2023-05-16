@@ -11,6 +11,9 @@
   </parent>
   <artifactId>activiti-cloud-starter-audit</artifactId>
   <name>Activiti Cloud Audit :: Starter :: Audit</name>
+  <properties>
+    <tests.forks>2</tests.forks>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
