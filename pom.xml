@@ -222,6 +222,9 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+    <!-- Test config -->
+    <tests.forks>2</tests.forks>
   </properties>
   <repositories>
     <repository>
@@ -283,6 +286,15 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <failIfNoTests>false</failIfNoTests>
             <trimStackTrace>false</trimStackTrace>
+            <properties>
+              <configurationParameters>
+                junit.jupiter.execution.parallel.enabled=${tests.parallel}
+                junit.jupiter.execution.parallel.config.strategy=dynamic
+                junit.jupiter.execution.parallel.mode.default=same_thread
+                junit.jupiter.execution.parallel.mode.classes.default=concurrent
+                junit.jupiter.execution.parallel.config.dynamic.factor=1
+              </configurationParameters>
+            </properties>
             <excludes>
               <exclude>**/*TestCase.java</exclude>
               <exclude>**/*IT.java</exclude>
@@ -616,6 +628,10 @@ limitations under the License.]]>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <forkCount>${tests.forks}</forkCount>
+              <reuseForks>true</reuseForks>
+            </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
