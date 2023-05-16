@@ -45,9 +45,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext
 public class QuerySwaggerIT {
 
     @Autowired
