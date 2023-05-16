@@ -117,7 +117,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -125,7 +124,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@DirtiesContext
 @ContextConfiguration(
     classes = { ServicesAuditITConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
