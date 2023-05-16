@@ -42,8 +42,6 @@ hs_err_pid*
 .updatebot-repos/
 .updatebot-repos/**
 
-config/
-
 # Kubernetes Helm
 requirements.lock
 **/charts/*.tgz
