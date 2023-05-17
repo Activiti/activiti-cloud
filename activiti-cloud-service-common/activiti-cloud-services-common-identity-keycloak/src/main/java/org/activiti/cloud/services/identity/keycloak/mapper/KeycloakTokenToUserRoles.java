@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minidev.json.JSONObject;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.identity.model.UserRoles.UserGlobalAccess;
