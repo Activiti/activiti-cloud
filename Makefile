@@ -28,6 +28,7 @@ install: release
 	test $(MESSAGING_DESTINATIONS) ||  exit 1
 
 	yq e -i '(.* | select(has("image")) | .image |select (has("pullPolicy"))).pullPolicy = "Always"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+	yq e -i '(.* | select(has("liquibase")) | .liquibase.image).pullPolicy = "Always"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		helm dep up && \
