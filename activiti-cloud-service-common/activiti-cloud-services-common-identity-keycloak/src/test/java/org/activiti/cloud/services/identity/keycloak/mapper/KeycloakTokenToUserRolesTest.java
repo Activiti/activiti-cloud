@@ -73,8 +73,8 @@ public class KeycloakTokenToUserRolesTest {
     }
 
     private void mockJwt(boolean withResourceRoleMappings, boolean withRealmRoleMappings) {
-        JSONObject resourceRoleMappings;
-        JSONObject realmRoleMappings;
+        Map<String, Object> resourceRoleMappings;
+        Map<String, Object> realmRoleMappings;
 
         if (withResourceRoleMappings) {
             resourceRoleMappings =

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minidev.json.JSONObject;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
 import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.identity.model.UserRoles.UserGlobalAccess;
@@ -51,7 +50,7 @@ public class KeycloakTokenToUserRoles {
             .map(Map::entrySet)
             .orElse(Collections.emptySet())
             .stream()
-            .map(e -> new UserApplicationAccess(e.getKey(), getRoles((JSONObject) e.getValue())))
+            .map(e -> new UserApplicationAccess(e.getKey(), getRoles((Map<String, Object>) e.getValue())))
             .collect(Collectors.toList());
     }
 
@@ -63,7 +62,7 @@ public class KeycloakTokenToUserRoles {
         }
     }
 
-    private static List<String> getRoles(JSONObject getRolesParent) {
+    private static List<String> getRoles(Map<String, Object> getRolesParent) {
         return Optional.ofNullable((List<String>) getRolesParent.get(ROLES)).orElse(Collections.emptyList());
     }
 }
