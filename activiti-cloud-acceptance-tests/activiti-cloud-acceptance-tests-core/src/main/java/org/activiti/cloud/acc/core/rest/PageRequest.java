@@ -37,9 +37,7 @@ public class PageRequest extends AbstractPageRequest {
      * @param sort must not be {@literal null}, use {@link Sort#unsorted()} instead.
      */
     protected PageRequest(int page, int size, Sort sort) {
-
         super(page, size);
-
         Assert.notNull(sort, "Sort must not be null");
 
         this.sort = sort;
@@ -113,7 +111,6 @@ public class PageRequest extends AbstractPageRequest {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-
         if (this == obj) {
             return true;
         }
@@ -169,5 +166,4 @@ public class PageRequest extends AbstractPageRequest {
     public String toString() {
         return String.format("Page request [number: %d, size %d, sort: %s]", getPageNumber(), getPageSize(), sort);
     }
-
 }
