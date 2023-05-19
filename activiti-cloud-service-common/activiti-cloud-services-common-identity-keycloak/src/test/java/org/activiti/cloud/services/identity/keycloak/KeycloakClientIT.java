@@ -370,7 +370,12 @@ public class KeycloakClientIT {
         String clientId = testKeycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 1).get(0).getId();
         KeycloakRoleMapping kRoleToAdd = assignRole(clientId);
 
-        List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(clientId, kRoleToAdd.getName(), 0, Integer.MAX_VALUE);
+        List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(
+            clientId,
+            kRoleToAdd.getName(),
+            0,
+            Integer.MAX_VALUE
+        );
 
         assertThat(users).hasSize(101);
 
@@ -378,13 +383,15 @@ public class KeycloakClientIT {
     }
 
     private KeycloakRoleMapping assignRole(String clientId) {
-        KeycloakRoleMapping kRoleToAdd = testKeycloakClient.getClientRoles(clientId)
-                .stream()
-                .filter(kRole -> kRole.getName().equals(DYNAMIC_ROLE_NAME))
-                .findFirst()
-                .get();
-        keycloakClient.searchUsers(TEST_USER_PREFIX, 0, Integer.MAX_VALUE).forEach(user ->
-                testKeycloakClient.addUserClientRoleMapping(user.getId(), clientId, List.of(kRoleToAdd)));
+        KeycloakRoleMapping kRoleToAdd = testKeycloakClient
+            .getClientRoles(clientId)
+            .stream()
+            .filter(kRole -> kRole.getName().equals(DYNAMIC_ROLE_NAME))
+            .findFirst()
+            .get();
+        keycloakClient
+            .searchUsers(TEST_USER_PREFIX, 0, Integer.MAX_VALUE)
+            .forEach(user -> testKeycloakClient.addUserClientRoleMapping(user.getId(), clientId, List.of(kRoleToAdd)));
         return kRoleToAdd;
     }
 

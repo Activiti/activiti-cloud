@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.identity.keycloak.client;
 
-import java.util.List;
 import feign.Headers;
 import feign.Response;
+import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepresentation;
@@ -140,11 +140,8 @@ public interface KeycloakClient {
         @RequestBody List<KeycloakRoleMapping> roles
     );
 
-    default List<KeycloakUser> getUsersClientRoleMapping(
-            String id,
-            String roleName
-    ) {
-        return getUsersClientRoleMapping(id, roleName, 0 ,100);
+    default List<KeycloakUser> getUsersClientRoleMapping(String id, String roleName) {
+        return getUsersClientRoleMapping(id, roleName, 0, 100);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/users")
@@ -188,9 +185,9 @@ public interface KeycloakClient {
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{groupId}/members")
     @Headers("Content-Type: application/json")
     List<KeycloakUser> getUsersByGroupId(
-            @PathVariable("groupId") String groupId,
-            @RequestParam(value = "first") Integer first,
-            @RequestParam(value = "max") Integer max
+        @PathVariable("groupId") String groupId,
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
     );
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}")

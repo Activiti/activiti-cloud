@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import java.util.Optional;
 import feign.Feign;
+import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityContextTokenProvider;
 import org.activiti.cloud.identity.config.IdentitySearchCacheConfiguration;
 import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
@@ -66,29 +66,31 @@ public class KeycloakClientApplication {
 
     @Bean
     public TestKeycloakClient testKeycloakClient(
-            @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
-            ObjectFactory<HttpMessageConverters> messageConverters,
-            ObjectProvider<HttpMessageConverterCustomizer> customizers,
-            OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
-            ClientRegistrationRepository clientRegistrationRepository
+        @Value("${keycloak.auth-server-url}/admin/realms/${keycloak.realm}/") String url,
+        ObjectFactory<HttpMessageConverters> messageConverters,
+        ObjectProvider<HttpMessageConverterCustomizer> customizers,
+        OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
+        ClientRegistrationRepository clientRegistrationRepository
     ) {
-        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration = new ClientCredentialsAuthConfiguration();
+        ClientCredentialsAuthConfiguration clientCredentialsAuthConfiguration =
+            new ClientCredentialsAuthConfiguration();
         ClientRegistration clientRegistration = clientCredentialsAuthConfiguration.clientRegistration(
-                clientRegistrationRepository,
-                "keycloak"
+            clientRegistrationRepository,
+            "keycloak"
         );
-        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor = clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
+        AuthTokenRequestInterceptor clientCredentialsAuthRequestInterceptor =
+            clientCredentialsAuthConfiguration.clientCredentialsAuthRequestInterceptor(
                 oAuth2AuthorizedClientService,
                 clientRegistrationRepository,
                 clientRegistration
-        );
+            );
         TestKeycloakClient testKeycloakClient = Feign
-                .builder()
-                .contract(new SpringMvcContract())
-                .encoder(new SpringEncoder(messageConverters))
-                .decoder(new SpringDecoder(messageConverters, customizers))
-                .requestInterceptor(clientCredentialsAuthRequestInterceptor)
-                .target(TestKeycloakClient.class, url);
+            .builder()
+            .contract(new SpringMvcContract())
+            .encoder(new SpringEncoder(messageConverters))
+            .decoder(new SpringDecoder(messageConverters, customizers))
+            .requestInterceptor(clientCredentialsAuthRequestInterceptor)
+            .target(TestKeycloakClient.class, url);
         return testKeycloakClient;
     }
 

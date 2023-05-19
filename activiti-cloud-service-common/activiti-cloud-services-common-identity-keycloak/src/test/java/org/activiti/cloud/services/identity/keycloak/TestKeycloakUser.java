@@ -30,5 +30,4 @@ public class TestKeycloakUser extends KeycloakUser {
     public void setGroups(List<String> groups) {
         this.groups = groups;
     }
-
 }

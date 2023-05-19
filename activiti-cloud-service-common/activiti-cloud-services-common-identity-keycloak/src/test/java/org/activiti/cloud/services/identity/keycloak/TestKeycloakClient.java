@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 public interface TestKeycloakClient extends KeycloakClient {
-
     @RequestMapping(method = RequestMethod.POST, value = "/users")
     @Headers("Content-Type: application/json")
     void addUser(TestKeycloakUser user);
@@ -31,5 +30,4 @@ public interface TestKeycloakClient extends KeycloakClient {
     @RequestMapping(method = RequestMethod.DELETE, value = "/users/{id}")
     @Headers("Content-Type: application/json")
     void deleteUser(@PathVariable("id") String id);
-
 }
