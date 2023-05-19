@@ -377,7 +377,7 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_returnApplicationPermissions() throws Exception {
         this.mockMvc.perform(get("/v1/permissions/{application}", "activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$", hasSize(6)))
             .andExpect(
                 jsonPath(
                     "$[?(@.role)].role",
@@ -386,7 +386,8 @@ public abstract class AbstractIdentityManagementControllerIT {
                         "ACTIVITI_ADMIN",
                         "APPLICATION_MANAGER",
                         "uma_authorization",
-                        "offline_access"
+                        "offline_access",
+                        "DYNAMIC_ROLE"
                     )
                 )
             );
