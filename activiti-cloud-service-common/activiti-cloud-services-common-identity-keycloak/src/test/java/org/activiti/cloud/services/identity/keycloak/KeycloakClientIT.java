@@ -51,9 +51,16 @@ public class KeycloakClientIT {
     public static final String ACTIVITI_MODELER = "ACTIVITI_MODELER";
     public static final String ACTIVITI_CLIENT_ID = "activiti";
     public static final String ACTIVITI_ADMIN = "ACTIVITI_ADMIN";
+    public static final String DYNAMIC_GROUP_ID = "51331bf0-00e4-4eff-ad88-bad9511ac919";
+    public static final String DYNAMIC_GROUP_NAME = "dynamic";
+    public static final String DYNAMIC_ROLE_NAME = "DYNAMIC_ROLE";
+    public static final String TEST_USER_PREFIX = "testKeycloakUser";
 
     @Autowired
     private KeycloakClient keycloakClient;
+
+    @Autowired
+    private TestKeycloakClient testKeycloakClient;
 
     @Autowired
     private CacheManager cacheManager;
@@ -344,6 +351,57 @@ public class KeycloakClientIT {
         List<KeycloakUser> users = keycloakClient.getUsersByGroupId(HR_GROUP_ID);
 
         assertThat(users).hasSizeGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void should_get101Users_by_groupId() {
+        addUsers(101);
+
+        List<KeycloakUser> users = keycloakClient.getUsersByGroupId(DYNAMIC_GROUP_ID, 0, Integer.MAX_VALUE);
+
+        assertThat(users).hasSize(101);
+
+        users.forEach(user -> testKeycloakClient.deleteUser(user.getId()));
+    }
+
+    @Test
+    public void should_get101Users_by_Role() {
+        addUsers(101);
+        String clientId = testKeycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 1).get(0).getId();
+        KeycloakRoleMapping kRoleToAdd = assignRole(clientId);
+
+        List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(
+            clientId,
+            kRoleToAdd.getName(),
+            0,
+            Integer.MAX_VALUE
+        );
+
+        assertThat(users).hasSize(101);
+
+        users.forEach(user -> testKeycloakClient.deleteUser(user.getId()));
+    }
+
+    private KeycloakRoleMapping assignRole(String clientId) {
+        KeycloakRoleMapping kRoleToAdd = testKeycloakClient
+            .getClientRoles(clientId)
+            .stream()
+            .filter(kRole -> kRole.getName().equals(DYNAMIC_ROLE_NAME))
+            .findFirst()
+            .get();
+        keycloakClient
+            .searchUsers(TEST_USER_PREFIX, 0, Integer.MAX_VALUE)
+            .forEach(user -> testKeycloakClient.addUserClientRoleMapping(user.getId(), clientId, List.of(kRoleToAdd)));
+        return kRoleToAdd;
+    }
+
+    private void addUsers(int userCount) {
+        for (int i = 0; i < userCount; i++) {
+            TestKeycloakUser user = new TestKeycloakUser();
+            user.setUsername(TEST_USER_PREFIX + i);
+            user.setGroups(List.of(DYNAMIC_GROUP_NAME));
+            testKeycloakClient.addUser(user);
+        }
     }
 
     @Test

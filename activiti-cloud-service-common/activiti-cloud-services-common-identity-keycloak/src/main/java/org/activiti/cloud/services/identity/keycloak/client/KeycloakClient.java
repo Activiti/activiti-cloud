@@ -140,11 +140,17 @@ public interface KeycloakClient {
         @RequestBody List<KeycloakRoleMapping> roles
     );
 
+    default List<KeycloakUser> getUsersClientRoleMapping(String id, String roleName) {
+        return getUsersClientRoleMapping(id, roleName, 0, 100);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/roles/{role-name}/users")
     @Headers("Content-Type: application/json")
     List<KeycloakUser> getUsersClientRoleMapping(
         @PathVariable("id") String id,
-        @PathVariable("role-name") String roleName
+        @PathVariable("role-name") String roleName,
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
     );
 
     @RequestMapping(method = RequestMethod.GET, value = "clients/{id}/service-account-user")
@@ -172,9 +178,17 @@ public interface KeycloakClient {
         @RequestBody KeycloakRoleMapping keycloakRoleMapping
     );
 
+    default List<KeycloakUser> getUsersByGroupId(String groupId) {
+        return getUsersByGroupId(groupId, 0, 100);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{groupId}/members")
     @Headers("Content-Type: application/json")
-    List<KeycloakUser> getUsersByGroupId(@PathVariable("groupId") String groupId);
+    List<KeycloakUser> getUsersByGroupId(
+        @PathVariable("groupId") String groupId,
+        @RequestParam(value = "first") Integer first,
+        @RequestParam(value = "max") Integer max
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/groups/{id}")
     @Headers("Content-Type: application/json")
