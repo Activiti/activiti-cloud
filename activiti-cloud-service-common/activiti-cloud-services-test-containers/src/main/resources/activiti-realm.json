@@ -81,7 +81,12 @@
     },
     {
       "id": "51331bf0-00e4-4eff-ad88-bad9511ac919",
-      "name": "dynamic"
+      "name": "dynamic",
+      "clientRoles": {
+        "activiti": [
+          "DYNAMIC_ROLE"
+        ]
+      }
     },
     {
       "name": "salesgroup",

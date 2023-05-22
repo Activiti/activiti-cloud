@@ -220,8 +220,8 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/groups?application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].name", is("salesgroup")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[?(@.name)].name", containsInAnyOrder("salesgroup", "dynamic")));
     }
 
     @Test
