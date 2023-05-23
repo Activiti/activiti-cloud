@@ -189,6 +189,7 @@
                   </includes>
                   <skipTests>false</skipTests>
                   <skipITs>false</skipITs>
+                  <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
               </execution>
             </executions>
