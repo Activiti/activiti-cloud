@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.11.0-alpha.6</version>
+    <version>7.11.0-mock</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-query-service-parent</artifactId>
@@ -18,7 +18,7 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
   <properties>
-    <activiti.version>7.11.0-alpha.1</activiti.version>
+    <activiti.version>7.11.0-mock</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
