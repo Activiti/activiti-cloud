@@ -96,6 +96,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <parallelMavenExecution>false</parallelMavenExecution>
+        </configuration>
         <executions>
           <execution>
             <goals>
@@ -104,9 +109,6 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-        </configuration>
       </plugin>
     </plugins>
   </build>
