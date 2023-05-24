@@ -172,7 +172,6 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <version>${maven-failsafe-plugin.version}</version>
             <configuration>
-              <forkCount>0</forkCount>
               <useSystemClassLoader>false</useSystemClassLoader>
               <classesDirectory>${project.build.outputDirectory}</classesDirectory>
             </configuration>
