@@ -19,13 +19,13 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
-    <skipTests>${noAcceptanceTests}</skipTests>
+    <noAcceptanceTests>true</noAcceptanceTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>
     <java.version>17</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
-    <serenity-maven-plugin.version>3.6.23</serenity-maven-plugin.version>
+    <serenity-maven-plugin.version>3.7.1</serenity-maven-plugin.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
   </properties>
   <dependencyManagement>
