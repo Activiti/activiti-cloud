@@ -16,14 +16,14 @@
 
 package org.activiti.cloud.alfresco.filter;
 
-import java.io.IOException;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import java.io.IOException;
 
 public class TrailingSlashRedirectFilter implements Filter {
 
@@ -59,7 +59,12 @@ public class TrailingSlashRedirectFilter implements Filter {
         @Override
         public StringBuffer getRequestURL() {
             StringBuffer url = new StringBuffer();
-            url.append(getScheme()).append("://").append(getServerName()).append(":").append(getServerPort())
+            url
+                .append(getScheme())
+                .append("://")
+                .append(getServerName())
+                .append(":")
+                .append(getServerPort())
                 .append(newPath);
             return url;
         }
