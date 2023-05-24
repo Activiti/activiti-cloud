@@ -18,6 +18,7 @@ package org.activiti.cloud.alfresco.config;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.Filter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +29,12 @@ import org.activiti.cloud.alfresco.converter.json.PageMetadataConverter;
 import org.activiti.cloud.alfresco.converter.json.PagedModelConverter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
+import org.activiti.cloud.alfresco.filter.TrailingSlashRedirectFilter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
@@ -57,6 +60,14 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     ) {
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
         this.defaultPageSize = defaultPageSize;
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> trailingSlashRedirectFilter() {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new TrailingSlashRedirectFilter());
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
     }
 
     @Override
