@@ -12,6 +12,11 @@
   <name>Activiti Cloud API :: Task Model Implementation</name>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-task-model</artifactId>
     </dependency>

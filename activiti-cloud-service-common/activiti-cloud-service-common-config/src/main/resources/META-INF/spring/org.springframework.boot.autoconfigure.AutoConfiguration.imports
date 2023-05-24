@@ -1,0 +1,2 @@
+org.activiti.cloud.common.error.attributes.ErrorAttributesAutoConfiguration
+org.activiti.cloud.common.properties.CommonPropertiesAutoConfiguration

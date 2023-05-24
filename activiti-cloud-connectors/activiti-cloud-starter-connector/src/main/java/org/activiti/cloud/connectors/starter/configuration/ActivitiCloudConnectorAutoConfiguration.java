@@ -31,14 +31,14 @@ import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinati
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultDestinationBuilderImpl;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSender;
 import org.activiti.cloud.connectors.starter.channels.IntegrationResultSenderImpl;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:activiti-cloud-connector.properties")
 @EnableConfigurationProperties(ConnectorProperties.class)
 public class ActivitiCloudConnectorAutoConfiguration {

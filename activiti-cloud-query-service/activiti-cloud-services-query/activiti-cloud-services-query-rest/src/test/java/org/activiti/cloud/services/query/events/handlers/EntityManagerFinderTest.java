@@ -22,10 +22,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
 import java.util.Map;
 import java.util.Optional;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.junit.jupiter.api.Test;

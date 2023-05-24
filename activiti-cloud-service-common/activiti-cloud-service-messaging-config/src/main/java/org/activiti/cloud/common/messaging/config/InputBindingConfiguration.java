@@ -47,15 +47,14 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, InputBinding.class))
                         .ifPresent(functionBinding -> {
-                            final String inputBinding = beanName + INPUT_BINDING;
-                            final String beanInName = getInBinding(inputBinding);
+                            final String beanInName = getInBinding(beanName + INPUT_BINDING);
 
                             String inputBindings = bindingServiceProperties.getInputBindings();
 
                             if (!StringUtils.hasText(inputBindings)) {
-                                inputBindings = inputBinding;
+                                inputBindings = beanInName;
                             } else {
-                                inputBindings += ";" + inputBinding;
+                                inputBindings += ";" + beanInName;
                             }
 
                             bindingServiceProperties.setInputBindings(inputBindings);

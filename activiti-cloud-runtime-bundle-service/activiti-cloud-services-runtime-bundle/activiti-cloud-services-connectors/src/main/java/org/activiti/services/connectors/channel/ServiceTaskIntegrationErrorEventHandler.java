@@ -16,6 +16,8 @@
 
 package org.activiti.services.connectors.channel;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.transaction.annotation.Transactional;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -67,6 +70,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         maxAttemptsExpression = "${activiti.cloud.integration.error.retry.max-attempts:3}",
         backoff = @Backoff(delayExpression = "${activiti.cloud.integration.error.retry.backoff.delay:0}")
     )
+    @Transactional(propagation = REQUIRES_NEW)
     public void receive(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(

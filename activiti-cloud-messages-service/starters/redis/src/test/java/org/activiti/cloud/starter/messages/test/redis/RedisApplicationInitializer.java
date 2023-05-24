@@ -30,8 +30,8 @@ public class RedisApplicationInitializer implements ApplicationContextInitialize
 
         TestPropertyValues
             .of(
-                "spring.redis.host=" + container.getContainerIpAddress(),
-                "spring.redis.port=" + container.getFirstMappedPort()
+                "spring.data.redis.host=" + container.getContainerIpAddress(),
+                "spring.data.redis.port=" + container.getFirstMappedPort()
             )
             .applyTo(context.getEnvironment());
     }

@@ -1,0 +1,2 @@
+org.activiti.services.connectors.conf.CloudConnectorsAutoConfiguration
+org.activiti.services.connectors.conf.CloudConnectorsMessagingAutoConfiguration

@@ -21,6 +21,7 @@ import org.activiti.cloud.services.query.model.QProcessModelEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
@@ -29,7 +30,8 @@ public interface ProcessModelRepository
     extends
         PagingAndSortingRepository<ProcessModelEntity, String>,
         QuerydslPredicateExecutor<ProcessModelEntity>,
-        QuerydslBinderCustomizer<QProcessModelEntity> {
+        QuerydslBinderCustomizer<QProcessModelEntity>,
+        CrudRepository<ProcessModelEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QProcessModelEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

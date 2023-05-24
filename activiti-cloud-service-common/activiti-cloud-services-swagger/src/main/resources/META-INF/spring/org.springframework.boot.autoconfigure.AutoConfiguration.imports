@@ -1,0 +1,2 @@
+org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration
+org.activiti.cloud.common.swagger.springdoc.conf.SwaggerCustomizerConfiguration

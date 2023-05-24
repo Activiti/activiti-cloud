@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak.mapper;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class KeycloakTokenToUserRoles {
             .map(Map::entrySet)
             .orElse(Collections.emptySet())
             .stream()
-            .map(e -> new UserApplicationAccess(e.getKey(), getRoles((JSONObject) e.getValue())))
+            .map(e -> new UserApplicationAccess(e.getKey(), getRoles((Map<String, Object>) e.getValue())))
             .collect(Collectors.toList());
     }
 
@@ -63,7 +62,7 @@ public class KeycloakTokenToUserRoles {
         }
     }
 
-    private static List<String> getRoles(JSONObject getRolesParent) {
+    private static List<String> getRoles(Map<String, Object> getRolesParent) {
         return Optional.ofNullable((List<String>) getRolesParent.get(ROLES)).orElse(Collections.emptyList());
     }
 }

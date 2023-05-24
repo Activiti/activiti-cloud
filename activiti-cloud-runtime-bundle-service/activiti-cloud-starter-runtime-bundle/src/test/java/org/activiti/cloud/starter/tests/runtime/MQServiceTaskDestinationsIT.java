@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -39,6 +40,7 @@ import org.springframework.cloud.stream.config.BindingProperties;
         "activiti.cloud.messaging.destinations.[Constants\\ Connector.constantsActionName].name=constants_connector.constants_action_name",
     }
 )
+@DirtiesContext
 public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
     @Test

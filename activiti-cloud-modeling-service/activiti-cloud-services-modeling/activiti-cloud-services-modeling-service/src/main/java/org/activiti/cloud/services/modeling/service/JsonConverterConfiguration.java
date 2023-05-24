@@ -22,13 +22,13 @@ import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContent;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Json converter configuration
  */
-@Configuration
+@AutoConfiguration
 public class JsonConverterConfiguration {
 
     @Bean

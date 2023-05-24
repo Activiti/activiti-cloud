@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;

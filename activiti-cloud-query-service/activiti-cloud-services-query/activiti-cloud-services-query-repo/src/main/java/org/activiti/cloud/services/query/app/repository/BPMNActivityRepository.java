@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.model.QBPMNActivityEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
@@ -31,7 +32,8 @@ public interface BPMNActivityRepository
     extends
         PagingAndSortingRepository<BPMNActivityEntity, String>,
         QuerydslPredicateExecutor<BPMNActivityEntity>,
-        QuerydslBinderCustomizer<QBPMNActivityEntity> {
+        QuerydslBinderCustomizer<QBPMNActivityEntity>,
+        CrudRepository<BPMNActivityEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QBPMNActivityEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

@@ -49,8 +49,8 @@ import org.springframework.util.LinkedMultiValueMap;
 @TestComponent
 public class TaskRestTemplate {
 
-    private static final String TASK_RELATIVE_URL = "/v1/tasks/";
-    private static final String ADMIN_TASK_RELATIVE_URL = "/admin/v1/tasks/";
+    private static final String TASK_RELATIVE_URL = "/v1/tasks";
+    private static final String ADMIN_TASK_RELATIVE_URL = "/admin/v1/tasks";
     private static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
         Map.of("Content-type", List.of("application/json"))
     );
@@ -85,7 +85,7 @@ public class TaskRestTemplate {
 
     private ResponseEntity<CloudTask> complete(Task task, String baseURL, CompleteTaskPayload completeTaskPayload) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            baseURL + task.getId() + "/complete",
+            baseURL.concat("/").concat(task.getId()).concat("/complete"),
             HttpMethod.POST,
             completeTaskPayload != null
                 ? new HttpEntity<>(completeTaskPayload, CONTENT_TYPE_HEADER)
@@ -106,7 +106,7 @@ public class TaskRestTemplate {
 
     private ResponseEntity<CloudTask> delete(Task task, String taskVarRelativeUrl) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            taskVarRelativeUrl + task.getId(),
+            taskVarRelativeUrl.concat("/").concat(task.getId()),
             HttpMethod.DELETE,
             null,
             TASK_RESPONSE_TYPE
@@ -121,7 +121,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CloudTask> claim(String taskId) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + taskId + "/claim",
+            TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/claim"),
             HttpMethod.POST,
             null,
             TASK_RESPONSE_TYPE
@@ -136,7 +136,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CloudTask> release(String taskId) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + taskId + "/release",
+            TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/release"),
             HttpMethod.POST,
             null,
             TASK_RESPONSE_TYPE
@@ -147,7 +147,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CloudTask> adminAssignTask(AssignTaskPayload assignTask) {
         return testRestTemplate.exchange(
-            ADMIN_TASK_RELATIVE_URL + assignTask.getTaskId() + "/assign",
+            ADMIN_TASK_RELATIVE_URL.concat("/").concat(assignTask.getTaskId()).concat("/assign"),
             HttpMethod.POST,
             new HttpEntity<>(assignTask),
             TASK_RESPONSE_TYPE
@@ -156,7 +156,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> getUserCandidates(String taskId) {
         ResponseEntity<CollectionModel<EntityModel<CandidateUser>>> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + taskId + "/candidate-users",
+            TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/candidate-users"),
             HttpMethod.GET,
             null,
             CANDIDATE_USERS_RESPONSE_TYPE
@@ -167,7 +167,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> addUserCandidates(CandidateUsersPayload candidateUsers) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + candidateUsers.getTaskId() + "/candidate-users",
+            TASK_RELATIVE_URL.concat("/").concat(candidateUsers.getTaskId()).concat("/candidate-users"),
             HttpMethod.POST,
             new HttpEntity<>(candidateUsers),
             VOID_RESPONSE_TYPE
@@ -178,7 +178,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> deleteUserCandidates(CandidateUsersPayload candidateUsers) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + candidateUsers.getTaskId() + "/candidate-users",
+            TASK_RELATIVE_URL.concat("/").concat(candidateUsers.getTaskId()).concat("/candidate-users"),
             HttpMethod.DELETE,
             new HttpEntity<>(candidateUsers),
             VOID_RESPONSE_TYPE
@@ -189,7 +189,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> getGroupCandidates(String taskId) {
         ResponseEntity<CollectionModel<EntityModel<CandidateGroup>>> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + taskId + "/candidate-groups",
+            TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/candidate-groups"),
             HttpMethod.GET,
             null,
             CANDIDATES_GROUPS_RESPONSE_TYPE
@@ -200,7 +200,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> addGroupCandidates(CandidateGroupsPayload candidateGroups) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + candidateGroups.getTaskId() + "/candidate-groups",
+            TASK_RELATIVE_URL.concat("/").concat(candidateGroups.getTaskId()).concat("/candidate-groups"),
             HttpMethod.POST,
             new HttpEntity<>(candidateGroups),
             VOID_RESPONSE_TYPE
@@ -211,7 +211,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> deleteGroupCandidates(CandidateGroupsPayload candidateGroups) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + candidateGroups.getTaskId() + "/candidate-groups",
+            TASK_RELATIVE_URL.concat("/").concat(candidateGroups.getTaskId()).concat("/candidate-groups"),
             HttpMethod.DELETE,
             new HttpEntity<>(candidateGroups),
             VOID_RESPONSE_TYPE
@@ -222,7 +222,7 @@ public class TaskRestTemplate {
 
     public PagedModel<CloudTask> getSubTasks(CloudTask parentTask) {
         ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + parentTask.getId() + "/subtasks",
+            TASK_RELATIVE_URL.concat("/").concat(parentTask.getId()).concat("/subtasks"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<PagedModel<CloudTask>>() {}
@@ -272,7 +272,7 @@ public class TaskRestTemplate {
 
     private ResponseEntity<CloudTask> getTask(String taskId, String baseURL) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            baseURL + taskId,
+            baseURL.concat("/").concat(taskId),
             HttpMethod.GET,
             null,
             TASK_RESPONSE_TYPE
@@ -303,7 +303,7 @@ public class TaskRestTemplate {
 
     private void updateTask(String taskId, UpdateTaskPayload updateTask, String baseURL) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            baseURL + taskId,
+            baseURL.concat("/").concat(taskId),
             HttpMethod.PUT,
             new HttpEntity<>(updateTask, CONTENT_TYPE_HEADER),
             TASK_RESPONSE_TYPE
@@ -322,7 +322,7 @@ public class TaskRestTemplate {
             CONTENT_TYPE_HEADER
         );
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.TASK_RELATIVE_URL + taskId + "/variables/",
+            TaskRestTemplate.TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables"),
             HttpMethod.POST,
             requestEntity,
             VOID_RESPONSE_TYPE
@@ -342,7 +342,7 @@ public class TaskRestTemplate {
             CONTENT_TYPE_HEADER
         );
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.TASK_RELATIVE_URL + taskId + "/variables/{variableName}",
+            TaskRestTemplate.TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables/{variableName}"),
             HttpMethod.PUT,
             requestEntity,
             VOID_RESPONSE_TYPE,
@@ -354,7 +354,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(String taskId) {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.TASK_RELATIVE_URL + taskId + "/variables/",
+            TaskRestTemplate.TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables"),
             HttpMethod.GET,
             new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
@@ -371,7 +371,7 @@ public class TaskRestTemplate {
 
         HttpEntity<CreateTaskVariablePayload> requestEntity = new HttpEntity<>(createTaskVariablePayload, null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL + taskId + "/variables/",
+            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables"),
             HttpMethod.POST,
             requestEntity,
             VOID_RESPONSE_TYPE
@@ -388,7 +388,7 @@ public class TaskRestTemplate {
 
         HttpEntity<UpdateTaskVariablePayload> requestEntity = new HttpEntity<>(updateTaskVariablePayload, null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL + taskId + "/variables/{variableName}",
+            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables/{variableName}"),
             HttpMethod.PUT,
             requestEntity,
             VOID_RESPONSE_TYPE,
@@ -400,7 +400,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(String taskId) {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
-            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL + taskId + "/variables/",
+            TaskRestTemplate.ADMIN_TASK_RELATIVE_URL.concat("/").concat(taskId).concat("/variables"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
@@ -411,7 +411,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<Void> save(Task task, SaveTaskPayload saveTaskPayload) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + task.getId() + "/save",
+            TASK_RELATIVE_URL.concat("/").concat(task.getId()).concat("/save"),
             HttpMethod.POST,
             saveTaskPayload != null
                 ? new HttpEntity<>(saveTaskPayload, CONTENT_TYPE_HEADER)
@@ -424,7 +424,7 @@ public class TaskRestTemplate {
 
     public ResponseEntity<CloudTask> userAssignTask(AssignTaskPayload assignTask) {
         ResponseEntity<CloudTask> responseEntity = testRestTemplate.exchange(
-            TASK_RELATIVE_URL + assignTask.getTaskId() + "/assign",
+            TASK_RELATIVE_URL.concat("/").concat(assignTask.getTaskId()).concat("/assign"),
             HttpMethod.POST,
             new HttpEntity<>(assignTask, CONTENT_TYPE_HEADER),
             TASK_RESPONSE_TYPE

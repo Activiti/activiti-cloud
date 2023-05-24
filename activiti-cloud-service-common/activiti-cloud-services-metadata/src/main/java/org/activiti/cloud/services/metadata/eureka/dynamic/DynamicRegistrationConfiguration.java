@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.metadata.eureka.dynamic;
 
 import com.netflix.appinfo.ApplicationInfoManager;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import org.activiti.cloud.services.metadata.MetadataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

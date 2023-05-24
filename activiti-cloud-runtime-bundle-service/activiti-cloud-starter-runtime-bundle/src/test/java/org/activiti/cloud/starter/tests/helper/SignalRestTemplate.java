@@ -45,7 +45,7 @@ public class SignalRestTemplate {
 
     public void signal(SignalPayload signalProcessInstancesCmd) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + "/signal",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/signal"),
             HttpMethod.POST,
             new HttpEntity<>(signalProcessInstancesCmd, CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<Void>() {}

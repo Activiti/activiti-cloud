@@ -66,15 +66,14 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, OutputBinding.class))
                         .ifPresent(functionBinding -> {
-                            String outputBinding = beanName + OUTPUT_BINDING;
-                            final String beanOutName = getOutBinding(outputBinding);
+                            final String beanOutName = getOutBinding(beanName + OUTPUT_BINDING);
 
                             String outputBindings = bindingServiceProperties.getOutputBindings();
 
                             if (!StringUtils.hasText(outputBindings)) {
-                                outputBindings = outputBinding;
+                                outputBindings = beanOutName;
                             } else {
-                                outputBindings += ";" + outputBinding;
+                                outputBindings += ";" + beanOutName;
                             }
 
                             bindingServiceProperties.setOutputBindings(outputBindings);

@@ -15,14 +15,14 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-@Configuration
+@AutoConfiguration
 @ConfigurationProperties(prefix = "activiti.cloud.runtime-bundle")
 @Validated
 public class RuntimeBundleProperties {

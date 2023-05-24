@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.modeling.service.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
 import java.io.IOException;
@@ -24,6 +25,12 @@ import java.io.IOException;
 public class ModelExtensionsPrettyPrinter extends DefaultPrettyPrinter {
 
     private boolean useEmptyObjectSeparator = true;
+
+    public ModelExtensionsPrettyPrinter() {
+        DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ", "\n");
+        this.indentArraysWith(indenter);
+        this.indentObjectsWith(indenter);
+    }
 
     @Override
     public ModelExtensionsPrettyPrinter createInstance() {

@@ -41,6 +41,7 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
@@ -48,6 +49,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:application-test.properties")
 @Import({ ProcessDefinitionRestTemplate.class, TestChannelBinderConfiguration.class })
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
+@DirtiesContext
 public class QueryProcessDefinitionCandidateStartersIT {
 
     @Autowired

@@ -68,13 +68,13 @@ import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilder
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.spring.process.CachingProcessExtensionService;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
-@Configuration
+@AutoConfiguration
 @PropertySources(
     value = {
         @PropertySource(value = "classpath:/META-INF/activiti-audit-producer.properties"), // default

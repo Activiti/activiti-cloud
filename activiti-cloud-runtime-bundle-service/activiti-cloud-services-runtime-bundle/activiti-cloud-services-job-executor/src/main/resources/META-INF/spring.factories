@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.services.job.executor.MessageBasedJobManagerAutoConfiguration,\
-    org.activiti.cloud.services.job.executor.JobExecutorChannelPropertiesAutoConfiguration

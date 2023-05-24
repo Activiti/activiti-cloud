@@ -38,6 +38,7 @@ import org.activiti.engine.impl.persistence.entity.integration.IntegrationContex
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
 import org.activiti.runtime.api.connector.IntegrationContextBuilder;
+import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,6 +91,9 @@ public class MQServiceTaskBehaviorTest {
     @Mock
     private BindingServiceProperties bindingServiceProperties;
 
+    @Mock
+    private IntegrationRequestSender integrationRequestSender;
+
     @InjectMocks
     private IntegrationRequestBuilder integrationRequestBuilder;
 
@@ -99,7 +103,7 @@ public class MQServiceTaskBehaviorTest {
             spy(
                 new MQServiceTaskBehavior(
                     integrationContextManager,
-                    eventPublisher,
+                    integrationRequestSender,
                     integrationContextBuilder,
                     defaultServiceTaskBehavior,
                     processEngineEventsAggregator,
@@ -153,7 +157,7 @@ public class MQServiceTaskBehaviorTest {
             .hasProcessDefinitionId(PROC_DEF_ID)
             .hasProcessInstanceId(PROC_INST_ID);
 
-        verify(eventPublisher).publishEvent(integrationRequestCaptor.capture());
+        verify(integrationRequestSender).sendIntegrationRequest(integrationRequestCaptor.capture());
         IntegrationRequestImpl integrationRequest = integrationRequestCaptor.getValue();
         assertThat(integrationRequest.getIntegrationContext()).isEqualTo(integrationContext);
 

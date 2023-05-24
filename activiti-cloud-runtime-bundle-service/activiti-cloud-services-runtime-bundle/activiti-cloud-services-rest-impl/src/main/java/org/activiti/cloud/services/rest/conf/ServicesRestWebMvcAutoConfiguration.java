@@ -35,18 +35,18 @@ import org.activiti.cloud.services.rest.assemblers.ToCloudTaskConverter;
 import org.activiti.cloud.services.rest.assemblers.ToCloudVariableInstanceConverter;
 import org.activiti.cloud.services.rest.assemblers.UserCandidatesRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleLinkRelationProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
 

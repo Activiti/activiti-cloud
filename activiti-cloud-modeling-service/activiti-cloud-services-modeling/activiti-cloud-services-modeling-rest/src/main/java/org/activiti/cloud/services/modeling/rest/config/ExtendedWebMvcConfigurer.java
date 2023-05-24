@@ -24,8 +24,8 @@ import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembl
 import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ValidationErrorRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -38,7 +38,7 @@ import org.springframework.web.util.UriComponents;
 /**
  * Extended WebMvcConfigurer
  */
-@Configuration
+@AutoConfiguration
 public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
     private final Jackson2ObjectMapperBuilder objectMapperBuilder;

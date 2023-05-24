@@ -29,6 +29,7 @@ import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.cloud.acc.core.rest.PageRequest;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -36,7 +37,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 

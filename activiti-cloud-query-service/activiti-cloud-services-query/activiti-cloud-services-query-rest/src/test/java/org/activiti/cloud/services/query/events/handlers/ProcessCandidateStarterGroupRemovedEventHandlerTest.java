@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.EntityManager;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;

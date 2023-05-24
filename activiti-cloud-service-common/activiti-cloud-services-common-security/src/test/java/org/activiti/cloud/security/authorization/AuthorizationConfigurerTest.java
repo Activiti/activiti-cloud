@@ -35,8 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer.AuthorizedUrl;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationConfigurerTest {
@@ -45,10 +44,10 @@ class AuthorizationConfigurerTest {
     private HttpSecurity http;
 
     @Mock
-    private ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry authorizeRequests;
+    private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorizeRequests;
 
     @Mock
-    private AuthorizedUrl authorizedUrl;
+    private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl;
 
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
@@ -61,17 +60,17 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.antMatchers(any(String.class))).thenReturn(authorizedUrl);
+        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.requestMatchers(any(String.class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        inOrder.verify(authorizeRequests).antMatchers(eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
 
-        inOrder.verify(authorizeRequests).antMatchers(eq("/a"), eq("/b"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq("/a"), eq("/b"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
     }
 
@@ -86,18 +85,18 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.antMatchers(any(String.class))).thenReturn(authorizedUrl);
+        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.requestMatchers(any(String.class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
         //URLs with permitAll must be defined first in order to avoid being overridden
-        inOrder.verify(authorizeRequests).antMatchers(eq("/d"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq("/d"));
         inOrder.verify(authorizedUrl).permitAll();
 
-        inOrder.verify(authorizeRequests).antMatchers(eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
     }
 
@@ -115,22 +114,22 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.antMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
+        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        inOrder.verify(authorizeRequests).antMatchers(eq(GET), eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq(GET), eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
-        inOrder.verify(authorizeRequests).antMatchers(eq(HEAD), eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq(HEAD), eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
-        inOrder.verify(authorizeRequests).antMatchers(eq(PATCH), eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq(PATCH), eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
-        inOrder.verify(authorizeRequests).antMatchers(eq(OPTIONS), eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq(OPTIONS), eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
-        inOrder.verify(authorizeRequests).antMatchers(eq(TRACE), eq("/c"));
+        inOrder.verify(authorizeRequests).requestMatchers(eq(TRACE), eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
     }
 

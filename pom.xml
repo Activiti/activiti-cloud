@@ -184,8 +184,8 @@
     <url>https://travis-ci.com/${project.scm.organization}/${project.scm.repository}</url>
   </ciManagement>
   <properties>
-    <java.release>17</java.release>
-    <java.version>1.${java.release}</java.version>
+    <java.release>${java.version}</java.release>
+    <java.version>17</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -195,7 +195,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>2.7.10</spring-boot.version>
+    <spring-boot.version>3.0.6</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -473,6 +473,9 @@ limitations under the License.]]>
           <showWarnings>true</showWarnings>
           <optimize>true</optimize>
           <forceJavacCompilerUse>true</forceJavacCompilerUse>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

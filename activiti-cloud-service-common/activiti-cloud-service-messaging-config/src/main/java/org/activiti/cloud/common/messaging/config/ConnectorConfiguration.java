@@ -30,12 +30,11 @@ import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
-import org.springframework.integration.handler.GenericHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -97,7 +96,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                                 .map(ExpressionEvaluatingSelector::new)
                                 .orElseGet(() -> new ExpressionEvaluatingSelector("true"));
 
-                            IntegrationFlow connectorFlow = IntegrationFlows
+                            IntegrationFlow connectorFlow = IntegrationFlow
                                 .from(
                                     getGatewayInterface(Function.class.isInstance(bean)),
                                     gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
@@ -114,7 +113,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             String inputChannel = connectorBinding.input();
 
-                            IntegrationFlow inputChannelFlow = IntegrationFlows
+                            IntegrationFlow inputChannelFlow = IntegrationFlow
                                 .from(inputChannel)
                                 .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
                                 .get();

@@ -21,9 +21,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;

@@ -19,9 +19,9 @@ import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.junit.jupiter.api.Test;

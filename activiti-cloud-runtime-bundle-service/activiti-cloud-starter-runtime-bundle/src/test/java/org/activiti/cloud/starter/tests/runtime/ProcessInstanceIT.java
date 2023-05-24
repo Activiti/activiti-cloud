@@ -41,6 +41,7 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
+import org.activiti.engine.impl.cmd.StartCreatedProcessInstanceCmd;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
@@ -63,6 +65,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext
 public class ProcessInstanceIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
@@ -151,6 +154,8 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
         assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
     }
+
+    StartCreatedProcessInstanceCmd startCreatedProcessInstanceCmd;
 
     @Test
     public void shouldStartAnAlreadyCreatedProcess() {

@@ -17,7 +17,7 @@ package org.activiti.cloud.services.modeling.service;
 
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_XML;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.JSON;
-import static org.springframework.data.repository.support.PageableExecutionUtils.getPage;
+import static org.springframework.data.support.PageableExecutionUtils.getPage;
 
 import java.util.ArrayList;
 import java.util.Collection;

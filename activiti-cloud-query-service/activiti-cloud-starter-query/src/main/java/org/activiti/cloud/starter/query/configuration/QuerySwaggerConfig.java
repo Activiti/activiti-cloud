@@ -18,7 +18,7 @@ package org.activiti.cloud.starter.query.configuration;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
 import org.activiti.cloud.services.query.rest.VariableSearch;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,7 +35,7 @@ public class QuerySwaggerConfig implements InitializingBean {
             .builder()
             .group("Query")
             .packagesToScan("org.activiti.cloud.services.query.rest")
-            .addOpenApiCustomiser(openApi ->
+            .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, querySwaggerBasePath)
             )
             .build();

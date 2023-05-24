@@ -63,16 +63,16 @@ import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.messaging.Message;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/command-endpoint-channels.properties")
 public class ServicesCoreAutoConfiguration {
 

@@ -50,9 +50,9 @@ import org.springframework.web.client.ResponseExtractor;
 @TestComponent
 public class ProcessInstanceRestTemplate {
 
-    public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
+    public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances";
 
-    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
+    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances";
 
     public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
         Map.of("Content-type", List.of("application/json"))
@@ -124,7 +124,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<CloudProcessInstance> createProcess(CreateProcessInstancePayload startPayload) {
-        return createProcess(PROCESS_INSTANCES_RELATIVE_URL + "create", startPayload);
+        return createProcess(PROCESS_INSTANCES_RELATIVE_URL + "/create", startPayload);
     }
 
     public ResponseEntity<CloudProcessInstance> adminStartProcess(StartProcessPayload startProcess) {
@@ -183,7 +183,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
-        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/start");
         ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessCall(baseURL);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -193,7 +193,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessFailing(String processInstanceId) {
-        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat(processInstanceId).concat("/start");
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/start");
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity = startCreatedProcessCallFail(baseURL);
         return responseEntity;
     }
@@ -247,7 +247,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<PagedModel<CloudTask>> getTasks(String processInstanceId) {
         ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/tasks"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<PagedModel<CloudTask>>() {}
@@ -265,7 +265,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(String processInstanceId) {
         return testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceId + "/variables",
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
@@ -289,7 +289,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
         ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
@@ -299,7 +299,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<ActivitiErrorMessageImpl> callGetVariablesWithErrorResponse(String processInstanceId) {
         ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
@@ -331,7 +331,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<CloudProcessInstance> getProcessInstance(String baseURL, String processInstanceId) {
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            baseURL + processInstanceId,
+            baseURL.concat("/").concat(processInstanceId),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<CloudProcessInstance>() {}
@@ -343,7 +343,7 @@ public class ProcessInstanceRestTemplate {
     public ResponseEntity<CloudProcessInstance> delete(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceEntity.getBody().getId()),
             HttpMethod.DELETE,
             null,
             new ParameterizedTypeReference<CloudProcessInstance>() {}
@@ -357,7 +357,7 @@ public class ProcessInstanceRestTemplate {
     ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId(),
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceEntity.getBody().getId()),
             HttpMethod.DELETE,
             null,
             new ParameterizedTypeReference<CloudProcessInstance>() {}
@@ -378,7 +378,7 @@ public class ProcessInstanceRestTemplate {
 
     private ResponseEntity<Void> suspend(String baseURL, String processInstanceId) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            baseURL + processInstanceId + "/suspend",
+            baseURL.concat("/").concat(processInstanceId).concat("/suspend"),
             HttpMethod.POST,
             new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<Void>() {}
@@ -398,7 +398,7 @@ public class ProcessInstanceRestTemplate {
 
     private ResponseEntity<Void> resume(String baseURL, String processInstanceId) {
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            baseURL + processInstanceId + "/resume",
+            baseURL.concat("/").concat(processInstanceId).concat("/resume"),
             HttpMethod.POST,
             new HttpEntity<>(CONTENT_TYPE_HEADER),
             new ParameterizedTypeReference<Void>() {}
@@ -414,7 +414,7 @@ public class ProcessInstanceRestTemplate {
 
         HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables/",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.PUT,
             requestEntity,
             new ParameterizedTypeReference<Void>() {}
@@ -439,7 +439,7 @@ public class ProcessInstanceRestTemplate {
 
         HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceId + "/variables/",
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
             HttpMethod.PUT,
             requestEntity,
             new ParameterizedTypeReference<Void>() {}
@@ -462,7 +462,7 @@ public class ProcessInstanceRestTemplate {
 
         HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(removeProcessVariablesPayload, null);
         ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processId + "/variables/",
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processId).concat("/variables"),
             HttpMethod.DELETE,
             requestEntity,
             new ParameterizedTypeReference<Void>() {}
@@ -490,7 +490,7 @@ public class ProcessInstanceRestTemplate {
         HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload, CONTENT_TYPE_HEADER);
 
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + updateProcessPayload.getProcessInstanceId(),
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(updateProcessPayload.getProcessInstanceId()),
             HttpMethod.PUT,
             requestEntity,
             new ParameterizedTypeReference<CloudProcessInstance>() {}
@@ -520,7 +520,7 @@ public class ProcessInstanceRestTemplate {
         HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload);
 
         ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_ADMIN_RELATIVE_URL + updateProcessPayload.getProcessInstanceId(),
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(updateProcessPayload.getProcessInstanceId()),
             HttpMethod.PUT,
             requestEntity,
             new ParameterizedTypeReference<CloudProcessInstance>() {}
@@ -533,7 +533,7 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<PagedModel<ProcessInstance>> getSubprocesses(String processInstanceId) {
         ResponseEntity<PagedModel<ProcessInstance>> responseEntity = testRestTemplate.exchange(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/subprocesses",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/subprocesses"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {}
@@ -544,7 +544,7 @@ public class ProcessInstanceRestTemplate {
 
     public String getModel(String processInstanceId) {
         return executeRequest(
-            PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/model",
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/model"),
             HttpMethod.GET,
             "image/svg+xml"
         );

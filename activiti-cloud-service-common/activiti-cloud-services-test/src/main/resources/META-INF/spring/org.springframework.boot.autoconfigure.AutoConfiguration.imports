@@ -1,0 +1,2 @@
+org.activiti.cloud.services.test.TestConfiguration
+org.activiti.cloud.services.test.TestProducerAutoConfiguration

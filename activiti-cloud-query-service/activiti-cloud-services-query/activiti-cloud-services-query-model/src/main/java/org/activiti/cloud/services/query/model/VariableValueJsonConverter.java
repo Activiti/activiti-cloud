@@ -17,8 +17,8 @@ package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
-import javax.persistence.AttributeConverter;
 
 public class VariableValueJsonConverter implements AttributeConverter<VariableValue<?>, String> {
 

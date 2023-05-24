@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.common.swagger.springdoc.customizer.DefaultOpenApiCustomizer;
 import org.activiti.cloud.common.swagger.springdoc.customizer.DefaultOperationCustomizer;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 
-@Configuration
+@AutoConfiguration
 public class SwaggerCustomizerConfiguration implements InitializingBean {
 
     @Autowired(required = false)
@@ -39,7 +39,7 @@ public class SwaggerCustomizerConfiguration implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         groupedOpenApis.forEach(groupedOpenApi -> {
-            groupedOpenApi.getOpenApiCustomisers().addAll(defaultOpenApiCustomizers);
+            groupedOpenApi.getOpenApiCustomizers().addAll(defaultOpenApiCustomizers);
             groupedOpenApi.getOperationCustomizers().addAll(defaultOperationCustomizers);
         });
     }

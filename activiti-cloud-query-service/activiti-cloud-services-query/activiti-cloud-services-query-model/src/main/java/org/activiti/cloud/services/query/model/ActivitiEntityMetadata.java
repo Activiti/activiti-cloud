@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import jakarta.persistence.MappedSuperclass;
 import java.util.Objects;
-import javax.persistence.MappedSuperclass;
 import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
 @MappedSuperclass

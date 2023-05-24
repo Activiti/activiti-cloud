@@ -18,7 +18,7 @@ package org.activiti.cloud.acc.core.assertions;
 import static org.assertj.core.api.Assertions.*;
 
 import feign.FeignException;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import net.thucydides.core.steps.StepEventBus;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 

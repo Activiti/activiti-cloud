@@ -17,13 +17,13 @@ package org.activiti.cloud.security.authorization;
 
 import static java.util.function.Predicate.not;
 
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.stereotype.Component;
 
 /**
@@ -84,7 +84,7 @@ public class AuthorizationConfigurer {
     private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
         throws Exception {
         boolean rolesNotEmpty = isNotEmpty(roles);
-        Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
+        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
         if (rolesNotEmpty) {
             authorizedUrlConsumer = a -> a.hasAnyRole(roles);
         } else {
@@ -99,17 +99,17 @@ public class AuthorizationConfigurer {
     private void buildAntMatchers(
         HttpSecurity http,
         SecurityCollection[] securityCollections,
-        Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> f
+        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> f
     ) throws Exception {
         for (SecurityCollection securityCollection : securityCollections) {
             String[] patterns = getPatterns(securityCollection.getPatterns());
             if (isNotEmpty(securityCollection.getOmittedMethods())) {
                 List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
                 for (HttpMethod method : methods) {
-                    f.accept(http.authorizeRequests().antMatchers(method, patterns));
+                    f.accept(http.authorizeHttpRequests().requestMatchers(method, patterns));
                 }
             } else {
-                f.accept(http.authorizeRequests().antMatchers(patterns));
+                f.accept(http.authorizeHttpRequests().requestMatchers(patterns));
             }
         }
     }

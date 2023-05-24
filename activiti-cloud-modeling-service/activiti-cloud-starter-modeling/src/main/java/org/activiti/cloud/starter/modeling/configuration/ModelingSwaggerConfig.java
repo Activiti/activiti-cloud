@@ -17,7 +17,7 @@ package org.activiti.cloud.starter.modeling.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

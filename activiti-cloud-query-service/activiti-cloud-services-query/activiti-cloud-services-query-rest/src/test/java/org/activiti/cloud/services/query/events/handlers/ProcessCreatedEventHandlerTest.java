@@ -18,8 +18,8 @@ package org.activiti.cloud.services.query.events.handlers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;

@@ -41,10 +41,10 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 public class CloudTaskModelAutoConfiguration {
 
     //this bean will be automatically injected inside boot's ObjectMapper

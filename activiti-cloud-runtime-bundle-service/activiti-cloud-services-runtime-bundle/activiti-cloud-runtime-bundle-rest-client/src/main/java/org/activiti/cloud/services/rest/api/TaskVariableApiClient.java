@@ -23,6 +23,6 @@ import org.springframework.cloud.openfeign.FeignClient;
     url = "${runtime.url}",
     path = "${runtime.path}",
     configuration = { ClientConfiguration.class },
-    decode404 = true
+    dismiss404 = false
 )
 public interface TaskVariableApiClient extends TaskVariableController {}
