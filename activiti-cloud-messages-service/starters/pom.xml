@@ -69,9 +69,9 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-messages-tests</artifactId>
-      <scope>test</scope>
       <type>test-jar</type>
       <version>${project.version}</version>
+      <classifier>tests</classifier>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
