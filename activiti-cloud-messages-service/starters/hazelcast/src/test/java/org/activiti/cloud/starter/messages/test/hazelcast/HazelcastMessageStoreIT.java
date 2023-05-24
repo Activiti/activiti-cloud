@@ -24,6 +24,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.activiti.cloud.services.messages.tests.AbstractMessagesCoreIntegrationTests;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -31,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.integration.hazelcast.store.HazelcastMessageStore;
 
+@Isolated
 public class HazelcastMessageStoreIT extends AbstractMessagesCoreIntegrationTests {
 
     @SpringBootApplication
