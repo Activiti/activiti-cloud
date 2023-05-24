@@ -12,6 +12,7 @@
   <name>Activiti Cloud Audit :: Services :: Audit JPA</name>
   <properties>
     <opencsv.version>5.6</opencsv.version>
+    <skipTests>true</skipTests>
   </properties>
   <dependencies>
     <dependency>

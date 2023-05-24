@@ -28,6 +28,7 @@ import org.springframework.integration.transaction.PseudoTransactionManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+@Isolated
 @ContextConfiguration(initializers = RedisApplicationInitializer.class)
 @Isolated
 public class RedisMessageStoreIT extends AbstractMessagesCoreIntegrationTests {

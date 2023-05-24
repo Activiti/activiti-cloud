@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
 import org.springframework.test.context.ContextConfiguration;
 
+@Isolated
 @ContextConfiguration(initializers = PostgresApplicationInitializer.class)
 @Isolated
 public class PostgresMessageStoreIT extends AbstractMessagesCoreIntegrationTests {

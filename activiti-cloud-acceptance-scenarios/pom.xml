@@ -19,13 +19,13 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
-    <skipTests>${noAcceptanceTests}</skipTests>
+    <noAcceptanceTests>true</noAcceptanceTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
     <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
-    <serenity-maven-plugin.version>2.4.34</serenity-maven-plugin.version>
+    <serenity-maven-plugin.version>3.7.1</serenity-maven-plugin.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
   </properties>
   <dependencyManagement>
@@ -46,42 +46,46 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-          <skipTests>${skipTests}</skipTests>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
-            <include>**/*TestSuite.java</include>
-          </includes>
-          <forkCount>0</forkCount>
-          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>net.serenity-bdd.maven.plugins</groupId>
-        <artifactId>serenity-maven-plugin</artifactId>
-        <version>${serenity-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>acceptance-tests</id>
+      <activation>
+        <property>!noAcceptanceTests</property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+                <include>**/*TestSuite.java</include>
+              </includes>
+              <forkCount>0</forkCount>
+              <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>net.serenity-bdd.maven.plugins</groupId>
+            <artifactId>serenity-maven-plugin</artifactId>
+            <version>${serenity-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
