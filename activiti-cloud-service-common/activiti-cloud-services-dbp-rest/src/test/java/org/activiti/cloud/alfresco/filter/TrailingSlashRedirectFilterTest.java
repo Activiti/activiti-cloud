@@ -38,41 +38,42 @@ class TrailingSlashRedirectFilterTest {
     MockMvc mvc;
 
     @SpringBootApplication
-    static class TestApplication {
-    }
+    static class TestApplication {}
 
     @Test
-    public void testGreeting() throws Exception {
-        mvc.perform(get(BASEURL + "/greeting").accept(APPLICATION_JSON_VALUE))
+    void testGreeting() throws Exception {
+        mvc
+            .perform(get(BASEURL + "/greeting").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, World!"));
     }
 
     @Test
-    public void testGreetingWithRequestParams() throws Exception {
-        mvc.perform(get(BASEURL + "/greeting?query=Foo").accept(APPLICATION_JSON_VALUE))
+    void testGreetingWithRequestParams() throws Exception {
+        mvc
+            .perform(get(BASEURL + "/greeting?query=Foo").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, Foo!"));
     }
 
     @Test
-    public void testGreetingTrailingSlashWithFilter() throws Exception {
-        mvc.perform(get(BASEURL + "/greeting/").accept(APPLICATION_JSON_VALUE))
+    void testGreetingTrailingSlashWithFilter() throws Exception {
+        mvc
+            .perform(get(BASEURL + "/greeting/").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, World!"));
     }
 
     @Test
-    public void testGreetingTrailingSlashAndRequestQueryParameter() throws Exception {
-        mvc.perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE))
+    void testGreetingTrailingSlashAndRequestQueryParameter() throws Exception {
+        mvc
+            .perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().string("Hello, Bar!"));
     }
 
     @Test
-    public void testGreetingTrailingSlash() throws Exception {
-        mvc.perform(get(BASEURL + "/greeting/slash/").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isNotFound());
+    void testGreetingTrailingSlash() throws Exception {
+        mvc.perform(get(BASEURL + "/greeting/slash/").accept(APPLICATION_JSON_VALUE)).andExpect(status().isNotFound());
     }
-
 }

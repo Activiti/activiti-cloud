@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/greeting")
 public class GreetingsController {
 
-    @GetMapping()
+    @GetMapping
     public String greeting(@RequestParam(defaultValue = "World") String query) {
         return "Hello, " + query + "!";
     }
@@ -34,5 +34,4 @@ public class GreetingsController {
     public String greetingTrailingSlash() {
         return "Hello with slash";
     }
-
 }
