@@ -19,7 +19,6 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
-    <noAcceptanceTests>false</noAcceptanceTests>
     <skipTests>${noAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>
@@ -51,7 +50,10 @@
     <profile>
       <id>acceptance-tests</id>
       <activation>
-        <property>!noAcceptanceTests</property>
+        <property>
+          <name>noAcceptanceTests</name>
+          <value>!true</value>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -68,7 +70,7 @@
                 <include>**/*Tests.java</include>
                 <include>**/*TestSuite.java</include>
               </includes>
-              <forkCount>0</forkCount>
+              <forkCount>1</forkCount>
               <classesDirectory>${project.build.outputDirectory}</classesDirectory>
             </configuration>
           </plugin>
