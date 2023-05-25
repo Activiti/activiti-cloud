@@ -28,3 +28,8 @@ repos:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.5.1
+    hooks:
+      - id: semgrep
+        args: ['--config', '.sempgrep.yaml', '--error','--metrics=off']

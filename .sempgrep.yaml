@@ -1,0 +1,8 @@
+rules:
+  - id: component-scan
+    patterns:
+      - pattern: import org.springframework.context.annotation.ComponentScan;
+    message: |
+      Do not use Spring ComponentScan Annotation.
+    languages: [java]
+    severity: ERROR
