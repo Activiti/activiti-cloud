@@ -33,9 +33,13 @@ public class RabbitMQContainerApplicationInitializer
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
     }
 
+    // TODO revert logging
     public void initialize() {
         if (!rabbitMQContainer.isRunning()) {
+            System.out.println("Starting rabbitMQContainer");
             rabbitMQContainer.start();
+        } else {
+            System.out.println("Reusing rabbitMQContainer");
         }
     }
 
