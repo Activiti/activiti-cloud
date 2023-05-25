@@ -120,7 +120,7 @@ class MultipleRbMessagesIT {
         keycloakContainerApplicationInitializer.initialize();
         RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
         rabbitMQContainerApplicationInitializer.initialize();
-        TestPropertyValues.empty()
+        TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
             .applyToSystemProperties(() -> {
