@@ -23,7 +23,7 @@
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
-    <java.version>${java.release}</java.version>
+    <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
     <docker-maven-plugin.version>0.34.1</docker-maven-plugin.version>
@@ -172,8 +172,7 @@
             <artifactId>maven-failsafe-plugin</artifactId>
             <version>${maven-failsafe-plugin.version}</version>
             <configuration>
-              <parallelMavenExecution>false</parallelMavenExecution>
-              <forkCount>1</forkCount>
+              <forkCount>0</forkCount>
               <useSystemClassLoader>false</useSystemClassLoader>
               <classesDirectory>${project.build.outputDirectory}</classesDirectory>
             </configuration>

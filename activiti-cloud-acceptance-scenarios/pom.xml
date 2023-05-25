@@ -22,7 +22,7 @@
     <skipTests>${noAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>11</java.release>
-    <java.version>${java.release}</java.version>
+    <java.version>1.${java.release}</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
     <serenity-maven-plugin.version>2.4.34</serenity-maven-plugin.version>
@@ -65,7 +65,7 @@
             <include>**/*Tests.java</include>
             <include>**/*TestSuite.java</include>
           </includes>
-          <forkCount>1</forkCount>
+          <forkCount>0</forkCount>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>
