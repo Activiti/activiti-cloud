@@ -76,7 +76,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn verify -T 3 -DnoAcceptanceTests=true  ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn verify -T 1C -DnoAcceptanceTests=true  ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
