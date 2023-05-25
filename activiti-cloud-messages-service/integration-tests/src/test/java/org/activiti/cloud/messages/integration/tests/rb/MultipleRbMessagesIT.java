@@ -53,9 +53,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.util.TestSocketUtils;
 
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 class MultipleRbMessagesIT {
+
+    private static final Integer DB_PORT = TestSocketUtils.findAvailableTcpPort();
 
     private static final String INTERMEDIATE_CATCH_MESSAGE_PROCESS = "IntermediateCatchMessageProcess";
     private static final String INTERMEDIATE_THROW_MESSAGE_PROCESS = "IntermediateThrowMessageProcess";
@@ -71,7 +74,7 @@ class MultipleRbMessagesIT {
 
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseServer() throws SQLException {
-            return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
+            return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT.toString());
         }
     }
 
@@ -134,7 +137,7 @@ class MultipleRbMessagesIT {
                 rb1Context =
                     new SpringApplicationBuilder(RbApplication.class)
                         .properties(
-                            "server.port=8081",
+                            "server.port=" + TestSocketUtils.findAvailableTcpPort(),
                             "spring.main.banner-mode=off",
                             "activiti.cloud.application.name=messages-app1",
                             "spring.application.name=rb"
@@ -144,7 +147,7 @@ class MultipleRbMessagesIT {
                 rb2Context =
                     new SpringApplicationBuilder(RbApplication.class)
                         .properties(
-                            "server.port=8082",
+                            "server.port=" + TestSocketUtils.findAvailableTcpPort(),
                             "spring.main.banner-mode=off",
                             "activiti.cloud.application.name=messages-app2",
                             "spring.application.name=rb"

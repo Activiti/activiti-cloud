@@ -51,8 +51,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.test.util.TestSocketUtils;
 
 class MultipleRbJobExecutorIT {
+
+    private static final Integer DB_PORT = TestSocketUtils.findAvailableTcpPort();
 
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
 
@@ -68,7 +71,7 @@ class MultipleRbJobExecutorIT {
 
         @Bean(initMethod = "start", destroyMethod = "stop")
         public Server inMemoryH2DatabaseaServer() throws SQLException {
-            return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", "9090");
+            return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-ifNotExists", "-tcpPort", DB_PORT.toString());
         }
     }
 
@@ -93,6 +96,10 @@ class MultipleRbJobExecutorIT {
         keycloakContainerApplicationInitializer.initialize();
         RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
         rabbitMQContainerApplicationInitializer.initialize();
+        final String datasourceUrl = String.format(
+            "spring.datasource.url=jdbc:h2:tcp://localhost:%d/mem:mydb",
+            DB_PORT
+        );
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
@@ -100,9 +107,15 @@ class MultipleRbJobExecutorIT {
                 h2Ctx =
                     new SpringApplicationBuilder(H2Application.class).web(WebApplicationType.NONE).profiles("h2").run();
 
-                rbCtx1 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8081").run();
+                rbCtx1 =
+                    new SpringApplicationBuilder(RbApplication.class)
+                        .properties("server.port=" + TestSocketUtils.findAvailableTcpPort(), datasourceUrl)
+                        .run();
 
-                rbCtx2 = new SpringApplicationBuilder(RbApplication.class).properties("server.port=8082").run();
+                rbCtx2 =
+                    new SpringApplicationBuilder(RbApplication.class)
+                        .properties("server.port=" + TestSocketUtils.findAvailableTcpPort(), datasourceUrl)
+                        .run();
                 return true;
             });
     }
