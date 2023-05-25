@@ -100,7 +100,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessagesCoreIntegrationTests.class);
 
-    private static final int TEST_TIMEOUT = 30;
+    protected static final int TEST_TIMEOUT = 30;
 
     protected ObjectMapper objectMapper = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
