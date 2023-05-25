@@ -38,9 +38,13 @@ public class KeycloakContainerApplicationInitializer
         TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
     }
 
+    // TODO revert logging
     public void initialize() {
         if (!keycloakContainer.isRunning()) {
+            System.out.println("Starting keycloakContainer");
             keycloakContainer.start();
+        } else {
+            System.out.println("Reusing keycloakContainer");
         }
     }
 
