@@ -29,11 +29,14 @@ public class RabbitMQContainerApplicationInitializer
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
+        initialize();
+        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+    }
+
+    public void initialize() {
         if (!rabbitMQContainer.isRunning()) {
             rabbitMQContainer.start();
         }
-
-        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
     }
 
     public static RabbitMQContainer getContainer() {

@@ -23,7 +23,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.sql.SQLException;
 import org.activiti.api.model.shared.Payload;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
@@ -55,11 +54,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Isolated
 class MultipleRbMessagesIT {
@@ -71,12 +66,6 @@ class MultipleRbMessagesIT {
     private static ConfigurableApplicationContext h2Context;
     private static ConfigurableApplicationContext rb1Context;
     private static ConfigurableApplicationContext rb2Context;
-
-    @Container
-    private static KeycloakContainer keycloakContainer = KeycloakContainerApplicationInitializer.getContainer();
-
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = RabbitMQContainerApplicationInitializer.getContainer();
 
     @Configuration
     @Profile("h2")
@@ -129,7 +118,11 @@ class MultipleRbMessagesIT {
 
     @BeforeAll
     public static void setUp() {
-        TestPropertyValues
+        KeycloakContainerApplicationInitializer keycloakContainerApplicationInitializer = new KeycloakContainerApplicationInitializer();
+        keycloakContainerApplicationInitializer.initialize();
+        RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
+        rabbitMQContainerApplicationInitializer.initialize();
+        TestPropertyValues.empty()
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
             .applyToSystemProperties(() -> {
