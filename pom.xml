@@ -224,6 +224,10 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+    <!-- Tests Config -->
+    <unitTests.parallel>true</unitTests.parallel>
+    <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
   </properties>
   <repositories>
     <repository>
@@ -480,6 +484,18 @@ limitations under the License.]]>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <properties>
+            <configurationParameters>
+              junit.jupiter.execution.parallel.enabled=${unitTests.parallel}
+              junit.jupiter.execution.parallel.config.strategy=dynamic
+              junit.jupiter.execution.parallel.mode.default=same_thread
+              junit.jupiter.execution.parallel.mode.classes.default=concurrent
+              junit.jupiter.execution.parallel.config.dynamic.factor=${unitTests.dynamicFactor}
+            </configurationParameters>
+          </properties>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
