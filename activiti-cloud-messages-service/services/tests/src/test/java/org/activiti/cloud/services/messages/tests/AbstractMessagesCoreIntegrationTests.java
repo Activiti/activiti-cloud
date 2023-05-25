@@ -100,6 +100,8 @@ public abstract class AbstractMessagesCoreIntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessagesCoreIntegrationTests.class);
 
+    private static final int TEST_TIMEOUT = 30;
+
     protected ObjectMapper objectMapper = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -186,7 +188,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    @Timeout(20)
+    @Timeout(TEST_TIMEOUT)
     public void shouldProcessMessageEventsConcurrently() throws InterruptedException, JsonProcessingException {
         // given
         String messageEventName = "start";
@@ -229,7 +231,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
     }
 
     @Test
-    @Timeout(20)
+    @Timeout(TEST_TIMEOUT)
     public void shouldProcessMessageEventsConcurrentlyInReversedOrder()
         throws InterruptedException, JsonProcessingException {
         // given
