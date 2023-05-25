@@ -90,7 +90,6 @@
           </execution>
         </executions>
         <configuration>
-          <useSystemClassLoader>false</useSystemClassLoader>
           <classesDirectory>${project.build.outputDirectory}</classesDirectory>
         </configuration>
       </plugin>

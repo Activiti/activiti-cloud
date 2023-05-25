@@ -239,7 +239,6 @@
                   <goal>verify</goal>
                 </goals>
                 <configuration>
-                  <useSystemClassLoader>false</useSystemClassLoader>
                   <includes>
                     <!-- use a custom suffix to be able to skip integration tests and still build swagger specification-->
                     <include>**/*ITSupport.java</include>
