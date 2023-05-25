@@ -22,7 +22,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,11 +52,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.test.util.TestSocketUtils;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 class MultipleRbJobExecutorIT {
 
     private static final Integer DB_PORT = TestSocketUtils.findAvailableTcpPort();
@@ -69,12 +64,6 @@ class MultipleRbJobExecutorIT {
     private static ConfigurableApplicationContext h2Ctx;
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
-
-    @Container
-    private static KeycloakContainer keycloakContainer = KeycloakContainerApplicationInitializer.getContainer();
-
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = RabbitMQContainerApplicationInitializer.getContainer();
 
     @Configuration
     @Profile("h2")
@@ -107,6 +96,10 @@ class MultipleRbJobExecutorIT {
             "spring.datasource.url=jdbc:h2:tcp://localhost:%d/mem:mydb",
             DB_PORT
         );
+        KeycloakContainerApplicationInitializer keycloakContainerApplicationInitializer = new KeycloakContainerApplicationInitializer();
+        keycloakContainerApplicationInitializer.initialize();
+        RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
+        rabbitMQContainerApplicationInitializer.initialize();
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
