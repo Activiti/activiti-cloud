@@ -18,9 +18,10 @@ package org.activiti.cloud.starter.tests.jobexecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import java.sql.SQLException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -50,11 +51,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.MessageHandler;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 class MultipleRbJobExecutorIT {
 
     private static final Logger logger = LoggerFactory.getLogger(MultipleRbJobExecutorIT.class);
@@ -64,12 +61,6 @@ class MultipleRbJobExecutorIT {
     private static ConfigurableApplicationContext h2Ctx;
     private static ConfigurableApplicationContext rbCtx1;
     private static ConfigurableApplicationContext rbCtx2;
-
-    @Container
-    private static KeycloakContainer keycloakContainer = KeycloakContainerApplicationInitializer.getContainer();
-
-    @Container
-    private static RabbitMQContainer rabbitMQContainer = RabbitMQContainerApplicationInitializer.getContainer();
 
     @Configuration
     @Profile("h2")
@@ -98,6 +89,10 @@ class MultipleRbJobExecutorIT {
 
     @BeforeAll
     public static void setUp() {
+        KeycloakContainerApplicationInitializer keycloakContainerApplicationInitializer = new KeycloakContainerApplicationInitializer();
+        keycloakContainerApplicationInitializer.initialize();
+        RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
+        rabbitMQContainerApplicationInitializer.initialize();
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
