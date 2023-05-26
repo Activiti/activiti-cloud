@@ -29,7 +29,8 @@ repos:
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/returntocorp/semgrep
-    rev: v1.5.1
+    rev: v1.23.0
     hooks:
       - id: semgrep
-        args: ['--config', '.sempgrep.yaml', '--error','--metrics=off']
+        types: [java]
+        args: ["--config", ".sempgrep.yaml", "--error","--metrics=off"]
