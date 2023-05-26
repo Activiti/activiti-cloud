@@ -2,6 +2,4 @@
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml" />
   <root level="OFF" />
-  <logger name="🐳 [quay.io/keycloak/keycloak:18.0.0]" level="INFO" />
-  <logger name="🐳 [rabbitmq:3.8.9-management-alpine]" level="INFO" />
 </configuration>
