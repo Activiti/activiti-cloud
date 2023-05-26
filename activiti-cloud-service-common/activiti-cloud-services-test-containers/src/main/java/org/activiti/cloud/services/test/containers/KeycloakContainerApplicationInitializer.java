@@ -44,7 +44,10 @@ public class KeycloakContainerApplicationInitializer
 
     protected static void start() {
         if (!keycloakContainer.isRunning()) {
+            System.out.println("Starting keycloakContainer");
             keycloakContainer.start();
+        } else {
+            System.out.println("Reusing keycloakContainer");
         }
     }
 
