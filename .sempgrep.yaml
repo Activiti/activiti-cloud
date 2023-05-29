@@ -3,5 +3,6 @@ rules:
     languages:
       - java
     message: Spring annotation ComponentScan usage is forbidden.
-    pattern: '@ComponentScan(...)'
+    pattern: |
+      @ComponentScan(...)
     severity: ERROR
