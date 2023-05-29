@@ -25,7 +25,7 @@
     <java.version>17</java.version>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <activiti-cloud.version>${project.version}</activiti-cloud.version>
-    <serenity-maven-plugin.version>3.7.1</serenity-maven-plugin.version>
+    <serenity-maven-plugin.version>2.4.34</serenity-maven-plugin.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
   </properties>
   <dependencyManagement>
