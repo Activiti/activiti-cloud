@@ -15,9 +15,10 @@
  */
 package org.activiti.cloud.services.common.security.test.support.keycloak;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
-import com.nimbusds.jose.shaded.json.JSONObject;
+import com.nimbusds.jose.util.JSONArrayUtils;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.services.common.security.test.support.RolesClaimProvider;
@@ -34,10 +35,10 @@ public class KeycloakRolesClaimProvider implements RolesClaimProvider {
 
     @Override
     public void setResourceRoles(Map<String, String[]> resourceRoles, Map<String, Object> claims) {
-        JSONObject resourceAccess = new JSONObject();
+        Map<String, Object> resourceAccess = JSONObjectUtils.newJSONObject();
         for (String key : resourceRoles.keySet()) {
-            JSONObject resourceRolesJSON = new JSONObject();
-            JSONArray resourceRolesArray = new JSONArray();
+            Map<String, Object> resourceRolesJSON = JSONObjectUtils.newJSONObject();
+            List<Object> resourceRolesArray = JSONArrayUtils.newJSONArray();
             resourceRolesArray.addAll(Arrays.asList(resourceRoles.get(key)));
             resourceRolesJSON.put("roles", resourceRolesArray);
             resourceAccess.put(key, resourceRolesJSON);
@@ -47,8 +48,8 @@ public class KeycloakRolesClaimProvider implements RolesClaimProvider {
 
     @Override
     public void setGlobalRoles(Set<String> globalRoles, Map<String, Object> claims) {
-        JSONObject realmAccess = new JSONObject();
-        JSONArray globalRolesArray = new JSONArray();
+        Map<String, Object> realmAccess = JSONObjectUtils.newJSONObject();
+        List<Object> globalRolesArray = JSONArrayUtils.newJSONArray();
         globalRolesArray.addAll(globalRoles);
         realmAccess.put("roles", globalRolesArray);
         claims.put("realm_access", realmAccess);

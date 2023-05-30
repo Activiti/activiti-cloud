@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.common.security.keycloak;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -56,7 +56,7 @@ public class KeycloakJwtAdapter implements JwtAdapter {
         }
     }
 
-    private List<String> getRoles(JSONObject getRolesParent) {
+    private List<String> getRoles(Map<String, Object> getRolesParent) {
         return (List<String>) getRolesParent.get("roles");
     }
 }

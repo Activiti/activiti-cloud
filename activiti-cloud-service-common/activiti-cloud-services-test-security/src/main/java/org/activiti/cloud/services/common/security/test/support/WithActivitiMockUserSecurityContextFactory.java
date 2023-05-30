@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.common.security.test.support;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
+import com.nimbusds.jose.util.JSONArrayUtils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
@@ -95,7 +95,7 @@ public class WithActivitiMockUserSecurityContextFactory implements WithSecurityC
         rolesClaimProvider.setGlobalRoles(globalRoles, claims);
         rolesClaimProvider.setResourceRoles(resourceRoles, claims);
 
-        JSONArray groupsArray = new JSONArray();
+        List<Object> groupsArray = JSONArrayUtils.newJSONArray();
         groupsArray.addAll(groups);
         claims.put("groups", groupsArray);
 
