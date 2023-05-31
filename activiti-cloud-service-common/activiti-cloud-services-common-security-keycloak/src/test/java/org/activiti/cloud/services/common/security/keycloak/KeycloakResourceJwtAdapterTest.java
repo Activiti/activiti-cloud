@@ -19,8 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ public class KeycloakResourceJwtAdapterTest {
 
     @Test
     public void shouldNotThrowAnyExceptionWhenRolesIsNull() {
-        JSONObject rolesParent = new JSONObject();
+        Map<String, Object> rolesParent = JSONObjectUtils.newJSONObject();
         rolesParent.put("roles", null);
         when(jwt.hasClaim("resource_access")).thenReturn(true);
         when(jwt.getClaim("resource_access")).thenReturn(rolesParent);
@@ -62,8 +63,8 @@ public class KeycloakResourceJwtAdapterTest {
 
     @Test
     public void shouldReturnRoles() {
-        JSONObject client = new JSONObject();
-        JSONObject roles = new JSONObject();
+        Map<String, Object> client = JSONObjectUtils.newJSONObject();
+        Map<String, Object> roles = JSONObjectUtils.newJSONObject();
         roles.put("roles", List.of("roleA", "roleB"));
         client.put("app", roles);
         when(jwt.hasClaim("resource_access")).thenReturn(true);
