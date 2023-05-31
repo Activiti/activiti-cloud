@@ -45,6 +45,8 @@ public interface ModelRepository<P extends Project, M extends Model<P, ?>> {
 
     M updateModel(M modelToUpdate, M newModel);
 
+    M resetVersion(M model);
+
     M copyModel(M model, P project);
 
     M updateModelContent(M modelToBeUpdate, FileContent fileContent);
