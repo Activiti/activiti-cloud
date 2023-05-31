@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.identity.model.UserApplicationAccess;
@@ -73,25 +73,24 @@ public class KeycloakTokenToUserRolesTest {
     }
 
     private void mockJwt(boolean withResourceRoleMappings, boolean withRealmRoleMappings) {
-        JSONObject resourceRoleMappings;
-        JSONObject realmRoleMappings;
+        Map<String, Object> resourceRoleMappings;
+        Map<String, Object> realmRoleMappings;
 
         if (withResourceRoleMappings) {
-            resourceRoleMappings =
-                new JSONObject(
-                    Map.of(
-                        "resource1",
-                        new JSONObject(Map.of("roles", List.of("role1"))),
-                        "resource2",
-                        new JSONObject(Map.of("roles", List.of("role1", "role2")))
-                    )
-                );
+            resourceRoleMappings = JSONObjectUtils.newJSONObject();
+            Map<String, Object> resource1Roles = JSONObjectUtils.newJSONObject();
+            resource1Roles.put("roles", List.of("role1"));
+            Map<String, Object> resource2Roles = JSONObjectUtils.newJSONObject();
+            resource2Roles.put("roles", List.of("role1", "role2"));
+            resourceRoleMappings.put("resource1", resource1Roles);
+            resourceRoleMappings.put("resource2", resource2Roles);
         } else {
             resourceRoleMappings = null;
         }
 
         if (withRealmRoleMappings) {
-            realmRoleMappings = new JSONObject(Map.of("roles", List.of("role1", "role2", "role3")));
+            realmRoleMappings = JSONObjectUtils.newJSONObject();
+            realmRoleMappings.putAll(Map.of("roles", List.of("role1", "role2", "role3")));
         } else {
             realmRoleMappings = null;
         }
