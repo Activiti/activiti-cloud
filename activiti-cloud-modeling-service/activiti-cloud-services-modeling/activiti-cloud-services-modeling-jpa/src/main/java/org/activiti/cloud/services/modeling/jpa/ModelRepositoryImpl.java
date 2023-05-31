@@ -15,9 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.process.ModelScope;
@@ -116,8 +114,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
         return modelJpaRepository.save(modelToBeUpdated);
     }
 
-    public ModelEntity resetVersion(ModelEntity model){
-        model.getVersions().remove(model.getVersions().size()-1);
+    public ModelEntity resetVersion(ModelEntity model) {
+        model.getVersions().remove(model.getVersions().size() - 1);
         model.setLatestVersion(model.getVersions().get(0));
         return modelJpaRepository.save(model);
     }
