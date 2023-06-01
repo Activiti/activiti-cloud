@@ -54,6 +54,18 @@ jobs:
           java-version: 11
           distribution: 'temurin'
 
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.9.2
+
+      - name: Restore Maven build cache
+        id: restore-mvn-build-cache
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-mvn-build-cache-${{ github.event.pull_request.number }}
+
       - name: Resolve override VERSION
         id: resolve-override-version
         if: ${{ github.event_name == 'pull_request' }}
@@ -78,6 +90,13 @@ jobs:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Save Maven build cache
+        id: save-mvn-build-cache
+        uses: actions/cache/save@v3
+        with:
+          path: ~/.m2/build-cache
+          key: ${{ runner.os }}-mvn-build-cache-${{ github.event.pull_request.number }}
 
       - name: Echo Longest Tests run
         shell: bash
