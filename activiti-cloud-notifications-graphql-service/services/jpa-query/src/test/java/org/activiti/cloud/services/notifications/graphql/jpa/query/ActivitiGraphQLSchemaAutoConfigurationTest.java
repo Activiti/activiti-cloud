@@ -141,7 +141,7 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
             // then
             assertThat(result).isEqualTo("1970-01-01T00:00:00.000Z");
         } finally {
-          TimeZone.setDefault(timeZone);
+            TimeZone.setDefault(timeZone);
         }
     }
 }

@@ -44,7 +44,9 @@ import org.springframework.context.annotation.Bean;
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
     @Bean
-    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(@Value("${activiti.cloud.graphql.jpa-query.date-format:yyyy-MM-dd'T'HH:mm:ss.SSSX}") String dateFormatString) {
+    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(
+        @Value("${activiti.cloud.graphql.jpa-query.date-format:yyyy-MM-dd'T'HH:mm:ss.SSSX}") String dateFormatString
+    ) {
         return builder ->
             builder
                 .name("Query")
