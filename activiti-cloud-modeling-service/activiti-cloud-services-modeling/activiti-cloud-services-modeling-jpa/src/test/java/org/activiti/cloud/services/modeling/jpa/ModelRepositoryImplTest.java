@@ -82,6 +82,7 @@ public class ModelRepositoryImplTest {
                 model.getName(),
                 processModelType.getName()
             );
+        assertThat(result).isNotNull();
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
         assertThat(result.get().hasProjects()).isTrue();
