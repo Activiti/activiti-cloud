@@ -17,9 +17,14 @@ package org.activiti.cloud.services.notifications.graphql.jpa.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import graphql.Scalars;
 import graphql.scalars.ExtendedScalars;
+import graphql.schema.Coercing;
 import graphql.schema.GraphQLSchema;
+import java.time.Instant;
+import java.util.Date;
+import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -119,5 +124,24 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
         assertThat(schema.getQueryType().getFieldDefinition("TaskVariables").getArguments())
             .describedAs("Ensure query has correct number of arguments")
             .hasSize(2);
+    }
+
+    @Test
+    void correctlyCoercesDateToISO8601FormatWithTimeAndZoneOffset() {
+        TimeZone timeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
+        try {
+            // given
+            Coercing<?, ?> subject = JavaScalars.of(Date.class).getCoercing();
+
+            // when
+            Object result = subject.parseValue(Date.from(Instant.EPOCH));
+
+            // then
+            assertThat(result).isEqualTo("1970-01-01T00:00:00.000Z");
+        } finally {
+          TimeZone.setDefault(timeZone);
+        }
     }
 }
