@@ -163,7 +163,7 @@ jobs:
           version: ${{ needs.build.outputs.version }}
 
       - name: Delete preview for ${{ matrix.messaging-broker }}
-        if: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           kubectl delete ns $PREVIEW_NAME || true
 
@@ -271,7 +271,7 @@ jobs:
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
         env:
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           if [ $IS_PREVIEW = true ]
           then
@@ -294,7 +294,7 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.head_ref, 'preview') }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
           VERSION: ${{ needs.build.outputs.version }}
         run: |
           if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
@@ -311,7 +311,7 @@ jobs:
     needs:
       - build
       - delete-test-images
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && (contains(github.head_ref, 'preview') || contains(github.event.pull_request.labels.*.name, 'preview'))) }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
 
