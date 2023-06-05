@@ -221,10 +221,6 @@
   </dependencies>
   <build>
     <plugins>
-<!--      <plugin>-->
-<!--        <groupId>com.mysema.maven</groupId>-->
-<!--        <artifactId>apt-maven-plugin</artifactId>-->
-<!--      </plugin>-->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
