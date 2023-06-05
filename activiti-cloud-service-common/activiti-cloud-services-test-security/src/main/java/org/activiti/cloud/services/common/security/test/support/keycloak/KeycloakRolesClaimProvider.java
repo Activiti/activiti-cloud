@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import org.activiti.cloud.services.common.security.test.support.RolesClaimProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

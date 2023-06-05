@@ -41,7 +41,6 @@ import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
-import org.activiti.engine.impl.cmd.StartCreatedProcessInstanceCmd;
 import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -156,8 +155,6 @@ public class ProcessInstanceIT {
         assertThat(returnedProcInst.getServiceType()).isEqualTo(runtimeBundleProperties.getServiceType());
         assertThat(returnedProcInst.getServiceVersion()).isEqualTo(runtimeBundleProperties.getServiceVersion());
     }
-
-    StartCreatedProcessInstanceCmd startCreatedProcessInstanceCmd;
 
     @Test
     public void shouldStartAnAlreadyCreatedProcess() {
