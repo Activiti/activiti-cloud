@@ -141,7 +141,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
             }
 
             String contentTypeFromHeader = message.getHeaders().containsKey(MessageHeaders.CONTENT_TYPE)
-                ? message.getHeaders().get(MessageHeaders.CONTENT_TYPE).toString()
+                ? (String) message.getHeaders().get(MessageHeaders.CONTENT_TYPE)
                 : null;
             String contentTypeFromPayload = message.getPayload() instanceof String
                 ? JavaClassMimeTypeUtils

@@ -29,6 +29,7 @@ public class ActivitiNotificationsGraphQLStarterAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(value = "keycloak.cors", matchIfMissing = true)
+    @SuppressWarnings("java:S5122")
     public WebMvcConfigurer graphQLBackendCorsConfiguration() {
         return new WebMvcConfigurer() {
             @Override
