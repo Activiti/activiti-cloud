@@ -199,7 +199,7 @@ public class CommonSecurityAutoConfiguration {
     }
 
     @Bean
-    @SuppressWarnings("java:S4502")
+    @SuppressWarnings({ "java:S4502", "java:S5122" })
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
         return http
