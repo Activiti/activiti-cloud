@@ -54,8 +54,8 @@ import org.activiti.cloud.services.modeling.validation.project.ProjectNameValida
 import org.activiti.validation.ProcessValidator;
 import org.activiti.validation.ProcessValidatorImpl;
 import org.activiti.validation.validator.ValidatorSetFactory;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.everit.json.schema.Schema;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
