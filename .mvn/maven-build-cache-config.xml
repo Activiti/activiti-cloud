@@ -6,24 +6,8 @@
     <hashAlgorithm>SHA-256</hashAlgorithm>
     <validateXml>true</validateXml>
     <local>
-      <maxBuildsCached>3</maxBuildsCached>
+      <maxBuildsCached>1</maxBuildsCached>
     </local>
     <projectVersioning adjustMetaInf="true"/>
   </configuration>
-  <executionControl>
-    <runAlways>
-      <goalsLists>
-        <goalsList artifactId="license-maven-plugin">
-          <goals>
-            <goal>add-third-party</goal>
-          </goals>
-        </goalsList>
-        <goalsList artifactId="maven-install-plugin">
-          <goals>
-            <goal>install</goal>
-          </goals>
-        </goalsList>
-      </goalsLists>
-    </runAlways>
-  </executionControl>
 </cache>
