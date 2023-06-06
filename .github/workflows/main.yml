@@ -108,6 +108,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      - name: Build Examples - no cache
+        shell: bash
+        run: mvn verify -T 1C ${{ env.MAVEN_BUILD_OPTS }} ${{ env.MAVEN_CLI_OPTS}} -f activiti-cloud-examples
+        env:
+          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+          MAVEN_BUILD_OPTS: -DnoAcceptanceTests=true -DskipTests -Dmaven.build.cache.enabled=false
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
 

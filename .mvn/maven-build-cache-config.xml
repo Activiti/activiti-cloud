@@ -10,15 +10,20 @@
     </local>
     <projectVersioning adjustMetaInf="true"/>
   </configuration>
-  <input>
-    <global>
-      <glob> {*.java,*.yaml,*.properties,*.json,*.xml,*.svg,*.factories,*.txt} </glob>
-      <includes>
-        <include>src/</include>
-      </includes>
-      <excludes>
-        <exclude>temp.out</exclude>
-      </excludes>
-    </global>
-  </input>
+  <executionControl>
+    <runAlways>
+      <goalsLists>
+        <goalsList artifactId="license-maven-plugin">
+          <goals>
+            <goal>add-third-party</goal>
+          </goals>
+        </goalsList>
+        <goalsList artifactId="maven-install-plugin">
+          <goals>
+            <goal>install</goal>
+          </goals>
+        </goalsList>
+      </goalsLists>
+    </runAlways>
+  </executionControl>
 </cache>
