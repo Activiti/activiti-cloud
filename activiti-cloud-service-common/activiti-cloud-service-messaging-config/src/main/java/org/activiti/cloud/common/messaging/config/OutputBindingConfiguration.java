@@ -135,6 +135,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
         }
 
         @Override
+        @SuppressWarnings("java:S2259")
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
             if (message instanceof ErrorMessage || isByteArrayWithContentType(message)) {
                 return message;
