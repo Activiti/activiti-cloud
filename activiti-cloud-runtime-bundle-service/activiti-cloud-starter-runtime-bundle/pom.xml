@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
-    <version>7.12.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-runtime-bundle-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-runtime-bundle</artifactId>
@@ -188,10 +188,8 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream</artifactId>
-      <type>test-jar</type>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
       <scope>test</scope>
-      <classifier>test-binder</classifier>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>

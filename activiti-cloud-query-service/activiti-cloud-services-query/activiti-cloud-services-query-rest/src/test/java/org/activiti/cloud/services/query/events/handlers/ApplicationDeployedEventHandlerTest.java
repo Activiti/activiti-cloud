@@ -21,8 +21,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.events.ApplicationEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;

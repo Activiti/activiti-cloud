@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.activiti.cloud.common.properties.CommonPropertiesAutoConfiguration,\
-org.activiti.cloud.common.error.attributes.ErrorAttributesAutoConfiguration

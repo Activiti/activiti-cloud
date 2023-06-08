@@ -17,13 +17,13 @@ package org.activiti.cloud.services.query.rest.config;
 
 import org.activiti.cloud.services.query.model.*;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy.RepositoryDetectionStrategies;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
-@Configuration
+@AutoConfiguration
 public class QueryRepositoryConfig implements RepositoryRestConfigurer {
 
     @Override

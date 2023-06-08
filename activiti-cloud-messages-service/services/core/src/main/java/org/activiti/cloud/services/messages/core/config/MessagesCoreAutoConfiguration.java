@@ -43,12 +43,12 @@ import org.activiti.cloud.services.messages.core.support.ChainBuilder;
 import org.activiti.cloud.services.messages.core.support.LockTemplate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -80,7 +80,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * A Processor app that performs aggregation.
  *
  */
-@Configuration
+@AutoConfiguration
 @EnableIntegration
 @EnableIntegrationManagement
 @EnableConfigurationProperties(MessageAggregatorProperties.class)
@@ -100,7 +100,7 @@ public class MessagesCoreAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = CONTROL_BUS_FLOW)
     public IntegrationFlow controlBusFlow() {
-        return IntegrationFlows.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
+        return IntegrationFlow.from(ControlBusGateway.class).controlBus(spec -> spec.id(CONTROL_BUS)).get();
     }
 
     @Bean

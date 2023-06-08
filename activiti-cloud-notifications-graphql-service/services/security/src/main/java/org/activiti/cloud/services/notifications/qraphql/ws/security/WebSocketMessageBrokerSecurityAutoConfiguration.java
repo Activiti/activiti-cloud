@@ -21,6 +21,7 @@ import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt.JwtAccessTokenVerifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notification.graphql.ws.security.enabled",
     matchIfMissing = true

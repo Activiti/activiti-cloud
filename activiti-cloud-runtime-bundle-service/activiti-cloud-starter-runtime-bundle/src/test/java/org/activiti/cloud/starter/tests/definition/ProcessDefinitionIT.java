@@ -46,6 +46,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
@@ -53,6 +54,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource({ "classpath:application-test.properties", "classpath:access-control.properties" })
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext
 public class ProcessDefinitionIT {
 
     @Autowired
@@ -64,9 +66,9 @@ public class ProcessDefinitionIT {
     @Autowired
     private IdentityTokenProducer identityTokenProducer;
 
-    public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    public static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
-    public static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions/";
+    public static final String ADMIN_PROCESS_DEFINITIONS_URL = "/admin/v1/process-definitions";
 
     private static final String PROCESS_WITH_VARIABLES = "ProcessWithVariables";
     private static final String PROCESS_WITH_VARIABLES_2 = "ProcessWithVariables2";
@@ -131,7 +133,7 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<CloudProcessDefinition> entity = restTemplate.exchange(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId(),
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()),
             HttpMethod.GET,
             null,
             responseType
@@ -152,7 +154,7 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()).concat("/meta"),
             HttpMethod.GET,
             null,
             responseType
@@ -176,7 +178,7 @@ public class ProcessDefinitionIT {
 
         //when
         ResponseEntity<ProcessDefinitionMeta> entity = restTemplate.exchange(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/meta",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()).concat("/meta"),
             HttpMethod.GET,
             null,
             responseType
@@ -197,7 +199,7 @@ public class ProcessDefinitionIT {
 
         //when
         String responseData = executeRequest(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()).concat("/model"),
             HttpMethod.GET,
             "application/xml"
         );
@@ -214,7 +216,7 @@ public class ProcessDefinitionIT {
 
         //when
         JsonNode responseData = executeRequest(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()).concat("/model"),
             HttpMethod.GET,
             "application/json",
             JsonNode.class
@@ -240,7 +242,7 @@ public class ProcessDefinitionIT {
 
         //when
         String responseData = executeRequest(
-            PROCESS_DEFINITIONS_URL + aProcessDefinition.getId() + "/model",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(aProcessDefinition.getId()).concat("/model"),
             HttpMethod.GET,
             "image/svg+xml"
         );

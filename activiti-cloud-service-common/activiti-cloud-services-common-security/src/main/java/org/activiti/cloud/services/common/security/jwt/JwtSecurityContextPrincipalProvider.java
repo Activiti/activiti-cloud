@@ -34,6 +34,6 @@ public class JwtSecurityContextPrincipalProvider implements SecurityContextPrinc
             .map(Authentication::getPrincipal)
             .filter(Jwt.class::isInstance)
             .map(Jwt.class::cast)
-            .map(jwt -> new JwtAuthenticationToken(jwt));
+            .map(JwtAuthenticationToken::new);
     }
 }

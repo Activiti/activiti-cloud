@@ -29,21 +29,27 @@ import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetch
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherDataFetcher;
 import org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher.EngineEventsPublisherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ReactorNettyTcpStompClient;
 import reactor.core.publisher.Flux;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass({ GraphQL.class, ReactorNettyTcpStompClient.class })
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.subscriptions.enabled",
     matchIfMissing = true
 )
+@EnableConfigurationProperties(GraphQLSubscriptionSchemaProperties.class)
+@PropertySource("classpath:META-INF/graphql-subscriptions.properties")
+@PropertySource(value = "classpath:graphql-subscriptions.properties", ignoreResourceNotFound = true)
 public class GraphQLSubscriptionsAutoConfiguration {
 
     @Configuration

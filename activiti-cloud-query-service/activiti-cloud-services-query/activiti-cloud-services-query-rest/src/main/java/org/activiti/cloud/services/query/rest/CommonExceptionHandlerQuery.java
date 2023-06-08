@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;

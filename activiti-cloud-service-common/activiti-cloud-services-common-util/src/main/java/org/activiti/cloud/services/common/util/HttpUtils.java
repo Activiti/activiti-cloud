@@ -17,9 +17,9 @@ package org.activiti.cloud.services.common.util;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;

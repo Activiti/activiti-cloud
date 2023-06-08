@@ -19,12 +19,14 @@ import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assert
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -72,11 +75,15 @@ public class ConnectorModelControllerIT {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @MockBean
+    private SecurityManager securityManager;
+
     private Project project;
     private Model connectorModel;
 
     @BeforeEach
     public void setUp() {
+        when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         project = null;
         connectorModel = null;

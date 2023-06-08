@@ -34,6 +34,6 @@ public class EngineEventsPublisherDataFetcher implements DataFetcher<Publisher<L
     public Publisher<List<EngineEvent>> get(DataFetchingEnvironment environment) {
         return publisherFactory
             .getPublisher(environment)
-            .subscriberContext(Context.of(DataFetchingEnvironment.class, environment));
+            .contextWrite(Context.of(DataFetchingEnvironment.class, environment));
     }
 }

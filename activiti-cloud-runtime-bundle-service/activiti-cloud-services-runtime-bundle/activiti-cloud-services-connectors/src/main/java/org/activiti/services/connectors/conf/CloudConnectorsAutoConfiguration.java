@@ -40,19 +40,18 @@ import org.activiti.services.connectors.channel.ProcessEngineIntegrationChannels
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationErrorEventHandler;
 import org.activiti.services.connectors.channel.ServiceTaskIntegrationResultEventHandler;
 import org.activiti.services.connectors.message.IntegrationContextMessageBuilderFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.EnableRetry;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
 @PropertySource("classpath:config/integration-result-stream.properties")
 @EnableRetry
@@ -171,16 +170,16 @@ public class CloudConnectorsAutoConfiguration {
     @ConditionalOnMissingBean(name = DefaultActivityBehaviorFactory.DEFAULT_SERVICE_TASK_BEAN_NAME)
     public MQServiceTaskBehavior mqServiceTaskBehavior(
         IntegrationContextManager integrationContextManager,
-        ApplicationEventPublisher eventPublisher,
         IntegrationContextBuilder integrationContextBuilder,
         DefaultServiceTaskBehavior defaultServiceTaskBehavior,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
         RuntimeBundleProperties runtimeBundleProperties,
-        IntegrationRequestBuilder integrationRequestBuilder
+        IntegrationRequestBuilder integrationRequestBuilder,
+        IntegrationRequestSender integrationRequestSender
     ) {
         return new MQServiceTaskBehavior(
             integrationContextManager,
-            eventPublisher,
+            integrationRequestSender,
             integrationContextBuilder,
             defaultServiceTaskBehavior,
             processEngineEventsAggregator,

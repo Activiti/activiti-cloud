@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-starters-messages</artifactId>
-    <version>7.12.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-starter-messages-hazelcast</artifactId>
+  <name>Activiti Cloud Starter :: Messages Hazelcast</name>
   <properties>
-    <spring-integration-hazelcast.version>3.0.0</spring-integration-hazelcast.version>
-    <hazelcast.version>5.1.2</hazelcast.version>
+    <hazelcast.version>5.2.3</hazelcast.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -34,7 +34,6 @@
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-hazelcast</artifactId>
-      <version>${spring-integration-hazelcast.version}</version>
     </dependency>
   </dependencies>
 </project>

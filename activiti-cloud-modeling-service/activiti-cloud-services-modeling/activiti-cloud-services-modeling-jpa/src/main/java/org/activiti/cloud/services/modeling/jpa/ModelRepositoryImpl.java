@@ -25,7 +25,6 @@ import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ModelVersionEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -34,7 +33,6 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     private final ModelJpaRepository modelJpaRepository;
     private final VersionGenerationHelper<ModelEntity, ModelVersionEntity> versionGenerationHelper;
 
-    @Autowired
     public ModelRepositoryImpl(ModelJpaRepository modelJpaRepository) {
         this.modelJpaRepository = modelJpaRepository;
         versionGenerationHelper = new VersionGenerationHelper<>(ModelEntity.class, ModelVersionEntity.class);

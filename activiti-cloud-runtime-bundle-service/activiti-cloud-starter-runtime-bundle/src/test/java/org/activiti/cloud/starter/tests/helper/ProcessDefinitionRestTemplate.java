@@ -32,7 +32,7 @@ import org.springframework.util.LinkedMultiValueMap;
 @TestComponent
 public class ProcessDefinitionRestTemplate {
 
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
     public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
         Map.of("Content-type", List.of("application/json"))
     );
@@ -58,7 +58,7 @@ public class ProcessDefinitionRestTemplate {
 
     public ResponseEntity<Map<String, String>> getProcessModelStaticValuesMappingForStartEvent(String id) {
         ResponseEntity<Map<String, String>> responseEntity = testRestTemplate.exchange(
-            PROCESS_DEFINITIONS_URL + id + "/static-values",
+            PROCESS_DEFINITIONS_URL.concat("/").concat(id).concat("/static-values"),
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<>() {}

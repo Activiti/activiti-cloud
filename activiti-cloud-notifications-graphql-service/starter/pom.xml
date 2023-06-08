@@ -6,11 +6,11 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-    <version>7.12.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
-  <name>Activiti Cloud Notifications :: Starter :: GraphQL</name>
+  <name>Activiti Cloud Starter :: Notifications GraphQL</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -129,10 +129,8 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream</artifactId>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
       <scope>test</scope>
-      <classifier>test-binder</classifier>
-      <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

@@ -47,6 +47,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
@@ -57,6 +58,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext
 public class SignalIT {
 
     @Autowired

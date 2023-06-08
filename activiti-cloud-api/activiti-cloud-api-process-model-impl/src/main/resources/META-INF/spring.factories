@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    org.activiti.cloud.api.process.model.impl.conf.CloudProcessModelAutoConfiguration

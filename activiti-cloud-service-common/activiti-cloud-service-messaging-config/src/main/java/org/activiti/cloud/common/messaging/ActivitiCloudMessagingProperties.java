@@ -16,9 +16,9 @@
 
 package org.activiti.cloud.common.messaging;
 
+import jakarta.validation.constraints.*;
 import java.util.*;
 import java.util.function.Function;
-import javax.validation.constraints.*;
 import org.activiti.cloud.common.messaging.config.InputConverterFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;

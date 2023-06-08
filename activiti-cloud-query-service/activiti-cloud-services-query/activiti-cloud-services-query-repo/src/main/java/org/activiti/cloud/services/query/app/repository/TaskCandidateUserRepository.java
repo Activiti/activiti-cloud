@@ -22,6 +22,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateUserId;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
@@ -30,7 +31,8 @@ public interface TaskCandidateUserRepository
     extends
         PagingAndSortingRepository<TaskCandidateUserEntity, TaskCandidateUserId>,
         QuerydslPredicateExecutor<TaskCandidateUserEntity>,
-        QuerydslBinderCustomizer<QTaskCandidateUserEntity> {
+        QuerydslBinderCustomizer<QTaskCandidateUserEntity>,
+        CrudRepository<TaskCandidateUserEntity, TaskCandidateUserId> {
     @Override
     default void customize(QuerydslBindings bindings, QTaskCandidateUserEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));

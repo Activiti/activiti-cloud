@@ -20,17 +20,16 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Transient;
 import java.util.Map;
 import java.util.Optional;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
-import javax.persistence.Transient;
-import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
@@ -48,7 +47,7 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
     private VersionIdentifier versionIdentifier;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = false)
     @MapsId("versionedEntityId")
     private ModelEntity versionedEntity;
 

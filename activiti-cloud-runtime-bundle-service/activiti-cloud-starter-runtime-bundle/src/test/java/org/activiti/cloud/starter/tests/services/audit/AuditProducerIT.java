@@ -117,7 +117,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -125,7 +124,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@DirtiesContext
 @ContextConfiguration(
     classes = { ServicesAuditITConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
@@ -170,7 +169,7 @@ public class AuditProducerIT {
     public static final String AUDIT_PRODUCER_IT = "AuditProducerIT";
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String SIMPLE_PROCESS_CATEGORY = "test-category";
-    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions/";
+    private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
 
     @Value("${activiti.identity.test-user}")
     protected String keycloakTestUser;

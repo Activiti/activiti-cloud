@@ -24,14 +24,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.swagger.v3.oas.models.security.OAuthFlow;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -63,7 +62,9 @@ public class SpringdocApiDocsIT {
             .andExpect(jsonPath("$.components.schemas").value(hasKey("ExtendedJsonDeserializer")))
             .andExpect(jsonPath("$.paths[*].[*].summary").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
-            .andExpect(content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes())))
+            .andExpect(
+                content().json(new String(springdocApiDocsFile.getInputStream().readAllBytes(), StandardCharsets.UTF_8))
+            )
             .andReturn();
     }
 }

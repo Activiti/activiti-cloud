@@ -46,6 +46,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
@@ -86,6 +88,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -95,7 +98,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(classes = ModelingRestApplication.class)
+@SpringBootTest(classes = ModelingRestApplication.class, properties = "spring.jpa.open-in-view=false")
 @WebAppConfiguration
 @WithMockModelerUser
 @Transactional
@@ -121,8 +124,12 @@ public class ModelControllerIT {
     @Autowired
     private ProjectJpaRepository projectJpaRepository;
 
+    @MockBean
+    private SecurityManager securityManager;
+
     @BeforeEach
     public void setUp() {
+        when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
         mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
@@ -1272,6 +1279,12 @@ public class ModelControllerIT {
                     .content(mapper.writeValueAsString(deserializedStringModel))
             )
             .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void should_returnOnlyGlobalModels_when_retrievingAllModels2() throws Exception {
+        createConnectorModel("connector-project-scoped");
+        modelJpaRepository.flush();
     }
 
     @Test

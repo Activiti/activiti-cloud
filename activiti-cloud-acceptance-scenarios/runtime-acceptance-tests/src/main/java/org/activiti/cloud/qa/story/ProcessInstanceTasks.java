@@ -61,6 +61,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.springframework.hateoas.PagedModel;
 
+@SuppressWarnings("java:S5960")
 public class ProcessInstanceTasks {
 
     @Steps
@@ -216,7 +217,7 @@ public class ProcessInstanceTasks {
     }
 
     @Then("the process instance reaches a task named $taskName")
-    public void checkProcessIsOnTask(String taskName) throws Exception {
+    public void checkProcessIsOnTask(String taskName) {
         await()
             .untilAsserted(() -> {
                 Collection<CloudTask> tasks = processRuntimeBundleSteps.getTaskByProcessInstanceId(

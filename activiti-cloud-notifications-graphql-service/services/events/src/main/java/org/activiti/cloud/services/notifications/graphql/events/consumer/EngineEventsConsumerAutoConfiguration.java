@@ -25,6 +25,7 @@ import org.activiti.cloud.services.notifications.graphql.events.transformer.Tran
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.SubscribableChannel;
@@ -44,7 +45,7 @@ import reactor.core.scheduler.Schedulers;
  * Notification Gateway configuration that enables messaging channel bindings
  * and scans for MessagingGateway on interfaces to create GatewayProxyFactoryBeans.
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(EngineEventsConsumerProperties.class)
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.events.enabled",
@@ -96,7 +97,7 @@ public class EngineEventsConsumerAutoConfiguration {
             EngineEventsConsumerMessageHandler engineEventsMessageHandler,
             @Qualifier(SOURCE) SubscribableChannel source
         ) {
-            return IntegrationFlows
+            return IntegrationFlow
                 .from(source)
                 .log(LoggingHandler.Level.DEBUG)
                 .transform(engineEventsMessageHandler)

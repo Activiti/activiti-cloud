@@ -29,16 +29,16 @@ import org.activiti.services.subscription.channel.BroadcastSignalEventHandler;
 import org.activiti.services.subscription.channel.ProcessEngineSignalChannels;
 import org.activiti.services.subscriptions.behavior.BroadcastSignalEventActivityBehavior;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/signal-events-channels.properties")
 @AutoConfigureBefore({ ProcessRuntimeAutoConfiguration.class })
 @Import(ProcessEngineSignalChannelsConfiguration.class)

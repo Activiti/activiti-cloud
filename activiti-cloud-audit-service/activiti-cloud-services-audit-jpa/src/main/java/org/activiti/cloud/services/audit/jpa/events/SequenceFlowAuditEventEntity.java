@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SequenceFlowJpaJsonConverter;

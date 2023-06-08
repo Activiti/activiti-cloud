@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.services.common.security.test.support.RolesClaimProvider;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+@AutoConfiguration
 @Component
 @ConditionalOnProperty(
     value = "activiti.cloud.services.oauth2.iam-name",

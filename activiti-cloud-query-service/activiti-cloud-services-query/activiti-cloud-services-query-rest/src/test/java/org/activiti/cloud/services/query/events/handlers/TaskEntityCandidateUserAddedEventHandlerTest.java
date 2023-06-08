@@ -21,8 +21,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.persistence.EntityManager;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;

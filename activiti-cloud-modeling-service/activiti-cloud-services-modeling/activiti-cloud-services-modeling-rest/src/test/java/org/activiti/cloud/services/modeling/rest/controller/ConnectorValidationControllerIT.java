@@ -22,10 +22,13 @@ import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteAr
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.connectorModel;
 import static org.activiti.cloud.services.modeling.validation.DNSNameValidator.DNS_LABEL_REGEX;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,9 +62,13 @@ public class ConnectorValidationControllerIT {
 
     private Model connectorModel;
 
+    @MockBean
+    private SecurityManager securityManager;
+
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
+        when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
     }
 
@@ -72,59 +80,71 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "simple-connector.json",
                 resourceAsByteArray("connector/connector-simple.json"),
                 "application/json"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "simple-connector.json",
                 resourceAsByteArray("connector/connector-simple.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-events.json",
                 resourceAsByteArray("connector/connector-with-events.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-simple-connector.json",
                     resourceAsByteArray("connector/invalid-simple-connector.json"),
                     "application/json"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -142,13 +162,16 @@ public class ConnectorValidationControllerIT {
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
                     resourceAsByteArray("connector/invalid-json-connector.json"),
                     "application/json"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -163,13 +186,16 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-json-connector.json",
                     resourceAsByteArray("connector/invalid-json-connector.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -184,13 +210,16 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-too-long.json",
                     resourceAsByteArray("connector/invalid-connector-name-too-long.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -205,13 +234,16 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-empty.json",
                     resourceAsByteArray("connector/invalid-connector-name-empty.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -227,13 +259,16 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-underscore.json",
                     resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
                     "text/plain"
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -246,13 +281,16 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "invalid-connector-name-with-uppercase.json",
                     resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
                     CONTENT_TYPE_JSON
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -260,35 +298,40 @@ public class ConnectorValidationControllerIT {
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
     }
 
-    @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-custom-type.json",
                 resourceAsByteArray("connector/connector-with-custom-type.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-errors.json",
                 resourceAsByteArray("connector/connector-with-errors.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 
     @Test
@@ -296,13 +339,16 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .log()
+                .everything(true)
                 .multiPart(
                     "file",
                     "connector-with-errors-invalid-property.json",
                     resourceAsByteArray("connector/connector-with-errors-invalid-property.json"),
                     CONTENT_TYPE_JSON
                 )
-                .post("/v1/models/{modelId}/validate", connectorModel.getId())
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
                 .then()
                 .expect(status().isBadRequest())
         )
@@ -313,15 +359,18 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
         given()
+            .log()
+            .everything(true)
             .multiPart(
                 "file",
                 "connector-with-event-model.json",
                 resourceAsByteArray("connector/connector-with-event-model.json"),
                 "text/plain"
             )
-            .post("/v1/models/{modelId}/validate", connectorModel.getId())
+            .contentType("multipart/form-data")
+            .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
             .then()
             .expect(status().isNoContent())
-            .body(isEmptyString());
+            .body(is(emptyString()));
     }
 }

@@ -5,19 +5,19 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>7.12.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-tracing</artifactId>
   <name>Activiti Cloud Services :: Tracing</name>
   <dependencies>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+      <groupId>io.zipkin.reporter2</groupId>
+      <artifactId>zipkin-reporter-brave</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-sleuth</artifactId>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-brave</artifactId>
     </dependency>
   </dependencies>
 </project>

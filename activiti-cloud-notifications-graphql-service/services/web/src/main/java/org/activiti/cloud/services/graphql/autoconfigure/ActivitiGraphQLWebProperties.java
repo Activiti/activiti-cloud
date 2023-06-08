@@ -15,12 +15,8 @@
  */
 package org.activiti.cloud.services.graphql.autoconfigure;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties(prefix = "spring.activiti.cloud.services.notifications.graphql")
@@ -37,16 +33,6 @@ public class ActivitiGraphQLWebProperties {
      */
     @NotBlank
     private String path = "/graphql";
-
-    @Configuration
-    @PropertySources(
-        {
-            @PropertySource(value = "classpath:META-INF/graphql.properties"),
-            @PropertySource(value = "classpath:graphql.properties", ignoreResourceNotFound = true),
-        }
-    )
-    @EnableConfigurationProperties(ActivitiGraphQLWebProperties.class)
-    public static class AutoConfiguration {}
 
     /**
      * Default constructor

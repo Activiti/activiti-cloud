@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -75,6 +74,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.CollectionUtils;
@@ -83,6 +83,7 @@ import org.springframework.util.CollectionUtils;
 @TestPropertySource("classpath:application-test.properties")
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 @Import(TestChannelBinderConfiguration.class)
+@DirtiesContext
 public class QueryTasksIT {
 
     private static final String TASKS_URL = "/v1/tasks";
@@ -2518,7 +2519,7 @@ public class QueryTasksIT {
                     .containsExactly(tuple("Task", "varAName", "varAValue"));
             });
 
-        BigInteger taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
+        Long taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
         assertThat(taskProcessVariableCount).isEqualTo(2);
 
         processVariablesMigrationHelper.deleteFromTaskProcessVariable(task.getId());

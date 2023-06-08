@@ -1,0 +1,3 @@
+org.activiti.cloud.services.modeling.rest.config.ExtendedWebMvcConfigurer
+org.activiti.cloud.services.modeling.rest.config.RepositoryRestConfig
+org.activiti.cloud.services.modeling.rest.config.RestControllerAutoConfiguration

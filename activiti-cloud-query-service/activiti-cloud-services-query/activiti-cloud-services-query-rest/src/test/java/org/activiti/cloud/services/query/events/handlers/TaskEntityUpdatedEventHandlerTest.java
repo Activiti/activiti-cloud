@@ -23,9 +23,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.UUID;
-import javax.persistence.EntityManager;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;

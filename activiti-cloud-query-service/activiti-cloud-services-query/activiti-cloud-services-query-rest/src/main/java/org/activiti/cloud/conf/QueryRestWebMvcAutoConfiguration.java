@@ -47,11 +47,11 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.cloud.services.security.TaskVariableLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 public class QueryRestWebMvcAutoConfiguration {
 
     @Bean

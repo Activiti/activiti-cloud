@@ -20,12 +20,16 @@ import graphql.schema.GraphQLSchema;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerMessageHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubProtocolHandler;
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLSubscriptionExecutor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
@@ -42,14 +46,21 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnWebApplication
 @ConditionalOnClass({ GraphQL.class, EnableWebSocketMessageBroker.class })
 @ConditionalOnProperty(name = "spring.activiti.cloud.services.query.graphql.ws.enabled", matchIfMissing = true)
+@EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
+@PropertySources(
+    {
+        @PropertySource("classpath:META-INF/graphql-ws.properties"),
+        @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true),
+    }
+)
 public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
-    @Configuration
     @EnableWebSocket
+    @Configuration
     public static class DefaultGraphQLWebSocketMessageBrokerConfiguration
         extends DelegatingWebSocketMessageBrokerConfiguration {
 

@@ -5,13 +5,17 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>7.12.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-common-security</artifactId>
   <name>Activiti Cloud Services :: Common Security</name>
   <description>Activiti Cloud Services Common Security</description>
   <dependencies>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-runtime-shared</artifactId>
@@ -45,20 +49,12 @@
       <artifactId>spring-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-client</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-dbp-rest</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>

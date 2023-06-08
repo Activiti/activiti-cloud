@@ -26,20 +26,27 @@ import org.activiti.cloud.services.messages.events.support.BpmnMessageEventMessa
 import org.activiti.cloud.services.messages.events.support.MessageEventsDispatcher;
 import org.activiti.cloud.services.messages.events.support.MessageSubscriptionEventMessageBuilderFactory;
 import org.activiti.cloud.services.messages.events.support.StartMessageDeployedEventMessageBuilderFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
+@Configuration(proxyBeanMethods = true)
 @PropertySource("classpath:config/messages-events-channels.properties")
-public class MessageEventsAutoConfiguration implements MessageEventsSource {
+@Import(MessageEventsSourceConfiguration.class)
+public class MessageEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageEventsDispatcher messageEventsDispatcher(BindingServiceProperties bindingServiceProperties) {
-        return new MessageEventsDispatcher(messageEventsOutput(), bindingServiceProperties);
+    public MessageEventsDispatcher messageEventsDispatcher(
+        BindingServiceProperties bindingServiceProperties,
+        MessageEventsSource messageEventsSource
+    ) {
+        return new MessageEventsDispatcher(messageEventsSource.messageEventsOutput(), bindingServiceProperties);
     }
 
     @Bean
