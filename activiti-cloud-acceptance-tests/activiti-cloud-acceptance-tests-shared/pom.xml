@@ -11,6 +11,11 @@
   <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
   <dependencies>
     <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
+    <dependency>
       <groupId>net.serenity-bdd</groupId>
       <artifactId>serenity-jbehave</artifactId>
     </dependency>

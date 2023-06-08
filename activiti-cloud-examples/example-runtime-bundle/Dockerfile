@@ -1,18 +1,11 @@
+FROM docker.io/library/alpine:3.18@sha256:02bb6f428431fbc2809c5d1b41eab5a68350194fb508869a33cb1af4444c9b11
 
-# FROM adoptopenjdk/openjdk11:jdk-11.0.2.7-alpine-slim
-# # Install the font required for runtime bundle BPMN diagram renderer. This will be removed later
-# RUN apk --update add fontconfig ttf-dejavu msttcorefonts-installer fontconfig && update-ms-fonts && fc-cache -f
-# ENV PORT 8080
-# EXPOSE 8080
-# COPY target/*.jar /opt/app.jar
-# WORKDIR /opt
-# ENTRYPOINT ["sh","-c", "java $JAVA_OPTS -jar app.jar"]
+RUN apk update && apk add --no-cache openjdk17-jre && rm -rf /var/cache/apk/*
 
-FROM adoptopenjdk/openjdk11:jdk-11.0.2.9-slim
-RUN  apt update
-RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
-RUN apt -y install ttf-mscorefonts-installer fontconfig
+# install missing fontconfig package
+RUN apk add --no-cache fontconfig ttf-dejavu
 RUN fc-cache -f -v
+
 ENV PORT 8080
 EXPOSE 8080
 WORKDIR /opt
