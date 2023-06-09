@@ -24,7 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.integration.jdbc.store.JdbcMessageStore;
 import org.springframework.test.context.TestPropertySource;
 
-
 @Isolated
 @TestPropertySource(properties = { "spring.sql.init.platform=h2" })
 public class JdbcMessageStoreTests extends AbstractMessagesCoreIntegrationTests {
