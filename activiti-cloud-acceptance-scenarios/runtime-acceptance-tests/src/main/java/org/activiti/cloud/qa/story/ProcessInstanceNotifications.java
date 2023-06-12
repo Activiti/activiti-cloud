@@ -196,6 +196,7 @@ public class ProcessInstanceNotifications {
     @Then("notifications: the user completes the subscription")
     public void completeSubscription() {
         assertThat(subscriptionRef.get()).isNotNull();
+
         cancelSubscription();
     }
 
