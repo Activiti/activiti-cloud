@@ -100,10 +100,6 @@ class MultipleRbJobExecutorIT {
         keycloakContainerApplicationInitializer.initialize();
         RabbitMQContainerApplicationInitializer rabbitMQContainerApplicationInitializer = new RabbitMQContainerApplicationInitializer();
         rabbitMQContainerApplicationInitializer.initialize();
-        final String datasourceUrl = String.format(
-            "spring.datasource.url=jdbc:h2:tcp://localhost:%d/mem:mydb",
-            DB_PORT
-        );
         TestPropertyValues
             .of(KeycloakContainerApplicationInitializer.getContainerProperties())
             .and(RabbitMQContainerApplicationInitializer.getContainerProperties())
