@@ -227,7 +227,7 @@ public class ProcessInstanceNotifications {
 
     private void cancelSubscription() {
         // signal to stop receiving notifications
-        stepVerifier.thenAwait(Duration.ofSeconds(3)).then(() -> subscriptionRef.get().cancel());
+        subscriptionRef.get().cancel();
     }
 
     private Consumer<Subscription> countDownLatchAction(
