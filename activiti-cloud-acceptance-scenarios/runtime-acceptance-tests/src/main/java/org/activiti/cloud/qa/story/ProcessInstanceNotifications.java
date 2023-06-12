@@ -196,7 +196,6 @@ public class ProcessInstanceNotifications {
     @Then("notifications: the user completes the subscription")
     public void completeSubscription() {
         assertThat(subscriptionRef.get()).isNotNull();
-
         cancelSubscription();
     }
 
@@ -228,7 +227,7 @@ public class ProcessInstanceNotifications {
 
     private void cancelSubscription() {
         // signal to stop receiving notifications
-        subscriptionRef.get().cancel();
+        stepVerifier.thenAwait(Duration.ofSeconds(3)).then(() -> subscriptionRef.get().cancel());
     }
 
     private Consumer<Subscription> countDownLatchAction(

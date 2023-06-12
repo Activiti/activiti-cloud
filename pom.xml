@@ -224,7 +224,7 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
     <!-- Tests Config -->
-    <unitTests.parallel>true</unitTests.parallel>
+    <unitTests.parallel>false</unitTests.parallel>
     <unitTests.dynamicFactor>1</unitTests.dynamicFactor>
   </properties>
   <repositories>
@@ -469,7 +469,6 @@ limitations under the License.]]>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <useSystemClassLoader>false</useSystemClassLoader>
           <properties>
             <configurationParameters>
               junit.jupiter.execution.parallel.enabled=${unitTests.parallel}
