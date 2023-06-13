@@ -16,17 +16,12 @@
 package org.activiti.cloud.services.modeling.service;
 
 import static java.util.Arrays.asList;
+import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsStream;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,8 +39,10 @@ import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
+import org.activiti.cloud.services.common.zip.ZipStream;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
+import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.junit.jupiter.api.Test;
@@ -53,6 +50,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceImplTest {
@@ -283,5 +283,26 @@ public class ProjectServiceImplTest {
         when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
         Optional<Project> foundProjectOptional = projectService.findProjectById("projectId", null);
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
+    }
+
+    @Test
+    public void should_resetModelVersion_when_importingProject() throws IOException {
+        InputStream file = resourceAsStream("project/aae-9137.zip").get();
+        Project proj = new ProjectImpl();
+        when(projectRepository.createProject(eq(proj))).thenReturn(proj);
+        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(proj));
+        ProcessModelType processModelType = new ProcessModelType();
+        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
+        when(modelService.contentFilenameToModelName("process1.bpmn20.xml", processModelType))
+            .thenReturn(Optional.of("process1"));
+
+        Model model = new ModelImpl();
+
+        when(modelService.importModel(eq(proj), eq(processModelType), any())).thenReturn(model);
+        when(modelService.resetVersion(eq(model))).thenReturn(model);
+
+        projectService.importProject(file, "new-project-name");
+
+        verify(modelService).resetVersion(eq(model));
     }
 }
