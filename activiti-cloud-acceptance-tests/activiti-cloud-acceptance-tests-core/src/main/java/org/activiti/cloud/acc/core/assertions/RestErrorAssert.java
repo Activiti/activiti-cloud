@@ -54,6 +54,10 @@ public class RestErrorAssert {
         return assertThatFeignExceptionIsThrownBy(throwingCallable).withInternalServerErrorCode();
     }
 
+    public static RestErrorAssert assertThatRestConflictIsThrownBy(final ThrowingCallable throwingCallable) {
+        return assertThatFeignExceptionIsThrownBy(throwingCallable).withConflictCode();
+    }
+
     public RestErrorAssert withErrorCode(int expectedCode) {
         assertThat(exception.status()).isEqualTo(expectedCode);
         return this;
@@ -79,5 +83,9 @@ public class RestErrorAssert {
 
     public RestErrorAssert withInternalServerErrorCode() {
         return withErrorCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    public RestErrorAssert withConflictCode() {
+        return withErrorCode(HttpServletResponse.SC_CONFLICT);
     }
 }
