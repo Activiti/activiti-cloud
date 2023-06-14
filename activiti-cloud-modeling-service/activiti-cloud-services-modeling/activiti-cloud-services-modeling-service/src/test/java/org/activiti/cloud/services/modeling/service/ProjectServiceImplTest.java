@@ -281,14 +281,16 @@ public class ProjectServiceImplTest {
 
     @Test
     public void should_resetModelVersion_when_importingProject() throws IOException {
-        InputStream file = resourceAsStream("project/aae-9137.zip").get();
+        InputStream file = resourceAsStream("project/project-xy.zip").get();
         Project proj = new ProjectImpl();
         when(projectRepository.createProject(eq(proj))).thenReturn(proj);
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(proj));
         ProcessModelType processModelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
-        when(modelService.contentFilenameToModelName("process1.bpmn20.xml", processModelType))
-            .thenReturn(Optional.of("process1"));
+        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType))
+            .thenReturn(Optional.of("process-x"));
+        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
+            .thenReturn(Optional.of("process-y"));
 
         Model model = new ModelImpl();
 
