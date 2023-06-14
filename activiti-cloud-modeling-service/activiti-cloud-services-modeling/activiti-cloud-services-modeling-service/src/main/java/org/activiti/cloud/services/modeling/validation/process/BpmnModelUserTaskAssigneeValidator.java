@@ -63,7 +63,7 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnCommonModelValida
                         userTask.getAssignee().equalsIgnoreCase("$initiator") ||
                         userTask.getAssignee().equalsIgnoreCase("${initiator}")
                     )
-                )  &&
+                ) &&
                 CollectionUtils.isEmpty(userTask.getCandidateUsers()) &&
                 CollectionUtils.isEmpty(userTask.getCandidateGroups())
             )
