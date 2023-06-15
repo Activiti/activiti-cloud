@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.*;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestConflictIsThrownBy;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
