@@ -209,7 +209,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     public void checkCurrentModelValidation() throws IOException {
         assertThat(validateCurrentModel())
             .extracting(Response::status)
-            .contains(HttpStatus.SC_NO_CONTENT, HttpStatus.SC_BAD_REQUEST);
+            .contains(HttpStatus.SC_NO_CONTENT, SC_BAD_REQUEST);
     }
 
     @Step
