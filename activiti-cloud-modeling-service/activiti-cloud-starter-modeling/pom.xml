@@ -167,7 +167,7 @@
       <id>generate-swagger</id>
       <activation>
         <property>
-          <name>!skipSwaggerGen</name>
+          <name>!swagger.skip</name>
         </property>
       </activation>
       <build>
