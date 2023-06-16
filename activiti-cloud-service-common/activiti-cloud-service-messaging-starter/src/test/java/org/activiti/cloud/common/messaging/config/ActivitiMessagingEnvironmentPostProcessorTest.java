@@ -53,7 +53,7 @@ public class ActivitiMessagingEnvironmentPostProcessorTest {
     }
 
     @Test
-    public void should_setDefaultBinderToKafkaAndDisableRabbitHelfCheck_when_brokerIsKafka() {
+    public void should_setDefaultBinderToKafkaAndDisableRabbitHealthCheck_when_brokerIsKafka() {
         //given
         final MutablePropertySources propertySources = mock(MutablePropertySources.class);
         final ConfigurableEnvironment environment = buildEnvironment(MessagingBroker.kafka, propertySources);
@@ -65,6 +65,23 @@ public class ActivitiMessagingEnvironmentPostProcessorTest {
         //then
         verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), captor.capture());
         assertThat(captor.getValue().getProperty(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY)).isEqualTo("kafka");
+
+        assertThat(captor.getValue().getProperty(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY)).isEqualTo(false);
+    }
+
+    @Test
+    public void should_setDefaultBinderToAwsAndDisableRabbitHealthCheck_when_brokerIsAws() {
+        //given
+        final MutablePropertySources propertySources = mock(MutablePropertySources.class);
+        final ConfigurableEnvironment environment = buildEnvironment(MessagingBroker.aws, propertySources);
+        final ArgumentCaptor<MapPropertySource> captor = ArgumentCaptor.forClass(MapPropertySource.class);
+
+        //when
+        processor.postProcessEnvironment(environment, mock(SpringApplication.class));
+
+        //then
+        verify(propertySources).addAfter(eq(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), captor.capture());
+        assertThat(captor.getValue().getProperty(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY)).isEqualTo("aws");
 
         assertThat(captor.getValue().getProperty(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY)).isEqualTo(false);
     }

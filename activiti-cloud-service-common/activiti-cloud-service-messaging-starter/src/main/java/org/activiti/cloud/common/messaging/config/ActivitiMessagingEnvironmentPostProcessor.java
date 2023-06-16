@@ -50,20 +50,16 @@ public class ActivitiMessagingEnvironmentPostProcessor implements EnvironmentPos
 
     private Map<String, Object> resolvePropertiesToSet(MessagingBroker messagingBroker) {
         Map<String, Object> extraProperties = new HashMap<>();
-        if (MessagingBroker.kafka.equals(messagingBroker)) {
-            extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, false);
-        }
+        extraProperties.put(MANAGEMENT_HEALTH_RABBIT_ENABLED_KEY, MessagingBroker.rabbitmq.equals(messagingBroker));
         extraProperties.put(SPRING_CLOUD_STREAM_DEFAULT_BINDER_KEY, resolveDefaultBinder(messagingBroker));
         return extraProperties;
     }
 
     private String resolveDefaultBinder(MessagingBroker messagingBroker) {
-        switch (messagingBroker) {
-            case kafka:
-                return "kafka";
-            case rabbitmq:
-            default:
-                return "rabbit";
-        }
+        return switch (messagingBroker) {
+            case kafka -> "kafka";
+            case aws -> "aws";
+            default -> "rabbit";
+        };
     }
 }

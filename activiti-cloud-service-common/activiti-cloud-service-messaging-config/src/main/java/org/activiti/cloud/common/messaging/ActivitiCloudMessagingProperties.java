@@ -35,6 +35,7 @@ public class ActivitiCloudMessagingProperties {
     public enum MessagingBroker {
         rabbitmq,
         kafka,
+        aws,
     }
 
     /**
