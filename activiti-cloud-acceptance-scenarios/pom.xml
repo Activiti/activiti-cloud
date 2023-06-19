@@ -19,8 +19,7 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
-    <noAcceptanceTests>false</noAcceptanceTests>
-    <skipTests>${noAcceptanceTests}</skipTests>
+    <skipTests>${skipAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>
     <java.version>17</java.version>
@@ -47,42 +46,58 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-          <skipTests>${skipTests}</skipTests>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
-            <include>**/*TestSuite.java</include>
-          </includes>
-          <forkCount>0</forkCount>
-          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>net.serenity-bdd.maven.plugins</groupId>
-        <artifactId>serenity-maven-plugin</artifactId>
-        <version>${serenity-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>post-integration-test</phase>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>acceptance-tests</id>
+      <activation>
+        <property>
+          <name>skipAcceptanceTests</name>
+          <value>!true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+              <skipTests>${skipTests}</skipTests>
+              <properties>
+                <configurationParameters>
+                  junit.jupiter.execution.parallel.enabled=false
+                </configurationParameters>
+              </properties>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/*Test.java</include>
+                <include>**/*Tests.java</include>
+                <include>**/*TestSuite.java</include>
+              </includes>
+              <forkCount>0</forkCount>
+              <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>net.serenity-bdd.maven.plugins</groupId>
+            <artifactId>serenity-maven-plugin</artifactId>
+            <version>${serenity-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
