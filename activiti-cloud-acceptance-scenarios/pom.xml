@@ -19,7 +19,7 @@
     <module>identity-adapter-acceptance-tests</module>
   </modules>
   <properties>
-    <skipTests>${noAcceptanceTests}</skipTests>
+    <skipTests>${skipAcceptanceTests}</skipTests>
     <maven.deploy.skip>true</maven.deploy.skip>
     <java.release>${java.version}</java.release>
     <java.version>17</java.version>
@@ -51,7 +51,7 @@
       <id>acceptance-tests</id>
       <activation>
         <property>
-          <name>noAcceptanceTests</name>
+          <name>skipAcceptanceTests</name>
           <value>!true</value>
         </property>
       </activation>
