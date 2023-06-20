@@ -87,9 +87,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Remove running docker containers
-        run: |
-          docker ps -a
-          docker rm -f $(docker ps -a -q)
+        run: docker rm -f $(docker ps -a -q)
 
       - name: Echo Longest Tests run
         shell: bash
