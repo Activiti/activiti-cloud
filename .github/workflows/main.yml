@@ -73,6 +73,9 @@ jobs:
           echo ${{ steps.update-pom-to-next-version.outputs.next-prerelease }} > VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Enable testcontainers reuse option
+        run: echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
+
       - name: Maven Build and Test
         shell: bash
         run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
@@ -80,6 +83,9 @@ jobs:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Remove running docker containers
+        run: docker rm -f $(docker ps -a -q)
 
       - name: Echo Longest Tests run
         shell: bash

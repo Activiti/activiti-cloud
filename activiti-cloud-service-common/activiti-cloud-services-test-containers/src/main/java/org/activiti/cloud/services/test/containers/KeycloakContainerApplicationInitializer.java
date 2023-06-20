@@ -34,11 +34,14 @@ public class KeycloakContainerApplicationInitializer
 
     @Override
     public void initialize(ConfigurableApplicationContext context) {
+        initialize();
+        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
+    }
+
+    public void initialize() {
         if (!keycloakContainer.isRunning()) {
             keycloakContainer.start();
         }
-
-        TestPropertyValues.of(getContainerProperties()).applyTo(context.getEnvironment());
     }
 
     public static KeycloakContainer getContainer() {
