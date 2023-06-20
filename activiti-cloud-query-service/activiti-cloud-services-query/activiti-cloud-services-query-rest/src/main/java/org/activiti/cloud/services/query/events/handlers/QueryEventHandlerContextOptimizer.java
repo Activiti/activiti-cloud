@@ -63,7 +63,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskSuspendedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.hibernate.jpa.QueryHints;
+import org.hibernate.jpa.AvailableHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +141,7 @@ public class QueryEventHandlerContextOptimizer {
                         entityManager.find(
                             ProcessInstanceEntity.class,
                             processInstanceId,
-                            Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+                            Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
                         )
                     )
                     .ifPresent(rootProcessInstance -> {
