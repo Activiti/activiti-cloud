@@ -88,7 +88,7 @@ jobs:
 
       - name: Remove running docker containers
         run: |
-          docker ps
+          docker ps -a
           docker rm -f $(docker ps -a -q)
 
       - name: Echo Longest Tests run
