@@ -533,6 +533,14 @@ public class ModelServiceImplTest {
     }
 
     @Test
+    public void should_resetVersion() {
+        when(modelRepository.resetVersion(eq(modelTwo))).thenReturn(modelTwo);
+        modelService.resetVersion(modelTwo);
+
+        verify(modelRepository).resetVersion(eq(modelTwo));
+    }
+
+    @Test
     public void should_getEmptyList_when_searchingWithEmptyString() {
         Page<Model> models = modelService.getModelsByName(projectOne, "", PageRequest.of(0, 50));
 

@@ -112,6 +112,12 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
         return modelJpaRepository.save(modelToBeUpdated);
     }
 
+    public ModelEntity resetVersion(ModelEntity model) {
+        model.getVersions().remove(model.getVersions().size() - 1);
+        model.setLatestVersion(model.getVersions().get(0));
+        return modelJpaRepository.save(model);
+    }
+
     @Override
     public ModelEntity copyModel(ModelEntity model, ProjectEntity project) {
         ModelEntity modelEntityClone = new ModelEntity(model.getName(), model.getType());

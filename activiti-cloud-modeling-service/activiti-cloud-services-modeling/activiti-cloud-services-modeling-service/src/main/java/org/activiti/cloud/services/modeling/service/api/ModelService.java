@@ -76,6 +76,8 @@ public interface ModelService {
 
     Model importModel(Project project, ModelType modelType, FileContent fileContent);
 
+    Model resetVersion(Model model);
+
     Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent);
 
     <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz);
