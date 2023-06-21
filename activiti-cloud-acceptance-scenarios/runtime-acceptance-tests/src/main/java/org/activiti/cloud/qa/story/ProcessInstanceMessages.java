@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.qa.story;
 
-import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestInternalServerErrorIsThrownBy;
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestConflictIsThrownBy;
 import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -127,7 +127,7 @@ public class ProcessInstanceMessages {
 
         StartMessagePayload payload = MessagePayloadBuilder.start(messageName).withBusinessKey(variableValue).build();
 
-        assertThatRestInternalServerErrorIsThrownBy(() -> processRuntimeBundleSteps.message(payload))
+        assertThatRestConflictIsThrownBy(() -> processRuntimeBundleSteps.message(payload))
             .withMessageContaining(
                 "Duplicate message subscription 'boundaryMessage' with correlation key '" + variableValue + "'"
             );

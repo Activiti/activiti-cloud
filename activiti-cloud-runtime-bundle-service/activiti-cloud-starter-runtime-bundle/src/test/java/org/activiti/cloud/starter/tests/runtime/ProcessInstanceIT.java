@@ -209,7 +209,7 @@ public class ProcessInstanceIT {
         );
         assertThat(failEntity.getBody().getMessage())
             .isEqualTo("Process instance " + startedProcessInstance.getId() + " has already been started");
-        assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(failEntity.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test

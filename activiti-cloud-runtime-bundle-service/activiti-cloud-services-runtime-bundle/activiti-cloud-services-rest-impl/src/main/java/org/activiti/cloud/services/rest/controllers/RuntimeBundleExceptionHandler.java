@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.rest.controllers;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -30,6 +31,7 @@ import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.UnprocessableEntityException;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.engine.ActivitiException;
+import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.springframework.hateoas.EntityModel;
@@ -92,5 +94,15 @@ public class RuntimeBundleExceptionHandler {
     public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(ActivitiIllegalArgumentException.class)
+    @ResponseStatus(CONFLICT)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        ActivitiIllegalArgumentException ex,
+        HttpServletResponse response
+    ) {
+        response.setContentType(APPLICATION_JSON_VALUE);
+        return EntityModel.of(new ActivitiErrorMessageImpl(CONFLICT.value(), ex.getMessage()));
     }
 }
