@@ -57,13 +57,7 @@ public class BpmnModelUserTaskAssigneeValidator implements BpmnCommonModelValida
     private Optional<ModelValidationError> validateTaskAssignedUser(UserTask userTask) {
         if (
             !(
-                (
-                    isEmpty(userTask.getAssignee()) ||
-                    (
-                        userTask.getAssignee().equalsIgnoreCase("$initiator") ||
-                        userTask.getAssignee().equalsIgnoreCase("${initiator}")
-                    )
-                ) &&
+                isEmpty(userTask.getAssignee()) &&
                 CollectionUtils.isEmpty(userTask.getCandidateUsers()) &&
                 CollectionUtils.isEmpty(userTask.getCandidateGroups())
             )

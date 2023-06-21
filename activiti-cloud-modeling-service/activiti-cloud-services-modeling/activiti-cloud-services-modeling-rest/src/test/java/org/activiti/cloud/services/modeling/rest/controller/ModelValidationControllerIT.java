@@ -114,7 +114,7 @@ public class ModelValidationControllerIT {
 
         mockMvc
             .perform(multipart("/v1/models/{model_id}/validate", processModel.getId()).file(file))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNoContent());
     }
 
     @Test
