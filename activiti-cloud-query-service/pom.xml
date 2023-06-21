@@ -18,7 +18,7 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
   <properties>
-    <activiti.version>0.0.1-PR-4353-1319-SNAPSHOT</activiti.version>
+    <activiti.version>8.0.0-alpha.3</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
