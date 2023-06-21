@@ -12,10 +12,10 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2022.0.2</spring-cloud.version>
+    <spring-cloud.version>2022.0.3</spring-cloud.version>
     <testcontainers.version>1.18.0</testcontainers.version>
     <h2.version>1.4.200</h2.version>
-    <graphql-java.version>19.4</graphql-java.version>
+    <graphql-java.version>20.2</graphql-java.version>
     <postgresql.version>42.5.1</postgresql.version>
     <liquibase.version>4.20.0</liquibase.version>
   </properties>

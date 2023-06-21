@@ -34,6 +34,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 
 /**
  * Model model entity
@@ -87,6 +89,7 @@ public class ModelEntity
     private String category;
 
     @Enumerated(EnumType.ORDINAL)
+    @JdbcTypeCode(Types.INTEGER)
     private ModelScope scope = ModelScope.PROJECT;
 
     public ModelEntity() {} // for JPA

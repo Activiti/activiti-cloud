@@ -61,7 +61,7 @@ class AuthorizationConfigurerTest {
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.requestMatchers(any(String.class))).thenReturn(authorizedUrl);
+        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
