@@ -88,6 +88,7 @@ jobs:
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
+        continue-on-error: true
 
       - name: Echo Longest Tests run
         shell: bash
