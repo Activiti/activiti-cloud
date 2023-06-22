@@ -16,11 +16,9 @@
 package org.activiti.cloud.qa.story.step;
 
 import java.util.List;
-import java.util.stream.Stream;
 import net.serenitybdd.core.Serenity;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.qa.story.client.IdentityManagementClient;
 import org.activiti.cloud.qa.story.configuration.EnableIdentityManagementContext;
 import org.assertj.core.api.Assertions;
@@ -35,27 +33,6 @@ public class IdentityManagementSteps {
 
     @Autowired
     private IdentityManagementClient identityManagementClient;
-
-    public void getRoles() {
-        UserRoles userRoles = identityManagementClient.getUserRoles();
-        Serenity.setSessionVariable(ROLES).to(userRoles);
-    }
-
-    public void containsGlobalAccessRole(String role) {
-        UserRoles roles = Serenity.sessionVariableCalled(ROLES);
-        Assertions.assertThat(roles.getGlobalAccess().getRoles()).contains(role);
-    }
-
-    public void containsApplicationAccessRole(String applicationName, String role) {
-        UserRoles roles = Serenity.sessionVariableCalled(ROLES);
-        Stream<String> applicationRoles = roles
-            .getApplicationAccess()
-            .stream()
-            .filter(a -> a.getName().equals(applicationName))
-            .flatMap(ar -> ar.getRoles().stream());
-        Assertions.assertThat(applicationRoles).contains(role);
-    }
-
     public void searchUsers(String searchKey) {
         List<User> result = identityManagementClient.searchUsers(searchKey, null, null, null);
         Serenity.setSessionVariable(USERS).to(result);
