@@ -33,6 +33,7 @@ public class IdentityManagementSteps {
 
     @Autowired
     private IdentityManagementClient identityManagementClient;
+
     public void searchUsers(String searchKey) {
         List<User> result = identityManagementClient.searchUsers(searchKey, null, null, null);
         Serenity.setSessionVariable(USERS).to(result);
