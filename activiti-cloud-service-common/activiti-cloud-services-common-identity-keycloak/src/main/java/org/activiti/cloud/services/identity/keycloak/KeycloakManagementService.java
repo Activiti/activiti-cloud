@@ -40,16 +40,13 @@ import org.activiti.cloud.identity.model.Role;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakGroupToGroup;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingToRole;
-import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakTokenToUserRoles;
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -207,11 +204,6 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
             currentRoles != null &&
             currentRoles.stream().map(Role::getName).collect(Collectors.toSet()).containsAll(filterRoles)
         );
-    }
-
-    @Override
-    public UserRoles getUserRoles(Jwt principal) {
-        return KeycloakTokenToUserRoles.toUserRoles(principal);
     }
 
     @Override
