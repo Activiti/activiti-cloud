@@ -30,7 +30,8 @@ public class ServiceTaskRepresentationModelAssembler
 
     @Override
     public EntityModel<CloudServiceTask> toModel(ServiceTaskEntity entity) {
-        Link selfRel = linkTo(methodOn(ServiceTaskAdminController.class).findById(entity.getId())).withSelfRel();
+        Link selfRel = linkTo(methodOn(ServiceTaskAdminController.class).findByIdServiceTaskAdmin(entity.getId()))
+            .withSelfRel();
 
         return EntityModel.of(entity, selfRel);
     }

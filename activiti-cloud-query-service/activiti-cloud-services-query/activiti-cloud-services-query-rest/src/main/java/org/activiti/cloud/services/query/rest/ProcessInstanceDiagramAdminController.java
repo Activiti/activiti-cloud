@@ -53,7 +53,7 @@ public class ProcessInstanceDiagramAdminController extends ProcessInstanceDiagra
 
     @GetMapping(produces = IMAGE_SVG_XML)
     @ResponseBody
-    public String getProcessDiagram(@PathVariable String processInstanceId) {
+    public String getProcessDiagramAdmin(@PathVariable String processInstanceId) {
         return generateDiagram(processInstanceId);
     }
 }

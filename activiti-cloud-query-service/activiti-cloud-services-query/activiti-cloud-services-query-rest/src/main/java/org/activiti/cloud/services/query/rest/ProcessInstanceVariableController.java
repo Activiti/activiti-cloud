@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -67,7 +68,7 @@ public class ProcessInstanceVariableController {
     }
 
     @RequestMapping(value = "/variables", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesProcess(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessVariableEntity.class

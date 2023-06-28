@@ -36,6 +36,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -61,10 +62,12 @@ public class ApplicationAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudApplication>> findAll(
-        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
-            root = ApplicationEntity.class
-        ) Predicate predicate,
+    public PagedModel<EntityModel<CloudApplication>> findAllApplicationAdmin(
+        @Parameter(
+            description = PREDICATE_DESC,
+            example = PREDICATE_EXAMPLE
+        ) @RequestParam //            (root = ApplicationEntity.class)
+        Predicate predicate,
         Pageable pageable
     ) {
         predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);

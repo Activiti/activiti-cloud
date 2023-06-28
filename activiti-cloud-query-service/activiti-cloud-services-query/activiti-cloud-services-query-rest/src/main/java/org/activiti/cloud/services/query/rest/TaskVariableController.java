@@ -40,11 +40,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-    value = "/v1/tasks/{taskId}/variables",
+    value = "/v1/tasks/{td}/variables",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public class TaskVariableController {
@@ -67,8 +68,8 @@ public class TaskVariableController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(
-        @PathVariable String taskId,
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesTask(
+        @PathVariable String td,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskVariableEntity.class
         ) Predicate predicate,
@@ -78,7 +79,7 @@ public class TaskVariableController {
 
         QTaskVariableEntity variable = QTaskVariableEntity.taskVariableEntity;
 
-        BooleanExpression expression = variable.taskId.eq(taskId);
+        BooleanExpression expression = variable.taskId.eq(td);
 
         if (predicate != null) {
             expression = expression.and(predicate);

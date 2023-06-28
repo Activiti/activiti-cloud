@@ -61,7 +61,10 @@ public class ProcessInstanceTasksAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<QueryCloudTask>> getTasks(@PathVariable String processInstanceId, Pageable pageable) {
+    public PagedModel<EntityModel<QueryCloudTask>> getTasksAdmin(
+        @PathVariable String processInstanceId,
+        Pageable pageable
+    ) {
         Page<TaskEntity> page = taskRepository.findAll(
             QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId),
             pageable

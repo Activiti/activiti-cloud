@@ -64,7 +64,7 @@ public class ProcessInstanceServiceTasksAdminController {
     }
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudServiceTask>> getTasks(
+    public PagedModel<EntityModel<CloudServiceTask>> getServiceTasks(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ServiceTaskEntity.class

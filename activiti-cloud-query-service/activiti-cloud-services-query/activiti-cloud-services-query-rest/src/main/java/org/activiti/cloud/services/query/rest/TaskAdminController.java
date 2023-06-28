@@ -81,10 +81,10 @@ public class TaskAdminController {
         this.taskControllerHelper = taskControllerHelper;
     }
 
-    @Operation(summary = "Find tasks")
+    @Operation(summary = "Find tasks Admin", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAll(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllServiceTaskAdmin(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -107,10 +107,10 @@ public class TaskAdminController {
         );
     }
 
-    @Operation(summary = "Find tasks")
+    @Operation(summary = "Find tasks with Process Variables Admin")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariablesAdmin(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -140,7 +140,7 @@ public class TaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(
+    public MappingJacksonValue findAllFromBodyTaskAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskEntity.class
         ) Predicate predicate,
@@ -173,7 +173,7 @@ public class TaskAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
+    public EntityModel<QueryCloudTask> findByIdTaskAdmin(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,
@@ -184,7 +184,7 @@ public class TaskAdminController {
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
-    public List<String> getTaskCandidateUsers(@PathVariable String taskId) {
+    public List<String> getTaskCandidateUsersAdmin(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,
@@ -201,7 +201,7 @@ public class TaskAdminController {
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
-    public List<String> getTaskCandidateGroups(@PathVariable String taskId) {
+    public List<String> getTaskCandidateGroupsAdmin(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,

@@ -72,10 +72,10 @@ public class ProcessInstanceAdminController {
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
-    @Operation(summary = "Find process instances")
+    @Operation(summary = "Find process instances", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllProcessInstanceAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
@@ -91,7 +91,7 @@ public class ProcessInstanceAdminController {
     @Operation(summary = "Find process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariablesAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
@@ -110,7 +110,7 @@ public class ProcessInstanceAdminController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(
+    public MappingJacksonValue findAllFromBodyProcessAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
@@ -142,7 +142,7 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
+    public EntityModel<CloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(
             processInstanceAdminService.findById(processInstanceId)
         );

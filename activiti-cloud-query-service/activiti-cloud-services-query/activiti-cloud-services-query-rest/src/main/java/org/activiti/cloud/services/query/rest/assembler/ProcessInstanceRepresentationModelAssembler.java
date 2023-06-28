@@ -32,11 +32,11 @@ public class ProcessInstanceRepresentationModelAssembler
 
     @Override
     public EntityModel<CloudProcessInstance> toModel(ProcessInstanceEntity entity) {
-        Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findById(entity.getId())).withSelfRel();
+        Link selfRel = linkTo(methodOn(ProcessInstanceController.class).findByIdProcess(entity.getId())).withSelfRel();
         Link tasksRel = linkTo(methodOn(ProcessInstanceTasksController.class).getTasks(entity.getId(), null))
             .withRel("tasks");
         Link variablesRel = linkTo(
-            methodOn(ProcessInstanceVariableController.class).getVariables(entity.getId(), null, null)
+            methodOn(ProcessInstanceVariableController.class).getVariablesProcess(entity.getId(), null, null)
         )
             .withRel("variables");
         return EntityModel.of(entity, selfRel, tasksRel, variablesRel);

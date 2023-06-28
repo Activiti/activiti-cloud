@@ -36,6 +36,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,7 +64,7 @@ public class ProcessDefinitionAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAllProcessAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessDefinitionEntity.class
         ) Predicate predicate,

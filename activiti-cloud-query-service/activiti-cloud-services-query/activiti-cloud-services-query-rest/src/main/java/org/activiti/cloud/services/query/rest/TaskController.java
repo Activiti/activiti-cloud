@@ -96,10 +96,10 @@ public class TaskController {
         this.taskPermissionsHelper = taskPermissionsHelper;
     }
 
-    @Operation(summary = "Find tasks")
+    @Operation(summary = "Find tasks", hidden=true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAll(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllTasks(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -138,9 +138,8 @@ public class TaskController {
             name = "standalone",
             defaultValue = "false"
         ) Boolean standalone,
-        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
-            root = TaskEntity.class
-        ) Predicate predicate,
+        //        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
+        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
         @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
             value = "variableKeys",
             required = false,
@@ -164,7 +163,7 @@ public class TaskController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
+    public EntityModel<QueryCloudTask> findByIdTask(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,
