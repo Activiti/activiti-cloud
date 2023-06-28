@@ -96,7 +96,7 @@ public class TaskController {
         this.taskPermissionsHelper = taskPermissionsHelper;
     }
 
-    @Operation(summary = "Find tasks", hidden=true)
+    @Operation(summary = "Find tasks", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
     public PagedModel<EntityModel<QueryCloudTask>> findAllTasks(
@@ -138,7 +138,6 @@ public class TaskController {
             name = "standalone",
             defaultValue = "false"
         ) Boolean standalone,
-        //        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE)
         @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
         @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
             value = "variableKeys",
