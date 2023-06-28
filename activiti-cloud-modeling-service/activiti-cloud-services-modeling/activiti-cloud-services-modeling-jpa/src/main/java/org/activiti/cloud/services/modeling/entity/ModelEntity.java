@@ -46,6 +46,8 @@ import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * Model model entity
@@ -73,10 +75,11 @@ public class ModelEntity
     private Set<ProjectEntity> projects = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "versionedEntity")
     private List<ModelVersionEntity> versions = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private ModelVersionEntity latestVersion = new ModelVersionEntity();
 
