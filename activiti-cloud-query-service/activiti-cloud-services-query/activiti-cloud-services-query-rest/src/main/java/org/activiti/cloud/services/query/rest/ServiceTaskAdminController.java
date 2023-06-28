@@ -66,7 +66,7 @@ public class ServiceTaskAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudServiceTask>> findAll(
+    public PagedModel<EntityModel<CloudServiceTask>> findAllServiceTasks(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ServiceTaskEntity.class
         ) Predicate predicate,
@@ -80,7 +80,7 @@ public class ServiceTaskAdminController {
     }
 
     @RequestMapping(value = "/{serviceTaskId}", method = RequestMethod.GET)
-    public EntityModel<CloudServiceTask> findById(@PathVariable String serviceTaskId) {
+    public EntityModel<CloudServiceTask> findByIdServiceTaskAdmin(@PathVariable String serviceTaskId) {
         Predicate filter = QServiceTaskEntity.serviceTaskEntity.id.eq(serviceTaskId);
 
         ServiceTaskEntity entity = entityFinder.findOne(

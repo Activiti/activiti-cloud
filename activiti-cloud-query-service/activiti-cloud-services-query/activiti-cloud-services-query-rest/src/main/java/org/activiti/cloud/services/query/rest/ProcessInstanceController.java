@@ -67,10 +67,10 @@ public class ProcessInstanceController {
         this.processInstanceService = processInstanceService;
     }
 
-    @Operation(summary = "Find process instances")
+    @Operation(summary = "Find process instances", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllProcessInstances(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
@@ -106,7 +106,7 @@ public class ProcessInstanceController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
+    public EntityModel<CloudProcessInstance> findByIdProcess(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(processInstanceService.findById(processInstanceId));
     }
 

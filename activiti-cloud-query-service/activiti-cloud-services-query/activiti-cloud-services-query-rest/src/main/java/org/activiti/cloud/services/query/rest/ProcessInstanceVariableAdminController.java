@@ -66,7 +66,7 @@ public class ProcessInstanceVariableAdminController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesProcessAdmin(
         @PathVariable String processInstanceId,
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessVariableEntity.class

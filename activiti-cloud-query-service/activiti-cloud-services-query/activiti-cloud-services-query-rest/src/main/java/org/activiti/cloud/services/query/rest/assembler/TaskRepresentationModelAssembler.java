@@ -30,7 +30,7 @@ public class TaskRepresentationModelAssembler
 
     @Override
     public EntityModel<QueryCloudTask> toModel(TaskEntity entity) {
-        Link selfRel = linkTo(methodOn(TaskController.class).findById(entity.getId())).withSelfRel();
+        Link selfRel = linkTo(methodOn(TaskController.class).findByIdTask(entity.getId())).withSelfRel();
         return EntityModel.of(entity, selfRel);
     }
 }

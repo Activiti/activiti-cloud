@@ -63,7 +63,7 @@ public class ProcessDefinitionAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAllProcessAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessDefinitionEntity.class
         ) Predicate predicate,

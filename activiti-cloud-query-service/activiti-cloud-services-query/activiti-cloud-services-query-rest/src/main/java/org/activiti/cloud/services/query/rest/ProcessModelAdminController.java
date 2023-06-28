@@ -42,7 +42,7 @@ public class ProcessModelAdminController {
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody
-    public String getProcessModel(@PathVariable("processDefinitionId") String processDefinitionId) {
+    public String getProcessModelAdmin(@PathVariable("processDefinitionId") String processDefinitionId) {
         return entityFinder
             .findById(
                 processModelRepository,

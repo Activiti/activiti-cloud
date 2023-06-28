@@ -61,7 +61,7 @@ public class ApplicationAdminController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudApplication>> findAll(
+    public PagedModel<EntityModel<CloudApplication>> findAllApplicationAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ApplicationEntity.class
         ) Predicate predicate,
