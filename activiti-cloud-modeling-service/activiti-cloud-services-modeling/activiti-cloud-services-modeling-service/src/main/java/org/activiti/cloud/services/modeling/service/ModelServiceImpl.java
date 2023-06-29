@@ -406,11 +406,6 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Model resetVersion(Model model) {
-        return modelRepository.resetVersion(model);
-    }
-
-    @Override
     public Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = null;

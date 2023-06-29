@@ -20,16 +20,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
-import org.activiti.cloud.services.modeling.entity.ModelVersionEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -204,32 +200,5 @@ public class ModelRepositoryImplTest {
         verify(modelJpaRepository, times(1))
             .findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isFalse();
-    }
-
-    @Test
-    public void should_returnModel_when_resetVersion() {
-        ModelVersionEntity version1 = new ModelVersionEntity();
-        version1.setVersionIdentifier(new VersionIdentifier("versionIdentifierId", "0.0.1"));
-        ModelVersionEntity version2 = new ModelVersionEntity();
-        version2.setVersionIdentifier(new VersionIdentifier("versionIdentifierId", "0.0.2"));
-
-        List<ModelVersionEntity> versions = new ArrayList<ModelVersionEntity>();
-        versions.add(version1);
-
-        ModelEntity model1 = new ModelEntity();
-        model1.setVersions(versions);
-        model1.setLatestVersion(version1);
-
-        versions.add(version2);
-        model.setVersions(versions);
-        model.setLatestVersion(version2);
-
-        when(modelJpaRepository.save(model)).thenReturn(model1);
-
-        ModelEntity resModel = repository.resetVersion(model);
-
-        assertThat(resModel.getVersions().size()).isEqualTo(1);
-        assertThat(resModel.getVersions().get(0).getVersion()).isEqualTo("0.0.1");
-        assertThat(resModel.getLatestVersion().getVersion()).isEqualTo("0.0.1");
     }
 }

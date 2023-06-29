@@ -386,7 +386,6 @@ public class ProjectServiceImpl implements ProjectService {
                 );
                 createdModels.put(createdModel, modelProcessFile.getFileContent());
             });
-
         return createdModels;
     }
 
@@ -531,7 +530,7 @@ public class ProjectServiceImpl implements ProjectService {
         createdProcesses
             .keySet()
             .forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
-        createdProcesses.keySet().forEach(model -> modelService.resetVersion(model));
+
         modelService.cleanModelIdList();
     }
 
