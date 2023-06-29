@@ -35,6 +35,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     private final ModelJpaRepository modelJpaRepository;
     private final VersionGenerationHelper<ModelEntity, ModelVersionEntity> versionGenerationHelper;
 
+    private static final String FIRST_VERSION = "0.0.1";
+
     public ModelRepositoryImpl(ModelJpaRepository modelJpaRepository) {
         this.modelJpaRepository = modelJpaRepository;
         versionGenerationHelper = new VersionGenerationHelper<>(ModelEntity.class, ModelVersionEntity.class);
@@ -117,7 +119,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     public ModelEntity resetVersion(ModelEntity model) {
         ModelVersionEntity firstVersion = new ModelVersionEntity();
         firstVersion.setVersionedEntity(model);
-        firstVersion.setVersionIdentifier(new VersionIdentifier(model.getId(), "0.0.1"));
+        firstVersion.setVersionIdentifier(new VersionIdentifier(model.getId(), FIRST_VERSION));
 
         model.setVersions(new ArrayList<>());
         model.getVersions().add(firstVersion);
