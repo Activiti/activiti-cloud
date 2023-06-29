@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -24,7 +26,10 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ModelVersionEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerationHelper;
+import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
+import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -113,8 +118,14 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     public ModelEntity resetVersion(ModelEntity model) {
-        model.getVersions().remove(model.getVersions().size() - 1);
-        model.setLatestVersion(model.getVersions().get(0));
+        ModelVersionEntity firstVersion = new ModelVersionEntity();
+        firstVersion.setVersionedEntity(model);
+        firstVersion.setVersionIdentifier(new VersionIdentifier(model.getId(), "0.0.1"));
+
+        model.setVersions(new ArrayList<>());
+        model.getVersions().add(firstVersion);
+        model.setLatestVersion(firstVersion);
+
         return modelJpaRepository.save(model);
     }
 
