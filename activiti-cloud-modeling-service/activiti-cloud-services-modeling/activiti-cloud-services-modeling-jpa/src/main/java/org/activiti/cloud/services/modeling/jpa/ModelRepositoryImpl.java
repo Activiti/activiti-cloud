@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.jpa;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +25,8 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ModelVersionEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionGenerationHelper;
 import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
-import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
