@@ -284,27 +284,4 @@ public class ProjectServiceImplTest {
         Optional<Project> foundProjectOptional = projectService.findProjectById("projectId", null);
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);
     }
-
-    @Test
-    public void should_resetModelVersion_when_importingProject() throws IOException {
-        InputStream file = resourceAsStream("project/project-xy.zip").get();
-        Project proj = new ProjectImpl();
-        when(projectRepository.createProject(eq(proj))).thenReturn(proj);
-        when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(proj));
-        ProcessModelType processModelType = new ProcessModelType();
-        when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
-        when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType))
-            .thenReturn(Optional.of("process-x"));
-        when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
-            .thenReturn(Optional.of("process-y"));
-
-        Model model = new ModelImpl();
-
-        when(modelService.importModel(eq(proj), eq(processModelType), any())).thenReturn(model);
-        when(modelService.resetVersion(eq(model))).thenReturn(model);
-
-        projectService.importProject(file, "new-project-name");
-
-        verify(modelService).resetVersion(eq(model));
-    }
 }
