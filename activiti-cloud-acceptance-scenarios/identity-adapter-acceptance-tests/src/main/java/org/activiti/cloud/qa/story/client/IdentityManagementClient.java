@@ -20,16 +20,11 @@ import java.util.List;
 import java.util.Set;
 import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 public interface IdentityManagementClient {
-    @RequestMapping(method = RequestMethod.GET, value = "/roles")
-    @Headers("Content-Type: application/json")
-    UserRoles getUserRoles();
-
     @RequestMapping(method = RequestMethod.GET, value = "/groups")
     @Headers("Content-Type: application/json")
     List<Group> searchGroups(

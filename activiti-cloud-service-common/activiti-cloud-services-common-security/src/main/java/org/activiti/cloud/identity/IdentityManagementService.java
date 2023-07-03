@@ -21,8 +21,6 @@ import org.activiti.cloud.identity.model.Group;
 import org.activiti.cloud.identity.model.SecurityRequestBodyRepresentation;
 import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
-import org.activiti.cloud.identity.model.UserRoles;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  *
@@ -34,8 +32,6 @@ public interface IdentityManagementService {
     List<User> findUsers(UserSearchParams userSearchParams);
 
     List<Group> findGroups(GroupSearchParams groupSearchParams);
-
-    UserRoles getUserRoles(Jwt principal);
 
     void addApplicationPermissions(
         String application,

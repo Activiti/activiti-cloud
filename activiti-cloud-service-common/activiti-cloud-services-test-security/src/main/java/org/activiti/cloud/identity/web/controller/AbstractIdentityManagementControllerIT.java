@@ -16,7 +16,6 @@
 package org.activiti.cloud.identity.web.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -27,8 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import java.util.Set;
-import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser;
-import org.activiti.cloud.services.common.security.test.support.WithActivitiMockUser.ResourceRoles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,23 +49,6 @@ public abstract class AbstractIdentityManagementControllerIT {
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
-    }
-
-    @Test
-    @WithActivitiMockUser(roles = { "role1" })
-    public void should_notReturnApplicationAccessRoles_when_userHasNotResourceRoles() throws Exception {
-        this.mockMvc.perform(get("/v1/roles"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.applicationAccess", hasSize(0)));
-    }
-
-    @Test
-    @WithActivitiMockUser(resourcesRoles = { @ResourceRoles(resource = "app1", roles = { "role1" }) })
-    public void should_notReturnGlobalAccessRoles_when_userHasNotRealmRoles() throws Exception {
-        this.mockMvc.perform(get("/v1/roles"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.globalAccess").exists())
-            .andExpect(jsonPath("$.globalAccess.roles", hasSize(0)));
     }
 
     @Test
@@ -230,28 +210,6 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/groups?application=fake"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(0)));
-    }
-
-    @Test
-    @WithActivitiMockUser(
-        roles = { "role1" },
-        resourcesRoles = {
-            @ResourceRoles(resource = "app1", roles = { "role1", "role2" }),
-            @ResourceRoles(resource = "app2", roles = "role1"),
-        }
-    )
-    public void should_returnAccessRoles() throws Exception {
-        mockMvc
-            .perform(get("/v1/roles"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.globalAccess").exists())
-            .andExpect(jsonPath("$.globalAccess.roles", hasSize(1)))
-            .andExpect(jsonPath("$.globalAccess.roles[0]", is("role1")))
-            .andExpect(jsonPath("$.applicationAccess", hasSize(2)))
-            .andExpect(jsonPath("$.applicationAccess[0].name", is("app2")))
-            .andExpect(jsonPath("$.applicationAccess[0].roles", contains("role1")))
-            .andExpect(jsonPath("$.applicationAccess[1].name", is("app1")))
-            .andExpect(jsonPath("$.applicationAccess[1].roles", contains("role1", "role2")));
     }
 
     @Test

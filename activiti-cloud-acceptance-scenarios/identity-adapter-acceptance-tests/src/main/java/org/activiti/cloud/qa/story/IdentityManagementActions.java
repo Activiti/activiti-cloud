@@ -28,16 +28,6 @@ public class IdentityManagementActions {
     @Steps
     private IdentityManagementSteps identityManagementSteps;
 
-    @When("the user retrieves his roles")
-    public void getRoles() {
-        identityManagementSteps.getRoles();
-    }
-
-    @Then("roles list contains global role $role")
-    public void containsGlobalRole(String role) {
-        identityManagementSteps.containsGlobalAccessRole(role);
-    }
-
     @When("the user searches for users containing $searchKey")
     public void searchUsers(String searchKey) {
         identityManagementSteps.searchUsers(searchKey);
