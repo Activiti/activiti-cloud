@@ -379,8 +379,8 @@ jobs:
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
-          labels: ${{ env.DEVELOPMENT_BRANCH }}
-          base-branch-name: ${{ env.DEVELOPMENT_BRANCH }}
+          labels: develop
+          base-branch-name: develop
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           git-author-name: ${{ secrets.BOT_GITHUB_USERNAME }}
