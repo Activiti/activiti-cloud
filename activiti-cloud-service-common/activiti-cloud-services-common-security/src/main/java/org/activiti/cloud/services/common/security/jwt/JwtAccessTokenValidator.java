@@ -48,7 +48,7 @@ public class JwtAccessTokenValidator {
                 boolean valid = check.isValid(accessToken);
                 if (!valid) {
                     LOGGER.error(
-                        "Token invalid because the {} validation has been failed.",
+                        "Token invalid because the {} validation has failed.",
                         check.getClass().toString()
                     );
                 }
