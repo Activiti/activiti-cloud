@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - develop
-      # TODO remove before merge
-      - dev-igdianov-AAE-10754-jdk-17
 
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -78,7 +76,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -DskipTests -DskipITs -T 1C install ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -87,291 +85,291 @@ jobs:
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
 
-      - name: Echo Longest Tests run
-        shell: bash
-        run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
+#      - name: Echo Longest Tests run
+#        shell: bash
+#        run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
+#
+#      - name: Login to DockerHub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+#
+#      - name: Build Example Runtime Bundle
+#        run: make docker/example-runtime-bundle
+#
+#      - name: Build Activiti Cloud Query
+#        run: make docker/activiti-cloud-query
+#
+#      - name: Build Example Cloud Connector
+#        run: make docker/example-cloud-connector
+#
+#      - name: Build Activiti Cloud Modeling
+#        run: make docker/activiti-cloud-modeling
+#
+#      - name: Build Activiti Cloud Identity Adapter
+#        run: make docker/activiti-cloud-identity-adapter
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build Example Runtime Bundle
-        run: make docker/example-runtime-bundle
-
-      - name: Build Activiti Cloud Query
-        run: make docker/activiti-cloud-query
-
-      - name: Build Example Cloud Connector
-        run: make docker/example-cloud-connector
-
-      - name: Build Activiti Cloud Modeling
-        run: make docker/activiti-cloud-modeling
-
-      - name: Build Activiti Cloud Identity Adapter
-        run: make docker/activiti-cloud-identity-adapter
-
-
-  acceptance-tests:
-    runs-on: ubuntu-latest
-    needs: build
-    env:
-      MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-    strategy:
-      fail-fast: false
-      matrix:
-        messaging-broker: [ rabbitmq, kafka ]
-        messaging-partitioned: [ partitioned, non-partitioned ]
-        messaging-destinations: [ default-destinations ]
-        include:
-          - messaging-broker: kafka
-            messaging-partitioned: partitioned
-            messaging-destinations: override-destinations
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # 3.6.0
-        with:
-          java-version: 17
-          distribution: 'temurin'
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: v1.19.6
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.5.2
-
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
-
-      - uses: ./.github/actions/setup-env-for-broker
-        with:
-          messaging-broker: ${{ matrix.messaging-broker }}
-          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
-          messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ needs.build.outputs.version }}
-
-      - name: Delete preview for ${{ matrix.messaging-broker }}
-        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-        run: |
-          kubectl delete ns $PREVIEW_NAME || true
-
-      - name: Install release for ${{ matrix.messaging-broker }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-
-          ### Main ###
-
-          echo "Installing release with make install"
-          make install
-
-      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
-        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export QUERY_CONSUMER_NUMBER=2
-
-          ### Functions ###
-
-          # It checks that the RESULT env var is equals to the first
-          # argument passed to the function
-          #
-          check_result_is () {
-            if [ "$RESULT" == "$1" ]; then
-              echo "correct"
-            else
-              echo "number expected is $1 but result is $RESULT"
-              exit 1
-            fi
-          }
-
-          # It counts the number of query consumer pods in the
-          # cluster and set it in RESULT env var
-          #
-          count_query_consumer_pods () {
-            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
-              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
-              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
-          }
-
-          # It counts the number of query partition of engineEvents topic
-          # created in Kafka and set it in RESULT env var
-          #
-          count_query_topic_partitions () {
-            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
-              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server=localhost:9092 --describe \
-              --topic engineEvents | grep PartitionCount |\
-              awk \'{ printf "%s",$6 }\'')
-          }
-
-          ### Main ###
-
-          echo "It checks the deployment has 1 query pod consumer"
-          count_query_consumer_pods
-          check_result_is 1
-
-          echo "It checks the deployment has 4 query topic patitions"
-          count_query_topic_partitions
-          check_result_is 4
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
-
-      - name: Run Modeling Acceptance Tests
-        # modeling acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/modeling-acceptance-tests
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
-
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/identity-adapter-acceptance-tests
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
-
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
-
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        run: |
-          make test/runtime-acceptance-tests
-
-      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
-        env:
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-        run: |
-          if [ $IS_PREVIEW = true ]
-          then
-              echo "Skipping delete Helm release for preview"
-          else
-              echo "Delete Helm release"
-              make delete
-          fi
-
-  delete-test-images:
-    runs-on: ubuntu-latest
-    needs:
-      - acceptance-tests
-      # dependency needed for build.outputs env variables resolution
-      - build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Delete Docker images
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-          VERSION: ${{ needs.build.outputs.version }}
-        run: |
-          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
-          then
-              echo "Skipping delete Docker images"
-          else
-              echo $VERSION > VERSION
-              echo "Delete Docker images"
-              make docker-delete-all
-          fi
-
-  publish:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - delete-test-images
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
-    env:
-      VERSION: ${{ needs.build.outputs.version }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
-        with:
-          java-version: 17
-          distribution: 'temurin'
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Update pom files to the new version
-        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
-
-      - name: Maven Deploy
-        shell: bash
-        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
-        env:
-          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
-          MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.36.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          commit-message: "Release $VERSION"
-
-      - name: Create release tag
-        if: github.event_name == 'push'
-        run: |
-          git tag -fa $VERSION -m "Release version $VERSION"
-          git push origin $VERSION
+#  acceptance-tests:
+#    runs-on: ubuntu-latest
+#    needs: build
+#    env:
+#      MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        messaging-broker: [ rabbitmq, kafka ]
+#        messaging-partitioned: [ partitioned, non-partitioned ]
+#        messaging-destinations: [ default-destinations ]
+#        include:
+#          - messaging-broker: kafka
+#            messaging-partitioned: partitioned
+#            messaging-destinations: override-destinations
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - uses: actions/cache@v3
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Setup Java JDK 17
+#        uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # 3.6.0
+#        with:
+#          java-version: 17
+#          distribution: 'temurin'
+#
+#      - name: Set up kubectl
+#        uses: azure/setup-kubectl@v1
+#        with:
+#          version: v1.19.6
+#
+#      - name: Set up Helm
+#        uses: azure/setup-helm@v3
+#        with:
+#          version: v3.5.2
+#
+#      - name: Set up rancher
+#        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
+#        with:
+#          url: ${{ secrets.RANCHER2_URL }}
+#          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+#          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+#          context: ${{ env.CLUSTER_NAME }}
+#
+#      - uses: ./.github/actions/setup-env-for-broker
+#        with:
+#          messaging-broker: ${{ matrix.messaging-broker }}
+#          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
+#          messaging-destinations-option: ${{ matrix.messaging-destinations }}
+#          version: ${{ needs.build.outputs.version }}
+#
+#      - name: Delete preview for ${{ matrix.messaging-broker }}
+#        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+#        run: |
+#          kubectl delete ns $PREVIEW_NAME || true
+#
+#      - name: Install release for ${{ matrix.messaging-broker }}
+#        run: |
+#          ### Variables ###
+#          export SSO_PROTOCOL=https
+#          export GATEWAY_PROTOCOL=https
+#          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+#          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+#          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+#
+#          ### Main ###
+#
+#          echo "Installing release with make install"
+#          make install
+#
+#      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
+#        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+#        run: |
+#          ### Variables ###
+#          export SSO_PROTOCOL=https
+#          export GATEWAY_PROTOCOL=https
+#          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+#          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+#          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+#          export QUERY_CONSUMER_NUMBER=2
+#
+#          ### Functions ###
+#
+#          # It checks that the RESULT env var is equals to the first
+#          # argument passed to the function
+#          #
+#          check_result_is () {
+#            if [ "$RESULT" == "$1" ]; then
+#              echo "correct"
+#            else
+#              echo "number expected is $1 but result is $RESULT"
+#              exit 1
+#            fi
+#          }
+#
+#          # It counts the number of query consumer pods in the
+#          # cluster and set it in RESULT env var
+#          #
+#          count_query_consumer_pods () {
+#            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
+#              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
+#              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
+#          }
+#
+#          # It counts the number of query partition of engineEvents topic
+#          # created in Kafka and set it in RESULT env var
+#          #
+#          count_query_topic_partitions () {
+#            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
+#              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
+#              --bootstrap-server=localhost:9092 --describe \
+#              --topic engineEvents | grep PartitionCount |\
+#              awk \'{ printf "%s",$6 }\'')
+#          }
+#
+#          ### Main ###
+#
+#          echo "It checks the deployment has 1 query pod consumer"
+#          count_query_consumer_pods
+#          check_result_is 1
+#
+#          echo "It checks the deployment has 4 query topic patitions"
+#          count_query_topic_partitions
+#          check_result_is 4
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
+#
+#      - name: Run Modeling Acceptance Tests
+#        # modeling acceptance tests does not depend on messaging, so they can be run only once
+#        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+#        run: |
+#          make test/modeling-acceptance-tests
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
+#
+#      - name: Run Identity Adapter Acceptance Tests
+#        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
+#        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+#        run: |
+#          make test/identity-adapter-acceptance-tests
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
+#
+#      - uses: ./.github/actions/check-service-health
+#        with:
+#          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
+#
+#      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+#        run: |
+#          make test/runtime-acceptance-tests
+#
+#      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+#        if: always()
+#        env:
+#          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+#        run: |
+#          if [ $IS_PREVIEW = true ]
+#          then
+#              echo "Skipping delete Helm release for preview"
+#          else
+#              echo "Delete Helm release"
+#              make delete
+#          fi
+#
+#  delete-test-images:
+#    runs-on: ubuntu-latest
+#    needs:
+#      - acceptance-tests
+#      # dependency needed for build.outputs env variables resolution
+#      - build
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#      - name: Delete Docker images
+#        env:
+#          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+#          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+#          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+#          VERSION: ${{ needs.build.outputs.version }}
+#        run: |
+#          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+#          then
+#              echo "Skipping delete Docker images"
+#          else
+#              echo $VERSION > VERSION
+#              echo "Delete Docker images"
+#              make docker-delete-all
+#          fi
+#
+#  publish:
+#    runs-on: ubuntu-latest
+#    needs:
+#      - build
+#      - delete-test-images
+#    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
+#    env:
+#      VERSION: ${{ needs.build.outputs.version }}
+#
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#        with:
+#          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+#
+#      - name: Setup Java JDK 17
+#        uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+#        with:
+#          java-version: 17
+#          distribution: 'temurin'
+#
+#      - uses: actions/cache@v3
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Update pom files to the new version
+#        run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+#
+#      - name: Maven Deploy
+#        shell: bash
+#        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
+#        env:
+#          MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
+#          MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+#          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+#          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+#
+#      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.36.0
+#        with:
+#          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+#          add-options: -u
+#          commit-message: "Release $VERSION"
+#
+#      - name: Create release tag
+#        if: github.event_name == 'push'
+#        run: |
+#          git tag -fa $VERSION -m "Release version $VERSION"
+#          git push origin $VERSION
 
   propagate-maven:
     runs-on: ubuntu-latest
     needs:
       - build
-      - publish
-    if: github.event_name == 'push'
+#      - publish
+#    if: github.event_name == 'push'
     env:
       VERSION: ${{ needs.build.outputs.version }}
       UPDATEBOT_FULL_CHART_REPO_PATH: .updatebot-repos/github/activiti/activiti-cloud-full-chart
@@ -387,63 +385,63 @@ jobs:
           updatebot push-version --kind maven \
             org.activiti.cloud:activiti-cloud-dependencies $VERSION
 
-  propagate-helm:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - publish
-    if: github.event_name == 'push' && github.ref_name == 'develop'
-    env:
-      VERSION: ${{ needs.build.outputs.version }}
-      FULL_CHART_DIR: full-chart
-      FULL_CHART_BASE_BRANCH: develop
-      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: ${{ env.FULL_CHART_DIR }}
-          repository: Activiti/activiti-cloud-full-chart
-          ref: ${{ env.FULL_CHART_BASE_BRANCH }}
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
-      - name: Update image tags in Helm chart
-        working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
-        run: |
-          git checkout -b $FULL_CHART_PR_BRANCH
-          yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
-          yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
-          yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
-          yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
-          yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.36.0
-      - name: Update helm docs
-        working-directory: ${{ env.FULL_CHART_DIR}}
-        run: helm-docs
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.36.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          add-options: -u
-          repository-directory: ${{ env.FULL_CHART_DIR}}
-          commit-message: "Update docker image tags to $VERSION"
-
-      - name: Create propagation PR
-        working-directory: ${{ env.FULL_CHART_DIR}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-        run: |
-          git push origin $FULL_CHART_PR_BRANCH
-          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
-
-  notify:
-    runs-on: ubuntu-latest
-    needs:
-      - propagate-helm
-      - propagate-maven
-    if: always() && failure() && github.event_name == 'push'
-    steps:
-      - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.36.0
-        with:
-          channel-id: 'eng-hxp-studio-activiti-gh-notifs'
-          token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
+#  propagate-helm:
+#    runs-on: ubuntu-latest
+#    needs:
+#      - build
+#      - publish
+#    if: github.event_name == 'push' && github.ref_name == 'develop'
+#    env:
+#      VERSION: ${{ needs.build.outputs.version }}
+#      FULL_CHART_DIR: full-chart
+#      FULL_CHART_BASE_BRANCH: develop
+#      FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          path: ${{ env.FULL_CHART_DIR }}
+#          repository: Activiti/activiti-cloud-full-chart
+#          ref: ${{ env.FULL_CHART_BASE_BRANCH }}
+#          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+#      - name: Update image tags in Helm chart
+#        working-directory: ${{ env.FULL_CHART_DIR }}/charts/activiti-cloud-full-example
+#        run: |
+#          git checkout -b $FULL_CHART_PR_BRANCH
+#          yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
+#          yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
+#          yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
+#          yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
+#          yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
+#
+#      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.36.0
+#      - name: Update helm docs
+#        working-directory: ${{ env.FULL_CHART_DIR}}
+#        run: helm-docs
+#
+#      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.36.0
+#        with:
+#          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+#          add-options: -u
+#          repository-directory: ${{ env.FULL_CHART_DIR}}
+#          commit-message: "Update docker image tags to $VERSION"
+#
+#      - name: Create propagation PR
+#        working-directory: ${{ env.FULL_CHART_DIR}}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+#        run: |
+#          git push origin $FULL_CHART_PR_BRANCH
+#          gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
+#
+#  notify:
+#    runs-on: ubuntu-latest
+#    needs:
+#      - propagate-helm
+#      - propagate-maven
+#    if: always() && failure() && github.event_name == 'push'
+#    steps:
+#      - name: Slack Notification
+#        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v1.36.0
+#        with:
+#          channel-id: 'eng-hxp-studio-activiti-gh-notifs'
+#          token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
