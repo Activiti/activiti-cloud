@@ -1,0 +1,13 @@
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+#        - https://github.com/Alfresco/alfresco-process
+        - https://github.com/Alfresco/alfresco-process-sdk
+      reusePullRequest: true
+      changes:
+        - regex:
+            pattern: "<activiti-cloud.version>(.*)</activiti-cloud.version>"
+            files:
+              - pom.xml
