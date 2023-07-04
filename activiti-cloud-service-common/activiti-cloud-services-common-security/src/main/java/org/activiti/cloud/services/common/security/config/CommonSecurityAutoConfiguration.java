@@ -17,6 +17,7 @@ package org.activiti.cloud.services.common.security.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.RequestInterceptor;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
@@ -64,6 +65,8 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
 @AutoConfiguration
@@ -204,6 +207,10 @@ public class CommonSecurityAutoConfiguration {
         authorizationConfigurer.configure(http);
         return http
             .authorizeHttpRequests()
+            .requestMatchers(actuatorEndpointsMatcher())
+            .authenticated()
+            .and()
+            .authorizeHttpRequests()
             .anyRequest()
             .permitAll()
             .and()
@@ -228,6 +235,12 @@ public class CommonSecurityAutoConfiguration {
             .and()
             .and()
             .build();
+    }
+
+    private RequestMatcher actuatorEndpointsMatcher() {
+        RequestMatcher actuatorMatcher = new AntPathRequestMatcher("/actuator/**");
+        RequestMatcher healthMatcher = new AntPathRequestMatcher("/actuator/health/**");
+        return request -> actuatorMatcher.matches(request) && !healthMatcher.matches(request);
     }
 
     @Bean
