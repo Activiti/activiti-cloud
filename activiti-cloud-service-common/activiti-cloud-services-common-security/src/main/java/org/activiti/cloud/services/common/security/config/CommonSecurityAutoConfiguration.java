@@ -17,7 +17,6 @@ package org.activiti.cloud.services.common.security.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.RequestInterceptor;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
