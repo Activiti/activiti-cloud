@@ -38,7 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ContextConfiguration(
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
-public class CommonSecurityAutoConfigurationActuatorIT {
+public class TestActuatorSecurityIT {
 
     @Autowired
     private MockMvc mockMvc;
