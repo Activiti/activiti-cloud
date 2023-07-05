@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -59,8 +58,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         IntegrationContextService integrationContextService,
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        TransactionTemplate transactionTemplate
+        ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
