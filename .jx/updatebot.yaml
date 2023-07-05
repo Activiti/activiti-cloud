@@ -3,7 +3,7 @@ kind: UpdateConfig
 spec:
   rules:
     - urls:
-#        - https://github.com/Alfresco/alfresco-process
+        - https://github.com/Alfresco/alfresco-process
         - https://github.com/Alfresco/alfresco-process-sdk
       reusePullRequest: true
       changes:
