@@ -16,7 +16,6 @@
 
 package org.activiti.services.connectors.channel;
 
-import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.activiti.cloud.api.process.model.CloudBpmnError;
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
@@ -42,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 public class ServiceTaskIntegrationErrorEventHandler {
 
@@ -59,8 +56,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         IntegrationContextService integrationContextService,
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        TransactionTemplate transactionTemplate
+        ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
         this.runtimeService = runtimeService;
         this.integrationContextService = integrationContextService;
@@ -110,9 +106,24 @@ public class ServiceTaskIntegrationErrorEventHandler {
 
                 if (CloudBpmnError.class.getName().equals(errorClassName)) {
                     if (execution.getActivityId().equals(clientId)) {
-                        commands = propagateError(commands, integrationError, execution);
-                        if (commands == null) {
+                        try {
+                            commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
+                            commands.add(
+                                new AggregateIntegrationErrorReceivedClosingEventCmd(
+                                    new AggregateIntegrationErrorReceivedEventCmd(
+                                        integrationError,
+                                        runtimeBundleProperties,
+                                        processEngineEventsAggregator
+                                    )
+                                )
+                            );
+
+                            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
                             return;
+                        } catch (Throwable cause) {
+                            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
+                            // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
+                            commands = restoreCommandList(commands);
                         }
                     } else {
                         LOGGER.warn(
@@ -144,33 +155,6 @@ public class ServiceTaskIntegrationErrorEventHandler {
             );
 
             managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
-        }
-    }
-
-    @Transactional(propagation = REQUIRED, noRollbackFor = { ActivitiException.class })
-    public List<Command<?>> propagateError(
-        List<Command<?>> commands,
-        IntegrationError integrationError,
-        ExecutionEntity execution
-    ) {
-        try {
-            commands.add(new PropagateCloudBpmnErrorCmd(integrationError, execution));
-            commands.add(
-                new AggregateIntegrationErrorReceivedClosingEventCmd(
-                    new AggregateIntegrationErrorReceivedEventCmd(
-                        integrationError,
-                        runtimeBundleProperties,
-                        processEngineEventsAggregator
-                    )
-                )
-            );
-
-            managementService.executeCommand(CompositeCommand.of(commands.toArray(Command[]::new)));
-            return null;
-        } catch (Throwable cause) {
-            LOGGER.error("Error propagating CloudBpmnError: {}", cause.getMessage());
-            // cleaned the commands list from PropagateCloudBpmnErrorCmd and AggregateIntegrationErrorReceivedClosingEventCmd
-            return restoreCommandList(commands);
         }
     }
 
