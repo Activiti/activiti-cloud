@@ -50,6 +50,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @AutoConfiguration
@@ -96,7 +97,7 @@ public class CloudConnectorsAutoConfiguration {
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
         ProcessEngineEventsAggregator processEngineEventsAggregator,
-        TransactionTemplate transactionTemplate
+        PlatformTransactionManager transactionManager
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
@@ -104,7 +105,7 @@ public class CloudConnectorsAutoConfiguration {
             managementService,
             runtimeBundleProperties,
             processEngineEventsAggregator,
-            transactionTemplate
+            new TransactionTemplate(transactionManager)
         );
     }
 
