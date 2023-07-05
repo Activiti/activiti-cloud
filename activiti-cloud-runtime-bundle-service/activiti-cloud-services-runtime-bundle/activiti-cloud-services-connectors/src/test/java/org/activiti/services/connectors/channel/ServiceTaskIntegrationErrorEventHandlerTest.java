@@ -46,6 +46,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class ServiceTaskIntegrationErrorEventHandlerTest {
@@ -71,6 +72,9 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
 
     @Mock
     private ManagementService managementService;
+
+    @Mock
+    private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     public void setUp() {
@@ -98,7 +102,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         );
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.receiveRequiresTransaction(integrationErrorEvent);
 
         //then
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
@@ -130,7 +134,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
         );
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.receiveRequiresTransaction(integrationErrorEvent);
 
         //then
         verify(managementService).executeCommand(commandArgumentCaptor.capture());
@@ -169,7 +173,7 @@ public class ServiceTaskIntegrationErrorEventHandlerTest {
             });
 
         //when
-        handler.receive(integrationErrorEvent);
+        handler.receiveRequiresTransaction(integrationErrorEvent);
 
         //then
         verify(managementService, times(2)).executeCommand(commandArgumentCaptor.capture());
