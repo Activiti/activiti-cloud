@@ -42,7 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.messaging.MessageChannel;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -76,9 +76,6 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private ConnectorImplementationsProvider connectorImplementationsProvider;
-
-    @MockBean
-    private PlatformTransactionManager platformTransactionManager;
 
     @BeforeEach
     public void beforeEach() {
