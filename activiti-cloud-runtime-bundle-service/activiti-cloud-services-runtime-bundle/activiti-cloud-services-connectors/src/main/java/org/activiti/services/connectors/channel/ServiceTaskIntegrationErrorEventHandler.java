@@ -78,7 +78,7 @@ public class ServiceTaskIntegrationErrorEventHandler {
         });
     }
 
-    protected void receiveRequiresTransaction(IntegrationError integrationError) {
+    private void receiveRequiresTransaction(IntegrationError integrationError) {
         IntegrationContext integrationContext = integrationError.getIntegrationContext();
         IntegrationContextEntity integrationContextEntity = integrationContextService.findById(
             integrationContext.getId()
