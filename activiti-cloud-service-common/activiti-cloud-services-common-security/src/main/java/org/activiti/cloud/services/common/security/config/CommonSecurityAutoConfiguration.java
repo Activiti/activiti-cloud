@@ -17,8 +17,11 @@ package org.activiti.cloud.services.common.security.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.RequestInterceptor;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.PrincipalRolesProvider;
@@ -239,7 +242,12 @@ public class CommonSecurityAutoConfiguration {
     private RequestMatcher actuatorEndpointsMatcher() {
         RequestMatcher actuatorMatcher = new AntPathRequestMatcher("/actuator/**");
         RequestMatcher healthMatcher = new AntPathRequestMatcher("/actuator/health/**");
-        return request -> actuatorMatcher.matches(request) && !healthMatcher.matches(request);
+        RequestMatcher infoMatcher = new AntPathRequestMatcher("/actuator/info/**");
+
+        List<RequestMatcher> excludeMatchers = Arrays.asList(healthMatcher, infoMatcher);
+
+        return request ->
+            actuatorMatcher.matches(request) && excludeMatchers.stream().noneMatch(matcher -> matcher.matches(request));
     }
 
     @Bean

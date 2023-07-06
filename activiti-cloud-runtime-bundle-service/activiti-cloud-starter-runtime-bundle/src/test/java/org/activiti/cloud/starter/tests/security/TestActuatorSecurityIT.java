@@ -23,13 +23,9 @@ import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationI
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -43,15 +39,8 @@ public class TestActuatorSecurityIT {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private BuildProperties buildProperties;
-
-    @Autowired(required = false)
+    @Autowired
     private CommonSecurityAutoConfiguration commonSecurityAutoConfiguration;
-
-    @SpringBootConfiguration
-    @EnableAutoConfiguration
-    static class Application {}
 
     @Test
     public void should_getActuatorLoggersAndReturnUnauthorized() throws Exception {
@@ -61,5 +50,10 @@ public class TestActuatorSecurityIT {
     @Test
     public void should_getActuatorHealthAndReturn200ok() throws Exception {
         mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_getActuatorInfoAndReturn200ok() throws Exception {
+        mockMvc.perform(get("/actuator/info")).andExpect(status().isOk());
     }
 }
