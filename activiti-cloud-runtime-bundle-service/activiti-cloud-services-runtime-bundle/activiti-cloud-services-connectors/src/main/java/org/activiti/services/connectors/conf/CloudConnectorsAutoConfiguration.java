@@ -50,7 +50,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @AutoConfiguration
 @AutoConfigureBefore(value = ConnectorsAutoConfiguration.class)
@@ -95,16 +94,14 @@ public class CloudConnectorsAutoConfiguration {
         IntegrationContextService integrationContextService,
         ManagementService managementService,
         RuntimeBundleProperties runtimeBundleProperties,
-        ProcessEngineEventsAggregator processEngineEventsAggregator,
-        TransactionTemplate transactionTemplate
+        ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
         return new ServiceTaskIntegrationErrorEventHandler(
             runtimeService,
             integrationContextService,
             managementService,
             runtimeBundleProperties,
-            processEngineEventsAggregator,
-            transactionTemplate
+            processEngineEventsAggregator
         );
     }
 
