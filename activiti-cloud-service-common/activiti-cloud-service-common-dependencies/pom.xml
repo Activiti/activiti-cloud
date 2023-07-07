@@ -10,6 +10,9 @@
   <artifactId>activiti-cloud-service-common-dependencies</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Dependencies BOM (Bill Of Materials)</name>
+  <properties>
+    <snappy.version>1.1.10.1</snappy.version>
+  </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -119,6 +122,11 @@
         <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-service-messaging-starter</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.xerial.snappy</groupId>
+        <artifactId>snappy-java</artifactId>
+        <version>${snappy.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
