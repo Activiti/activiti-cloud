@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-examples</artifactId>
-    <version>8.0.0-SNAPSHOT</version>
+    <version>8.0.0-alpha.20</version>
   </parent>
   <artifactId>example-cloud-connector</artifactId>
   <name>Activiti Cloud :: Example Cloud Connector</name>
