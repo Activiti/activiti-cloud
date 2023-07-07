@@ -72,7 +72,9 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Enable testcontainers reuse option
-        run: echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
+        run: |
+          echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
+          echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
       - name: Maven Build and Test
         shell: bash
@@ -84,6 +86,7 @@ jobs:
 
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
+        continue-on-error: true
 
       - name: Echo Longest Tests run
         shell: bash
