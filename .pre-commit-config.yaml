@@ -33,4 +33,4 @@ repos:
     hooks:
       - id: semgrep
         types: [java]
-        args: ["--config", ".sempgrep.yaml", "--error","--metrics=off"]
+        args: ["--config", ".sempgrep.yaml", "--error", "--metrics=off"]
