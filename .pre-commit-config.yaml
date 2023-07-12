@@ -29,7 +29,7 @@ repos:
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/returntocorp/semgrep
-    rev: v1.23.0
+    rev: v1.31.2
     hooks:
       - id: semgrep
         types: [java]
