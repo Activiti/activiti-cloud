@@ -1,0 +1,8 @@
+rules:
+  - id: disallow-component-scan
+    languages:
+      - java
+    message: Spring annotation ComponentScan usage is forbidden.
+    pattern: |
+      @ComponentScan(...)
+    severity: ERROR
