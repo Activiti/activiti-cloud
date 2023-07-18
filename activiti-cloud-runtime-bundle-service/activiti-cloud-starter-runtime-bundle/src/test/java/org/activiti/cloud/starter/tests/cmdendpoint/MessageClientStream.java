@@ -27,11 +27,11 @@ public interface MessageClientStream {
 
     @OutputBinding(MY_CMD_PRODUCER)
     default MessageChannel myCmdProducer() {
-        return MessageChannels.direct(MY_CMD_PRODUCER).get();
+        return MessageChannels.direct(MY_CMD_PRODUCER).getObject();
     }
 
     @InputBinding(MY_CMD_RESULTS)
     default SubscribableChannel myCmdResults() {
-        return MessageChannels.publishSubscribe(MY_CMD_RESULTS).get();
+        return MessageChannels.publishSubscribe(MY_CMD_RESULTS).getObject();
     }
 }

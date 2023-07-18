@@ -24,6 +24,6 @@ public interface QueryConsumerChannels {
 
     @InputBinding(QUERY_CONSUMER)
     default SubscribableChannel queryConsumer() {
-        return MessageChannels.publishSubscribe(QUERY_CONSUMER).get();
+        return MessageChannels.publishSubscribe(QUERY_CONSUMER).getObject();
     }
 }

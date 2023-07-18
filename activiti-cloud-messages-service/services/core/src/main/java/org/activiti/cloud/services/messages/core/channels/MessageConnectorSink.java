@@ -24,6 +24,6 @@ public interface MessageConnectorSink {
 
     @InputBinding(INPUT)
     default MessageChannel input() {
-        return MessageChannels.publishSubscribe(INPUT).get();
+        return MessageChannels.publishSubscribe(INPUT).getObject();
     }
 }

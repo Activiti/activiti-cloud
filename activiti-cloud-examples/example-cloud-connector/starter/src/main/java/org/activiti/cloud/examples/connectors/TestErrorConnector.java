@@ -48,7 +48,7 @@ public class TestErrorConnector implements ConsumerConnector<IntegrationRequest>
 
         @InputBinding(CHANNEL)
         default SubscribableChannel testErrorConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).get();
+            return MessageChannels.publishSubscribe(CHANNEL).getObject();
         }
     }
 

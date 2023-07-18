@@ -24,6 +24,6 @@ public interface MessageConnectorSource {
 
     @OutputBinding(OUTPUT)
     default MessageChannel output() {
-        return MessageChannels.direct(OUTPUT).get();
+        return MessageChannels.direct(OUTPUT).getObject();
     }
 }

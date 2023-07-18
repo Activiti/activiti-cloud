@@ -30,16 +30,16 @@ public interface ProcessEngineChannels {
 
     @InputBinding(COMMAND_CONSUMER)
     default SubscribableChannel commandConsumer() {
-        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).get();
+        return MessageChannels.publishSubscribe(COMMAND_CONSUMER).getObject();
     }
 
     @OutputBinding(COMMAND_RESULTS)
     default MessageChannel commandResults() {
-        return MessageChannels.direct(COMMAND_RESULTS).get();
+        return MessageChannels.direct(COMMAND_RESULTS).getObject();
     }
 
     @OutputBinding(AUDIT_PRODUCER)
     default MessageChannel auditProducer() {
-        return MessageChannels.direct(AUDIT_PRODUCER).get();
+        return MessageChannels.direct(AUDIT_PRODUCER).getObject();
     }
 }

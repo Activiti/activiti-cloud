@@ -24,6 +24,6 @@ public interface MessageEventsSource {
 
     @OutputBinding(MESSAGE_EVENTS_OUTPUT)
     default MessageChannel messageEventsOutput() {
-        return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).get();
+        return MessageChannels.direct(MESSAGE_EVENTS_OUTPUT).getObject();
     }
 }

@@ -29,31 +29,31 @@ public interface ConnectorIntegrationChannels {
 
     @InputBinding(INTEGRATION_EVENTS_CONSUMER)
     default SubscribableChannel integrationEventsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_EVENTS_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_EVENTS_CONSUMER).getObject();
     }
 
     @InputBinding(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER)
     default SubscribableChannel varMappingIntegrationEventsConsumer() {
-        return MessageChannels.publishSubscribe(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER).get();
+        return MessageChannels.publishSubscribe(VAR_MAPPING_INTEGRATION_EVENTS_CONSUMER).getObject();
     }
 
     @InputBinding(CONSTANTS_INTEGRATION_EVENTS_CONSUMER)
     default SubscribableChannel constantsIntegrationEventsConsumer() {
-        return MessageChannels.publishSubscribe(CONSTANTS_INTEGRATION_EVENTS_CONSUMER).get();
+        return MessageChannels.publishSubscribe(CONSTANTS_INTEGRATION_EVENTS_CONSUMER).getObject();
     }
 
     @InputBinding(REST_CONNECTOR_CONSUMER)
     default SubscribableChannel restConnectorConsumer() {
-        return MessageChannels.publishSubscribe(REST_CONNECTOR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(REST_CONNECTOR_CONSUMER).getObject();
     }
 
     @InputBinding(MEALS_CONNECTOR_CONSUMER)
     default SubscribableChannel mealsConnectorConsumer() {
-        return MessageChannels.publishSubscribe(MEALS_CONNECTOR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(MEALS_CONNECTOR_CONSUMER).getObject();
     }
 
     @InputBinding(VALUE_PROCESSOR_CONSUMER)
     default SubscribableChannel valueProcessorConsumer() {
-        return MessageChannels.publishSubscribe(VALUE_PROCESSOR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(VALUE_PROCESSOR_CONSUMER).getObject();
     }
 }
