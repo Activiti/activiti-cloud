@@ -49,7 +49,7 @@ public class TestBpmnErrorConnector implements ConsumerConnector<IntegrationRequ
 
         @InputBinding(CHANNEL)
         default SubscribableChannel testBpmnErrorConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).get();
+            return MessageChannels.publishSubscribe(CHANNEL).getObject();
         }
     }
 

@@ -25,6 +25,6 @@ public interface CanFailConnectorChannels {
 
     @InputBinding(CAN_FAIL_CONNECTOR)
     default SubscribableChannel canFailConnector() {
-        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR).get();
+        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR).getObject();
     }
 }

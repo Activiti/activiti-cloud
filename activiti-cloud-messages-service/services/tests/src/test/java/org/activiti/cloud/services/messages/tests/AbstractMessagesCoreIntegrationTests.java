@@ -148,13 +148,13 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         @Bean
         @BridgeFrom("errorChannel")
         MessageChannel errorQueue() {
-            return MessageChannels.queue().get();
+            return MessageChannels.queue().getObject();
         }
 
         @Bean
         @BridgeFrom("discardChannel")
         MessageChannel discardQueue() {
-            return MessageChannels.queue().get();
+            return MessageChannels.queue().getObject();
         }
 
         @Bean

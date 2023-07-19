@@ -28,11 +28,11 @@ public interface ProcessEngineSignalChannels {
 
     @InputBinding(SIGNAL_CONSUMER)
     default SubscribableChannel signalConsumer() {
-        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER).get();
+        return MessageChannels.publishSubscribe(SIGNAL_CONSUMER).getObject();
     }
 
     @OutputBinding(SIGNAL_PRODUCER)
     default MessageChannel signalProducer() {
-        return MessageChannels.direct(SIGNAL_PRODUCER).get();
+        return MessageChannels.direct(SIGNAL_PRODUCER).getObject();
     }
 }

@@ -24,6 +24,6 @@ public interface AuditConsumerChannels {
 
     @InputBinding(AUDIT_CONSUMER)
     default SubscribableChannel auditConsumer() {
-        return MessageChannels.publishSubscribe(AUDIT_CONSUMER).get();
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
     }
 }

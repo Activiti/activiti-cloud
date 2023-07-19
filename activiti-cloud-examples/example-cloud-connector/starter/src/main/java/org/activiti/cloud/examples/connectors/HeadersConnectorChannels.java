@@ -24,6 +24,6 @@ public interface HeadersConnectorChannels {
 
     @InputBinding(HEADERS_CONNECTOR_CONSUMER)
     default SubscribableChannel headersConnectorConsumer() {
-        return MessageChannels.publishSubscribe(HEADERS_CONNECTOR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(HEADERS_CONNECTOR_CONSUMER).getObject();
     }
 }

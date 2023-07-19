@@ -24,6 +24,6 @@ public interface EngineEventsConsumerChannels {
 
     @InputBinding(SOURCE)
     default SubscribableChannel input() {
-        return MessageChannels.publishSubscribe(SOURCE).get();
+        return MessageChannels.publishSubscribe(SOURCE).getObject();
     }
 }

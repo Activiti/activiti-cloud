@@ -24,6 +24,6 @@ public interface StreamProducer {
 
     @OutputBinding(PRODUCER)
     default MessageChannel producer() {
-        return MessageChannels.direct(PRODUCER).get();
+        return MessageChannels.direct(PRODUCER).getObject();
     }
 }

@@ -24,6 +24,6 @@ public interface EngineEvents {
 
     @OutputBinding(ENGINE_EVENTS_PRODUCER)
     default MessageChannel output() {
-        return MessageChannels.direct(ENGINE_EVENTS_PRODUCER).get();
+        return MessageChannels.direct(ENGINE_EVENTS_PRODUCER).getObject();
     }
 }

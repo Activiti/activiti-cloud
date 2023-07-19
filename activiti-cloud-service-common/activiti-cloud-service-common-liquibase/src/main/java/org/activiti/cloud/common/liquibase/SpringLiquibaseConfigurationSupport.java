@@ -41,7 +41,7 @@ public abstract class SpringLiquibaseConfigurationSupport implements ResourceLoa
         liquibase.setLiquibaseTablespace(properties.getLiquibaseTablespace());
         liquibase.setDropFirst(properties.isDropFirst());
         liquibase.setShouldRun(properties.isEnabled());
-        liquibase.setLabels(properties.getLabels());
+        liquibase.setLabelFilter(properties.getLabelFilter());
         liquibase.setChangeLogParameters(properties.getParameters());
         liquibase.setRollbackFile(properties.getRollbackFile());
         liquibase.setDatabaseChangeLogTable(properties.getDatabaseChangeLogTable());

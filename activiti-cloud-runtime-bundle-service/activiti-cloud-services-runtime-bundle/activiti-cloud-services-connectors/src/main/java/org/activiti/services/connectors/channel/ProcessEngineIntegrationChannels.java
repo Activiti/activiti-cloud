@@ -26,11 +26,11 @@ public interface ProcessEngineIntegrationChannels {
 
     @InputBinding(INTEGRATION_RESULTS_CONSUMER)
     default SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER).getObject();
     }
 
     @InputBinding(INTEGRATION_ERRORS_CONSUMER)
     default SubscribableChannel integrationErrorsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER).getObject();
     }
 }

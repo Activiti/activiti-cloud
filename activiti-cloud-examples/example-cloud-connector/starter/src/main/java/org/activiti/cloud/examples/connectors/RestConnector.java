@@ -42,7 +42,7 @@ public class RestConnector implements ConsumerConnector<IntegrationRequest> {
 
         @InputBinding(POST)
         default SubscribableChannel restConnectorPost() {
-            return MessageChannels.publishSubscribe(POST).get();
+            return MessageChannels.publishSubscribe(POST).getObject();
         }
     }
 

@@ -47,7 +47,7 @@ public class MultiInstanceConnector implements ConsumerConnector<IntegrationRequ
 
         @InputBinding(CHANNEL)
         default SubscribableChannel miCloudConnectorInput() {
-            return MessageChannels.publishSubscribe(CHANNEL).get();
+            return MessageChannels.publishSubscribe(CHANNEL).getObject();
         }
     }
 

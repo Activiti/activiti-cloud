@@ -24,6 +24,6 @@ public interface MoviesDescriptionConnectorChannels {
 
     @InputBinding(MOVIES_DESCRIPTION_CONSUMER)
     default SubscribableChannel moviesDescriptionConsumer() {
-        return MessageChannels.publishSubscribe(MOVIES_DESCRIPTION_CONSUMER).get();
+        return MessageChannels.publishSubscribe(MOVIES_DESCRIPTION_CONSUMER).getObject();
     }
 }

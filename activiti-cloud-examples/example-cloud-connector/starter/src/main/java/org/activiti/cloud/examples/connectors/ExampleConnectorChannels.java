@@ -24,6 +24,6 @@ public interface ExampleConnectorChannels {
 
     @InputBinding(EXAMPLE_CONNECTOR_CONSUMER)
     default SubscribableChannel exampleConnectorConsumer() {
-        return MessageChannels.publishSubscribe(EXAMPLE_CONNECTOR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(EXAMPLE_CONNECTOR_CONSUMER).getObject();
     }
 }
