@@ -12,7 +12,7 @@
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti.version>8.0.0-alpha.5</activiti.version>
+    <activiti.version>8.0.0-alpha.6</activiti.version>
   </properties>
   <modules>
     <module>activiti-cloud-api-dependencies</module>
