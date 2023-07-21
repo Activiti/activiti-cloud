@@ -108,7 +108,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     public ModelEntity updateModel(ModelEntity modelToBeUpdated, ModelEntity newModel) {
         Optional.ofNullable(newModel.getName()).ifPresent(modelToBeUpdated::setName);
         Optional.ofNullable(newModel.getExtensions()).ifPresent(modelToBeUpdated::setExtensions);
-        versionGenerationHelper.generateNextVersion(modelToBeUpdated);
+        if (modelToBeUpdated != newModel)
+            versionGenerationHelper.generateNextVersion(modelToBeUpdated);
         return modelJpaRepository.save(modelToBeUpdated);
     }
 
