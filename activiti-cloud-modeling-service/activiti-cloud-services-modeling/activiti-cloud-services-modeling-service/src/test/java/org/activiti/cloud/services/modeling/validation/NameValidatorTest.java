@@ -68,9 +68,9 @@ class NameValidatorTest {
             "myType"
             );
         assertThat(errors)
-                .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-                .containsOnly(
-                        "length.greater",
-                        "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'");
+            .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
+            .containsOnly(
+                    "length.greater",
+                    "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'");
     }
 }
