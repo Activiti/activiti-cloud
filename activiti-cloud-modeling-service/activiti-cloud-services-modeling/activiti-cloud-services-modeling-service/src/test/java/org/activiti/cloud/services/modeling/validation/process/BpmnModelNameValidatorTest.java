@@ -84,7 +84,10 @@ class BpmnModelNameValidatorTest {
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
-        when(process.getName()).thenReturn("Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g");
+        when(process.getName())
+            .thenReturn(
+                "Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g"
+            );
         Stream<ModelValidationError> errors = bpmnModelNameValidator.validate(bpmnModel, validationContext);
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
