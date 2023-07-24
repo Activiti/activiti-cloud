@@ -61,16 +61,16 @@ public interface NameValidator extends ModelValidationErrorProducer {
                     )
                 );
             }
-           if (name.length() > NAME_MAX_LENGTH) {
-               validationErrors.add(
-                   createModelValidationError(
-                       INVALID_NAME_LENGTH_PROBLEM,
-                       format(INVALID_NAME_LENGTH_DESCRIPTION, type, name),
-                       NAME_VALIDATOR,
-                       "length.greater"
-                   )
-               );
-           }
+            if (name.length() > NAME_MAX_LENGTH) {
+                validationErrors.add(
+                    createModelValidationError(
+                        INVALID_NAME_LENGTH_PROBLEM,
+                        format(INVALID_NAME_LENGTH_DESCRIPTION, type, name),
+                        NAME_VALIDATOR,
+                        "length.greater"
+                    )
+                );
+            }
         }
 
         return validationErrors.stream();
