@@ -63,12 +63,12 @@ class NameValidatorTest {
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
-        Stream<ModelValidationError> errors = nameValidator.validateName("Abc 123 def 456 ghi 789 jkl", "myType");
+        Stream<ModelValidationError> errors = nameValidator.validateName("Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g", "myType");
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
             .containsOnly(
                 "length.greater",
-                "The myType name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+                "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'"
             );
     }
 }

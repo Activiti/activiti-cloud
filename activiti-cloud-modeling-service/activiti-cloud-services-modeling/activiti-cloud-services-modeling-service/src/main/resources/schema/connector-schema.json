@@ -118,7 +118,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 100,
-      "pattern": "^.{1,100}$"
+      "pattern": "^.+$|^.+.{1,99}$\n"
     },
     "description": {
       "description": "The connector's description",
