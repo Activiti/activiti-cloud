@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.validation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
