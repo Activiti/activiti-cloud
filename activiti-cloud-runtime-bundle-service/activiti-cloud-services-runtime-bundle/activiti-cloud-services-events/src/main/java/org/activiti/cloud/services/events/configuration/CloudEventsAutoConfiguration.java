@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.configuration;
 
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.cloud.services.events.converter.ToCloudTaskRuntimeEventConverter;
@@ -91,6 +92,12 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public AuditServiceInfoAppender auditServiceInfoAppender() {
+        return new AuditServiceInfoAppender();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public CloudRuntimeEventMessageBuilderFactory cloudRuntimeEventMessageBuilderFactory(
         RuntimeBundleProperties properties
     ) {
@@ -108,17 +115,19 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ToCloudProcessRuntimeEventConverter toCloudProcessRuntimeEventConverter(
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        AuditServiceInfoAppender auditServiceInfoAppender
     ) {
-        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender);
+        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ToCloudTaskRuntimeEventConverter toCloudTaskRuntimeEventConverter(
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        AuditServiceInfoAppender auditServiceInfoAppender
     ) {
-        return new ToCloudTaskRuntimeEventConverter(runtimeBundleInfoAppender);
+        return new ToCloudTaskRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender);
     }
 
     @Bean
