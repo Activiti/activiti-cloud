@@ -78,13 +78,16 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
-        when(model.getName()).thenReturn("Abc 123 def 456 ghi 789 jkl");
+        when(model.getName())
+            .thenReturn(
+                "Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g"
+            );
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors)
             .rejectValue(
                 "name",
                 "length.greater",
-                "The model name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+                "The model name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'"
             );
     }
 }
