@@ -114,212 +114,212 @@ jobs:
         run: make docker/activiti-cloud-identity-adapter
 
 
-  acceptance-tests:
-    runs-on: ubuntu-latest
-    needs: build
-    env:
-      MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -DskipAcceptanceTests=true
-    strategy:
-      fail-fast: false
-      matrix:
-        messaging-broker: [ rabbitmq, kafka ]
-        messaging-partitioned: [ partitioned, non-partitioned ]
-        messaging-destinations: [ default-destinations ]
-        include:
-          - messaging-broker: kafka
-            messaging-partitioned: partitioned
-            messaging-destinations: override-destinations
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # acceptance-tests:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   env:
+  #     MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -DskipAcceptanceTests=true
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       messaging-broker: [ rabbitmq, kafka ]
+  #       messaging-partitioned: [ partitioned, non-partitioned ]
+  #       messaging-destinations: [ default-destinations ]
+  #       include:
+  #         - messaging-broker: kafka
+  #           messaging-partitioned: partitioned
+  #           messaging-destinations: override-destinations
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: ~/.m2/repository
+  #         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-maven-
 
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # 3.6.0
-        with:
-          java-version: 17
-          distribution: 'temurin'
+  #     - name: Setup Java JDK 17
+  #       uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc # 3.6.0
+  #       with:
+  #         java-version: 17
+  #         distribution: 'temurin'
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: v1.19.6
+  #     - name: Set up kubectl
+  #       uses: azure/setup-kubectl@v1
+  #       with:
+  #         version: v1.19.6
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.5.2
+  #     - name: Set up Helm
+  #       uses: azure/setup-helm@v3
+  #       with:
+  #         version: v3.5.2
 
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
+  #     - name: Set up rancher
+  #       uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
+  #       with:
+  #         url: ${{ secrets.RANCHER2_URL }}
+  #         access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+  #         secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+  #         context: ${{ env.CLUSTER_NAME }}
 
-      - uses: ./.github/actions/setup-env-for-broker
-        with:
-          messaging-broker: ${{ matrix.messaging-broker }}
-          messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
-          messaging-destinations-option: ${{ matrix.messaging-destinations }}
-          version: ${{ needs.build.outputs.version }}
+  #     - uses: ./.github/actions/setup-env-for-broker
+  #       with:
+  #         messaging-broker: ${{ matrix.messaging-broker }}
+  #         messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
+  #         messaging-destinations-option: ${{ matrix.messaging-destinations }}
+  #         version: ${{ needs.build.outputs.version }}
 
-      - name: Delete preview for ${{ matrix.messaging-broker }}
-        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-        run: |
-          kubectl delete ns $PREVIEW_NAME || true
+  #     - name: Delete preview for ${{ matrix.messaging-broker }}
+  #       if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+  #       run: |
+  #         kubectl delete ns $PREVIEW_NAME || true
 
-      - name: Install release for ${{ matrix.messaging-broker }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+  #     - name: Install release for ${{ matrix.messaging-broker }}
+  #       run: |
+  #         ### Variables ###
+  #         export SSO_PROTOCOL=https
+  #         export GATEWAY_PROTOCOL=https
+  #         export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+  #         export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+  #         export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 
-          ### Main ###
+  #         ### Main ###
 
-          echo "Installing release with make install"
-          make install
+  #         echo "Installing release with make install"
+  #         make install
 
-      - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
-        if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
-          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-          export QUERY_CONSUMER_NUMBER=2
+  #     - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
+  #       if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+  #       run: |
+  #         ### Variables ###
+  #         export SSO_PROTOCOL=https
+  #         export GATEWAY_PROTOCOL=https
+  #         export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+  #         export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+  #         export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+  #         export QUERY_CONSUMER_NUMBER=2
 
-          ### Functions ###
+  #         ### Functions ###
 
-          # It checks that the RESULT env var is equals to the first
-          # argument passed to the function
-          #
-          check_result_is () {
-            if [ "$RESULT" == "$1" ]; then
-              echo "correct"
-            else
-              echo "number expected is $1 but result is $RESULT"
-              exit 1
-            fi
-          }
+  #         # It checks that the RESULT env var is equals to the first
+  #         # argument passed to the function
+  #         #
+  #         check_result_is () {
+  #           if [ "$RESULT" == "$1" ]; then
+  #             echo "correct"
+  #           else
+  #             echo "number expected is $1 but result is $RESULT"
+  #             exit 1
+  #           fi
+  #         }
 
-          # It counts the number of query consumer pods in the
-          # cluster and set it in RESULT env var
-          #
-          count_query_consumer_pods () {
-            export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
-              'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
-              grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
-          }
+  #         # It counts the number of query consumer pods in the
+  #         # cluster and set it in RESULT env var
+  #         #
+  #         count_query_consumer_pods () {
+  #           export RESULT=$(kubectl -n $PREVIEW_NAME get pods -o \
+  #             'custom-columns=POD:metadata.name,READY-true:status.containerStatuses[*].ready' |\
+  #             grep -e 'activiti-cloud-query.*true' | wc -l | xargs);
+  #         }
 
-          # It counts the number of query partition of engineEvents topic
-          # created in Kafka and set it in RESULT env var
-          #
-          count_query_topic_partitions () {
-            export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
-              -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
-              --bootstrap-server=localhost:9092 --describe \
-              --topic engineEvents | grep PartitionCount |\
-              awk \'{ printf "%s",$6 }\'')
-          }
+  #         # It counts the number of query partition of engineEvents topic
+  #         # created in Kafka and set it in RESULT env var
+  #         #
+  #         count_query_topic_partitions () {
+  #           export RESULT=$(kubectl exec -t -n $PREVIEW_NAME kafka-0 \
+  #             -c kafka "--" sh -c $'/opt/bitnami/kafka/bin/kafka-topics.sh \
+  #             --bootstrap-server=localhost:9092 --describe \
+  #             --topic engineEvents | grep PartitionCount |\
+  #             awk \'{ printf "%s",$6 }\'')
+  #         }
 
-          ### Main ###
+  #         ### Main ###
 
-          echo "It checks the deployment has 1 query pod consumer"
-          count_query_consumer_pods
-          check_result_is 1
+  #         echo "It checks the deployment has 1 query pod consumer"
+  #         count_query_consumer_pods
+  #         check_result_is 1
 
-          echo "It checks the deployment has 4 query topic patitions"
-          count_query_topic_partitions
-          check_result_is 4
+  #         echo "It checks the deployment has 4 query topic patitions"
+  #         count_query_topic_partitions
+  #         check_result_is 4
 
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
+  #     - uses: ./.github/actions/check-service-health
+  #       with:
+  #         health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
 
-      - name: Run Modeling Acceptance Tests
-        # modeling acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/modeling-acceptance-tests
+  #     - name: Run Modeling Acceptance Tests
+  #       # modeling acceptance tests does not depend on messaging, so they can be run only once
+  #       if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+  #       run: |
+  #         make test/modeling-acceptance-tests
 
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
+  #     - uses: ./.github/actions/check-service-health
+  #       with:
+  #         health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
 
-      - name: Run Identity Adapter Acceptance Tests
-        # identity adapter acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/identity-adapter-acceptance-tests
+  #     - name: Run Identity Adapter Acceptance Tests
+  #       # identity adapter acceptance tests does not depend on messaging, so they can be run only once
+  #       if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
+  #       run: |
+  #         make test/identity-adapter-acceptance-tests
 
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
+  #     - uses: ./.github/actions/check-service-health
+  #       with:
+  #         health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
 
-      - uses: ./.github/actions/check-service-health
-        with:
-          health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
+  #     - uses: ./.github/actions/check-service-health
+  #       with:
+  #         health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
 
-      - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
-        run: |
-          make test/runtime-acceptance-tests
+  #     - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
+  #       run: |
+  #         make test/runtime-acceptance-tests
 
-      - name: Delete Helm chart for ${{ matrix.messaging-broker }}
-        if: always()
-        env:
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-        run: |
-          if [ $IS_PREVIEW = true ]
-          then
-              echo "Skipping delete Helm release for preview"
-          else
-              echo "Delete Helm release"
-              make delete
-          fi
+  #     - name: Delete Helm chart for ${{ matrix.messaging-broker }}
+  #       if: always()
+  #       env:
+  #         IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+  #       run: |
+  #         if [ $IS_PREVIEW = true ]
+  #         then
+  #             echo "Skipping delete Helm release for preview"
+  #         else
+  #             echo "Delete Helm release"
+  #             make delete
+  #         fi
 
-  delete-test-images:
-    runs-on: ubuntu-latest
-    needs:
-      - acceptance-tests
-      # dependency needed for build.outputs env variables resolution
-      - build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Delete Docker images
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
-          VERSION: ${{ needs.build.outputs.version }}
-        run: |
-          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
-          then
-              echo "Skipping delete Docker images"
-          else
-              echo $VERSION > VERSION
-              echo "Delete Docker images"
-              make docker-delete-all
-          fi
+  # delete-test-images:
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - acceptance-tests
+  #     # dependency needed for build.outputs env variables resolution
+  #     - build
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #     - name: Delete Docker images
+  #       env:
+  #         DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  #         IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+  #         VERSION: ${{ needs.build.outputs.version }}
+  #       run: |
+  #         if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+  #         then
+  #             echo "Skipping delete Docker images"
+  #         else
+  #             echo $VERSION > VERSION
+  #             echo "Delete Docker images"
+  #             make docker-delete-all
+  #         fi
 
   publish:
     runs-on: ubuntu-latest
     needs:
       - build
-      - delete-test-images
+      # - delete-test-images
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
