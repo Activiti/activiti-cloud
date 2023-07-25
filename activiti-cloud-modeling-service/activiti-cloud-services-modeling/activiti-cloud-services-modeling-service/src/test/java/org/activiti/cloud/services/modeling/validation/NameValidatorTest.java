@@ -29,8 +29,7 @@ class NameValidatorTest {
 
     @BeforeEach
     public void setup() {
-        nameValidator = new NameValidator() {
-        };
+        nameValidator = new NameValidator() {};
     }
 
     @Test
@@ -73,6 +72,7 @@ class NameValidatorTest {
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
             .containsOnly(
                 "length.greater",
-                "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'");
+                "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'"
+            );
     }
 }
