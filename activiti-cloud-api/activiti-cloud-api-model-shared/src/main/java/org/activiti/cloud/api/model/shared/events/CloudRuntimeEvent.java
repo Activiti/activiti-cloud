@@ -34,4 +34,11 @@ public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
      * ID of the entity included in the message.
      */
     String getEntityId();
+
+    /**
+     * User who performed an action
+     */
+    String getActor();
+
+    void setActor(String actor);
 }
