@@ -18,6 +18,7 @@ package org.activiti.cloud.services.modeling.validation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
+
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,8 @@ class NameValidatorTest {
 
     @BeforeEach
     public void setup() {
-        nameValidator = new NameValidator() {};
+        nameValidator = new NameValidator() {
+        };
     }
 
     @Test
@@ -66,11 +68,11 @@ class NameValidatorTest {
         Stream<ModelValidationError> errors = nameValidator.validateName(
             "Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g",
             "myType"
-            );
+        );
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
             .containsOnly(
-                    "length.greater",
-                    "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'");
+                "length.greater",
+                "The myType name length cannot be greater than 100: 'Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g'");
     }
 }

@@ -107,8 +107,8 @@ class DNSNameValidatorTest {
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
         Stream<ModelValidationError> errors = dnsNameValidator.validateDNSName(
-           "Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g",
-           "myType"
+            "Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 ghi 789 jkl Abc 123 def 456 g",
+            "myType"
         );
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
