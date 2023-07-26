@@ -81,6 +81,9 @@ public class CsvLogEntry implements CloudRuntimeEvent {
     @CsvBindByName
     private Integer processDefinitionVersion;
 
+    @CsvBindByName
+    private String actor;
+
     public CsvLogEntry(CloudRuntimeEvent event) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -104,6 +107,7 @@ public class CsvLogEntry implements CloudRuntimeEvent {
         this.processDefinitionId = event.getProcessDefinitionId();
         this.processDefinitionKey = event.getProcessDefinitionKey();
         this.processDefinitionVersion = event.getProcessDefinitionVersion();
+        this.actor = event.getActor();
     }
 
     public String getTime() {
@@ -123,6 +127,11 @@ public class CsvLogEntry implements CloudRuntimeEvent {
     @Override
     public String getEntityId() {
         return this.entityId;
+    }
+
+    @Override
+    public String getActor() {
+        return this.actor;
     }
 
     @Override
