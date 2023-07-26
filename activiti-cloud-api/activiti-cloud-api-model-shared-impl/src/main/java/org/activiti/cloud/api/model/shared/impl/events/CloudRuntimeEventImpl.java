@@ -130,7 +130,6 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
         return this.actor;
     }
 
-    @Override
     public void setActor(String actor) {
         this.actor = actor;
     }

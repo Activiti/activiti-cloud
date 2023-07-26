@@ -39,6 +39,4 @@ public interface CloudRuntimeEvent<ENTITY_TYPE, EVENT_TYPE extends Enum<?>>
      * User who performed an action
      */
     String getActor();
-
-    void setActor(String actor);
 }
