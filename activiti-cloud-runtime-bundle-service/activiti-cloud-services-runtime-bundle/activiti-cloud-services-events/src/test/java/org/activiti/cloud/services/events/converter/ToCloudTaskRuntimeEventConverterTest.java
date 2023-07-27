@@ -19,7 +19,6 @@ package org.activiti.cloud.services.events.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -63,7 +62,7 @@ class ToCloudTaskRuntimeEventConverterTest {
     void beforeEach() {
         User user = new User();
         user.setId(USERNAME_GUID);
-        when(this.identityService.findUserByName(eq(USERNAME))).thenReturn(user);
+        when(this.identityService.findUserByName(USERNAME)).thenReturn(user);
     }
 
     @Test

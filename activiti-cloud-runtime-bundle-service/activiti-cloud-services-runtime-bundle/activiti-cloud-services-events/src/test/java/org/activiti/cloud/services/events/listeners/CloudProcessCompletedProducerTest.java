@@ -77,7 +77,7 @@ class CloudProcessCompletedProducerTest {
     void beforeEach() {
         User user = new User();
         user.setId(USERNAME_GUID);
-        when(this.identityService.findUserByName(eq(USERNAME))).thenReturn(user);
+        when(this.identityService.findUserByName(USERNAME)).thenReturn(user);
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
     }
 
