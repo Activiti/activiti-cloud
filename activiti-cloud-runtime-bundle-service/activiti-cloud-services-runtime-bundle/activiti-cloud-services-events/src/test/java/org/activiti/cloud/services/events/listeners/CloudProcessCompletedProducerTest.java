@@ -28,6 +28,8 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -49,7 +51,9 @@ class CloudProcessCompletedProducerTest {
         new RuntimeBundleProperties()
     );
 
-    private AuditServiceInfoAppender auditServiceInfoAppender = spy(AuditServiceInfoAppender.class);
+    private IdentityService identityService = mock(IdentityService.class);
+
+    private AuditServiceInfoAppender auditServiceInfoAppender = spy(new AuditServiceInfoAppender(identityService));
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
         new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
@@ -65,26 +69,32 @@ class CloudProcessCompletedProducerTest {
     @Captor
     private ArgumentCaptor<CloudRuntimeEvent> argumentCaptor;
 
+    private static final String USERNAME = "myUserTest";
+
+    private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
+
     @BeforeEach
     void beforeEach() {
+        User user = new User();
+        user.setId(USERNAME_GUID);
+        when(this.identityService.findUserByName(eq(USERNAME))).thenReturn(user);
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
     }
 
     @Test
     void should_setActorFromInitiator_when_invokeCloudProcessCompletedProducerOnEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-        String initiator = "myUserTest";
-        processInstance.setInitiator(initiator);
+        processInstance.setInitiator(USERNAME);
         ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);
         CloudProcessCompletedProducer cloudProcessCompletedProducer = new CloudProcessCompletedProducer(
-            eventConverter,
-            eventsAggregator
+            this.eventConverter,
+            this.eventsAggregator
         );
 
         cloudProcessCompletedProducer.onEvent(processCompletedEvent);
 
-        verify(this.auditServiceInfoAppender).appendAuditServiceInfoTo(any(CloudRuntimeEventImpl.class), eq(initiator));
+        verify(this.auditServiceInfoAppender).appendAuditServiceInfoTo(any(CloudRuntimeEventImpl.class), eq(USERNAME));
         verify(this.eventsAggregator).add(this.argumentCaptor.capture());
-        assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo(initiator);
+        assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo(USERNAME_GUID);
     }
 }

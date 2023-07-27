@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.configuration;
 
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -92,8 +93,8 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuditServiceInfoAppender auditServiceInfoAppender() {
-        return new AuditServiceInfoAppender();
+    public AuditServiceInfoAppender auditServiceInfoAppender(IdentityService identityService) {
+        return new AuditServiceInfoAppender(identityService);
     }
 
     @Bean
