@@ -62,15 +62,15 @@ import org.springframework.test.web.servlet.MvcResult;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @Import({ AuditAPIAutoConfiguration.class, AuditJPAAutoConfiguration.class, AlfrescoWebAutoConfiguration.class })
-public class EventsEngineEventsAdminControllerIT {
+class EventsEngineEventsAdminControllerIT {
 
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
     private static final String CSV_FILENAME = "20220710_testApp_audit.csv";
 
     private static String CSV_CONTENT =
-        "\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
-        "\"testApp\",\"\",\"\",\"{\"\"appVersion\"\":null,\"\"id\"\":\"\"10\"\",\"\"name\"\":null,\"\"processDefinitionId\"\":\"\"1\"\",\"\"processDefinitionKey\"\":null,\"\"initiator\"\":null,\"\"startDate\"\":null,\"\"completedDate\"\":null,\"\"businessKey\"\":null,\"\"status\"\":null,\"\"parentId\"\":null,\"\"processDefinitionVersion\"\":null,\"\"processDefinitionName\"\":null}\",\"\",\"PROCESS_STARTED\",\"processEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
-        "\"testApp\",\"\",\"\",\"{\"\"name\"\":\"\"var\"\",\"\"type\"\":null,\"\"processInstanceId\"\":\"\"processId\"\",\"\"value\"\":null,\"\"taskId\"\":\"\"taskId\"\",\"\"taskVariable\"\":true}\",\"var\",\"VARIABLE_CREATED\",\"variableEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
+        "\"ACTOR\",\"APPNAME\",\"APPVERSION\",\"BUSINESSKEY\",\"ENTITY\",\"ENTITYID\",\"EVENTTYPE\",\"ID\",\"MESSAGEID\",\"PARENTPROCESSINSTANCEID\",\"PROCESSDEFINITIONID\",\"PROCESSDEFINITIONKEY\",\"PROCESSDEFINITIONVERSION\",\"PROCESSINSTANCEID\",\"SEQUENCENUMBER\",\"SERVICEFULLNAME\",\"SERVICENAME\",\"SERVICETYPE\",\"SERVICEVERSION\",\"TIME\"\n" +
+        "\"service_user\",\"testApp\",\"\",\"\",\"{\"\"appVersion\"\":null,\"\"id\"\":\"\"10\"\",\"\"name\"\":null,\"\"processDefinitionId\"\":\"\"1\"\",\"\"processDefinitionKey\"\":null,\"\"initiator\"\":null,\"\"startDate\"\":null,\"\"completedDate\"\":null,\"\"businessKey\"\":null,\"\"status\"\":null,\"\"parentId\"\":null,\"\"processDefinitionVersion\"\":null,\"\"processDefinitionName\"\":null}\",\"\",\"PROCESS_STARTED\",\"processEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n" +
+        "\"service_user\",\"testApp\",\"\",\"\",\"{\"\"name\"\":\"\"var\"\",\"\"type\"\":null,\"\"processInstanceId\"\":\"\"processId\"\",\"\"value\"\":null,\"\"taskId\"\":\"\"taskId\"\",\"\"taskVariable\"\":true}\",\"var\",\"VARIABLE_CREATED\",\"variableEventId\",\"\",\"\",\"1\",\"\",\"\",\"10\",\"0\",\"\",\"rb-my-app\",\"\",\"\",\"2022-07-07 14:59:37\"\n";
 
     @MockBean
     private EventsRepository eventsRepository;
@@ -85,12 +85,12 @@ public class EventsEngineEventsAdminControllerIT {
     private UserGroupManager userGroupManager;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("user");
     }
 
     @Test
-    public void getEvents() throws Exception {
+    void getEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 11);
 
@@ -102,7 +102,7 @@ public class EventsEngineEventsAdminControllerIT {
     }
 
     @Test
-    public void exportEvents() throws Exception {
+    void exportEvents() throws Exception {
         List<AuditEventEntity> events = buildEventsData(1);
         events.add(buildVariableAuditEventEntity(2));
 
@@ -162,7 +162,7 @@ public class EventsEngineEventsAdminControllerIT {
     }
 
     @Test
-    public void getEventsAlfresco() throws Exception {
+    void getEventsAlfresco() throws Exception {
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
@@ -189,7 +189,7 @@ public class EventsEngineEventsAdminControllerIT {
     }
 
     @Test
-    public void headEvents() throws Exception {
+    void headEvents() throws Exception {
         PageRequest pageable = PageRequest.of(1, 10);
         Page<AuditEventEntity> eventsPage = new PageImpl<>(buildEventsData(1), pageable, 10);
 
@@ -199,7 +199,7 @@ public class EventsEngineEventsAdminControllerIT {
     }
 
     @Test
-    public void headEventsAlfresco() throws Exception {
+    void headEventsAlfresco() throws Exception {
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
         List<AuditEventEntity> events = buildEventsData(1);
