@@ -167,13 +167,8 @@ jobs:
         with:
           version: v3.5.2
 
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
+      - name: Setup Cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v2.8.0
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
@@ -192,7 +187,7 @@ jobs:
           ### Variables ###
           export SSO_PROTOCOL=https
           export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 
@@ -207,7 +202,7 @@ jobs:
           ### Variables ###
           export SSO_PROTOCOL=https
           export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export QUERY_CONSUMER_NUMBER=2
