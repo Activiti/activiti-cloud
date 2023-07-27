@@ -160,11 +160,8 @@ jobs:
 
       - name: Setup Cluster
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v2.8.0
-
-      - name: Patch Ingress conf
-        run: |
-          kubectl patch ingressclass/nginx \
-            -p '{"metadata":{"annotations":{"nginx.ingress.kubernetes.io/use-regex":"true"}}}'
+        with:
+          kind-node-image: kindest/node:v1.27.3
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
