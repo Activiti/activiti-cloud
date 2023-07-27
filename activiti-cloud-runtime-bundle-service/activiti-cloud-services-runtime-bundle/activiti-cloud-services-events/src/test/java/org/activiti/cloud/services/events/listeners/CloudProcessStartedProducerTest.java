@@ -29,6 +29,7 @@ import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -50,7 +51,10 @@ class CloudProcessStartedProducerTest {
         new RuntimeBundleProperties()
     );
 
-    private AuditServiceInfoAppender auditServiceInfoAppender = spy(AuditServiceInfoAppender.class);
+    @Mock
+    private IdentityService identityService;
+
+    private AuditServiceInfoAppender auditServiceInfoAppender = spy(new AuditServiceInfoAppender(identityService));
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
         new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
@@ -78,8 +82,8 @@ class CloudProcessStartedProducerTest {
         processInstance.setInitiator(initiator);
         ProcessStartedEvent processCompletedEvent = new ProcessStartedEventImpl(processInstance);
         CloudProcessStartedProducer cloudProcessStartedProducer = new CloudProcessStartedProducer(
-            eventConverter,
-            eventsAggregator
+            this.eventConverter,
+            this.eventsAggregator
         );
 
         cloudProcessStartedProducer.onEvent(processCompletedEvent);

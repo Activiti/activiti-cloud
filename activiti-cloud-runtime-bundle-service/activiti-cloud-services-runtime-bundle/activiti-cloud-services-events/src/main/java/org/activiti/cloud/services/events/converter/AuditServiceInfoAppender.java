@@ -17,14 +17,26 @@
 package org.activiti.cloud.services.events.converter;
 
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
+import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.identity.model.User;
+import org.springframework.util.StringUtils;
 
 public class AuditServiceInfoAppender {
+
+    private final IdentityService identityService;
+
+    public AuditServiceInfoAppender(IdentityService identityService) {
+        this.identityService = identityService;
+    }
 
     public CloudRuntimeEventImpl<?, ?> appendAuditServiceInfoTo(
         CloudRuntimeEventImpl<?, ?> cloudRuntimeEvent,
         String actor
     ) {
-        cloudRuntimeEvent.setActor(actor);
+        if (StringUtils.hasText(actor)) {
+            User actorUser = this.identityService.findUserByName(actor);
+            cloudRuntimeEvent.setActor(actorUser.getId());
+        }
 
         return cloudRuntimeEvent;
     }
