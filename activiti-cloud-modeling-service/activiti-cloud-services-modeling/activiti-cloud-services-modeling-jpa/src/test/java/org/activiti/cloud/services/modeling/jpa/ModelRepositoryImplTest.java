@@ -16,16 +16,22 @@
 package org.activiti.cloud.services.modeling.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
+import org.activiti.cloud.services.modeling.entity.ModelVersionEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -200,5 +206,74 @@ public class ModelRepositoryImplTest {
         verify(modelJpaRepository, times(1))
             .findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isFalse();
+    }
+
+    @Test
+    public void should_notGenerateNewVersion_when_updateModelAndModelToBeUpdatedAndNewModelHasSameReference() {
+        ModelVersionEntity version = new ModelVersionEntity();
+        version.setVersionIdentifier(new VersionIdentifier("versionIdentifierId", "0.0.1"));
+
+        List<ModelVersionEntity> versions = new ArrayList<ModelVersionEntity>();
+        versions.add(version);
+        model.setVersions(versions);
+        model.setLatestVersion(version);
+
+        when(modelJpaRepository.save(any(ModelEntity.class))).thenReturn(model);
+
+        ModelEntity updatedModel = repository.updateModel(model, model);
+
+        assertThat(updatedModel.getLatestVersion().getVersion()).isEqualTo("0.0.1");
+    }
+
+    @Test
+    public void should_GenerateNewVersion_when_updateModelAndModelToBeUpdatedAndNewModelWithDifferentReference() {
+        ModelVersionEntity version = new ModelVersionEntity();
+        version.setVersionIdentifier(new VersionIdentifier("versionIdentifierId", "0.0.1"));
+
+        List<ModelVersionEntity> versions = new ArrayList<ModelVersionEntity>();
+        versions.add(version);
+
+        model.setVersions(versions);
+        model.setLatestVersion(version);
+
+        ModelEntity newModel = new ModelEntity();
+        newModel.setId("newModelId");
+        newModel.setName("newNameId");
+
+        when(modelJpaRepository.save(any(ModelEntity.class))).thenReturn(model);
+
+        ModelEntity updatedModel = repository.updateModel(model, newModel);
+
+        assertThat(updatedModel.getName()).isEqualTo("newNameId");
+        assertThat(updatedModel.getLatestVersion().getVersion()).isEqualTo("0.0.2");
+    }
+
+    @Test
+    public void should_GenerateNewVersion_when_updateModelAndModelToBeUpdatedAndNewModelIsSameButDifferentReference() {
+        ModelVersionEntity version = new ModelVersionEntity();
+        version.setVersionIdentifier(new VersionIdentifier("versionIdentifierId", "0.0.1"));
+
+        List<ModelVersionEntity> versions = new ArrayList<ModelVersionEntity>();
+        versions.add(version);
+
+        model.setVersions(versions);
+        model.setLatestVersion(version);
+
+        ModelEntity newModel = new ModelEntity();
+        newModel.setId("testModelId");
+        newModel.setName("testNameId");
+        newModel.addProject(project);
+        newModel.addProject(new ProjectEntity());
+
+        when(modelJpaRepository.save(any(ModelEntity.class))).thenReturn(model);
+
+        ModelEntity updatedModel = repository.updateModel(model, newModel);
+
+        assertThat(updatedModel.getLatestVersion().getVersion()).isEqualTo("0.0.2");
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_updateModelWithNullNewModel() {
+        assertThatThrownBy(() -> repository.updateModel(model, null)).isInstanceOf(NullPointerException.class);
     }
 }
