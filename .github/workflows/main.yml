@@ -159,9 +159,10 @@ jobs:
           version: v3.5.2
 
       - name: Setup Cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v2.8.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@setup-kind-versions
         with:
           kind-node-image: kindest/node:v1.27.3
+          nxginx-manifest: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.6.4/deploy/static/provider/kind/deploy.yaml
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
