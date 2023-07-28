@@ -24,16 +24,18 @@ import java.util.HashMap;
 import java.util.Map;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-public class ProcessVariablesPayloadConverterTest {
+class ProcessVariablesPayloadConverterTest {
 
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
@@ -43,8 +45,11 @@ public class ProcessVariablesPayloadConverterTest {
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
 
+    @MockBean
+    private IdentityService identityService;
+
     @Test
-    public void testProcessVariablesPayloadConverter() {
+    void testProcessVariablesPayloadConverter() {
         // given
         Map<String, Object> input = new HashMap<>();
 

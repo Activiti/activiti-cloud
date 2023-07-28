@@ -18,7 +18,6 @@ package org.activiti.cloud.services.events.configuration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.identity.IdentityService;
-import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManager;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
@@ -26,12 +25,9 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class CloudEventsAutoConfigurationIT {
@@ -62,18 +58,6 @@ class CloudEventsAutoConfigurationIT {
 
         @MockBean
         private IdentityService identityService;
-
-        @MockBean
-        private BuildProperties buildProperties;
-
-        @MockBean
-        private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
-
-        @MockBean
-        private ClientRegistrationRepository clientRegistrationRepository;
-
-        @MockBean
-        private KeycloakUserGroupManager keycloakUserGroupManager;
     }
 
     @Test
