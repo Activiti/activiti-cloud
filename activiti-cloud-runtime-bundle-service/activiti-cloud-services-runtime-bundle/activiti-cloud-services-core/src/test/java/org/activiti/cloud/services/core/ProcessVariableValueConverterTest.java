@@ -23,15 +23,20 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
+import org.activiti.cloud.services.identity.keycloak.KeycloakUserGroupManager;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-public class ProcessVariableValueConverterTest {
+class ProcessVariableValueConverterTest {
 
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
@@ -41,8 +46,20 @@ public class ProcessVariableValueConverterTest {
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
 
+    @MockBean
+    private BuildProperties buildProperties;
+
+    @MockBean
+    private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private KeycloakUserGroupManager keycloakUserGroupManager;
+
     @Test
-    public void testProcessVariableValueConverterNullValue() {
+    void testProcessVariableValueConverterNullValue() {
         // when
         String nullValue = variableValueConverter.convert(new ProcessVariableValue("String", null));
 
@@ -51,7 +68,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterStringValue() {
+    void testProcessVariableValueConverterStringValue() {
         // when
         String stringValue = variableValueConverter.convert(new ProcessVariableValue("string", "name"));
 
@@ -60,7 +77,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterIntValue() {
+    void testProcessVariableValueConverterIntValue() {
         // when
         Integer intValue = variableValueConverter.convert(new ProcessVariableValue("int", "10"));
 
@@ -69,7 +86,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterLongValue() {
+    void testProcessVariableValueConverterLongValue() {
         // when
         Long longValue = variableValueConverter.convert(new ProcessVariableValue("long", "10"));
 
@@ -78,7 +95,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterBooleanValue() {
+    void testProcessVariableValueConverterBooleanValue() {
         // when
         Boolean booleanValue = variableValueConverter.convert(new ProcessVariableValue("boolean", "true"));
 
@@ -87,7 +104,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterDoubleValue() {
+    void testProcessVariableValueConverterDoubleValue() {
         // when
         Double doubleValue = variableValueConverter.convert(new ProcessVariableValue("double", "10.00"));
 
@@ -96,7 +113,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterLocalDateValue() {
+    void testProcessVariableValueConverterLocalDateValue() {
         // when
         LocalDate localDateValue = variableValueConverter.convert(new ProcessVariableValue("LocalDate", "2020-04-20"));
 
@@ -105,7 +122,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterDateValue() {
+    void testProcessVariableValueConverterDateValue() {
         // when
         Date dateValue = variableValueConverter.convert(
             new ProcessVariableValue("Date", DATE_1970_01_01T01_01_01_001Z)
@@ -116,7 +133,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterBigDecimalValue() {
+    void testProcessVariableValueConverterBigDecimalValue() {
         // when
         BigDecimal bigDecimalValue = variableValueConverter.convert(new ProcessVariableValue("BigDecimal", "10.00"));
 
@@ -125,7 +142,7 @@ public class ProcessVariableValueConverterTest {
     }
 
     @Test
-    public void testProcessVariableValueConverterJsonNodeValue() {
+    void testProcessVariableValueConverterJsonNodeValue() {
         // when
         JsonNode jsonNodeValue = variableValueConverter.convert(new ProcessVariableValue("json", "{}"));
 
