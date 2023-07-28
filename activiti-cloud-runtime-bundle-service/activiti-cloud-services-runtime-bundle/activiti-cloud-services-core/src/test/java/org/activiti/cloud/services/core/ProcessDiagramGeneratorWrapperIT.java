@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
@@ -36,7 +38,7 @@ import org.springframework.test.context.TestPropertySource;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test-process-diagram.properties")
-public class ProcessDiagramGeneratorWrapperIT {
+class ProcessDiagramGeneratorWrapperIT {
 
     private static final String DEFAULT_DIAGRAM_FONT_NAME = "Arial";
 
@@ -49,6 +51,9 @@ public class ProcessDiagramGeneratorWrapperIT {
     @Autowired
     private TestProcessEngine processEngine;
 
+    @MockBean
+    private IdentityService identityService;
+
     /**
      * Test for generating a valid process diagram
      * <p>
@@ -58,7 +63,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: the diagram is not empty
      */
     @Test
-    public void testGenerateProcessDiagram() throws Exception {
+    void testGenerateProcessDiagram() throws Exception {
         //GIVEN
         processEngine.deploy("processes/SimpleProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("SimpleProcess");
@@ -81,7 +86,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: the diagram is empty
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfo() throws Exception {
+    void testGenerateDiagramForProcessWithNoGraphicInfo() throws Exception {
         //GIVEN
         processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
@@ -104,7 +109,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage() throws Exception {
+    void testGenerateDiagramForProcessWithNoGraphicInfoAndNoDefaultImage() throws Exception {
         //GIVEN
         processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
@@ -130,7 +135,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 4. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage() throws Exception {
+    void testGenerateDiagramForProcessWithNoGraphicInfoAndInvalidDefaultImage() throws Exception {
         //GIVEN
         processEngine.deploy("processes/SubProcessTest.fixSystemFailureProcess");
         ProcessInstance processInstance = processEngine.startProcessInstanceByKey("fixSystemFailure");
@@ -154,7 +159,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * 2. Expected: ActivitiException is thrown while generating diagram
      */
     @Test
-    public void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
+    void testGenerateDiagramForProcessWithInvalidGraphicInfo() throws Exception {
         //GIVEN
         BpmnModel bpmnModel = new BpmnModel();
         bpmnModel.addGraphicInfo("key", null);
@@ -179,7 +184,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * - the diagram annotation font name is the engine default one (Arial)
      */
     @Test
-    public void testProcessDiagramFonts() {
+    void testProcessDiagramFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { "Lucida" });
 
@@ -200,7 +205,7 @@ public class ProcessDiagramGeneratorWrapperIT {
      * Expected: The only used font is the default, no matter what custom font are specified
      */
     @Test
-    public void testProcessDiagramFontsWhenWithAvailableFonts() {
+    void testProcessDiagramFontsWhenWithAvailableFonts() {
         //GIVEN
         when(processDiagramGenerator.getAvailableFonts()).thenReturn(new String[] { DEFAULT_DIAGRAM_FONT_NAME });
 
