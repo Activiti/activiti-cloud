@@ -46,6 +46,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -80,6 +81,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -99,8 +101,9 @@ import org.springframework.test.web.servlet.MvcResult;
         StreamConfig.class,
     }
 )
+@WithMockUser
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
-public class ProcessDefinitionControllerImplIT {
+class ProcessDefinitionControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -132,10 +135,13 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private CachingProcessExtensionService cachingProcessExtensionService;
 
+    @MockBean
+    private IdentityService identityService;
+
     private final ObjectMapper om = new ObjectMapper();
 
     @Test
-    public void getProcessDefinitions() throws Exception {
+    void getProcessDefinitions() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -166,7 +172,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
         ProcessDefinition processDefinition = buildProcessDefinition(
@@ -211,7 +217,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinitionsWithVariables() throws Exception {
+    void getProcessDefinitionsWithVariables() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -249,7 +255,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void shouldGetProcessDefinitionById() throws Exception {
+    void shouldGetProcessDefinitionById() throws Exception {
         //given
         String processId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(processId))
@@ -261,7 +267,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         String procDefId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(procDefId))
             .willReturn(buildProcessDefinition(procDefId, "my process", "This is my process", 1));
@@ -283,7 +289,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void shouldGetXMLProcessModel() throws Exception {
+    void shouldGetXMLProcessModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
@@ -296,7 +302,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void shouldGetBpmnJsonModel() throws Exception {
+    void shouldGetBpmnJsonModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
@@ -313,7 +319,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void shouldGetSVGProcessDiagram() throws Exception {
+    void shouldGetSVGProcessDiagram() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
@@ -327,7 +333,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getProcessDiagramReturnNotFound_when_processDefinitionIsNotFound() throws Exception {
+    void should_getProcessDiagramReturnNotFound_when_processDefinitionIsNotFound() throws Exception {
         String processDefinitionId = "missingProcessDefinitionId";
         willThrow(new ActivitiObjectNotFoundException("not found"))
             .given(processRuntime)
@@ -341,7 +347,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getProcessDiagramReturnNoContent_when_noInterchangeInfo() throws Exception {
+    void should_getProcessDiagramReturnNoContent_when_noInterchangeInfo() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
         BpmnModel bpmnModel = new BpmnModel();
         given(repositoryService.getBpmnModel(processDefinitionId)).willReturn(bpmnModel);
@@ -359,8 +365,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getProcessModelStaticValuesMappingForStartEvent_when_hasStartEventFormAndMappings()
-        throws Exception {
+    void should_getProcessModelStaticValuesMappingForStartEvent_when_hasStartEventFormAndMappings() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -422,7 +427,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings()
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings()
         throws Exception {
         String procId = "procId";
         String my_process = "my process";
@@ -484,7 +489,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent()
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent()
         throws Exception {
         String procId = "procId";
         String my_process = "my process";
@@ -537,8 +542,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoStartEvent()
-        throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoStartEvent() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -599,8 +603,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoExtensions()
-        throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoExtensions() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,6 +36,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -59,6 +61,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceVariableControllerImpl.class)
@@ -75,7 +78,8 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class ProcessInstanceVariableControllerImplIT {
+@WithMockUser
+class ProcessInstanceVariableControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -115,8 +119,11 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private CachingProcessExtensionService cachingProcessExtensionService;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -128,7 +135,7 @@ public class ProcessInstanceVariableControllerImplIT {
     }
 
     @Test
-    public void getVariables() throws Exception {
+    void getVariables() throws Exception {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
             "name",
             String.class.getName(),
@@ -152,7 +159,7 @@ public class ProcessInstanceVariableControllerImplIT {
     }
 
     @Test
-    public void setVariables() throws Exception {
+    void setVariables() throws Exception {
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1", "varObj1");
         variables.put("var2", "varObj2");
@@ -174,6 +181,7 @@ public class ProcessInstanceVariableControllerImplIT {
                                 .build()
                         )
                     )
+                    .with(csrf())
             )
             .andExpect(status().isOk());
 

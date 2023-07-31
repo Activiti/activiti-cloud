@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -47,6 +48,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -66,7 +68,8 @@ import org.springframework.test.web.servlet.MvcResult;
         StreamConfig.class,
     }
 )
-public class CandidateUserAdminControllerIT {
+@WithMockUser
+class CandidateUserAdminControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,15 +89,18 @@ public class CandidateUserAdminControllerIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 
@@ -112,7 +118,7 @@ public class CandidateUserAdminControllerIT {
     }
 
     @Test
-    public void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
+    void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskAdminRuntime.userCandidates("1")).thenReturn(stringList);
 

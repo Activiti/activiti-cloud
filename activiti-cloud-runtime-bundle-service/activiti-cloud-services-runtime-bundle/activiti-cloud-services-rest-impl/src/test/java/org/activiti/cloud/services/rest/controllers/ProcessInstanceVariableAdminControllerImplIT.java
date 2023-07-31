@@ -35,6 +35,7 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -79,7 +80,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         StreamConfig.class,
     }
 )
-public class ProcessInstanceVariableAdminControllerImplIT {
+class ProcessInstanceVariableAdminControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -116,8 +117,11 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ProcessInstanceImpl processInstance;
         processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
@@ -139,7 +143,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     }
 
     @Test
-    public void shouldGetVariables() throws Exception {
+    void shouldGetVariables() throws Exception {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
             "name",
             String.class.getName(),
@@ -163,7 +167,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     }
 
     @Test
-    public void shouldReturn200WithEmptyErrorListWhenSetVariablesWithCorrectNamesAndTypes() throws Exception {
+    void shouldReturn200WithEmptyErrorListWhenSetVariablesWithCorrectNamesAndTypes() throws Exception {
         //GIVEN
         Map<String, Object> variables = new HashMap<>();
         variables.put("name", "Alice");
@@ -197,7 +201,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     }
 
     @Test
-    public void deleteVariables() throws Exception {
+    void deleteVariables() throws Exception {
         this.mockMvc.perform(
                 delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
                     .accept(MediaTypes.HAL_JSON_VALUE)
