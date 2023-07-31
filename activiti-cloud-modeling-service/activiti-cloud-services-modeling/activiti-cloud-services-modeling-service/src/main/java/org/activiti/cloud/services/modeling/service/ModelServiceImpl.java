@@ -186,7 +186,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model createModel(Project project, Model model) {
-        if (!model.getType().equals("PROCESS")) validateModelNameCharacters(model.getName());
+        if (model.getType() != null && !model.getType().equals("PROCESS")) {
+            validateModelNameCharacters(model.getName());
+        }
         checkIfModelNameExistsInProject(project, model);
         checkModelScopeIntegrity(model);
         model.setId(null);
