@@ -66,6 +66,7 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -127,6 +128,9 @@ class ModelServiceImplTest {
     private FileMagicNumberValidator fileMagicNumberValidator;
 
     @Mock
+    private ModelNameValidator modelNameValidator;
+
+    @Mock
     private FileContentSanitizer fileContentSanitizer;
 
     @Mock
@@ -169,6 +173,7 @@ class ModelServiceImplTest {
                     processModelContentConverter,
                     modelUpdateListeners,
                     fileMagicNumberValidator,
+                    modelNameValidator,
                     fileContentSanitizer
                 )
             );

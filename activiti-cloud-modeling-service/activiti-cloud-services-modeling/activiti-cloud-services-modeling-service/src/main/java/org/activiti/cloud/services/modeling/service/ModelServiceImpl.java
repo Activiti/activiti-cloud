@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
@@ -58,6 +59,7 @@ import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
@@ -68,6 +70,7 @@ import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -101,6 +104,8 @@ public class ModelServiceImpl implements ModelService {
 
     private final FileMagicNumberValidator fileContentValidator;
 
+    private final ModelNameValidator modelNameValidator;
+
     private final FileContentSanitizer fileContentSanitizer;
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
@@ -121,6 +126,7 @@ public class ModelServiceImpl implements ModelService {
         ProcessModelContentConverter processModelContentConverter,
         Set<ModelUpdateListener> modelUpdateListeners,
         FileMagicNumberValidator fileContentValidator,
+        ModelNameValidator modelNameValidator,
         FileContentSanitizer fileContentSanitizer
     ) {
         this.modelRepository = modelRepository;
@@ -130,6 +136,7 @@ public class ModelServiceImpl implements ModelService {
         this.modelExtensionsService = modelExtensionsService;
         this.processModelContentConverter = processModelContentConverter;
         this.fileContentValidator = fileContentValidator;
+        this.modelNameValidator = modelNameValidator;
         this.fileContentSanitizer = fileContentSanitizer;
         modelUpdateListenersMapByModelType =
             modelUpdateListeners
@@ -179,6 +186,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model createModel(Project project, Model model) {
+        if (!model.getType().equals("PROCESS")) validateModelNameCharacters(model.getName());
         checkIfModelNameExistsInProject(project, model);
         checkModelScopeIntegrity(model);
         model.setId(null);
@@ -200,6 +208,23 @@ public class ModelServiceImpl implements ModelService {
         }
 
         return modelRepository.createModel(model);
+    }
+
+    private void validateModelName(String modelName) {
+        Stream<ModelValidationError> validationErrors = this.modelNameValidator.validateDNSName(modelName, "model");
+        validationErrors.findFirst().ifPresent(this::throwModelNameInvalidException);
+    }
+
+    private void validateModelNameCharacters(String modelName) {
+        Stream<ModelValidationError> validationErrors =
+            this.modelNameValidator.validateDNSNameCharacters(modelName, "model");
+        validationErrors.findFirst().ifPresent(this::throwModelNameInvalidException);
+    }
+
+    private void throwModelNameInvalidException(ModelValidationError error) {
+        String errorDescription = error.getDescription();
+        logger.info(errorDescription);
+        throw new ModelNameInvalidException(errorDescription);
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
@@ -235,6 +260,7 @@ public class ModelServiceImpl implements ModelService {
                 .forEach(project -> checkIfModelNameExistsInProject((Project) project, newModel));
         }
 
+        validateModelName(newModel.getName());
         checkModelScopeIntegrity(newModel);
 
         findModelUpdateListeners(modelToBeUpdated.getType())
