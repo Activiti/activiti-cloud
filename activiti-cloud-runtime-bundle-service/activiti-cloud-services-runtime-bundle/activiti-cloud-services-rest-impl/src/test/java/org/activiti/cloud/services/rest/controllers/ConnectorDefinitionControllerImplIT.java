@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -64,7 +65,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         StreamConfig.class,
     }
 )
-public class ConnectorDefinitionControllerImplIT {
+class ConnectorDefinitionControllerImplIT {
 
     private MockMvc mockMvc;
 
@@ -79,6 +80,9 @@ public class ConnectorDefinitionControllerImplIT {
 
     @MockBean
     private RepositoryService repositoryService;
+
+    @MockBean
+    private IdentityService identityService;
 
     @BeforeEach
     public void setup() {
@@ -106,7 +110,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getAllConnectorDefinitions() throws Exception {
+    void getAllConnectorDefinitions() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("content[0].links[0].rel", is("self")))
@@ -115,7 +119,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getOneSpecificConnectorDefinition() throws Exception {
+    void getOneSpecificConnectorDefinition() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("links[0].rel", is("self")))
@@ -124,7 +128,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getConnectorDefinitionNotFound() throws Exception {
+    void getConnectorDefinitionNotFound() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isNotFound());
     }

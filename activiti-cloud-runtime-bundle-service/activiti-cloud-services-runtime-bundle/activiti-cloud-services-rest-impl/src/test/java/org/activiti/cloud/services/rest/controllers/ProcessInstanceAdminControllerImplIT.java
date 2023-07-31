@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +42,7 @@ import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -68,6 +70,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceAdminControllerImpl.class)
@@ -86,8 +89,9 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
+@WithMockUser
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
-public class ProcessInstanceAdminControllerImplIT {
+class ProcessInstanceAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -119,15 +123,18 @@ public class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private CloudProcessDeletedService cloudProcessDeletedService;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
     }
 
     @Test
-    public void getProcessInstances() throws Exception {
+    void getProcessInstances() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
@@ -137,7 +144,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
@@ -149,53 +156,54 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void resume() throws Exception {
+    void resume() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
 
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
         when(processAdminRuntime.resume(any())).thenReturn(defaultProcessInstance());
 
-        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/resume", 1))
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/resume", 1).with(csrf()))
             .andExpect(status().isOk());
     }
 
     @Test
-    public void suspend() throws Exception {
+    void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
-        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/suspend", 1))
+        this.mockMvc.perform(post("/admin/v1/process-instances/{processInstanceId}/suspend", 1).with(csrf()))
             .andExpect(status().isOk());
     }
 
     @Test
-    public void deleteProcessInstance() throws Exception {
+    void deleteProcessInstance() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.delete(any())).thenReturn(defaultProcessInstance());
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}", 1)).andExpect(status().isOk());
-    }
-
-    @Test
-    public void destroyProcessInstance() throws Exception {
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}", 1).with(csrf()))
             .andExpect(status().isOk());
     }
 
     @Test
-    public void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
+    void destroyProcessInstance() throws Exception {
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1).with(csrf()))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
         //given
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1).with(csrf()))
             .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void update() throws Exception {
+    void update() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.update(any())).thenReturn(defaultProcessInstance());
@@ -211,12 +219,13 @@ public class ProcessInstanceAdminControllerImplIT {
                 put("/admin/v1/process-instances/{processInstanceId}", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    public void startMessage() throws Exception {
+    void startMessage() throws Exception {
         StartMessagePayload cmd = MessagePayloadBuilder
             .start("messageName")
             .withBusinessKey("buisinessId")
@@ -229,12 +238,13 @@ public class ProcessInstanceAdminControllerImplIT {
                 post("/admin/v1/process-instances/message")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    public void receiveMessage() throws Exception {
+    void receiveMessage() throws Exception {
         ReceiveMessagePayload cmd = MessagePayloadBuilder
             .receive("messageName")
             .withCorrelationKey("correlationId")
@@ -245,6 +255,7 @@ public class ProcessInstanceAdminControllerImplIT {
                 put("/admin/v1/process-instances/message")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }

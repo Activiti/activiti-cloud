@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,6 +38,7 @@ import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -60,6 +62,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskAdminControllerImpl.class)
@@ -78,7 +81,8 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class TaskAdminControllerImplIT {
+@WithMockUser
+class TaskAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -101,15 +105,18 @@ public class TaskAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private IdentityService identityService;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getTasks() throws Exception {
+    void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
@@ -119,7 +126,7 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
@@ -129,13 +136,13 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void deleteTask() throws Exception {
+    void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
-    public void updateTask() throws Exception {
+    void updateTask() throws Exception {
         given(taskAdminRuntime.update(any())).willReturn(buildDefaultAssignedTask());
         UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
             .update()
@@ -148,18 +155,19 @@ public class TaskAdminControllerImplIT {
                 put("/admin/v1/tasks/{taskId}", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(updateTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    public void completeTask() throws Exception {
+    void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
-    public void assignTask() throws Exception {
+    void assignTask() throws Exception {
         given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
@@ -167,12 +175,13 @@ public class TaskAdminControllerImplIT {
                 post("/admin/v1/tasks/{taskId}/assign", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    public void assignMultipleTasks() throws Exception {
+    void assignMultipleTasks() throws Exception {
         given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
         AssignTasksPayload assignTasksCmd = TaskPayloadBuilder
             .assignMultiple()
@@ -184,6 +193,7 @@ public class TaskAdminControllerImplIT {
                 post("/admin/v1/tasks/assign")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTasksCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
