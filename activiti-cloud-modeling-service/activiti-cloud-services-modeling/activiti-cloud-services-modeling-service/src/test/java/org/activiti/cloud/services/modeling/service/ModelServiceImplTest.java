@@ -59,6 +59,7 @@ import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
+import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -71,6 +72,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -127,7 +129,7 @@ class ModelServiceImplTest {
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
 
-    @Mock
+    @Spy
     private ModelNameValidator modelNameValidator;
 
     @Mock
@@ -209,6 +211,34 @@ class ModelServiceImplTest {
         assertThatThrownBy(() -> modelService.getTasksBy(projectOne, modelType, null))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Class task type it must not be null");
+    }
+
+    @Test
+    void should_throwModelNameInvalidException_when_creatingAModelWithInvalidCharAtEnd() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("wrong-name-");
+        wrongNameModel.setType("model-type");
+        assertThatThrownBy(() -> modelService.createModel(projectOne, wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'wrong-name-'"
+            );
+    }
+
+    @Test
+    void should_throwModelNameInvalidException_when_creatingAModelWithInvalidCharAtBeginning() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("-wrong-name");
+        wrongNameModel.setType("model-type");
+        assertThatThrownBy(() -> modelService.createModel(projectOne, wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: '-wrong-name'"
+            );
     }
 
     @Test
@@ -295,6 +325,32 @@ class ModelServiceImplTest {
 
         assertThatThrownBy(() -> modelService.updateModel(null, model))
             .isInstanceOf(ModelScopeIntegrityException.class);
+    }
+
+    @Test
+    void should_throwModelNameInvalidException_when_updatingModelWithInvalidCharAtBeginning() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("-wrong-name");
+        assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: '-wrong-name'"
+            );
+    }
+
+    @Test
+    void should_throwModelNameInvalidException_when_updatingModelWithInvalidCharAtEnd() {
+        Model wrongNameModel = new ModelImpl();
+        wrongNameModel.setName("wrong-name-");
+        assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
+            .isInstanceOf(ModelNameInvalidException.class)
+            .hasMessage(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'wrong-name-'"
+            );
     }
 
     @Test
