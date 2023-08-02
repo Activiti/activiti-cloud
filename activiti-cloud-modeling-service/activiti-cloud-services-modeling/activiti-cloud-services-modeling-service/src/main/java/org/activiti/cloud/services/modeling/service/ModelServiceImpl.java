@@ -262,7 +262,7 @@ public class ModelServiceImpl implements ModelService {
                 .forEach(project -> checkIfModelNameExistsInProject((Project) project, newModel));
         }
 
-        if (newModel.getName() != null) {
+        if (newModel.getName() != null && !modelToBeUpdated.getType().equals(PROCESS)) {
             validateModelName(newModel.getName());
         }
         checkModelScopeIntegrity(newModel);
