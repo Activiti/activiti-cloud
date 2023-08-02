@@ -331,6 +331,7 @@ class ModelServiceImplTest {
     void should_throwModelNameInvalidException_when_updatingModelWithInvalidCharAtBeginning() {
         Model wrongNameModel = new ModelImpl();
         wrongNameModel.setName("-wrong-name");
+        modelTwo.setType("model-type");
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
             .isInstanceOf(ModelNameInvalidException.class)
             .hasMessage(
@@ -344,6 +345,7 @@ class ModelServiceImplTest {
     void should_throwModelNameInvalidException_when_updatingModelWithInvalidCharAtEnd() {
         Model wrongNameModel = new ModelImpl();
         wrongNameModel.setName("wrong-name-");
+        modelTwo.setType("model-type");
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
             .isInstanceOf(ModelNameInvalidException.class)
             .hasMessage(

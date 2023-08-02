@@ -31,7 +31,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
 @ContextConfiguration(classes = ModelValidatorConfiguration.class)
-class ModelNameValidatorImplIT {
+class ModelNameValidatorImplTest {
 
     @Autowired
     private ModelNameValidator modelNameValidator;
