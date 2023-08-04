@@ -45,8 +45,7 @@ public class QueryLiquibaseApplicationIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres =
-        new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Test
     public void contextLoads() {
