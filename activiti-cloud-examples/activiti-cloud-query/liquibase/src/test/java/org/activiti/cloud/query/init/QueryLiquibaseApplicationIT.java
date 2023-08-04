@@ -15,13 +15,41 @@
  */
 package org.activiti.cloud.query.init;
 
-import org.activiti.cloud.query.liquibase.QueryLiquibaseApplication;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = { QueryLiquibaseApplication.class })
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import org.activiti.cloud.query.liquibase.QueryLiquibaseApplication;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@SpringBootTest(classes = { QueryLiquibaseApplication.class }, properties = "spring.jpa.hibernate.ddl-auto=validate")
+@Testcontainers
+@EntityScan(basePackageClasses = { ProcessInstanceEntity.class, AuditEventEntity.class })
 public class QueryLiquibaseApplicationIT {
 
+    @MockBean
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres =
+        new PostgreSQLContainer<>("postgres:15-alpine");
+
     @Test
-    public void contextLoads() {}
+    public void contextLoads() {
+        assertThat(entityManager.getMetamodel().getEntities()).hasSizeGreaterThan(0);
+    }
 }

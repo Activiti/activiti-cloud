@@ -15,7 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.events;
 
-import jakarta.persistence.*;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.SequenceGenerator;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.hibernate.annotations.Immutable;
