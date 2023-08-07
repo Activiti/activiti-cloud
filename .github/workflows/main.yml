@@ -162,7 +162,7 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@feat-AAE-15944-setup-kind-nxginx-conf
         with:
           kind-node-image: kindest/node:v1.27.3
-          nxginx-manifest: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.6.4/deploy/static/provider/kind/deploy.yaml
+          nginx-manifest: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.6.4/deploy/static/provider/kind/deploy.yaml
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
