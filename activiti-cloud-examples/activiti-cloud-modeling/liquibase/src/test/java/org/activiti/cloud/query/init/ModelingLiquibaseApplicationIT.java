@@ -18,9 +18,18 @@ package org.activiti.cloud.query.init;
 import org.activiti.cloud.modeling.liquibase.ModelingLiquibaseApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest(classes = { ModelingLiquibaseApplication.class })
+@SpringBootTest(classes = { ModelingLiquibaseApplication.class }, properties = "spring.jpa.hibernate.ddl-auto=validate")
+@Testcontainers
 public class ModelingLiquibaseApplicationIT {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Test
     public void contextLoads() {}
