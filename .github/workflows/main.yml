@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Activiti/Activiti/.github/actions/check-ext-build@fix-AAE-15950-dependabot-validation
+      - uses: Activiti/Activiti/.github/actions/check-ext-build@8.0.0-alpha.10
 
   pre-commit:
     needs: check-ext-build
