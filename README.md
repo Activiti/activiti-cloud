@@ -13,30 +13,33 @@ Activiti Cloud libraries and Spring Boot starters.
 
 ## CI/CD
 
-Running on [GitHub Actions](https://github.com/features/actions), requires the following secrets to be set:
+Running on GH Actions.
 
-| Name                | Description                            |
-| ------------------- | -------------------------------------- |
-| NEXUS_USERNAME      | Internal Maven repository username     |
-| NEXUS_PASSWORD      | Internal Maven repository password     |
-| BOT_GITHUB_USERNAME | GitHub username for other repositories |
-| BOT_GITHUB_TOKEN    | GitHub token for other repositories    |
+For Dependabot PRs to be validated by CI, the label "CI" should be added to the PR.
+
+Requires the following secrets to be set:
+
+| Name                         | Description                        |
+| ---------------------------- | ---------------------------------- |
+| BOT_GITHUB_TOKEN             | Token to launch other builds on GH |
+| BOT_GITHUB_USERNAME          | Username to issue propagation PRs  |
+| DOCKERHUB_USERNAME           | Docker Hub repository username     |
+| DOCKERHUB_PASSWORD           | Docker Hub repository password     |
+| NEXUS_USERNAME               | Internal Maven repository username |
+| NEXUS_PASSWORD               | Internal Maven repository password |
+| RANCHER2_URL                 | Rancher URL for tests              |
+| RANCHER2_ACCESS_KEY          | Rancher access key for tests       |
+| RANCHER2_SECRET_KEY          | Rancher secret key for tests       |
+| SLACK_NOTIFICATION_BOT_TOKEN | Token to notify slack on failure   |
 
 ## Formatting
 
 The local `.editorconfig` file is leveraged for automated formatting.
 
-Pre-commit hooks run on CI include:
-
-- local hooks
-- shared hooks leveraging prettier
-
-See documentation at [pre-commit](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit) and [pre-commit-default](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit-default)
+See documentation at [pre-commit](https://github.com/Alfresco/alfresco-build-tools/tree/master/docs#pre-commit).
 
 To run all hooks locally:
 
 ```sh
 pre-commit run -a
-pre-commit run -a --config /path/to/config/format-config.yaml
-pre-commit run -a --config /path/to/config/github-config.yaml
 ```
