@@ -30,7 +30,6 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntityAssert;
 import org.activiti.cloud.services.audit.jpa.events.ProcessCompletedEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessDeletedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
@@ -76,8 +75,8 @@ public class ProcessDeletedEventConverterTest {
         ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
 
         //then
-        AuditEventEntityAssert.assertThat(event).hasProcessInstanceId(runtimeEvent.getProcessInstanceId());
-        AuditEventEntityAssert.assertThat(event).hasProcessDefinitionId(processDefinitionId);
+        assertThat(event.getProcessInstanceId()).isEqualTo(runtimeEvent.getProcessInstanceId());
+        assertThat(event.getProcessDefinitionId()).isEqualTo(processDefinitionId);
     }
 
     @Test
