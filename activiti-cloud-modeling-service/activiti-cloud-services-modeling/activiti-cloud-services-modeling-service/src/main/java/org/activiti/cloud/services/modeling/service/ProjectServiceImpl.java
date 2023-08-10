@@ -26,6 +26,7 @@ import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,6 +147,7 @@ public class ProjectServiceImpl implements ProjectService {
                 nameValidationErrors
             );
         }
+        modelService.createModel(project, modelService.buildModel("UI","default"));
         return projectRepository.createProject(project);
     }
 
