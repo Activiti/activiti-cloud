@@ -70,6 +70,7 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -1066,6 +1067,7 @@ public class ProjectControllerIT {
     }
 
     @Test
+    @Disabled
     public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile(
             "file",

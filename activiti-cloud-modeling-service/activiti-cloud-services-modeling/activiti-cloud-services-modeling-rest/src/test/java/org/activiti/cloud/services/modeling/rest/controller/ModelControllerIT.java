@@ -67,6 +67,7 @@ import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.UIModelType;
 import org.activiti.cloud.modeling.api.process.Extensions;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.api.process.ProcessVariable;
@@ -505,9 +506,10 @@ public class ModelControllerIT {
         mockMvc
             .perform(get("/v1/model-types"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$._embedded.model-types", hasSize(2)))
-            .andExpect(jsonPath("$._embedded.model-types[0].name", is(PROCESS)))
-            .andExpect(jsonPath("$._embedded.model-types[1].name", is(ConnectorModelType.NAME)));
+            .andExpect(jsonPath("$._embedded.model-types", hasSize(3)))
+            .andExpect(jsonPath("$._embedded.model-types[0].name", is(UIModelType.NAME)))
+            .andExpect(jsonPath("$._embedded.model-types[1].name", is(PROCESS)))
+            .andExpect(jsonPath("$._embedded.model-types[2].name", is(ConnectorModelType.NAME)));
     }
 
     @Test

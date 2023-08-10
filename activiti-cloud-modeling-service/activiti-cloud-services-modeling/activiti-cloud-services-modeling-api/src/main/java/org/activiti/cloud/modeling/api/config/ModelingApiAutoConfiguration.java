@@ -17,6 +17,7 @@ package org.activiti.cloud.modeling.api.config;
 
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.api.UIModelType;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -31,5 +32,10 @@ public class ModelingApiAutoConfiguration {
     @Bean
     public ProcessModelType processModelType() {
         return new ProcessModelType();
+    }
+
+    @Bean
+    public UIModelType uiType() {
+        return new UIModelType();
     }
 }
