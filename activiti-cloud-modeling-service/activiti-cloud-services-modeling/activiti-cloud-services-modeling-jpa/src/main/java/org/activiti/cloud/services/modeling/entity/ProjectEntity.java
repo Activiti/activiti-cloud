@@ -26,6 +26,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Column;
 import java.util.HashSet;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
@@ -36,7 +37,7 @@ import org.hibernate.annotations.GenericGenerator;
 /**
  * Project model entity
  */
-@Table(name = "Project", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "createdBy" }))
+@Table(name = "Project", uniqueConstraints = @UniqueConstraint(columnNames = { "tech_name", "createdBy" }))
 @Entity(name = "Project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
@@ -51,7 +52,11 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
-    private String name;
+    @Column(name ="tech_name", nullable = false)
+    private String technicalName;
+
+    @Column(name ="disp_name", nullable = false)
+    private String displayName;
 
     private String description;
 
@@ -59,8 +64,8 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     public ProjectEntity() {} // for JPA
 
-    public ProjectEntity(String name) {
-        this.name = name;
+    public ProjectEntity(String technicalName) {
+        this.technicalName = technicalName;
     }
 
     @Override
@@ -83,13 +88,29 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     @Override
     public String getName() {
-        return name;
+        return technicalName;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String technicalName) {
+        this.technicalName = technicalName;
     }
+
+    @Override
+    public String getTechnicalName() {
+        return technicalName;
+    }
+
+    @Override
+    public void setTechnicalName(String technicalName) {
+        this.technicalName = technicalName;
+    }
+
+    @Override
+    public String getDisplayName() { return displayName; }
+
+    @Override
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
 
     @Override
     public String getVersion() {

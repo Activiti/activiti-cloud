@@ -29,6 +29,14 @@ public interface Project<U> extends Auditable<U> {
 
     void setName(String name);
 
+    String getTechnicalName();
+
+    void setTechnicalName(String name);
+
+    String getDisplayName();
+
+    void setDisplayName(String name);
+
     String getVersion();
 
     void setVersion(String version);

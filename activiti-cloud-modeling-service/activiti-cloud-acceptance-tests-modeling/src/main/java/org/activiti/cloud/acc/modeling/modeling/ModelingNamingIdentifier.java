@@ -50,7 +50,7 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
         return new ModelingNamingIdentifier<Project>(name) {
             @Override
             protected String getName(Project project) {
-                return project.getName();
+                return project.getTechnicalName();
             }
         };
     }
@@ -59,7 +59,7 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
         return new ModelingNamingIdentifier<Project>(names) {
             @Override
             protected String getName(Project project) {
-                return project.getName();
+                return project.getTechnicalName();
             }
         };
     }

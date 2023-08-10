@@ -234,7 +234,7 @@ public class ProjectControllerIT {
 
         assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
             .hasValueSatisfying(updatedProject -> {
-                assertThat(updatedProject.getName()).isEqualTo("updated-project-name");
+                assertThat(updatedProject.getTechnicalName()).isEqualTo("updated-project-name");
             });
     }
 
