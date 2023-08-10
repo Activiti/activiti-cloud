@@ -147,7 +147,7 @@ public class ProjectServiceImpl implements ProjectService {
                 nameValidationErrors
             );
         }
-        modelService.createModel(project, modelService.buildModel("UI","default"));
+        modelService.createModel(project, modelService.buildModel("UI", "default"));
         return projectRepository.createProject(project);
     }
 
