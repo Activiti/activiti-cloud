@@ -548,7 +548,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream)
         throws IOException {
-        ProjectHolder projectHolder = getProjectHolderFromZipStream(ZipStream.of(inputStream), project.getTechnicalName());
+        ProjectHolder projectHolder = getProjectHolderFromZipStream(
+            ZipStream.of(inputStream),
+            project.getTechnicalName()
+        );
 
         if (projectHolder.getProjectMetadata().isEmpty()) {
             throw new ImportProjectException("No valid project entry found to import");

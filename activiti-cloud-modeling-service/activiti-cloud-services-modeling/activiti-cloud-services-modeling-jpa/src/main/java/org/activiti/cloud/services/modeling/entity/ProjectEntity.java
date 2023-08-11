@@ -20,13 +20,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.Column;
 import java.util.HashSet;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
@@ -52,10 +52,10 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
-    @Column(name ="tech_name", nullable = false)
+    @Column(name = "tech_name", nullable = false)
     private String technicalName;
 
-    @Column(name ="disp_name", nullable = false)
+    @Column(name = "disp_name", nullable = false)
     private String displayName;
 
     private String description;
@@ -110,10 +110,14 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     }
 
     @Override
-    public String getDisplayName() { return displayName; }
+    public String getDisplayName() {
+        return displayName;
+    }
 
     @Override
-    public void setDisplayName(String displayName) { this.displayName = displayName; }
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
     @Override
     public String getVersion() {

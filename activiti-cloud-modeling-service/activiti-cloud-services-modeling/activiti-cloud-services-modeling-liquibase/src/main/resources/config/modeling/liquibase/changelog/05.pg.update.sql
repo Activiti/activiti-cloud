@@ -28,6 +28,3 @@
 
    ALTER TABLE project
       ALTER COLUMN tech_name SET NOT NULL;
-
-
-
