@@ -64,8 +64,8 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     public ProjectEntity() {} // for JPA
 
-    public ProjectEntity(String technicalName) {
-        this.technicalName = technicalName;
+    public ProjectEntity(String name) {
+        setName(name);
     }
 
     @Override
@@ -88,12 +88,15 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     @Override
     public String getName() {
-        return technicalName;
+        return getTechnicalName();
     }
 
     @Override
-    public void setName(String technicalName) {
-        this.technicalName = technicalName;
+    public void setName(String name) {
+        setTechnicalName(name);
+
+        //TODO: Modify temporary code that sets display name same as technical name
+        setDisplayName(name);
     }
 
     @Override

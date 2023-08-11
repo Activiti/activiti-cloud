@@ -26,5 +26,8 @@
   ALTER TABLE project
    RENAME COLUMN name TO tech_name;
 
+   ALTER TABLE project
+      ALTER COLUMN tech_name SET NOT NULL;
+
 
 

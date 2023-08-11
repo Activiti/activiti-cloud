@@ -48,9 +48,9 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     public ProjectImpl() {}
 
-    public ProjectImpl(String id, String technicalName) {
+    public ProjectImpl(String id, String name) {
         this.id = id;
-        this.technicalName = technicalName;
+        setName(name);
     }
 
     @Override
@@ -65,12 +65,15 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     @Override
     public String getName() {
-        return technicalName;
+        return getTechnicalName();
     }
 
     @Override
-    public void setName(String technicalName) {
-        this.technicalName = technicalName;
+    public void setName(String name) {
+        setTechnicalName(name);
+
+        //TODO: Modify temporary code that sets display name same as technical name
+        setDisplayName(name);
     }
 
     @Override
