@@ -15,8 +15,13 @@
  */
 package org.activiti.cloud.query.init;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
 import org.activiti.cloud.modeling.liquibase.ModelingLiquibaseApplication;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -31,6 +36,14 @@ public class ModelingLiquibaseApplicationIT {
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Test
-    public void contextLoads() {}
+    public void contextLoads() {
+        assertThat(entityManager.getMetamodel().getEntities())
+            .hasSizeGreaterThan(0)
+            .extracting(EntityType::getName)
+            .contains("Project", "Model", "ModelVersion");
+    }
 }

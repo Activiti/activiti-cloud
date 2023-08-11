@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.metamodel.EntityType;
 import org.activiti.cloud.query.liquibase.QueryLiquibaseApplication;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -49,6 +50,9 @@ public class QueryLiquibaseApplicationIT {
 
     @Test
     public void contextLoads() {
-        assertThat(entityManager.getMetamodel().getEntities()).hasSizeGreaterThan(0);
+        assertThat(entityManager.getMetamodel().getEntities())
+            .hasSizeGreaterThan(0)
+            .extracting(EntityType::getName)
+            .contains("AuditEvent", "ProcessInstance");
     }
 }
