@@ -26,7 +26,6 @@ import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.UIModelType;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
@@ -147,7 +147,7 @@ public class ProjectServiceImpl implements ProjectService {
                 nameValidationErrors
             );
         }
-        modelService.createModel(project, modelService.buildModel("UI", "default"));
+        modelService.createModel(project, modelService.buildModel(UIModelType.NAME, "default"));
         return projectRepository.createProject(project);
     }
 
