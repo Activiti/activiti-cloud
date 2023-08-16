@@ -28,6 +28,7 @@ public class ProjectNameValidator implements ProjectValidator, DNSNameValidator 
 
     @Override
     public Stream<ModelValidationError> validate(Project project, ValidationContext validationContext) {
-        return validateDNSName(project.getName(), "project");
+        Stream<ModelValidationError> validationErrors = validateDNSName(project.getTechnicalName(), "project");
+        return validationErrors;
     }
 }

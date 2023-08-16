@@ -57,7 +57,7 @@ public class ModelRepositoryImplTest {
         repository = new ModelRepositoryImpl(modelJpaRepository);
         project = new ProjectEntity();
         project.setId("testProjectId");
-        project.setName("testProjectName");
+        project.setTechnicalName("testProjectName");
         model = new ModelEntity();
         model.setId("testModelId");
         model.setName("testNameId");

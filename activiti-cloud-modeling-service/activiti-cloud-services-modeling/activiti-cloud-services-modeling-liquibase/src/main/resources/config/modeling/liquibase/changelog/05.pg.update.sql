@@ -13,35 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.modeling.api;
 
-import org.activiti.cloud.services.auditable.Auditable;
+  ALTER TABLE project
+   ADD COLUMN disp_name varchar(255);
 
-/**
- * Interface for projects
- */
-public interface Project<U> extends Auditable<U> {
-    String getId();
+  UPDATE project p
+   SET disp_name = p.name;
 
-    void setId(String id);
+  ALTER TABLE project
+   ALTER COLUMN disp_name SET NOT NULL;
 
-    String getName();
+  ALTER TABLE project
+   RENAME COLUMN name TO tech_name;
 
-    void setName(String name);
-
-    String getTechnicalName();
-
-    void setTechnicalName(String name);
-
-    String getDisplayName();
-
-    void setDisplayName(String name);
-
-    String getVersion();
-
-    void setVersion(String version);
-
-    String getDescription();
-
-    void setDescription(String description);
-}
+   ALTER TABLE project
+      ALTER COLUMN tech_name SET NOT NULL;

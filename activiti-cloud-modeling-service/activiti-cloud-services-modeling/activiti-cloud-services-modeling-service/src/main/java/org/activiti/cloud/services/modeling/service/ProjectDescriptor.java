@@ -50,7 +50,7 @@ public class ProjectDescriptor {
     }
 
     public String getName() {
-        return project.getName();
+        return project.getTechnicalName();
     }
 
     public String getVersion() {

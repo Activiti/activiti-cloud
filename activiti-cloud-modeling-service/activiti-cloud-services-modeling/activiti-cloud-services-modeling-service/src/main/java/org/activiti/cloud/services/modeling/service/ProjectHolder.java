@@ -45,7 +45,7 @@ public class ProjectHolder {
         if (this.project == null) {
             this.project = project;
             if (!StringUtils.isBlank(name)) {
-                this.project.setName(name);
+                this.project.setTechnicalName(name);
             }
         }
         return this;

@@ -138,7 +138,7 @@ public class ModelServiceImplTest {
     public void setUp() {
         projectOne = new ProjectImpl();
         projectOne.setId("projectOneId");
-        projectOne.setName("projectOne");
+        projectOne.setTechnicalName("projectOne");
 
         modelType = new ProcessModelType();
         modelTwo = new ModelImpl();

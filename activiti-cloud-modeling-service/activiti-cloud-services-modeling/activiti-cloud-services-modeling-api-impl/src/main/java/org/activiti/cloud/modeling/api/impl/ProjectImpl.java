@@ -34,8 +34,11 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Schema(description = "The unique identifier of the project", readOnly = true)
     private String id;
 
-    @Schema(description = "The name of the project")
-    private String name;
+    @Schema(description = "The technical name of the project")
+    private String technicalName;
+
+    @Schema(description = "The display name of the project")
+    private String displayName;
 
     @Schema(description = "The description of the project")
     private String description;
@@ -47,7 +50,7 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     public ProjectImpl(String id, String name) {
         this.id = id;
-        this.name = name;
+        setName(name);
     }
 
     @Override
@@ -62,12 +65,35 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     @Override
     public String getName() {
-        return name;
+        return getTechnicalName();
     }
 
     @Override
     public void setName(String name) {
-        this.name = name;
+        setTechnicalName(name);
+
+        //TODO: Modify temporary code that sets display name same as technical name
+        setDisplayName(name);
+    }
+
+    @Override
+    public String getTechnicalName() {
+        return technicalName;
+    }
+
+    @Override
+    public void setTechnicalName(String technicalName) {
+        this.technicalName = technicalName;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public void setDisplayName(String name) {
+        this.displayName = name;
     }
 
     @Override

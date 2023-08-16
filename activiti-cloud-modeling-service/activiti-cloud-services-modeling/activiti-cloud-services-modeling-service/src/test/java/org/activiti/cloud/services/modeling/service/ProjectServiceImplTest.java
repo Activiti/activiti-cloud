@@ -211,7 +211,7 @@ public class ProjectServiceImplTest {
 
         Project copiedProject = projectService.copyProject(projectToCopy, copiedProjectName);
 
-        assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
+        assertThat(copiedProject.getTechnicalName()).isEqualTo(copiedProjectName);
         verify(projectRepository, times(1)).copyProject(projectToCopy, copiedProjectName);
         verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
         verify(modelService, times(1)).cleanModelIdList();

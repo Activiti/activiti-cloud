@@ -67,4 +67,13 @@
       splitStatements="true"
       stripComments="true"/>
   </changeSet>
+
+  <changeSet id="project-name-alter" author="aae-modeling">
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/05.pg.update.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true" />
+  </changeSet>
 </databaseChangeLog>

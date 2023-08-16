@@ -74,7 +74,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         assertThat(
             modelingContextHandler
                 .getCurrentProjects()
-                .map(resources -> resources.stream().map(EntityModel::getContent).map(Project::getName))
+                .map(resources -> resources.stream().map(EntityModel::getContent).map(Project::getTechnicalName))
                 .orElseGet(Stream::empty)
                 .collect(Collectors.toList())
         )
@@ -84,7 +84,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     @Step
     public EntityModel<Project> create(String projectName) {
         Project project = mock(Project.class);
-        doReturn(projectName).when(project).getName();
+        doReturn(projectName).when(project).getTechnicalName();
         return create(project);
     }
 
@@ -92,7 +92,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public void updateProjectName(String newProjectName) {
         EntityModel<Project> currentContext = checkAndGetCurrentContext(Project.class);
         Project project = currentContext.getContent();
-        project.setName(newProjectName);
+        project.setTechnicalName(newProjectName);
 
         modelingProjectService.updateByUri(modelingUri(currentContext.getLink(SELF).get().getHref()), project);
     }
@@ -101,7 +101,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public void checkCurrentProjectName(String projectName) {
         updateCurrentModelingObject();
         EntityModel<Project> currentContext = checkAndGetCurrentContext(Project.class);
-        assertThat(currentContext.getContent().getName()).isEqualTo(projectName);
+        assertThat(currentContext.getContent().getTechnicalName()).isEqualTo(projectName);
     }
 
     @Step
@@ -172,11 +172,11 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         assertThat(modelingContextHandler.getCurrentModelingFile())
             .hasValueSatisfying(fileContent ->
                 assertThatFileContent(fileContent)
-                    .hasName(currentProject.getName() + ".zip")
+                    .hasName(currentProject.getTechnicalName() + ".zip")
                     .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
                     .isZip()
                     .hasEntries(
-                        changeToJsonFilename(currentProject.getName()),
+                        changeToJsonFilename(currentProject.getTechnicalName()),
                         modelType.getFolderName() + "/",
                         modelType.getFolderName() +
                         "/" +
@@ -186,8 +186,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         changeExtension(modelName, modelType.getContentFileExtension())
                     )
                     .hasJsonContentSatisfying(
-                        changeToJsonFilename(currentProject.getName()),
-                        jsonContent -> jsonContent.node("name").isEqualTo(currentProject.getName())
+                        changeToJsonFilename(currentProject.getTechnicalName()),
+                        jsonContent -> jsonContent.node("name").isEqualTo(currentProject.getTechnicalName())
                     )
                     .hasJsonContentSatisfying(
                         modelType.getFolderName() +

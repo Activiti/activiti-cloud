@@ -111,7 +111,7 @@ public class ProjectControllerExistingNameIT {
             .andExpect(status().isCreated());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
-            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
+            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getTechnicalName)
             .contains(tuple("otherUser", "application-xy"), tuple("testuser", "application-xy"));
     }
 
@@ -129,7 +129,7 @@ public class ProjectControllerExistingNameIT {
             .andExpect(status().isCreated());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
-            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
+            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getTechnicalName)
             .contains(tuple("otherUser", "creating-project"), tuple("testuser", "creating-project"));
     }
 
@@ -149,7 +149,7 @@ public class ProjectControllerExistingNameIT {
             .andExpect(status().isOk());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
-            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
+            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getTechnicalName)
             .contains(tuple("otherUser", "updating-project"), tuple("testuser", "updating-project"));
     }
 
@@ -165,7 +165,7 @@ public class ProjectControllerExistingNameIT {
             .andExpect(status().isOk());
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
-            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
+            .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getTechnicalName)
             .contains(tuple("otherUser", "copying-project"), tuple("testuser", "copying-project"));
     }
 }

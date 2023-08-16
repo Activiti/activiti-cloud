@@ -159,7 +159,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project updateProject(Project projectToUpdate, Project newProject) {
         Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
-        Optional.ofNullable(newProject.getName()).ifPresent(projectToUpdate::setName);
+        Optional.ofNullable(newProject.getTechnicalName()).ifPresent(projectToUpdate::setTechnicalName);
         return projectRepository.updateProject(projectToUpdate);
     }
 
@@ -205,10 +205,10 @@ public class ProjectServiceImpl implements ProjectService {
     public FileContent exportProject(Project project) throws IOException {
         ProjectDescriptor projectDescriptor = buildDescriptor(project);
 
-        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
+        ZipBuilder zipBuilder = new ZipBuilder(project.getTechnicalName())
             .appendFile(
                 descriptorJsonConverter.convertToJsonBytes(projectDescriptor),
-                changeToJsonFilename(project.getName())
+                changeToJsonFilename(project.getTechnicalName())
             );
 
         modelService
@@ -548,7 +548,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project replaceProjectContentWithProvidedModelsInFile(Project project, InputStream inputStream)
         throws IOException {
-        ProjectHolder projectHolder = getProjectHolderFromZipStream(ZipStream.of(inputStream), project.getName());
+        ProjectHolder projectHolder = getProjectHolderFromZipStream(
+            ZipStream.of(inputStream),
+            project.getTechnicalName()
+        );
 
         if (projectHolder.getProjectMetadata().isEmpty()) {
             throw new ImportProjectException("No valid project entry found to import");
