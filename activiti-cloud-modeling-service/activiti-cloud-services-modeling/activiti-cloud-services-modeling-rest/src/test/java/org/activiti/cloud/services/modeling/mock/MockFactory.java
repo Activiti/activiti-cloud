@@ -60,6 +60,12 @@ public class MockFactory {
         return project;
     }
 
+    public static ProjectEntity projectWithDisplayName(String name, String displayName) {
+        ProjectEntity project = new ProjectEntity(name);
+        project.setDisplayName(displayName);
+        return project;
+    }
+
     public static ModelEntity processModel(String name) {
         return processModelWithExtensions(name, null);
     }
