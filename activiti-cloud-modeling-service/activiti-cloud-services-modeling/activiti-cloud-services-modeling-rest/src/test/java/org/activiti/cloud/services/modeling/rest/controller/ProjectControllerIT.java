@@ -28,6 +28,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDisplayName;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -203,6 +204,19 @@ public class ProjectControllerIT {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", is("new-project")))
             .andExpect(jsonPath("$.description", is("Project description")));
+    }
+
+    @Test
+    public void should_returnStatusCreatedAndProjectDisplayName_when_creatingProject() throws Exception {
+        mockMvc
+            .perform(
+                post("/v1/projects")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(projectWithDisplayName("new-project", "Project description")))
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name", is("new-project")))
+            .andExpect(jsonPath("$.displayName", is("Project description")));
     }
 
     @Test

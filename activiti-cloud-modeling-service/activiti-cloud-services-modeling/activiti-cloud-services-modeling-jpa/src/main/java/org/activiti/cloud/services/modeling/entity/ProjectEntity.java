@@ -20,6 +20,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -52,6 +53,9 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     private String id;
 
     private String name;
+
+    @Column(name = "disp_name")
+    private String displayName;
 
     private String description;
 
@@ -89,6 +93,16 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
