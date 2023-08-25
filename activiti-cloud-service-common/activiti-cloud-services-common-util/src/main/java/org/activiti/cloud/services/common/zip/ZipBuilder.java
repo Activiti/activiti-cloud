@@ -18,7 +18,11 @@ package org.activiti.cloud.services.common.zip;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,11 +93,11 @@ public class ZipBuilder {
     }
 
     /**
-     * Build the zip content based on collected folder and files.
-     * @return the zip content as byte array
+     * Build the zip content stream based on collected folder and files.
+     * @return the zip content as byte array output stream
      * @throws IOException in case of I/O error
      */
-    public byte[] toZipBytes() throws IOException {
+    public ByteArrayOutputStream toByteArrayOutputStream() throws IOException {
         try (
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)
@@ -107,8 +111,28 @@ public class ZipBuilder {
                 zipOutputStream.closeEntry();
             }
             zipOutputStream.close();
-            return outputStream.toByteArray();
+            return outputStream;
         }
+    }
+
+    /**
+     * Write the zip content into the provided file.
+     * @param file the file where the zip file will be written to
+     * @throws IOException in case of I/O error
+     */
+    public void writeToFile(File file) throws IOException {
+        try(OutputStream outputStream = new FileOutputStream(file)) {
+            toByteArrayOutputStream().writeTo(outputStream);
+        }
+    }
+
+    /**
+     * Build the zip content based on collected folder and files.
+     * @return the zip content as byte array
+     * @throws IOException in case of I/O error
+     */
+    public byte[] toZipBytes() throws IOException {
+        return toByteArrayOutputStream().toByteArray();
     }
 
     /**
