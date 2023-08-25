@@ -18,7 +18,10 @@ package org.activiti.cloud.services.common.zip;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_ZIP;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,8 +52,8 @@ public class ZipBuilder {
     }
 
     /**
-     * Append a folder to the zip content.
-     * The path of the folder to be appended is given as an array of folder names.
+     * Append a folder to the zip content. The path of the folder to be appended is given as an array of folder names.
+     *
      * @param path the path of the folder
      * @return this
      */
@@ -61,10 +64,11 @@ public class ZipBuilder {
     }
 
     /**
-     * Append a file to the zip content.
-     * The path of the file to be appended is given as an array of folder names ended with the file name.
+     * Append a file to the zip content. The path of the file to be appended is given as an array of folder names ended
+     * with the file name.
+     *
      * @param content the file content
-     * @param path the path of the file
+     * @param path    the path of the file
      * @return this
      */
     public ZipBuilder appendFile(byte[] content, String... path) {
@@ -75,11 +79,11 @@ public class ZipBuilder {
     }
 
     /**
-     * Append a file to the zip content.
-     * The path of the file to be appended is given as an array of folder names.
-     * The file name will be appended to this path.
+     * Append a file to the zip content. The path of the file to be appended is given as an array of folder names. The
+     * file name will be appended to this path.
+     *
      * @param fileContent the file content
-     * @param path the folders path
+     * @param path        the folders path
      * @return this
      */
     public ZipBuilder appendFile(FileContent fileContent, String... path) {
@@ -89,11 +93,12 @@ public class ZipBuilder {
     }
 
     /**
-     * Build the zip content based on collected folder and files.
-     * @return the zip content as byte array
+     * Build the zip content stream based on collected folder and files.
+     *
+     * @return the zip content as byte array output stream
      * @throws IOException in case of I/O error
      */
-    public byte[] toZipBytes() throws IOException {
+    public ByteArrayOutputStream toByteArrayOutputStream() throws IOException {
         try (
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)
@@ -107,12 +112,35 @@ public class ZipBuilder {
                 zipOutputStream.closeEntry();
             }
             zipOutputStream.close();
-            return outputStream.toByteArray();
+            return outputStream;
         }
     }
 
     /**
+     * Write the zip content into the provided file.
+     *
+     * @param file the file where the zip file will be written to
+     * @throws IOException in case of I/O error
+     */
+    public void writeToFile(File file) throws IOException {
+        try (OutputStream outputStream = new FileOutputStream(file)) {
+            toByteArrayOutputStream().writeTo(outputStream);
+        }
+    }
+
+    /**
+     * Build the zip content based on collected folder and files.
+     *
+     * @return the zip content as byte array
+     * @throws IOException in case of I/O error
+     */
+    public byte[] toZipBytes() throws IOException {
+        return toByteArrayOutputStream().toByteArray();
+    }
+
+    /**
      * Build the zip content as {@link FileContent}
+     *
      * @return the {@link FileContent}
      * @throws IOException in case of I/O error
      */
