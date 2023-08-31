@@ -80,7 +80,9 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
             XMLInputFactory safeXmlInputFactory = createSafeXmlInputFactory();
-            safeXmlInputFactory.setProperty("http://apache.org/xml/features/disallow-doctype-decl", true);
+            if (safeXmlInputFactory.isPropertySupported("http://apache.org/xml/features/disallow-doctype-decl")) {
+                safeXmlInputFactory.setProperty("http://apache.org/xml/features/disallow-doctype-decl", true);
+            }
             XMLStreamReader xmlReader = safeXmlInputFactory.createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
