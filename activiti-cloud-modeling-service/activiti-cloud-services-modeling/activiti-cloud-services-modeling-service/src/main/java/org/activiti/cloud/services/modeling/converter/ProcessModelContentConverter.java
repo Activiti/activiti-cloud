@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Optional;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
@@ -78,7 +79,9 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
-            XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
+            XMLInputFactory safeXmlInputFactory = createSafeXmlInputFactory();
+            safeXmlInputFactory.setProperty("http://apache.org/xml/features/disallow-doctype-decl", true);
+            XMLStreamReader xmlReader = safeXmlInputFactory.createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
             throw new ModelConversionException(this.XML_CONTENT_NOT_PRESENT, ioError);
