@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -80,9 +78,6 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
             XMLInputFactory safeXmlInputFactory = createSafeXmlInputFactory();
-            if (safeXmlInputFactory.isPropertySupported("http://apache.org/xml/features/disallow-doctype-decl")) {
-                safeXmlInputFactory.setProperty("http://apache.org/xml/features/disallow-doctype-decl", true);
-            }
             XMLStreamReader xmlReader = safeXmlInputFactory.createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
@@ -92,6 +87,23 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
         } catch (XMLException xmlError) {
             throw new ModelConversionException(this.XML_NOT_VALID, xmlError);
         }
+    }
+
+    private XMLInputFactory createSafeXmlInputFactory() {
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        if (xif.isPropertySupported("javax.xml.stream.isReplacingEntityReferences")) {
+            xif.setProperty("javax.xml.stream.isReplacingEntityReferences", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.isSupportingExternalEntities")) {
+            xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.supportDTD")) {
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        }
+
+        return xif;
     }
 
     @Override
