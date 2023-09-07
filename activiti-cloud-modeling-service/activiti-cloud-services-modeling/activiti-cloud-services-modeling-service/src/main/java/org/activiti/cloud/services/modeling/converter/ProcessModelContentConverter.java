@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Optional;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
@@ -78,7 +77,8 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
-            XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
+            XMLInputFactory safeXmlInputFactory = createSafeXmlInputFactory();
+            XMLStreamReader xmlReader = safeXmlInputFactory.createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
             throw new ModelConversionException(this.XML_CONTENT_NOT_PRESENT, ioError);
@@ -87,6 +87,23 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
         } catch (XMLException xmlError) {
             throw new ModelConversionException(this.XML_NOT_VALID, xmlError);
         }
+    }
+
+    private XMLInputFactory createSafeXmlInputFactory() {
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        if (xif.isPropertySupported("javax.xml.stream.isReplacingEntityReferences")) {
+            xif.setProperty("javax.xml.stream.isReplacingEntityReferences", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.isSupportingExternalEntities")) {
+            xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.supportDTD")) {
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        }
+
+        return xif;
     }
 
     @Override

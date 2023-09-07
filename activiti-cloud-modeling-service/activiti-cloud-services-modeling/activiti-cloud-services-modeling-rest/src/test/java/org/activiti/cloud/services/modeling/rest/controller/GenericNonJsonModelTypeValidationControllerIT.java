@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.emptyString;
@@ -51,6 +50,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -83,11 +84,13 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
     private Model genericNonJsonModel;
 
+    private MockMvc mockMvc;
+
     @BeforeEach
     public void setUp() {
-        webAppContextSetup(context);
         genericNonJsonModel =
             modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     private void validateInvalidContent() {
@@ -117,6 +120,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart("file", "simple-model.bin", fileContent, APPLICATION_OCTET_STREAM_VALUE)
@@ -143,6 +147,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart("file", "simple-model.bin", fileContent, "text/plain")
@@ -169,6 +174,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple.json");
 
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart("file", "simple-model.json", fileContent, "application/json")
@@ -198,6 +204,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart("file", "invalid-simple-model.json", fileContent, APPLICATION_OCTET_STREAM_VALUE)
@@ -226,6 +233,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
         byte[] fileContent = resourceAsByteArray("generic/model-simple-valid-extensions.json");
 
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
@@ -250,6 +258,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
@@ -276,6 +285,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
@@ -304,6 +314,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")
@@ -332,6 +343,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
 
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart("file", "simple-model-extensions.json", fileContent, "application/json")

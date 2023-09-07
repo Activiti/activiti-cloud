@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.ContentTypeUtils.CONTENT_TYPE_JSON;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
@@ -41,6 +40,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -65,11 +66,13 @@ public class ConnectorValidationControllerIT {
     @MockBean
     private SecurityManager securityManager;
 
+    private MockMvc mockMvc;
+
     @BeforeEach
     public void setUp() {
-        webAppContextSetup(context);
         when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
     @AfterEach
@@ -80,6 +83,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingSimpleConnector() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(
@@ -98,6 +102,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorTextContentType() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(
@@ -116,6 +121,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithEvents() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(
@@ -135,6 +141,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidSimpleConnector() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -162,6 +169,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSyntacticValidationException_when_validatingJsonInvalidConnector() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -186,6 +194,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -210,6 +219,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -234,6 +244,7 @@ public class ConnectorValidationControllerIT {
     public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameEmpty() throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -259,6 +270,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -281,6 +293,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -301,6 +314,7 @@ public class ConnectorValidationControllerIT {
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(
@@ -319,6 +333,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithErrors() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(
@@ -339,6 +354,7 @@ public class ConnectorValidationControllerIT {
         throws IOException {
         assertThatResponse(
             given()
+                .mockMvc(mockMvc)
                 .log()
                 .everything(true)
                 .multiPart(
@@ -359,6 +375,7 @@ public class ConnectorValidationControllerIT {
     @Test
     public void should_returnStatusNoContent_when_validatingConnectorEventWithModel() throws IOException {
         given()
+            .mockMvc(mockMvc)
             .log()
             .everything(true)
             .multiPart(

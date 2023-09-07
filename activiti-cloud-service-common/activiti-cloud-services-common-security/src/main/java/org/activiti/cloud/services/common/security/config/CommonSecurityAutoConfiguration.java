@@ -225,8 +225,6 @@ public class CommonSecurityAutoConfiguration {
             .exceptionHandling()
             .accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             .and()
-            .csrf()
-            .disable()
             .httpBasic()
             .disable()
             .oauth2ResourceServer()
