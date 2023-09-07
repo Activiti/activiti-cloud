@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.modeling.rest.controller;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.activiti.cloud.services.common.util.FileUtils.resourceAsByteArray;
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.hamcrest.Matchers.emptyString;
@@ -95,7 +94,6 @@ public class GenericJsonModelTypeValidationControllerIT {
 
     @BeforeEach
     public void setUp() {
-        webAppContextSetup(context);
         when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
 
         genericJsonModel =
