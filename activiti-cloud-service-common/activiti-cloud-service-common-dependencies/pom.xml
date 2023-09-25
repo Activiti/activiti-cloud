@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Service Common Dependencies BOM (Bill Of Materials)</name>
   <properties>
-    <snappy.version>1.1.10.1</snappy.version>
+    <snappy.version>1.1.10.4</snappy.version>
   </properties>
   <dependencyManagement>
     <dependencies>
