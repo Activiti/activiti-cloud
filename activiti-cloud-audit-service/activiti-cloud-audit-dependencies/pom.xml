@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-service-parent</artifactId>
-    <version>8.0.0-alpha.45</version>
+    <version>8.0.0</version>
   </parent>
   <artifactId>activiti-cloud-audit-dependencies</artifactId>
   <packaging>pom</packaging>

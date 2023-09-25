@@ -5,14 +5,14 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>8.0.0-alpha.45</version>
+    <version>8.0.0</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-api</artifactId>
   <name>Activiti Cloud :: Runtime API Parent</name>
   <packaging>pom</packaging>
   <properties>
-    <activiti.version>8.0.0-alpha.16</activiti.version>
+    <activiti.version>8.0.0</activiti.version>
   </properties>
   <modules>
     <module>activiti-cloud-api-dependencies</module>
