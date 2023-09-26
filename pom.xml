@@ -464,11 +464,11 @@ limitations under the License.]]>
             <arg>-parameters</arg>
           </compilerArgs>
           <annotationProcessorPaths>
-            <path>
+            <annotationProcessorPath>
               <groupId>org.springframework.boot</groupId>
               <artifactId>spring-boot-configuration-processor</artifactId>
               <version>${spring-boot.version}</version>
-            </path>
+            </annotationProcessorPath>
           </annotationProcessorPaths>
         </configuration>
       </plugin>
