@@ -25,10 +25,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @MappedSuperclass
 public abstract class AbstractVariableEntity extends ActivitiEntityMetadata implements CloudVariableInstance {
 
-    @Column(name = "`type`")
     private String type;
 
-    @Column(name = "`name`")
     private String name;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -40,7 +38,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
-    @Column(columnDefinition = "text", name = "'value'")
+    @Column(columnDefinition = "text", name = "\"value\"")
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
