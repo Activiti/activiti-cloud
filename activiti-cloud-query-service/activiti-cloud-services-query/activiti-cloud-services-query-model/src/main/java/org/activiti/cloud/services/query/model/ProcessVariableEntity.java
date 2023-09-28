@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -48,6 +49,7 @@ import org.hibernate.annotations.ParamDef;
 public class ProcessVariableEntity extends AbstractVariableEntity {
 
     @Id
+    @Column(name = "`id`")
     @GeneratedValue(generator = "process_variable_sequence", strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(
         name = "process_variable_sequence",
