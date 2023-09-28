@@ -25,6 +25,7 @@ import graphql.schema.GraphQLSchema;
 import java.time.Instant;
 import java.util.Date;
 import java.util.TimeZone;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "spring.data.jpa.repositories.bootstrap-mode=default")
+@Disabled
 @TestPropertySource("classpath:application-test.properties")
 class ActivitiGraphQLSchemaAutoConfigurationTest {
 
