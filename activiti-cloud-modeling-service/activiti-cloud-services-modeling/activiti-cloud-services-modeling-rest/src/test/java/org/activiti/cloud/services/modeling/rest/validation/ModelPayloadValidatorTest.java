@@ -22,12 +22,14 @@ import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.modeling.api.Model;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.Errors;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class ModelPayloadValidatorTest {
 

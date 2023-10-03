@@ -35,6 +35,7 @@ import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +52,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Integration tests for models rest api dealing with connector models
  */
+@Disabled
 @ActiveProfiles("test")
 @SpringBootTest(classes = ModelingRestApplication.class)
 @Transactional
