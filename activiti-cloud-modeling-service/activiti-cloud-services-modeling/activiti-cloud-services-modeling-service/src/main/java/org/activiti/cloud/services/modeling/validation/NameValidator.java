@@ -28,7 +28,7 @@ import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
  * Name label validator
  */
 public interface NameValidator extends ModelValidationErrorProducer {
-    int NAME_MAX_LENGTH = 26;
+    int NAME_MAX_LENGTH = 100;
 
     String NAME_VALIDATOR = "Name validator";
     String INVALID_REQUIRED_NAME_PROBLEM = "The name is required";

@@ -24,7 +24,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
  * DNS label validator
  */
 public interface DNSNameValidator extends NameValidator {
-    String DNS_LABEL_REGEX = "^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$";
+    String DNS_LABEL_REGEX = "^.{0,100}$";
 
     String DNS_NAME_VALIDATOR = "DNS name validator";
     String INVALID_DNS_NAME_PROBLEM = "The name is not a valid DNS name";
