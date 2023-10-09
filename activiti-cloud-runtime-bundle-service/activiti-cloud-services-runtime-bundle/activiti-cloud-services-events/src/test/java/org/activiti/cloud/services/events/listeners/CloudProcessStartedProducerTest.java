@@ -18,7 +18,6 @@ package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -28,12 +27,12 @@ import static org.mockito.Mockito.when;
 import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
+import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +51,11 @@ class CloudProcessStartedProducerTest {
     );
 
     @Mock
-    private IdentityService identityService;
+    private RuntimeService runtimerService;
 
-    private AuditServiceInfoAppender auditServiceInfoAppender = spy(new AuditServiceInfoAppender(identityService));
+    private ProcessAuditServiceInfoAppender auditServiceInfoAppender = spy(
+        new ProcessAuditServiceInfoAppender(runtimerService)
+    );
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
         new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
@@ -89,7 +90,7 @@ class CloudProcessStartedProducerTest {
         cloudProcessStartedProducer.onEvent(processCompletedEvent);
 
         verify(this.auditServiceInfoAppender, never())
-            .appendAuditServiceInfoTo(any(CloudRuntimeEventImpl.class), anyString());
+            .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
         verify(this.eventsAggregator).add(this.argumentCaptor.capture());
         assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo("service_user");
     }

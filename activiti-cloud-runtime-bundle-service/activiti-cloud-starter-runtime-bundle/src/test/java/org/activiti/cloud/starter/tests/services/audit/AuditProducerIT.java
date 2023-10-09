@@ -60,6 +60,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,6 +102,7 @@ import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.task.IdentityLink;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -446,6 +448,48 @@ public class AuditProducerIT {
             .filteredOn(event -> event.getEventType().equals(TASK_COMPLETED))
             .extracting(event -> ((Task) event.getEntity()).getCompletedBy())
             .doesNotContainNull();
+    }
+
+    @Test
+    public void shouldProduceEventsDuringSimpleProcessExecutionWithActor() {
+        //given
+        String expectedActor = "c8460aa6-6c5d-4898-9176-098cbc54a9a7";
+
+        //when
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("name", "peter")
+                .withName("my instance name")
+                .withBusinessKey("my business key")
+                .build()
+        );
+
+        //then
+        assertThat(runtimeService.getIdentityLinksForProcessInstance(startProcessEntity.getBody().getId()))
+            .filteredOn(it -> "actor".equals(it.getType()))
+            .isNotEmpty()
+            .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
+            .containsOnly(tuple("hruser", expectedActor.getBytes()));
+
+        //and given
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        Task task = tasks.getBody().iterator().next();
+
+        //when
+        taskRestTemplate.claim(task);
+        taskRestTemplate.complete(task);
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(streamHandler.getLatestReceivedEvents())
+                    .filteredOn(it -> Arrays.asList(TASK_COMPLETED, PROCESS_COMPLETED).contains(it.getEventType()))
+                    .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getActor)
+                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, expectedActor));
+            });
     }
 
     @Test
