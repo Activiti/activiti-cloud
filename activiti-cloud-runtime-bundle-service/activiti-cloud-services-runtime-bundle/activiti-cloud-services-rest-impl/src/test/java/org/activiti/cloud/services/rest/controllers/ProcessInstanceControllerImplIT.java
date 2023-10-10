@@ -28,7 +28,6 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -59,7 +58,6 @@ import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -84,7 +82,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceControllerImpl.class)
@@ -103,8 +100,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class ProcessInstanceControllerImplIT {
+public class ProcessInstanceControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -136,11 +132,8 @@ class ProcessInstanceControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     @Test
-    void getProcessInstances() throws Exception {
+    public void getProcessInstances() throws Exception {
         //given
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
@@ -155,7 +148,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processRuntime.processInstances(any())).thenReturn(processInstancePage);
@@ -166,22 +159,19 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void startProcess() throws Exception {
+    public void startProcess() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
         when(processRuntime.start(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
 
         mockMvc
             .perform(
-                post("/v1/process-instances")
-                    .contentType(APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
+                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void createProcess() throws Exception {
+    public void createProcess() throws Exception {
         CreateProcessInstancePayload cmd = ProcessPayloadBuilder.create().withProcessDefinitionId("1").build();
         when(processRuntime.create(any(CreateProcessInstancePayload.class))).thenReturn(defaultProcessInstance());
 
@@ -190,13 +180,12 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/create")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void startCreatedProcess() throws Exception {
+    public void startCreatedProcess() throws Exception {
         StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
         when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class)))
             .thenReturn(defaultProcessInstance());
@@ -206,13 +195,13 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/{processInstanceId}/start", 1)
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(payload))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void should_startProcessReturnForbidden_when_activitiForbiddenExceptionIsThrownByTheController() throws Exception {
+    public void should_startProcessReturnForbidden_when_activitiForbiddenExceptionIsThrownByTheController()
+        throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
         willThrow(new ActivitiForbiddenException("Not permitted"))
@@ -221,10 +210,7 @@ class ProcessInstanceControllerImplIT {
 
         mockMvc
             .perform(
-                post("/v1/process-instances")
-                    .contentType(APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
+                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
             )
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("entry.code", is(403)))
@@ -232,7 +218,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController()
+    public void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController()
         throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
@@ -242,10 +228,7 @@ class ProcessInstanceControllerImplIT {
 
         mockMvc
             .perform(
-                post("/v1/process-instances")
-                    .contentType(APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
+                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
             )
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("entry.code", is(422)))
@@ -253,14 +236,15 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void getProcessInstanceById() throws Exception {
+    public void getProcessInstanceById() throws Exception {
         when(processRuntime.processInstance("1")).thenReturn(defaultProcessInstance());
 
         mockMvc.perform(get("/v1/process-instances/{processInstanceId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void should_getProcessInstanceByIdReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
+    public void should_getProcessInstanceByIdReturnNotFound_when_notFoundExceptionIsThrownByController()
+        throws Exception {
         String processInstanceId = "nonExistentProcessInstanceId";
         willThrow(new NotFoundException("not found")).given(processRuntime).processInstance(processInstanceId);
 
@@ -272,7 +256,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void getProcessDiagram() throws Exception {
+    public void getProcessDiagram() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId()))
@@ -290,7 +274,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void should_getProcessDiagramReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
+    public void should_getProcessDiagramReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
         String processInstanceId = "nonExistentProcessInstanceId";
         willThrow(new NotFoundException("not found")).given(processRuntime).processInstance(processInstanceId);
 
@@ -304,7 +288,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void should_getProcessDiagram_when_NoInterchangeInfo() throws Exception {
+    public void should_getProcessDiagram_when_NoInterchangeInfo() throws Exception {
         String processInstanceId = UUID.randomUUID().toString();
         String processDefinitionId = UUID.randomUUID().toString();
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
@@ -331,7 +315,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void sendSignal() throws Exception {
+    public void sendSignal() throws Exception {
         SignalPayload cmd = ProcessPayloadBuilder.signal().withName("signalInstance").build();
 
         mockMvc
@@ -339,45 +323,40 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/signal")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void suspend() throws Exception {
+    public void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.suspend(any())).thenReturn(defaultProcessInstance());
         mockMvc
-            .perform(
-                post("/v1/process-instances/{processInstanceId}/suspend", 1).contentType(APPLICATION_JSON).with(csrf())
-            )
+            .perform(post("/v1/process-instances/{processInstanceId}/suspend", 1).contentType(APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
-    void resume() throws Exception {
+    public void resume() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.resume(any())).thenReturn(defaultProcessInstance());
         mockMvc
-            .perform(
-                post("/v1/process-instances/{processInstanceId}/resume", 1).contentType(APPLICATION_JSON).with(csrf())
-            )
+            .perform(post("/v1/process-instances/{processInstanceId}/resume", 1).contentType(APPLICATION_JSON))
             .andExpect(status().isOk());
     }
 
     @Test
-    void deleteProcessInstance() throws Exception {
+    public void deleteProcessInstance() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.delete(any())).thenReturn(defaultProcessInstance());
-        mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1).with(csrf())).andExpect(status().isOk());
+        mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void update() throws Exception {
+    public void update() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.update(any())).thenReturn(defaultProcessInstance());
@@ -394,13 +373,12 @@ class ProcessInstanceControllerImplIT {
                 put("/v1/process-instances/{processInstanceId}", 1)
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void subprocesses() throws Exception {
+    public void subprocesses() throws Exception {
         //Simply check here that controller is working
         List<ProcessInstance> processInstanceList = singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList, processInstanceList.size());
@@ -411,7 +389,7 @@ class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    void receiveMessage() throws Exception {
+    public void receiveMessage() throws Exception {
         ReceiveMessagePayload cmd = MessagePayloadBuilder
             .receive("messageName")
             .withCorrelationKey("correlationId")
@@ -423,13 +401,12 @@ class ProcessInstanceControllerImplIT {
                 put("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void startMessage() throws Exception {
+    public void startMessage() throws Exception {
         StartMessagePayload cmd = MessagePayloadBuilder
             .start("messageName")
             .withBusinessKey("buisinessId")
@@ -443,7 +420,6 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
