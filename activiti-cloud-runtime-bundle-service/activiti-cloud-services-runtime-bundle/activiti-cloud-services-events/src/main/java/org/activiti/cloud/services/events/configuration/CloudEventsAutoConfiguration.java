@@ -76,7 +76,6 @@ import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilder
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.engine.RuntimeService;
-import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -126,7 +125,7 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender() {
-        return new TaskAuditServiceInfoAppender(Context.getCommandContext());
+        return new TaskAuditServiceInfoAppender();
     }
 
     @Bean

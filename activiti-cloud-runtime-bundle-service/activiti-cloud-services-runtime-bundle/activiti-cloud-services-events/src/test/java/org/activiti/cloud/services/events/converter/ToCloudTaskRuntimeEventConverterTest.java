@@ -47,14 +47,12 @@ class ToCloudTaskRuntimeEventConverterTest {
     @InjectMocks
     private ToCloudTaskRuntimeEventConverter converter;
 
+    private CommandContext commandContext = mock(CommandContext.class);
+
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    private CommandContext commandContext = mock(CommandContext.class);
-
-    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = spy(
-        new TaskAuditServiceInfoAppender(commandContext)
-    );
+    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = spy(new TaskAuditServiceInfoAppender());
 
     private static final String USERNAME = "user1";
 
@@ -63,6 +61,7 @@ class ToCloudTaskRuntimeEventConverterTest {
     @BeforeEach
     void setUp() {
         when(this.commandContext.getGenericAttribute(eq("actor"))).thenReturn(USERNAME_GUID);
+        when(this.taskAuditServiceInfoAppender.getCommandContext()).thenReturn(this.commandContext);
     }
 
     @Test

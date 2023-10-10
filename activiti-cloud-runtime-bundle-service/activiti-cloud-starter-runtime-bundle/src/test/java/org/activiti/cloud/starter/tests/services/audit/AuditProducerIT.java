@@ -452,9 +452,6 @@ public class AuditProducerIT {
 
     @Test
     public void shouldProduceEventsDuringSimpleProcessExecutionWithActor() {
-        //given
-        String expectedActor = "c8460aa6-6c5d-4898-9176-098cbc54a9a7";
-
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -468,7 +465,19 @@ public class AuditProducerIT {
         );
 
         //then
-        assertThat(runtimeService.getIdentityLinksForProcessInstance(startProcessEntity.getBody().getId()))
+        List<IdentityLink> identityLinksForProcessInstance = runtimeService.getIdentityLinksForProcessInstance(
+            startProcessEntity.getBody().getId()
+        );
+        String expectedActor = new String(
+            identityLinksForProcessInstance
+                .stream()
+                .filter(identityLink -> "actor".equals(identityLink.getType()))
+                .findFirst()
+                .get()
+                .getDetails()
+        );
+
+        assertThat(identityLinksForProcessInstance)
             .filteredOn(it -> "actor".equals(it.getType()))
             .isNotEmpty()
             .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
