@@ -34,7 +34,7 @@ public class ProcessAuditServiceInfoAppender {
 
         identityLinks
             .stream()
-            .filter($ -> "actor".equalsIgnoreCase($.getType()))
+            .filter(identityLink -> "actor".equalsIgnoreCase(identityLink.getType()))
             .map(IdentityLink::getDetails)
             .map(String::new)
             .findFirst()

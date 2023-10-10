@@ -28,7 +28,6 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
-import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -54,12 +53,12 @@ class CloudProcessCompletedProducerTest {
 
     private RuntimeService runtimeService = mock(RuntimeService.class);
 
-    private ProcessAuditServiceInfoAppender auditServiceInfoAppender = spy(
+    private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
         new ProcessAuditServiceInfoAppender(runtimeService)
     );
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
-        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
+        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender)
     );
 
     private ProcessEngineEventsAggregator eventsAggregator = spy(
@@ -78,10 +77,10 @@ class CloudProcessCompletedProducerTest {
 
     @BeforeEach
     void beforeEach() {
-        User user = new User();
-        user.setId(USERNAME_GUID);
-        when(this.runtimeService.getIdentityLinksForProcessInstance(USERNAME))
-            .thenReturn(List.of(new IdentityLinkEntityImpl()));
+        IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
+        identityLink.setDetails(USERNAME_GUID.getBytes());
+        identityLink.setType("actor");
+        when(this.runtimeService.getIdentityLinksForProcessInstance(any())).thenReturn(List.of(identityLink));
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
     }
 
@@ -97,7 +96,8 @@ class CloudProcessCompletedProducerTest {
 
         cloudProcessCompletedProducer.onEvent(processCompletedEvent);
 
-        verify(this.auditServiceInfoAppender).appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
+        verify(this.processAuditServiceInfoAppender)
+            .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
         verify(this.eventsAggregator).add(this.argumentCaptor.capture());
         assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo(USERNAME_GUID);
     }

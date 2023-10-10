@@ -19,20 +19,19 @@ package org.activiti.cloud.services.events.converter;
 import java.util.Optional;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.engine.TaskService;
-import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.interceptor.CommandContext;
 
 public class TaskAuditServiceInfoAppender {
 
-    private final TaskService taskService;
+    private CommandContext commandContext;
 
-    public TaskAuditServiceInfoAppender(TaskService taskService) {
-        this.taskService = taskService;
+    public TaskAuditServiceInfoAppender(CommandContext commandContext) {
+        this.commandContext = commandContext;
     }
 
     public CloudRuntimeEventImpl<?, ?> appendAuditServiceInfoTo(CloudTaskCompletedEventImpl cloudRuntimeEvent) {
         Optional
-            .<String>ofNullable(Context.getCommandContext().getGenericAttribute("actor"))
+            .<String>ofNullable(this.commandContext.getGenericAttribute("actor"))
             .ifPresent(cloudRuntimeEvent::setActor);
 
         return cloudRuntimeEvent;
