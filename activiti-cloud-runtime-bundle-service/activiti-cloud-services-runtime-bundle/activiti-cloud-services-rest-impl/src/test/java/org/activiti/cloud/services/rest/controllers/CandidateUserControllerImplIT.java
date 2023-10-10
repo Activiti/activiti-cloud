@@ -27,7 +27,6 @@ import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -50,7 +49,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -71,8 +69,7 @@ import org.springframework.test.web.servlet.MvcResult;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class CandidateUserControllerImplIT {
+public class CandidateUserControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -92,18 +89,15 @@ class CandidateUserControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         assertThat(springPageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getUserCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskRuntime.userCandidates("1")).thenReturn(stringList);
 
@@ -121,7 +115,7 @@ class CandidateUserControllerImplIT {
     }
 
     @Test
-    void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
+    public void getUserCandidatesShouldHaveProperHALFormat() throws Exception {
         List<String> stringList = Arrays.asList("hruser", "testuser");
         when(taskRuntime.userCandidates("1")).thenReturn(stringList);
 

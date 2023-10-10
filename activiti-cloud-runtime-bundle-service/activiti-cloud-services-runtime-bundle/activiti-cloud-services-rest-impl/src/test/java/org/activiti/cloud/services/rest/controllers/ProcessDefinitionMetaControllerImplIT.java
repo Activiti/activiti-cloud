@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.engine.RepositoryService;
@@ -38,7 +37,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
@@ -46,8 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @Import({ StreamConfig.class })
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
-@WithMockUser
-class ProcessDefinitionMetaControllerImplIT {
+public class ProcessDefinitionMetaControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,11 +55,8 @@ class ProcessDefinitionMetaControllerImplIT {
     @MockBean
     private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler;
 
-    @MockBean
-    private IdentityService identityService;
-
     @Test
-    void getProcessDefinitionMetadata() throws Exception {
+    public void getProcessDefinitionMetadata() throws Exception {
         ProcessDefinitionQuery processDefinitionQuery = mock(ProcessDefinitionQuery.class);
         when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
         when(processDefinitionQuery.processDefinitionId("1")).thenReturn(processDefinitionQuery);

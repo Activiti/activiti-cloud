@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +49,6 @@ import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -75,7 +73,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskControllerImpl.class)
@@ -95,8 +92,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class TaskControllerImplIT {
+public class TaskControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -125,18 +121,15 @@ class TaskControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         assertThat(springPageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    void getTasks() throws Exception {
+    public void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(tasks);
@@ -146,7 +139,7 @@ class TaskControllerImplIT {
     }
 
     @Test
-    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(taskPage);
@@ -156,61 +149,60 @@ class TaskControllerImplIT {
     }
 
     @Test
-    void getTaskById() throws Exception {
+    public void getTaskById() throws Exception {
         when(taskRuntime.task("1")).thenReturn(buildDefaultAssignedTask());
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void claimTask() throws Exception {
+    public void claimTask() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("assignee");
         given(taskRuntime.claim(any())).willReturn(buildDefaultAssignedTask());
 
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/claim", 1).with(csrf())).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/claim", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void releaseTask() throws Exception {
+    public void releaseTask() throws Exception {
         given(taskRuntime.release(any())).willReturn(buildTask("my task", CREATED));
 
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/release", 1).with(csrf())).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/release", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void completeTask() throws Exception {
+    public void completeTask() throws Exception {
         given(taskRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/complete", 1).with(csrf())).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void saveTask() throws Exception {
+    public void saveTask() throws Exception {
         SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
 
         this.mockMvc.perform(
                 post("/v1/tasks/{taskId}/save", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(saveTask))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void deleteTask() throws Exception {
+    public void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(delete("/v1/tasks/{taskId}", 1).with(csrf())).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    void getTaskByIdTaskNotFound() throws Exception {
+    public void getTaskByIdTaskNotFound() throws Exception {
         when(taskRuntime.task("not-existent-task")).thenThrow(new NotFoundException("Not found"));
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}", "not-existent-task")).andExpect(status().isNotFound());
     }
 
     @Test
-    void createNewStandaloneTask() throws Exception {
+    public void createNewStandaloneTask() throws Exception {
         TaskImpl task = buildStandAloneTask("new-task", "New task to be performed");
         given(taskRuntime.create(any())).willReturn(task);
 
@@ -224,13 +216,12 @@ class TaskControllerImplIT {
                 post("/v1/tasks", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTask))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void createNewSubtask() throws Exception {
+    public void createNewSubtask() throws Exception {
         String parentTaskId = UUID.randomUUID().toString();
         Task subTask = buildSubTask("new-subtask", "subtask description", parentTaskId);
         given(taskRuntime.create(any())).willReturn(subTask);
@@ -245,13 +236,12 @@ class TaskControllerImplIT {
                 post("/v1/tasks", parentTaskId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTaskCmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void getSubtasks() throws Exception {
+    public void getSubtasks() throws Exception {
         final TaskImpl subtask1 = buildTask("subtask-1", "subtask-1 description");
         subtask1.setPriority(85);
 
@@ -264,7 +254,7 @@ class TaskControllerImplIT {
     }
 
     @Test
-    void updateTask() throws Exception {
+    public void updateTask() throws Exception {
         given(taskRuntime.update(any())).willReturn(buildDefaultAssignedTask());
         UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
             .update()
@@ -277,13 +267,12 @@ class TaskControllerImplIT {
                 put("/v1/tasks/{taskId}", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(updateTaskCmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
 
     @Test
-    void assignTask() throws Exception {
+    public void assignTask() throws Exception {
         given(taskRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
@@ -291,7 +280,6 @@ class TaskControllerImplIT {
                 post("/v1/tasks/{taskId}/assign", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTaskCmd))
-                    .with(csrf())
             )
             .andExpect(status().isOk());
     }

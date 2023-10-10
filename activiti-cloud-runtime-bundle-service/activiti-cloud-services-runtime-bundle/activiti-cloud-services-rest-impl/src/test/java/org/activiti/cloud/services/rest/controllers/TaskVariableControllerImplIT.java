@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -34,7 +33,6 @@ import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -58,7 +56,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskVariableControllerImpl.class)
@@ -77,8 +74,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class TaskVariableControllerImplIT {
+public class TaskVariableControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -104,14 +100,11 @@ class TaskVariableControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -123,7 +116,7 @@ class TaskVariableControllerImplIT {
     }
 
     @Test
-    void getVariables() throws Exception {
+    public void getVariables() throws Exception {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
             "name",
             String.class.getName(),
@@ -148,7 +141,7 @@ class TaskVariableControllerImplIT {
     }
 
     @Test
-    void createVariable() throws Exception {
+    public void createVariable() throws Exception {
         this.mockMvc.perform(
                 post("/v1/tasks/{taskId}/variables", TASK_ID)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -161,7 +154,6 @@ class TaskVariableControllerImplIT {
                                 .build()
                         )
                     )
-                    .with(csrf())
             )
             .andExpect(status().isOk());
 
@@ -169,7 +161,7 @@ class TaskVariableControllerImplIT {
     }
 
     @Test
-    void updateVariable() throws Exception {
+    public void updateVariable() throws Exception {
         //WHEN
         this.mockMvc.perform(
                 put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
@@ -183,7 +175,6 @@ class TaskVariableControllerImplIT {
                                 .build()
                         )
                     )
-                    .with(csrf())
             )
             .andExpect(status().isOk());
 

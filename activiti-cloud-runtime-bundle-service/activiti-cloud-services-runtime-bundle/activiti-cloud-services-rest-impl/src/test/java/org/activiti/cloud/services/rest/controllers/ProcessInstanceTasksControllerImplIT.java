@@ -55,7 +55,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
@@ -73,8 +72,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class ProcessInstanceTasksControllerImplIT {
+public class ProcessInstanceTasksControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -107,14 +105,14 @@ class ProcessInstanceTasksControllerImplIT {
     private IdentityService identityService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    void getTasks() throws Exception {
+    public void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
 
@@ -128,7 +126,7 @@ class ProcessInstanceTasksControllerImplIT {
     }
 
     @Test
-    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         Task task = buildDefaultAssignedTask();
         List<Task> taskList = Collections.singletonList(task);
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
