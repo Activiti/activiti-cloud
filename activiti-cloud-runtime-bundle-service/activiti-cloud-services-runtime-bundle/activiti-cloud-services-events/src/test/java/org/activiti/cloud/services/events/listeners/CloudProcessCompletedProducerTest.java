@@ -28,8 +28,6 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
-import org.activiti.cloud.identity.IdentityService;
-import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -51,9 +49,7 @@ class CloudProcessCompletedProducerTest {
         new RuntimeBundleProperties()
     );
 
-    private IdentityService identityService = mock(IdentityService.class);
-
-    private AuditServiceInfoAppender auditServiceInfoAppender = spy(new AuditServiceInfoAppender(identityService));
+    private AuditServiceInfoAppender auditServiceInfoAppender = spy(new AuditServiceInfoAppender());
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
         new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
@@ -75,9 +71,6 @@ class CloudProcessCompletedProducerTest {
 
     @BeforeEach
     void beforeEach() {
-        User user = new User();
-        user.setId(USERNAME_GUID);
-        when(this.identityService.findUserByName(USERNAME)).thenReturn(user);
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
     }
 
