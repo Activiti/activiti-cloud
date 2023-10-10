@@ -22,10 +22,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.identity.IdentityService;
-import org.activiti.cloud.services.common.security.config.CommonJwtAuthenticationConverterConfiguration;
-import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
-import org.activiti.cloud.services.common.security.jwt.OAuth2UserServiceCacheable;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -47,9 +43,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -86,27 +79,6 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private BuildProperties buildProperties;
-
-    @MockBean
-    private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
-
-    @MockBean
-    private ClientRegistrationRepository clientRegistrationRepository;
-
-    @MockBean
-    private CommonJwtAuthenticationConverterConfiguration commonJwtAuthenticationConverterConfiguration;
-
-    @MockBean
-    private JwtAccessTokenProvider jwtAccessTokenProvider;
-
-    @MockBean
-    private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
-
-    @MockBean
-    private JwtDecoder jwtDecoder;
-
-    @MockBean
-    private IdentityService identityService;
 
     @BeforeEach
     public void beforeEach() {
