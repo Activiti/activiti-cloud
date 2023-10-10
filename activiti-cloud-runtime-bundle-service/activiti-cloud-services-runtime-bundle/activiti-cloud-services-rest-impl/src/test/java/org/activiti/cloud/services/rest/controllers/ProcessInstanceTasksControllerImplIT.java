@@ -30,7 +30,6 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -55,7 +54,6 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceTasksControllerImpl.class)
@@ -73,8 +71,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class ProcessInstanceTasksControllerImplIT {
+public class ProcessInstanceTasksControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -103,18 +100,15 @@ class ProcessInstanceTasksControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    void getTasks() throws Exception {
+    public void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
 
@@ -128,7 +122,7 @@ class ProcessInstanceTasksControllerImplIT {
     }
 
     @Test
-    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         Task task = buildDefaultAssignedTask();
         List<Task> taskList = Collections.singletonList(task);
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());

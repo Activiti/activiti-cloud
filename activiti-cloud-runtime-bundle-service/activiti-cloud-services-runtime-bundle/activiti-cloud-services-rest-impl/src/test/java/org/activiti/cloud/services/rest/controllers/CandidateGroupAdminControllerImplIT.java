@@ -27,7 +27,6 @@ import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -50,7 +49,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -71,8 +69,7 @@ import org.springframework.test.web.servlet.MvcResult;
         StreamConfig.class,
     }
 )
-@WithMockUser
-class CandidateGroupAdminControllerImplIT {
+public class CandidateGroupAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -92,18 +89,15 @@ class CandidateGroupAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
-    @MockBean
-    private IdentityService identityService;
-
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    void getGroupCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    public void getGroupCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 
@@ -121,7 +115,7 @@ class CandidateGroupAdminControllerImplIT {
     }
 
     @Test
-    void getGroupCandidatesShouldHaveProperHALFormat() throws Exception {
+    public void getGroupCandidatesShouldHaveProperHALFormat() throws Exception {
         List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 

@@ -19,9 +19,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
-import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.converter.AuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.TaskAuditServiceInfoAppender;
@@ -135,12 +133,6 @@ public class CloudEventsAutoConfiguration {
     @ConditionalOnMissingBean
     public RuntimeBundleInfoAppender runtimeBundleInfoAppender(RuntimeBundleProperties properties) {
         return new RuntimeBundleInfoAppender(properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public AuditServiceInfoAppender auditServiceInfoAppender(IdentityService identityService) {
-        return new AuditServiceInfoAppender(identityService);
     }
 
     @Bean
