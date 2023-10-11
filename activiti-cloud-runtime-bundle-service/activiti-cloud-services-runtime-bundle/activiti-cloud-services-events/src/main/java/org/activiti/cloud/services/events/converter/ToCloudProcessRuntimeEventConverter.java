@@ -95,11 +95,11 @@ public class ToCloudProcessRuntimeEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    private final AuditServiceInfoAppender auditServiceInfoAppender;
+    private final ProcessAuditServiceInfoAppender auditServiceInfoAppender;
 
     public ToCloudProcessRuntimeEventConverter(
         RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        AuditServiceInfoAppender auditServiceInfoAppender
+        ProcessAuditServiceInfoAppender auditServiceInfoAppender
     ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.auditServiceInfoAppender = auditServiceInfoAppender;
@@ -142,7 +142,7 @@ public class ToCloudProcessRuntimeEventConverter {
     public CloudProcessCompletedEvent from(ProcessCompletedEvent event) {
         CloudProcessCompletedEventImpl cloudEvent = new CloudProcessCompletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
-        this.auditServiceInfoAppender.appendAuditServiceInfoTo(cloudEvent, cloudEvent.getEntity().getInitiator());
+        this.auditServiceInfoAppender.appendAuditServiceInfoTo(cloudEvent);
         return cloudEvent;
     }
 
