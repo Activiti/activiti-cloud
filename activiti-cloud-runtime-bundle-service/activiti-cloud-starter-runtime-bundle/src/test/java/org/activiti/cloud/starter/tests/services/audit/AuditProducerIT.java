@@ -132,7 +132,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-public class AuditProducerIT {
+class AuditProducerIT {
 
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
@@ -199,7 +199,7 @@ public class AuditProducerIT {
     private RepositoryService repositoryService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -214,7 +214,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForProcessDeployment() {
+    void shouldProduceEventsForProcessDeployment() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -241,7 +241,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCandidateUserStarterEvents() {
+    void shouldProduceCandidateUserStarterEvents() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -259,7 +259,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCandidateGroupStarterEvents() {
+    void shouldProduceCandidateGroupStarterEvents() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -280,7 +280,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringSimpleProcessExecution() {
+    void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -451,7 +451,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringSimpleProcessExecutionWithActor() {
+    void shouldProduceEventsDuringSimpleProcessExecutionWithActor() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -502,7 +502,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForAProcessDeletion() {
+    void shouldProduceEventsForAProcessDeletion() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -536,7 +536,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldSendIntegrationResultReceiveEvent() {
+    void shouldSendIntegrationResultReceiveEvent() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -559,7 +559,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForAProcessUpdate() {
+    void shouldProduceEventsForAProcessUpdate() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -597,7 +597,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskDelete() {
+    void shouldEmitEventsForTaskDelete() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -649,7 +649,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskUpdate() {
+    void shouldEmitEventsForTaskUpdate() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -687,7 +687,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskAddDeleteUserCandidates() {
+    void shouldEmitEventsForTaskAddDeleteUserCandidates() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -773,7 +773,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
+    void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -862,7 +862,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void testTwoSubProcesses() {
+    void testTwoSubProcesses() {
         //given
         String businessKey = "testBusinessKey";
         String processDefinitionId = processDefinitionIds.get(CALL_TWO_SUB_PROCESSES);
@@ -964,7 +964,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCancelEventsDuringMultiInstanceExecution() {
+    void shouldProduceCancelEventsDuringMultiInstanceExecution() {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
             "miParallelUserTasksCompletionCondition",
             null,
@@ -1062,7 +1062,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringMultiInstanceSubProcessExecution() {
+    void shouldProduceEventsDuringMultiInstanceSubProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
             "miParallelSubprocessCompletionCondition",
@@ -1162,7 +1162,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
+    void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
         // given
         final String appVersion = processDefinitionAppVersions.get(SIMPLE_PROCESS);
 
@@ -1201,7 +1201,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringMultiInstanceCallActivityExecution() {
+    void shouldProduceEventsDuringMultiInstanceCallActivityExecution() {
         //given
         List<CloudTask> tasks;
 
@@ -1298,7 +1298,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void testCallSimpleSubProcessWithExpressions() {
+    void testCallSimpleSubProcessWithExpressions() {
         CloudProcessInstance processInstance = processInstanceRestTemplate
             .startProcessByKey("callSimpleSubProcess", null, null)
             .getBody();
@@ -1367,7 +1367,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForApplicationDeployment() {
+    void shouldProduceEventsForApplicationDeployment() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 

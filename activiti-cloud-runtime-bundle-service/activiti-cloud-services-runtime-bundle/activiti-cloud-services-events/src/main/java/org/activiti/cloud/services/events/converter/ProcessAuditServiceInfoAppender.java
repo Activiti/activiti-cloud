@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.engine.RuntimeService;
@@ -29,7 +31,9 @@ public class ProcessAuditServiceInfoAppender {
         this.runtimeService = runtimeService;
     }
 
-    public CloudRuntimeEventImpl<?, ?> appendAuditServiceInfoTo(CloudProcessCompletedEventImpl cloudRuntimeEvent) {
+    public CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> appendAuditServiceInfoTo(
+        CloudProcessCompletedEventImpl cloudRuntimeEvent
+    ) {
         var identityLinks = runtimeService.getIdentityLinksForProcessInstance(cloudRuntimeEvent.getProcessInstanceId());
 
         identityLinks
