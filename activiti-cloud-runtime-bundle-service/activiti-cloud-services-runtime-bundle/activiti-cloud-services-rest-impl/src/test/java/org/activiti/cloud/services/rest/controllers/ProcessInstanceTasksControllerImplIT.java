@@ -74,7 +74,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class ProcessInstanceTasksControllerImplIT {
+class ProcessInstanceTasksControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -113,14 +113,14 @@ public class ProcessInstanceTasksControllerImplIT {
     private PrincipalIdentityProvider principalIdentityProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getTasks() throws Exception {
+    void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
 
@@ -134,7 +134,7 @@ public class ProcessInstanceTasksControllerImplIT {
     }
 
     @Test
-    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         Task task = buildDefaultAssignedTask();
         List<Task> taskList = Collections.singletonList(task);
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());

@@ -790,7 +790,7 @@ class AuditProducerIT {
         );
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
+        assertThat(groupCandidates.getBody().getContent().size()).isZero();
 
         //when
         taskRestTemplate.addGroupCandidates(
@@ -852,7 +852,7 @@ class AuditProducerIT {
         groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
+        assertThat(groupCandidates.getBody().getContent().size()).isZero();
 
         //Delete task
         taskRestTemplate.delete(task);

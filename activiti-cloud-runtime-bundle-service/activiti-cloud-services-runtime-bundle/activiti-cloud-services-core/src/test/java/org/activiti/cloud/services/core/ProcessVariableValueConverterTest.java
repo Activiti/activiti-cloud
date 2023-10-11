@@ -83,7 +83,7 @@ class ProcessVariableValueConverterTest {
         Boolean booleanValue = variableValueConverter.convert(new ProcessVariableValue("boolean", "true"));
 
         // then
-        assertThat(booleanValue).isEqualTo(true);
+        assertThat(booleanValue).isTrue();
     }
 
     @Test
