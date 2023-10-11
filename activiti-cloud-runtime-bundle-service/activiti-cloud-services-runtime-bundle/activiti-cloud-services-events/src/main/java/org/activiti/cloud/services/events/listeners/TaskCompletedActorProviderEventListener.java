@@ -18,16 +18,14 @@ package org.activiti.cloud.services.events.listeners;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.events.TaskCompletedEvent;
 import org.activiti.api.task.runtime.events.listener.TaskRuntimeEventListener;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.impl.context.Context;
 
-public class TaskCompletedCommandContextActorProviderEventListener
-    implements TaskRuntimeEventListener<TaskCompletedEvent> {
+public class TaskCompletedActorProviderEventListener implements TaskRuntimeEventListener<TaskCompletedEvent> {
 
     private final SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
-    public TaskCompletedCommandContextActorProviderEventListener(
-        SecurityContextPrincipalProvider securityContextPrincipalProvider
-    ) {
+    public TaskCompletedActorProviderEventListener(SecurityContextPrincipalProvider securityContextPrincipalProvider) {
         this.securityContextPrincipalProvider = securityContextPrincipalProvider;
     }
 
@@ -35,6 +33,8 @@ public class TaskCompletedCommandContextActorProviderEventListener
     public void onEvent(TaskCompletedEvent event) {
         securityContextPrincipalProvider
             .getCurrentPrincipal()
-            .ifPresent(principal -> Context.getCommandContext().addAttribute("actor", principal.getName()));
+            .ifPresent(principal ->
+                Context.getCommandContext().addAttribute(ActorConstants.ACTOR_TYPE, principal.getName())
+            );
     }
 }

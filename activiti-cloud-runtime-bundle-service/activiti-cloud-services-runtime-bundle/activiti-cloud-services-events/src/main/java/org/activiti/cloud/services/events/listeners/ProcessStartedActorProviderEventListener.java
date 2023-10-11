@@ -21,16 +21,16 @@ import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListener;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
 
-public class ProcessStartedEventIdentityLinkActorProviderEventListener
-    implements ProcessRuntimeEventListener<ProcessStartedEvent> {
+public class ProcessStartedActorProviderEventListener implements ProcessRuntimeEventListener<ProcessStartedEvent> {
 
     private final RuntimeService runtimeService;
     private final SecurityContextPrincipalProvider securityContextPrincipalProvider;
     private final PrincipalIdentityProvider principalIdentityProvider;
 
-    public ProcessStartedEventIdentityLinkActorProviderEventListener(
+    public ProcessStartedActorProviderEventListener(
         RuntimeService runtimeService,
         SecurityContextPrincipalProvider securityContextPrincipalProvider,
         PrincipalIdentityProvider principalIdentityProvider
@@ -52,7 +52,7 @@ public class ProcessStartedEventIdentityLinkActorProviderEventListener
                         runtimeService.addUserIdentityLink(
                             event.getEntity().getId(),
                             principalIdentityProvider.getUserId(principal),
-                            "actor",
+                            ActorConstants.ACTOR_TYPE,
                             details
                         )
                     )

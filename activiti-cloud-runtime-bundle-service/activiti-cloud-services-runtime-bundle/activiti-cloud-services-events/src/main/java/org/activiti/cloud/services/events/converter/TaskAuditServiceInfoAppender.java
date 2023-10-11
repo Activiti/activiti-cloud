@@ -21,6 +21,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
@@ -30,7 +31,7 @@ public class TaskAuditServiceInfoAppender {
         CloudTaskCompletedEventImpl cloudRuntimeEvent
     ) {
         Optional
-            .<String>ofNullable(getCommandContext().getGenericAttribute("actor"))
+            .<String>ofNullable(getCommandContext().getGenericAttribute(ActorConstants.ACTOR_TYPE))
             .ifPresent(cloudRuntimeEvent::setActor);
 
         return cloudRuntimeEvent;

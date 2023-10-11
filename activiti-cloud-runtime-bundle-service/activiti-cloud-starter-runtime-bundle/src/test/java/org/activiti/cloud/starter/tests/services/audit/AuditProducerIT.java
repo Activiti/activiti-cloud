@@ -97,6 +97,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
@@ -471,14 +472,14 @@ class AuditProducerIT {
         String expectedActor = new String(
             identityLinksForProcessInstance
                 .stream()
-                .filter(identityLink -> "actor".equals(identityLink.getType()))
+                .filter(identityLink -> ActorConstants.ACTOR_TYPE.equals(identityLink.getType()))
                 .findFirst()
                 .get()
                 .getDetails()
         );
 
         assertThat(identityLinksForProcessInstance)
-            .filteredOn(it -> "actor".equals(it.getType()))
+            .filteredOn(it -> ActorConstants.ACTOR_TYPE.equals(it.getType()))
             .isNotEmpty()
             .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
             .containsOnly(tuple("hruser", expectedActor.getBytes()));

@@ -33,6 +33,7 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
@@ -67,7 +68,7 @@ class ToCloudProcessRuntimeEventConverterTest {
     void beforeEach() {
         IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
         identityLink.setDetails(USERNAME_GUID.getBytes());
-        identityLink.setType("actor");
+        identityLink.setType(ActorConstants.ACTOR_TYPE);
         when(this.runtimeService.getIdentityLinksForProcessInstance(any())).thenReturn(List.of(identityLink));
     }
 

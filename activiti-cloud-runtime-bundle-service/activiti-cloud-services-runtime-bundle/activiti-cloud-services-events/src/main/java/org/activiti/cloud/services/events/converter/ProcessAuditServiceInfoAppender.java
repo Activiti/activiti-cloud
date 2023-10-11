@@ -20,6 +20,7 @@ import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.task.IdentityLink;
 
@@ -38,7 +39,7 @@ public class ProcessAuditServiceInfoAppender {
 
         identityLinks
             .stream()
-            .filter(identityLink -> "actor".equalsIgnoreCase(identityLink.getType()))
+            .filter(identityLink -> ActorConstants.ACTOR_TYPE.equalsIgnoreCase(identityLink.getType()))
             .map(IdentityLink::getDetails)
             .map(String::new)
             .findFirst()

@@ -31,6 +31,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.runtime.api.event.impl.TaskCompletedImpl;
 import org.activiti.runtime.api.event.impl.TaskCreatedEventImpl;
@@ -60,7 +61,7 @@ class ToCloudTaskRuntimeEventConverterTest {
 
     @BeforeEach
     void setUp() {
-        when(this.commandContext.getGenericAttribute(eq("actor"))).thenReturn(USERNAME_GUID);
+        when(this.commandContext.getGenericAttribute(eq(ActorConstants.ACTOR_TYPE))).thenReturn(USERNAME_GUID);
         when(this.taskAuditServiceInfoAppender.getCommandContext()).thenReturn(this.commandContext);
     }
 

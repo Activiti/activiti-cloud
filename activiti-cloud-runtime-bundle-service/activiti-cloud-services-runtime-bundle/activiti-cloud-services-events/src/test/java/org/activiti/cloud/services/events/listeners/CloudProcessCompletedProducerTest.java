@@ -28,6 +28,7 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -79,7 +80,7 @@ class CloudProcessCompletedProducerTest {
     void beforeEach() {
         IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
         identityLink.setDetails(USERNAME_GUID.getBytes());
-        identityLink.setType("actor");
+        identityLink.setType(ActorConstants.ACTOR_TYPE);
         when(this.runtimeService.getIdentityLinksForProcessInstance(any())).thenReturn(List.of(identityLink));
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
     }

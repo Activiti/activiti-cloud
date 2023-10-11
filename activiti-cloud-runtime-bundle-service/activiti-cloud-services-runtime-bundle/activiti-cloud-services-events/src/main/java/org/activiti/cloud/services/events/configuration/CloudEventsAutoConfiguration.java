@@ -69,8 +69,8 @@ import org.activiti.cloud.services.events.listeners.CloudVariableDeletedProducer
 import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer;
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
-import org.activiti.cloud.services.events.listeners.ProcessStartedEventIdentityLinkActorProviderEventListener;
-import org.activiti.cloud.services.events.listeners.TaskCompletedCommandContextActorProviderEventListener;
+import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
+import org.activiti.cloud.services.events.listeners.TaskCompletedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
@@ -96,20 +96,20 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @Order(HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public TaskCompletedCommandContextActorProviderEventListener taskCompletedCommandContextActorProviderEventListener(
+    public TaskCompletedActorProviderEventListener taskCompletedActorProviderEventListener(
         SecurityContextPrincipalProvider securityContextPrincipalProvider
     ) {
-        return new TaskCompletedCommandContextActorProviderEventListener(securityContextPrincipalProvider);
+        return new TaskCompletedActorProviderEventListener(securityContextPrincipalProvider);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessStartedEventIdentityLinkActorProviderEventListener processStartedEventIdentityLinkActorProviderEventListener(
+    public ProcessStartedActorProviderEventListener processStartedActorProviderEventListener(
         RuntimeService runtimeService,
         SecurityContextPrincipalProvider securityContextPrincipalProvider,
         PrincipalIdentityProvider principalIdentityProvider
     ) {
-        return new ProcessStartedEventIdentityLinkActorProviderEventListener(
+        return new ProcessStartedActorProviderEventListener(
             runtimeService,
             securityContextPrincipalProvider,
             principalIdentityProvider
