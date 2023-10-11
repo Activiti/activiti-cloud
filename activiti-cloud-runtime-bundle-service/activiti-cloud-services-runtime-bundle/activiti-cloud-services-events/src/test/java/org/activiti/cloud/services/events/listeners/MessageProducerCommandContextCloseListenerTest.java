@@ -189,7 +189,7 @@ class MessageProducerCommandContextCloseListenerTest {
     }
 
     @Test
-    public void closedShouldSendMessageHeadersWithExecutionContext() {
+    void closedShouldSendMessageHeadersWithExecutionContext() {
         // given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(Collections.singletonList(event));
