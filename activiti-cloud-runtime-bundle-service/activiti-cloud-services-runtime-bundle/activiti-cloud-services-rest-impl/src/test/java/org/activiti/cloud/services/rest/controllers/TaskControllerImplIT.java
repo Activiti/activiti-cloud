@@ -38,6 +38,8 @@ import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.Task;
@@ -59,6 +61,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,7 +95,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class TaskControllerImplIT {
+class TaskControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -121,15 +124,24 @@ public class TaskControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(springPageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getTasks() throws Exception {
+    void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(tasks);
@@ -139,7 +151,7 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskRuntime.tasks(any())).thenReturn(taskPage);
@@ -149,14 +161,14 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void getTaskById() throws Exception {
+    void getTaskById() throws Exception {
         when(taskRuntime.task("1")).thenReturn(buildDefaultAssignedTask());
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void claimTask() throws Exception {
+    void claimTask() throws Exception {
         when(securityManager.getAuthenticatedUserId()).thenReturn("assignee");
         given(taskRuntime.claim(any())).willReturn(buildDefaultAssignedTask());
 
@@ -164,20 +176,20 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void releaseTask() throws Exception {
+    void releaseTask() throws Exception {
         given(taskRuntime.release(any())).willReturn(buildTask("my task", CREATED));
 
         this.mockMvc.perform(post("/v1/tasks/{taskId}/release", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void completeTask() throws Exception {
+    void completeTask() throws Exception {
         given(taskRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void saveTask() throws Exception {
+    void saveTask() throws Exception {
         SaveTaskPayload saveTask = TaskPayloadBuilder.save().withTaskId("1").withVariable("name", "value").build();
 
         this.mockMvc.perform(
@@ -189,20 +201,20 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void deleteTask() throws Exception {
+    void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void getTaskByIdTaskNotFound() throws Exception {
+    void getTaskByIdTaskNotFound() throws Exception {
         when(taskRuntime.task("not-existent-task")).thenThrow(new NotFoundException("Not found"));
 
         this.mockMvc.perform(get("/v1/tasks/{taskId}", "not-existent-task")).andExpect(status().isNotFound());
     }
 
     @Test
-    public void createNewStandaloneTask() throws Exception {
+    void createNewStandaloneTask() throws Exception {
         TaskImpl task = buildStandAloneTask("new-task", "New task to be performed");
         given(taskRuntime.create(any())).willReturn(task);
 
@@ -221,7 +233,7 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void createNewSubtask() throws Exception {
+    void createNewSubtask() throws Exception {
         String parentTaskId = UUID.randomUUID().toString();
         Task subTask = buildSubTask("new-subtask", "subtask description", parentTaskId);
         given(taskRuntime.create(any())).willReturn(subTask);
@@ -241,7 +253,7 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void getSubtasks() throws Exception {
+    void getSubtasks() throws Exception {
         final TaskImpl subtask1 = buildTask("subtask-1", "subtask-1 description");
         subtask1.setPriority(85);
 
@@ -254,7 +266,7 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void updateTask() throws Exception {
+    void updateTask() throws Exception {
         given(taskRuntime.update(any())).willReturn(buildDefaultAssignedTask());
         UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
             .update()
@@ -272,7 +284,7 @@ public class TaskControllerImplIT {
     }
 
     @Test
-    public void assignTask() throws Exception {
+    void assignTask() throws Exception {
         given(taskRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 

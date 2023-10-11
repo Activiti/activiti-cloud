@@ -33,6 +33,8 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -45,6 +47,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.DateFormatterProvider;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.variable.VariableValidationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +78,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class ProcessInstanceVariableControllerImplIT {
+class ProcessInstanceVariableControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -115,8 +118,17 @@ public class ProcessInstanceVariableControllerImplIT {
     @MockBean
     private CachingProcessExtensionService cachingProcessExtensionService;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -128,7 +140,7 @@ public class ProcessInstanceVariableControllerImplIT {
     }
 
     @Test
-    public void getVariables() throws Exception {
+    void getVariables() throws Exception {
         VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
             "name",
             String.class.getName(),
@@ -152,7 +164,7 @@ public class ProcessInstanceVariableControllerImplIT {
     }
 
     @Test
-    public void setVariables() throws Exception {
+    void setVariables() throws Exception {
         Map<String, Object> variables = new HashMap<>();
         variables.put("var1", "varObj1");
         variables.put("var2", "varObj2");

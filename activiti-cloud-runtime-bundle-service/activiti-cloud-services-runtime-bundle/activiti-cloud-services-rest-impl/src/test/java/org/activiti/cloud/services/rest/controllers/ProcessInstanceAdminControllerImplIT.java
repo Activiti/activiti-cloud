@@ -39,6 +39,8 @@ import org.activiti.api.process.model.payloads.UpdateProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
@@ -52,6 +54,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +90,7 @@ import org.springframework.test.web.servlet.MockMvc;
     }
 )
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
-public class ProcessInstanceAdminControllerImplIT {
+class ProcessInstanceAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -119,15 +122,24 @@ public class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private CloudProcessDeletedService cloudProcessDeletedService;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
     }
 
     @Test
-    public void getProcessInstances() throws Exception {
+    void getProcessInstances() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstances);
@@ -137,7 +149,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processAdminRuntime.processInstances(any())).thenReturn(processInstancePage);
@@ -149,7 +161,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void resume() throws Exception {
+    void resume() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
 
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
@@ -161,7 +173,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void suspend() throws Exception {
+    void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.suspend(any())).thenReturn(defaultProcessInstance());
@@ -170,7 +182,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void deleteProcessInstance() throws Exception {
+    void deleteProcessInstance() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.delete(any())).thenReturn(defaultProcessInstance());
@@ -178,13 +190,13 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void destroyProcessInstance() throws Exception {
+    void destroyProcessInstance() throws Exception {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
             .andExpect(status().isOk());
     }
 
     @Test
-    public void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
+    void destroyProcessInstance_ShouldReturnBadRequestAsProcessIsNotCompletedOrCancelled() throws Exception {
         //given
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
@@ -195,7 +207,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void update() throws Exception {
+    void update() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
         when(processAdminRuntime.update(any())).thenReturn(defaultProcessInstance());
@@ -216,7 +228,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void startMessage() throws Exception {
+    void startMessage() throws Exception {
         StartMessagePayload cmd = MessagePayloadBuilder
             .start("messageName")
             .withBusinessKey("buisinessId")
@@ -234,7 +246,7 @@ public class ProcessInstanceAdminControllerImplIT {
     }
 
     @Test
-    public void receiveMessage() throws Exception {
+    void receiveMessage() throws Exception {
         ReceiveMessagePayload cmd = MessagePayloadBuilder
             .receive("messageName")
             .withCorrelationKey("correlationId")

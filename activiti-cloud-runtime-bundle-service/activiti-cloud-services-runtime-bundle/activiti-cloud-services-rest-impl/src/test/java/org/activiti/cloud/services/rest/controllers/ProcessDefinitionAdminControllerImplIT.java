@@ -31,6 +31,8 @@ import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -44,6 +46,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -77,7 +80,7 @@ import org.springframework.test.web.servlet.MvcResult;
         StreamConfig.class,
     }
 )
-public class ProcessDefinitionAdminControllerImplIT {
+class ProcessDefinitionAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -109,15 +112,24 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private ProcessRuntime processRuntime;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
     }
 
     @Test
-    public void getProcessDefinitions() throws Exception {
+    void getProcessDefinitions() throws Exception {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("procId");
         processDefinition.setName("my process");
@@ -154,7 +166,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();

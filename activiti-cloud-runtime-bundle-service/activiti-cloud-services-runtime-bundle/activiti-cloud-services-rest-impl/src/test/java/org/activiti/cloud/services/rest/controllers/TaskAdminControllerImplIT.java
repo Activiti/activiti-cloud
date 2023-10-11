@@ -30,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
@@ -47,6 +49,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +81,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class TaskAdminControllerImplIT {
+class TaskAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -101,15 +104,24 @@ public class TaskAdminControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getTasks() throws Exception {
+    void getTasks() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> tasks = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(tasks);
@@ -119,7 +131,7 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getTasksShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<Task> taskList = Collections.singletonList(buildDefaultAssignedTask());
         Page<Task> taskPage = new PageImpl<>(taskList, taskList.size());
         when(taskAdminRuntime.tasks(any())).thenReturn(taskPage);
@@ -129,13 +141,13 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void deleteTask() throws Exception {
+    void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void updateTask() throws Exception {
+    void updateTask() throws Exception {
         given(taskAdminRuntime.update(any())).willReturn(buildDefaultAssignedTask());
         UpdateTaskPayload updateTaskCmd = TaskPayloadBuilder
             .update()
@@ -153,13 +165,13 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void completeTask() throws Exception {
+    void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
         this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void assignTask() throws Exception {
+    void assignTask() throws Exception {
         given(taskAdminRuntime.assign(any())).willReturn(buildDefaultAssignedTask());
         AssignTaskPayload assignTaskCmd = TaskPayloadBuilder.assign().withTaskId("1").withAssignee("assignee").build();
 
@@ -172,7 +184,7 @@ public class TaskAdminControllerImplIT {
     }
 
     @Test
-    public void assignMultipleTasks() throws Exception {
+    void assignMultipleTasks() throws Exception {
         given(taskAdminRuntime.assignMultiple(any())).willReturn(new PageImpl(List.of(buildDefaultAssignedTask()), 1));
         AssignTasksPayload assignTasksCmd = TaskPayloadBuilder
             .assignMultiple()
