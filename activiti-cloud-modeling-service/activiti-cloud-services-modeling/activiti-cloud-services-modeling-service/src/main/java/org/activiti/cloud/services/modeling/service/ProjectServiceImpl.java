@@ -397,7 +397,11 @@ public class ProjectServiceImpl implements ProjectService {
         updateModelProcessImported(projectHolder, createdModel, fileContent);
     }
 
-    private void updateModelProcessImported(ProjectHolder projectHolder, ImportedModel importedModel, FileContent fileContent) {
+    private void updateModelProcessImported(
+        ProjectHolder projectHolder,
+        ImportedModel importedModel,
+        FileContent fileContent
+    ) {
         modelService.updateModelContent(importedModel, fileContent);
 
         Model model = importedModel.model();
@@ -530,7 +534,6 @@ public class ProjectServiceImpl implements ProjectService {
         createdProcesses
             .keySet()
             .forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
-
     }
 
     private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {

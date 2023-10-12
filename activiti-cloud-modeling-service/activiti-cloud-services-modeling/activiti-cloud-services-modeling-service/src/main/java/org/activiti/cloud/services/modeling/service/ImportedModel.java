@@ -16,19 +16,16 @@
 
 package org.activiti.cloud.services.modeling.service;
 
-import org.activiti.cloud.modeling.api.Model;
-
 import java.util.Collections;
 import java.util.Map;
+import org.activiti.cloud.modeling.api.Model;
 
 public record ImportedModel(Model model, Map<String, String> identifiersToUpdate) {
-
     public static ImportedModel modelWithoutIdentifiersToUpdate(Model model) {
         return new ImportedModel(model, Collections.emptyMap());
     }
 
-    public boolean hasIdentifiersToUpdate(){
+    public boolean hasIdentifiersToUpdate() {
         return identifiersToUpdate != null && !identifiersToUpdate.isEmpty();
     }
-
 }

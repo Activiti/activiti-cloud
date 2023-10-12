@@ -360,7 +360,9 @@ public class ModelServiceImpl implements ModelService {
     public FileContent overrideModelContentId(ImportedModel importedModel, FileContent fileContent) {
         return modelContentService
             .findModelContentConverter(importedModel.model().getType())
-            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, importedModel.identifiersToUpdate()))
+            .map(modelContentConverter ->
+                modelContentConverter.overrideModelId(fileContent, importedModel.identifiersToUpdate())
+            )
             .orElse(fileContent);
     }
 
@@ -416,7 +418,10 @@ public class ModelServiceImpl implements ModelService {
     private String resolveConvertedId(ModelType modelType, FileContent fileContent, Model model) {
         String convertedId = model.getId();
 
-        if (model.getId() == null && (modelTypeService.isJson(modelType) == isJsonContentType(fileContent.getContentType()))) {
+        if (
+            model.getId() == null &&
+            (modelTypeService.isJson(modelType) == isJsonContentType(fileContent.getContentType()))
+        ) {
             convertedId = retrieveModelIdFromModelContent(model, fileContent);
         }
         return convertedId;

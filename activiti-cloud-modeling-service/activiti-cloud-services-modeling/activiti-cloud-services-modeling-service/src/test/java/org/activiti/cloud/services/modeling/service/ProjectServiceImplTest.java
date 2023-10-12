@@ -270,7 +270,8 @@ public class ProjectServiceImplTest {
             .thenReturn(Optional.of("process-x"));
         when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
             .thenReturn(Optional.of("process-y"));
-        when(modelService.importModel(eq(project), eq(processModelType), any())).thenReturn(ImportedModel.modelWithoutIdentifiersToUpdate(new ModelImpl()));
+        when(modelService.importModel(eq(project), eq(processModelType), any()))
+            .thenReturn(ImportedModel.modelWithoutIdentifiersToUpdate(new ModelImpl()));
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
