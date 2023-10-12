@@ -105,6 +105,7 @@ public class CloudEventsAutoConfiguration {
             principalIdentityProvider
         );
     }
+
     @Bean
     @ConditionalOnMissingBean
     public ProcessAuditServiceInfoAppender processAuditServiceInfoAppender(RuntimeService runtimeService) {
@@ -113,7 +114,9 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender(SecurityContextPrincipalProvider securityContextPrincipalProvider) {
+    public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender(
+        SecurityContextPrincipalProvider securityContextPrincipalProvider
+    ) {
         return new TaskAuditServiceInfoAppender(securityContextPrincipalProvider);
     }
 

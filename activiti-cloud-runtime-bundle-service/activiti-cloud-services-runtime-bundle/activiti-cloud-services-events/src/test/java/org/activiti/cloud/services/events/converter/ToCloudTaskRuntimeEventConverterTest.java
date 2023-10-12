@@ -51,18 +51,21 @@ class ToCloudTaskRuntimeEventConverterTest {
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    private final SecurityContextPrincipalProvider securityContextPrincipalProvider = mock(SecurityContextPrincipalProvider.class);
+    private final SecurityContextPrincipalProvider securityContextPrincipalProvider = mock(
+        SecurityContextPrincipalProvider.class
+    );
 
     @Spy
-    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = new TaskAuditServiceInfoAppender(securityContextPrincipalProvider);
+    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = new TaskAuditServiceInfoAppender(
+        securityContextPrincipalProvider
+    );
 
     private static final String USERNAME = "user1";
 
     private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
 
     @BeforeEach
-    void setUp() {
-    }
+    void setUp() {}
 
     @Test
     void should_convertInternalTaskCompletedEvent_when_convertToExternalEvent() {

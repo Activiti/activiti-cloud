@@ -24,6 +24,7 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 
 public class TaskAuditServiceInfoAppender {
+
     private final SecurityContextPrincipalProvider securityContextPrincipalProvider;
 
     public TaskAuditServiceInfoAppender(SecurityContextPrincipalProvider securityContextPrincipalProvider) {
