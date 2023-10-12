@@ -34,7 +34,6 @@ import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
 import org.activiti.runtime.api.event.impl.TaskCompletedImpl;
 import org.activiti.runtime.api.event.impl.TaskCreatedEventImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,9 +62,6 @@ class ToCloudTaskRuntimeEventConverterTest {
     private static final String USERNAME = "user1";
 
     private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
-
-    @BeforeEach
-    void setUp() {}
 
     @Test
     void should_convertInternalTaskCompletedEvent_when_convertToExternalEvent() {
