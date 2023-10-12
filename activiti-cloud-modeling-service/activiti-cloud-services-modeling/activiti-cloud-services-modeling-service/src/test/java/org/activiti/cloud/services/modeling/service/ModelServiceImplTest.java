@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -455,7 +456,7 @@ public class ModelServiceImplTest {
         FileContent fileContent = new FileContent("a.exe", null, "mockContent".getBytes(StandardCharsets.UTF_8));
         when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(true);
 
-        assertThatThrownBy(() -> modelService.updateModelContent(modelTwo, fileContent))
+        assertThatThrownBy(() -> modelService.updateModelContent(ImportedModel.modelWithoutIdentifiersToUpdate(modelTwo), fileContent))
             .hasMessage("Import the executable file a.exe for type PROCESS is forbidden.");
     }
 
@@ -473,7 +474,7 @@ public class ModelServiceImplTest {
 
         assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
 
-        Model updatedModel = modelService.updateModelContent(modelTwo, fileContent);
+        Model updatedModel = modelService.updateModelContent(ImportedModel.modelWithoutIdentifiersToUpdate(modelTwo), fileContent);
 
         assertThat(updatedModel.getCategory()).isEqualTo(PROCESS_MODEL_TEST_CATEGORY);
     }

@@ -38,6 +38,7 @@ import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationMo
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
 import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
+import org.activiti.cloud.services.modeling.service.ImportedModel;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.springframework.beans.factory.annotation.Value;
@@ -157,7 +158,7 @@ public class ModelController implements ModelRestApi {
         if (file.getSize() > maxModelFileSize) {
             throw new FileSizeException("File size exceeded");
         }
-        modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
+        modelService.updateModelContent(ImportedModel.modelWithoutIdentifiersToUpdate(findModelById(modelId)), multipartToFileContent(file));
     }
 
     @Override

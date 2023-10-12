@@ -59,7 +59,6 @@ import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -93,7 +92,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectDecoratorService projectDecoratorService;
 
-    @Autowired
     public ProjectServiceImpl(
         ProjectRepository projectRepository,
         ModelService modelService,
@@ -239,7 +237,6 @@ public class ProjectServiceImpl implements ProjectService {
                 modelService.copyModel(model, copiedProject);
             });
 
-        modelService.cleanModelIdList();
         return copiedProject;
     }
 
@@ -356,7 +353,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project createdProject,
         ProjectHolder.ModelJsonFile modelJsonFile
     ) {
-        Model createdModel = modelService.importModel(
+        ImportedModel createdModel = modelService.importModel(
             createdProject,
             modelJsonFile.getModelType(),
             modelJsonFile.getFileContent()
@@ -364,22 +361,23 @@ public class ProjectServiceImpl implements ProjectService {
 
         modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
 
+        Model model = createdModel.model();
         projectHolder
-            .getModelExtension(createdModel)
+            .getModelExtension(model)
             .ifPresent(fileMetadata -> {
                 jsonMetadataConverter
                     .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
-                modelService.updateModel(createdModel, createdModel);
+                    .ifPresent(extensions -> model.setExtensions(getExtensionsValueMapFromJson(extensions)));
+                modelService.updateModel(model, model);
             });
     }
 
-    private Map<Model, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
-        Map<Model, FileContent> createdModels = new HashMap<>();
+    private Map<ImportedModel, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
+        Map<ImportedModel, FileContent> createdModels = new HashMap<>();
         projectHolder
             .getProcessFiles()
             .forEach(modelProcessFile -> {
-                Model createdModel = modelService.importModel(
+                ImportedModel createdModel = modelService.importModel(
                     createdProject,
                     modelProcessFile.getModelType(),
                     modelProcessFile.getFileContent()
@@ -395,20 +393,22 @@ public class ProjectServiceImpl implements ProjectService {
         ModelType modelType,
         FileContent fileContent
     ) {
-        Model createdModel = modelService.importModel(createdProject, modelType, fileContent);
+        ImportedModel createdModel = modelService.importModel(createdProject, modelType, fileContent);
         updateModelProcessImported(projectHolder, createdModel, fileContent);
     }
 
-    private void updateModelProcessImported(ProjectHolder projectHolder, Model createdModel, FileContent fileContent) {
-        modelService.updateModelContent(createdModel, fileContent);
+    private void updateModelProcessImported(ProjectHolder projectHolder, ImportedModel importedModel, FileContent fileContent) {
+        modelService.updateModelContent(importedModel, fileContent);
+
+        Model model = importedModel.model();
 
         projectHolder
-            .getModelExtension(createdModel)
+            .getModelExtension(model)
             .ifPresent(fileMetadata -> {
                 jsonMetadataConverter
                     .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> createdModel.setExtensions(getExtensionsValueMapFromJson(extensions)));
-                modelService.updateModel(createdModel, createdModel);
+                    .ifPresent(extensions -> model.setExtensions(getExtensionsValueMapFromJson(extensions)));
+                modelService.updateModel(model, model);
             });
     }
 
@@ -526,12 +526,11 @@ public class ProjectServiceImpl implements ProjectService {
                 importXMLModelFiles(projectHolder, project, modelXmlFile.getModelType(), modelXmlFile.getFileContent())
             );
 
-        Map<Model, FileContent> createdProcesses = createXMLModelFiles(projectHolder, project);
+        Map<ImportedModel, FileContent> createdProcesses = createXMLModelFiles(projectHolder, project);
         createdProcesses
             .keySet()
             .forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
 
-        modelService.cleanModelIdList();
     }
 
     private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {

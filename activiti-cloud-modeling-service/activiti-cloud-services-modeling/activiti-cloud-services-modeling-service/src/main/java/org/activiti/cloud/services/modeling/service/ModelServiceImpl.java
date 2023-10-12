@@ -70,7 +70,6 @@ import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
@@ -104,8 +103,6 @@ public class ModelServiceImpl implements ModelService {
 
     private final FileContentSanitizer fileContentSanitizer;
 
-    private final HashMap<String, String> modelIdentifiers = new HashMap();
-
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
 
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
@@ -115,7 +112,6 @@ public class ModelServiceImpl implements ModelService {
 
     private static final String WARNING_MESSAGE = "Semantic model validation warnings encountered: %d warnings found";
 
-    @Autowired
     public ModelServiceImpl(
         ModelRepository modelRepository,
         ModelTypeService modelTypeService,
@@ -251,11 +247,12 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Model copyModel(Model modelToBeCopied, Project project) {
         Model copiedModel = modelRepository.copyModel(modelToBeCopied, project);
-        modelIdentifiers.put(
+        Map<String, String> identifiersToUpdate = Map.of(
             String.join(MODEL_IDENTIFIER_SEPARATOR, modelToBeCopied.getType().toLowerCase(), modelToBeCopied.getId()),
             String.join(MODEL_IDENTIFIER_SEPARATOR, copiedModel.getType().toLowerCase(), copiedModel.getId())
         );
-        updateModelContent(copiedModel, getModelContentFile(copiedModel));
+        ImportedModel importedModel = new ImportedModel(copiedModel, identifiersToUpdate);
+        updateModelContent(importedModel, getModelContentFile(copiedModel));
         return copiedModel;
     }
 
@@ -290,11 +287,6 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public void cleanModelIdList() {
-        modelIdentifiers.clear();
-    }
-
-    @Override
     public Optional<FileContent> getModelDiagramFile(String modelId) {
         //TODO: to implement
         return Optional.empty();
@@ -324,11 +316,12 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Model updateModelContent(Model modelToBeUpdated, FileContent fileContent) {
+    public Model updateModelContent(ImportedModel importedModel, FileContent fileContent) {
+        Model modelToBeUpdated = importedModel.model();
         throwExceptionIfFileIsExecutable(modelToBeUpdated.getType(), fileContent);
-        FileContent fixedFileContent = modelIdentifiers.isEmpty()
+        FileContent fixedFileContent = importedModel.hasIdentifiersToUpdate()
             ? fileContent
-            : overrideModelContentId(modelToBeUpdated, fileContent);
+            : overrideModelContentId(importedModel, fileContent);
         final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fixedFileContent);
 
         modelToBeUpdated.setContentType(sanitizedFileContent.getContentType());
@@ -364,10 +357,10 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public FileContent overrideModelContentId(Model model, FileContent fileContent) {
+    public FileContent overrideModelContentId(ImportedModel importedModel, FileContent fileContent) {
         return modelContentService
-            .findModelContentConverter(model.getType())
-            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, modelIdentifiers))
+            .findModelContentConverter(importedModel.model().getType())
+            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, importedModel.identifiersToUpdate()))
             .orElse(fileContent);
     }
 
@@ -384,14 +377,12 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model importSingleModel(Project project, ModelType modelType, FileContent fileContent) {
-        Model model = importModel(project, modelType, fileContent);
-        model = updateModelContent(model, fileContent);
-        cleanModelIdList();
-        return model;
+        ImportedModel importedModel = importModel(project, modelType, fileContent);
+        return updateModelContent(importedModel, fileContent);
     }
 
     @Override
-    public Model importModel(Project project, ModelType modelType, FileContent fileContent) {
+    public ImportedModel importModel(Project project, ModelType modelType, FileContent fileContent) {
         logger.debug(
             MessageFormat.format(
                 "Importing model type {0} from file {1}: {2}",
@@ -401,36 +392,42 @@ public class ModelServiceImpl implements ModelService {
             )
         );
 
-        Model model = importModelFromContent(project, modelType, fileContent);
-        return model;
+        return importModelFromContent(project, modelType, fileContent);
     }
 
     @Override
-    public Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
+    public ImportedModel importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
-        Model model = null;
+        Model model = loadModel(modelType, fileContent);
+        String convertedId = resolveConvertedId(modelType, fileContent, model);
+
+        model.setScope(ModelScope.PROJECT);
+        createModel(project, model);
+        Map<String, String> identifiersToUpdate = new HashMap<>();
+        if (convertedId != null) {
+            identifiersToUpdate.put(
+                convertedId,
+                String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId())
+            );
+        }
+        return new ImportedModel(model, identifiersToUpdate);
+    }
+
+    private String resolveConvertedId(ModelType modelType, FileContent fileContent, Model model) {
+        String convertedId = model.getId();
+
+        if (model.getId() == null && (modelTypeService.isJson(modelType) == isJsonContentType(fileContent.getContentType()))) {
+            convertedId = retrieveModelIdFromModelContent(model, fileContent);
+        }
+        return convertedId;
+    }
+
+    private Model loadModel(ModelType modelType, FileContent fileContent) {
+        Model model;
         if (modelTypeService.isJson(modelType) || isJsonContentType(fileContent.getContentType())) {
             model = convertContentToModel(modelType, fileContent);
         } else {
             model = createModelFromContent(modelType, fileContent);
-        }
-        String convertedId = model.getId();
-
-        if (
-            model.getId() == null &&
-            (modelTypeService.isJson(modelType) == isJsonContentType(fileContent.getContentType()))
-        ) {
-            convertedId = retrieveModelIdFromModelContent(model, fileContent);
-        }
-
-        model.setScope(ModelScope.PROJECT);
-        createModel(project, model);
-
-        if (convertedId != null) {
-            modelIdentifiers.put(
-                convertedId,
-                String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId())
-            );
         }
         return model;
     }

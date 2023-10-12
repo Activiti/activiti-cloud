@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -214,7 +215,6 @@ public class ProjectServiceImplTest {
         assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
         verify(projectRepository, times(1)).copyProject(projectToCopy, copiedProjectName);
         verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
-        verify(modelService, times(1)).cleanModelIdList();
     }
 
     @Test
@@ -270,7 +270,7 @@ public class ProjectServiceImplTest {
             .thenReturn(Optional.of("process-x"));
         when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
             .thenReturn(Optional.of("process-y"));
-        when(modelService.importModel(eq(project), eq(processModelType), any())).thenReturn(new ModelImpl());
+        when(modelService.importModel(eq(project), eq(processModelType), any())).thenReturn(ImportedModel.modelWithoutIdentifiersToUpdate(new ModelImpl()));
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
