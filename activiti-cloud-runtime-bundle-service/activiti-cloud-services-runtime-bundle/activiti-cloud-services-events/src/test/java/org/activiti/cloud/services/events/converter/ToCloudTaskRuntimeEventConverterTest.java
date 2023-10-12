@@ -20,18 +20,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
+import java.util.Optional;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.runtime.events.TaskCreatedEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCompletedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.services.events.ActorConstants;
-import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.runtime.api.event.impl.TaskCompletedImpl;
 import org.activiti.runtime.api.event.impl.TaskCreatedEventImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,12 +48,13 @@ class ToCloudTaskRuntimeEventConverterTest {
     @InjectMocks
     private ToCloudTaskRuntimeEventConverter converter;
 
-    private CommandContext commandContext = mock(CommandContext.class);
-
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = spy(new TaskAuditServiceInfoAppender());
+    private final SecurityContextPrincipalProvider securityContextPrincipalProvider = mock(SecurityContextPrincipalProvider.class);
+
+    @Spy
+    private TaskAuditServiceInfoAppender taskAuditServiceInfoAppender = new TaskAuditServiceInfoAppender(securityContextPrincipalProvider);
 
     private static final String USERNAME = "user1";
 
@@ -60,12 +62,14 @@ class ToCloudTaskRuntimeEventConverterTest {
 
     @BeforeEach
     void setUp() {
-        when(this.commandContext.getGenericAttribute(ActorConstants.ACTOR_TYPE)).thenReturn(USERNAME_GUID);
-        when(this.taskAuditServiceInfoAppender.getCommandContext()).thenReturn(this.commandContext);
     }
 
     @Test
     void should_convertInternalTaskCompletedEvent_when_convertToExternalEvent() {
+        Principal principal = mock(Principal.class);
+        when(principal.getName()).thenReturn(USERNAME_GUID);
+        when(this.securityContextPrincipalProvider.getCurrentPrincipal()).thenReturn(Optional.of(principal));
+
         //given
         TaskImpl task = new TaskImpl();
         task.setId("10");

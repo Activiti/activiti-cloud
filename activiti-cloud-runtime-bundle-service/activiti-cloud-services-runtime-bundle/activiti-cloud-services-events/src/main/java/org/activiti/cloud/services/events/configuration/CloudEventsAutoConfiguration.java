@@ -70,7 +70,6 @@ import org.activiti.cloud.services.events.listeners.CloudVariableUpdatedProducer
 import org.activiti.cloud.services.events.listeners.MessageProducerCommandContextCloseListener;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.listeners.ProcessStartedActorProviderEventListener;
-import org.activiti.cloud.services.events.listeners.TaskCompletedActorProviderEventListener;
 import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
@@ -94,15 +93,6 @@ import org.springframework.core.annotation.Order;
 public class CloudEventsAutoConfiguration {
 
     @Bean
-    @Order(HIGHEST_PRECEDENCE)
-    @ConditionalOnMissingBean
-    public TaskCompletedActorProviderEventListener taskCompletedActorProviderEventListener(
-        SecurityContextPrincipalProvider securityContextPrincipalProvider
-    ) {
-        return new TaskCompletedActorProviderEventListener(securityContextPrincipalProvider);
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     public ProcessStartedActorProviderEventListener processStartedActorProviderEventListener(
         RuntimeService runtimeService,
@@ -115,7 +105,6 @@ public class CloudEventsAutoConfiguration {
             principalIdentityProvider
         );
     }
-
     @Bean
     @ConditionalOnMissingBean
     public ProcessAuditServiceInfoAppender processAuditServiceInfoAppender(RuntimeService runtimeService) {
@@ -124,8 +113,8 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender() {
-        return new TaskAuditServiceInfoAppender();
+    public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender(SecurityContextPrincipalProvider securityContextPrincipalProvider) {
+        return new TaskAuditServiceInfoAppender(securityContextPrincipalProvider);
     }
 
     @Bean
@@ -290,6 +279,7 @@ public class CloudEventsAutoConfiguration {
     }
 
     @Bean
+    @Order(HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
     public CloudProcessCreatedProducer processCreatedProducer(
         ToCloudProcessRuntimeEventConverter eventConverter,
@@ -299,7 +289,6 @@ public class CloudEventsAutoConfiguration {
     }
 
     @Bean
-    @Order(HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
     public CloudProcessStartedProducer processStartedProducer(
         ToCloudProcessRuntimeEventConverter eventConverter,

@@ -17,14 +17,14 @@
 package org.activiti.cloud.services.events.listeners;
 
 import java.util.Optional;
-import org.activiti.api.process.runtime.events.ProcessStartedEvent;
-import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListener;
+import org.activiti.api.process.runtime.events.ProcessCreatedEvent;
+import org.activiti.api.process.runtime.events.listener.ProcessEventListener;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
 
-public class ProcessStartedActorProviderEventListener implements ProcessRuntimeEventListener<ProcessStartedEvent> {
+public class ProcessStartedActorProviderEventListener implements ProcessEventListener<ProcessCreatedEvent> {
 
     private final RuntimeService runtimeService;
     private final SecurityContextPrincipalProvider securityContextPrincipalProvider;
@@ -41,7 +41,7 @@ public class ProcessStartedActorProviderEventListener implements ProcessRuntimeE
     }
 
     @Override
-    public void onEvent(ProcessStartedEvent event) {
+    public void onEvent(ProcessCreatedEvent event) {
         securityContextPrincipalProvider
             .getCurrentPrincipal()
             .ifPresent(principal ->

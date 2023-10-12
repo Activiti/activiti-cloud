@@ -16,28 +16,28 @@
 
 package org.activiti.cloud.services.events.converter;
 
-import java.util.Optional;
+import java.security.Principal;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCompletedEventImpl;
-import org.activiti.cloud.services.events.ActorConstants;
-import org.activiti.engine.impl.context.Context;
-import org.activiti.engine.impl.interceptor.CommandContext;
 
 public class TaskAuditServiceInfoAppender {
+    private final SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    public TaskAuditServiceInfoAppender(SecurityContextPrincipalProvider securityContextPrincipalProvider) {
+        this.securityContextPrincipalProvider = securityContextPrincipalProvider;
+    }
 
     public CloudRuntimeEventImpl<Task, TaskRuntimeEvent.TaskEvents> appendAuditServiceInfoTo(
         CloudTaskCompletedEventImpl cloudRuntimeEvent
     ) {
-        Optional
-            .<String>ofNullable(getCommandContext().getGenericAttribute(ActorConstants.ACTOR_TYPE))
+        securityContextPrincipalProvider
+            .getCurrentPrincipal()
+            .map(Principal::getName)
             .ifPresent(cloudRuntimeEvent::setActor);
 
         return cloudRuntimeEvent;
-    }
-
-    public CommandContext getCommandContext() {
-        return Context.getCommandContext();
     }
 }
