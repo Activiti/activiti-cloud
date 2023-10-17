@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
   <properties>
     <activiti.version>8.2.0-alpha.12</activiti.version>
+    <activiti.version>0.0.1-PR-4448-1485-SNAPSHOT</activiti.version>
   </properties>
   <modules>
     <module>activiti-cloud-api-dependencies</module>
