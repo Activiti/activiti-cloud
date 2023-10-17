@@ -16,6 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.function.Predicate.not;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class AuthorizationConfigurer {
             String[] roles = securityConstraint.getAuthRoles();
             configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
         }
-        http.anonymous();
+        http.anonymous(withDefaults());
     }
 
     private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
@@ -144,7 +145,7 @@ public class AuthorizationConfigurer {
     }
 
     private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
-        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::resolve).collect(Collectors.toList());
+        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::valueOf).toList();
         return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
     }
 
