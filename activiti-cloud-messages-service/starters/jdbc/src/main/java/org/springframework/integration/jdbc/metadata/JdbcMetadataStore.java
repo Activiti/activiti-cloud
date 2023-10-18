@@ -91,18 +91,21 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
 			WHERE METADATA_KEY=? AND REGION=?
 			""";
 
-    private String getValueForUpdateQuery = """
+    private String getValueForUpdateQuery =
+        """
 			SELECT METADATA_VALUE FROM %sMETADATA_STORE
 			WHERE METADATA_KEY=? AND REGION=? %s
 			""";
 
-    private String replaceValueQuery = """
+    private String replaceValueQuery =
+        """
 			UPDATE %sMETADATA_STORE
 			SET METADATA_VALUE=?
 			WHERE METADATA_KEY=? AND METADATA_VALUE=? AND REGION=?
 			""";
 
-    private String replaceValueByKeyQuery = """
+    private String replaceValueByKeyQuery =
+        """
 			UPDATE %sMETADATA_STORE
 			SET METADATA_VALUE=?
 			WHERE METADATA_KEY=? AND REGION=?
@@ -113,7 +116,8 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
 			WHERE METADATA_KEY=? AND REGION=?
 			""";
 
-    private String putIfAbsentValueQuery = """
+    private String putIfAbsentValueQuery =
+        """
 			INSERT INTO %sMETADATA_STORE(METADATA_KEY, METADATA_VALUE, REGION)
 			SELECT ?, ?, ?
 				FROM %sMETADATA_STORE
@@ -199,8 +203,10 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
     public void setCheckDatabaseOnStart(boolean checkDatabaseOnStart) {
         this.checkDatabaseOnStart = checkDatabaseOnStart;
         if (!checkDatabaseOnStart) {
-            LOGGER.info("The 'DefaultLockRepository' won't be started automatically " +
-                "and required table is not going be checked.");
+            LOGGER.info(
+                "The 'DefaultLockRepository' won't be started automatically " +
+                "and required table is not going be checked."
+            );
         }
     }
 
@@ -237,13 +243,11 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
             if (affectedRows > 0) {
                 //it was not in the table, so we have just inserted
                 return null;
-            }
-            else {
+            } else {
                 //value should be in table. try to return it
                 try {
                     return this.jdbcTemplate.queryForObject(this.getValueQuery, String.class, key, this.region);
-                }
-                catch (EmptyResultDataAccessException e) {
+                } catch (EmptyResultDataAccessException e) {
                     //somebody deleted it between calls. try to insert again (go to beginning of while loop)
                 }
             }
@@ -252,16 +256,17 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
 
     private int tryToPutIfAbsent(String key, String value) {
         try {
-            return this.jdbcTemplate.update(this.putIfAbsentValueQuery,
-                ps -> {
-                    ps.setString(1, key);
-                    ps.setString(2, value);
-                    ps.setString(3, this.region); // NOSONAR magic number
-                    ps.setString(4, key); // NOSONAR magic number
-                    ps.setString(5, this.region); // NOSONAR magic number
-                });
-        }
-        catch (DuplicateKeyException ex) {
+            return this.jdbcTemplate.update(
+                    this.putIfAbsentValueQuery,
+                    ps -> {
+                        ps.setString(1, key);
+                        ps.setString(2, value);
+                        ps.setString(3, this.region); // NOSONAR magic number
+                        ps.setString(4, key); // NOSONAR magic number
+                        ps.setString(5, this.region); // NOSONAR magic number
+                    }
+                );
+        } catch (DuplicateKeyException ex) {
             return 0;
         }
     }
@@ -272,13 +277,16 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
         Assert.notNull(key, KEY_CANNOT_BE_NULL);
         Assert.notNull(oldValue, "'oldValue' cannot be null");
         Assert.notNull(newValue, "'newValue' cannot be null");
-        int affectedRows = this.jdbcTemplate.update(this.replaceValueQuery,
-            ps -> {
-                ps.setString(1, newValue);
-                ps.setString(2, key);
-                ps.setString(3, oldValue); // NOSONAR magic number
-                ps.setString(4, this.region); // NOSONAR magic number
-            });
+        int affectedRows =
+            this.jdbcTemplate.update(
+                    this.replaceValueQuery,
+                    ps -> {
+                        ps.setString(1, newValue);
+                        ps.setString(2, key);
+                        ps.setString(3, oldValue); // NOSONAR magic number
+                        ps.setString(4, this.region); // NOSONAR magic number
+                    }
+                );
         return affectedRows > 0;
     }
 
@@ -295,18 +303,19 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
                 try {
                     //lock row for updating
                     this.jdbcTemplate.queryForObject(this.getValueForUpdateQuery, String.class, key, this.region);
-                }
-                catch (EmptyResultDataAccessException e) {
+                } catch (EmptyResultDataAccessException e) {
                     //if there are no rows with this key, somebody deleted it in between two calls
-                    continue;    //try to insert again from beginning
+                    continue; //try to insert again from beginning
                 }
                 //lock successful, so - replace
-                this.jdbcTemplate.update(this.replaceValueByKeyQuery,
-                    ps -> {
-                        ps.setString(1, value);
-                        ps.setString(2, key);
-                        ps.setString(3, this.region); // NOSONAR magic number
-                    });
+                this.jdbcTemplate.update(
+                        this.replaceValueByKeyQuery,
+                        ps -> {
+                            ps.setString(1, value);
+                            ps.setString(2, key);
+                            ps.setString(3, this.region); // NOSONAR magic number
+                        }
+                    );
             }
             return;
         }
@@ -318,8 +327,7 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
         Assert.notNull(key, KEY_CANNOT_BE_NULL);
         try {
             return this.jdbcTemplate.queryForObject(this.getValueQuery, String.class, key, this.region);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             //if there are no rows with this key, return null
             return null;
         }
@@ -333,8 +341,7 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
         try {
             //select old value and lock row for removal
             oldValue = this.jdbcTemplate.queryForObject(this.getValueForUpdateQuery, String.class, key, this.region);
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             //key is not present, so no need to delete it
             return null;
         }
@@ -345,5 +352,4 @@ public class JdbcMetadataStore implements ConcurrentMetadataStore, InitializingB
         }
         return null;
     }
-
 }
