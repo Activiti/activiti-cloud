@@ -206,32 +206,23 @@ public class CommonSecurityAutoConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
         return http
-            .authorizeHttpRequests()
-            .requestMatchers(actuatorEndpointsMatcher())
-            .authenticated()
-            .and()
-            .authorizeHttpRequests()
-            .anyRequest()
-            .permitAll()
-            .and()
-            .cors()
-            .configurationSource(request -> {
-                CorsConfiguration corsConfiguration = new CorsConfiguration();
-                corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
-                corsConfiguration.setAllowedOrigins(allowedOrigins);
-                return corsConfiguration.applyPermitDefaultValues();
-            })
-            .and()
-            .exceptionHandling()
-            .accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-            .and()
-            .httpBasic()
-            .disable()
-            .oauth2ResourceServer()
-            .jwt()
-            .jwtAuthenticationConverter(jwtAuthenticationConverter)
-            .and()
-            .and()
+            .authorizeHttpRequests(spec ->
+                spec.requestMatchers(actuatorEndpointsMatcher()).authenticated().anyRequest().permitAll()
+            )
+            .cors(spec ->
+                spec.configurationSource(request -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedMethods(List.of("GET", "HEAD", "OPTION", "POST", "PUT", "DELETE"));
+                    corsConfiguration.setAllowedOrigins(allowedOrigins);
+                    return corsConfiguration.applyPermitDefaultValues();
+                })
+            )
+            .exceptionHandling(spec ->
+                spec.accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
+            )
+            .csrf(spec -> spec.enable())
+            .httpBasic(spec -> spec.disable())
+            .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
             .build();
     }
 

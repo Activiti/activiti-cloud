@@ -107,10 +107,10 @@ public class AuthorizationConfigurer {
             if (isNotEmpty(securityCollection.getOmittedMethods())) {
                 List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
                 for (HttpMethod method : methods) {
-                    f.accept(http.authorizeHttpRequests().requestMatchers(method, patterns));
+                    http.authorizeHttpRequests(spec -> f.accept(spec.requestMatchers(method, patterns)));
                 }
             } else {
-                f.accept(http.authorizeHttpRequests().requestMatchers(patterns));
+                http.authorizeHttpRequests(spec -> f.accept(spec.requestMatchers(patterns)));
             }
         }
     }
