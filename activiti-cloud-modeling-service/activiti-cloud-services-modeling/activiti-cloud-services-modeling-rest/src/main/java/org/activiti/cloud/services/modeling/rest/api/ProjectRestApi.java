@@ -25,6 +25,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -39,6 +40,8 @@ import org.springframework.web.multipart.MultipartFile;
  * Controller for {@link Project} resources.
  */
 @RestController
+@MultipartConfig(maxFileSize=1024*1024*50,
+    maxRequestSize=1024*1024*50)
 @Tag(name = PROJECTS, description = "Retrieve and manage project definitions")
 @RequestMapping(path = "/v1", produces = { HAL_JSON_VALUE, APPLICATION_JSON_VALUE })
 public interface ProjectRestApi {
