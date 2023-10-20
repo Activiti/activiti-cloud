@@ -37,6 +37,7 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class CloudProcessCompletedProducerTest {
+
+    private static final String USERNAME = "myUserTest";
+
+    private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
 
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(
         new RuntimeBundleProperties()
@@ -72,9 +77,7 @@ class CloudProcessCompletedProducerTest {
     @Captor
     private ArgumentCaptor<CloudRuntimeEvent> argumentCaptor;
 
-    private static final String USERNAME = "myUserTest";
-
-    private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
+    private CloudProcessCompletedProducer cloudProcessCompletedProducer;
 
     @BeforeEach
     void beforeEach() {
@@ -83,23 +86,27 @@ class CloudProcessCompletedProducerTest {
         identityLink.setType(ActorConstants.ACTOR_TYPE);
         when(this.runtimeService.getIdentityLinksForProcessInstance(any())).thenReturn(List.of(identityLink));
         when(this.eventsAggregator.getCurrentCommandContext()).thenReturn(this.commandContext);
+        this.cloudProcessCompletedProducer =
+            new CloudProcessCompletedProducer(this.eventConverter, this.eventsAggregator);
     }
 
     @Test
-    void should_setActorFromInitiator_when_invokeCloudProcessCompletedProducerOnEvent() {
-        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
-        processInstance.setInitiator(USERNAME);
-        ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);
-        CloudProcessCompletedProducer cloudProcessCompletedProducer = new CloudProcessCompletedProducer(
-            this.eventConverter,
-            this.eventsAggregator
-        );
+    void should_setActorFromIdentityLinkProvider_when_invokeCloudProcessCompletedProducerOnEvent() {
+        ProcessCompletedEvent processCompletedEvent = getProcessCompletedEvent();
 
-        cloudProcessCompletedProducer.onEvent(processCompletedEvent);
+        this.cloudProcessCompletedProducer.onEvent(processCompletedEvent);
 
         verify(this.processAuditServiceInfoAppender)
             .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
         verify(this.eventsAggregator).add(this.argumentCaptor.capture());
         assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo(USERNAME_GUID);
+    }
+
+    @NotNull
+    private ProcessCompletedEvent getProcessCompletedEvent() {
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setInitiator(USERNAME);
+        ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);
+        return processCompletedEvent;
     }
 }
