@@ -29,7 +29,7 @@ jobs:
     name: Check dependabot/external build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: Activiti/Activiti/.github/actions/check-ext-build@8.0.0-alpha.10
 
   pre-commit:
@@ -48,7 +48,7 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -142,7 +142,7 @@ jobs:
             messaging-destinations: override-destinations
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: actions/cache@v3
         with:
@@ -309,7 +309,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -337,7 +337,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -388,7 +388,7 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@v2.5.0
         with:
           version: ${{ needs.build.outputs.version }}
@@ -411,7 +411,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
