@@ -23,6 +23,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
@@ -37,7 +38,6 @@ import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,7 +92,7 @@ class CloudProcessCompletedProducerTest {
 
     @Test
     void should_setActorFromIdentityLinkProvider_when_invokeCloudProcessCompletedProducerOnEvent() {
-        ProcessCompletedEvent processCompletedEvent = getProcessCompletedEvent();
+        ProcessCompletedEvent processCompletedEvent = buildProcessCompletedEvent();
 
         this.cloudProcessCompletedProducer.onEvent(processCompletedEvent);
 
@@ -103,7 +103,7 @@ class CloudProcessCompletedProducerTest {
     }
 
     @NotNull
-    private ProcessCompletedEvent getProcessCompletedEvent() {
+    private ProcessCompletedEvent buildProcessCompletedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setInitiator(USERNAME);
         ProcessCompletedEvent processCompletedEvent = new ProcessCompletedImpl(processInstance);

@@ -58,10 +58,10 @@ class ProcessAuditServiceInfoAppenderTest {
     }
 
     @Test
-    void should_setAndGetActor_when_cloudEventTypeIsActor() {
+    void should_setAndGetActor_when_identityLinkTypeIsActor() {
         this.identityLink.setType(ActorConstants.ACTOR_TYPE);
         this.identityLink.setDetails(EXPECTED_ACTOR.getBytes());
-        CloudProcessCompletedEventImpl processCompletedEvent = getProcessCompletedEvent();
+        CloudProcessCompletedEventImpl processCompletedEvent = buildProcessCompletedEvent();
 
         CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> processInstanceProcessEventsCloudRuntimeEvent =
             this.processAuditServiceInfoAppender.appendAuditServiceInfoTo(processCompletedEvent);
@@ -70,8 +70,8 @@ class ProcessAuditServiceInfoAppenderTest {
     }
 
     @Test
-    void should_setDefaultActor_when_cloudEventTypeIsNotActor() {
-        CloudProcessCompletedEventImpl processCompletedEvent = getProcessCompletedEvent();
+    void should_setDefaultActor_when_IdentityLinkTypeIsNotActor() {
+        CloudProcessCompletedEventImpl processCompletedEvent = buildProcessCompletedEvent();
 
         CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> processInstanceProcessEventsCloudRuntimeEvent =
             this.processAuditServiceInfoAppender.appendAuditServiceInfoTo(processCompletedEvent);
@@ -79,7 +79,7 @@ class ProcessAuditServiceInfoAppenderTest {
         assertThat(processInstanceProcessEventsCloudRuntimeEvent.getActor()).isEqualTo("service_user");
     }
 
-    private CloudProcessCompletedEventImpl getProcessCompletedEvent() {
+    private CloudProcessCompletedEventImpl buildProcessCompletedEvent() {
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId(this.processInstanceId);
         return new CloudProcessCompletedEventImpl(processInstance);

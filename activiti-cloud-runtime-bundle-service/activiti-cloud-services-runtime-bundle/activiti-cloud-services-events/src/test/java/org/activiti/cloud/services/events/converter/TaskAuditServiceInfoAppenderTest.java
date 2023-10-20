@@ -56,7 +56,7 @@ class TaskAuditServiceInfoAppenderTest {
     @Test
     void should_setAndGetActor_when_userHasNameSet() {
         when(this.principal.getName()).thenReturn(USERNAME_GUID);
-        CloudTaskCompletedEventImpl taskCompletedEvent = getTaskCompletedEvent();
+        CloudTaskCompletedEventImpl taskCompletedEvent = buildTaskCompletedEvent();
 
         CloudRuntimeEventImpl<Task, TaskEvents> taskTaskEventsCloudRuntimeEvent =
             this.taskAuditServiceInfoAppender.appendAuditServiceInfoTo(taskCompletedEvent);
@@ -66,7 +66,7 @@ class TaskAuditServiceInfoAppenderTest {
 
     @Test
     void should_setDefaultActor_when_userHasNoNameSet() {
-        CloudTaskCompletedEventImpl taskCompletedEvent = getTaskCompletedEvent();
+        CloudTaskCompletedEventImpl taskCompletedEvent = buildTaskCompletedEvent();
 
         CloudRuntimeEventImpl<Task, TaskEvents> taskTaskEventsCloudRuntimeEvent =
             this.taskAuditServiceInfoAppender.appendAuditServiceInfoTo(taskCompletedEvent);
@@ -74,7 +74,7 @@ class TaskAuditServiceInfoAppenderTest {
         assertThat(taskTaskEventsCloudRuntimeEvent.getActor()).isEqualTo("service_user");
     }
 
-    private CloudTaskCompletedEventImpl getTaskCompletedEvent() {
+    private CloudTaskCompletedEventImpl buildTaskCompletedEvent() {
         return new CloudTaskCompletedEventImpl(
             new TaskImpl(UUID.randomUUID().toString(), "my task", Task.TaskStatus.COMPLETED)
         );

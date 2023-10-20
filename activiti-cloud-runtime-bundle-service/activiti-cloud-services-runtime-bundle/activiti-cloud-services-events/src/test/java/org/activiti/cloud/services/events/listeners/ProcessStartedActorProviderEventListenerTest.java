@@ -19,6 +19,7 @@ package org.activiti.cloud.services.events.listeners;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.constraints.NotNull;
 import java.security.Principal;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,7 +29,6 @@ import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ class ProcessStartedActorProviderEventListenerTest {
     @Test
     void should_setActorFromPrincipal_when_invokeProcessStartedActorProviderEventListenerOnEvent() {
         when(this.principal.getName()).thenReturn(USERNAME_GUID);
-        CloudProcessCreatedEventImpl cloudProcessCreatedEvent = getCloudProcessCreatedEvent();
+        CloudProcessCreatedEventImpl cloudProcessCreatedEvent = buildCloudProcessCreatedEvent();
 
         this.processStartedActorProviderEventListener.onEvent(cloudProcessCreatedEvent);
 
@@ -85,7 +85,7 @@ class ProcessStartedActorProviderEventListenerTest {
     }
 
     @NotNull
-    private CloudProcessCreatedEventImpl getCloudProcessCreatedEvent() {
+    private CloudProcessCreatedEventImpl buildCloudProcessCreatedEvent() {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
         CloudProcessCreatedEventImpl cloudProcessCreatedEvent = new CloudProcessCreatedEventImpl(process);
