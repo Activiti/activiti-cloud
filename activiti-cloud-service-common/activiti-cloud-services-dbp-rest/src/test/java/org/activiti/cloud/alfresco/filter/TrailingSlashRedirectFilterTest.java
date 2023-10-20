@@ -29,8 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    properties = "SPRING_MVC_REST_USE_TRAILING_SLASH_MATCH=true"
+    webEnvironment = SpringBootTest.WebEnvironment.MOCK
 )
 @AutoConfigureMockMvc
 class TrailingSlashRedirectFilterTest {
@@ -63,16 +62,14 @@ class TrailingSlashRedirectFilterTest {
     void testGreetingTrailingSlashWithFilter() throws Exception {
         mvc
             .perform(get(BASEURL + "/greeting/").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Hello, World!"));
+            .andExpect(status().isNotFound());
     }
 
     @Test
     void testGreetingTrailingSlashAndRequestQueryParameter() throws Exception {
         mvc
             .perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Hello, Bar!"));
+            .andExpect(status().isNotFound());
     }
 
     @Test
