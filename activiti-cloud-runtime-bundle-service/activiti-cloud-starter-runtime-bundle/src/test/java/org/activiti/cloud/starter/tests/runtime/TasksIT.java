@@ -348,7 +348,7 @@ public class TasksIT {
         ResponseEntity<CloudTask> delete = taskRestTemplate.delete(standaloneTask);
 
         //then
-        assertThat(delete.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(delete.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -362,7 +362,7 @@ public class TasksIT {
         ResponseEntity<CloudTask> delete = taskRestTemplate.adminDelete(standaloneTask);
 
         //then
-        assertThat(delete.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(delete.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -447,7 +447,7 @@ public class TasksIT {
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task);
 
         //then
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -463,7 +463,7 @@ public class TasksIT {
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.adminComplete(task);
 
         //then
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -485,7 +485,7 @@ public class TasksIT {
         ResponseEntity<CloudTask> responseEntity = taskRestTemplate.complete(task, completeTaskPayload);
 
         //then
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test
@@ -722,7 +722,7 @@ public class TasksIT {
         ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
 
         //then
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
 
         // when
         ResponseEntity<CollectionModel<CloudVariableInstance>> variablesResponse = taskRestTemplate.getVariables(
@@ -759,7 +759,7 @@ public class TasksIT {
         ResponseEntity<Void> responseEntity = taskRestTemplate.save(task, saveTaskPayload);
 
         //then
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 
         // cleanup
         processInstanceRestTemplate.delete(processInstanceEntity);
