@@ -17,9 +17,7 @@
 package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,9 +25,7 @@ import static org.mockito.Mockito.when;
 import org.activiti.api.process.runtime.events.ProcessStartedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.engine.RuntimeService;
@@ -53,12 +49,8 @@ class CloudProcessStartedProducerTest {
     @Mock
     private RuntimeService runtimerService;
 
-    private ProcessAuditServiceInfoAppender auditServiceInfoAppender = spy(
-        new ProcessAuditServiceInfoAppender(runtimerService)
-    );
-
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
-        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender)
+        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender)
     );
 
     private ProcessEngineEventsAggregator eventsAggregator = spy(
@@ -89,8 +81,6 @@ class CloudProcessStartedProducerTest {
 
         cloudProcessStartedProducer.onEvent(processCompletedEvent);
 
-        verify(this.auditServiceInfoAppender, never())
-            .appendAuditServiceInfoTo(any(CloudProcessCompletedEventImpl.class));
         verify(this.eventsAggregator).add(this.argumentCaptor.capture());
         assertThat(this.argumentCaptor.getValue().getActor()).isEqualTo("service_user");
     }

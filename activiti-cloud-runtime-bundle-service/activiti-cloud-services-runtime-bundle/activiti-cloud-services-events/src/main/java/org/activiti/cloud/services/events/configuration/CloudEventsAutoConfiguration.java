@@ -20,7 +20,6 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.TaskAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
@@ -108,12 +107,6 @@ public class CloudEventsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessAuditServiceInfoAppender processAuditServiceInfoAppender(RuntimeService runtimeService) {
-        return new ProcessAuditServiceInfoAppender(runtimeService);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public TaskAuditServiceInfoAppender taskAuditServiceInfoAppender(
         SecurityContextPrincipalProvider securityContextPrincipalProvider
     ) {
@@ -145,10 +138,9 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ToCloudProcessRuntimeEventConverter toCloudProcessRuntimeEventConverter(
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
-        ProcessAuditServiceInfoAppender auditServiceInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender
     ) {
-        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, auditServiceInfoAppender);
+        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender);
     }
 
     @Bean
