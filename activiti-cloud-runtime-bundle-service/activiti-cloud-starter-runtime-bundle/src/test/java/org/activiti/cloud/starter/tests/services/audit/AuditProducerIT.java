@@ -60,6 +60,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,11 +97,13 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.task.IdentityLink;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +133,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-public class AuditProducerIT {
+class AuditProducerIT {
 
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
@@ -197,7 +200,7 @@ public class AuditProducerIT {
     private RepositoryService repositoryService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = getProcessDefinitions();
         assertThat(processDefinitions.getStatusCode()).isEqualTo(HttpStatus.OK);
 
@@ -212,7 +215,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForProcessDeployment() {
+    void shouldProduceEventsForProcessDeployment() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -239,7 +242,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCandidateUserStarterEvents() {
+    void shouldProduceCandidateUserStarterEvents() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -257,7 +260,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCandidateGroupStarterEvents() {
+    void shouldProduceCandidateGroupStarterEvents() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 
@@ -278,7 +281,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringSimpleProcessExecution() {
+    void shouldProduceEventsDuringSimpleProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -449,7 +452,58 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForAProcessDeletion() {
+    void shouldProduceEventsDuringSimpleProcessExecutionWithActor() {
+        //when
+        ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
+            ProcessPayloadBuilder
+                .start()
+                .withProcessDefinitionKey(SIMPLE_PROCESS)
+                .withProcessDefinitionId(processDefinitionIds.get(SIMPLE_PROCESS))
+                .withVariable("name", "peter")
+                .withName("my instance name")
+                .withBusinessKey("my business key")
+                .build()
+        );
+
+        //then
+        List<IdentityLink> identityLinksForProcessInstance = runtimeService.getIdentityLinksForProcessInstance(
+            startProcessEntity.getBody().getId()
+        );
+        String expectedActor = new String(
+            identityLinksForProcessInstance
+                .stream()
+                .filter(identityLink -> ActorConstants.ACTOR_TYPE.equals(identityLink.getType()))
+                .findFirst()
+                .get()
+                .getDetails()
+        );
+
+        assertThat(identityLinksForProcessInstance)
+            .filteredOn(it -> ActorConstants.ACTOR_TYPE.equals(it.getType()))
+            .isNotEmpty()
+            .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
+            .containsOnly(tuple("hruser", expectedActor.getBytes()));
+
+        //and given
+        ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
+        Task task = tasks.getBody().iterator().next();
+
+        //when
+        taskRestTemplate.claim(task);
+        taskRestTemplate.complete(task);
+
+        //then
+        await()
+            .untilAsserted(() -> {
+                assertThat(streamHandler.getLatestReceivedEvents())
+                    .filteredOn(it -> Arrays.asList(TASK_COMPLETED, PROCESS_COMPLETED).contains(it.getEventType()))
+                    .extracting(CloudRuntimeEvent::getEventType, CloudRuntimeEvent::getActor)
+                    .containsExactly(tuple(TASK_COMPLETED, expectedActor), tuple(PROCESS_COMPLETED, "service_user"));
+            });
+    }
+
+    @Test
+    void shouldProduceEventsForAProcessDeletion() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             new StartProcessPayloadBuilder()
@@ -483,7 +537,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldSendIntegrationResultReceiveEvent() {
+    void shouldSendIntegrationResultReceiveEvent() {
         //given
         ResponseEntity<CloudProcessInstance> processInstanceResponseEntity = processInstanceRestTemplate.startProcess(
             ProcessPayloadBuilder
@@ -506,7 +560,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForAProcessUpdate() {
+    void shouldProduceEventsForAProcessUpdate() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -544,7 +598,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskDelete() {
+    void shouldEmitEventsForTaskDelete() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -596,7 +650,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskUpdate() {
+    void shouldEmitEventsForTaskUpdate() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -634,7 +688,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskAddDeleteUserCandidates() {
+    void shouldEmitEventsForTaskAddDeleteUserCandidates() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -720,7 +774,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
+    void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
         //given
         CloudTask task = taskRestTemplate.createTask(
             TaskPayloadBuilder
@@ -736,7 +790,7 @@ public class AuditProducerIT {
         );
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
+        assertThat(groupCandidates.getBody().getContent().size()).isZero();
 
         //when
         taskRestTemplate.addGroupCandidates(
@@ -798,7 +852,7 @@ public class AuditProducerIT {
         groupCandidates = taskRestTemplate.getGroupCandidates(task.getId());
         assertThat(groupCandidates).isNotNull();
         assertThat(groupCandidates.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(groupCandidates.getBody().getContent().size()).isEqualTo(0);
+        assertThat(groupCandidates.getBody().getContent().size()).isZero();
 
         //Delete task
         taskRestTemplate.delete(task);
@@ -809,7 +863,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void testTwoSubProcesses() {
+    void testTwoSubProcesses() {
         //given
         String businessKey = "testBusinessKey";
         String processDefinitionId = processDefinitionIds.get(CALL_TWO_SUB_PROCESSES);
@@ -911,7 +965,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceCancelEventsDuringMultiInstanceExecution() {
+    void shouldProduceCancelEventsDuringMultiInstanceExecution() {
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
             "miParallelUserTasksCompletionCondition",
             null,
@@ -1009,7 +1063,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringMultiInstanceSubProcessExecution() {
+    void shouldProduceEventsDuringMultiInstanceSubProcessExecution() {
         //when
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcessByKey(
             "miParallelSubprocessCompletionCondition",
@@ -1109,7 +1163,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
+    void shouldHaveAppVersionSetInBothEventsAndApplicationElementEntities() {
         // given
         final String appVersion = processDefinitionAppVersions.get(SIMPLE_PROCESS);
 
@@ -1148,7 +1202,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsDuringMultiInstanceCallActivityExecution() {
+    void shouldProduceEventsDuringMultiInstanceCallActivityExecution() {
         //given
         List<CloudTask> tasks;
 
@@ -1245,7 +1299,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void testCallSimpleSubProcessWithExpressions() {
+    void testCallSimpleSubProcessWithExpressions() {
         CloudProcessInstance processInstance = processInstanceRestTemplate
             .startProcessByKey("callSimpleSubProcess", null, null)
             .getBody();
@@ -1314,7 +1368,7 @@ public class AuditProducerIT {
     }
 
     @Test
-    public void shouldProduceEventsForApplicationDeployment() {
+    void shouldProduceEventsForApplicationDeployment() {
         //when
         List<CloudRuntimeEvent<?, ?>> receivedEvents = streamHandler.getAllReceivedEvents();
 

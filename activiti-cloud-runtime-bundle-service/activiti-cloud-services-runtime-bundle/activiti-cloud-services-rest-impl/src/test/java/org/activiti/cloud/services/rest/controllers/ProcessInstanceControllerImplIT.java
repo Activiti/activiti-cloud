@@ -55,6 +55,8 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.UnprocessableEntityException;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
@@ -70,6 +72,7 @@ import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -100,7 +103,7 @@ import org.springframework.test.web.servlet.MockMvc;
         StreamConfig.class,
     }
 )
-public class ProcessInstanceControllerImplIT {
+class ProcessInstanceControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -132,8 +135,17 @@ public class ProcessInstanceControllerImplIT {
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @Test
-    public void getProcessInstances() throws Exception {
+    void getProcessInstances() throws Exception {
         //given
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
@@ -148,7 +160,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessInstancesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         List<ProcessInstance> processInstanceList = Collections.singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstancePage = new PageImpl<>(processInstanceList, processInstanceList.size());
         when(processRuntime.processInstances(any())).thenReturn(processInstancePage);
@@ -159,7 +171,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void startProcess() throws Exception {
+    void startProcess() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
         when(processRuntime.start(any(StartProcessPayload.class))).thenReturn(defaultProcessInstance());
 
@@ -171,7 +183,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void createProcess() throws Exception {
+    void createProcess() throws Exception {
         CreateProcessInstancePayload cmd = ProcessPayloadBuilder.create().withProcessDefinitionId("1").build();
         when(processRuntime.create(any(CreateProcessInstancePayload.class))).thenReturn(defaultProcessInstance());
 
@@ -185,7 +197,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void startCreatedProcess() throws Exception {
+    void startCreatedProcess() throws Exception {
         StartProcessPayload payload = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
         when(processRuntime.startCreatedProcess(eq("1"), any(StartProcessPayload.class)))
             .thenReturn(defaultProcessInstance());
@@ -200,8 +212,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void should_startProcessReturnForbidden_when_activitiForbiddenExceptionIsThrownByTheController()
-        throws Exception {
+    void should_startProcessReturnForbidden_when_activitiForbiddenExceptionIsThrownByTheController() throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
         willThrow(new ActivitiForbiddenException("Not permitted"))
@@ -218,7 +229,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController()
+    void should_startProcessReturnUnprocessableEntity_when_unprocessableEntityExceptionIsThrownByController()
         throws Exception {
         StartProcessPayload cmd = ProcessPayloadBuilder.start().withProcessDefinitionId("1").build();
 
@@ -236,15 +247,14 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void getProcessInstanceById() throws Exception {
+    void getProcessInstanceById() throws Exception {
         when(processRuntime.processInstance("1")).thenReturn(defaultProcessInstance());
 
         mockMvc.perform(get("/v1/process-instances/{processInstanceId}", 1)).andExpect(status().isOk());
     }
 
     @Test
-    public void should_getProcessInstanceByIdReturnNotFound_when_notFoundExceptionIsThrownByController()
-        throws Exception {
+    void should_getProcessInstanceByIdReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
         String processInstanceId = "nonExistentProcessInstanceId";
         willThrow(new NotFoundException("not found")).given(processRuntime).processInstance(processInstanceId);
 
@@ -256,7 +266,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void getProcessDiagram() throws Exception {
+    void getProcessDiagram() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance(anyString())).thenReturn(processInstance);
         when(repositoryService.getBpmnModel(processInstance.getProcessDefinitionId()))
@@ -274,7 +284,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void should_getProcessDiagramReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
+    void should_getProcessDiagramReturnNotFound_when_notFoundExceptionIsThrownByController() throws Exception {
         String processInstanceId = "nonExistentProcessInstanceId";
         willThrow(new NotFoundException("not found")).given(processRuntime).processInstance(processInstanceId);
 
@@ -288,7 +298,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void should_getProcessDiagram_when_NoInterchangeInfo() throws Exception {
+    void should_getProcessDiagram_when_NoInterchangeInfo() throws Exception {
         String processInstanceId = UUID.randomUUID().toString();
         String processDefinitionId = UUID.randomUUID().toString();
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
@@ -315,7 +325,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void sendSignal() throws Exception {
+    void sendSignal() throws Exception {
         SignalPayload cmd = ProcessPayloadBuilder.signal().withName("signalInstance").build();
 
         mockMvc
@@ -328,7 +338,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void suspend() throws Exception {
+    void suspend() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.suspend(any())).thenReturn(defaultProcessInstance());
@@ -338,7 +348,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void resume() throws Exception {
+    void resume() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.resume(any())).thenReturn(defaultProcessInstance());
@@ -348,7 +358,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void deleteProcessInstance() throws Exception {
+    void deleteProcessInstance() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.delete(any())).thenReturn(defaultProcessInstance());
@@ -356,7 +366,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void update() throws Exception {
+    void update() throws Exception {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.update(any())).thenReturn(defaultProcessInstance());
@@ -378,7 +388,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void subprocesses() throws Exception {
+    void subprocesses() throws Exception {
         //Simply check here that controller is working
         List<ProcessInstance> processInstanceList = singletonList(defaultProcessInstance());
         Page<ProcessInstance> processInstances = new PageImpl<>(processInstanceList, processInstanceList.size());
@@ -389,7 +399,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void receiveMessage() throws Exception {
+    void receiveMessage() throws Exception {
         ReceiveMessagePayload cmd = MessagePayloadBuilder
             .receive("messageName")
             .withCorrelationKey("correlationId")
@@ -406,7 +416,7 @@ public class ProcessInstanceControllerImplIT {
     }
 
     @Test
-    public void startMessage() throws Exception {
+    void startMessage() throws Exception {
         StartMessagePayload cmd = MessagePayloadBuilder
             .start("messageName")
             .withBusinessKey("buisinessId")

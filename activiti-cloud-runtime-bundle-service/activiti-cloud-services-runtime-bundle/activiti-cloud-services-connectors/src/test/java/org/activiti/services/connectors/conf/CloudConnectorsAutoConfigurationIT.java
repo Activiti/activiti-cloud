@@ -38,11 +38,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.MessageChannel;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -76,6 +76,9 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private ConnectorImplementationsProvider connectorImplementationsProvider;
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @BeforeEach
     public void beforeEach() {

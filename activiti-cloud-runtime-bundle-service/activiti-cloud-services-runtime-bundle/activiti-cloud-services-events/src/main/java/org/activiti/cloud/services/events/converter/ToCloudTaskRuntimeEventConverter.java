@@ -53,8 +53,14 @@ public class ToCloudTaskRuntimeEventConverter {
 
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    public ToCloudTaskRuntimeEventConverter(RuntimeBundleInfoAppender runtimeBundleInfoAppender) {
+    private final TaskAuditServiceInfoAppender auditServiceInfoAppender;
+
+    public ToCloudTaskRuntimeEventConverter(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        TaskAuditServiceInfoAppender auditServiceInfoAppender
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.auditServiceInfoAppender = auditServiceInfoAppender;
     }
 
     public CloudTaskCreatedEvent from(TaskCreatedEvent event) {
@@ -78,6 +84,7 @@ public class ToCloudTaskRuntimeEventConverter {
     public CloudTaskCompletedEvent from(TaskCompletedEvent event) {
         CloudTaskCompletedEventImpl cloudEvent = new CloudTaskCompletedEventImpl(event.getEntity());
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudEvent);
+        this.auditServiceInfoAppender.appendAuditServiceInfoTo(cloudEvent);
         return cloudEvent;
     }
 

@@ -33,7 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-public class ProcessVariablesPayloadConverterTest {
+class ProcessVariablesPayloadConverterTest {
 
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
@@ -44,7 +44,7 @@ public class ProcessVariablesPayloadConverterTest {
     private DateFormatterProvider dateFormatterProvider;
 
     @Test
-    public void testProcessVariablesPayloadConverter() {
+    void testProcessVariablesPayloadConverter() {
         // given
         Map<String, Object> input = new HashMap<>();
 

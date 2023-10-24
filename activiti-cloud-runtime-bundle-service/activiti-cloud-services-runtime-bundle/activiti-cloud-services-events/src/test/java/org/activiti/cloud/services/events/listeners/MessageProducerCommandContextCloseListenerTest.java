@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +56,7 @@ import org.springframework.messaging.MessageChannel;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class MessageProducerCommandContextCloseListenerTest {
+class MessageProducerCommandContextCloseListenerTest {
 
     private static final String MOCK_ROUTING_KEY = "engineEvents.springAppName.appName";
     private static final String MOCK_PARENT_PROCESS_NAME = "mockParentProcessName";
@@ -130,7 +131,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     }
 
     @Test
-    public void closedShouldSendEventsRegisteredOnTheCommandContext() {
+    void closedShouldSendEventsRegisteredOnTheCommandContext() {
         // given
         processEngineEventsAggregator.add(event);
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
@@ -158,10 +159,11 @@ public class MessageProducerCommandContextCloseListenerTest {
         assertThat(result[0].getServiceName()).isEqualTo(SPRING_APP_NAME);
         assertThat(result[0].getServiceType()).isEqualTo(SERVICE_TYPE);
         assertThat(result[0].getServiceVersion()).isEqualTo(SERVICE_VERSION);
+        assertThat(result[0].getActor()).isEqualTo("service_user");
     }
 
     @Test
-    public void closedShouldDoNothingWhenRegisteredEventsIsNull() {
+    void closedShouldDoNothingWhenRegisteredEventsIsNull() {
         // given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(null);
@@ -174,7 +176,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     }
 
     @Test
-    public void closedShouldDoNothingWhenRegisteredEventsIsEmpty() {
+    void closedShouldDoNothingWhenRegisteredEventsIsEmpty() {
         // given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(Collections.emptyList());
@@ -187,7 +189,7 @@ public class MessageProducerCommandContextCloseListenerTest {
     }
 
     @Test
-    public void closedShouldSendMessageHeadersWithExecutionContext() {
+    void closedShouldSendMessageHeadersWithExecutionContext() {
         // given
         given(commandContext.getGenericAttribute(MessageProducerCommandContextCloseListener.PROCESS_ENGINE_EVENTS))
             .willReturn(Collections.singletonList(event));

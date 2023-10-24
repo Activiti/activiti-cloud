@@ -29,7 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-public class CloudEventsAutoConfigurationIT {
+class CloudEventsAutoConfigurationIT {
 
     @SpringBootApplication
     static class MockRuntimeBundleApplication {
@@ -57,7 +57,7 @@ public class CloudEventsAutoConfigurationIT {
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         // success
     }
 }

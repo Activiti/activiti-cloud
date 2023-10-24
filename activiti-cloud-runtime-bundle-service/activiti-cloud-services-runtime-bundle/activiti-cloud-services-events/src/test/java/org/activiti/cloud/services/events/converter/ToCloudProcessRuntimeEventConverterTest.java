@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,9 @@ import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +36,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ToCloudProcessRuntimeEventConverterTest {
+class ToCloudProcessRuntimeEventConverterTest {
+
+    private static final String SERVICE_USER = "service_user";
 
     @InjectMocks
     private ToCloudProcessRuntimeEventConverter converter;
@@ -41,8 +46,10 @@ public class ToCloudProcessRuntimeEventConverterTest {
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
+    private static final String USERNAME = "user1";
+
     @Test
-    public void fromShouldConvertInternalProcessStartedEventToExternalEvent() {
+    void fromShouldConvertInternalProcessStartedEventToExternalEvent() {
         //given
         ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
         processInstance.setId("10");
@@ -53,7 +60,7 @@ public class ToCloudProcessRuntimeEventConverterTest {
         event.setNestedProcessInstanceId("2");
 
         //when
-        CloudProcessStartedEvent processStarted = converter.from(event);
+        CloudProcessStartedEvent processStarted = this.converter.from(event);
 
         //then
         assertThat(processStarted).isInstanceOf(CloudProcessStartedEvent.class);
@@ -62,12 +69,13 @@ public class ToCloudProcessRuntimeEventConverterTest {
         assertThat(processStarted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
         assertThat(processStarted.getNestedProcessDefinitionId()).isEqualTo("myParentProcessDef");
         assertThat(processStarted.getNestedProcessInstanceId()).isEqualTo("2");
+        assertThat(processStarted.getActor()).isEqualTo(SERVICE_USER);
 
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 
     @Test
-    public void shouldConvertBPMNSignalReceivedEventToCloudBPMNSignalReceivedEvent() {
+    void shouldConvertBPMNSignalReceivedEventToCloudBPMNSignalReceivedEvent() {
         //given
         BPMNSignalImpl signal = new BPMNSignalImpl();
         signal.setProcessDefinitionId("procDefId");
@@ -75,12 +83,37 @@ public class ToCloudProcessRuntimeEventConverterTest {
         BPMNSignalReceivedEventImpl signalReceivedEvent = new BPMNSignalReceivedEventImpl(signal);
 
         //when
-        CloudBPMNSignalReceivedEvent cloudEvent = converter.from(signalReceivedEvent);
+        CloudBPMNSignalReceivedEvent cloudEvent = this.converter.from(signalReceivedEvent);
         assertThat(cloudEvent.getEntity()).isEqualTo(signal);
         assertThat(cloudEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(cloudEvent.getProcessInstanceId()).isEqualTo("procInstId");
 
         //then
-        verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+    }
+
+    @Test
+    void should_convertInternalProcessCompletedEvent_when_convertToExternalEvent() {
+        //given
+        ProcessInstanceImpl processInstance = new ProcessInstanceImpl();
+        processInstance.setId("10");
+        processInstance.setProcessDefinitionId("myProcessDef");
+        processInstance.setInitiator(USERNAME);
+
+        ProcessCompletedImpl event = new ProcessCompletedImpl(processInstance);
+
+        //when
+        CloudProcessCompletedEvent processCompleted = converter.from(event);
+
+        //then
+        assertThat(processCompleted).isInstanceOf(CloudProcessCompletedEvent.class);
+
+        assertThat(processCompleted.getEntity().getId()).isEqualTo("10");
+        assertThat(processCompleted.getEntity().getProcessDefinitionId()).isEqualTo("myProcessDef");
+        assertThat(processCompleted.getProcessDefinitionId()).isEqualTo("myProcessDef");
+        assertThat(processCompleted.getProcessInstanceId()).isEqualTo("10");
+        assertThat(processCompleted.getActor()).isEqualTo(SERVICE_USER);
+
+        verify(this.runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
     }
 }

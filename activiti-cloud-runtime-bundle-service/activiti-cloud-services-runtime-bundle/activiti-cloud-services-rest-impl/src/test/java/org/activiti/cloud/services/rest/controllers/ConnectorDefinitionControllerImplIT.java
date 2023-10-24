@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -36,6 +38,7 @@ import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
 import org.activiti.spring.process.ProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -64,7 +67,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         StreamConfig.class,
     }
 )
-public class ConnectorDefinitionControllerImplIT {
+class ConnectorDefinitionControllerImplIT {
 
     private MockMvc mockMvc;
 
@@ -80,8 +83,17 @@ public class ConnectorDefinitionControllerImplIT {
     @MockBean
     private RepositoryService repositoryService;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setup() {
+    void setup() {
         assertThat(processExtensionService).isNotNull();
 
         List<ConnectorDefinition> connectorDefinitions = new ArrayList<>();
@@ -106,7 +118,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getAllConnectorDefinitions() throws Exception {
+    void getAllConnectorDefinitions() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("content[0].links[0].rel", is("self")))
@@ -115,7 +127,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getOneSpecificConnectorDefinition() throws Exception {
+    void getOneSpecificConnectorDefinition() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/id1").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("links[0].rel", is("self")))
@@ -124,7 +136,7 @@ public class ConnectorDefinitionControllerImplIT {
     }
 
     @Test
-    public void getConnectorDefinitionNotFound() throws Exception {
+    void getConnectorDefinitionNotFound() throws Exception {
         this.mockMvc.perform(get("/v1/connector-definitions/idNotFound").accept(MediaTypes.HAL_JSON_VALUE))
             .andExpect(status().isNotFound());
     }

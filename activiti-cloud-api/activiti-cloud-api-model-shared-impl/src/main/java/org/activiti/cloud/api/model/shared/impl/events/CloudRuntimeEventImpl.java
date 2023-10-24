@@ -32,6 +32,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     private String entityId;
     private Integer sequenceNumber;
     private String messageId;
+    private String actor = "service_user";
 
     public CloudRuntimeEventImpl() {}
 
@@ -125,6 +126,15 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
     }
 
     @Override
+    public String getActor() {
+        return this.actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder
@@ -146,6 +156,8 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             .append(sequenceNumber)
             .append(", messageId=")
             .append(messageId)
+            .append(", actor=")
+            .append(actor)
             .append(", toString()=")
             .append(super.toString())
             .append("]");
@@ -159,6 +171,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             appVersion,
             entityId,
             messageId,
+            actor,
             sequenceNumber,
             serviceFullName,
             serviceName,
@@ -188,6 +201,7 @@ public abstract class CloudRuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum
             Objects.equals(appVersion, other.appVersion) &&
             Objects.equals(entityId, other.entityId) &&
             Objects.equals(messageId, other.messageId) &&
+            Objects.equals(actor, other.actor) &&
             Objects.equals(sequenceNumber, other.sequenceNumber) &&
             Objects.equals(serviceFullName, other.serviceFullName) &&
             Objects.equals(serviceName, other.serviceName) &&
