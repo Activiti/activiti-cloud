@@ -38,7 +38,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
-    @Column(name = "`value`", columnDefinition = "text")
+    @Column(columnDefinition = "text")
     private VariableValue<?> value;
 
     private Boolean markedAsDeleted = false;
