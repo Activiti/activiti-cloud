@@ -12,7 +12,7 @@ insert into task (id, assignee, category, create_time, description, due_date, la
   ('7', '', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task7', 'Normal', 'process_definition_id', '1', 'Suspended', 'owner', null ),
   ('8', 'assignee', 'category', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task8', 'Normal', null, null, 'ASSIGNED', 'owner', null);
 
-insert into variable (create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, value) values
+insert into variable (create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value") values
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', '0', '1', 'String', 'value1'),
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable2', '0', '1', 'String', 'value2'),
   (CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable3', '0', '2', 'String', 'value3'),
