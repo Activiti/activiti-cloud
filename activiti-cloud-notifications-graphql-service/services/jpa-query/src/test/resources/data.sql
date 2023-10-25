@@ -9,10 +9,10 @@ insert into task (id, assignee, created_date, description, due_date, last_modifi
   ('4', 'assignee', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task4', 10, 'process_definition_id', 1, 'CREATED'  , 'owner', null),
   ('5', 'assignee', CURRENT_TIMESTAMP, 'description', null, null, null, null, 'task5', 5, 'process_definition_id', 1, 'COMPLETED'  , 'owner', null);
 
-insert into PROCESS_VARIABLE (id,create_time, execution_id, last_updated_time, name, process_instance_id, type, "value") values
+insert into PROCESS_VARIABLE (id,create_time, execution_id, last_updated_time, name, process_instance_id, type, value) values
   (1,CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'initiator', 1, 'map', '{"value": { "key" : ["1","2","3","4","5"]}}');
 
-insert into TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, "value") values
+insert into TASK_VARIABLE (id, create_time, execution_id, last_updated_time, name, process_instance_id, task_id, type, value) values
   (2, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable1', 0, '1', 'String', '{"value": "10"}'),
   (3, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable2', 0, '1', 'String', '{"value": true}'),
   (4, CURRENT_TIMESTAMP, 'execution_id', CURRENT_TIMESTAMP, 'variable3', 0, '2', 'String', '{"value": null}'),
