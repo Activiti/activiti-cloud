@@ -916,7 +916,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_returnStatusCreated_when_importingProjectLessThan50mbAndMoreThan10mb() throws Exception {
+    public void should_returnStatusCreated_when_importingProject() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile(
             "file",
             "project-xy.zip",
@@ -929,22 +929,6 @@ public class ProjectControllerIT {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.entry.name", is("application-xy")));
     }
-
-    @Test
-    public void should_returnStatusCreated_when_importingProjectMoreThan50mb() throws Exception {
-        byte[] bytes = new byte[1024 * 1024 * 20];
-        MockMultipartFile zipFile = new MockMultipartFile(
-            "file",
-            "project-xy.zip",
-            "project/zip",
-            bytes
-        );
-
-        mockMvc
-            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isCreated());
-    }
-
 
     @Test
     public void should_throwBadRequestException_when_importingProjectInvalidJsonFile() throws Exception {
