@@ -37,6 +37,7 @@ import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
+import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.springframework.data.domain.Pageable;
@@ -149,6 +150,9 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
+        if(file.getSize() > 1024*1024*10) {
+            throw new FileSizeException("File size exceeded");
+        }
         modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
     }
 

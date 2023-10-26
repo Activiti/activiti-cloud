@@ -58,10 +58,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import jakarta.servlet.ServletException;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -79,6 +82,7 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.mock.MockFactory;
+import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,6 +99,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -644,12 +649,12 @@ public class ModelControllerIT {
                 tuple(
                     "WRONG_MAPPING_TYPE is not a valid enum value",
                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b/mappingType: " +
-                    "WRONG_MAPPING_TYPE is not a valid enum value"
+                        "WRONG_MAPPING_TYPE is not a valid enum value"
                 ),
                 tuple(
                     "extraneous key [mappingTypo] is not permitted",
                     "#/extensions/Process_test/mappings/ServiceTask_07fergb: extraneous key [mappingTypo]" +
-                    " is not permitted"
+                        " is not permitted"
                 )
             );
     }
@@ -689,12 +694,12 @@ public class ModelControllerIT {
                 tuple(
                     "extraneous key [inputds] is not permitted",
                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [inputds] is " +
-                    "not permitted"
+                        "not permitted"
                 ),
                 tuple(
                     "extraneous key [outputss] is not permitted",
                     "#/extensions/Process_test/mappings/ServiceTask_06crg3b: extraneous key [outputss] is" +
-                    " not permitted"
+                        " not permitted"
                 )
             );
     }
@@ -724,7 +729,7 @@ public class ModelControllerIT {
                 tuple(
                     "expected type: String, found: Integer",
                     "Mismatch value type - stringVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
-                    "Expected type is string"
+                        "Expected type is string"
                 )
             );
     }
@@ -754,12 +759,12 @@ public class ModelControllerIT {
                 tuple(
                     "expected type: Integer, found: String",
                     "Mismatch value type - integerVariable" +
-                    "(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"
+                        "(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is integer"
                 ),
                 tuple(
                     "string [aloha] does not match pattern ^\\$\\{(.*)[\\}]$",
                     "Value format in integerVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) " +
-                    "is not a valid expression"
+                        "is not a valid expression"
                 )
             );
     }
@@ -789,12 +794,12 @@ public class ModelControllerIT {
                 tuple(
                     "expected type: Boolean, found: Integer",
                     "Mismatch value type - booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
-                    "Expected type is boolean"
+                        "Expected type is boolean"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
                     "Value format in booleanVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
-                    "valid expression"
+                        "valid expression"
                 )
             );
     }
@@ -840,7 +845,7 @@ public class ModelControllerIT {
                 tuple(
                     "expected type: String, found: Integer",
                     "Mismatch value type - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). Expected type is " +
-                    "date"
+                        "date"
                 ),
                 tuple(
                     "expected type: String, found: Integer",
@@ -848,7 +853,7 @@ public class ModelControllerIT {
                 ),
                 tuple(
                     "string [aloha] does not match pattern ^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))" +
-                    "|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
+                        "|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$",
                     "Invalid date - dateVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68)"
                 ),
                 tuple(
@@ -887,20 +892,20 @@ public class ModelControllerIT {
                 ),
                 tuple(
                     "string [2019-12-06T00:60:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
-                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
-                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                        "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                        "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47g)"
                 ),
                 tuple(
                     "string [2019-12-06T00:00:60] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
-                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
-                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                        "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                        "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47f)"
                 ),
                 tuple(
                     "string [2019-12-06T24:00:00] does not match pattern ^((19|20)[0-9][0-9])[-](0[1-9]|1[012])[-]" +
-                    "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
-                    "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
+                        "(0[1-9]|[12][0-9]|3[01])[T]([01][0-9]|[2][0-3])[:]([0-5][0-9])[:]([0-5][0-9])([+|-]" +
+                        "([01][0-9]|[2][0-3])[:]([0-5][0-9])){0,1}$",
                     "Invalid datetime - case4(e0740a3a-fec4-4ee5-bece-61f39df2a47e)"
                 ),
                 tuple(
@@ -1157,6 +1162,28 @@ public class ModelControllerIT {
     }
 
     @Test
+    public void should_returnBadRequest_when_fileSizeIsGreaterThan10mb() throws Exception {
+        Model connectorModel = modelRepository.createModel(connectorModel("SimpleConnector"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "memory-test.zip",
+            "project/zip",
+            resourceAsByteArray("project/memory-test.zip")
+        );
+        mockMvc
+            .perform(
+                putMultipart("/v1/models/{modelId}/content", connectorModel.getId())
+                    .file(
+                        zipFile
+                    )
+            ).andExpect(status().isBadRequest())
+            .andExpect(result -> assertThat(result.getResolvedException() instanceof FileSizeException))
+            .andExpect(result -> assertThat("File size exceeded").isEqualTo(result.getResolvedException().getMessage()));
+
+
+    }
+
+    @Test
     public void should_setProjectScopeByDefault_when_creatingModel() throws Exception {
         Project project = projectRepository.createProject(project("parent-project"));
 
@@ -1214,7 +1241,7 @@ public class ModelControllerIT {
         processModel.addProject(parentProjectTwo);
         modelRepository.createModel(processModel);
 
-        String[] projectIds = { parentProjectOne.getId(), parentProjectTwo.getId() };
+        String[] projectIds = {parentProjectOne.getId(), parentProjectTwo.getId()};
 
         mockMvc
             .perform(get("/v1/models/{modelId}", processModel.getId()))
@@ -1560,11 +1587,11 @@ public class ModelControllerIT {
         throws Exception {
         final String svg =
             "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI" +
-            "yNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNhdmUtMjR" +
-            "weCAoMSkiIG9wYWNpdHk9IjEiPjxwYXRoIGlkPSJQYXRoXzE3OTY1IiBkYXRhLW5hbWU9IlBhdGggMTc5NjUiIGQ9Ik0wLDBIMjR" +
-            "WMjRIMFoiIGZpbGw9Im5vbmUiLz48cGF0aCBpZD0iUGF0aF8xNzk2NiIgZGF0YS1uYW1lPSJQYXRoIDE3OTY2IiBkPSJNMTcsM0g" +
-            "1QTIsMiwwLDAsMCwzLDVWMTlhMiwyLDAsMCwwLDIsMkgxOWEyLjAwNiwyLjAwNiwwLDAsMCwyLTJWN1ptMiwxNkg1VjVIMTYuMTd" +
-            "MMTksNy44M1ptLTctN2EzLDMsMCwxLDAsMywzQTMsMywwLDAsMCwxMiwxMlpNNiw2aDl2NEg2WiIvPjwvZz48L3N2Zz4K";
+                "yNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNhdmUtMjR" +
+                "weCAoMSkiIG9wYWNpdHk9IjEiPjxwYXRoIGlkPSJQYXRoXzE3OTY1IiBkYXRhLW5hbWU9IlBhdGggMTc5NjUiIGQ9Ik0wLDBIMjR" +
+                "WMjRIMFoiIGZpbGw9Im5vbmUiLz48cGF0aCBpZD0iUGF0aF8xNzk2NiIgZGF0YS1uYW1lPSJQYXRoIDE3OTY2IiBkPSJNMTcsM0g" +
+                "1QTIsMiwwLDAsMCwzLDVWMTlhMiwyLDAsMCwwLDIsMkgxOWEyLjAwNiwyLjAwNiwwLDAsMCwyLTJWN1ptMiwxNkg1VjVIMTYuMTd" +
+                "MMTksNy44M1ptLTctN2EzLDMsMCwxLDAsMywzQTMsMywwLDAsMCwxMiwxMlpNNiw2aDl2NEg2WiIvPjwvZz48L3N2Zz4K";
 
         Project project = projectRepository.createProject(project("parent-project"));
 
