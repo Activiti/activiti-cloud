@@ -150,7 +150,7 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
-        if(file.getSize() > 1024*1024*10) {
+        if (file.getSize() > 1024 * 1024 * 10) {
             throw new FileSizeException("File size exceeded");
         }
         modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
