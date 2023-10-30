@@ -164,10 +164,12 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project updateProject(Project projectToUpdate, Project newProject) {
         Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
-        Optional.ofNullable(newProject.getName()).ifPresent(name -> {
-            projectToUpdate.setName(name);
-            projectToUpdate.setKey(projectKeyGenerator.generate(name));
-        });
+        Optional
+            .ofNullable(newProject.getName())
+            .ifPresent(name -> {
+                projectToUpdate.setName(name);
+                projectToUpdate.setKey(projectKeyGenerator.generate(name));
+            });
         return projectRepository.updateProject(projectToUpdate);
     }
 
