@@ -55,6 +55,7 @@ import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAcce
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -92,6 +93,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectDecoratorService projectDecoratorService;
 
+    private final ProjectKeyGenerator projectKeyGenerator;
+
     public ProjectServiceImpl(
         ProjectRepository projectRepository,
         ModelService modelService,
@@ -101,7 +104,8 @@ public class ProjectServiceImpl implements ProjectService {
         JsonConverter<Map> jsonMetadataConverter,
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
-        ProjectDecoratorService projectDecoratorService
+        ProjectDecoratorService projectDecoratorService,
+        ProjectKeyGenerator projectKeyGenerator
     ) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
@@ -112,6 +116,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.jsonMetadataConverter = jsonMetadataConverter;
         this.projectFilterService = projectFilterService;
         this.projectDecoratorService = projectDecoratorService;
+        this.projectKeyGenerator = projectKeyGenerator;
     }
 
     /**
@@ -137,6 +142,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project createProject(Project project) {
         project.setId(null);
+        project.setKey(projectKeyGenerator.generate(project.getName()));
+        project.setDisplayName(project.getName()); //TODO validate display name (up to 100 chars)
         List<ModelValidationError> nameValidationErrors = validateProjectName(project);
         if (!nameValidationErrors.isEmpty()) {
             throw new SemanticModelValidationException(
@@ -157,7 +164,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project updateProject(Project projectToUpdate, Project newProject) {
         Optional.ofNullable(newProject.getDescription()).ifPresent(projectToUpdate::setDescription);
-        Optional.ofNullable(newProject.getName()).ifPresent(projectToUpdate::setName);
+        Optional.ofNullable(newProject.getName()).ifPresent(name -> {
+            projectToUpdate.setName(name);
+            projectToUpdate.setKey(projectKeyGenerator.generate(name));
+        });
         return projectRepository.updateProject(projectToUpdate);
     }
 
@@ -227,7 +237,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project copyProject(Project projectToCopy, String newProjectName) {
-        Project projectCopy = projectRepository.copyProject(projectToCopy, newProjectName);
+        String newProjectKey = projectKeyGenerator.generate(newProjectName);
+        Project projectCopy = projectRepository.copyProject(projectToCopy, newProjectName, newProjectKey);
         List<Model> models = modelService.getAllModels(projectToCopy);
 
         Map<String, String> identifiersToUpdate = new HashMap<>();
@@ -470,13 +481,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public List<ModelValidationError> validateProjectName(Project project) {
-        Optional<ProjectValidator> projectNameValidator = projectValidators
+        return getProjectNameValidator().validate(project, null).collect(Collectors.toList());
+    }
+
+    private ProjectNameValidator getProjectNameValidator() {
+        return (ProjectNameValidator) projectValidators
             .stream()
             .filter(projectValidator -> projectValidator instanceof ProjectNameValidator)
-            .findFirst();
-        return projectNameValidator.isPresent()
-            ? projectNameValidator.get().validate(project, null).collect(Collectors.toList())
-            : Collections.emptyList();
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("ProjectNameValidator not found."));
     }
 
     @Override

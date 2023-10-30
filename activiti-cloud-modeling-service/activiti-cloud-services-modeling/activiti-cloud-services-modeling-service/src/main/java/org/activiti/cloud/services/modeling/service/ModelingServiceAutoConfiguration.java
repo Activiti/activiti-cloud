@@ -39,8 +39,11 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorS
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGeneratorImpl;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.everit.json.schema.Schema;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,7 +118,8 @@ public class ModelingServiceAutoConfiguration {
         JsonConverter<Map> jsonMetadataConverter,
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
-        ProjectDecoratorService projectDecoratorService
+        ProjectDecoratorService projectDecoratorService,
+        ProjectKeyGenerator projectKeyGenerator
     ) {
         return new ProjectServiceImpl(
             projectRepository,
@@ -126,7 +130,8 @@ public class ModelingServiceAutoConfiguration {
             jsonMetadataConverter,
             projectValidators,
             projectFilterService,
-            projectDecoratorService
+            projectDecoratorService,
+            projectKeyGenerator
         );
     }
 
@@ -168,5 +173,11 @@ public class ModelingServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public FileContentSanitizer fileContentSanitizer() {
         return new FileContentSanitizer();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProjectKeyGenerator projectKeyGenerator(ProjectNameValidator projectNameValidator) {
+        return new ProjectKeyGeneratorImpl(projectNameValidator);
     }
 }

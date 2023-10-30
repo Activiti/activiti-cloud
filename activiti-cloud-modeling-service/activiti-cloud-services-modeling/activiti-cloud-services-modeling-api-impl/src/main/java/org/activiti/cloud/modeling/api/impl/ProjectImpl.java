@@ -40,6 +40,9 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Schema(description = "The display name of the project")
     private String displayName;
 
+    @Schema(description = "The key (technical name) of the project")
+    private String key;
+
     @Schema(description = "The description of the project")
     private String description;
 
@@ -48,9 +51,10 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     public ProjectImpl() {}
 
-    public ProjectImpl(String id, String name) {
+    public ProjectImpl(String id, String name, String key) {
         this.id = id;
-        this.name = name;
+        this.displayName = name;
+        this.key = key;
     }
 
     @Override
@@ -65,12 +69,12 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     @Override
     public String getName() {
-        return name;
+        return displayName;
     }
 
     @Override
     public void setName(String name) {
-        this.name = name;
+        this.displayName = name;
     }
 
     @Override
@@ -81,6 +85,16 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Override
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @Override
+    public String getKey() {
+        return key;
+    }
+
+    @Override
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
