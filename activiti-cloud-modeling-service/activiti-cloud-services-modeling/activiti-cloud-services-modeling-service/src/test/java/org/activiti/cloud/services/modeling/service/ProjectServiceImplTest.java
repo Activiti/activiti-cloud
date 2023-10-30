@@ -21,8 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -46,12 +49,16 @@ import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,11 +88,19 @@ public class ProjectServiceImplTest {
     @Mock
     private ModelTypeService modelTypeService;
 
-    @Mock
-    private Set<ProjectValidator> projectValidators;
+    @Spy
+    private Set<ProjectValidator> projectValidators = Set.of(new ProjectNameValidator());
 
     @Mock
     private Model modelOne;
+
+    @Mock
+    private ProjectKeyGenerator projectKeyGenerator;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(projectKeyGenerator.generate(anyString())).then(AdditionalAnswers.returnsFirstArg());
+    }
 
     @Test
     public void should_getUsersAndGroupsBelongingToAProject_when_getProcessAccessControl() {
@@ -167,12 +182,11 @@ public class ProjectServiceImplTest {
 
     @Test
     public void should_returnProject_importingValidProject() throws IOException {
-        Project project = new ProjectImpl("name", "id");
+        Project project = new ProjectImpl("name", "id", "key");
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
 
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
-        projectValidators.add(new ProjectNameValidator());
         when(projectRepository.createProject(any())).thenReturn(project);
 
         projectService.importProject(file.get(), "new-project-name");
@@ -184,7 +198,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void should_throwImportProjectException_importingInvalidProject() throws IOException {
-        Project project = new ProjectImpl("name", "id");
+        Project project = new ProjectImpl("name", "id", "key");
         Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
 
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
@@ -204,9 +218,10 @@ public class ProjectServiceImplTest {
     @Test
     public void should_returnProject_copyingProject() {
         String copiedProjectName = "copied-project";
-        Project projectToCopy = new ProjectImpl("id", "copied-project");
+        String copiedProjectKey = "copied-project-key";
+        Project projectToCopy = new ProjectImpl("id", copiedProjectName, copiedProjectKey);
 
-        when(projectRepository.copyProject(projectToCopy, copiedProjectName)).thenReturn(projectToCopy);
+        when(projectRepository.copyProject(projectToCopy, copiedProjectName, copiedProjectName)).thenReturn(projectToCopy);
         when(modelService.getAllModels(projectToCopy)).thenReturn(asList(modelOne));
         when(modelService.copyModel(eq(modelOne), eq(projectToCopy), any())).thenReturn(modelOne);
 
@@ -248,7 +263,6 @@ public class ProjectServiceImplTest {
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
-        projectValidators.add(new ProjectNameValidator());
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
@@ -263,7 +277,6 @@ public class ProjectServiceImplTest {
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         ProcessModelType processModelType = new ProcessModelType();
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(processModelType));
-        projectValidators.add(new ProjectNameValidator());
         when(modelService.contentFilenameToModelName("process-x.bpmn20.xml", processModelType))
             .thenReturn(Optional.of("process-x"));
         when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
@@ -278,7 +291,7 @@ public class ProjectServiceImplTest {
 
     @Test
     void should_findProjectRepresentationById() {
-        ProjectImpl givenProject = new ProjectImpl("projectId", "name");
+        ProjectImpl givenProject = new ProjectImpl("projectId", "name", "key");
         when(projectRepository.findProjectById("projectId")).thenReturn(Optional.of(givenProject));
         Optional<Project> foundProjectOptional = projectService.findProjectById("projectId", null);
         assertThat(foundProjectOptional.get()).isEqualTo(givenProject);

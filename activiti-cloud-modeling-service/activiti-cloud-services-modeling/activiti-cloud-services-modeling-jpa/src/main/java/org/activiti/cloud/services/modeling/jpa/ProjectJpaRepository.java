@@ -29,28 +29,28 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * JPA Repository for {@link ProjectEntity} entity
  */
 @RepositoryRestResource(
-    path = "projects",
-    collectionResourceRel = "projects",
-    itemResourceRel = "projects",
-    exported = false
+        path = "projects",
+        collectionResourceRel = "projects",
+        itemResourceRel = "projects",
+        exported = false
 )
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>, ProjectRepository<ProjectEntity> {
-    Page<ProjectEntity> findAllByNameContaining(String name, Pageable pageable);
+    Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<ProjectEntity> findAllByIdIn(Collection<String> filteredProjectIds, Pageable pageable);
 
-    Page<ProjectEntity> findAllByNameContainingAndIdIn(
-        String name,
-        Collection<String> filteredProjectIds,
-        Pageable pageable
+    Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCaseAndIdIn(
+            String name,
+            Collection<String> filteredProjectIds,
+            Pageable pageable
     );
 
     @Override
     default Page<ProjectEntity> getProjects(Pageable pageable, String nameToFilter, List<String> filteredProjectIds) {
         if (nameToFilter != null && filteredProjectIds != null) {
-            return findAllByNameContainingAndIdIn(nameToFilter, filteredProjectIds, pageable);
+            return findAllByDisplayNameContainingIgnoreCaseAndIdIn(nameToFilter, filteredProjectIds, pageable);
         } else if (nameToFilter != null) {
-            return findAllByNameContaining(nameToFilter, pageable);
+            return findAllByDisplayNameContainingIgnoreCase(nameToFilter, pageable);
         } else if (filteredProjectIds != null) {
             return findAllByIdIn(filteredProjectIds, pageable);
         } else {
@@ -74,8 +74,8 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     }
 
     @Override
-    default ProjectEntity copyProject(ProjectEntity projectToCopy, String newProjectName) {
-        ProjectEntity projectEntityClone = new ProjectEntity(newProjectName);
+    default ProjectEntity copyProject(ProjectEntity projectToCopy, String newProjectName, String newProjectKey) {
+        ProjectEntity projectEntityClone = new ProjectEntity(newProjectName, newProjectKey);
         projectEntityClone.setDescription(projectToCopy.getDescription());
         return save(projectEntityClone);
     }
