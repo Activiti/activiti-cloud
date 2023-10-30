@@ -13,35 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.modeling.api;
 
-import org.activiti.cloud.services.auditable.Auditable;
+package org.activiti.cloud.services.modeling.service.utils;
 
-/**
- * Interface for projects
- */
-public interface Project<U> extends Auditable<U> {
-    String getId();
+public interface ProjectKeyGenerator {
 
-    void setId(String id);
-
-    String getName();
-
-    void setName(String name);
-
-    String getDisplayName();
-
-    void setDisplayName(String displayName);
-
-    String getKey();
-
-    void setKey(String key);
-
-    String getVersion();
-
-    void setVersion(String version);
-
-    String getDescription();
-
-    void setDescription(String description);
+    String generate(String projectName);
 }

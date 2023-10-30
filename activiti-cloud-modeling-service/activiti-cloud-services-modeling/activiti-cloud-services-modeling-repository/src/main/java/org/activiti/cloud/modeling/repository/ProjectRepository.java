@@ -33,7 +33,7 @@ public interface ProjectRepository<P extends Project> {
 
     P updateProject(P projectToUpdate);
 
-    P copyProject(P projectToCopy, String newProjectName);
+    P copyProject(P projectToCopy, String newProjectName, String newProjectKey);
 
     void deleteProject(P project);
 }

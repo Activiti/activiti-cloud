@@ -26,6 +26,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,10 +53,14 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
+    @Transient
     private String name;
 
     @Column(name = "disp_name")
     private String displayName;
+
+    @Column(name = "name")
+    private String key;
 
     private String description;
 
@@ -63,8 +68,9 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     public ProjectEntity() {} // for JPA
 
-    public ProjectEntity(String name) {
-        this.name = name;
+    public ProjectEntity(String name, String key) {
+        this.displayName = name;
+        this.key = key;
     }
 
     @Override
@@ -85,14 +91,15 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
         this.models = models;
     }
 
+    @Transient
     @Override
     public String getName() {
-        return name;
+        return displayName;
     }
 
     @Override
     public void setName(String name) {
-        this.name = name;
+        this.displayName = name;
     }
 
     @Override
@@ -103,6 +110,16 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @Override
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @Override
+    public String getKey() {
+        return key;
+    }
+
+    @Override
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
