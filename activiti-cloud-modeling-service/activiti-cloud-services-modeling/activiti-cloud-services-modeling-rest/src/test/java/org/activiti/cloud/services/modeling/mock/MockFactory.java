@@ -49,7 +49,8 @@ import org.springframework.util.StringUtils;
  * Mocks factory
  */
 public class MockFactory {
-//TODO remake these methods to not use name (maybe display name & key)
+
+    //TODO remake these methods to not use name (maybe display name & key)
     public static ProjectEntity project(String name) {
         return new ProjectEntity(name, name);
     }

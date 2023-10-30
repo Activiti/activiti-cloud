@@ -221,7 +221,8 @@ public class ProjectServiceImplTest {
         String copiedProjectKey = "copied-project-key";
         Project projectToCopy = new ProjectImpl("id", copiedProjectName, copiedProjectKey);
 
-        when(projectRepository.copyProject(projectToCopy, copiedProjectName, copiedProjectName)).thenReturn(projectToCopy);
+        when(projectRepository.copyProject(projectToCopy, copiedProjectName, copiedProjectName))
+            .thenReturn(projectToCopy);
         when(modelService.getAllModels(projectToCopy)).thenReturn(asList(modelOne));
         when(modelService.copyModel(eq(modelOne), eq(projectToCopy), any())).thenReturn(modelOne);
 

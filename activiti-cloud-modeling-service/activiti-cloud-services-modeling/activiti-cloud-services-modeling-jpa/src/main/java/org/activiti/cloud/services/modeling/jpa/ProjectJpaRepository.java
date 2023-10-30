@@ -29,10 +29,10 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * JPA Repository for {@link ProjectEntity} entity
  */
 @RepositoryRestResource(
-        path = "projects",
-        collectionResourceRel = "projects",
-        itemResourceRel = "projects",
-        exported = false
+    path = "projects",
+    collectionResourceRel = "projects",
+    itemResourceRel = "projects",
+    exported = false
 )
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>, ProjectRepository<ProjectEntity> {
     Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCase(String name, Pageable pageable);
@@ -40,9 +40,9 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     Page<ProjectEntity> findAllByIdIn(Collection<String> filteredProjectIds, Pageable pageable);
 
     Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCaseAndIdIn(
-            String name,
-            Collection<String> filteredProjectIds,
-            Pageable pageable
+        String name,
+        Collection<String> filteredProjectIds,
+        Pageable pageable
     );
 
     @Override
