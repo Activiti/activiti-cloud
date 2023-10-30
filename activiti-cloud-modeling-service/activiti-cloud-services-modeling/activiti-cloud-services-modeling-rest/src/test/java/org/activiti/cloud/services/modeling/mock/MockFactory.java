@@ -49,19 +49,19 @@ import org.springframework.util.StringUtils;
  * Mocks factory
  */
 public class MockFactory {
-
+//TODO remake these methods to not use name (maybe display name & key)
     public static ProjectEntity project(String name) {
-        return new ProjectEntity(name);
+        return new ProjectEntity(name, name);
     }
 
     public static ProjectEntity projectWithDescription(String name, String description) {
-        ProjectEntity project = new ProjectEntity(name);
+        ProjectEntity project = new ProjectEntity(name, name);
         project.setDescription(description);
         return project;
     }
 
     public static ProjectEntity projectWithDisplayName(String name, String displayName) {
-        ProjectEntity project = new ProjectEntity(name);
+        ProjectEntity project = new ProjectEntity(name, name);
         project.setDisplayName(displayName);
         return project;
     }
