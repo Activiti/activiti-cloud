@@ -17,6 +17,5 @@
 package org.activiti.cloud.services.modeling.service.utils;
 
 public interface ProjectKeyGenerator {
-
     String generate(String projectName);
 }
