@@ -35,13 +35,13 @@ public class ProjectKeyGeneratorImpl implements ProjectKeyGenerator {
     public String generate(String projectName) {
         if (StringUtils.isNotBlank(projectName)) {
             String generatedKey =
-                    StringUtils.substring(
-                            StringUtils.stripAccents(projectName).toLowerCase().replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR),
-                            0,
-                            20
-                    ) +
-                            KEY_SEPARATOR +
-                            RandomStringUtils.randomAlphanumeric(5).toLowerCase();
+                StringUtils.substring(
+                    StringUtils.stripAccents(projectName).toLowerCase().replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR),
+                    0,
+                    20
+                ) +
+                KEY_SEPARATOR +
+                RandomStringUtils.randomAlphanumeric(5).toLowerCase();
             if (isValidProjectName(generatedKey)) {
                 return generatedKey;
             }

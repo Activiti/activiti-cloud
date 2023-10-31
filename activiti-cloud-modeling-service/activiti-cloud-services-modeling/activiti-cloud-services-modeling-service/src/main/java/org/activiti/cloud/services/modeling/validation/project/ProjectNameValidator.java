@@ -37,7 +37,7 @@ public class ProjectNameValidator implements ProjectValidator, DNSNameValidator 
     }
 
     public Stream<ModelValidationError> validateNameAndKey(Project project) {
-        return Stream.concat(validateName(project), validateKey(project)) ;
+        return Stream.concat(validateName(project), validateKey(project));
     }
 
     public Stream<ModelValidationError> validateName(Project project) {
