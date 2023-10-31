@@ -27,7 +27,24 @@ import org.activiti.cloud.services.modeling.validation.DNSNameValidator;
 public class ProjectNameValidator implements ProjectValidator, DNSNameValidator {
 
     @Override
+    public int getNameMaxLength() {
+        return 100;
+    }
+
+    @Override
     public Stream<ModelValidationError> validate(Project project, ValidationContext validationContext) {
+        return validateName(project);
+    }
+
+    public Stream<ModelValidationError> validateNameAndKey(Project project) {
+        return Stream.concat(validateName(project), validateKey(project)) ;
+    }
+
+    public Stream<ModelValidationError> validateName(Project project) {
+        return validateName(project.getDisplayName(), "project");
+    }
+
+    public Stream<ModelValidationError> validateKey(Project project) {
         return validateDNSName(project.getKey(), "project");
     }
 }
