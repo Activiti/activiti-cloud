@@ -143,8 +143,8 @@ public class ProjectServiceImpl implements ProjectService {
     public Project createProject(Project project) {
         project.setId(null);
         project.setKey(projectKeyGenerator.generate(project.getName()));
-        project.setDisplayName(project.getName()); //TODO validate display name (up to 100 chars)
-        List<ModelValidationError> nameValidationErrors = validateProjectName(project);
+        project.setDisplayName(project.getName());
+        List<ModelValidationError> nameValidationErrors = validateProjectNameAndKey(project);
         if (!nameValidationErrors.isEmpty()) {
             throw new SemanticModelValidationException(
                 "Validation errors found in project's models",
@@ -482,8 +482,8 @@ public class ProjectServiceImpl implements ProjectService {
         );
     }
 
-    public List<ModelValidationError> validateProjectName(Project project) {
-        return getProjectNameValidator().validate(project, null).collect(Collectors.toList());
+    public List<ModelValidationError> validateProjectNameAndKey(Project project) {
+        return getProjectNameValidator().validateNameAndKey(project).collect(Collectors.toList());
     }
 
     private ProjectNameValidator getProjectNameValidator() {

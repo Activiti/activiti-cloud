@@ -33,11 +33,11 @@ public interface NameValidator extends ModelValidationErrorProducer {
     String NAME_VALIDATOR = "Name validator";
     String INVALID_REQUIRED_NAME_PROBLEM = "The name is required";
     String INVALID_EMPTY_NAME_PROBLEM = "The name cannot be empty";
-    String INVALID_NAME_LENGTH_PROBLEM = "The name length cannot be greater than " + NAME_MAX_LENGTH;
+    String INVALID_NAME_LENGTH_PROBLEM = "The name length cannot be greater than %s";
 
     String INVALID_REQUIRED_NAME_DESCRIPTION = "The %s name is required";
     String INVALID_EMPTY_NAME_DESCRIPTION = "The %s name cannot be empty";
-    String INVALID_NAME_LENGTH_DESCRIPTION = "The %s name length cannot be greater than " + NAME_MAX_LENGTH + ": '%s'";
+    String INVALID_NAME_LENGTH_DESCRIPTION = "The %s name length cannot be greater than %s: '%s'";
 
     default Stream<ModelValidationError> validateName(String name, String type) {
         List<ModelValidationError> validationErrors = new ArrayList<>();
@@ -61,11 +61,11 @@ public interface NameValidator extends ModelValidationErrorProducer {
                     )
                 );
             }
-            if (name.length() > NAME_MAX_LENGTH) {
+            if (name.length() > getNameMaxLength()) {
                 validationErrors.add(
                     createModelValidationError(
-                        INVALID_NAME_LENGTH_PROBLEM,
-                        format(INVALID_NAME_LENGTH_DESCRIPTION, type, name),
+                        format(INVALID_NAME_LENGTH_PROBLEM, getNameMaxLength()),
+                        format(INVALID_NAME_LENGTH_DESCRIPTION, type, getNameMaxLength(), name),
                         NAME_VALIDATOR,
                         "length.greater"
                     )
@@ -74,5 +74,9 @@ public interface NameValidator extends ModelValidationErrorProducer {
         }
 
         return validationErrors.stream();
+    }
+
+    default int getNameMaxLength() {
+        return NAME_MAX_LENGTH;
     }
 }

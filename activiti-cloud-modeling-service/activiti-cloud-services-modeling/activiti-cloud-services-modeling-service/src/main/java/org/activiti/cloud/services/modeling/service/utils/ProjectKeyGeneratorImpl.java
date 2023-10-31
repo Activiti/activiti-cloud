@@ -33,16 +33,18 @@ public class ProjectKeyGeneratorImpl implements ProjectKeyGenerator {
     //TODO improve on key generation and move it to separate class
     @Override
     public String generate(String projectName) {
-        String generatedKey =
-            StringUtils.substring(
-                StringUtils.stripAccents(projectName).toLowerCase().replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR),
-                0,
-                20
-            ) +
-            KEY_SEPARATOR +
-            RandomStringUtils.randomAlphanumeric(5).toLowerCase();
-        if (isValidProjectName(generatedKey)) {
-            return generatedKey;
+        if (StringUtils.isNotBlank(projectName)) {
+            String generatedKey =
+                    StringUtils.substring(
+                            StringUtils.stripAccents(projectName).toLowerCase().replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR),
+                            0,
+                            20
+                    ) +
+                            KEY_SEPARATOR +
+                            RandomStringUtils.randomAlphanumeric(5).toLowerCase();
+            if (isValidProjectName(generatedKey)) {
+                return generatedKey;
+            }
         }
         return RandomStringUtils.randomAlphanumeric(20);
     }
