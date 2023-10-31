@@ -304,7 +304,7 @@ public class ProjectControllerIT {
             .perform(
                 put("/v1/projects/{projectId}", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(project("_1-invalid-name")))
+                    .content(mapper.writeValueAsString(project("a".repeat(101))))
             )
             .andExpect(status().isBadRequest());
     }
