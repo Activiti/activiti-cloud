@@ -85,6 +85,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
     public EntityModel<Project> create(String projectName) {
         Project project = mock(Project.class);
         doReturn(projectName).when(project).getName();
+        doReturn(projectName).when(project).getDisplayName();
+        doReturn(projectName).when(project).getKey();
         return create(project);
     }
 
