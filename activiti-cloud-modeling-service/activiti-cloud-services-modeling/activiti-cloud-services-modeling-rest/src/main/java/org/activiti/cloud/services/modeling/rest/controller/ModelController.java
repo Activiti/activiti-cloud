@@ -184,6 +184,10 @@ public class ModelController implements ModelRestApi {
         @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
+        if (file.getSize() > 1024 * 1024 * 10) {
+            throw new FileSizeException("File size exceeded");
+        }
+
         Project project = projectController.findProjectById(projectId);
         return representationModelAssembler.toModel(
             modelService.importSingleModel(project, findModelType(type), multipartToFileContent(file))
