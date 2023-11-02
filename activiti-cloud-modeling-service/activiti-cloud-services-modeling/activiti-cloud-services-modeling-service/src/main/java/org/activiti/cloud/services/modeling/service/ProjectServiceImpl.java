@@ -227,17 +227,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project copyProject(Project projectToCopy, String newProjectName) {
-        Project copiedProject = projectRepository.copyProject(projectToCopy, newProjectName);
+        Project projectCopy = projectRepository.copyProject(projectToCopy, newProjectName);
         List<Model> models = modelService.getAllModels(projectToCopy);
 
+        Map<String, String> identifiersToUpdate = new HashMap<>();
         models
             .stream()
             .sorted(MODEL_TYPE_COMPARATOR)
-            .forEach(model -> {
-                modelService.copyModel(model, copiedProject);
-            });
+            .forEach(model -> modelService.copyModel(model, projectCopy, identifiersToUpdate));
 
-        return copiedProject;
+        return projectCopy;
     }
 
     @Override
@@ -358,10 +357,17 @@ public class ProjectServiceImpl implements ProjectService {
             modelJsonFile.getModelType(),
             modelJsonFile.getFileContent()
         );
+        if (createdModel.hasIdentifiersToUpdate()) {
+            projectHolder.addIdentifierToUpdate(createdModel.getOrignialId(), createdModel.getUpdatedId());
+        }
 
-        modelService.updateModelContent(createdModel, modelJsonFile.getFileContent());
+        modelService.updateModelContent(
+            createdModel.getModel(),
+            modelJsonFile.getFileContent(),
+            projectHolder.getIdentifiersToUpdate()
+        );
 
-        Model model = createdModel.model();
+        Model model = createdModel.getModel();
         projectHolder
             .getModelExtension(model)
             .ifPresent(fileMetadata -> {
@@ -394,6 +400,9 @@ public class ProjectServiceImpl implements ProjectService {
         FileContent fileContent
     ) {
         ImportedModel createdModel = modelService.importModel(createdProject, modelType, fileContent);
+        if (createdModel.hasIdentifiersToUpdate()) {
+            projectHolder.addIdentifierToUpdate(createdModel.getOrignialId(), createdModel.getUpdatedId());
+        }
         updateModelProcessImported(projectHolder, createdModel, fileContent);
     }
 
@@ -402,9 +411,9 @@ public class ProjectServiceImpl implements ProjectService {
         ImportedModel importedModel,
         FileContent fileContent
     ) {
-        modelService.updateModelContent(importedModel, fileContent);
+        modelService.updateModelContent(importedModel.getModel(), fileContent, projectHolder.getIdentifiersToUpdate());
 
-        Model model = importedModel.model();
+        Model model = importedModel.getModel();
 
         projectHolder
             .getModelExtension(model)
@@ -532,8 +541,8 @@ public class ProjectServiceImpl implements ProjectService {
 
         Map<ImportedModel, FileContent> createdProcesses = createXMLModelFiles(projectHolder, project);
         createdProcesses
-            .keySet()
-            .forEach(model -> updateModelProcessImported(projectHolder, model, createdProcesses.get(model)));
+            .entrySet()
+            .forEach(entry -> updateModelProcessImported(projectHolder, entry.getKey(), entry.getValue()));
     }
 
     private ProjectHolder getProjectHolderFromZipStream(ZipStream stream, String name) throws IOException {

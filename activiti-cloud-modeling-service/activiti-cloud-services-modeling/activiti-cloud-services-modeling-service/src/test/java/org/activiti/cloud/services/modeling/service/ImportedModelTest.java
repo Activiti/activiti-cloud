@@ -26,22 +26,22 @@ import org.junit.jupiter.api.Test;
 public class ImportedModelTest {
 
     @Test
-    void hasIdentifiersToUpdate_shouldReturnTrue_when_mapContainsEntries() {
-        ImportedModel importedModel = new ImportedModel(new ModelImpl(), Map.of("from", "to"));
+    void hasIdentifiersToUpdate_shouldReturnTrue_when_originalIdAndUpdatedIdAreSet() {
+        ImportedModel importedModel = new ImportedModel(new ModelImpl(), "from", "to");
 
         assertThat(importedModel.hasIdentifiersToUpdate()).isTrue();
     }
 
     @Test
-    void hasIdentifiersToUpdate_shouldReturnFalse_when_mapIsEmpty() {
-        ImportedModel importedModel = new ImportedModel(new ModelImpl(), Collections.emptyMap());
+    void hasIdentifiersToUpdate_shouldReturnFalse_when_originalIdIsNotSet() {
+        ImportedModel importedModel = new ImportedModel(new ModelImpl(), null, "any");
 
         assertThat(importedModel.hasIdentifiersToUpdate()).isFalse();
     }
 
     @Test
-    void hasIdentifiersToUpdate_shouldReturnFalse_when_mapIsNull() {
-        ImportedModel importedModel = new ImportedModel(new ModelImpl(), null);
+    void hasIdentifiersToUpdate_shouldReturnFalse_when_UpdateIdIsNotSet() {
+        ImportedModel importedModel = new ImportedModel(new ModelImpl(), "from", null);
 
         assertThat(importedModel.hasIdentifiersToUpdate()).isFalse();
     }

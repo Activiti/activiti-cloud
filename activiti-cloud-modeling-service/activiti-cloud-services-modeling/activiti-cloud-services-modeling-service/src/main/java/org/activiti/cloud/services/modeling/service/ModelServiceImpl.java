@@ -245,15 +245,11 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Model copyModel(Model modelToBeCopied, Project project) {
-        Model copiedModel = modelRepository.copyModel(modelToBeCopied, project);
-        Map<String, String> identifiersToUpdate = Map.of(
-            String.join(MODEL_IDENTIFIER_SEPARATOR, modelToBeCopied.getType().toLowerCase(), modelToBeCopied.getId()),
-            String.join(MODEL_IDENTIFIER_SEPARATOR, copiedModel.getType().toLowerCase(), copiedModel.getId())
-        );
-        ImportedModel importedModel = new ImportedModel(copiedModel, identifiersToUpdate);
-        updateModelContent(importedModel, getModelContentFile(copiedModel));
-        return copiedModel;
+    public Model copyModel(Model modelToBeCopied, Project project, Map<String, String> identifiersToUpdate) {
+        Model copy = modelRepository.copyModel(modelToBeCopied, project);
+        identifiersToUpdate.put(buildModelTypeAwareIdentifier(modelToBeCopied), buildModelTypeAwareIdentifier(copy));
+        updateModelContent(copy, getModelContentFile(copy), identifiersToUpdate);
+        return copy;
     }
 
     @Override
@@ -316,23 +312,22 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public Model updateModelContent(ImportedModel importedModel, FileContent fileContent) {
-        Model modelToBeUpdated = importedModel.model();
-        throwExceptionIfFileIsExecutable(modelToBeUpdated.getType(), fileContent);
-        FileContent fixedFileContent = importedModel.hasIdentifiersToUpdate()
-            ? fileContent
-            : overrideModelContentId(importedModel, fileContent);
+    public Model updateModelContent(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate) {
+        throwExceptionIfFileIsExecutable(model.getType(), fileContent);
+        FileContent fixedFileContent = hasIdentifiersToUpdate(identifiersToUpdate)
+            ? overrideModelContentId(model, fileContent, identifiersToUpdate)
+            : fileContent;
         final FileContent sanitizedFileContent = fileContentSanitizer.sanitizeContent(fixedFileContent);
 
-        modelToBeUpdated.setContentType(sanitizedFileContent.getContentType());
-        modelToBeUpdated.setContent(sanitizedFileContent.getFileContent());
+        model.setContentType(sanitizedFileContent.getContentType());
+        model.setContent(sanitizedFileContent.getFileContent());
 
         if (
-            modelToBeUpdated.getType().equals(PROCESS) &&
+            model.getType().equals(PROCESS) &&
             sanitizedFileContent.getFileContent() != null &&
             isBpmnModelContent(sanitizedFileContent.getFileContent())
         ) {
-            modelToBeUpdated.setCategory(
+            model.setCategory(
                 processModelContentConverter
                     .convertToBpmnModel(sanitizedFileContent.getFileContent())
                     .getTargetNamespace()
@@ -341,28 +336,34 @@ public class ModelServiceImpl implements ModelService {
 
         try {
             Optional
-                .ofNullable(modelToBeUpdated.getType())
+                .ofNullable(model.getType())
                 .flatMap(modelContentService::findModelContentConverter)
                 .flatMap(validator -> validator.convertToModelContent(sanitizedFileContent.getFileContent()))
-                .ifPresent(modelContent -> modelToBeUpdated.setTemplate(modelContent.getTemplate()));
+                .ifPresent(modelContent -> model.setTemplate(modelContent.getTemplate()));
         } catch (XMLException e) {
             throw new ImportModelException("Error importing model : " + e.getMessage());
         }
 
-        emptyIfNull(modelContentService.findContentUploadListeners(modelToBeUpdated.getType()))
+        emptyIfNull(modelContentService.findContentUploadListeners(model.getType()))
             .stream()
-            .forEach(listener -> listener.execute(modelToBeUpdated, sanitizedFileContent));
+            .forEach(listener -> listener.execute(model, sanitizedFileContent));
 
-        return modelRepository.updateModelContent(modelToBeUpdated, sanitizedFileContent);
+        return modelRepository.updateModelContent(model, sanitizedFileContent);
+    }
+
+    private static boolean hasIdentifiersToUpdate(Map<String, String> identifiersToUpdate) {
+        return identifiersToUpdate != null && !identifiersToUpdate.isEmpty();
     }
 
     @Override
-    public FileContent overrideModelContentId(ImportedModel importedModel, FileContent fileContent) {
+    public FileContent overrideModelContentId(
+        Model model,
+        FileContent fileContent,
+        Map<String, String> identifiersToUpdate
+    ) {
         return modelContentService
-            .findModelContentConverter(importedModel.model().getType())
-            .map(modelContentConverter ->
-                modelContentConverter.overrideModelId(fileContent, importedModel.identifiersToUpdate())
-            )
+            .findModelContentConverter(model.getType())
+            .map(modelContentConverter -> modelContentConverter.overrideModelId(fileContent, identifiersToUpdate))
             .orElse(fileContent);
     }
 
@@ -380,7 +381,11 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Model importSingleModel(Project project, ModelType modelType, FileContent fileContent) {
         ImportedModel importedModel = importModel(project, modelType, fileContent);
-        return updateModelContent(importedModel, fileContent);
+        return updateModelContent(
+            importedModel.getModel(),
+            fileContent,
+            Map.of(importedModel.getOrignialId(), importedModel.getUpdatedId())
+        );
     }
 
     @Override
@@ -401,21 +406,21 @@ public class ModelServiceImpl implements ModelService {
     public ImportedModel importModelFromContent(Project project, ModelType modelType, FileContent fileContent) {
         throwExceptionIfFileIsExecutable(modelType.getName(), fileContent);
         Model model = loadModel(modelType, fileContent);
-        String convertedId = resolveConvertedId(modelType, fileContent, model);
+        String originalId = resolveOriginalId(modelType, fileContent, model);
 
         model.setScope(ModelScope.PROJECT);
         createModel(project, model);
-        Map<String, String> identifiersToUpdate = new HashMap<>();
-        if (convertedId != null) {
-            identifiersToUpdate.put(
-                convertedId,
-                String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId())
-            );
+        if (originalId != null) {
+            return new ImportedModel(model, originalId, buildModelTypeAwareIdentifier(model));
         }
-        return new ImportedModel(model, identifiersToUpdate);
+        return new ImportedModel(model);
     }
 
-    private String resolveConvertedId(ModelType modelType, FileContent fileContent, Model model) {
+    private static String buildModelTypeAwareIdentifier(Model model) {
+        return String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId());
+    }
+
+    private String resolveOriginalId(ModelType modelType, FileContent fileContent, Model model) {
         String convertedId = model.getId();
 
         if (

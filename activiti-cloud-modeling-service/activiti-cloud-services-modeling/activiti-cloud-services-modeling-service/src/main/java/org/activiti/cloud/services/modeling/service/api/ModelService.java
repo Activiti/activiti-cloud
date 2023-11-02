@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.service.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.bpmn.model.Process;
@@ -49,7 +50,7 @@ public interface ModelService {
 
     Model updateModel(Model modelToBeUpdated, Model newModel);
 
-    Model copyModel(Model modelToBeCopied, Project project);
+    Model copyModel(Model modelToBeCopied, Project project, Map<String, String> identifiersToUpdate);
 
     void deleteModel(Model model);
 
@@ -65,9 +66,9 @@ public interface ModelService {
 
     FileContent exportModel(Model model);
 
-    Model updateModelContent(ImportedModel importedModel, FileContent fileContent);
+    Model updateModelContent(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
-    FileContent overrideModelContentId(ImportedModel importedModel, FileContent fileContent);
+    FileContent overrideModelContentId(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
     Optional<ModelContent> createModelContentFromModel(Model model, FileContent fileContent);
 

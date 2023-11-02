@@ -16,16 +16,71 @@
 
 package org.activiti.cloud.services.modeling.service;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.Objects;
 import org.activiti.cloud.modeling.api.Model;
 
-public record ImportedModel(Model model, Map<String, String> identifiersToUpdate) {
-    public static ImportedModel modelWithoutIdentifiersToUpdate(Model model) {
-        return new ImportedModel(model, Collections.emptyMap());
+public final class ImportedModel {
+
+    private final Model model;
+    private final String originalId;
+    private final String updatedId;
+
+    public ImportedModel(Model model) {
+        this(model, null, null);
+    }
+
+    public ImportedModel(Model model, String originalId, String updatedId) {
+        this.model = model;
+        this.originalId = originalId;
+        this.updatedId = updatedId;
     }
 
     public boolean hasIdentifiersToUpdate() {
-        return identifiersToUpdate != null && !identifiersToUpdate.isEmpty();
+        return originalId != null && updatedId != null;
+    }
+
+    public Model getModel() {
+        return model;
+    }
+
+    public String getOrignialId() {
+        return originalId;
+    }
+
+    public String getUpdatedId() {
+        return updatedId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (ImportedModel) obj;
+        return (
+            Objects.equals(this.model, that.model) &&
+            Objects.equals(this.originalId, that.originalId) &&
+            Objects.equals(this.updatedId, that.updatedId)
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(model, originalId, updatedId);
+    }
+
+    @Override
+    public String toString() {
+        return (
+            "ImportedModel[" +
+            "model=" +
+            model +
+            ", " +
+            "orignialId=" +
+            originalId +
+            ", " +
+            "updatedId=" +
+            updatedId +
+            ']'
+        );
     }
 }

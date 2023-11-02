@@ -22,7 +22,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -35,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
@@ -43,6 +46,7 @@ import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelContentConverter;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
@@ -124,6 +128,9 @@ public class ModelServiceImplTest {
 
     @Mock
     private FileContentSanitizer fileContentSanitizer;
+
+    @Mock
+    private ModelContentConverter<?> modelContentConverter;
 
     private Model modelTwo;
 
@@ -456,9 +463,7 @@ public class ModelServiceImplTest {
         FileContent fileContent = new FileContent("a.exe", null, "mockContent".getBytes(StandardCharsets.UTF_8));
         when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(true);
 
-        assertThatThrownBy(() ->
-                modelService.updateModelContent(ImportedModel.modelWithoutIdentifiersToUpdate(modelTwo), fileContent)
-            )
+        assertThatThrownBy(() -> modelService.updateModelContent(modelTwo, fileContent, emptyMap()))
             .hasMessage("Import the executable file a.exe for type PROCESS is forbidden.");
     }
 
@@ -476,10 +481,7 @@ public class ModelServiceImplTest {
 
         assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
 
-        Model updatedModel = modelService.updateModelContent(
-            ImportedModel.modelWithoutIdentifiersToUpdate(modelTwo),
-            fileContent
-        );
+        Model updatedModel = modelService.updateModelContent(modelTwo, fileContent, emptyMap());
 
         assertThat(updatedModel.getCategory()).isEqualTo(PROCESS_MODEL_TEST_CATEGORY);
     }
@@ -581,6 +583,55 @@ public class ModelServiceImplTest {
         assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne))
             .isInstanceOf(SemanticModelValidationException.class)
             .hasMessage("Semantic model validation errors encountered: 1 schema violations found");
+    }
+
+    @Test
+    public void overrideModelContentId_should_returnUpdatedContent_when_aConverterIsFound() {
+        //given
+        ModelImpl model = new ModelImpl();
+        model.setType("any");
+
+        Map<String, String> identifiersToUpdate = Map.of("from", "to");
+
+        given(modelContentService.findModelContentConverter(model.getType()))
+            .willReturn(Optional.of(modelContentConverter));
+
+        FileContent originalContent = mock(FileContent.class);
+        FileContent updatedContent = mock(FileContent.class);
+        given(modelContentConverter.overrideModelId(originalContent, identifiersToUpdate)).willReturn(updatedContent);
+
+        //when
+        FileContent overriddenContent = modelService.overrideModelContentId(
+            model,
+            originalContent,
+            identifiersToUpdate
+        );
+
+        //then
+        assertThat(overriddenContent).isEqualTo(updatedContent);
+    }
+
+    @Test
+    public void overrideModelContentId_should_returnOrignalContent_when_noConverterIsFoundForType() {
+        //given
+        ModelImpl model = new ModelImpl();
+        model.setType("any");
+
+        Map<String, String> identifiersToUpdate = Map.of("from", "to");
+
+        given(modelContentService.findModelContentConverter(model.getType())).willReturn(Optional.empty());
+
+        FileContent originalContent = mock(FileContent.class);
+
+        //when
+        FileContent overriddenContent = modelService.overrideModelContentId(
+            model,
+            originalContent,
+            identifiersToUpdate
+        );
+
+        //then
+        assertThat(overriddenContent).isEqualTo(originalContent);
     }
 
     private ModelImpl createModelImpl() {
