@@ -37,8 +37,10 @@ import org.activiti.cloud.services.modeling.rest.api.ModelRestApi;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembler;
+import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.EntityModel;
@@ -76,6 +78,9 @@ public class ModelController implements ModelRestApi {
     private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
     private final ProjectController projectController;
+
+    @Value("${activiti.modeling.maxModelFileSize:10485760}")
+    private long maxModelFileSize;
 
     public ModelController(
         ModelService modelService,
@@ -149,6 +154,9 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
+        if (file.getSize() > maxModelFileSize) {
+            throw new FileSizeException("File size exceeded");
+        }
         modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
     }
 
@@ -180,6 +188,10 @@ public class ModelController implements ModelRestApi {
         @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
+        if (file.getSize() > maxModelFileSize) {
+            throw new FileSizeException("File size exceeded");
+        }
+
         Project project = projectController.findProjectById(projectId);
         return representationModelAssembler.toModel(
             modelService.importSingleModel(project, findModelType(type), multipartToFileContent(file))

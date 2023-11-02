@@ -79,6 +79,7 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.jpa.ProjectJpaRepository;
 import org.activiti.cloud.services.modeling.mock.MockFactory;
+import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1154,6 +1155,23 @@ public class ModelControllerIT {
             .perform(get("/v1/models/{modelId}", connectorModel.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.template").doesNotExist());
+    }
+
+    @Test
+    public void should_returnBadRequest_when_fileSizeIsGreaterThan10mb() throws Exception {
+        Model connectorModel = modelRepository.createModel(connectorModel("SimpleConnector"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "memory-test.zip",
+            "project/zip",
+            resourceAsByteArray("project/memory-test.zip")
+        );
+        mockMvc
+            .perform(putMultipart("/v1/models/{modelId}/content", connectorModel.getId()).file(zipFile))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertThat(result.getResolvedException() instanceof FileSizeException))
+            .andExpect(result -> assertThat("File size exceeded").isEqualTo(result.getResolvedException().getMessage())
+            );
     }
 
     @Test
