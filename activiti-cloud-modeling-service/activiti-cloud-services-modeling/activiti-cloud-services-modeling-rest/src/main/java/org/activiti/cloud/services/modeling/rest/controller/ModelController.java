@@ -79,7 +79,7 @@ public class ModelController implements ModelRestApi {
 
     private final ProjectController projectController;
 
-    @Value("${activiti.modeling.maxModelFileSize:1024102410}")
+    @Value("${activiti.modeling.maxModelFileSize: 10485760}")
     private long maxModelFileSize;
 
     public ModelController(
