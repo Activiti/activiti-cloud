@@ -53,7 +53,9 @@ import org.springframework.util.StringUtils;
  */
 public class MockFactory {
 
-    private static final ProjectKeyGenerator projectKeyGenerator = new ProjectKeyGeneratorImpl(new ProjectNameValidator());
+    private static final ProjectKeyGenerator projectKeyGenerator = new ProjectKeyGeneratorImpl(
+        new ProjectNameValidator()
+    );
 
     public static ProjectEntity project(String name) {
         return new ProjectEntity(name, generateKey(name));
