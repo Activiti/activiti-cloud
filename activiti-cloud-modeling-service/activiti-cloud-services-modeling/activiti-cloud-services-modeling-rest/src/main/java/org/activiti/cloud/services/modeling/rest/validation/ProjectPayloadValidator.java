@@ -31,7 +31,7 @@ public class ProjectPayloadValidator extends GenericPayloadValidator<Project> im
     @Override
     public void validatePayload(Project project, Errors errors) {
         if (validateRequiredFields || project.getName() != null) {
-            validateName(project.getDisplayName(), "project") //TODO validate display name
+            validateName(project.getDisplayName(), "project")
                 .forEach(error -> errors.rejectValue("name", error.getErrorCode(), error.getDescription()));
         }
     }

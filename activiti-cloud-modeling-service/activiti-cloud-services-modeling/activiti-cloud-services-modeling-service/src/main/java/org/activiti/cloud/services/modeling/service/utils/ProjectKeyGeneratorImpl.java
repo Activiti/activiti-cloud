@@ -30,7 +30,7 @@ public class ProjectKeyGeneratorImpl implements ProjectKeyGenerator {
         this.projectNameValidator = projectNameValidator;
     }
 
-    //TODO improve on key generation and move it to separate class
+    //TODO improve on key generation
     @Override
     public String generate(String projectName) {
         if (StringUtils.isNotBlank(projectName)) {

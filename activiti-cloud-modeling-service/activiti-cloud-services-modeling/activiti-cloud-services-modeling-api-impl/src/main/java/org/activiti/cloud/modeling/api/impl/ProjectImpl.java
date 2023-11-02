@@ -53,6 +53,7 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     public ProjectImpl(String id, String name, String key) {
         this.id = id;
+        this.name = name;
         this.displayName = name;
         this.key = key;
     }
@@ -75,6 +76,7 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Override
     public void setName(String name) {
         this.displayName = name;
+        this.name = name;
     }
 
     @Override
