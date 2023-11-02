@@ -32,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +54,6 @@ import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -99,7 +97,7 @@ public class ProjectServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(projectKeyGenerator.generate(anyString())).then(AdditionalAnswers.returnsFirstArg());
+        lenient().when(projectKeyGenerator.generate(anyString())).thenReturn("key");
     }
 
     @Test
@@ -182,14 +180,14 @@ public class ProjectServiceImplTest {
 
     @Test
     public void should_returnProject_importingValidProject() throws IOException {
-        Project project = new ProjectImpl("name", "id", "key");
+        Project project = new ProjectImpl("id", "name", "key");
         Optional<InputStream> file = resourceAsStream("project/project-xy.zip");
 
         when(jsonConverter.tryConvertToEntity(any(byte[].class))).thenReturn(Optional.of(project));
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
         when(projectRepository.createProject(any())).thenReturn(project);
 
-        projectService.importProject(file.get(), "new-project-name");
+        projectService.importProject(file.get(), "New project name");
 
         verify(jsonConverter, times(1)).tryConvertToEntity(any(byte[].class));
         verify(modelTypeService, times(4)).findModelTypeByFolderName("processes");
@@ -198,7 +196,6 @@ public class ProjectServiceImplTest {
 
     @Test
     public void should_throwImportProjectException_importingInvalidProject() throws IOException {
-        Project project = new ProjectImpl("name", "id", "key");
         Optional<InputStream> file = resourceAsStream("project/project-xy-invalid.zip");
 
         when(modelTypeService.findModelTypeByFolderName("processes")).thenReturn(Optional.of(new ProcessModelType()));
@@ -221,7 +218,7 @@ public class ProjectServiceImplTest {
         String copiedProjectKey = "copied-project-key";
         Project projectToCopy = new ProjectImpl("id", copiedProjectName, copiedProjectKey);
 
-        when(projectRepository.copyProject(projectToCopy, copiedProjectName, copiedProjectName))
+        when(projectRepository.copyProject(projectToCopy, copiedProjectName, "key"))
             .thenReturn(projectToCopy);
         when(modelService.getAllModels(projectToCopy)).thenReturn(asList(modelOne));
         when(modelService.copyModel(eq(modelOne), eq(projectToCopy), any())).thenReturn(modelOne);
@@ -229,6 +226,7 @@ public class ProjectServiceImplTest {
         Project projectCopy = projectService.copyProject(projectToCopy, copiedProjectName);
 
         assertThat(projectCopy.getName()).isEqualTo(copiedProjectName);
+        assertThat(projectCopy.getKey()).isEqualTo(copiedProjectKey);
     }
 
     @Test
@@ -239,9 +237,7 @@ public class ProjectServiceImplTest {
 
         Exception exception = assertThrows(
             ImportProjectException.class,
-            () -> {
-                projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
-            }
+            () -> projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get())
         );
         String expectedMessage = "No valid project entry found to import";
         String actualMessage = exception.getMessage();
