@@ -174,7 +174,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
         assertThat(modelingContextHandler.getCurrentModelingFile())
             .hasValueSatisfying(fileContent ->
                 assertThatFileContent(fileContent)
-                    .hasName(currentProject.getName() + ".zip")
+                    .hasName(currentProject.getKey() + ".zip")
                     .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
                     .isZip()
                     .hasEntries(
