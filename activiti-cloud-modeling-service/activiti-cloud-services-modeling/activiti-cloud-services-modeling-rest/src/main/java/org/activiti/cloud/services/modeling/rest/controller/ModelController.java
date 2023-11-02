@@ -40,6 +40,7 @@ import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembl
 import org.activiti.cloud.services.modeling.rest.exceptions.FileSizeException;
 import org.activiti.cloud.services.modeling.service.ModelTypeService;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.EntityModel;
@@ -77,6 +78,9 @@ public class ModelController implements ModelRestApi {
     private final PagedModelTypeAssembler pagedModelTypeAssembler;
 
     private final ProjectController projectController;
+
+    @Value("${activiti.modeling.maxModelFileSize:10485760}")
+    private long maxModelFileSize;
 
     public ModelController(
         ModelService modelService,
@@ -150,7 +154,7 @@ public class ModelController implements ModelRestApi {
         @PathVariable String modelId,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
-        if (file.getSize() > 1024 * 1024 * 10) {
+        if (file.getSize() > maxModelFileSize) {
             throw new FileSizeException("File size exceeded");
         }
         modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
@@ -184,7 +188,7 @@ public class ModelController implements ModelRestApi {
         @RequestParam(MODEL_TYPE_PARAM_NAME) String type,
         @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file
     ) throws IOException {
-        if (file.getSize() > 1024 * 1024 * 10) {
+        if (file.getSize() > maxModelFileSize) {
             throw new FileSizeException("File size exceeded");
         }
 
