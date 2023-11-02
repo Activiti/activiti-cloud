@@ -28,7 +28,6 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
-import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDisplayName;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -72,7 +71,6 @@ import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -201,10 +199,11 @@ public class ProjectControllerIT {
             .perform(
                 post("/v1/projects")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(projectWithDescription("new-project", "Project description")))
+                    .content(mapper.writeValueAsString(projectWithDescription("New project", "Project description")))
             )
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.name", is("new-project")))
+            .andExpect(jsonPath("$.name", is("New project")))
+            .andExpect(jsonPath("$.key", startsWith("new-project-")))
             .andExpect(jsonPath("$.description", is("Project description")));
     }
 
@@ -214,12 +213,12 @@ public class ProjectControllerIT {
             .perform(
                 post("/v1/projects")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(projectWithDisplayName("new-project", "Project description")))
+                    .content(mapper.writeValueAsString(project("Project name")))
             )
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.name", is("Project description")))
-            .andExpect(jsonPath("$.key", startsWith("project-description-")))
-            .andExpect(jsonPath("$.displayName", is("Project description")));
+            .andExpect(jsonPath("$.name", is("Project name")))
+            .andExpect(jsonPath("$.key", startsWith("project-name-")))
+            .andExpect(jsonPath("$.displayName", is("Project name")));
     }
 
     @Test
@@ -244,14 +243,16 @@ public class ProjectControllerIT {
             .perform(
                 put("/v1/projects/{projectId}", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(project("updated-project-name")))
+                    .content(mapper.writeValueAsString(project("Updated project name")))
             )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("updated-project-name")));
+            .andExpect(jsonPath("$.name", is("Updated project name")))
+            .andExpect(jsonPath("$.key", startsWith("updated-project-name-")));
 
         assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
             .hasValueSatisfying(updatedProject -> {
-                assertThat(updatedProject.getName()).isEqualTo("updated-project-name");
+                assertThat(updatedProject.getName()).isEqualTo("Updated project name");
+                assertThat(updatedProject.getKey()).startsWith("updated-project-name-");
             });
     }
 
@@ -272,7 +273,7 @@ public class ProjectControllerIT {
 
     @Test
     public void should_returnStatusOk_when_updatingProjectNoName() throws Exception {
-        Project project = projectRepository.createProject(project("project-to-update"));
+        Project project = projectRepository.createProject(project("Project to update"));
 
         mockMvc
             .perform(
@@ -280,7 +281,9 @@ public class ProjectControllerIT {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(projectWithDescription(null, "New Description")))
             )
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("Project to update")))
+            .andExpect(jsonPath("$.key", startsWith("project-to-update-")));
     }
 
     @Test
@@ -360,12 +363,13 @@ public class ProjectControllerIT {
             .andExpect(status().isOk())
             .andReturn();
 
+        String projectJsonFile = project.getKey() + ".json";
         assertThatResponseContent(response)
             .isFile()
             .isZip()
-            .hasName("project-with-models.zip")
+            .hasName(project.getKey() + ".zip")
             .hasEntries(
-                "project-with-models.json",
+                projectJsonFile,
                 "processes/",
                 "processes/Process_RankMovieId.bpmn20.xml",
                 "processes/Process_RankMovieId-extensions.json",
@@ -373,16 +377,16 @@ public class ProjectControllerIT {
                 "connectors/movies.json"
             )
             .hasJsonContentSatisfying(
-                "project-with-models.json",
+                projectJsonFile,
                 jsonContent -> jsonContent.node("name").isStringEqualTo("project-with-models")
             )
             .hasJsonContentSatisfying(
-                "project-with-models.json",
+                projectJsonFile,
                 jsonContent ->
                     jsonContent.node("users").isArray().ofLength(2).thatContains("userOne").thatContains("userTwo")
             )
             .hasJsonContentSatisfying(
-                "project-with-models.json",
+                projectJsonFile,
                 jsonContent ->
                     jsonContent.node("groups").isArray().ofLength(2).thatContains("hr").thatContains("testgroup")
             )
@@ -930,7 +934,8 @@ public class ProjectControllerIT {
         mockMvc
             .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.entry.name", is("application-xy")));
+            .andExpect(jsonPath("$.entry.name", is("application-xy")))
+            .andExpect(jsonPath("$.entry.key", startsWith("application-xy-")));
     }
 
     @Test
@@ -972,14 +977,15 @@ public class ProjectControllerIT {
             resourceAsByteArray("project/project-xy.zip")
         );
 
-        String overridingName = "override";
+        String overridingName = "override name";
 
         mockMvc
             .perform(
                 multipart("/v1/projects/import?name=" + overridingName).file(zipFile).accept(APPLICATION_JSON_VALUE)
             )
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.entry.name", is(overridingName)));
+            .andExpect(jsonPath("$.entry.name", is(overridingName)))
+            .andExpect(jsonPath("$.entry.key", startsWith("override-name-")));
     }
 
     @Test
@@ -1039,8 +1045,6 @@ public class ProjectControllerIT {
         mockMvc.perform(get("/v1/projects/{projectId}/export", project.getId())).andExpect(status().isOk());
     }
 
-    //TODO enable after validation for display name is added
-    @Disabled
     @Test
     public void should_throwBadRequestException_when_importingProjectWithInvalidName() throws Exception {
         MockMultipartFile zipFile = new MockMultipartFile(
@@ -1062,12 +1066,13 @@ public class ProjectControllerIT {
             projectWithDescription("project-with-models", "Project with models to be copied")
         );
 
-        String projectName = "new-project-name";
+        String projectName = "new project name";
 
         mockMvc
             .perform(post("/v1/projects/{projectId}/copy?name=" + projectName, project.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("new-project-name")))
+            .andExpect(jsonPath("$.name", is("new project name")))
+            .andExpect(jsonPath("$.key", startsWith("new-project-name-")))
             .andExpect(jsonPath("$.description", is("Project with models to be copied")));
     }
 

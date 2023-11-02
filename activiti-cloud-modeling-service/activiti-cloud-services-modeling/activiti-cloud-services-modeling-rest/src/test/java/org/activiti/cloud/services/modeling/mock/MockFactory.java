@@ -42,6 +42,9 @@ import org.activiti.cloud.modeling.api.process.TaskVariableMapping;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGeneratorImpl;
+import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StringUtils;
 
@@ -50,21 +53,20 @@ import org.springframework.util.StringUtils;
  */
 public class MockFactory {
 
-    //TODO remake these methods to not use name (maybe display name & key)
+    private static final ProjectKeyGenerator projectKeyGenerator = new ProjectKeyGeneratorImpl(new ProjectNameValidator());
+
     public static ProjectEntity project(String name) {
-        return new ProjectEntity(name, name);
+        return new ProjectEntity(name, generateKey(name));
     }
 
     public static ProjectEntity projectWithDescription(String name, String description) {
-        ProjectEntity project = new ProjectEntity(name, name);
+        ProjectEntity project = new ProjectEntity(name, generateKey(name));
         project.setDescription(description);
         return project;
     }
 
-    public static ProjectEntity projectWithDisplayName(String name, String displayName) {
-        ProjectEntity project = new ProjectEntity(name, name);
-        project.setDisplayName(displayName);
-        return project;
+    public static String generateKey(String name) {
+        return projectKeyGenerator.generate(name);
     }
 
     public static ModelEntity processModel(String name) {
