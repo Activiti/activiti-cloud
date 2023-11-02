@@ -215,10 +215,10 @@ public class ProjectServiceImpl implements ProjectService {
     public FileContent exportProject(Project project) throws IOException {
         ProjectDescriptor projectDescriptor = buildDescriptor(project);
 
-        ZipBuilder zipBuilder = new ZipBuilder(project.getName())
+        ZipBuilder zipBuilder = new ZipBuilder(project.getKey())
             .appendFile(
                 descriptorJsonConverter.convertToJsonBytes(projectDescriptor),
-                changeToJsonFilename(project.getName())
+                changeToJsonFilename(project.getKey())
             );
 
         modelService
