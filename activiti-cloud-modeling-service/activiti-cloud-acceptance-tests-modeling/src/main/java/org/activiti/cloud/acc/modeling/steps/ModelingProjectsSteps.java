@@ -178,7 +178,7 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                     .hasContentType(ContentTypeUtils.CONTENT_TYPE_ZIP)
                     .isZip()
                     .hasEntries(
-                        changeToJsonFilename(currentProject.getName()),
+                        changeToJsonFilename(currentProject.getKey()),
                         modelType.getFolderName() + "/",
                         modelType.getFolderName() +
                         "/" +
@@ -188,8 +188,8 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                         changeExtension(modelName, modelType.getContentFileExtension())
                     )
                     .hasJsonContentSatisfying(
-                        changeToJsonFilename(currentProject.getName()),
-                        jsonContent -> jsonContent.node("name").isEqualTo(currentProject.getName())
+                        changeToJsonFilename(currentProject.getKey()),
+                        jsonContent -> jsonContent.node("name").isEqualTo(currentProject.getName()) //TODO check for key
                     )
                     .hasJsonContentSatisfying(
                         modelType.getFolderName() +
