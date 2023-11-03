@@ -75,7 +75,7 @@ public final class ImportedModel {
             "model=" +
             model +
             ", " +
-            "orignialId=" +
+            "originalId=" +
             originalId +
             ", " +
             "updatedId=" +
