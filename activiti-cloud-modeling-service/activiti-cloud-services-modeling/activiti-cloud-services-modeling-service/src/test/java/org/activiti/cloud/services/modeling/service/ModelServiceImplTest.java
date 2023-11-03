@@ -80,7 +80,7 @@ import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ModelServiceImplTest {
+class ModelServiceImplTest {
 
     private ModelServiceImpl modelService;
 
@@ -121,7 +121,7 @@ public class ModelServiceImplTest {
     private ModelExtensionsValidator modelExtensionsValidator;
 
     @Mock
-    public Set<ModelUpdateListener> modelUpdateListeners;
+    private Set<ModelUpdateListener> modelUpdateListeners;
 
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
@@ -143,7 +143,7 @@ public class ModelServiceImplTest {
     private final String PROCESS_MODEL_DEFAULT_CATEGORY = "default-category";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         projectOne = new ProjectImpl();
         projectOne.setId("projectOneId");
         projectOne.setName("projectOne");
@@ -173,7 +173,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnTasksInAProjectByModelTypeAndTaskType() {
+    void should_returnTasksInAProjectByModelTypeAndTaskType() {
         UserTask userTaskOne = new UserTask();
         UserTask userTaskTwo = new UserTask();
         UserTask userTaskThree = new UserTask();
@@ -198,14 +198,14 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnException_when_classTypeIsNotSpecified() {
+    void should_returnException_when_classTypeIsNotSpecified() {
         assertThatThrownBy(() -> modelService.getTasksBy(projectOne, modelType, null))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Class task type it must not be null");
     }
 
     @Test
-    public void should_returnProcessesInAProjectByTypeAndModelType() {
+    void should_returnProcessesInAProjectByTypeAndModelType() {
         Page page = new PageImpl(asList(modelOne));
         Process processOne = new Process();
 
@@ -223,7 +223,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnProcessExtensionsFileForTheModelGiven() throws IOException {
+    void should_returnProcessExtensionsFileForTheModelGiven() throws IOException {
         ModelImpl extensionModelImpl = createModelImpl();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -240,7 +240,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
+    void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
             .thenReturn(Optional.of(modelOne));
@@ -254,7 +254,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
+    void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
@@ -269,7 +269,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
+    void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
         ModelImpl model = new ModelImpl();
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
@@ -280,7 +280,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
+    void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
         ModelImpl model = new ModelImpl();
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
@@ -291,7 +291,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelContentInProjectContext() {
+    void should_throwException_when_validatingAnInvalidModelContentInProjectContext() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName()))
@@ -305,7 +305,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelContentFileInProjectContext() {
+    void should_throwException_when_validatingAnInvalidModelContentFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.txt", "txt", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -321,7 +321,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidJSONModelContentFileInProjectContext() {
+    void should_throwException_when_validatingAnInvalidJSONModelContentFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -337,7 +337,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnErrors_when_gettingValidationErrorOfAnInvalidModel() {
+    void should_returnErrors_when_gettingValidationErrorOfAnInvalidModel() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         List<ModelValidationError> validationErrors = List.of(
@@ -354,7 +354,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() {
+    void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
@@ -368,7 +368,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnErrors_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
+    void should_returnErrors_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
         ConnectorModelType modelType = new ConnectorModelType();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -390,7 +390,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
+    void should_throwException_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         ConnectorModelType modelType = new ConnectorModelType();
@@ -408,7 +408,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidJSONModelExtensionsFileInProjectContext() {
+    void should_throwException_when_validatingAnInvalidJSONModelExtensionsFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -425,7 +425,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
+    void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
             .thenReturn(Optional.of(modelTwo));
@@ -487,7 +487,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_updateModelSuccessfully_when_updatingAValidModelWithProject() {
+    void should_updateModelSuccessfully_when_updatingAValidModelWithProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
@@ -505,7 +505,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_updateModelSuccessfully_when_updatingAValidModelWithoutProject() {
+    void should_updateModelSuccessfully_when_updatingAValidModelWithoutProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
@@ -528,7 +528,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_getModels_when_searchingByName() {
+    void should_getModels_when_searchingByName() {
         when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class)))
             .thenReturn(new PageImpl(asList(modelTwo)));
 
@@ -541,7 +541,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_getEmptyList_when_searchingWithEmptyString() {
+    void should_getEmptyList_when_searchingWithEmptyString() {
         Page<Model> models = modelService.getModelsByName(projectOne, "", PageRequest.of(0, 50));
 
         assertThat(models.getContent()).hasSize(0);
@@ -550,7 +550,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_not_return_duplicated_Errors_when_having_more_validators_registered() {
+    void should_not_return_duplicated_Errors_when_having_more_validators_registered() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         List<ModelValidationError> validationErrors = List.of(
@@ -568,7 +568,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_with_single_validation_issue_when_havingMoreValidatorsRegistered() {
+    void should_throwException_with_single_validation_issue_when_havingMoreValidatorsRegistered() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -586,7 +586,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void overrideModelContentId_should_returnUpdatedContent_when_aConverterIsFound() {
+    void overrideModelContentId_should_returnUpdatedContent_when_aConverterIsFound() {
         //given
         ModelImpl model = new ModelImpl();
         model.setType("any");
@@ -612,7 +612,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void overrideModelContentId_should_returnOrignalContent_when_noConverterIsFoundForType() {
+    void overrideModelContentId_should_returnOrignalContent_when_noConverterIsFoundForType() {
         //given
         ModelImpl model = new ModelImpl();
         model.setType("any");

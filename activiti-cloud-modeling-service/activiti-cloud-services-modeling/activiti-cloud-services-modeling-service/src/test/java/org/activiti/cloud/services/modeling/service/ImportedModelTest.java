@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.junit.jupiter.api.Test;
 
-public class ImportedModelTest {
+class ImportedModelTest {
 
     @Test
     void hasIdentifiersToUpdate_shouldReturnTrue_when_originalIdAndUpdatedIdAreSet() {
