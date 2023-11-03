@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
