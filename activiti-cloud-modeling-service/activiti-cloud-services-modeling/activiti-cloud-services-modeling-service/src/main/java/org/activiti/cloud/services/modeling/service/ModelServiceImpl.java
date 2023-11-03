@@ -351,7 +351,7 @@ public class ModelServiceImpl implements ModelService {
         return modelRepository.updateModelContent(model, sanitizedFileContent);
     }
 
-    private static boolean hasIdentifiersToUpdate(Map<String, String> identifiersToUpdate) {
+    private boolean hasIdentifiersToUpdate(Map<String, String> identifiersToUpdate) {
         return identifiersToUpdate != null && !identifiersToUpdate.isEmpty();
     }
 
@@ -416,7 +416,7 @@ public class ModelServiceImpl implements ModelService {
         return new ImportedModel(model);
     }
 
-    private static String buildModelTypeAwareIdentifier(Model model) {
+    private String buildModelTypeAwareIdentifier(Model model) {
         return String.join(MODEL_IDENTIFIER_SEPARATOR, model.getType().toLowerCase(), model.getId());
     }
 
