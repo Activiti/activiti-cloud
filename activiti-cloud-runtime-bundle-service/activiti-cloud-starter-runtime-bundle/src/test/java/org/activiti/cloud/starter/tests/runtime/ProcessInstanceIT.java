@@ -17,6 +17,7 @@ package org.activiti.cloud.starter.tests.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -35,19 +36,27 @@ import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
+import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessDefinitionRestTemplate;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.util.TestResourceUtil;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.util.IoUtil;
+import org.activiti.engine.task.IdentityLink;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
@@ -65,7 +74,7 @@ import org.springframework.test.context.TestPropertySource;
 )
 @Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-public class ProcessInstanceIT {
+class ProcessInstanceIT {
 
     private static final String SIMPLE_PROCESS = "SimpleProcess";
     private static final String SUB_PROCESS = "SubProcess";
@@ -92,8 +101,17 @@ public class ProcessInstanceIT {
     @Autowired
     private RuntimeBundleProperties runtimeBundleProperties;
 
+    @Autowired
+    private RuntimeService runtimeService;
+
+    @SpyBean
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
+    @Captor
+    private ArgumentCaptor<CloudProcessStartedEvent> processStartedEventArgumentCaptor;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         keycloakTestUser = "hruser";
         identityTokenProducer.withTestUser(keycloakTestUser);
         ResponseEntity<PagedModel<CloudProcessDefinition>> processDefinitions = processDefinitionRestTemplate.getProcessDefinitions();
@@ -107,7 +125,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldStartProcess() {
+    void shouldStartProcess() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -120,6 +138,7 @@ public class ProcessInstanceIT {
         CloudProcessInstance returnedProcInst = entity.getBody();
         assertThat(returnedProcInst).isNotNull();
         assertThat(returnedProcInst.getId()).isNotNull();
+        assertEventActorIsSet(returnedProcInst.getId());
         assertThat(returnedProcInst.getProcessDefinitionId()).contains("SimpleProcess:");
         assertThat(returnedProcInst.getInitiator()).isNotNull();
         assertThat(returnedProcInst.getInitiator()).isEqualTo(keycloakTestUser); //will only match if using username not id
@@ -132,7 +151,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldCreateProcessInstanceWithoutStartingIt() {
+    void shouldCreateProcessInstanceWithoutStartingIt() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.createProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -157,7 +176,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldStartAnAlreadyCreatedProcess() {
+    void shouldStartAnAlreadyCreatedProcess() {
         //when
         ResponseEntity<CloudProcessInstance> createdEntity = processInstanceRestTemplate.createProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -192,7 +211,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldThrowAnError_when_StartingAnAlreadyStartedProcess() {
+    void shouldThrowAnError_when_StartingAnAlreadyStartedProcess() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -213,7 +232,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldStartProcessByKey() {
+    void shouldStartProcessByKey() {
         //when
         ResponseEntity<CloudProcessInstance> entity = processInstanceRestTemplate.startProcessByKey(
             SIMPLE_PROCESS,
@@ -233,7 +252,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldNotStartProcessWithoutPermission() {
+    void shouldNotStartProcessWithoutPermission() {
         //testuser does not have access to SIMPLE_PROCESS according to access-control.properties
         identityTokenProducer.withTestUser("testuser");
 
@@ -242,7 +261,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldStartProcessIfAdmin() {
+    void shouldStartProcessIfAdmin() {
         //testadmin does not have access to SIMPLE_PROCESS according to access-control.properties
         identityTokenProducer.withTestUser("testadmin");
 
@@ -266,7 +285,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldRetrieveProcessInstanceById() {
+    void shouldRetrieveProcessInstanceById() {
         //given
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -284,7 +303,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldRetrieveProcessInstanceDiagram() throws Exception {
+    void shouldRetrieveProcessInstanceDiagram() throws Exception {
         //given
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -332,7 +351,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldRetrieveListOfProcessInstances() {
+    void shouldRetrieveListOfProcessInstances() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
@@ -349,7 +368,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldNotSeeProcessInstancesWithoutPermission() {
+    void shouldNotSeeProcessInstancesWithoutPermission() {
         //given
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
         processInstanceRestTemplate.startProcess(processDefinitionIds.get(SIMPLE_PROCESS));
@@ -378,7 +397,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void suspendShouldPutProcessInstanceInSuspendedState() {
+    void suspendShouldPutProcessInstanceInSuspendedState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -397,7 +416,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void adminSuspendShouldPutProcessInstanceInSuspendedState() {
+    void adminSuspendShouldPutProcessInstanceInSuspendedState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -428,7 +447,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void resumeShouldPutASuspendedProcessInstanceBackToActiveState() {
+    void resumeShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -448,7 +467,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void adminResumeShouldPutASuspendedProcessInstanceBackToActiveState() {
+    void adminResumeShouldPutASuspendedProcessInstanceBackToActiveState() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS)
@@ -494,7 +513,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldUpdateProcessInstance() {
+    void shouldUpdateProcessInstance() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -534,7 +553,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void adminShouldUpdateProcessInstance() {
+    void adminShouldUpdateProcessInstance() {
         //given
         ResponseEntity<CloudProcessInstance> startProcessEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -576,7 +595,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void shouldGetSubprocesses() {
+    void shouldGetSubprocesses() {
         //given
         ResponseEntity<CloudProcessInstance> startedProcessEntity = processInstanceRestTemplate.startProcessByKey(
             PARENT_PROCESS,
@@ -599,7 +618,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void nonAdminShouldBeAbleToDeleteProcessInstance() {
+    void nonAdminShouldBeAbleToDeleteProcessInstance() {
         //given
         ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -623,7 +642,7 @@ public class ProcessInstanceIT {
     }
 
     @Test
-    public void adminShouldDeleteProcessInstance() {
+    void adminShouldDeleteProcessInstance() {
         //given
         ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(
             processDefinitionIds.get(SIMPLE_PROCESS),
@@ -645,5 +664,20 @@ public class ProcessInstanceIT {
 
         assertThatExceptionOfType(AssertionError.class)
             .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity));
+    }
+
+    private void assertEventActorIsSet(String processInstanceId) {
+        List<IdentityLink> identityLinksForProcessInstance =
+            this.runtimeService.getIdentityLinksForProcessInstance(processInstanceId);
+        IdentityLink actorIdentityLink = identityLinksForProcessInstance
+            .stream()
+            .filter(identityLink -> identityLink.getType().equals(ActorConstants.ACTOR_TYPE))
+            .findFirst()
+            .get();
+
+        verify(this.processEngineEventsAggregator).add(this.processStartedEventArgumentCaptor.capture());
+        assertThat(actorIdentityLink.getDetails())
+            .asString()
+            .isEqualTo(this.processStartedEventArgumentCaptor.getValue().getActor());
     }
 }

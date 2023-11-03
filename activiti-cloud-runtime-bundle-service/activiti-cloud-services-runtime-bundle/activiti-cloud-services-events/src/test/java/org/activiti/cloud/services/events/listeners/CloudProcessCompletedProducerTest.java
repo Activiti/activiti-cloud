@@ -27,6 +27,7 @@ import org.activiti.api.process.runtime.events.ProcessCompletedEvent;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
+import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
 import org.activiti.engine.RuntimeService;
@@ -51,8 +52,12 @@ class CloudProcessCompletedProducerTest {
 
     private RuntimeService runtimeService = mock(RuntimeService.class);
 
+    private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
+        new ProcessAuditServiceInfoAppender(runtimeService)
+    );
+
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
-        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender)
+        new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender)
     );
 
     private ProcessEngineEventsAggregator eventsAggregator = spy(
