@@ -196,7 +196,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>3.2.0-RC1</spring-boot.version>
+    <spring-boot.version>3.2.0-RC2</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
