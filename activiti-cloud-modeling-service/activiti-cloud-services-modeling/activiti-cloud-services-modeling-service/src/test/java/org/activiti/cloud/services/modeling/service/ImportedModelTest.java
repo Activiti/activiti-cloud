@@ -18,8 +18,6 @@ package org.activiti.cloud.services.modeling.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
-import java.util.Map;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.junit.jupiter.api.Test;
 
