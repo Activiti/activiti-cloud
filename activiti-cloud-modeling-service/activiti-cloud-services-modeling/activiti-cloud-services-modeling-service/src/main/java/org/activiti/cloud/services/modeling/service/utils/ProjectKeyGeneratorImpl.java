@@ -34,22 +34,33 @@ public class ProjectKeyGeneratorImpl implements ProjectKeyGenerator {
     @Override
     public String generate(String projectName) {
         if (StringUtils.isNotBlank(projectName)) {
-            String generatedKey =
-                StringUtils.substring(
-                    StringUtils.stripAccents(projectName).toLowerCase().replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR),
-                    0,
-                    20
-                ) +
-                KEY_SEPARATOR +
-                RandomStringUtils.randomAlphanumeric(5).toLowerCase();
-            if (isValidProjectName(generatedKey)) {
-                return generatedKey;
+            String sanitizedProjectName = StringUtils.substring(
+                stripKeySeparators(
+                    StringUtils
+                        .stripAccents(projectName)
+                        .toLowerCase()
+                        .trim()
+                        .replaceAll(ALPHANUMERIC_REGEX, KEY_SEPARATOR)
+                ),
+                0,
+                20
+            );
+            if (StringUtils.isNotBlank(sanitizedProjectName)) {
+                String generatedKey =
+                    sanitizedProjectName + KEY_SEPARATOR + RandomStringUtils.randomAlphanumeric(5).toLowerCase();
+                if (isValidProjectName(generatedKey)) {
+                    return generatedKey;
+                }
             }
         }
-        return RandomStringUtils.randomAlphanumeric(20);
+        return RandomStringUtils.randomAlphanumeric(20).toLowerCase();
     }
 
     private boolean isValidProjectName(String projectName) {
         return projectNameValidator.validateDNSName(projectName, "project").findAny().isEmpty();
+    }
+
+    private String stripKeySeparators(String string) {
+        return StringUtils.stripEnd(StringUtils.stripStart(string, KEY_SEPARATOR), KEY_SEPARATOR);
     }
 }
