@@ -18,7 +18,6 @@ package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +32,9 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.activiti.runtime.api.event.impl.ProcessCompletedImpl;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
@@ -55,10 +56,17 @@ class ToCloudProcessRuntimeEventConverterTest {
     @Mock
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender;
 
-    private RuntimeService runtimeService = mock(RuntimeService.class);
+    @Mock
+    private CommandContext commandContext;
+
+    @Mock
+    private ExecutionEntityManager executionEntityManager;
+
+    @Mock
+    private ExecutionEntity executionEntity;
 
     private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
-        new ProcessAuditServiceInfoAppender(this.runtimeService)
+        new ProcessAuditServiceInfoAppender(() -> commandContext)
     );
 
     private static final String USERNAME = "user1";
@@ -66,12 +74,7 @@ class ToCloudProcessRuntimeEventConverterTest {
     private static final String USERNAME_GUID = "964b5dff-173a-4ba2-947d-1db16c1236a7";
 
     @BeforeEach
-    void beforeEach() {
-        IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
-        identityLink.setDetails(USERNAME_GUID.getBytes());
-        identityLink.setType(ActorConstants.ACTOR_TYPE);
-        when(this.runtimeService.getIdentityLinksForProcessInstance(any())).thenReturn(List.of(identityLink));
-    }
+    void beforeEach() {}
 
     @Test
     void fromShouldConvertInternalProcessStartedEventToExternalEvent() {
@@ -83,6 +86,14 @@ class ToCloudProcessRuntimeEventConverterTest {
         ProcessStartedEventImpl event = new ProcessStartedEventImpl(processInstance);
         event.setNestedProcessDefinitionId("myParentProcessDef");
         event.setNestedProcessInstanceId("2");
+
+        IdentityLinkEntityImpl identityLink = new IdentityLinkEntityImpl();
+        identityLink.setDetails(USERNAME_GUID.getBytes());
+        identityLink.setType(ActorConstants.ACTOR_TYPE);
+
+        when(this.commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
+        when(executionEntityManager.findById(any())).thenReturn(executionEntity);
+        when(executionEntity.getIdentityLinks()).thenReturn(List.of(identityLink));
 
         //when
         CloudProcessStartedEvent processStarted = this.converter.from(event);

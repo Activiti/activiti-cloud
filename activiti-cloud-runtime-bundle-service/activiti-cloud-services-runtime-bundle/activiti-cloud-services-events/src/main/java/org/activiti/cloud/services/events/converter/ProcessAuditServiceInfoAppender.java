@@ -16,32 +16,40 @@
 
 package org.activiti.cloud.services.events.converter;
 
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.task.IdentityLink;
 
 public class ProcessAuditServiceInfoAppender {
 
-    private final RuntimeService runtimeService;
+    private final Supplier<CommandContext> commandContext;
 
-    public ProcessAuditServiceInfoAppender(RuntimeService runtimeService) {
-        this.runtimeService = runtimeService;
+    public ProcessAuditServiceInfoAppender(Supplier<CommandContext> commandContext) {
+        this.commandContext = commandContext;
     }
 
     public CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> appendAuditServiceInfoTo(
         CloudRuntimeEventImpl cloudRuntimeEvent
     ) {
-        var identityLinks = runtimeService.getIdentityLinksForProcessInstance(cloudRuntimeEvent.getProcessInstanceId());
-
-        identityLinks
-            .stream()
-            .filter(identityLink -> ActorConstants.ACTOR_TYPE.equalsIgnoreCase(identityLink.getType()))
-            .map(IdentityLink::getDetails)
-            .map(String::new)
-            .findFirst()
+        Optional
+            .ofNullable(commandContext)
+            .map(Supplier::get)
+            .map(CommandContext::getExecutionEntityManager)
+            .map(it -> it.findById(cloudRuntimeEvent.getProcessInstanceId()))
+            .flatMap(processInstance ->
+                processInstance
+                    .getIdentityLinks()
+                    .stream()
+                    .filter(identityLink -> ActorConstants.ACTOR_TYPE.equalsIgnoreCase(identityLink.getType()))
+                    .map(IdentityLink::getDetails)
+                    .map(String::new)
+                    .findFirst()
+            )
             .ifPresent(cloudRuntimeEvent::setActor);
 
         return cloudRuntimeEvent;

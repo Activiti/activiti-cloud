@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.events.listeners;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -32,8 +33,9 @@ import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
-import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.activiti.runtime.api.event.impl.ProcessStartedEventImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,14 +49,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CloudProcessStartedProducerTest {
 
+    @Mock
+    private CommandContext commandContext;
+
+    @Mock
+    private ExecutionEntityManager executionEntityManager;
+
+    @Mock
+    private ExecutionEntity executionEntity;
+
     private RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(
         new RuntimeBundleProperties()
     );
 
-    private RuntimeService runtimeService = mock(RuntimeService.class);
-
     private ProcessAuditServiceInfoAppender processAuditServiceInfoAppender = spy(
-        new ProcessAuditServiceInfoAppender(runtimeService)
+        new ProcessAuditServiceInfoAppender(() -> commandContext)
     );
 
     private ToCloudProcessRuntimeEventConverter eventConverter = spy(
@@ -64,9 +73,6 @@ class CloudProcessStartedProducerTest {
     private ProcessEngineEventsAggregator eventsAggregator = spy(
         new ProcessEngineEventsAggregator(mock(MessageProducerCommandContextCloseListener.class))
     );
-
-    @Mock
-    private CommandContext commandContext;
 
     @Captor
     private ArgumentCaptor<CloudRuntimeEvent> argumentCaptor;
@@ -123,7 +129,9 @@ class CloudProcessStartedProducerTest {
         IdentityLinkEntityImpl identityLinkEntity = new IdentityLinkEntityImpl();
         identityLinkEntity.setType(ActorConstants.ACTOR_TYPE);
         identityLinkEntity.setDetails(expectedActor.getBytes());
-        when(this.runtimeService.getIdentityLinksForProcessInstance(processInstance.getId()))
-            .thenReturn(List.of(identityLinkEntity));
+
+        when(this.commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
+        when(executionEntityManager.findById(eq(processInstance.getId()))).thenReturn(executionEntity);
+        when(executionEntity.getIdentityLinks()).thenReturn(List.of(identityLinkEntity));
     }
 }
