@@ -20,6 +20,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
+import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.converter.TaskAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.ToCloudProcessRuntimeEventConverter;
@@ -74,6 +75,7 @@ import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilder
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -103,6 +105,12 @@ public class CloudEventsAutoConfiguration {
             securityContextPrincipalProvider,
             principalIdentityProvider
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessAuditServiceInfoAppender processAuditServiceInfoAppender() {
+        return new ProcessAuditServiceInfoAppender(Context::getCommandContext);
     }
 
     @Bean
@@ -138,9 +146,10 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ToCloudProcessRuntimeEventConverter toCloudProcessRuntimeEventConverter(
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ProcessAuditServiceInfoAppender processAuditServiceInfoAppender
     ) {
-        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender);
+        return new ToCloudProcessRuntimeEventConverter(runtimeBundleInfoAppender, processAuditServiceInfoAppender);
     }
 
     @Bean

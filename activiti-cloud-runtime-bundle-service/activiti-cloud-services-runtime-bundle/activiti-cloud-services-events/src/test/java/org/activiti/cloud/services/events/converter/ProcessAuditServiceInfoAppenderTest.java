@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.events.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -27,7 +28,9 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.services.events.ActorConstants;
-import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityManager;
 import org.activiti.engine.impl.persistence.entity.IdentityLinkEntityImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +44,13 @@ class ProcessAuditServiceInfoAppenderTest {
     private static final String EXPECTED_ACTOR = "actor1";
 
     @Mock
-    private RuntimeService runtimeService;
+    private CommandContext commandContext;
+
+    @Mock
+    private ExecutionEntityManager executionEntityManager;
+
+    @Mock
+    private ExecutionEntity processInstance;
 
     private final String processInstanceId = UUID.randomUUID().toString();
 
@@ -51,10 +60,12 @@ class ProcessAuditServiceInfoAppenderTest {
 
     @BeforeEach
     void setUp() {
-        this.processAuditServiceInfoAppender = new ProcessAuditServiceInfoAppender(this.runtimeService);
+        this.processAuditServiceInfoAppender = new ProcessAuditServiceInfoAppender(() -> commandContext);
         this.identityLink = new IdentityLinkEntityImpl();
-        when(this.runtimeService.getIdentityLinksForProcessInstance(this.processInstanceId))
-            .thenReturn(List.of(this.identityLink));
+
+        when(this.commandContext.getExecutionEntityManager()).thenReturn(executionEntityManager);
+        when(executionEntityManager.findById(eq(processInstanceId))).thenReturn(processInstance);
+        when(processInstance.getIdentityLinks()).thenReturn(List.of(this.identityLink));
     }
 
     @Test
