@@ -16,22 +16,25 @@
 package org.activiti.cloud.services.modeling.rest.validation;
 
 import org.activiti.cloud.modeling.api.Project;
-import org.activiti.cloud.services.modeling.validation.DNSNameValidator;
+import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.springframework.validation.Errors;
 
 /**
  * Validator fot project payload
  */
-public class ProjectPayloadValidator extends GenericPayloadValidator<Project> implements DNSNameValidator {
+public class ProjectPayloadValidator extends GenericPayloadValidator<Project> {
 
-    public ProjectPayloadValidator(boolean validateRequiredFields) {
+    private ProjectNameValidator projectNameValidator;
+
+    public ProjectPayloadValidator(boolean validateRequiredFields, ProjectNameValidator projectNameValidator) {
         super(Project.class, validateRequiredFields);
+        this.projectNameValidator = projectNameValidator;
     }
 
     @Override
     public void validatePayload(Project project, Errors errors) {
-        if (validateRequiredFields || project.getName() != null) {
-            validateName(project.getDisplayName(), "project")
+        if (validateRequiredFields || project.getDisplayName() != null) {
+            projectNameValidator.validateName(project.getDisplayName(), "project")
                 .forEach(error -> errors.rejectValue("name", error.getErrorCode(), error.getDescription()));
         }
     }
