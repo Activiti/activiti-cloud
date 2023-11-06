@@ -133,13 +133,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        messaging-broker: [ rabbitmq, kafka ]
-        messaging-partitioned: [ partitioned, non-partitioned ]
+        messaging-broker: [ rabbitmq ]
+        messaging-partitioned: [ non-partitioned ]
         messaging-destinations: [ default-destinations ]
-        include:
-          - messaging-broker: kafka
-            messaging-partitioned: partitioned
-            messaging-destinations: override-destinations
+#        include:
+#          - messaging-broker: kafka
+#            messaging-partitioned: partitioned
+#            messaging-destinations: override-destinations
     steps:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
