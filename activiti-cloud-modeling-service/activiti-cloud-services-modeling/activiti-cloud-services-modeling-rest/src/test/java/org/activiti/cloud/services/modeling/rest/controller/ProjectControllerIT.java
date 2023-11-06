@@ -320,7 +320,7 @@ public class ProjectControllerIT {
             .perform(
                 put("/v1/projects/{projectId}", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890")))
+                    .content(mapper.writeValueAsString(project("a".repeat(101))))
             )
             .andExpect(status().isBadRequest());
     }
