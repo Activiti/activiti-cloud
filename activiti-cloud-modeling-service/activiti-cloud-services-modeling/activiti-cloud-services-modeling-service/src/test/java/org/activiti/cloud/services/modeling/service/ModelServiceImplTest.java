@@ -159,16 +159,18 @@ class ModelServiceImplTest {
         modelTwo.addProject(projectOne);
 
         modelService =
-            new ModelServiceImpl(
-                modelRepository,
-                modelTypeService,
-                modelContentService,
-                modelExtensionsService,
-                jsonConverter,
-                processModelContentConverter,
-                modelUpdateListeners,
-                fileMagicNumberValidator,
-                fileContentSanitizer
+            spy(
+                new ModelServiceImpl(
+                    modelRepository,
+                    modelTypeService,
+                    modelContentService,
+                    modelExtensionsService,
+                    jsonConverter,
+                    processModelContentConverter,
+                    modelUpdateListeners,
+                    fileMagicNumberValidator,
+                    fileContentSanitizer
+                )
             );
     }
 
@@ -632,6 +634,42 @@ class ModelServiceImplTest {
 
         //then
         assertThat(overriddenContent).isEqualTo(originalContent);
+    }
+
+    @Test
+    void importSingleModel_should_passIdsToUpdate_when_importedModelHaveIdsToUpdate() {
+        //given
+        FileContent fileContent = mock(FileContent.class);
+        doReturn(new ImportedModel(modelTwo, "oldId", "newId"))
+            .when(modelService)
+            .importModel(projectOne, modelType, fileContent);
+
+        Map<String, String> expectedIdentifiersToUpdate = Map.of("oldId", "newId");
+        Model updatedModel = mock(Model.class);
+        doReturn(updatedModel)
+            .when(modelService)
+            .updateModelContent(modelTwo, fileContent, expectedIdentifiersToUpdate);
+
+        //when
+        Model importedModel = modelService.importSingleModel(projectOne, modelType, fileContent);
+
+        //then
+        verify(modelService).updateModelContent(modelTwo, fileContent, expectedIdentifiersToUpdate);
+        assertThat(importedModel).isEqualTo(updatedModel);
+    }
+
+    @Test
+    void importSingleModel_should_sentNullAsIdsToUpdate_when_importedModelDoesntHaveIdsToUpdate() {
+        FileContent fileContent = mock(FileContent.class);
+        doReturn(new ImportedModel(modelTwo)).when(modelService).importModel(projectOne, modelType, fileContent);
+        doReturn(modelTwo).when(modelService).updateModelContent(modelTwo, fileContent, null);
+
+        //when
+        Model importedModel = modelService.importSingleModel(projectOne, modelType, fileContent);
+
+        //then
+        verify(modelService).updateModelContent(modelTwo, fileContent, null);
+        assertThat(importedModel).isEqualTo(modelTwo);
     }
 
     private ModelImpl createModelImpl() {

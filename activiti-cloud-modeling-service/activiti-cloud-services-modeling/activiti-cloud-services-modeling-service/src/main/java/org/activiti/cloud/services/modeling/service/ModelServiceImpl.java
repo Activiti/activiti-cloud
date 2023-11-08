@@ -381,11 +381,10 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Model importSingleModel(Project project, ModelType modelType, FileContent fileContent) {
         ImportedModel importedModel = importModel(project, modelType, fileContent);
-        return updateModelContent(
-            importedModel.getModel(),
-            fileContent,
-            Map.of(importedModel.getOrignialId(), importedModel.getUpdatedId())
-        );
+        Map<String, String> identifiersToUpdate = importedModel.hasIdentifiersToUpdate()
+            ? Map.of(importedModel.getOrignialId(), importedModel.getUpdatedId())
+            : null;
+        return updateModelContent(importedModel.getModel(), fileContent, identifiersToUpdate);
     }
 
     @Override
