@@ -157,7 +157,7 @@ public class ModelController implements ModelRestApi {
         if (file.getSize() > maxModelFileSize) {
             throw new FileSizeException("File size exceeded");
         }
-        modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file));
+        modelService.updateModelContent(findModelById(modelId), multipartToFileContent(file), null);
     }
 
     @Override

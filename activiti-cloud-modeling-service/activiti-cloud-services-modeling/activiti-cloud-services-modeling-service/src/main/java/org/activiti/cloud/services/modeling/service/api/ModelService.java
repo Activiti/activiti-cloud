@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.service.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.bpmn.model.Process;
@@ -28,6 +29,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.modeling.service.ImportedModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
@@ -48,15 +50,13 @@ public interface ModelService {
 
     Model updateModel(Model modelToBeUpdated, Model newModel);
 
-    Model copyModel(Model modelToBeCopied, Project project);
+    Model copyModel(Model modelToBeCopied, Project project, Map<String, String> identifiersToUpdate);
 
     void deleteModel(Model model);
 
     Optional<Model> findModelById(String modelId);
 
     Optional<FileContent> getModelExtensionsFileContent(Model model);
-
-    void cleanModelIdList();
 
     Optional<FileContent> getModelDiagramFile(String modelId);
 
@@ -66,17 +66,17 @@ public interface ModelService {
 
     FileContent exportModel(Model model);
 
-    Model updateModelContent(Model modelToBeUpdate, FileContent fileContent);
+    Model updateModelContent(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
-    FileContent overrideModelContentId(Model model, FileContent fileContent);
+    FileContent overrideModelContentId(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
     Optional<ModelContent> createModelContentFromModel(Model model, FileContent fileContent);
 
     Model importSingleModel(Project project, ModelType modelType, FileContent fileContent);
 
-    Model importModel(Project project, ModelType modelType, FileContent fileContent);
+    ImportedModel importModel(Project project, ModelType modelType, FileContent fileContent);
 
-    Model importModelFromContent(Project project, ModelType modelType, FileContent fileContent);
+    ImportedModel importModelFromContent(Project project, ModelType modelType, FileContent fileContent);
 
     <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz);
 

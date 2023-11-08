@@ -16,6 +16,9 @@
 package org.activiti.cloud.services.modeling.service;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
@@ -40,6 +43,8 @@ public class ProjectHolder {
     private final MultiKeyMap<String, ModelXmlFile> modelContent = new MultiKeyMap<>();
 
     private final MultiKeyMap<String, FileContent> extensionFilesMap = new MultiKeyMap<>();
+
+    private final Map<String, String> identifiersToUpdate = new HashMap<>();
 
     public ProjectHolder setProject(Project project, @Nullable String name) {
         if (this.project == null) {
@@ -97,6 +102,14 @@ public class ProjectHolder {
 
     private MultiKey<String> key(String name, String type) {
         return new MultiKey<>(name, type);
+    }
+
+    public void addIdentifierToUpdate(String from, String to) {
+        identifiersToUpdate.put(from, to);
+    }
+
+    public Map<String, String> getIdentifiersToUpdate() {
+        return Collections.unmodifiableMap(identifiersToUpdate);
     }
 
     class ModelXmlFile {

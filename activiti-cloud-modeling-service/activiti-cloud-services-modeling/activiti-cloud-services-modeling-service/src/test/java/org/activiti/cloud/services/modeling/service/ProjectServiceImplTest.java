@@ -207,14 +207,12 @@ public class ProjectServiceImplTest {
         Project projectToCopy = new ProjectImpl("id", "copied-project");
 
         when(projectRepository.copyProject(projectToCopy, copiedProjectName)).thenReturn(projectToCopy);
-        when(modelService.getAllModels(any())).thenReturn(asList(modelOne));
+        when(modelService.getAllModels(projectToCopy)).thenReturn(asList(modelOne));
+        when(modelService.copyModel(eq(modelOne), eq(projectToCopy), any())).thenReturn(modelOne);
 
-        Project copiedProject = projectService.copyProject(projectToCopy, copiedProjectName);
+        Project projectCopy = projectService.copyProject(projectToCopy, copiedProjectName);
 
-        assertThat(copiedProject.getName()).isEqualTo(copiedProjectName);
-        verify(projectRepository, times(1)).copyProject(projectToCopy, copiedProjectName);
-        verify(modelService, times(1)).copyModel(modelOne, projectToCopy);
-        verify(modelService, times(1)).cleanModelIdList();
+        assertThat(projectCopy.getName()).isEqualTo(copiedProjectName);
     }
 
     @Test
@@ -270,7 +268,8 @@ public class ProjectServiceImplTest {
             .thenReturn(Optional.of("process-x"));
         when(modelService.contentFilenameToModelName("process-y.bpmn20.xml", processModelType))
             .thenReturn(Optional.of("process-y"));
-        when(modelService.importModel(eq(project), eq(processModelType), any())).thenReturn(new ModelImpl());
+        when(modelService.importModel(eq(project), eq(processModelType), any()))
+            .thenReturn(new ImportedModel(new ModelImpl()));
 
         projectService.replaceProjectContentWithProvidedModelsInFile(project, file.get());
 
