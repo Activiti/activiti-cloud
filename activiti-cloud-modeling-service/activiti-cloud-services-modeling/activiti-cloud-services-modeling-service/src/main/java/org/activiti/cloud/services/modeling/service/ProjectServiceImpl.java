@@ -358,7 +358,7 @@ public class ProjectServiceImpl implements ProjectService {
             modelJsonFile.getFileContent()
         );
         if (createdModel.hasIdentifiersToUpdate()) {
-            projectHolder.addIdentifierToUpdate(createdModel.getOrignialId(), createdModel.getUpdatedId());
+            projectHolder.addIdentifierToUpdate(createdModel.getOriginalId(), createdModel.getUpdatedId());
         }
 
         modelService.updateModelContent(
@@ -401,7 +401,7 @@ public class ProjectServiceImpl implements ProjectService {
     ) {
         ImportedModel createdModel = modelService.importModel(createdProject, modelType, fileContent);
         if (createdModel.hasIdentifiersToUpdate()) {
-            projectHolder.addIdentifierToUpdate(createdModel.getOrignialId(), createdModel.getUpdatedId());
+            projectHolder.addIdentifierToUpdate(createdModel.getOriginalId(), createdModel.getUpdatedId());
         }
         updateModelProcessImported(projectHolder, createdModel, fileContent);
     }

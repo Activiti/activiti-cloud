@@ -43,7 +43,7 @@ public final class ImportedModel {
         return model;
     }
 
-    public String getOrignialId() {
+    public String getOriginalId() {
         return originalId;
     }
 

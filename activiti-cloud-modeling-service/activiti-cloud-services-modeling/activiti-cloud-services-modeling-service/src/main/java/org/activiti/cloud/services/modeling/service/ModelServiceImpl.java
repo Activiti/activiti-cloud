@@ -382,7 +382,7 @@ public class ModelServiceImpl implements ModelService {
     public Model importSingleModel(Project project, ModelType modelType, FileContent fileContent) {
         ImportedModel importedModel = importModel(project, modelType, fileContent);
         Map<String, String> identifiersToUpdate = importedModel.hasIdentifiersToUpdate()
-            ? Map.of(importedModel.getOrignialId(), importedModel.getUpdatedId())
+            ? Map.of(importedModel.getOriginalId(), importedModel.getUpdatedId())
             : null;
         return updateModelContent(importedModel.getModel(), fileContent, identifiersToUpdate);
     }
