@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
@@ -934,8 +935,24 @@ public class ProjectControllerIT {
         mockMvc
             .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is("application xy")))
+            .andExpect(jsonPath("$.entry.key", allOf(startsWith("application-xy-"), not(is("application-xy-asdfg")))));
+    }
+
+    @Test
+    public void should_returnStatusCreated_when_importingProjectWithoutKey() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy-no-key.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy-no-key.zip")
+        );
+
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
             .andExpect(jsonPath("$.entry.name", is("application-xy")))
-            .andExpect(jsonPath("$.entry.key", startsWith("application-xy-")));
+            .andExpect(jsonPath("$.entry.key", allOf(startsWith("application-xy-"), not(is("application-xy-asdfg")))));
     }
 
     @Test
@@ -1000,7 +1017,7 @@ public class ProjectControllerIT {
         mockMvc
             .perform(multipart("/v1/projects/import?name=").file(zipFile).accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.entry.name", is("application-xy")));
+            .andExpect(jsonPath("$.entry.name", is("application xy")));
     }
 
     @Test
@@ -1019,7 +1036,7 @@ public class ProjectControllerIT {
                 multipart("/v1/projects/import?name=" + overridingName).file(zipFile).accept(APPLICATION_JSON_VALUE)
             )
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.entry.name", is("application-xy")));
+            .andExpect(jsonPath("$.entry.name", is("application xy")));
     }
 
     @Test

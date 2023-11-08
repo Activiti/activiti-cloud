@@ -48,3 +48,5 @@ requirements.lock
 /*.tgz
 
 *.versionsBackup
+
+!**/src/test/resources/project/*.zip
