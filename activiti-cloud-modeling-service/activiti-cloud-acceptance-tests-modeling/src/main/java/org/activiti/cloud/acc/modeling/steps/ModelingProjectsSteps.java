@@ -189,7 +189,10 @@ public class ModelingProjectsSteps extends ModelingContextSteps<Project> {
                     )
                     .hasJsonContentSatisfying(
                         changeToJsonFilename(currentProject.getKey()),
-                        jsonContent -> jsonContent.node("name").isEqualTo(currentProject.getName()) //TODO check for key
+                        jsonContent -> {
+                            jsonContent.node("name").isEqualTo(currentProject.getName());
+                            jsonContent.node("key").isEqualTo(currentProject.getKey());
+                        }
                     )
                     .hasJsonContentSatisfying(
                         modelType.getFolderName() +
