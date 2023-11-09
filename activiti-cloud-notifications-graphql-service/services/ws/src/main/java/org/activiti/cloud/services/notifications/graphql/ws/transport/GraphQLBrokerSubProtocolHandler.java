@@ -190,8 +190,8 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
                         " in session " +
                         session.getId() +
                         ". Sending CONNECTION_ERROR to client. Cause: {}:{}",
-                            ex.getMessage(),
-                            ex.getCause().getMessage()
+                        ex.getMessage(),
+                        ex.getCause().getMessage()
                     );
                 }
                 if (logger.isDebugEnabled()) {
