@@ -189,9 +189,13 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
                         "Failed to send client message to application via MessageChannel" +
                         " in session " +
                         session.getId() +
-                        ". Sending CONNECTION_ERROR to client.",
-                        ex
+                        ". Sending CONNECTION_ERROR to client. Cause: {}:{}",
+                            ex.getMessage(),
+                            ex.getCause().getMessage()
                     );
+                }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Exception stacktrace: ", ex);
                 }
                 sendErrorMessage(session, ex, sourceMessage);
             }
@@ -268,6 +272,18 @@ public class GraphQLBrokerSubProtocolHandler implements SubProtocolHandler, Appl
             }
 
             outputChannel.send(message);
+        } catch (Exception e) {
+            if (logger.isErrorEnabled()) {
+                logger.error(
+                    "Failed to send WebSocket message to client after session {}. Cause: {}:{}",
+                    session.getId(),
+                    e.getMessage(),
+                    e.getCause().getMessage()
+                );
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("Exception stacktrace: ", e);
+            }
         } finally {
             this.graphqlAuthentications.remove(session.getId());
 
