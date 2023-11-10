@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-    <version>8.1.0-alpha.14</version>
+    <version>8.1.0-mock</version>
   </parent>
   <artifactId>activiti-cloud-services-core</artifactId>
   <name>Activiti Cloud Services :: Core</name>

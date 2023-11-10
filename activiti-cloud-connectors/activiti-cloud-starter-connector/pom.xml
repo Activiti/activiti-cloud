@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-connectors-dependencies</artifactId>
-    <version>8.1.0-alpha.14</version>
+    <version>8.1.0-mock</version>
     <relativePath>../activiti-cloud-connectors-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-connector</artifactId>
