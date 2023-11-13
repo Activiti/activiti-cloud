@@ -84,7 +84,7 @@ public class ProjectControllerExistingNameIT {
     @Transactional(propagation = Propagation.NEVER)
     @WithActivitiMockUser(username = "otherUser", roles = { "ACTIVITI_MODELER" })
     public void should_createProjectWithOtherUser() throws Exception {
-        projectRepository.createProject(project("application-xy"));
+        projectRepository.createProject(project("application xy"));
         projectRepository.createProject(project("creating-project"));
         projectRepository.createProject(project("updating-project"));
         projectRepository.createProject(project("copying-project"));
@@ -112,7 +112,7 @@ public class ProjectControllerExistingNameIT {
 
         assertThat((Page<ProjectEntity>) projectRepository.getProjects(Pageable.ofSize(50), null, null))
             .extracting(ProjectEntity::getCreatedBy, ProjectEntity::getName)
-            .contains(tuple("otherUser", "application-xy"), tuple("testuser", "application-xy"));
+            .contains(tuple("otherUser", "application xy"), tuple("testuser", "application xy"));
     }
 
     @Test
