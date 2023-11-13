@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.hibernate.jpa.QueryHints;
+import org.hibernate.jpa.AvailableHints;
 
 public class EntityManagerFinder {
 
@@ -49,7 +49,7 @@ public class EntityManagerFinder {
         entityGraph.addAttributeNodes(VARIABLES);
 
         return Optional.ofNullable(
-            entityManager.find(TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph))
+            entityManager.find(TaskEntity.class, taskId, Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph))
         );
     }
 
@@ -61,7 +61,7 @@ public class EntityManagerFinder {
         CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
         Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
         criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("processInstanceId"), processInstanceId));
-        return entityManager.createQuery(criteriaQuery).setHint(QueryHints.HINT_LOADGRAPH, entityGraph).getResultList();
+        return entityManager.createQuery(criteriaQuery).setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph).getResultList();
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
@@ -70,7 +70,7 @@ public class EntityManagerFinder {
         entityGraph.addAttributeNodes(TASK_CANDIDATE_USERS);
 
         return Optional.ofNullable(
-            entityManager.find(TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph))
+            entityManager.find(TaskEntity.class, taskId, Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph))
         );
     }
 
@@ -80,7 +80,7 @@ public class EntityManagerFinder {
         entityGraph.addAttributeNodes(TASK_CANDIDATE_GROUPS);
 
         return Optional.ofNullable(
-            entityManager.find(TaskEntity.class, taskId, Map.of(QueryHints.HINT_LOADGRAPH, entityGraph))
+            entityManager.find(TaskEntity.class, taskId, Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph))
         );
     }
 
@@ -93,7 +93,7 @@ public class EntityManagerFinder {
             entityManager.find(
                 ProcessInstanceEntity.class,
                 processInstanceId,
-                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+                Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
             )
         );
     }
@@ -107,7 +107,7 @@ public class EntityManagerFinder {
             entityManager.find(
                 ProcessInstanceEntity.class,
                 processInstanceId,
-                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+                Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
             )
         );
     }
@@ -121,7 +121,7 @@ public class EntityManagerFinder {
             entityManager.find(
                 ProcessInstanceEntity.class,
                 processInstanceId,
-                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+                Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
             )
         );
     }
