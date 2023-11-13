@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -37,8 +38,23 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessCreatedEvent createdEvent = (CloudProcessCreatedEvent) event;
+        String processInstanceId = createdEvent.getEntity().getId();
+
         LOGGER.debug("Handling created process Instance " + createdEvent.getEntity().getId());
 
+        Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class, processInstanceId))
+            .ifPresentOrElse(processInstance ->
+                LOGGER.warn(
+                    "Process instance entity already exists for: " + processInstanceId + "!"
+                )
+            ,() -> {
+                    var createdProcessInstanceEntity = createProcessInstanceEntity(createdEvent);
+                    entityManager.persist(createdProcessInstanceEntity);
+             }
+        );
+    }
+
+    private ProcessInstanceEntity createProcessInstanceEntity(CloudProcessCreatedEvent createdEvent) {
         ProcessInstanceEntity createdProcessInstanceEntity = new ProcessInstanceEntity();
         createdProcessInstanceEntity.setServiceName(createdEvent.getServiceName());
         createdProcessInstanceEntity.setServiceFullName(createdEvent.getServiceFullName());
@@ -63,7 +79,7 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
         );
         createdProcessInstanceEntity.setProcessDefinitionName(createdEvent.getEntity().getProcessDefinitionName());
 
-        entityManager.persist(createdProcessInstanceEntity);
+        return createdProcessInstanceEntity;
     }
 
     @Override
