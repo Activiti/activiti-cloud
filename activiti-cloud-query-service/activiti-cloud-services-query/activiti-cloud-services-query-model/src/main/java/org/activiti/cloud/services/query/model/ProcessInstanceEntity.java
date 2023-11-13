@@ -271,6 +271,10 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
     }
 
+    public Optional<BPMNSequenceFlowEntity> getSequenceFlowByEventId(String eventId) {
+        return getSequenceFlows().stream().filter(v -> eventId.equals(v.getEventId())).findFirst();
+    }
+
     @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;

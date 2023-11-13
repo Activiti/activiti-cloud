@@ -111,4 +111,18 @@ public class EntityManagerFinder {
             )
         );
     }
+
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithSequenceFlows(String processInstanceId) {
+        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+
+        entityGraph.addAttributeNodes(SEQUENCE_FLOWS);
+
+        return Optional.ofNullable(
+            entityManager.find(
+                ProcessInstanceEntity.class,
+                processInstanceId,
+                Map.of(QueryHints.HINT_LOADGRAPH, entityGraph)
+            )
+        );
+    }
 }
