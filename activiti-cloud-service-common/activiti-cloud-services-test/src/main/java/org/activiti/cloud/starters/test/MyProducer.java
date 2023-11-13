@@ -28,6 +28,6 @@ public class MyProducer {
     }
 
     public void send(CloudRuntimeEvent<?, ?>... newEvents) {
-        producer.send(MessageBuilder.withPayload(newEvents).build());
+        producer.send(MessageBuilder.withPayload(newEvents).setErrorChannelName("errorChannel").build());
     }
 }

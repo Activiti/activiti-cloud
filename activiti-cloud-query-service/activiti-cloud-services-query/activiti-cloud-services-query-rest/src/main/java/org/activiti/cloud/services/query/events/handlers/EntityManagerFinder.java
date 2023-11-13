@@ -61,7 +61,10 @@ public class EntityManagerFinder {
         CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
         Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
         criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("processInstanceId"), processInstanceId));
-        return entityManager.createQuery(criteriaQuery).setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph).getResultList();
+        return entityManager
+            .createQuery(criteriaQuery)
+            .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
+            .getResultList();
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
