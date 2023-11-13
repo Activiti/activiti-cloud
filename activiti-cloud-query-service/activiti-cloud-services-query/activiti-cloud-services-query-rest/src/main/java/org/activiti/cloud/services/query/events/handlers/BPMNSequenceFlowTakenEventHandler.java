@@ -33,10 +33,7 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
 
-    public BPMNSequenceFlowTakenEventHandler(
-        EntityManager entityManager,
-        EntityManagerFinder entityManagerFinder
-    ) {
+    public BPMNSequenceFlowTakenEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
     }
@@ -56,7 +53,13 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
                     .ifPresentOrElse(
                         sequenceFlowEntity -> {
                             logger.warn(
-                                "Sequence flow '" + sequenceFlowEntity.getElementId()  + "' with eventId '" + eventId +"' already exists in the process '" + processInstanceId + "'!"
+                                "Sequence flow '" +
+                                sequenceFlowEntity.getElementId() +
+                                "' with eventId '" +
+                                eventId +
+                                "' already exists in the process '" +
+                                processInstanceId +
+                                "'!"
                             );
                         },
                         () -> {

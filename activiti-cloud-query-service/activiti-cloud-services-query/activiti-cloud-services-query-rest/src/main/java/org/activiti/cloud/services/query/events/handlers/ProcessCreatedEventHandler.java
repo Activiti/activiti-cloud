@@ -42,16 +42,16 @@ public class ProcessCreatedEventHandler implements QueryEventHandler {
 
         LOGGER.debug("Handling created process Instance " + createdEvent.getEntity().getId());
 
-        Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class, processInstanceId))
-            .ifPresentOrElse(processInstance ->
-                LOGGER.warn(
-                    "Process instance entity already exists for: " + processInstanceId + "!"
-                )
-            ,() -> {
+        Optional
+            .ofNullable(entityManager.find(ProcessInstanceEntity.class, processInstanceId))
+            .ifPresentOrElse(
+                processInstance ->
+                    LOGGER.warn("Process instance entity already exists for: " + processInstanceId + "!"),
+                () -> {
                     var createdProcessInstanceEntity = createProcessInstanceEntity(createdEvent);
                     entityManager.persist(createdProcessInstanceEntity);
-             }
-        );
+                }
+            );
     }
 
     private ProcessInstanceEntity createProcessInstanceEntity(CloudProcessCreatedEvent createdEvent) {
