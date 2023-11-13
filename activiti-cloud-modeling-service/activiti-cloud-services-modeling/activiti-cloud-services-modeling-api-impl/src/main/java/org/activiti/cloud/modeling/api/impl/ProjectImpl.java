@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation for {@link Project}
@@ -91,7 +92,10 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
 
     @Override
     public String getKey() {
-        return key;
+        if (StringUtils.hasText(key)) {
+            return key;
+        }
+        return name;
     }
 
     @Override
