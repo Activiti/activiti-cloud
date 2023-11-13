@@ -34,6 +34,7 @@ import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.util.StringUtils;
 
 /**
  * Project model entity
@@ -114,7 +115,10 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
 
     @Override
     public String getKey() {
-        return key;
+        if (StringUtils.hasText(key)) {
+            return key;
+        }
+        return name;
     }
 
     @Override
