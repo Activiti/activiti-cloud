@@ -167,8 +167,10 @@ public class ProjectServiceImpl implements ProjectService {
         Optional
             .ofNullable(newProject.getName())
             .ifPresent(name -> {
-                projectToUpdate.setName(name);
-                projectToUpdate.setKey(projectKeyGenerator.generate(name));
+                if (!name.equals(projectToUpdate.getName())) {
+                    projectToUpdate.setName(name);
+                    projectToUpdate.setKey(projectKeyGenerator.generate(name));
+                }
             });
         return projectRepository.updateProject(projectToUpdate);
     }
