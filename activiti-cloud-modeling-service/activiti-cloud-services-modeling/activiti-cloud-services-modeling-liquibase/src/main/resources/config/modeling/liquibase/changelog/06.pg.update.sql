@@ -15,7 +15,8 @@
  */
 
 UPDATE project p
-SET disp_name = p.name;
+SET disp_name = p.name
+WHERE disp_name IS NULL;
 
 ALTER TABLE project
     ALTER COLUMN disp_name SET NOT NULL;
