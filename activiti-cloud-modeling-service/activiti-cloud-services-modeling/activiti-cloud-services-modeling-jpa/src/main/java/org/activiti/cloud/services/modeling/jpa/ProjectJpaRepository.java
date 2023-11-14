@@ -35,11 +35,11 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
     exported = false
 )
 public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, String>, ProjectRepository<ProjectEntity> {
-    Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<ProjectEntity> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<ProjectEntity> findAllByIdIn(Collection<String> filteredProjectIds, Pageable pageable);
 
-    Page<ProjectEntity> findAllByDisplayNameContainingIgnoreCaseAndIdIn(
+    Page<ProjectEntity> findAllByNameContainingIgnoreCaseAndIdIn(
         String name,
         Collection<String> filteredProjectIds,
         Pageable pageable
@@ -48,9 +48,9 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, Strin
     @Override
     default Page<ProjectEntity> getProjects(Pageable pageable, String nameToFilter, List<String> filteredProjectIds) {
         if (nameToFilter != null && filteredProjectIds != null) {
-            return findAllByDisplayNameContainingIgnoreCaseAndIdIn(nameToFilter, filteredProjectIds, pageable);
+            return findAllByNameContainingIgnoreCaseAndIdIn(nameToFilter, filteredProjectIds, pageable);
         } else if (nameToFilter != null) {
-            return findAllByDisplayNameContainingIgnoreCase(nameToFilter, pageable);
+            return findAllByNameContainingIgnoreCase(nameToFilter, pageable);
         } else if (filteredProjectIds != null) {
             return findAllByIdIn(filteredProjectIds, pageable);
         } else {

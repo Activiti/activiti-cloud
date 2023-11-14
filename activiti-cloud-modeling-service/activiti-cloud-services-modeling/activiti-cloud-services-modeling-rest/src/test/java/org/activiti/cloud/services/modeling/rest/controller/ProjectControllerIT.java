@@ -209,7 +209,7 @@ public class ProjectControllerIT {
     }
 
     @Test
-    public void should_returnStatusCreatedAndProjectDisplayName_when_creatingProject() throws Exception {
+    public void should_returnStatusCreatedAndProjectName_when_creatingProject() throws Exception {
         mockMvc
             .perform(
                 post("/v1/projects")
@@ -218,8 +218,7 @@ public class ProjectControllerIT {
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", is("Project name")))
-            .andExpect(jsonPath("$.key", startsWith("project-name-")))
-            .andExpect(jsonPath("$.displayName", is("Project name")));
+            .andExpect(jsonPath("$.key", startsWith("project-name-")));
     }
 
     @Test

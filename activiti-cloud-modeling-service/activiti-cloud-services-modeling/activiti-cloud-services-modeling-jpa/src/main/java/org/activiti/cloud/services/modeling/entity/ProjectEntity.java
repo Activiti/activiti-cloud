@@ -20,13 +20,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,13 +52,8 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     private String id;
 
-    @Transient
     private String name;
 
-    @Column(name = "disp_name")
-    private String displayName;
-
-    @Column(name = "name")
     private String key;
 
     private String description;
@@ -70,7 +63,7 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
     public ProjectEntity() {} // for JPA
 
     public ProjectEntity(String name, String key) {
-        this.displayName = name;
+        this.name = name;
         this.key = key;
     }
 
@@ -92,25 +85,14 @@ public class ProjectEntity extends AuditableEntity<String> implements Project<St
         this.models = models;
     }
 
-    @Transient
     @Override
     public String getName() {
-        return displayName;
+        return name;
     }
 
     @Override
     public void setName(String name) {
-        this.displayName = name;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return this.displayName;
-    }
-
-    @Override
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+        this.name = name;
     }
 
     @Override
