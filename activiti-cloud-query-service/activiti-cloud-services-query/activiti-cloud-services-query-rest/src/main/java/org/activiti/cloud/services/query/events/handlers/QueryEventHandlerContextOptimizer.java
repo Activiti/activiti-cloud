@@ -31,7 +31,6 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudSequenceFlowTakenEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -136,8 +135,6 @@ public class QueryEventHandlerContextOptimizer {
                     .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
                 findRuntimeEvent(events, CloudBPMNActivityEvent.class)
                     .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES, SERVICE_TASKS));
-                findRuntimeEvent(events, CloudSequenceFlowTakenEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(SEQUENCE_FLOWS));
 
                 Optional
                     .ofNullable(

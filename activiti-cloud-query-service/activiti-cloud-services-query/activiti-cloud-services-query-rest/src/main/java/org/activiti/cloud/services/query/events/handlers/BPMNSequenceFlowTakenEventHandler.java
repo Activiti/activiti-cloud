@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
-import java.util.UUID;
+import java.util.Optional;
 import org.activiti.api.process.model.BPMNSequenceFlow;
 import org.activiti.api.process.model.events.SequenceFlowEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -31,50 +31,39 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
     private static final Logger logger = LoggerFactory.getLogger(BPMNSequenceFlowTakenEventHandler.class);
 
     private final EntityManager entityManager;
-    private final EntityManagerFinder entityManagerFinder;
 
-    public BPMNSequenceFlowTakenEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
+    public BPMNSequenceFlowTakenEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.entityManagerFinder = entityManagerFinder;
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
-        CloudSequenceFlowTakenEvent activityEvent = CloudSequenceFlowTakenEvent.class.cast(event);
-        BPMNSequenceFlow bpmnSequenceFlow = activityEvent.getEntity();
-        var processInstanceId = bpmnSequenceFlow.getProcessInstanceId();
-        var eventId = event.getId();
+        CloudSequenceFlowTakenEvent sequenceFlowTakenEvent = CloudSequenceFlowTakenEvent.class.cast(event);
+        var entityId = getEntityId(sequenceFlowTakenEvent);
 
-        entityManagerFinder
-            .findProcessInstanceWithSequenceFlows(processInstanceId)
-            .ifPresent(processInstanceEntity -> {
-                processInstanceEntity
-                    .getSequenceFlowByEventId(eventId)
-                    .ifPresentOrElse(
-                        sequenceFlowEntity -> {
-                            logger.warn(
-                                "Sequence flow '" +
-                                sequenceFlowEntity.getElementId() +
-                                "' with eventId '" +
-                                eventId +
-                                "' already exists in the process '" +
-                                processInstanceId +
-                                "'!"
-                            );
-                        },
-                        () -> {
-                            var variableEntity = createBpmnSequenceFlowEntity(event);
-                            entityManager.persist(variableEntity);
-
-                            processInstanceEntity.getSequenceFlows().add(variableEntity);
-                        }
+        Optional
+            .ofNullable(entityManager.find(BPMNSequenceFlowEntity.class, entityId))
+            .ifPresentOrElse(
+                sequenceFlowEntity -> {
+                    logger.warn(
+                        "Sequence flow '" +
+                        sequenceFlowEntity.getElementId() +
+                        "' with eventId '" +
+                        event.getId() +
+                        "' already exists in the process '" +
+                        sequenceFlowTakenEvent.getEntity().getProcessInstanceId() +
+                        "'!"
                     );
-            });
+                },
+                () -> {
+                    var sequenceFlowTakenEntity = createBpmnSequenceFlowEntity(entityId, sequenceFlowTakenEvent);
+                    entityManager.persist(sequenceFlowTakenEntity);
+                }
+            );
     }
 
-    private BPMNSequenceFlowEntity createBpmnSequenceFlowEntity(CloudRuntimeEvent<?, ?> event) {
-        CloudSequenceFlowTakenEvent activityEvent = CloudSequenceFlowTakenEvent.class.cast(event);
-        BPMNSequenceFlow bpmnSequenceFlow = activityEvent.getEntity();
+    private BPMNSequenceFlowEntity createBpmnSequenceFlowEntity(String entityId, CloudSequenceFlowTakenEvent event) {
+        BPMNSequenceFlow bpmnSequenceFlow = event.getEntity();
 
         BPMNSequenceFlowEntity bpmnSequenceFlowEntity = new BPMNSequenceFlowEntity(
             event.getServiceName(),
@@ -83,11 +72,11 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
             event.getAppName(),
             event.getAppVersion()
         );
-        bpmnSequenceFlowEntity.setId(UUID.randomUUID().toString());
+        bpmnSequenceFlowEntity.setId(entityId);
         bpmnSequenceFlowEntity.setElementId(bpmnSequenceFlow.getElementId());
         bpmnSequenceFlowEntity.setProcessDefinitionId(bpmnSequenceFlow.getProcessDefinitionId());
         bpmnSequenceFlowEntity.setProcessInstanceId(bpmnSequenceFlow.getProcessInstanceId());
-        bpmnSequenceFlowEntity.setDate(new Date(activityEvent.getTimestamp()));
+        bpmnSequenceFlowEntity.setDate(new Date(event.getTimestamp()));
         bpmnSequenceFlowEntity.setSourceActivityElementId(bpmnSequenceFlow.getSourceActivityElementId());
         bpmnSequenceFlowEntity.setSourceActivityType(bpmnSequenceFlow.getSourceActivityType());
         bpmnSequenceFlowEntity.setSourceActivityName(bpmnSequenceFlow.getSourceActivityName());
@@ -100,6 +89,16 @@ public class BPMNSequenceFlowTakenEventHandler implements QueryEventHandler {
         bpmnSequenceFlowEntity.setEventId(event.getId());
 
         return bpmnSequenceFlowEntity;
+    }
+
+    private String getEntityId(CloudSequenceFlowTakenEvent event) {
+        return new StringBuilder()
+            .append(event.getEntity().getProcessInstanceId())
+            .append(":")
+            .append(event.getEntity().getElementId())
+            .append(":")
+            .append(event.getId())
+            .toString();
     }
 
     @Override

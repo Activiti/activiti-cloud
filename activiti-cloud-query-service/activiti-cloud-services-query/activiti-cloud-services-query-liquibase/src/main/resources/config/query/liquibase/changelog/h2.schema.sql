@@ -272,8 +272,7 @@ alter table bpmn_activity
 create index bpmn_sequence_flow_processInstance_idx on bpmn_sequence_flow (process_instance_id);
 create index bpmn_sequence_flow_elementId_idx on bpmn_sequence_flow (element_id);
 create index bpmn_sequence_flow_processInstance_elementId_idx on bpmn_sequence_flow (process_instance_id, element_id);
-alter table bpmn_sequence_flow
-    add constraint bpmn_sequence_flow_eventId_idx unique (event_id);
+create index bpmn_sequence_flow_eventId_idx on bpmn_sequence_flow (event_id);
 create index pd_name_idx on process_definition (name);
 create index pd_key_idx on process_definition (process_definition_key);
 create index pi_status_idx on process_instance (status);
