@@ -33,6 +33,8 @@ public class EventsAggregator implements MessageHandler {
 
     private MyProducer producer;
 
+    private AtomicReference<Message<?>> errorMessageRef = new AtomicReference<>();
+
     public EventsAggregator(MyProducer producer) {
         this.producer = producer;
     }
@@ -52,8 +54,6 @@ public class EventsAggregator implements MessageHandler {
 
         return sentEvents.toArray(CloudRuntimeEvent[]::new);
     }
-
-    private AtomicReference<Message<?>> errorMessageRef = new AtomicReference<>();
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
