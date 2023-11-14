@@ -57,10 +57,6 @@ public class ProjectDescriptor {
         return project.getKey();
     }
 
-    public String getDisplayName() {
-        return project.getDisplayName();
-    }
-
     public String getVersion() {
         return project.getVersion();
     }

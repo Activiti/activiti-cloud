@@ -85,4 +85,20 @@
       splitStatements="true"
       stripComments="true" />
   </changeSet>
+
+  <changeSet id="project-rename-columns-name-key" author="aae-modeling">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="project"/>
+      <columnExists tableName="project" columnName="disp_name"/>
+      <not>
+        <columnExists tableName="project" columnName="key"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/07.pg.update.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true" />
+  </changeSet>
 </databaseChangeLog>
