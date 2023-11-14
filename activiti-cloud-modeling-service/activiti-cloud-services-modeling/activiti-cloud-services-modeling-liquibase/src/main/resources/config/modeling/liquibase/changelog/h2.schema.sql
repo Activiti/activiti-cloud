@@ -41,8 +41,8 @@ create table project
     last_modified_by   varchar(255),
     last_modified_date timestamp,
     description        varchar(255),
+    key                varchar(255),
     name               varchar(255),
-    disp_name          varchar(255),
     version            varchar(255),
     primary key (id)
 );
@@ -56,8 +56,6 @@ alter table model_versions
     add constraint UK_ei9juhk09r20q4bmvgpjrcrs3 unique (versions_version, versions_versioned_entity_id);
 alter table project
     add constraint unique_project_name_createdby unique (name, created_by);
-alter table project
-    add constraint unique_project_display_name_createdby unique (disp_name, created_by);
 alter table model
     add constraint FKqjpgrrtoo1bryor3iymmb03pu foreign key (latest_version_version, latest_version_versioned_entity_id) references model_version;
 alter table model_versions

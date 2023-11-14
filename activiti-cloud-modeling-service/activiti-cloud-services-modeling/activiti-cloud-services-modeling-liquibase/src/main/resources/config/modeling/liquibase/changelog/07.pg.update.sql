@@ -13,20 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.modeling.liquibase;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+ALTER TABLE project
+    RENAME name TO key;
 
-@SpringBootTest
-@SpringBootApplication
-@TestPropertySource("classpath:application-test.properties")
-public class ActivitiCloudModelingLiquibaseAutoConfigurationIT {
-
-    @Test
-    public void contextLoads() {
-        // application context loads successfully
-    }
-}
+ALTER TABLE project
+    RENAME disp_name TO name;

@@ -143,7 +143,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project createProject(Project project) {
         project.setId(null);
         project.setKey(projectKeyGenerator.generate(project.getName()));
-        project.setDisplayName(project.getName());
+        project.setName(project.getName());
         List<ModelValidationError> nameValidationErrors = validateProjectNameAndKey(project);
         if (!nameValidationErrors.isEmpty()) {
             throw new SemanticModelValidationException(
