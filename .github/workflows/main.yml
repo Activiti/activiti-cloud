@@ -411,8 +411,6 @@ jobs:
           yq -i e '.activiti-cloud-modeling.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-          yq -i e '.activiti-cloud-query.ingress.subPaths = ["/query/","/audit/","/notifications/"]' values.yaml
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.36.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
