@@ -174,8 +174,8 @@ jobs:
       - name: Install release for ${{ matrix.messaging-broker }}
         run: |
           ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
           export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
@@ -189,8 +189,8 @@ jobs:
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
           ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
           export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
