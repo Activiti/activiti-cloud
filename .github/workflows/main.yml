@@ -159,7 +159,7 @@ jobs:
           version: v3.5.2
 
       - name: Setup Cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@3.8.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v3.8.0
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
