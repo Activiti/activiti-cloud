@@ -38,7 +38,6 @@ runs:
           done
         }
         check_services_up () {
-          local readonly GATEWAY_URL=http://$GATEWAY_HOST
           curl --head --fail $HEALTH_URL
           curl --silent --head --fail $HEALTH_URL > /dev/null 2>&1
         }
