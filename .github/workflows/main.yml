@@ -19,8 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CLUSTER_NAME: activiti
-  CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
