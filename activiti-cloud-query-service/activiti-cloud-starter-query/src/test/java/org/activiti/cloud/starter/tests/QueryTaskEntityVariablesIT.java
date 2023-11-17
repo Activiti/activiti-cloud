@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus.RUNNING;
 import static org.activiti.cloud.starters.test.builder.TaskEventContainedBuilder.buildTask;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -23,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
-import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -34,6 +34,7 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -55,6 +56,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -89,6 +91,9 @@ public class QueryTaskEntityVariablesIT {
     @Autowired
     private MyProducer producer;
 
+    @Autowired
+    private SubscribableChannel errorChannel;
+
     private EventsAggregator eventsAggregator;
 
     private ProcessInstanceEventContainedBuilder processInstanceEventContainedBuilder;
@@ -97,24 +102,12 @@ public class QueryTaskEntityVariablesIT {
 
     private VariableEventContainedBuilder variableEventContainedBuilder;
 
-    private Task task;
-
-    private Task standAloneTask;
-
     @BeforeEach
     public void setUp() {
-        eventsAggregator = new EventsAggregator(producer);
+        eventsAggregator = new EventsAggregator(producer).errorChannel(errorChannel);
         processInstanceEventContainedBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
         variableEventContainedBuilder = new VariableEventContainedBuilder(eventsAggregator);
-
-        ProcessInstance runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
-            "Process with variables"
-        );
-
-        task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
-
-        standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
     }
 
     @AfterEach
@@ -127,6 +120,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldRetrieveAllTaskVariables() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         variableEventContainedBuilder.aCreatedVariable("varCreated", "v1", "string").onTask(task);
 
         eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
@@ -159,6 +157,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     void should_handleBigDecimalVariables() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         BigDecimal bigDecimalValue = BigDecimal.valueOf(100, 2);
         variableEventContainedBuilder.aCreatedVariable("bigDecimalVar", bigDecimalValue).onTask(task);
 
@@ -182,6 +185,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldFilterOnVariableName() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         variableEventContainedBuilder.aCreatedVariable("var1", "v1", "string").onTask(task);
         variableEventContainedBuilder.aCreatedVariable("var2", "v2", "string").onTask(task);
 
@@ -212,6 +220,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldNotSeeAdminVariables() {
         //when
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         ResponseEntity<PagedModel<TaskVariableEntity>> responseEntity = testRestTemplate.exchange(
             ADMIN_VARIABLES_URL,
             HttpMethod.GET,
@@ -226,6 +239,7 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldRetrieveVariablesFromStandAloneTask() {
         //given
+        var standAloneTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("StandAlone task");
 
         variableEventContainedBuilder.aCreatedVariable("varCreated", "v1", "string").onTask(standAloneTask);
 
@@ -249,6 +263,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldGetTaskVariablesAfterTaskCompleted() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         VariableInstanceImpl<String> var = buildVariable("var", "string", "value");
         var.setTaskId(task.getId());
 
@@ -300,6 +319,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldNotCreateTaskVariableWithSameName() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         VariableInstanceImpl<String> var = buildVariable("varCreated", "string", "value");
         var.setTaskId(task.getId());
         eventsAggregator.addEvents(new CloudVariableCreatedEventImpl(var));
@@ -349,6 +373,11 @@ public class QueryTaskEntityVariablesIT {
     @Test
     public void shouldReCreateVariableAfterItWasDeleted() {
         //given
+        var runningProcessInstance = processInstanceEventContainedBuilder.aRunningProcessInstance(
+            "Process with variables"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, runningProcessInstance);
+
         VariableInstanceImpl<String> var = buildVariable("var", "string", "value");
         var.setTaskId(task.getId());
 
@@ -419,5 +448,46 @@ public class QueryTaskEntityVariablesIT {
             PAGED_VARIABLE_RESPONSE_TYPE,
             taskId
         );
+    }
+
+    @Test
+    void should_handleDuplicateSimpleProcessInstanceWithTaskVariablesEvents() {
+        // given
+        var simpleProcessInstance = processInstanceEventContainedBuilder.startSimpleProcessInstance(
+            "sampleDefinitionId"
+        );
+        var task = buildTask("Created task", Task.TaskStatus.CREATED, simpleProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("varCreated", "v1", "string").onTask(task);
+
+        eventsAggregator.addEvents(new CloudTaskCreatedEventImpl(task));
+
+        variableEventContainedBuilder
+            .anUpdatedVariable("varUpdated", "v2-up", "beforeUpdateValue", "string")
+            .onTask(task);
+
+        variableEventContainedBuilder.aDeletedVariable("varDeleted", "v1", "string").onTask(task);
+
+        // when
+        var sentEvents = eventsAggregator.sendAll();
+
+        // then
+        assertThat(eventsAggregator.getException()).isNull();
+        assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+            .isNotEmpty()
+            .get()
+            .extracting(ProcessInstanceEntity::getStatus)
+            .isEqualTo(RUNNING);
+
+        assertThat(variableRepository.findAll())
+            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+            .extracting(TaskVariableEntity::getName, TaskVariableEntity::getValue)
+            .containsExactly(tuple("varCreated", "v1"), tuple("varUpdated", "v2-up"));
+
+        // and when
+        eventsAggregator.addEvents(sentEvents).sendAll();
+
+        // and then
+        assertThat(eventsAggregator.getException()).isNull();
     }
 }

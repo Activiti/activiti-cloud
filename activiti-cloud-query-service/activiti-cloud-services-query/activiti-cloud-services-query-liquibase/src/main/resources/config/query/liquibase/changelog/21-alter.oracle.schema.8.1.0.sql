@@ -13,21 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starters.test;
 
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
-
-public class MyProducer {
-
-    private final MessageChannel producer;
-
-    public MyProducer(MessageChannel producer) {
-        this.producer = producer;
-    }
-
-    public void send(CloudRuntimeEvent<?, ?>... newEvents) {
-        producer.send(MessageBuilder.withPayload(newEvents).setErrorChannelName("errorChannel").build());
-    }
-}
+update bpmn_sequence_flow set id = concat(process_instance_id, ':', element_id, ':', event_id);
+alter table bpmn_sequence_flow drop constraint bpmn_sequence_flow_eventId_idx;
+create index bpmn_sequence_flow_eventId_idx on bpmn_sequence_flow (event_id);
