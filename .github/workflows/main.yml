@@ -259,6 +259,16 @@ jobs:
         run: |
           make test/modeling-acceptance-tests
 
+      - name: Spit cluster status after acc tests
+        if: always()
+        env:
+          NAMESPACE: ${{ env.GATEWAY_HOST }}
+        run: |
+          helm ls --all-namespaces
+          kubectl get all --all-namespaces
+          kubectl describe pod
+          kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=activiti-cloud-modeling
+
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
@@ -280,6 +290,16 @@ jobs:
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
           make test/runtime-acceptance-tests
+
+      - name: Spit cluster status after acc tests
+        if: always()
+        env:
+          NAMESPACE: ${{ env.GATEWAY_HOST }}
+        run: |
+          helm ls --all-namespaces
+          kubectl get all --all-namespaces
+          kubectl describe pod
+          kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=runtime-bundle
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
