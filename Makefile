@@ -38,7 +38,6 @@ install: release
 			--install \
 			--set global.application.name=default-app \
 			--set global.keycloak.clientSecret=$(shell uuidgen) \
-			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \
