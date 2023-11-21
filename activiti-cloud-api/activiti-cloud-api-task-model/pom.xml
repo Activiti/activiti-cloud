@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-api-dependencies</artifactId>
-    <version>8.1.0</version>
+    <version>8.1.1-SNAPSHOT</version>
     <relativePath>../activiti-cloud-api-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-api-task-model</artifactId>
