@@ -43,3 +43,29 @@ To run all hooks locally:
 ```sh
 pre-commit run -a
 ```
+
+
+export MESSAGING_BROKER=rabbitmq
+export MESSAGING_PARTITIONED=partitioned
+export MESSAGING_DESTINATIONS=default-destinations
+export PREVIEW_NAME=pr-test
+
+# fill VERSION
+
+export SSO_PROTOCOL=http
+export GATEWAY_PROTOCOL=http
+export GLOBAL_GATEWAY_DOMAIN=localhost
+
+export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+
+
+kind create cluster --name "chart-testing" --config ~/apa/alfresco-build-tools/.github/actions/setup-kind/kind.yml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+
+mvnnotest
+make docker-all
+make kind-load-docker-all
+make install

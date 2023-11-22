@@ -1,6 +1,7 @@
 name: Close PR
 
 # only trigger on pull request closed events
+# TODO: get rid of all cleanups once PRs are merged (?)
 on:
   pull_request_target:
     types: [ closed ]

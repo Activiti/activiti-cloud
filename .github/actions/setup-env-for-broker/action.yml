@@ -51,7 +51,7 @@
           SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           echo "SSO_HOST=$SSO_HOST" >> $GITHUB_ENV
 
-          source $GITHUB_ENV
+          # recap
 
           echo MESSAGING_BROKER=$MESSAGING_BROKER
           echo MESSAGING_PARTITIONED=$MESSAGING_PARTITIONED
