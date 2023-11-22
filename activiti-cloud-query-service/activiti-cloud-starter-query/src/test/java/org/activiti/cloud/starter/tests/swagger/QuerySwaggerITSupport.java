@@ -17,12 +17,24 @@ package org.activiti.cloud.starter.tests.swagger;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.swagger.v3.core.converter.AnnotatedType;
+import io.swagger.v3.core.converter.ModelConverter;
+import io.swagger.v3.core.converter.ModelConverterContext;
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.media.Schema;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Iterator;
+import java.util.Set;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
+import org.hibernate.engine.spi.EntityEntry;
+import org.hibernate.engine.spi.ManagedEntity;
+import org.hibernate.engine.spi.PersistentAttributeInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,6 +64,8 @@ public class QuerySwaggerITSupport {
      */
     @Test
     public void generateSwagger() throws Exception {
+        ModelConverters.getInstance().addConverter(new HibernateBytecodeEnhancementIgnoredConverter());
+
         mockMvc
             .perform(get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
             .andDo(result -> {
@@ -62,5 +76,30 @@ public class QuerySwaggerITSupport {
                 );
                 Files.write(new File("target/swagger.yaml").toPath(), new YAMLMapper().writeValueAsBytes(jsonNodeTree));
             });
+    }
+
+    /**
+     * API model schema filter to enable hiding of API model attributes.
+     */
+    public static class HibernateBytecodeEnhancementIgnoredConverter implements ModelConverter {
+
+        private static final Set<Class<?>> IGNORED_CLASSES = Set.of(
+            EntityEntry.class,
+            ManagedEntity.class,
+            PersistentAttributeInterceptor.class
+        );
+
+        @Override
+        public Schema resolve(
+            AnnotatedType annotatedType,
+            ModelConverterContext context,
+            Iterator<ModelConverter> chain
+        ) {
+            JavaType javaType = Json.mapper().constructType(annotatedType.getType());
+            if (javaType != null && IGNORED_CLASSES.contains(javaType.getRawClass())) {
+                return null;
+            }
+            return (chain.hasNext()) ? chain.next().resolve(annotatedType, context, chain) : null;
+        }
     }
 }
