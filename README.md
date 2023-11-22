@@ -44,7 +44,6 @@ To run all hooks locally:
 pre-commit run -a
 ```
 
-
 export MESSAGING_BROKER=rabbitmq
 export MESSAGING_PARTITIONED=partitioned
 export MESSAGING_DESTINATIONS=default-destinations
@@ -58,7 +57,6 @@ export GLOBAL_GATEWAY_DOMAIN=localhost
 
 export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
-
 
 kind create cluster --name "chart-testing" --config ~/apa/alfresco-build-tools/.github/actions/setup-kind/kind.yml
 
