@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.swagger.v3.core.converter.ModelConverters;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,10 @@ public class QuerySwaggerIT {
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
+        ModelConverters
+            .getInstance()
+            .addConverter(new QuerySwaggerITSupport.HibernateBytecodeEnhancementIgnoredConverter());
+
         MvcResult result = mockMvc
             .perform(get("/v3/api-docs/Query").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
