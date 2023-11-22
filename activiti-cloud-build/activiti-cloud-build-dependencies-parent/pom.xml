@@ -88,4 +88,15 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.hibernate.orm.tooling</groupId>
+          <artifactId>hibernate-enhance-maven-plugin</artifactId>
+          <version>${hibernate.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
