@@ -30,13 +30,17 @@ install: release
 	yq e -i '(.* | select(has("image")) | .image |select (has("pullPolicy"))).pullPolicy = "Always"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 	yq e -i '(.* | select(has("liquibase")) | .liquibase.image).pullPolicy = "Always"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 
+	yq -i e '.activiti-cloud-query.ingress.subPaths = ["/query/","/audit/","/notifications/"]' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+
+	yq e -i '.global.keycloak.url = "http://${PREVIEW_NAME}-k-http/auth"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+	item=`echo "\n- name: KEYCLOAK_HOSTNAME\n  value: ${PREVIEW_NAME}-k-http\n"` yq e -i '.activiti-cloud-identity.extraEnv += strenv(item)' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		helm dep up && \
 		helm upgrade ${PREVIEW_NAME} . \
 			--install \
 			--set global.application.name=default-app \
 			--set global.keycloak.clientSecret=$(shell uuidgen) \
-			--set global.gateway.http=false \
 			--set global.gateway.domain=${GLOBAL_GATEWAY_DOMAIN} \
 			--values $(MESSAGING_BROKER)-values.yaml \
 			--values $(MESSAGING_PARTITIONED)-values.yaml \

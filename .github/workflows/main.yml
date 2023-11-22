@@ -19,8 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CLUSTER_NAME: activiti
-  CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
@@ -89,7 +87,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}} -DskipTests=true
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -167,13 +165,8 @@ jobs:
         with:
           version: v3.5.2
 
-      - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.36.0
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: ${{ env.CLUSTER_NAME }}
+      - name: Setup Cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v3.8.0
 
       - uses: ./.github/actions/setup-env-for-broker
         with:
@@ -190,9 +183,9 @@ jobs:
       - name: Install release for ${{ matrix.messaging-broker }}
         run: |
           ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
+          export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
 
@@ -205,9 +198,9 @@ jobs:
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
           ### Variables ###
-          export SSO_PROTOCOL=https
-          export GATEWAY_PROTOCOL=https
-          export GLOBAL_GATEWAY_DOMAIN=$CLUSTER_NAME.$CLUSTER_DOMAIN
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
+          export GLOBAL_GATEWAY_DOMAIN=localhost
           export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export QUERY_CONSUMER_NUMBER=2
@@ -266,6 +259,15 @@ jobs:
         run: |
           make test/modeling-acceptance-tests
 
+      - name: Spit cluster status after acc tests
+        if: always()
+        run: |
+          helm ls --all-namespaces
+          kubectl get all --all-namespaces
+          kubectl get svc -A
+          kubectl describe pod -n $PREVIEW_NAME
+          kubectl logs -n $PREVIEW_NAME -l app.kubernetes.io/name=activiti-cloud-modeling --tail=200
+
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
@@ -275,6 +277,14 @@ jobs:
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
           make test/identity-adapter-acceptance-tests
+
+      - name: Spit cluster status after acc tests
+        if: always()
+        run: |
+          helm ls --all-namespaces
+          kubectl get all --all-namespaces
+          kubectl describe pod -n $PREVIEW_NAME
+          kubectl logs -n $PREVIEW_NAME -l app.kubernetes.io/name=activiti-cloud-identity-adapter --tail=200
 
       - uses: ./.github/actions/check-service-health
         with:
@@ -287,6 +297,14 @@ jobs:
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
           make test/runtime-acceptance-tests
+
+      - name: Spit cluster status after acc tests
+        if: always()
+        run: |
+          helm ls --all-namespaces
+          kubectl get all --all-namespaces
+          kubectl describe pod -n $PREVIEW_NAME
+          kubectl logs -n $PREVIEW_NAME -l app.kubernetes.io/name=runtime-bundle --tail=200
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
