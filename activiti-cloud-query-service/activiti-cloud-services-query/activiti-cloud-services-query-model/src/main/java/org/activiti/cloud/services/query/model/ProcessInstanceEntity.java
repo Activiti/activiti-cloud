@@ -61,13 +61,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 )
 @DynamicInsert
 @DynamicUpdate
-@NamedEntityGraphs(value = {
-    @NamedEntityGraph(
-        name = "ProcessInstances.withVariables",
-        attributeNodes = { @NamedAttributeNode(value = "variables", subgraph = "variables") },
-        subgraphs = { @NamedSubgraph(name = "variables", attributeNodes = { @NamedAttributeNode("value") } ) }
-    )
-})
+@NamedEntityGraphs(
+    value = {
+        @NamedEntityGraph(
+            name = "ProcessInstances.withVariables",
+            attributeNodes = { @NamedAttributeNode(value = "variables", subgraph = "variables") },
+            subgraphs = { @NamedSubgraph(name = "variables", attributeNodes = { @NamedAttributeNode("value") }) }
+        ),
+    }
+)
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id

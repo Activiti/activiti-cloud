@@ -56,5 +56,4 @@ public interface ProcessInstanceRepository
     @Override
     @EntityGraph(value = "ProcessInstances.withVariables", type = EntityGraph.EntityGraphType.LOAD)
     Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable);
-
 }
