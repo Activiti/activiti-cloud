@@ -101,8 +101,27 @@ jobs:
         shell: bash
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
-      - name: Build Docker Images
-        run: make docker-all
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build Example Runtime Bundle
+        run: make docker/example-runtime-bundle
+
+      - name: Build Activiti Cloud Query
+        run: make docker/activiti-cloud-query
+
+      - name: Build Example Cloud Connector
+        run: make docker/example-cloud-connector
+
+      - name: Build Activiti Cloud Modeling
+        run: make docker/activiti-cloud-modeling
+
+      - name: Build Activiti Cloud Identity Adapter
+        run: make docker/activiti-cloud-identity-adapter
+
 
   acceptance-tests:
     runs-on: ubuntu-latest
@@ -149,9 +168,6 @@ jobs:
       - name: Setup Cluster
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v3.8.0
 
-      - name: Load local docker images
-        run: make kind-load-docker-all
-
       - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
@@ -159,14 +175,21 @@ jobs:
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
           version: ${{ needs.build.outputs.version }}
 
+      - name: Delete preview for ${{ matrix.messaging-broker }}
+        if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+        run: |
+          kubectl delete ns $PREVIEW_NAME || true
+
       - name: Install release for ${{ matrix.messaging-broker }}
         run: |
           ### Variables ###
-          export SSO_PROTOCOL=$SSO_PROTOCOL
-          export GATEWAY_PROTOCOL=$GATEWAY_PROTOCOL
-          export GLOBAL_GATEWAY_DOMAIN=$GLOBAL_GATEWAY_DOMAIN
-          export GATEWAY_HOST=$GATEWAY_HOST
-          export SSO_HOST=$SSO_HOST
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
+          export GLOBAL_GATEWAY_DOMAIN=localhost
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+
+          ### Main ###
 
           echo "Installing release with make install"
           make install
@@ -174,6 +197,12 @@ jobs:
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
+          ### Variables ###
+          export SSO_PROTOCOL=http
+          export GATEWAY_PROTOCOL=http
+          export GLOBAL_GATEWAY_DOMAIN=localhost
+          export GATEWAY_HOST=gateway-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
+          export SSO_HOST=identity-$PREVIEW_NAME.$GLOBAL_GATEWAY_DOMAIN
           export QUERY_CONSUMER_NUMBER=2
 
           ### Functions ###
@@ -290,10 +319,36 @@ jobs:
               make delete
           fi
 
+  delete-test-images:
+    runs-on: ubuntu-latest
+    needs:
+      - acceptance-tests
+      # dependency needed for build.outputs env variables resolution
+      - build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Delete Docker images
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          if [ $IS_PREVIEW = true ] || [ $GITHUB_EVENT_NAME = "push" ]
+          then
+              echo "Skipping delete Docker images"
+          else
+              echo $VERSION > VERSION
+              echo "Delete Docker images"
+              make docker-delete-all
+          fi
+
   publish:
     runs-on: ubuntu-latest
     needs:
       - build
+      - delete-test-images
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
