@@ -32,6 +32,8 @@ install: release
 
 	yq -i e '.activiti-cloud-query.ingress.subPaths = ["/query/","/audit/","/notifications/"]' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 
+	yq e -i '.global.keycloak.url = "http://${PREVIEW_NAME}-keycloak-http/auth"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+
 	cd $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR) && \
 		helm dep up && \
 		helm upgrade ${PREVIEW_NAME} . \
