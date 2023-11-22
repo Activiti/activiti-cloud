@@ -27,6 +27,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -57,6 +61,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 )
 @DynamicInsert
 @DynamicUpdate
+@NamedEntityGraphs(value = {
+    @NamedEntityGraph(
+        name = "ProcessInstances.withVariables",
+        attributeNodes = { @NamedAttributeNode(value = "variables", subgraph = "variables") },
+        subgraphs = { @NamedSubgraph(name = "variables", attributeNodes = { @NamedAttributeNode("value") } ) }
+    )
+})
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
