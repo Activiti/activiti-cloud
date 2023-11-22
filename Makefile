@@ -16,6 +16,7 @@ install: release
 	yq e -i '.activiti-cloud-query.ingress.subPaths = ["/query/","/audit/","/notifications/"]' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 
 	yq e -i '.global.keycloak.url = "http://${PREVIEW_NAME}-k-http/auth"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
+	item=`echo "\n- name: KEYCLOAK_HOSTNAME\n  value: ${PREVIEW_NAME}-k-http\n"` yq e -i '.activiti-cloud-identity.extraEnv += strenv(item)' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 
 	# yq e -i '.global.keycloak.url = "http://${PREVIEW_NAME}-keycloak-http/auth"' $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
 	# cat $(ACTIVITI_CLOUD_FULL_EXAMPLE_DIR)/values.yaml
