@@ -23,10 +23,18 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Iterator;
 import java.util.Set;
+import org.hibernate.engine.spi.EntityEntry;
+import org.hibernate.engine.spi.ManagedEntity;
+import org.hibernate.engine.spi.PersistentAttributeInterceptor;
 
 public class IgnoredTypesModelConverter implements ModelConverter {
 
-    private static final Set<Class<?>> IGNORED_CLASSES = Set.of(JavaType.class);
+    private static final Set<Class<?>> IGNORED_CLASSES = Set.of(
+        JavaType.class,
+        EntityEntry.class,
+        ManagedEntity.class,
+        PersistentAttributeInterceptor.class
+    );
 
     // fixes NPE exception in SpringDoc SchemaPropertyDeprecatingConverter (issue #3934)
     @Override
