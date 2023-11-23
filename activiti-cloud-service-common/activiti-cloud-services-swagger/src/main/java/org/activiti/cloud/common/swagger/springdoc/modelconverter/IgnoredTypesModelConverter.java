@@ -25,22 +25,22 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IgnoredTypesModelConverter implements ModelConverter {
 
-    private static final Set<String> IGNORED_CLASS_NAMES = Set.of(
+    private static final String[] IGNORED_CLASS_NAMES = {
         "com.fasterxml.jackson.databind.JavaType",
         "org.hibernate.engine.spi.EntityEntry",
         "org.hibernate.engine.spi.ManagedEntity",
         "org.hibernate.engine.spi.PersistentAttributeInterceptor"
-    );
+    };
 
     private static final Set<Class<?>> IGNORED_CLASSES;
 
     static {
         IGNORED_CLASSES =
-            IGNORED_CLASS_NAMES
-                .stream()
+            Stream.of(IGNORED_CLASS_NAMES)
                 .map(IgnoredTypesModelConverter::forName)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
