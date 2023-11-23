@@ -22,19 +22,39 @@ import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
-import org.hibernate.engine.spi.EntityEntry;
-import org.hibernate.engine.spi.ManagedEntity;
-import org.hibernate.engine.spi.PersistentAttributeInterceptor;
+import java.util.stream.Collectors;
 
 public class IgnoredTypesModelConverter implements ModelConverter {
 
-    private static final Set<Class<?>> IGNORED_CLASSES = Set.of(
-        JavaType.class,
-        EntityEntry.class,
-        ManagedEntity.class,
-        PersistentAttributeInterceptor.class
+    private static final Set<String> IGNORED_CLASS_NAMES = Set.of(
+        "com.fasterxml.jackson.databind.JavaType",
+        "org.hibernate.engine.spi.EntityEntry",
+        "org.hibernate.engine.spi.ManagedEntity",
+        "org.hibernate.engine.spi.PersistentAttributeInterceptor"
     );
+
+    private static final Set<Class<?>> IGNORED_CLASSES;
+
+    static {
+        IGNORED_CLASSES =
+            IGNORED_CLASS_NAMES
+                .stream()
+                .map(IgnoredTypesModelConverter::forName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+    }
+
+    private static Optional<Class<?>> forName(String className) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(className, false, IgnoredTypesModelConverter.class.getClassLoader());
+        } catch (ClassNotFoundException ignored) {}
+
+        return Optional.ofNullable(clazz);
+    }
 
     // fixes NPE exception in SpringDoc SchemaPropertyDeprecatingConverter (issue #3934)
     @Override
