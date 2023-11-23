@@ -220,7 +220,6 @@ public class CommonSecurityAutoConfiguration {
             .exceptionHandling(spec ->
                 spec.accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             )
-            .csrf(spec -> spec.enable())
             .httpBasic(spec -> spec.disable())
             .oauth2ResourceServer(spec -> spec.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
             .build();
