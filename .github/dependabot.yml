@@ -28,4 +28,12 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/check-service-health"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/setup-env-for-brokers"
+    schedule:
+      interval: "weekly"
