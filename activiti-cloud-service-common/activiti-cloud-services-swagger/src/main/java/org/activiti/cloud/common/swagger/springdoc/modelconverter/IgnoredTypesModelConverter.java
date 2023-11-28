@@ -33,14 +33,15 @@ public class IgnoredTypesModelConverter implements ModelConverter {
         "com.fasterxml.jackson.databind.JavaType",
         "org.hibernate.engine.spi.EntityEntry",
         "org.hibernate.engine.spi.ManagedEntity",
-        "org.hibernate.engine.spi.PersistentAttributeInterceptor"
+        "org.hibernate.engine.spi.PersistentAttributeInterceptor",
     };
 
     private static final Set<Class<?>> IGNORED_CLASSES;
 
     static {
         IGNORED_CLASSES =
-            Stream.of(IGNORED_CLASS_NAMES)
+            Stream
+                .of(IGNORED_CLASS_NAMES)
                 .map(IgnoredTypesModelConverter::forName)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
