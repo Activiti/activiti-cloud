@@ -6,6 +6,7 @@ create table model
     last_modified_by                   varchar(255),
     last_modified_date                 timestamp,
     name                               varchar(255),
+    disp_name                          varchar(255),
     template                           varchar(255),
     type                               varchar(255),
     latest_version_version             varchar(255),

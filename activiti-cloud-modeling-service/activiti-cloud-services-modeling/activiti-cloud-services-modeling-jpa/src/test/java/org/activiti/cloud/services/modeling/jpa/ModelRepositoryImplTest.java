@@ -60,7 +60,8 @@ public class ModelRepositoryImplTest {
         project.setName("testProjectName");
         model = new ModelEntity();
         model.setId("testModelId");
-        model.setName("testNameId");
+        model.setDisplayName("testNameId");
+        model.setKey("key");
         model.addProject(project);
         model.addProject(new ProjectEntity());
     }
@@ -70,7 +71,7 @@ public class ModelRepositoryImplTest {
         when(
             modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
                 project.getId(),
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             )
         )
@@ -78,14 +79,14 @@ public class ModelRepositoryImplTest {
 
         Optional<ModelEntity> result = repository.findModelByNameInProject(
             project,
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
             .findModelByProjectIdAndNameEqualsAndTypeEquals(
                 project.getId(),
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             );
         assertThat(result.isPresent()).isTrue();
@@ -99,7 +100,7 @@ public class ModelRepositoryImplTest {
         when(
             modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
                 null,
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             )
         )
@@ -107,12 +108,12 @@ public class ModelRepositoryImplTest {
 
         Optional<ModelEntity> result = repository.findModelByNameInProject(
             null,
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
+            .findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getDisplayName(), processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
     }
@@ -122,7 +123,7 @@ public class ModelRepositoryImplTest {
         when(
             modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
                 project.getId(),
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             )
         )
@@ -130,14 +131,14 @@ public class ModelRepositoryImplTest {
 
         Optional<ModelEntity> result = repository.findModelByNameInProject(
             project,
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
             .findModelByProjectIdAndNameEqualsAndTypeEquals(
                 project.getId(),
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             );
         assertThat(result.isEmpty()).isTrue();
@@ -148,7 +149,7 @@ public class ModelRepositoryImplTest {
         when(
             modelJpaRepository.findModelByProjectIdAndNameEqualsAndTypeEquals(
                 null,
-                model.getName(),
+                model.getDisplayName(),
                 processModelType.getName()
             )
         )
@@ -156,12 +157,12 @@ public class ModelRepositoryImplTest {
 
         Optional<ModelEntity> result = repository.findModelByNameInProject(
             null,
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getName(), processModelType.getName());
+            .findModelByProjectIdAndNameEqualsAndTypeEquals(null, model.getDisplayName(), processModelType.getName());
         assertThat(result.isEmpty()).isTrue();
     }
 
@@ -169,7 +170,7 @@ public class ModelRepositoryImplTest {
     public void should_returnModel_when_getModelByNameAndScopeExists() {
         when(
             modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
-                model.getName(),
+                model.getDisplayName(),
                 ModelScope.GLOBAL,
                 processModelType.getName()
             )
@@ -177,12 +178,12 @@ public class ModelRepositoryImplTest {
             .thenReturn(Collections.singletonList(model));
 
         Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL, processModelType.getName());
+            .findModelByNameAndScopeAndTypeEquals(model.getDisplayName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
     }
@@ -191,7 +192,7 @@ public class ModelRepositoryImplTest {
     public void should_returnEmpty_when_getModelByNameAndScopeDoesNotExist() {
         when(
             modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
-                model.getName(),
+                model.getDisplayName(),
                 ModelScope.GLOBAL,
                 processModelType.getName()
             )
@@ -199,12 +200,12 @@ public class ModelRepositoryImplTest {
             .thenReturn(Collections.emptyList());
 
         Optional<ModelEntity> result = repository.findGlobalModelByNameAndType(
-            model.getName(),
+            model.getDisplayName(),
             processModelType.getName()
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByNameAndScopeAndTypeEquals(model.getName(), ModelScope.GLOBAL, processModelType.getName());
+            .findModelByNameAndScopeAndTypeEquals(model.getDisplayName(), ModelScope.GLOBAL, processModelType.getName());
         assertThat(result.isPresent()).isFalse();
     }
 
@@ -238,13 +239,16 @@ public class ModelRepositoryImplTest {
 
         ModelEntity newModel = new ModelEntity();
         newModel.setId("newModelId");
-        newModel.setName("newNameId");
+        newModel.setDisplayName("newNameId");
+        newModel.setKey("key");
 
         when(modelJpaRepository.save(any(ModelEntity.class))).thenReturn(model);
 
         ModelEntity updatedModel = repository.updateModel(model, newModel);
 
         assertThat(updatedModel.getName()).isEqualTo("newNameId");
+        assertThat(updatedModel.getDisplayName()).isEqualTo("newNameId");
+        assertThat(updatedModel.getKey()).isEqualTo("key");
         assertThat(updatedModel.getLatestVersion().getVersion()).isEqualTo("0.0.2");
     }
 
@@ -261,7 +265,8 @@ public class ModelRepositoryImplTest {
 
         ModelEntity newModel = new ModelEntity();
         newModel.setId("testModelId");
-        newModel.setName("testNameId");
+        newModel.setDisplayName("testNameId");
+        newModel.setKey("key");
         newModel.addProject(project);
         newModel.addProject(new ProjectEntity());
 

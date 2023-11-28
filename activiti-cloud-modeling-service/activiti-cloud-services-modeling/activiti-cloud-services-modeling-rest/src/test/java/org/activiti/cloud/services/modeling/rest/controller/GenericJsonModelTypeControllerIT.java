@@ -124,7 +124,7 @@ public class GenericJsonModelTypeControllerIT {
             .perform(
                 post("/v1/projects/{projectId}/models", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -139,7 +139,7 @@ public class GenericJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -158,7 +158,7 @@ public class GenericJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -170,14 +170,14 @@ public class GenericJsonModelTypeControllerIT {
 
     @Test
     public void should_throwTooLongNameException_when_creatingGenericJsonModelWithNameTooLong() throws Exception {
-        String name = "123456789_123456789_1234567";
+        String name = "a".repeat(101);
 
         project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -185,7 +185,7 @@ public class GenericJsonModelTypeControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                    String.format("The model name length cannot be greater than 100: '%s'", name)
             );
     }
 
@@ -198,7 +198,7 @@ public class GenericJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isCreated());
@@ -213,7 +213,7 @@ public class GenericJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isCreated());
@@ -224,13 +224,13 @@ public class GenericJsonModelTypeControllerIT {
         String name = "updated-connector-name";
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         mockMvc
             .perform(
                 put("/v1/models/{modelId}", genericJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
@@ -241,13 +241,13 @@ public class GenericJsonModelTypeControllerIT {
         String name = null;
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         mockMvc
             .perform(
                 put("/v1/models/{modelId}", genericJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -258,12 +258,12 @@ public class GenericJsonModelTypeControllerIT {
         String name = "";
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -275,15 +275,15 @@ public class GenericJsonModelTypeControllerIT {
 
     @Test
     public void should_throwBadNameException_when_updatingGenericJsonModelWithNameTooLong() throws Exception {
-        String name = "123456789_123456789_1234567";
+        String name = "a".repeat(101);
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -291,7 +291,7 @@ public class GenericJsonModelTypeControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                    String.format("The model name length cannot be greater than 100: '%s'", name)
             );
     }
 
@@ -300,12 +300,12 @@ public class GenericJsonModelTypeControllerIT {
         String name = "name_with_underscore";
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isOk());
@@ -316,12 +316,12 @@ public class GenericJsonModelTypeControllerIT {
         String name = "NameWithUppercase";
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isOk());
@@ -333,7 +333,7 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
         Map<String, Object> extensions = null;
 
         genericJsonModel.setExtensions(extensions);
@@ -354,7 +354,7 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
 
         genericJsonModel.setExtensions(extensions);
@@ -375,7 +375,7 @@ public class GenericJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
         extensions.put("string", "value");
         extensions.put("number", 2);

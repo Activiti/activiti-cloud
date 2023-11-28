@@ -1,0 +1,16 @@
+{
+    "type": "FILE",
+    "id": "extension-123456",
+    "name": "simple-valid-extension",
+    "key": "!@#$%^&*()",
+    "extensions": {
+        "a": "1",
+        "b": 1,
+        "c": true,
+        "d": {
+        	"d1":"a",
+        	"d2":"b"
+        },
+        "e":[1,2,3,4,5]
+    }
+}

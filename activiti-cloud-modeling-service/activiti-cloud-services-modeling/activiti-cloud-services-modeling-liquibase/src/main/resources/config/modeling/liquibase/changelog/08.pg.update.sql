@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.services.modeling.service.utils;
+ALTER TABLE model
+ADD COLUMN disp_name varchar(255);
 
-public interface ProjectKeyGenerator {
-    String generate(String projectName);
-}
+UPDATE model m
+SET disp_name = m.name;

@@ -85,7 +85,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
     public void setUp() {
         this.mockMvc = webAppContextSetup(context).build();
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
     }
 
     @AfterEach
@@ -96,7 +96,7 @@ public class GenericJsonModelTypeContentUpdateListenerControllerIT {
     @Test
     public void should_callJsonContentUpdateListener_when_updatingModelContent() throws Exception {
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
 
         String stringModel = objectMapper.writer(jsonPrettyPrinter).writeValueAsString(genericJsonModel);
 

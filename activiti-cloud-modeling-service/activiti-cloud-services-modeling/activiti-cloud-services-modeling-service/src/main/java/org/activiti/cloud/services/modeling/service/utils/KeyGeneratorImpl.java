@@ -20,17 +20,16 @@ import org.activiti.cloud.services.modeling.validation.project.ProjectNameValida
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class ProjectKeyGeneratorImpl implements ProjectKeyGenerator {
+public class KeyGeneratorImpl implements KeyGenerator {
 
     public static final String KEY_SEPARATOR = "-";
     public static final String ALPHANUMERIC_REGEX = "[^a-z0-9]+";
     private final ProjectNameValidator projectNameValidator;
 
-    public ProjectKeyGeneratorImpl(ProjectNameValidator projectNameValidator) {
+    public KeyGeneratorImpl(ProjectNameValidator projectNameValidator) {
         this.projectNameValidator = projectNameValidator;
     }
 
-    //TODO improve on key generation
     @Override
     public String generate(String projectName) {
         if (StringUtils.isNotBlank(projectName)) {

@@ -83,7 +83,7 @@ public class ModelUpdateListenerControllerIT {
     public void setUp() {
         mockMvc = webAppContextSetup(context).build();
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
     }
 
     @AfterEach
@@ -94,7 +94,7 @@ public class ModelUpdateListenerControllerIT {
     @Test
     public void should_callUpdateListenerMatchingWithModelType_when_updatingModelContent() throws Exception {
         String name = "updated-model-name";
-        Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
+        Model updatedModel = new ModelEntity(name, "key", genericJsonModelType.getName());
 
         mockMvc
             .perform(
@@ -107,7 +107,7 @@ public class ModelUpdateListenerControllerIT {
         verify(genericJsonModelUpdateListener, times(1))
             .execute(
                 argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
-                argThat(newModel -> newModel.getName().equals(name))
+                argThat(newModel -> newModel.getName().equals(name) && newModel.getDisplayName().equals(name))
             );
 
         verify(genericNonJsonModelUpdateListener, never()).execute(any(), any());

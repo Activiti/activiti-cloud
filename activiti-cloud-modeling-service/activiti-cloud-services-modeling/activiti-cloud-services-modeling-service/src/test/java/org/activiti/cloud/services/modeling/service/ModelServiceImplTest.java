@@ -21,9 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -65,6 +67,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,6 +135,9 @@ class ModelServiceImplTest {
     @Mock
     private ModelContentConverter<?> modelContentConverter;
 
+    @Mock
+    private KeyGenerator keyGenerator;
+
     private Model modelTwo;
 
     private Project projectOne;
@@ -169,9 +175,11 @@ class ModelServiceImplTest {
                     processModelContentConverter,
                     modelUpdateListeners,
                     fileMagicNumberValidator,
-                    fileContentSanitizer
+                    fileContentSanitizer,
+                    keyGenerator
                 )
             );
+        lenient().when(keyGenerator.generate(anyString())).thenReturn("key");
     }
 
     @Test
@@ -233,10 +241,11 @@ class ModelServiceImplTest {
             .thenReturn(new ObjectMapper().writeValueAsBytes(extensionModelImpl));
 
         Optional<FileContent> fileContent = modelService.getModelExtensionsFileContent(extensionModelImpl);
-        assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-extensions.json");
+        assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-asdfg-extensions.json");
         assertThat(new String(fileContent.get().getFileContent()))
             .isEqualToIgnoringCase(
-                "{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"type\":\"PROCESS\"," +
+                "{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"displayName\":\"fake-process-model\"," +
+                "\"key\":\"fake-process-model-asdfg\",\"type\":\"PROCESS\"," +
                 "\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}"
             );
     }
@@ -248,7 +257,7 @@ class ModelServiceImplTest {
             .thenReturn(Optional.of(modelOne));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getDisplayName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         assertThatThrownBy(() -> modelService.createModel(projectOne, modelTwo))
@@ -260,7 +269,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getDisplayName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -439,7 +448,7 @@ class ModelServiceImplTest {
         when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getDisplayName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         assertThat(modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
@@ -493,7 +502,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getDisplayName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -511,7 +520,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getName()).thenReturn("name");
+        when(modelOne.getDisplayName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -519,7 +528,8 @@ class ModelServiceImplTest {
 
         Model modelThree = new ModelImpl();
         modelThree.setId("modelThreeId");
-        modelThree.setName("name");
+        modelThree.setDisplayName("name");
+        modelThree.setKey("key");
         modelThree.setType(modelType.getName());
 
         when(modelRepository.updateModel(modelThree, modelThree)).thenReturn(modelThree);
@@ -531,15 +541,15 @@ class ModelServiceImplTest {
 
     @Test
     void should_getModels_when_searchingByName() {
-        when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class)))
+        when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getDisplayName()), any(Pageable.class)))
             .thenReturn(new PageImpl(asList(modelTwo)));
 
-        Page<Model> models = modelService.getModelsByName(projectOne, modelTwo.getName(), PageRequest.of(0, 50));
+        Page<Model> models = modelService.getModelsByName(projectOne, modelTwo.getDisplayName(), PageRequest.of(0, 50));
 
         assertThat(models.getContent()).hasSize(1);
         assertThat(models.getContent().get(0)).isEqualTo(modelTwo);
 
-        verify(modelRepository).getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class));
+        verify(modelRepository).getModelsByName(eq(projectOne), eq(modelTwo.getDisplayName()), any(Pageable.class));
     }
 
     @Test
@@ -679,7 +689,8 @@ class ModelServiceImplTest {
         extension.put("constants", "");
         extension.put("properties", "");
         transformationModelImpl.setExtensions(extension);
-        transformationModelImpl.setName("fake-process-model");
+        transformationModelImpl.setDisplayName("fake-process-model");
+        transformationModelImpl.setKey("fake-process-model-asdfg");
         transformationModelImpl.setType("PROCESS");
         transformationModelImpl.setId("12345678");
         return transformationModelImpl;

@@ -42,8 +42,8 @@ import org.activiti.cloud.modeling.api.process.TaskVariableMapping;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.entity.ProjectEntity;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGeneratorImpl;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.KeyGeneratorImpl;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.StringUtils;
@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  */
 public class MockFactory {
 
-    private static final ProjectKeyGenerator projectKeyGenerator = new ProjectKeyGeneratorImpl(
+    private static final KeyGenerator KEY_GENERATOR = new KeyGeneratorImpl(
         new ProjectNameValidator()
     );
 
@@ -68,7 +68,7 @@ public class MockFactory {
     }
 
     public static String generateKey(String name) {
-        return projectKeyGenerator.generate(name);
+        return KEY_GENERATOR.generate(name);
     }
 
     public static ModelEntity processModel(String name) {
@@ -103,7 +103,8 @@ public class MockFactory {
         Extensions extensions,
         byte[] content
     ) {
-        ModelEntity processModel = new ModelEntity(name, PROCESS);
+        //TODO change null to generated key
+        ModelEntity processModel = new ModelEntity(name, null, PROCESS);
         processModel.addProject(parentProject);
         processModel.setExtensions(extensions != null ? buildExtensions(name, extensions) : null);
         if (content != null) {
@@ -266,7 +267,8 @@ public class MockFactory {
     }
 
     public static ModelEntity connectorModel(String name) {
-        return new ModelEntity(name, ConnectorModelType.NAME);
+        //TODO change null to generated key
+        return new ModelEntity(name, null, ConnectorModelType.NAME);
     }
 
     public static ModelEntity connectorModel(ProjectEntity parentProject, String name) {
@@ -304,7 +306,7 @@ public class MockFactory {
             mainProcessName + "." + BPMN20_XML,
             CONTENT_TYPE_XML,
             new String(content)
-                .replaceFirst("calledElement=\".*\"", "calledElement=\"" + callActivity.getName() + "\"")
+                .replaceFirst("calledElement=\".*\"", "calledElement=\"" + callActivity.getKey() + "\"")
                 .getBytes()
         );
     }
@@ -312,13 +314,13 @@ public class MockFactory {
     public static MockMultipartFile multipartExtensionsFile(Model model, byte[] content) {
         return new MockMultipartFile(
             "file",
-            model.getName() + "-extensions.json",
+            model.getKey() + "-extensions.json",
             CONTENT_TYPE_JSON,
             new String(content).replaceAll("\"id\": \".*\"", "\"id\": \"process-" + model.getId() + "\"").getBytes()
         );
     }
 
     public static MockMultipartFile multipartProcessFile(Model model, byte[] content) {
-        return new MockMultipartFile("file", model.getName() + "." + BPMN20_XML, CONTENT_TYPE_XML, content);
+        return new MockMultipartFile("file", model.getKey() + "." + BPMN20_XML, CONTENT_TYPE_XML, content);
     }
 }

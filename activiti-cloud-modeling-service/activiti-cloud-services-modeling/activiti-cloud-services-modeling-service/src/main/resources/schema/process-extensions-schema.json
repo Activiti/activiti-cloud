@@ -618,6 +618,12 @@
     "name": {
       "type": "string"
     },
+    "displayName": {
+      "type": "string"
+    },
+    "key": {
+      "type": "string"
+    },
     "type": {
       "type": "string"
     },

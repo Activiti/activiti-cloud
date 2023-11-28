@@ -68,6 +68,25 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
     }
 
     @Override
+    public Optional<ModelEntity> findModelByKeyInProject(
+        ProjectEntity project,
+        String modelKey,
+        String modelTypeFilter
+    ) {
+        List<ModelEntity> models = modelJpaRepository.findModelByProjectIdAndKeyEqualsAndTypeEquals(
+            project != null ? project.getId() : null,
+            modelKey,
+            modelTypeFilter
+        );
+
+        if (models != null && !models.isEmpty()) {
+            return Optional.of(models.get(0));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<ModelEntity> findGlobalModelByNameAndType(String modelName, String modelTypeFilter) {
         List<ModelEntity> models = modelJpaRepository.findModelByNameAndScopeAndTypeEquals(
             modelName,
@@ -106,7 +125,8 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity updateModel(ModelEntity modelToBeUpdated, ModelEntity newModel) {
-        Optional.ofNullable(newModel.getName()).ifPresent(modelToBeUpdated::setName);
+        // TODO add key?
+        Optional.ofNullable(newModel.getDisplayName()).ifPresent(modelToBeUpdated::setDisplayName);
         Optional.ofNullable(newModel.getExtensions()).ifPresent(modelToBeUpdated::setExtensions);
         if (!modelToBeUpdated.equals(newModel)) {
             versionGenerationHelper.generateNextVersion(modelToBeUpdated);
@@ -116,7 +136,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity copyModel(ModelEntity model, ProjectEntity project) {
-        ModelEntity modelEntityClone = new ModelEntity(model.getName(), model.getType());
+        ModelEntity modelEntityClone = new ModelEntity(model.getDisplayName(), "key", model.getType());
         modelEntityClone.setExtensions(model.getExtensions());
         modelEntityClone.setContentType(model.getContentType());
         modelEntityClone.setContent(model.getContent());

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
 import org.activiti.cloud.modeling.api.ModelContent;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Implementation for the {@link ModelContent} corresponding to connector model type
@@ -32,6 +33,8 @@ public class ConnectorModelContent implements ModelContent {
     private String id;
 
     private String name;
+
+    private String key;
 
     private String template;
 
@@ -54,6 +57,17 @@ public class ConnectorModelContent implements ModelContent {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getKey() {
+        if (StringUtils.isBlank(key)) {
+            return name;
+        }
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override

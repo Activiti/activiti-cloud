@@ -89,7 +89,7 @@ public class GenericNonJsonModelTypeValidationControllerIT {
     @BeforeEach
     public void setUp() {
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 

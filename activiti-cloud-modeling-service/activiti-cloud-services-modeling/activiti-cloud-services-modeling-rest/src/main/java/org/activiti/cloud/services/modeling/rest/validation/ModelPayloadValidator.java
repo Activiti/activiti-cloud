@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.rest.validation;
 
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.services.modeling.validation.NameValidator;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.springframework.validation.Errors;
 
 /**
@@ -24,14 +25,17 @@ import org.springframework.validation.Errors;
  */
 public class ModelPayloadValidator extends GenericPayloadValidator<Model> implements NameValidator {
 
-    public ModelPayloadValidator(boolean validateRequiredFields) {
+    private ModelNameValidator modelNameValidator;
+
+    public ModelPayloadValidator(boolean validateRequiredFields, ModelNameValidator modelNameValidator) {
         super(Model.class, validateRequiredFields);
+        this.modelNameValidator = modelNameValidator;
     }
 
     @Override
     public void validatePayload(Model model, Errors errors) {
-        if (validateRequiredFields || model.getName() != null) {
-            validateName(model.getName(), "model")
+        if (validateRequiredFields || model.getDisplayName() != null) {
+            modelNameValidator.validateName(model)
                 .forEach(error -> errors.rejectValue("name", error.getErrorCode(), error.getDescription()));
         }
     }

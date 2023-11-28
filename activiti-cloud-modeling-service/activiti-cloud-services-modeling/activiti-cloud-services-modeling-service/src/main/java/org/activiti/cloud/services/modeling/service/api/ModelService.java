@@ -48,6 +48,8 @@ public interface ModelService {
 
     Model createModel(Project project, Model model);
 
+    Model createModelForImport(Project project, Model model);
+
     Model updateModel(Model modelToBeUpdated, Model newModel);
 
     Model copyModel(Model modelToBeCopied, Project project, Map<String, String> identifiersToUpdate);

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -46,6 +47,7 @@ import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.springframework.util.StringUtils;
 
 /**
  * Model model entity
@@ -82,7 +84,14 @@ public class ModelEntity
 
     private String type;
 
+    @Transient
     private String name;
+
+    @Column(name = "disp_name")
+    private String displayName;
+
+    @Column(name = "name")
+    private String key;
 
     private String template;
 
@@ -94,8 +103,10 @@ public class ModelEntity
 
     public ModelEntity() {} // for JPA
 
-    public ModelEntity(String name, String type) {
+    public ModelEntity(String name, String key, String type) {
         this.name = name;
+        this.displayName = name;
+        this.key = key;
         this.type = type;
     }
 
@@ -111,12 +122,43 @@ public class ModelEntity
 
     @Override
     public String getName() {
-        return name;
+        if (StringUtils.hasText(name)) {
+            return name;
+        }
+        return displayName;
     }
 
     @Override
     public void setName(String name) {
+        this.displayName = name;
         this.name = name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        if (StringUtils.hasText(displayName)) {
+            return displayName;
+        }
+        return name;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+        this.name = displayName;
+    }
+
+    @Override
+    public String getKey() {
+        if (StringUtils.hasText(key)) {
+            return key;
+        }
+        return name;
+    }
+
+    @Override
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override

@@ -101,4 +101,20 @@
       splitStatements="true"
       stripComments="true" />
   </changeSet>
+
+  <changeSet id="model-add-display-name" author="aae-modeling">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="model"/>
+      <columnExists tableName="model" columnName="name"/>
+      <not>
+        <columnExists tableName="project" columnName="disp_name"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+      encoding="utf8"
+      path="changelog/08.pg.update.sql"
+      relativeToChangelogFile="true"
+      splitStatements="true"
+      stripComments="true" />
+  </changeSet>
 </databaseChangeLog>

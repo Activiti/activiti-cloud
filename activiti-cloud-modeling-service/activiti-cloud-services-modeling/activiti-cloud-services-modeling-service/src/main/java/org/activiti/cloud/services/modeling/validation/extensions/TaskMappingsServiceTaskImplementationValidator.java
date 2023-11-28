@@ -41,6 +41,7 @@ import org.activiti.cloud.services.modeling.converter.ConnectorModelContentConve
 import org.activiti.cloud.services.modeling.converter.ConnectorModelFeature;
 import org.activiti.cloud.services.modeling.validation.process.ServiceTaskImplementationType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Implementation of {@link TaskMappingsValidator} for {@link ServiceTask} implementation
@@ -215,7 +216,7 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
                     .values()
                     .forEach(action ->
                         availableConnectorActions.put(
-                            getImplementationKey(connectorModelContent.getName(), action),
+                            getImplementationKey(connectorModelContent.getKey(), action),
                             action
                         )
                     )
@@ -224,9 +225,9 @@ public class TaskMappingsServiceTaskImplementationValidator implements TaskMappi
         return availableConnectorActions;
     }
 
-    private String getImplementationKey(String connectorName, ConnectorModelFeature action) {
-        return isEmpty(action) && isEmpty(action.getName())
-            ? connectorName
-            : String.join(".", connectorName, action.getName());
+    private String getImplementationKey(String connectorKey, ConnectorModelFeature action) {
+        return ObjectUtils.isEmpty(action) && ObjectUtils.isEmpty(action.getName())
+            ? connectorKey
+            : String.join(".", connectorKey, action.getName());
     }
 }

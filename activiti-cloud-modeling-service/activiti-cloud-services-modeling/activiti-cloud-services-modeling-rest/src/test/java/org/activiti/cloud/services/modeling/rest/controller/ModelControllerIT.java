@@ -247,7 +247,7 @@ public class ModelControllerIT {
     public void should_throwBadRequestException_when_creatingModelOfUnknownType() throws Exception {
         Project project = projectRepository.createProject(project("parent-project"));
 
-        Model formModel = new ModelEntity("name", "FORM");
+        Model formModel = new ModelEntity("name", "key", "FORM");
 
         mockMvc
             .perform(
@@ -470,7 +470,7 @@ public class ModelControllerIT {
 
         Optional<Model> optionalModel = modelRepository.findModelById(processModel.getId());
         assertThat(optionalModel)
-            .hasValueSatisfying(model -> assertThat(model.getName()).isEqualTo("new-process-model"));
+            .hasValueSatisfying(model -> assertThat(model.getDisplayName()).isEqualTo("new-process-model"));
     }
 
     @Test
@@ -1286,7 +1286,8 @@ public class ModelControllerIT {
 
         String subjectModelString = mapper.writeValueAsString(modelTwo);
         Model deserializedStringModel = mapper.readValue(subjectModelString, Model.class);
-        deserializedStringModel.setName("model-1");
+        deserializedStringModel.setDisplayName("model-1");
+        deserializedStringModel.setKey("key");
         deserializedStringModel.addProject(projectOne);
         deserializedStringModel.addProject(projectTwo);
 

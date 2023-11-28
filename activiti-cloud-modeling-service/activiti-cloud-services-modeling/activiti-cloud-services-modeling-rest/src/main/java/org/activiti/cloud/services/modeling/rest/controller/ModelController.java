@@ -352,7 +352,7 @@ public class ModelController implements ModelRestApi {
     private boolean hasSameModelName(Model storedModel, Model modelToBeUpdated) {
         return (
             storedModel.getType().equals(modelToBeUpdated.getType()) &&
-            storedModel.getName().equals(modelToBeUpdated.getName())
+            storedModel.getDisplayName().equals(modelToBeUpdated.getDisplayName())
         );
     }
 }

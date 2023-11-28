@@ -55,7 +55,7 @@ import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAcce
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -93,7 +93,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectDecoratorService projectDecoratorService;
 
-    private final ProjectKeyGenerator projectKeyGenerator;
+    private final KeyGenerator keyGenerator;
 
     public ProjectServiceImpl(
         ProjectRepository projectRepository,
@@ -105,7 +105,7 @@ public class ProjectServiceImpl implements ProjectService {
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
         ProjectDecoratorService projectDecoratorService,
-        ProjectKeyGenerator projectKeyGenerator
+        KeyGenerator keyGenerator
     ) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
@@ -116,7 +116,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.jsonMetadataConverter = jsonMetadataConverter;
         this.projectFilterService = projectFilterService;
         this.projectDecoratorService = projectDecoratorService;
-        this.projectKeyGenerator = projectKeyGenerator;
+        this.keyGenerator = keyGenerator;
     }
 
     /**
@@ -142,7 +142,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project createProject(Project project) {
         project.setId(null);
-        project.setKey(projectKeyGenerator.generate(project.getName()));
+        project.setKey(keyGenerator.generate(project.getName()));
         project.setName(project.getName());
         List<ModelValidationError> nameValidationErrors = validateProjectNameAndKey(project);
         if (!nameValidationErrors.isEmpty()) {
@@ -169,7 +169,7 @@ public class ProjectServiceImpl implements ProjectService {
             .ifPresent(name -> {
                 if (!name.equals(projectToUpdate.getName())) {
                     projectToUpdate.setName(name);
-                    projectToUpdate.setKey(projectKeyGenerator.generate(name));
+                    projectToUpdate.setKey(keyGenerator.generate(name));
                 }
             });
         return projectRepository.updateProject(projectToUpdate);
@@ -241,7 +241,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project copyProject(Project projectToCopy, String newProjectName) {
-        String newProjectKey = projectKeyGenerator.generate(newProjectName);
+        String newProjectKey = keyGenerator.generate(newProjectName);
         Project projectCopy = projectRepository.copyProject(projectToCopy, newProjectName, newProjectKey);
         List<Model> models = modelService.getAllModels(projectToCopy);
 

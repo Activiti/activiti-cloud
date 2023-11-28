@@ -57,6 +57,7 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
+import org.activiti.cloud.modeling.core.error.ModelKeyConflictException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
@@ -66,8 +67,10 @@ import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
 import org.activiti.cloud.services.modeling.validation.ProjectValidationContext;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -105,6 +108,8 @@ public class ModelServiceImpl implements ModelService {
 
     private final Map<String, List<ModelUpdateListener>> modelUpdateListenersMapByModelType;
 
+    private final KeyGenerator keyGenerator;
+
     private static final String MODEL_IDENTIFIER_SEPARATOR = "-";
 
     private static final String ERROR_MESSAGE =
@@ -121,7 +126,8 @@ public class ModelServiceImpl implements ModelService {
         ProcessModelContentConverter processModelContentConverter,
         Set<ModelUpdateListener> modelUpdateListeners,
         FileMagicNumberValidator fileContentValidator,
-        FileContentSanitizer fileContentSanitizer
+        FileContentSanitizer fileContentSanitizer,
+        KeyGenerator keyGenerator
     ) {
         this.modelRepository = modelRepository;
         this.modelTypeService = modelTypeService;
@@ -137,6 +143,7 @@ public class ModelServiceImpl implements ModelService {
                 .collect(
                     Collectors.groupingBy(modelUpdateListener -> modelUpdateListener.getHandledModelType().getName())
                 );
+        this.keyGenerator = keyGenerator;
     }
 
     @Override
@@ -168,7 +175,8 @@ public class ModelServiceImpl implements ModelService {
         try {
             Model model = (Model) modelRepository.getModelType().getConstructor().newInstance();
             model.setType(type);
-            model.setName(name);
+            model.setDisplayName(name); // TODO add key?
+            //            model.setKey();
             return model;
         } catch (
             InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e
@@ -179,8 +187,20 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model createModel(Project project, Model model) {
+        String key = keyGenerator.generate(model.getDisplayName());
+        return createModelWithKey(project, model, key);
+    }
+
+    @Override
+    public Model createModelForImport(Project project, Model model) {
+        return createModelWithKey(project, model, model.getKey());
+    }
+
+    private Model createModelWithKey(Project project, Model model, String key) {
+        model.setKey(key);
         checkIfModelNameExistsInProject(project, model);
         checkModelScopeIntegrity(model);
+        checkIfModelKeyExistsInProject(project, model);
         model.setId(null);
         ModelType modelType = findModelType(model);
 
@@ -203,15 +223,29 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        Optional<Model> existingModel = modelRepository.findModelByNameInProject(
-            project,
-            model.getName(),
-            model.getType()
-        );
+        String name = model.getDisplayName();
+        Optional<Model> existingModel = modelRepository.findModelByNameInProject(project, name, model.getType());
         if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
-                "A model with the same type already exists within the project with id: " +
-                (project != null ? project.getId() : "null")
+                String.format(
+                    "A model with the same type and name %s already exists within the project with id: %s",
+                    name,
+                    project != null ? project.getId() : "null"
+                )
+            );
+        }
+    }
+
+    private void checkIfModelKeyExistsInProject(Project project, Model model) {
+        String key = model.getKey();
+        Optional<Model> existingModel = modelRepository.findModelByKeyInProject(project, key, model.getType());
+        if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
+            throw new ModelKeyConflictException(
+                String.format(
+                    "A model with the same type and key %s already exists within the project with id: %s",
+                    key,
+                    project != null ? project.getId() : "null"
+                )
             );
         }
     }
@@ -269,7 +303,7 @@ public class ModelServiceImpl implements ModelService {
         }
 
         Model fullModel = findModelById(model.getId()).orElse(model);
-        Model modelToFile = buildModel(fullModel.getType(), fullModel.getName());
+        Model modelToFile = buildModel(fullModel.getType(), fullModel.getDisplayName());
         modelToFile.setId(fullModel.getType().toLowerCase().concat(MODEL_IDENTIFIER_SEPARATOR).concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
         modelToFile.setScope(null);
@@ -290,7 +324,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public String getExtensionsFilename(Model model) {
-        return toJsonFilename(model.getName() + findModelType(model).getExtensionsFileSuffix());
+        return toJsonFilename(model.getKey() + findModelType(model).getExtensionsFileSuffix());
     }
 
     @Override
@@ -305,7 +339,7 @@ public class ModelServiceImpl implements ModelService {
 
     private FileContent getModelFileContent(Model model, byte[] modelBytes) {
         return new FileContent(
-            setExtension(model.getName(), findModelType(model).getContentFileExtension()),
+            setExtension(model.getKey(), findModelType(model).getContentFileExtension()),
             model.getContentType(),
             modelBytes
         );
@@ -338,7 +372,7 @@ public class ModelServiceImpl implements ModelService {
             Optional
                 .ofNullable(model.getType())
                 .flatMap(modelContentService::findModelContentConverter)
-                .flatMap(validator -> validator.convertToModelContent(sanitizedFileContent.getFileContent()))
+                .flatMap(converter -> converter.convertToModelContent(sanitizedFileContent.getFileContent()))
                 .ifPresent(modelContent -> model.setTemplate(modelContent.getTemplate()));
         } catch (XMLException e) {
             throw new ImportModelException("Error importing model : " + e.getMessage());
@@ -408,7 +442,7 @@ public class ModelServiceImpl implements ModelService {
         String originalId = resolveOriginalId(modelType, fileContent, model);
 
         model.setScope(ModelScope.PROJECT);
-        createModel(project, model);
+        createModelForImport(project, model);
         if (originalId != null) {
             return new ImportedModel(model, originalId, buildModelTypeAwareIdentifier(model));
         }
@@ -497,7 +531,12 @@ public class ModelServiceImpl implements ModelService {
         Model model = jsonConverter
             .tryConvertToEntity(fileContent.getFileContent())
             .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
-        model.setName(removeEnd(removeExtension(fileContent.getFilename(), JSON), modelType.getExtensionsFileSuffix()));
+        //TODO check if behavior is expected
+        var key = removeEnd(removeExtension(fileContent.getFilename(), JSON), modelType.getExtensionsFileSuffix());
+        model.setKey(key);
+        if (StringUtils.isBlank(model.getDisplayName())) {
+            model.setDisplayName(key);
+        }
         model.setType(modelType.getName());
 
         return model;
