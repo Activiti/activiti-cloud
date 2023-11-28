@@ -16,10 +16,14 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.UUID;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
@@ -49,6 +53,9 @@ public class TaskEntityCreatedEventHandlerTest {
     private EntityManager entityManager;
 
     @Mock
+    private EntityManagerFinder entityManagerFinder;
+
+    @Mock
     private ProcessInstanceRepository processInstanceRepository;
 
     @Test
@@ -56,6 +63,7 @@ public class TaskEntityCreatedEventHandlerTest {
         //given
         ProcessInstanceEntity processInstanceEntity = mock(ProcessInstanceEntity.class);
         when(processInstanceEntity.getProcessDefinitionName()).thenReturn("processDefinitionName");
+        when(processInstanceEntity.getTasks()).thenReturn(new LinkedHashSet<>());
 
         TaskImpl task = new TaskImpl(UUID.randomUUID().toString(), "task", Task.TaskStatus.CREATED);
         task.setCreatedDate(new Date());
@@ -68,8 +76,8 @@ public class TaskEntityCreatedEventHandlerTest {
         event.setProcessDefinitionVersion(10);
         event.setBusinessKey("businessKey");
 
-        when(entityManager.getReference(ProcessInstanceEntity.class, task.getProcessInstanceId()))
-            .thenReturn(processInstanceEntity);
+        when(entityManagerFinder.findProcessInstanceWithTasks(task.getProcessInstanceId()))
+            .thenReturn(Optional.of(processInstanceEntity));
 
         //when
         handler.handle(event);
@@ -87,6 +95,7 @@ public class TaskEntityCreatedEventHandlerTest {
         assertThat(captor.getValue().getBusinessKey()).isEqualTo(event.getBusinessKey());
         assertThat(captor.getValue().getTaskDefinitionKey()).isEqualTo(task.getTaskDefinitionKey());
         assertThat(captor.getValue().getProcessDefinitionName()).isEqualTo("processDefinitionName");
+        assertThat(processInstanceEntity.getTasks()).containsOnly(captor.getValue());
     }
 
     @Test
