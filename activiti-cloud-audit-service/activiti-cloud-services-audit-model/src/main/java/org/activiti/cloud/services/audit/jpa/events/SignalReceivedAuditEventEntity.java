@@ -22,11 +22,9 @@ import jakarta.persistence.Entity;
 import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.SignalJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
 @DiscriminatorValue(value = SignalReceivedAuditEventEntity.SIGNAL_RECEIVED_EVENT)
-@DynamicInsert
 public class SignalReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String SIGNAL_RECEIVED_EVENT = "SignalReceivedEvent";

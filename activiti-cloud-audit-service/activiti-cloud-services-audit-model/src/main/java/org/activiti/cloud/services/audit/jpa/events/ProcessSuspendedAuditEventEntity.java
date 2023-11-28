@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudProcessSuspendedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessSuspendedAuditEventEntity.PROCESS_SUSPENDED_EVENT)
 @DiscriminatorValue(value = ProcessSuspendedAuditEventEntity.PROCESS_SUSPENDED_EVENT)
-@DynamicInsert
 public class ProcessSuspendedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_SUSPENDED_EVENT = "ProcessSuspendedEvent";

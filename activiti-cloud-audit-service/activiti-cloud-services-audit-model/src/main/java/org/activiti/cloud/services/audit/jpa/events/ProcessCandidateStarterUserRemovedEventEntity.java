@@ -27,7 +27,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCandidateStarterUserRemovedEventEntity.PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT)
 @DiscriminatorValue(value = ProcessCandidateStarterUserRemovedEventEntity.PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT)
-@DynamicInsert
 public class ProcessCandidateStarterUserRemovedEventEntity extends AuditEventEntity {
 
     protected static final String PROCESS_CANDIDATE_STARTER_USER_REMOVED_EVENT =

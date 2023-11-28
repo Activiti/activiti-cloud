@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ActivityCompletedAuditEventEntity.ACTIVITY_COMPLETED_EVENT)
 @DiscriminatorValue(value = ActivityCompletedAuditEventEntity.ACTIVITY_COMPLETED_EVENT)
-@DynamicInsert
 public class ActivityCompletedAuditEventEntity extends BPMNActivityAuditEventEntity {
 
     protected static final String ACTIVITY_COMPLETED_EVENT = "ActivityCompletedEvent";

@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCompletedEventEntity.TASK_COMPLETED_EVENT)
 @DiscriminatorValue(value = TaskCompletedEventEntity.TASK_COMPLETED_EVENT)
-@DynamicInsert
 public class TaskCompletedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_COMPLETED_EVENT = "TaskCompletedEvent";

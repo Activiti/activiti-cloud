@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TimerExecutedAuditEventEntity.TIMER_EXECUTED_EVENT)
 @DiscriminatorValue(value = TimerExecutedAuditEventEntity.TIMER_EXECUTED_EVENT)
-@DynamicInsert
 public class TimerExecutedAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_EXECUTED_EVENT = "TimerExecutedEvent";

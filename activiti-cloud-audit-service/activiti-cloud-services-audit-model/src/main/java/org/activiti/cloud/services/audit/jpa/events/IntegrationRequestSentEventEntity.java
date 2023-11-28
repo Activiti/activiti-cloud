@@ -18,16 +18,14 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationRequestedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
 @DiscriminatorValue(value = IntegrationRequestSentEventEntity.INTEGRATION_REQUEST_SENT_EVENT)
-@DynamicInsert
 public class IntegrationRequestSentEventEntity extends IntegrationEventEntity {
 
     protected static final String INTEGRATION_REQUEST_SENT_EVENT = "IntegrationRequestSentEvent";
 
-    IntegrationRequestSentEventEntity() {}
+    protected IntegrationRequestSentEventEntity() {}
 
     public IntegrationRequestSentEventEntity(CloudIntegrationRequestedEvent event) {
         super(event);

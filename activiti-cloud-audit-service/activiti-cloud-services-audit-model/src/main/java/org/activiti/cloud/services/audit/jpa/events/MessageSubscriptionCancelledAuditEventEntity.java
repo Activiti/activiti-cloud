@@ -26,7 +26,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @DiscriminatorValue(value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)
-@DynamicInsert
 public class MessageSubscriptionCancelledAuditEventEntity extends AuditEventEntity {
 
     protected static final String MESSAGE_SUBSCRIPTION_CANCELLED_EVENT = "MsgSubscriptionCancelledEvent";

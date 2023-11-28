@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
 @DiscriminatorValue(value = TaskCancelledEventEntity.TASK_CANCELLED_EVENT)
-@DynamicInsert
 public class TaskCancelledEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_CANCELLED_EVENT = "TaskCancelledEvent";
