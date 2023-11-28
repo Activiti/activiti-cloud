@@ -84,7 +84,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     public EntityModel<Model> create(String modelName, String modelType, List<String> processVariables) {
         Model model = mock(Model.class);
         doReturn(modelType.toUpperCase()).when(model).getType();
-        doReturn(modelName).when(model).getName();
+        doReturn(modelName).when(model).getDisplayName();
         if (processVariables != null) {
             Map<String, Extensions> processExtension = Collections.singletonMap(
                 modelName,
@@ -140,7 +140,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
             .orElseGet(HashSet::new);
         processVariables.addAll(processVariable);
         Map<String, Extensions> processsExtensionMap = new HashMap();
-        processsExtensionMap.put(model.getName(), extensions(processVariables));
+        processsExtensionMap.put(model.getKey(), extensions(processVariables));
         model.setExtensions(processsExtensionMap);
     }
 
@@ -185,8 +185,8 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
             ? CONTENT_TYPE_JSON
             : getModelType(model.getType()).getContentFileExtension();
         final String fileName = isExtensionType
-            ? changeToJsonFilename(model.getName() + getModelType(model.getType()).getExtensionsFileSuffix())
-            : changeExtension(model.getName(), fileExtension);
+            ? changeToJsonFilename(model.getKey() + getModelType(model.getType()).getExtensionsFileSuffix())
+            : changeExtension(model.getKey(), fileExtension);
         final String resourcePath = model.getType().toLowerCase() + "/" + fileName;
         return new FormData(
             fileExtension,
@@ -338,7 +338,7 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
 
     private Extensions getExtensionFromMap(Model model) {
         Map<String, Extensions> extensionProcessMap = this.retrieveExtensionForModel(model);
-        return extensionProcessMap.get(model.getName());
+        return extensionProcessMap.get(model.getKey());
     }
 
     private Map<String, Extensions> retrieveExtensionForModel(Model model) {

@@ -1,7 +1,8 @@
 {
     "type": "FILE",
     "id": "extension-123456",
-    "name": "alfresco-adf-app-deployment-develop",
+    "name": "simple-valid-extension",
+    "key": "",
     "extensions": {
         "a": "1",
         "b": 1,

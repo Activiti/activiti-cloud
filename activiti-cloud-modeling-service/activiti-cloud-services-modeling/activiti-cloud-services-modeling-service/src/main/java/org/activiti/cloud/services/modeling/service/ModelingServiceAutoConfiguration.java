@@ -39,8 +39,8 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorS
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGeneratorImpl;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.KeyGeneratorImpl;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
@@ -88,7 +88,8 @@ public class ModelingServiceAutoConfiguration {
         ProcessModelContentConverter processModelContentConverter,
         Set<ModelUpdateListener> modelUpdateListeners,
         FileMagicNumberValidator fileContentValidator,
-        FileContentSanitizer fileContentSanitizer
+        FileContentSanitizer fileContentSanitizer,
+        KeyGenerator keyGenerator
     ) {
         return new ModelServiceImpl(
             modelRepository,
@@ -99,7 +100,8 @@ public class ModelingServiceAutoConfiguration {
             processModelContentConverter,
             modelUpdateListeners,
             fileContentValidator,
-            fileContentSanitizer
+            fileContentSanitizer,
+            keyGenerator
         );
     }
 
@@ -119,7 +121,7 @@ public class ModelingServiceAutoConfiguration {
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
         ProjectDecoratorService projectDecoratorService,
-        ProjectKeyGenerator projectKeyGenerator
+        KeyGenerator keyGenerator
     ) {
         return new ProjectServiceImpl(
             projectRepository,
@@ -131,7 +133,7 @@ public class ModelingServiceAutoConfiguration {
             projectValidators,
             projectFilterService,
             projectDecoratorService,
-            projectKeyGenerator
+                keyGenerator
         );
     }
 
@@ -177,7 +179,7 @@ public class ModelingServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProjectKeyGenerator projectKeyGenerator(ProjectNameValidator projectNameValidator) {
-        return new ProjectKeyGeneratorImpl(projectNameValidator);
+    public KeyGenerator projectKeyGenerator(ProjectNameValidator projectNameValidator) {
+        return new KeyGeneratorImpl(projectNameValidator);
     }
 }

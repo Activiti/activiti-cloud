@@ -152,10 +152,11 @@ public class ConnectorModelControllerIT {
     public void should_throwTooLongNameException_when_createConnectorModelWithNameTooLong() throws Exception {
         project = projectRepository.createProject(project("project-with-connectors"));
 
+        var connectorName = "a".repeat(101);
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567")))
+                .content(objectMapper.writeValueAsString(connectorModel(connectorName)))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -163,7 +164,7 @@ public class ConnectorModelControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                String.format("The model name length cannot be greater than 100: '%s'", connectorName)
             );
     }
 
@@ -242,10 +243,11 @@ public class ConnectorModelControllerIT {
     public void should_throwBadNameException_when_updatingConnectorModelWithNameTooLong() throws Exception {
         connectorModel = modelRepository.createModel(connectorModel("connector-name"));
 
+        var connectorName = "a".repeat(101);
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", connectorModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorModel("123456789_123456789_1234567")))
+                .content(objectMapper.writeValueAsString(connectorModel(connectorName)))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -253,7 +255,7 @@ public class ConnectorModelControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                    String.format("The model name length cannot be greater than 100: '%s'", connectorName)
             );
     }
 

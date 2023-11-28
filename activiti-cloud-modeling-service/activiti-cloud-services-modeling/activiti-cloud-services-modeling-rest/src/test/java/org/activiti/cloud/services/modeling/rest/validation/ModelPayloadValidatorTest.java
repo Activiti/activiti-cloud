@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,12 +42,12 @@ class ModelPayloadValidatorTest {
 
     @BeforeEach
     public void setup() {
-        modelPayloadValidator = new ModelPayloadValidator(true);
+        modelPayloadValidator = new ModelPayloadValidator(true, new ModelNameValidator());
     }
 
     @Test
     public void should_returnEmptyStream_when_theInputIsValid() {
-        when(model.getName()).thenReturn("This is a test!");
+        when(model.getDisplayName()).thenReturn("This is a test!");
 
         modelPayloadValidator.validatePayload(model, this.errors);
 
@@ -55,7 +56,7 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnFieldRequiredError_when_itIsNull() {
-        when(model.getName()).thenReturn(null);
+        when(model.getDisplayName()).thenReturn(null);
 
         modelPayloadValidator.validatePayload(model, this.errors);
 
@@ -64,27 +65,28 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnFieldEmptyError_when_itIsAnEmptyString() {
-        when(model.getName()).thenReturn("");
+        when(model.getDisplayName()).thenReturn("");
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itContainsOnlyBlankSpaces() {
-        when(model.getName()).thenReturn("   ");
+        when(model.getDisplayName()).thenReturn("   ");
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
     }
 
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
-        when(model.getName()).thenReturn("Abc 123 def 456 ghi 789 jkl");
+        String name = "a".repeat(101);
+        when(model.getDisplayName()).thenReturn(name);
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors)
             .rejectValue(
                 "name",
                 "length.greater",
-                "The model name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+                String.format("The model name length cannot be greater than 100: '%s'", name)
             );
     }
 }

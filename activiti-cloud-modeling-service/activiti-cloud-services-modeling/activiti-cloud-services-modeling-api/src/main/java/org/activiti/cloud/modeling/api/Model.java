@@ -32,6 +32,14 @@ public interface Model<A extends Project, U> extends Auditable<U> {
 
     void setName(String name);
 
+    String getDisplayName();
+
+    void setDisplayName(String displayName);
+
+    String getKey();
+
+    void setKey(String name);
+
     String getType();
 
     void setType(String type);

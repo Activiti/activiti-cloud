@@ -81,7 +81,7 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
     public void setUp() {
         this.mockMvc = webAppContextSetup(context).build();
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
     }
 
     @AfterEach

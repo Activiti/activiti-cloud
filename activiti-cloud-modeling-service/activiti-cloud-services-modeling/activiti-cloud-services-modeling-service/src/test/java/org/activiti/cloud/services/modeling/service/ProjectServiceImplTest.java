@@ -48,7 +48,7 @@ import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
-import org.activiti.cloud.services.modeling.service.utils.ProjectKeyGenerator;
+import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,11 +93,11 @@ public class ProjectServiceImplTest {
     private Model modelOne;
 
     @Mock
-    private ProjectKeyGenerator projectKeyGenerator;
+    private KeyGenerator keyGenerator;
 
     @BeforeEach
     void setUp() {
-        lenient().when(projectKeyGenerator.generate(anyString())).thenReturn("key");
+        lenient().when(keyGenerator.generate(anyString())).thenReturn("key");
     }
 
     @Test

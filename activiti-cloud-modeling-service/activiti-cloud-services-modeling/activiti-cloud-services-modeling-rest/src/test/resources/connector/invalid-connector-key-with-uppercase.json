@@ -1,0 +1,5 @@
+{
+  "name": "name-of-the-connector",
+  "key": "NameWithUppercase",
+  "description": "Connector with wrong name"
+}

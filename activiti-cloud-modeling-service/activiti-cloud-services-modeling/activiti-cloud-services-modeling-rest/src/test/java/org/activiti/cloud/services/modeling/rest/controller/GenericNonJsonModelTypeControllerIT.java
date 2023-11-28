@@ -117,7 +117,7 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(
                 post("/v1/projects/{projectId}/models", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -132,7 +132,7 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -151,7 +151,7 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -163,14 +163,14 @@ public class GenericNonJsonModelTypeControllerIT {
 
     @Test
     public void should_throwTooLongNameException_when_creatingGenericNonJsonModelWithNameTooLong() throws Exception {
-        String name = "123456789_123456789_1234567";
+        String name = "a".repeat(101);
 
         project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -178,7 +178,7 @@ public class GenericNonJsonModelTypeControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                    String.format("The model name length cannot be greater than 100: '%s'", name)
             );
     }
 
@@ -191,7 +191,7 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isCreated());
@@ -206,7 +206,7 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isCreated());
@@ -217,13 +217,13 @@ public class GenericNonJsonModelTypeControllerIT {
         String name = "updated-connector-name";
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         mockMvc
             .perform(
                 put("/v1/models/{modelId}", genericNonJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
@@ -234,13 +234,13 @@ public class GenericNonJsonModelTypeControllerIT {
         String name = null;
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         mockMvc
             .perform(
                 put("/v1/models/{modelId}", genericNonJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -251,12 +251,12 @@ public class GenericNonJsonModelTypeControllerIT {
         String name = "";
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -268,15 +268,15 @@ public class GenericNonJsonModelTypeControllerIT {
 
     @Test
     public void should_throwBadNameException_when_updatingGenericNonJsonModelWithNameTooLong() throws Exception {
-        String name = "123456789_123456789_1234567";
+        String name = "a".repeat(101);
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -284,7 +284,7 @@ public class GenericNonJsonModelTypeControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                "The model name length cannot be greater than 26: '123456789_123456789_1234567'"
+                    String.format("The model name length cannot be greater than 100: '%s'", name)
             );
     }
 
@@ -293,12 +293,12 @@ public class GenericNonJsonModelTypeControllerIT {
         String name = "name_with_underscore";
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isOk());
@@ -309,12 +309,12 @@ public class GenericNonJsonModelTypeControllerIT {
         String name = "NameWithUppercase";
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
 
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
         );
 
         resultActions.andExpect(status().isOk());
@@ -326,7 +326,7 @@ public class GenericNonJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
         Map<String, Object> extensions = null;
 
         genericNonJsonModel.setExtensions(extensions);
@@ -347,7 +347,7 @@ public class GenericNonJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
 
         genericNonJsonModel.setExtensions(extensions);
@@ -368,7 +368,7 @@ public class GenericNonJsonModelTypeControllerIT {
         Project project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
         genericNonJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericNonJsonModelType.getName()));
         Map<String, Object> extensions = new HashMap();
         extensions.put("string", "value");
         extensions.put("number", 2);

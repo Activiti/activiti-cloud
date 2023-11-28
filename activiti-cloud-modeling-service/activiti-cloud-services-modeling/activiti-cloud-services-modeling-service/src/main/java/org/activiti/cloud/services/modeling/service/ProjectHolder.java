@@ -93,7 +93,7 @@ public class ProjectHolder {
     }
 
     public Optional<FileContent> getModelExtension(Model model) {
-        return Optional.ofNullable(model.getName()).map(name -> key(name, model.getType())).map(extensionFilesMap::get);
+        return Optional.ofNullable(model.getKey()).map(name -> key(name, model.getType())).map(extensionFilesMap::get);
     }
 
     private MultiKey<String> key(String name, ModelType type) {

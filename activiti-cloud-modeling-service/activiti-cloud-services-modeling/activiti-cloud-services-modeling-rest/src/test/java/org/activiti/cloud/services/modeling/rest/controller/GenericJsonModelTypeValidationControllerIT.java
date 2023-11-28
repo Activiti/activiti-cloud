@@ -43,7 +43,9 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
+import org.activiti.cloud.services.modeling.rest.validation.ValidationConstants;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.activiti.cloud.services.modeling.validation.DNSNameValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,7 +99,7 @@ public class GenericJsonModelTypeValidationControllerIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("modeler");
 
         genericJsonModel =
-            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, "key", genericJsonModelType.getName()));
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
@@ -294,16 +296,78 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingModelMismatchNameExtensions()
-        throws IOException {
-        byte[] fileContent = resourceAsByteArray("generic/model-simple-mismatch-name-extensions.json");
+    public void should_throwSemanticValidationException_when_validatingModelLongNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-long-name-extensions.json");
 
         assertThatResponse(
             given()
                 .mockMvc(mockMvc)
                 .log()
                 .everything(true)
-                .multiPart("file", "model-simple-mismatch-name-extensions.json", fileContent, "application/json")
+                .multiPart("file", "model-simple-invalid-long-name-extensions.json", fileContent, "application/json")
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected maxLength: 100, actual: 101",
+                "string [%s] does not match pattern %s".formatted(
+                        "a".repeat(101),
+                        ValidationConstants.NAME_VALIDATION_REGEX
+                    )
+            );
+
+        verify(genericJsonContentValidator, times(0)).validateModelContent(any(), any());
+
+        verify(genericJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty())
+            );
+    }
+
+    @Test
+    public void should_throwSemanticValidationException_when_validatingModelEmptyNameExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-empty-name-extensions.json");
+
+        assertThatResponse(
+            given()
+                .mockMvc(mockMvc)
+                .log()
+                .everything(true)
+                .multiPart("file", "model-simple-invalid-empty-name-extensions.json", fileContent, "application/json")
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected minLength: 1, actual: 0",
+                "string [] does not match pattern " + ValidationConstants.NAME_VALIDATION_REGEX
+            );
+
+        verify(genericJsonContentValidator, times(0)).validateModelContent(any(), any());
+
+        verify(genericJsonExtensionsValidator, times(1))
+            .validateModelExtensions(
+                argThat(content -> new String(content).equals(new String(fileContent))),
+                argThat(context -> !context.isEmpty())
+            );
+    }
+
+    @Test
+    public void should_throwSemanticValidationException_when_validatingModelMismatchKeyExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-mismatch-key-extensions.json");
+
+        assertThatResponse(
+            given()
+                .mockMvc(mockMvc)
+                .log()
+                .everything(true)
+                .multiPart("file", "model-simple-invalid-mismatch-key-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
                 .then()
@@ -322,15 +386,15 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingModelLongNameExtensions() throws IOException {
-        byte[] fileContent = resourceAsByteArray("generic/model-simple-long-name-extensions.json");
+    public void should_throwSemanticValidationException_when_validatingModelLongKeyExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-long-key-extensions.json");
 
         assertThatResponse(
             given()
                 .mockMvc(mockMvc)
                 .log()
                 .everything(true)
-                .multiPart("file", "model-simple-long-name-extensions.json", fileContent, "application/json")
+                .multiPart("file", "model-simple-invalid-long-key-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
                 .then()
@@ -353,15 +417,15 @@ public class GenericJsonModelTypeValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingModelEmptyNameExtensions() throws IOException {
-        byte[] fileContent = resourceAsByteArray("generic/model-simple-empty-name-extensions.json");
+    public void should_throwSemanticValidationException_when_validatingModelEmptyKeyExtensions() throws IOException {
+        byte[] fileContent = resourceAsByteArray("generic/model-simple-invalid-empty-key-extensions.json");
 
         assertThatResponse(
             given()
                 .mockMvc(mockMvc)
                 .log()
                 .everything(true)
-                .multiPart("file", "model-simple-empty-name-extensions.json", fileContent, "application/json")
+                .multiPart("file", "model-simple-invalid-empty-key-extensions.json", fileContent, "application/json")
                 .contentType("multipart/form-data")
                 .post(String.format("/v1/models/%s/validate/extensions", genericJsonModel.getId()))
                 .then()
@@ -370,7 +434,7 @@ public class GenericJsonModelTypeValidationControllerIT {
             .isSemanticValidationException()
             .hasValidationErrors(
                 "expected minLength: 1, actual: 0",
-                "string [] does not match pattern ^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$"
+                "string [] does not match pattern " + DNSNameValidator.DNS_LABEL_REGEX
             );
 
         verify(genericJsonContentValidator, times(0)).validateModelContent(any(), any());

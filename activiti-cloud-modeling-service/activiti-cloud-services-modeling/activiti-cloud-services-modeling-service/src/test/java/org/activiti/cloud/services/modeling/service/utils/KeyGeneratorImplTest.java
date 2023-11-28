@@ -22,9 +22,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class ProjectKeyGeneratorImplTest {
+class KeyGeneratorImplTest {
 
-    private final ProjectKeyGeneratorImpl projectKeyGenerator = new ProjectKeyGeneratorImpl(new ProjectNameValidator());
+    private final KeyGeneratorImpl projectKeyGenerator = new KeyGeneratorImpl(new ProjectNameValidator());
 
     @CsvSource(
         value = {

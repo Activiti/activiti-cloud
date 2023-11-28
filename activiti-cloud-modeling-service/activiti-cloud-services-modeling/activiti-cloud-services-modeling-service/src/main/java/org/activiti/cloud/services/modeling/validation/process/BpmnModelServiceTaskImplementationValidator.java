@@ -75,19 +75,19 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonMo
         return validationContext
             .getAvailableModels(connectorModelType)
             .stream()
-            .map(this::concatNameAndActions)
+            .map(this::concatKeyAndActions)
             .flatMap(Stream::sorted)
             .collect(Collectors.toList());
     }
 
-    private Stream<String> concatNameAndActions(Model model) {
+    private Stream<String> concatKeyAndActions(Model model) {
         return extractConnectorModelContent(model)
             .map(connectorModelContent ->
                 connectorModelContent
                     .getActions()
                     .values()
                     .stream()
-                    .map(connectorModelAction -> concatNameAndAction(connectorModelAction, model))
+                    .map(connectorModelAction -> concatKeyAndAction(connectorModelAction, model))
             )
             .orElse(Stream.empty());
     }
@@ -99,10 +99,10 @@ public class BpmnModelServiceTaskImplementationValidator implements BpmnCommonMo
             .filter(connectorModelContent -> connectorModelContent.getActions() != null);
     }
 
-    private String concatNameAndAction(ConnectorModelFeature connectorModelFeature, Model model) {
+    private String concatKeyAndAction(ConnectorModelFeature connectorModelFeature, Model model) {
         return isEmpty(connectorModelFeature) && isEmpty(connectorModelFeature.getName())
-            ? model.getName()
-            : model.getName() + "." + connectorModelFeature.getName();
+            ? model.getKey()
+            : model.getKey() + "." + connectorModelFeature.getName();
     }
 
     private Optional<ModelValidationError> validateServiceTaskImplementation(

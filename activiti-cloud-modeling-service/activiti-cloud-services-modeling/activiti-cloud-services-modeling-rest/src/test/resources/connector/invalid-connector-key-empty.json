@@ -1,4 +1,5 @@
 {
-  "name": "",
+  "name": "name-of-the-connector",
+  "key": "",
   "description": "Connector with empty name"
 }

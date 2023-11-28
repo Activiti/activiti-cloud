@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.modeling.rest.validation;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.activiti.cloud.services.modeling.validation.model.ModelNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.WebDataBinder;
@@ -30,7 +31,7 @@ public class ValidationControllerAdvice {
 
     @InitBinder("model")
     public void initModelBinder(final WebDataBinder binder, final HttpServletRequest request) {
-        binder.addValidators(new ModelPayloadValidator(isPost(request)));
+        binder.addValidators(new ModelPayloadValidator(isPost(request), new ModelNameValidator()));
     }
 
     @InitBinder("project")

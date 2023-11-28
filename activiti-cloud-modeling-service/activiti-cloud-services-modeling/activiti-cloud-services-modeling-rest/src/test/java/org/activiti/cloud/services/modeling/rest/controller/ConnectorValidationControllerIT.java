@@ -31,6 +31,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
+import org.activiti.cloud.services.modeling.rest.validation.ValidationConstants;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -235,8 +236,9 @@ public class ConnectorValidationControllerIT {
         )
             .isSemanticValidationException()
             .hasValidationErrors(
-                "expected maxLength: 26, actual: 27",
-                "string [123456789_123456789_1234567] does not match pattern " + DNS_LABEL_REGEX
+                "expected maxLength: 100, actual: 101",
+                "string [123456789_123456789_12345679_123456789_123456789_12345679_123456789_123456789_12345679_123456789_1234] does not match pattern " +
+                ValidationConstants.NAME_VALIDATION_REGEX
             );
     }
 
@@ -261,12 +263,62 @@ public class ConnectorValidationControllerIT {
             .isSemanticValidationException()
             .hasValidationErrors(
                 "expected minLength: 1, actual: 0",
+                "string [] does not match pattern " + ValidationConstants.NAME_VALIDATION_REGEX
+            );
+    }
+
+    @Test
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorKeyTooLong() throws IOException {
+        assertThatResponse(
+            given()
+                .mockMvc(mockMvc)
+                .log()
+                .everything(true)
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-too-long.json",
+                    resourceAsByteArray("connector/invalid-connector-key-too-long.json"),
+                    "text/plain"
+                )
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected maxLength: 26, actual: 27",
+                "string [123456789_123456789_1234567] does not match pattern " + DNS_LABEL_REGEX
+            );
+    }
+
+    @Test
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorKeyEmpty() throws IOException {
+        assertThatResponse(
+            given()
+                .mockMvc(mockMvc)
+                .log()
+                .everything(true)
+                .multiPart(
+                    "file",
+                    "invalid-connector-name-empty.json",
+                    resourceAsByteArray("connector/invalid-connector-key-empty.json"),
+                    "text/plain"
+                )
+                .contentType("multipart/form-data")
+                .post(String.format("/v1/models/%s/validate", connectorModel.getId()))
+                .then()
+                .expect(status().isBadRequest())
+        )
+            .isSemanticValidationException()
+            .hasValidationErrors(
+                "expected minLength: 1, actual: 0",
                 "string [] does not match pattern " + DNS_LABEL_REGEX
             );
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUnderscore()
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorKeyWithUnderscore()
         throws IOException {
         assertThatResponse(
             given()
@@ -275,8 +327,8 @@ public class ConnectorValidationControllerIT {
                 .everything(true)
                 .multiPart(
                     "file",
-                    "invalid-connector-name-with-underscore.json",
-                    resourceAsByteArray("connector/invalid-connector-name-with-underscore.json"),
+                    "invalid-connector-key-with-underscore.json",
+                    resourceAsByteArray("connector/invalid-connector-key-with-underscore.json"),
                     "text/plain"
                 )
                 .contentType("multipart/form-data")
@@ -289,7 +341,7 @@ public class ConnectorValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticValidationException_when_validatingInvalidConnectorNameWithUppercase()
+    public void should_throwSemanticValidationException_when_validatingInvalidConnectorKeyWithUppercase()
         throws IOException {
         assertThatResponse(
             given()
@@ -298,8 +350,8 @@ public class ConnectorValidationControllerIT {
                 .everything(true)
                 .multiPart(
                     "file",
-                    "invalid-connector-name-with-uppercase.json",
-                    resourceAsByteArray("connector/invalid-connector-name-with-uppercase.json"),
+                    "invalid-connector-key-with-uppercase.json",
+                    resourceAsByteArray("connector/invalid-connector-key-with-uppercase.json"),
                     CONTENT_TYPE_JSON
                 )
                 .contentType("multipart/form-data")
@@ -311,6 +363,7 @@ public class ConnectorValidationControllerIT {
             .hasValidationErrors("string [NameWithUppercase] does not match pattern " + DNS_LABEL_REGEX);
     }
 
+    @Test
     public void should_returnStatusNoContent_when_validatingConnectorWithCustomTypesInEventsAndActions()
         throws IOException {
         given()

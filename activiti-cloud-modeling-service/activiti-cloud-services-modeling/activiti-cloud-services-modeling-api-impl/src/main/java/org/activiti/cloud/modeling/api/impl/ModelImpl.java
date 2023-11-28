@@ -27,6 +27,7 @@ import java.util.Set;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
+import org.springframework.util.StringUtils;
 
 /**
  * Implementation for {@link Model}
@@ -41,6 +42,12 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     @Schema(description = "The name of the model")
     private String name;
+
+    @Schema(description = "The display name of the model")
+    private String displayName;
+
+    @Schema(description = "The key (technical name) of the model")
+    private String key;
 
     @Schema(description = "The type of the model", readOnly = true)
     private String type;
@@ -75,9 +82,10 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     public ModelImpl() {}
 
-    public ModelImpl(String id, String name, String type) {
+    public ModelImpl(String id, String name, String key, String type) {
         this.id = id;
         this.name = name;
+        this.key = key;
         this.type = type;
     }
 
@@ -98,7 +106,35 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     @Override
     public void setName(String name) {
+        this.displayName = name;
         this.name = name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        if (StringUtils.hasText(displayName)) {
+            return displayName;
+        }
+        return name;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+        this.name = displayName;
+    }
+
+    @Override
+    public String getKey() {
+        if (StringUtils.hasText(key)) {
+            return key;
+        }
+        return name;
+    }
+
+    @Override
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
