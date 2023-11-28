@@ -17,12 +17,10 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import java.util.List;
+import jakarta.persistence.Subgraph;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.hibernate.jpa.AvailableHints;
@@ -53,18 +51,19 @@ public class EntityManagerFinder {
         );
     }
 
-    public List<TaskEntity> findTasksWithProcessVariables(String processInstanceId) {
-        EntityGraph<TaskEntity> entityGraph = entityManager.createEntityGraph(TaskEntity.class);
-        entityGraph.addAttributeNodes(PROCESS_VARIABLES);
+    public Set<TaskEntity> findTasksWithProcessVariables(String processInstanceId) {
+        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+        entityGraph.addAttributeNodes(TASKS);
+        Subgraph<TaskEntity> taskEntitySubgraph = entityGraph.addSubgraph(TASKS);
+        taskEntitySubgraph.addAttributeNodes(PROCESS_VARIABLES);
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<TaskEntity> criteriaQuery = criteriaBuilder.createQuery(TaskEntity.class);
-        Root<TaskEntity> root = criteriaQuery.from(TaskEntity.class);
-        criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("processInstanceId"), processInstanceId));
         return entityManager
-            .createQuery(criteriaQuery)
-            .setHint(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
-            .getResultList();
+            .find(
+                ProcessInstanceEntity.class,
+                processInstanceId,
+                Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
+            )
+            .getTasks();
     }
 
     public Optional<TaskEntity> findTaskWithCandidateUsers(String taskId) {
@@ -119,6 +118,20 @@ public class EntityManagerFinder {
         EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
         entityGraph.addAttributeNodes(SEQUENCE_FLOWS);
+
+        return Optional.ofNullable(
+            entityManager.find(
+                ProcessInstanceEntity.class,
+                processInstanceId,
+                Map.of(AvailableHints.HINT_SPEC_LOAD_GRAPH, entityGraph)
+            )
+        );
+    }
+
+    public Optional<ProcessInstanceEntity> findProcessInstanceWithTasks(String processInstanceId) {
+        EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
+
+        entityGraph.addAttributeNodes(TASKS);
 
         return Optional.ofNullable(
             entityManager.find(
