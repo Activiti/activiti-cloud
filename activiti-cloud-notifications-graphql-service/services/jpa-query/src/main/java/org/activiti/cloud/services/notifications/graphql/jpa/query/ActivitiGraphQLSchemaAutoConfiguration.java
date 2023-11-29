@@ -22,10 +22,8 @@ import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuil
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaBuilderAutoConfiguration;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import graphql.GraphQL;
-import java.util.Date;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -44,9 +42,7 @@ import org.springframework.context.annotation.Bean;
 public class ActivitiGraphQLSchemaAutoConfiguration {
 
     @Bean
-    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer(
-        @Value("${activiti.cloud.graphql.jpa-query.date-format:yyyy-MM-dd'T'HH:mm:ss.SSSX}") String dateFormatString
-    ) {
+    GraphQLJPASchemaBuilderCustomizer graphQLJPASchemaBuilderCustomizer() {
         return builder ->
             builder
                 .name("Query")
@@ -57,14 +53,6 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                         .name("VariableValue")
                         .description("VariableValue type")
                         .coercing(new JavaScalars.GraphQLObjectCoercing())
-                        .build()
-                )
-                .scalar(
-                    Date.class,
-                    newScalar()
-                        .name("Date")
-                        .description("Date type with '" + dateFormatString + "' format")
-                        .coercing(new JavaScalars.GraphQLDateCoercing(dateFormatString))
                         .build()
                 );
     }
