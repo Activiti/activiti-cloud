@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
@@ -33,6 +35,7 @@ import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -81,6 +84,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String initiator;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date startDate;
 
     private String businessKey;
@@ -92,30 +96,37 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String processDefinitionName;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date completedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date suspendedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModified;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @QueryType(PropertyType.DATETIME)
+    @Temporal(TIMESTAMP)
     private Date startFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @QueryType(PropertyType.DATETIME)
+    @Temporal(TIMESTAMP)
     private Date startTo;
 
     @JsonIgnore
