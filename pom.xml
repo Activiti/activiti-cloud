@@ -185,7 +185,7 @@
   </ciManagement>
   <properties>
     <java.release>${java.version}</java.release>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <skipAcceptanceTests>false</skipAcceptanceTests>
     <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
