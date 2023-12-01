@@ -16,28 +16,28 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.*;
+import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.util.Objects;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.ConstraintMode;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import java.util.Objects;
-
-@Entity(name="ProcessCandidateStarterUser")
+@Entity(name = "ProcessCandidateStarterUser")
 @IdClass(ProcessCandidateStarterUserId.class)
-@Table(name="PROCESS_CANDIDATE_STARTER_USER", indexes= {
-		@Index(name="pcsu_userId_idx", columnList="userId", unique=false),
-		@Index(name="pcsu_processDefinition_idx", columnList="processDefinitionId", unique=false)
-	}
+@Table(
+    name = "PROCESS_CANDIDATE_STARTER_USER",
+    indexes = {
+        @Index(name = "pcsu_userId_idx", columnList = "userId", unique = false),
+        @Index(name = "pcsu_processDefinition_idx", columnList = "processDefinitionId", unique = false),
+    }
 )
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -53,20 +53,26 @@ public class ProcessCandidateStarterUserEntity {
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false, nullable = true
-            , foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+        name = "processDefinitionId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        nullable = true,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     private ProcessDefinitionEntity processDefinition;
 
     @JsonCreator
-    public ProcessCandidateStarterUserEntity(@JsonProperty("processDefinitionId") String processDefinitionId,
-                                             @JsonProperty("userId") String userId) {
+    public ProcessCandidateStarterUserEntity(
+        @JsonProperty("processDefinitionId") String processDefinitionId,
+        @JsonProperty("userId") String userId
+    ) {
         this.processDefinitionId = processDefinitionId;
         this.userId = userId;
     }
 
-    public ProcessCandidateStarterUserEntity() {
-
-    }
+    public ProcessCandidateStarterUserEntity() {}
 
     public String getProcessDefinitionId() {
         return processDefinitionId;
@@ -106,7 +112,6 @@ public class ProcessCandidateStarterUserEntity {
             return false;
         }
         ProcessCandidateStarterUserEntity other = (ProcessCandidateStarterUserEntity) obj;
-        return Objects.equals(processDefinitionId, other.processDefinitionId) &&
-                Objects.equals(userId, other.userId);
+        return Objects.equals(processDefinitionId, other.processDefinitionId) && Objects.equals(userId, other.userId);
     }
 }

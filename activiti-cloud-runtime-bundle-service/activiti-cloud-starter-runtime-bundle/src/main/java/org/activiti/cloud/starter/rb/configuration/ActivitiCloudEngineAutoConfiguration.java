@@ -15,37 +15,48 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
+import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
+
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationTransformer;
 import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.event.EventSubscriptionPayloadMappingProvider;
 import org.activiti.runtime.api.impl.ExtensionsVariablesMappingProvider;
 import org.activiti.spring.boot.ProcessEngineAutoConfiguration;
 import org.activiti.spring.process.ProcessVariablesInitiator;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import static org.activiti.spring.boot.ProcessEngineAutoConfiguration.BEHAVIOR_FACTORY_MAPPING_CONFIGURER;
-
+@AutoConfiguration
 @AutoConfigureBefore(ProcessEngineAutoConfiguration.class)
-@Configuration
 @Import(RuntimeBundleSwaggerConfig.class)
 public class ActivitiCloudEngineAutoConfiguration {
 
     @Bean(BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
     @ConditionalOnMissingBean(name = BEHAVIOR_FACTORY_MAPPING_CONFIGURER)
-    public SignalBehaviourConfigurer signalBehaviourConfigurator(ApplicationContext applicationContext,
-        ExtensionsVariablesMappingProvider variablesMappingProvider, ProcessVariablesInitiator processVariablesInitiator,
-        EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider, VariablesPropagator variablesPropagator) {
-        return new SignalBehaviourConfigurer(applicationContext, variablesMappingProvider, processVariablesInitiator,
-            eventSubscriptionPayloadMappingProvider, variablesPropagator);
+    public SignalBehaviourConfigurer signalBehaviourConfigurator(
+        ApplicationContext applicationContext,
+        ExtensionsVariablesMappingProvider variablesMappingProvider,
+        ProcessVariablesInitiator processVariablesInitiator,
+        EventSubscriptionPayloadMappingProvider eventSubscriptionPayloadMappingProvider,
+        VariablesPropagator variablesPropagator
+    ) {
+        return new SignalBehaviourConfigurer(
+            applicationContext,
+            variablesMappingProvider,
+            processVariablesInitiator,
+            eventSubscriptionPayloadMappingProvider,
+            variablesPropagator
+        );
     }
 
     @Bean
-    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiConnectorDestinationMappingStrategy runtimeBundleConnectorDestinationMappingStrategy(
+        ActivitiMessagingDestinationTransformer destinationTransformer
+    ) {
         return new ActivitiConnectorDestinationMappingStrategy(destinationTransformer);
     }
 }

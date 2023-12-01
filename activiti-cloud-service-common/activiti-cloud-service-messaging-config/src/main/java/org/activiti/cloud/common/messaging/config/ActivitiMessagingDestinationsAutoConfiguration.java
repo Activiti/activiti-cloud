@@ -17,28 +17,32 @@
 package org.activiti.cloud.common.messaging.config;
 
 import org.activiti.cloud.common.messaging.ActivitiCloudMessagingProperties;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore(BinderFactoryAutoConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ActivitiMessagingDestinationTransformer activitiMessagingDestinationTransformer(ActivitiCloudMessagingProperties messagingProperties) {
+    public ActivitiMessagingDestinationTransformer activitiMessagingDestinationTransformer(
+        ActivitiCloudMessagingProperties messagingProperties
+    ) {
         return new ActivitiMessagingDestinationTransformer(messagingProperties);
     }
 
     @Bean
-    public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
+        ActivitiMessagingDestinationTransformer destinationTransformer
+    ) {
         return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
     }
 
@@ -49,7 +53,10 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
 
     @Bean
     public InputConverterFunction escapeIllegalChars(@Lazy ActivitiCloudMessagingProperties messagingProperties) {
-        return (value) -> value.replaceAll(messagingProperties.getDestinationIllegalCharsRegex(),
-                                           messagingProperties.getDestinationIllegalCharsReplacement());
+        return value ->
+            value.replaceAll(
+                messagingProperties.getDestinationIllegalCharsRegex(),
+                messagingProperties.getDestinationIllegalCharsReplacement()
+            );
     }
 }

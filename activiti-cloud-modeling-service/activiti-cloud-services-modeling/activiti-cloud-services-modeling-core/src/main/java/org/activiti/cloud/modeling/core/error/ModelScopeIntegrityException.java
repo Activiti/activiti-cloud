@@ -20,8 +20,7 @@ package org.activiti.cloud.modeling.core.error;
  */
 public class ModelScopeIntegrityException extends ModelingException {
 
-    public ModelScopeIntegrityException() {
-    }
+    public ModelScopeIntegrityException() {}
 
     public ModelScopeIntegrityException(Throwable cause) {
         super(cause);
@@ -31,9 +30,7 @@ public class ModelScopeIntegrityException extends ModelingException {
         super(message);
     }
 
-    public ModelScopeIntegrityException(String message,
-                                Throwable cause) {
-        super(message,
-              cause);
+    public ModelScopeIntegrityException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

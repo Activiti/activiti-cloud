@@ -63,21 +63,22 @@ public class CloudApplicationImpl implements CloudApplication {
             return false;
         }
         CloudApplicationImpl other = (CloudApplicationImpl) obj;
-        return Objects.equals(id, other.id) &&
-                Objects.equals(name, other.name) &&
-                Objects.equals(version, other.version);
+        return (
+            Objects.equals(id, other.id) && Objects.equals(name, other.name) && Objects.equals(version, other.version)
+        );
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudApplicationImpl [id=")
-                .append(id)
-                .append(", name=")
-                .append(name)
-                .append(", version=")
-                .append(version)
-                .append("]");
+        builder
+            .append("CloudApplicationImpl [id=")
+            .append(id)
+            .append(", name=")
+            .append(name)
+            .append(", version=")
+            .append(version)
+            .append("]");
         return builder.toString();
     }
 }

@@ -17,10 +17,10 @@ package org.activiti.cloud.services.query.model.conf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.query.model.VariableValueJsonConverter;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 public class QueryModelAutoConfiguration {
 
     @Bean
@@ -29,5 +29,4 @@ public class QueryModelAutoConfiguration {
         //it's only here as a workaround to be able to inject the object mapper
         return new VariableValueJsonConverter(objectMapper);
     }
-
 }

@@ -27,7 +27,7 @@ public abstract class BaseProcessDefinitionService {
 
     private final List<ProcessDefinitionDecorator> processDefinitionDecorators;
 
-    public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators){
+    public BaseProcessDefinitionService(List<ProcessDefinitionDecorator> processDefinitionDecorators) {
         this.processDefinitionDecorators = processDefinitionDecorators;
     }
 
@@ -41,12 +41,15 @@ public abstract class BaseProcessDefinitionService {
         return decoratedProcessDefinition;
     }
 
-    protected ExtendedCloudProcessDefinition decorate(ExtendedCloudProcessDefinition processDefinition, String includeParam) {
-        return processDefinitionDecorators.stream()
+    protected ExtendedCloudProcessDefinition decorate(
+        ExtendedCloudProcessDefinition processDefinition,
+        String includeParam
+    ) {
+        return processDefinitionDecorators
+            .stream()
             .filter(decorator -> decorator.applies(includeParam))
             .findFirst()
             .map(decorator -> decorator.decorate(processDefinition))
             .orElse(processDefinition);
     }
-
 }

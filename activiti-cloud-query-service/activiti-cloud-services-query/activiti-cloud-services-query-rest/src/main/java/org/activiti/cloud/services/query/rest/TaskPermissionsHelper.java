@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TaskPermissionsHelper {
 
@@ -36,22 +35,22 @@ public class TaskPermissionsHelper {
 
     public void setCurrentUserTaskPermissions(TaskEntity task) {
         String userId = securityManager.getAuthenticatedUserId();
-        if(userId!=null) {
+        if (userId != null) {
             List<String> userGroups = securityManager.getAuthenticatedUserGroups();
             List<TaskPermissions> permissions = new ArrayList<>();
-            if(!canUserViewTask(task)) return;
+            if (!canUserViewTask(task)) return;
 
             permissions.add(TaskPermissions.VIEW);
 
-            if(canUserClaimTask(task, userId, userGroups)) {
+            if (canUserClaimTask(task, userId, userGroups)) {
                 permissions.add(TaskPermissions.CLAIM);
             }
 
-            if(canUserReleaseTask(task, userId)) {
+            if (canUserReleaseTask(task, userId)) {
                 permissions.add(TaskPermissions.RELEASE);
             }
 
-            if(canUserUpdateTask(task, userId)) {
+            if (canUserUpdateTask(task, userId)) {
                 permissions.add(TaskPermissions.UPDATE);
             }
 
@@ -70,7 +69,7 @@ public class TaskPermissionsHelper {
     private boolean canUserReleaseTask(TaskEntity task, String userId) {
         boolean taskHasCandidatesUser = task.getCandidateUsers() != null && !task.getCandidateUsers().isEmpty();
         boolean taskHasCandidateGroups = task.getCandidateGroups() != null && !task.getCandidateGroups().isEmpty();
-        return isUserAssignee(task,userId) && (taskHasCandidatesUser || taskHasCandidateGroups);
+        return isUserAssignee(task, userId) && (taskHasCandidatesUser || taskHasCandidateGroups);
     }
 
     private boolean canUserUpdateTask(TaskEntity task, String userId) {
@@ -80,11 +79,10 @@ public class TaskPermissionsHelper {
 
     private boolean isUserCandidate(TaskEntity task, String userId, List<String> userGroups) {
         boolean isCandidateUser = task.getCandidateUsers() != null && task.getCandidateUsers().contains(userId);
-        boolean isCandidateGroup = task.getCandidateGroups() != null &&
-                task.getCandidateGroups().stream().anyMatch(userGroups::contains);
-        return  isCandidateUser || isCandidateGroup;
+        boolean isCandidateGroup =
+            task.getCandidateGroups() != null && task.getCandidateGroups().stream().anyMatch(userGroups::contains);
+        return isCandidateUser || isCandidateGroup;
     }
-
 
     private boolean isUserAssignee(TaskEntity task, String userId) {
         return isTaskAssigned(task) && task.getAssignee().equals(userId);

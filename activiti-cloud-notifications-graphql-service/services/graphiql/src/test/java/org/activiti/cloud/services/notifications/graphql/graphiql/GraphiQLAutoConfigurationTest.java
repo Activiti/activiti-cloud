@@ -20,17 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
 public class GraphiQLAutoConfigurationTest {
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @Autowired
     private KeycloakJsonController keycloakJsonController;
 
     @Autowired
     private GraphiQLConfigController graphiQLConfigController;
-
 
     @SpringBootApplication
     static class Application {
@@ -46,13 +50,14 @@ public class GraphiQLAutoConfigurationTest {
 
     @Test
     public void testContextPath() {
-        assertThat(graphiQLConfigController.appendSegmentToPath("","/graphql")).isEqualTo("/graphql");
-        assertThat(graphiQLConfigController.appendSegmentToPath("/","/graphql")).isEqualTo("/graphql");
-        assertThat(graphiQLConfigController.appendSegmentToPath(null,"/graphql")).isEqualTo("/graphql");
-        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app","/graphql")).isEqualTo("/default-app/graphql");
-        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app/","/graphql")).isEqualTo("/default-app/graphql");
-        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app","graphql")).isEqualTo("/default-app/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath("", "/graphql")).isEqualTo("/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath("/", "/graphql")).isEqualTo("/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath(null, "/graphql")).isEqualTo("/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app", "/graphql"))
+            .isEqualTo("/default-app/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app/", "/graphql"))
+            .isEqualTo("/default-app/graphql");
+        assertThat(graphiQLConfigController.appendSegmentToPath("/default-app", "graphql"))
+            .isEqualTo("/default-app/graphql");
     }
-
-
 }

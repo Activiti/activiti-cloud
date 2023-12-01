@@ -23,7 +23,11 @@ public class ProcessDefinitionFilter implements ProcessDefinitionKeyBasedFilter 
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
         QProcessDefinitionEntity qProcessDefinitionEntity = QProcessDefinitionEntity.processDefinitionEntity;
-        return new ProcessDefinitionRestrictionProperties(qProcessDefinitionEntity.serviceName, qProcessDefinitionEntity.serviceFullName, qProcessDefinitionEntity.key);
+        return new ProcessDefinitionRestrictionProperties(
+            qProcessDefinitionEntity.serviceName,
+            qProcessDefinitionEntity.serviceFullName,
+            qProcessDefinitionEntity.key
+        );
     }
 
     @Override

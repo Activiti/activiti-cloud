@@ -21,19 +21,19 @@ import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface VariableRepository extends PagingAndSortingRepository<ProcessVariableEntity, Long>,
-                                            QuerydslPredicateExecutor<ProcessVariableEntity>,
-                                            QuerydslBinderCustomizer<QProcessVariableEntity> {
-
+public interface VariableRepository
+    extends
+        PagingAndSortingRepository<ProcessVariableEntity, Long>,
+        QuerydslPredicateExecutor<ProcessVariableEntity>,
+        QuerydslBinderCustomizer<QProcessVariableEntity>,
+        CrudRepository<ProcessVariableEntity, Long> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QProcessVariableEntity root) {
-
-        bindings.bind(String.class).first(
-                (StringPath path, String value) -> path.eq(value));
+    default void customize(QuerydslBindings bindings, QProcessVariableEntity root) {
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }

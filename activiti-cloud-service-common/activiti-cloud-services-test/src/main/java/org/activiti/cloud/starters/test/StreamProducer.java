@@ -15,13 +15,15 @@
  */
 package org.activiti.cloud.starters.test;
 
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 
 public interface StreamProducer {
-
     String PRODUCER = "producer";
 
-    @Output(PRODUCER)
-    MessageChannel producer();
+    @OutputBinding(PRODUCER)
+    default MessageChannel producer() {
+        return MessageChannels.direct(PRODUCER).getObject();
+    }
 }

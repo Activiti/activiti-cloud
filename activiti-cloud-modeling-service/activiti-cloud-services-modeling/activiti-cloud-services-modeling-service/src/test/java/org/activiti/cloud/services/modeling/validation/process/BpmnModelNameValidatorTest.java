@@ -38,6 +38,7 @@ class BpmnModelNameValidatorTest {
 
     @Mock
     private BpmnModel bpmnModel;
+
     @Mock
     private Process process;
 
@@ -87,7 +88,9 @@ class BpmnModelNameValidatorTest {
         Stream<ModelValidationError> errors = bpmnModelNameValidator.validate(bpmnModel, validationContext);
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly("length.greater", "The process name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'");
+            .containsOnly(
+                "length.greater",
+                "The process name length cannot be greater than 26: 'Abc 123 def 456 ghi 789 jkl'"
+            );
     }
-
 }

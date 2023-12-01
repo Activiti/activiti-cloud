@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.rest.assembler;
 
+import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.activiti.cloud.services.modeling.rest.controller.ModelController;
@@ -24,36 +31,27 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-
-import static org.activiti.cloud.modeling.api.ProcessModelType.PROCESS;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
 /**
  * Assembler for {@link Project} resource
  */
-public class ProjectRepresentationModelAssembler implements RepresentationModelAssembler<Project, EntityModel<Project>> {
+public class ProjectRepresentationModelAssembler
+    implements RepresentationModelAssembler<Project, EntityModel<Project>> {
 
     @Override
     public EntityModel<Project> toModel(Project project) {
         return EntityModel.of(
-                project,
-                linkTo(methodOn(ProjectController.class).getProject(project.getId(), List.of())).withSelfRel(),
-                getExportProjectLink(project.getId()),
-                getImportProjectModelLink(project.getId()),
-                linkTo(methodOn(ModelController.class).getModels(project.getId(),
-                                                                 PROCESS,
-                                                                 Pageable.unpaged())).withRel("models"));
+            project,
+            linkTo(methodOn(ProjectController.class).getProject(project.getId(), List.of())).withSelfRel(),
+            getExportProjectLink(project.getId()),
+            getImportProjectModelLink(project.getId()),
+            linkTo(methodOn(ModelController.class).getModels(project.getId(), PROCESS, Pageable.unpaged()))
+                .withRel("models")
+        );
     }
 
     private Link getImportProjectModelLink(String projectId) {
         try {
-            return linkTo(methodOn(ModelController.class).importModel(projectId,
-                                                                      PROCESS,
-                                                                      null)).withRel("import");
+            return linkTo(methodOn(ModelController.class).importModel(projectId, PROCESS, null)).withRel("import");
         } catch (IOException e) {
             throw new ModelingException(e);
         }
@@ -61,15 +59,19 @@ public class ProjectRepresentationModelAssembler implements RepresentationModelA
 
     private Link getExportProjectLink(String projectId) {
         try {
-            return linkTo(ProjectController.class,
-                          ProjectController.class.getMethod("exportProject",
-                                                            HttpServletResponse.class,
-                                                            String.class,
-                                                            boolean.class),
-                          null,
-                          projectId,
-                          true)
-                    .withRel("export");
+            return linkTo(
+                ProjectController.class,
+                ProjectController.class.getMethod(
+                        "exportProject",
+                        HttpServletResponse.class,
+                        String.class,
+                        boolean.class
+                    ),
+                null,
+                projectId,
+                true
+            )
+                .withRel("export");
         } catch (NoSuchMethodException e) {
             throw new ModelingException(e);
         }

@@ -15,6 +15,18 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import jakarta.persistence.EntityManagerFactory;
+import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -39,27 +51,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessModelController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({
-    QueryRestWebMvcAutoConfiguration.class,
-    CommonModelAutoConfiguration.class,
-    AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @WithMockUser
 public class ProcessModelControllerIT {
 
@@ -114,18 +111,20 @@ public class ProcessModelControllerIT {
         processDefinition.setServiceName("serviceName");
 
         given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-                .willReturn(true);
+            .willReturn(true);
 
         given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-        .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
         //when
-       mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                                                  processDefinitionId)
-                                                      .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
-                .andExpect(status().isOk())
-                .andExpect(content().xml("<model/>"));
+        mockMvc
+            .perform(
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
+                    .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+            //then
+            .andExpect(status().isOk())
+            .andExpect(content().xml("<model/>"));
     }
 
     @Test
@@ -139,18 +138,19 @@ public class ProcessModelControllerIT {
         processDefinition.setServiceName("serviceName");
 
         given(securityPoliciesManager.canRead(processDefinition.getKey(), processDefinition.getServiceName()))
-                .willReturn(false);
+            .willReturn(false);
 
         given(entityFinder.findById(eq(processModelRepository), eq(processDefinitionId), anyString()))
-                .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
+            .willReturn(new ProcessModelEntity(processDefinition, "<model/>"));
 
         //when
-        mockMvc.perform(get("/v1/process-definitions/{processDefinitionId}/model",
-                            processDefinitionId)
-                                .accept(MediaType.APPLICATION_XML_VALUE))
-                //then
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("entry.message", is("Operation not permitted for " + processDefinition.getKey())));
+        mockMvc
+            .perform(
+                get("/v1/process-definitions/{processDefinitionId}/model", processDefinitionId)
+                    .accept(MediaType.APPLICATION_XML_VALUE)
+            )
+            //then
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("entry.message", is("Operation not permitted for " + processDefinition.getKey())));
     }
-
 }

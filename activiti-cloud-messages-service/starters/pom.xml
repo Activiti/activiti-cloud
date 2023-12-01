@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-messages-dependencies</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starters-messages</artifactId>
@@ -34,10 +34,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-tracing</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
@@ -61,9 +57,16 @@
       <artifactId>spring-messaging</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-messages-tests</artifactId>
       <scope>test</scope>
+      <type>test-jar</type>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>

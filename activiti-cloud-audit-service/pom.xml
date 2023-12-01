@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-audit-service-parent</artifactId>
@@ -14,6 +14,7 @@
   <modules>
     <module>activiti-cloud-audit-dependencies</module>
     <module>activiti-cloud-services-audit-api</module>
+    <module>activiti-cloud-services-audit-model</module>
     <module>activiti-cloud-services-audit-jpa</module>
     <module>activiti-cloud-services-audit-liquibase</module>
     <module>activiti-cloud-starter-audit</module>

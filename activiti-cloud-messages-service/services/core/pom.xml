@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-messages</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
   </parent>
   <name>Activiti Cloud Services :: Messages Core</name>
   <artifactId>activiti-cloud-services-messages-core</artifactId>
@@ -42,6 +42,10 @@
       <artifactId>spring-cloud-stream</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-function-context</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-autoconfigure</artifactId>
       <optional>true</optional>
@@ -62,11 +66,16 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.springframework.cloud</groupId>-->
+<!--      <artifactId>spring-cloud-stream-test-support</artifactId>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
     <dependency>
-       <groupId>org.springframework.cloud</groupId>
-       <artifactId>spring-cloud-stream-test-support</artifactId>
-       <scope>test</scope>
-   </dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.integration</groupId>
       <artifactId>spring-integration-test</artifactId>

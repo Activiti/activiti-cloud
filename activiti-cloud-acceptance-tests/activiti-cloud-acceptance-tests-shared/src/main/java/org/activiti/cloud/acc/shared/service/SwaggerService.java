@@ -19,11 +19,9 @@ import feign.Param;
 import feign.RequestLine;
 
 public interface SwaggerService {
-
     @RequestLine("GET /v3/api-docs")
     String getSwaggerSpecification();
 
     @RequestLine("GET /v3/api-docs/{group}")
     String getSwaggerSpecification(@Param("group") String group);
-
 }

@@ -18,18 +18,16 @@ package org.activiti.cloud.services.audit.jpa.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.converters.CloudRuntimeEventType;
 import org.activiti.cloud.services.audit.jpa.controllers.csv.CsvLogEntry;
 import org.activiti.cloud.services.audit.jpa.controllers.csv.ObjectToJsonStrategy;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-
 public class AuditEventsExporter {
-
 
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";
     private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
@@ -41,9 +39,11 @@ public class AuditEventsExporter {
         objectToJsonStrategy = new ObjectToJsonStrategy(objectMapper);
     }
 
-    public void exportCsv(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-                          String fileName,
-                          HttpServletResponse response) throws Exception {
+    public void exportCsv(
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
+        String fileName,
+        HttpServletResponse response
+    ) throws Exception {
         setHttpHeaders(fileName, response);
         writeEventsAsCsv(events, response);
     }
@@ -53,22 +53,23 @@ public class AuditEventsExporter {
         response.setHeader(HEADER_CONTENT_DISPOSITION, HEADER_ATTACHMENT_FILENAME + fileName);
     }
 
-    private void writeEventsAsCsv(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
-                              HttpServletResponse response) throws Exception {
-
+    private void writeEventsAsCsv(
+        List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events,
+        HttpServletResponse response
+    ) throws Exception {
         List<CsvLogEntry> entries = toCsvLogEntryList(events);
 
         PrintWriter writer = response.getWriter();
         StatefulBeanToCsv beanToCsv = new StatefulBeanToCsvBuilder<List<CloudRuntimeEvent>>(writer)
-                                          .withMappingStrategy(objectToJsonStrategy)
-                                          .build();
+            .withMappingStrategy(objectToJsonStrategy)
+            .build();
         beanToCsv.write(entries);
         writer.close();
     }
 
     private List<CsvLogEntry> toCsvLogEntryList(List<CloudRuntimeEvent<?, CloudRuntimeEventType>> events) {
         List<CsvLogEntry> entries = new ArrayList<>();
-        for(CloudRuntimeEvent event: events) {
+        for (CloudRuntimeEvent event : events) {
             entries.add(new CsvLogEntry(event));
         }
         return entries;

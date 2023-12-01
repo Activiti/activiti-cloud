@@ -17,22 +17,36 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "properties": { "$ref": "#/definitions/properties" },
-        "mappings": { "$ref": "#/definitions/mappings" },
-        "constants": { "$ref": "#/definitions/constants" },
-        "templates": { "$ref": "#/definitions/templates" },
-        "assignments": { "$ref": "#/definitions/assignments" }
+        "properties": {
+          "$ref": "#/definitions/properties"
+        },
+        "mappings": {
+          "$ref": "#/definitions/mappings"
+        },
+        "constants": {
+          "$ref": "#/definitions/constants"
+        },
+        "templates": {
+          "$ref": "#/definitions/templates"
+        },
+        "assignments": {
+          "$ref": "#/definitions/assignments"
+        }
       }
     },
     "templates": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "tasks" : {"$ref" :  "#/definitions/taskTemplates"},
-        "default" : {"$ref": "#/definitions/taskTemplate"}
+        "tasks": {
+          "$ref": "#/definitions/taskTemplates"
+        },
+        "default": {
+          "$ref": "#/definitions/taskTemplate"
+        }
       }
     },
-    "taskTemplates" : {
+    "taskTemplates": {
       "type": "object",
       "patternProperties": {
         ".*": {
@@ -40,12 +54,16 @@
         }
       }
     },
-    "taskTemplate" : {
+    "taskTemplate": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "assignee" : {"$ref" :  "#/definitions/template"},
-        "candidate" : {"$ref" :  "#/definitions/template"}
+        "assignee": {
+          "$ref": "#/definitions/template"
+        },
+        "candidate": {
+          "$ref": "#/definitions/template"
+        }
       }
     },
     "template": {
@@ -102,6 +120,7 @@
             "json",
             "file",
             "folder",
+            "content",
             "array"
           ]
         },
@@ -119,16 +138,24 @@
         }
       },
       "dependencies": {
-        "display":{
+        "display": {
           "oneOf": [
             {
               "not": {
-                "properties": { "display": { "const": true } },
-                "required": ["display"]
+                "properties": {
+                  "display": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "display"
+                ]
               }
             },
             {
-              "required": ["displayName"],
+              "required": [
+                "displayName"
+              ],
               "message": {
                 "type": "string",
                 "required": "If a process variable is displayable in the UI, then a display name must be specified"
@@ -219,7 +246,6 @@
                 "message": {
                   "type": "Mismatch value type - {{name}}({{id}}). Expected type is string"
                 }
-
               }
             }
           }
@@ -401,6 +427,37 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "content"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is content"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ],
       "required": [
@@ -463,7 +520,14 @@
           ]
         },
         "value": {
-          "type": ["string", "number", "integer", "boolean", "object", "array"]
+          "type": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "object",
+            "array"
+          ]
         }
       },
       "dependencies": {
@@ -494,7 +558,9 @@
     "constant-element": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["value"],
+      "required": [
+        "value"
+      ],
       "properties": {
         "value": {
           "type": "string"
@@ -518,17 +584,27 @@
         },
         "assignment": {
           "type": "string",
-          "enum": ["assignee", "candidates"],
+          "enum": [
+            "assignee",
+            "candidates"
+          ],
           "additionalProperties": false
         },
         "type": {
           "type": "string",
-          "enum": ["static", "identity", "expression"],
+          "enum": [
+            "static",
+            "identity",
+            "expression"
+          ],
           "additionalProperties": false
         },
         "mode": {
           "type": "string",
-          "enum": ["manual", "sequential"],
+          "enum": [
+            "manual",
+            "sequential"
+          ],
           "additionalProperties": false,
           "default": "manual"
         }
@@ -536,7 +612,9 @@
     }
   },
   "patternProperties": {
-    "extensions": { "$ref": "#/definitions/extensions" },
+    "extensions": {
+      "$ref": "#/definitions/extensions"
+    },
     "name": {
       "type": "string"
     },
@@ -547,6 +625,8 @@
       "type": "string"
     }
   },
-  "required": [ "id" ],
+  "required": [
+    "id"
+  ],
   "additionalProperties": false
 }

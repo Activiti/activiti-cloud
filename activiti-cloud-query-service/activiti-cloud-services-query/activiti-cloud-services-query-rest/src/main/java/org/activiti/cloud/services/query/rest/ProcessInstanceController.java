@@ -15,8 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -35,15 +43,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(
     value = "/v1/process-instances",
-    produces = {
-        MediaTypes.HAL_JSON_VALUE,
-        MediaType.APPLICATION_JSON_VALUE
-    })
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceController {
 
     private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;
@@ -53,48 +57,72 @@ public class ProcessInstanceController {
     private final ProcessInstanceService processInstanceService;
 
     @Autowired
-    public ProcessInstanceController(ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-                                     AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
-                                     ProcessInstanceService processInstanceService) {
+    public ProcessInstanceController(
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        ProcessInstanceService processInstanceService
+    ) {
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processInstanceService = processInstanceService;
     }
 
+    @Operation(summary = "Find process instances", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                 Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllProcessInstances(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceService.findAll(predicate, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
+    @Operation(summary = "Find process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                              @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> variableKeys,
-                                                                              Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
+            value = "variableKeys",
+            required = false,
+            defaultValue = ""
+        ) List<String> variableKeys,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceService.findAllWithVariables(predicate, variableKeys, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
-
+    public EntityModel<CloudProcessInstance> findByIdProcess(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(processInstanceService.findById(processInstanceId));
     }
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}/subprocesses", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable String processInstanceId,
-                                                                      @QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                      Pageable pageable) {
-
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> subprocesses(
+        @PathVariable String processInstanceId,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceService.subprocesses(processInstanceId, predicate, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 }

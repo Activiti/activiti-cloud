@@ -16,33 +16,36 @@
 package org.activiti.cloud.services.modeling.entity;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionedEntity;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
 
 /**
  * Model model entity
@@ -51,8 +54,9 @@ import org.hibernate.annotations.GenericGenerator;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 @Table(name = "Model")
-public class ModelEntity extends AuditableEntity<String> implements Model<ProjectEntity, String>,
-    VersionedEntity<ModelVersionEntity> {
+public class ModelEntity
+    extends AuditableEntity<String>
+    implements Model<ProjectEntity, String>, VersionedEntity<ModelVersionEntity> {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
@@ -63,8 +67,8 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     @ManyToMany
     @JoinTable(
         name = "project_models",
-        joinColumns = {@JoinColumn(name = "models_id")},
-        inverseJoinColumns = {@JoinColumn(name = "project_id")}
+        joinColumns = { @JoinColumn(name = "models_id") },
+        inverseJoinColumns = { @JoinColumn(name = "project_id") }
     )
     private Set<ProjectEntity> projects = new HashSet<>();
 
@@ -85,13 +89,12 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
     private String category;
 
     @Enumerated(EnumType.ORDINAL)
+    @JdbcTypeCode(Types.INTEGER)
     private ModelScope scope = ModelScope.PROJECT;
 
-    public ModelEntity() { // for JPA
-    }
+    public ModelEntity() {} // for JPA
 
-    public ModelEntity(String name,
-        String type) {
+    public ModelEntity(String name, String type) {
         this.name = name;
         this.type = type;
     }
@@ -137,11 +140,11 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     public void addProject(ProjectEntity project) {
-        if(project!=null) {
-            if(projects == null){
+        if (project != null) {
+            if (projects == null) {
                 projects = new HashSet<>();
             }
-            if(!projects.contains(project)){
+            if (!projects.contains(project)) {
                 projects.add(project);
                 project.addModel(this);
             }
@@ -150,14 +153,14 @@ public class ModelEntity extends AuditableEntity<String> implements Model<Projec
 
     @Override
     public void removeProject(ProjectEntity project) {
-        if(projects!=null && projects.contains(project)){
+        if (projects != null && projects.contains(project)) {
             projects.remove(project);
             project.removeModel(this);
         }
     }
 
     @Override
-    public void clearProjects(){
+    public void clearProjects() {
         projects.clear();
     }
 

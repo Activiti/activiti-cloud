@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.Process;
@@ -37,7 +36,8 @@ public class BpmnProcessModelContent implements ModelContent {
 
     public BpmnProcessModelContent(BpmnModel bpmnModel) {
         this.bpmnModel = bpmnModel;
-        this.process = bpmnModel
+        this.process =
+            bpmnModel
                 .getProcesses()
                 .stream()
                 .findFirst()
@@ -63,21 +63,19 @@ public class BpmnProcessModelContent implements ModelContent {
     }
 
     public Set<FlowNode> findAllNodes(Class<? extends FlowNode>... activityTypes) {
-        return bpmnModel.getProcesses()
-                .stream()
-                .flatMap(process -> Arrays.stream(activityTypes)
-                        .map(process::findFlowElementsOfType)
-                        .flatMap(List::stream)
-                )
-                .collect(Collectors.toSet());
+        return bpmnModel
+            .getProcesses()
+            .stream()
+            .flatMap(process -> Arrays.stream(activityTypes).map(process::findFlowElementsOfType).flatMap(List::stream))
+            .collect(Collectors.toSet());
     }
 
     public <T extends FlowNode> Set<T> findAllNodes(Class<T> activityType) {
-        return bpmnModel.getProcesses()
-                .stream()
-                .map(process -> process.findFlowElementsOfType(activityType,
-                                                               true)
-                ).flatMap(List::stream)
-                .collect(Collectors.toSet());
+        return bpmnModel
+            .getProcesses()
+            .stream()
+            .map(process -> process.findFlowElementsOfType(activityType, true))
+            .flatMap(List::stream)
+            .collect(Collectors.toSet());
     }
 }

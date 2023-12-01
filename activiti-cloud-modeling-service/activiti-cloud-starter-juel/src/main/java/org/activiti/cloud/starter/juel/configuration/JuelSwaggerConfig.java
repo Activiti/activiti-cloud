@@ -16,7 +16,7 @@
 package org.activiti.cloud.starter.juel.configuration;
 
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -28,10 +28,13 @@ public class JuelSwaggerConfig {
     @Bean
     @ConditionalOnMissingBean(name = "juelApi")
     public GroupedOpenApi juelApi(@Value("${activiti.cloud.swagger.juel-base-path:}") String swaggerBasePath) {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Juel")
             .packagesToScan("org.activiti.cloud.starter.juel")
-            .addOpenApiCustomiser(openApi -> openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath))
+            .addOpenApiCustomizer(openApi ->
+                openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
+            )
             .build();
     }
 }

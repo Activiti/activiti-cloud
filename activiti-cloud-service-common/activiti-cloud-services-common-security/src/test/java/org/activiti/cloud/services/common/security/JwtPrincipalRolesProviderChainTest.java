@@ -56,20 +56,16 @@ public class JwtPrincipalRolesProviderChainTest {
         // given
         Principal principal = mock(KeycloakPrincipal.class);
         when(provider1.getRoles(any())).thenReturn(null);
-        when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1",
-            "role2"));
+        when(provider2.getRoles(any())).thenReturn(Arrays.asList("role1", "role2"));
 
         // when
         List<String> result = subject.getRoles(principal);
 
         // then
-        assertThat(result).isNotEmpty()
-                          .containsExactly("role1",
-                                           "role2");
+        assertThat(result).isNotEmpty().containsExactly("role1", "role2");
 
         verify(provider1).getRoles(eq(principal));
         verify(provider2).getRoles(eq(principal));
-
     }
 
     @Test
@@ -80,7 +76,9 @@ public class JwtPrincipalRolesProviderChainTest {
         when(provider2.getRoles(any())).thenReturn(null);
 
         // when
-        Throwable thrown = catchThrowable(() -> { subject.getRoles(principal); });
+        Throwable thrown = catchThrowable(() -> {
+            subject.getRoles(principal);
+        });
 
         // then
         assertThat(thrown).isInstanceOf(SecurityException.class);
@@ -88,5 +86,4 @@ public class JwtPrincipalRolesProviderChainTest {
         verify(provider1).getRoles(eq(principal));
         verify(provider2).getRoles(eq(principal));
     }
-
 }

@@ -17,7 +17,6 @@ package org.activiti.cloud.services.notifications.graphql.graphiql;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -28,7 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @ConditionalOnWebApplication
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
 public class KeycloakJsonController {
 
     @Value("${keycloak.auth-server-url}")
@@ -53,8 +56,8 @@ public class KeycloakJsonController {
         //
     }
 
-    @GetMapping(value="graphiql/keycloak.json",  produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String,Object>> get() {
+    @GetMapping(value = "graphiql/keycloak.json", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> get() {
         Map<String, Object> values = new LinkedHashMap<>();
 
         values.put("auth-server-url", authServerUrl);
@@ -66,6 +69,4 @@ public class KeycloakJsonController {
 
         return ResponseEntity.ok(values);
     }
-
-
 }

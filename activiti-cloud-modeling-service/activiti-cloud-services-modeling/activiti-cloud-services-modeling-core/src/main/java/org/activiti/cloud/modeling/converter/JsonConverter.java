@@ -15,18 +15,18 @@
  */
 package org.activiti.cloud.modeling.converter;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.modeling.core.error.ModelingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Generic json converter
@@ -39,100 +39,86 @@ public class JsonConverter<T> {
 
     private final ObjectMapper objectMapper;
 
-    public JsonConverter(Class<T> entityClass,
-                         ObjectMapper objectMapper) {
+    public JsonConverter(Class<T> entityClass, ObjectMapper objectMapper) {
         this.entityClass = entityClass;
         this.objectMapper = objectMapper;
     }
 
     public String convertToJson(T entity) {
-        return convertToJson(entity,
-                             null);
+        return convertToJson(entity, null);
     }
 
-    public String convertToJson(T entity,
-                                Class<?> view) {
+    public String convertToJson(T entity, Class<?> view) {
         try {
             if (entity == null) {
                 return null;
             }
 
             ObjectMapper objectMapper = getObjectMapper();
-            return Optional.ofNullable(view)
-                    .map(objectMapper::writerWithView)
-                    .orElseGet(objectMapper::writer)
-                    .writeValueAsString(entity);
+            return Optional
+                .ofNullable(view)
+                .map(objectMapper::writerWithView)
+                .orElseGet(objectMapper::writer)
+                .writeValueAsString(entity);
         } catch (JsonProcessingException e) {
-            logger.error("Cannot convert entity to json: " + entity,
-                         e);
-            throw new ModelingException("Cannot convert entity to json: " + entity,
-                                        e);
+            logger.error("Cannot convert entity to json: " + entity, e);
+            throw new ModelingException("Cannot convert entity to json: " + entity, e);
         }
     }
 
     public byte[] convertToJsonBytes(T entity) {
-        return convertToJsonBytes(entity,
-                                  null);
+        return convertToJsonBytes(entity, null);
     }
 
-    public byte[] convertToJsonBytes(T entity,
-                                     Class<?> view) {
+    public byte[] convertToJsonBytes(T entity, Class<?> view) {
         try {
             if (entity == null) {
                 return null;
             }
 
             ObjectMapper objectMapper = getObjectMapper();
-            return Optional.ofNullable(view)
-                    .map(objectMapper::writerWithView)
-                    .orElseGet(objectMapper::writer)
-                    .writeValueAsBytes(entity);
+            return Optional
+                .ofNullable(view)
+                .map(objectMapper::writerWithView)
+                .orElseGet(objectMapper::writer)
+                .writeValueAsBytes(entity);
         } catch (JsonProcessingException e) {
-            logger.error("Cannot convert entity to json: " + entity,
-                         e);
-            throw new ModelingException("Cannot convert entity to json: " + entity,
-                                        e);
+            logger.error("Cannot convert entity to json: " + entity, e);
+            throw new ModelingException("Cannot convert entity to json: " + entity, e);
         }
     }
 
     public T convertToEntity(byte[] json) {
-        return convertToEntity(json,
-                               null);
+        return convertToEntity(json, null);
     }
 
-    public T convertToEntity(byte[] json,
-                             Class<?> view) {
-        if (StringUtils.isEmpty(json)) {
+    public T convertToEntity(byte[] json, Class<?> view) {
+        if (ObjectUtils.isEmpty(json)) {
             return null;
         }
-        return convertToEntity(new String(json,
-                                          UTF_8),
-                               view);
+        return convertToEntity(new String(json, UTF_8), view);
     }
 
     public T convertToEntity(String json) {
-        return convertToEntity(json,
-                               null);
+        return convertToEntity(json, null);
     }
 
-    public T convertToEntity(String json,
-                             Class<?> view) {
+    public T convertToEntity(String json, Class<?> view) {
         try {
-            if (StringUtils.isEmpty(json)) {
+            if (!StringUtils.hasLength(json)) {
                 return null;
             }
 
             ObjectMapper objectMapper = getObjectMapper();
-            return Optional.ofNullable(view)
-                    .map(objectMapper::readerWithView)
-                    .orElseGet(objectMapper::reader)
-                    .forType(getEntityClass())
-                    .readValue(json);
+            return Optional
+                .ofNullable(view)
+                .map(objectMapper::readerWithView)
+                .orElseGet(objectMapper::reader)
+                .forType(getEntityClass())
+                .readValue(json);
         } catch (IOException e) {
-            logger.error("Cannot convert json to entity: " + json,
-                         e);
-            throw new ModelingException("Cannot convert json to entity: " + json,
-                                        e);
+            logger.error("Cannot convert json to entity: " + json, e);
+            throw new ModelingException("Cannot convert json to entity: " + json, e);
         }
     }
 
@@ -161,7 +147,7 @@ public class JsonConverter<T> {
     }
 
     public Optional<T> tryConvertToEntity(Map jsonMap) {
-        if(jsonMap==null || jsonMap.isEmpty()) {
+        if (jsonMap == null || jsonMap.isEmpty()) {
             return Optional.empty();
         }
         try {

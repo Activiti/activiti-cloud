@@ -15,33 +15,59 @@
  */
 package org.activiti.cloud.services.common.security.keycloak.config;
 
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.Scopes;
+import java.util.function.Function;
+import org.activiti.cloud.common.swagger.springdoc.conf.SwaggerAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakJwtAdapter;
 import org.activiti.cloud.services.common.security.keycloak.KeycloakResourceJwtAdapter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.oauth2.jwt.Jwt;
 
-@Configuration
-@PropertySource("classpath:keycloak-configuration.properties" )
-@ConditionalOnProperty(value = "activiti.cloud.services.oauth2.iam-name", havingValue = "keycloak", matchIfMissing = true)
+@AutoConfiguration
+@PropertySource("classpath:keycloak-configuration.properties")
+@AutoConfigureBefore(SwaggerAutoConfiguration.class)
+@ConditionalOnProperty(
+    value = "activiti.cloud.services.oauth2.iam-name",
+    havingValue = "keycloak",
+    matchIfMissing = true
+)
 public class KeycloakSecurityConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "false", matchIfMissing = true)
-    public JwtAccessTokenProvider jwtGlobalAccessTokenProvider() {
-        return new JwtAccessTokenProvider(jwt -> new KeycloakJwtAdapter(jwt));
+    public Function<Jwt, JwtAdapter> jwtGlobalAdapter() {
+        return jwt -> new KeycloakJwtAdapter(jwt);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "true")
+    public Function<Jwt, JwtAdapter> jwtResourceResourceAdapter(@Value("${keycloak.resource}") String resource) {
+        return jwt -> new KeycloakResourceJwtAdapter(resource, jwt);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "keycloak.use-resource-role-mappings", havingValue = "true")
-    public JwtAccessTokenProvider jwtResourceAccessTokenProvider(@Value("${keycloak.resource}" ) String resource) {
-        return new JwtAccessTokenProvider(jwt -> new KeycloakResourceJwtAdapter(resource, jwt));
+    public JwtAccessTokenProvider jwtAccessTokenProvider(Function<Jwt, JwtAdapter> jwtAdapterSupplier) {
+        return new JwtAccessTokenProvider(jwtAdapterSupplier);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public OAuthFlow swaggerOAuthFlow(
+        @Value("${keycloak.auth-server-url}") String authServer,
+        @Value("${keycloak.realm}") String realm
+    ) {
+        return new OAuthFlow()
+            .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
+            .scopes(new Scopes());
+    }
 }

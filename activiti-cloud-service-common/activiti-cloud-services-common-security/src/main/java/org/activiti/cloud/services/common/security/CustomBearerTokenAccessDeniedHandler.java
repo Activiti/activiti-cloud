@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.common.security;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -27,21 +27,24 @@ public class CustomBearerTokenAccessDeniedHandler implements AccessDeniedHandler
 
     private final AccessDeniedHandler accessDeniedHandler;
 
-    public CustomBearerTokenAccessDeniedHandler(AccessDeniedHandler accessDeniedHandler){
+    public CustomBearerTokenAccessDeniedHandler(AccessDeniedHandler accessDeniedHandler) {
         this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        AccessDeniedException accessDeniedException
+    ) throws IOException, ServletException {
         accessDeniedHandler.handle(request, response, accessDeniedException);
         setStatusWithReasonIfErrorIs403(response);
     }
 
     private void setStatusWithReasonIfErrorIs403(HttpServletResponse response) throws IOException {
         // After using Spring Security Oauth2 the reason is not more set in the error, so we need to set it manually
-        if(response.getStatus() == 403) {
+        if (response.getStatus() == 403) {
             response.sendError(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.getReasonPhrase());
         }
     }
-
 }

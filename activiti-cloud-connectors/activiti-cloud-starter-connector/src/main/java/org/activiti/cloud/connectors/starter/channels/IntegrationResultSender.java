@@ -19,6 +19,5 @@ import org.activiti.cloud.api.process.model.IntegrationResult;
 import org.springframework.messaging.Message;
 
 public interface IntegrationResultSender {
-
     void send(Message<IntegrationResult> message);
 }

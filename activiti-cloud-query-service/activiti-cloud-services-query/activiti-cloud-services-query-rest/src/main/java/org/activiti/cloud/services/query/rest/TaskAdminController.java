@@ -15,8 +15,17 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.ROOT_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.STANDALONE_TASKS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,12 +57,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(
-    value = "/admin/v1/tasks",
-    produces = {
-        MediaTypes.HAL_JSON_VALUE,
-        MediaType.APPLICATION_JSON_VALUE
-    })
+@RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class TaskAdminController {
 
     private final TaskRepository taskRepository;
@@ -65,58 +69,100 @@ public class TaskAdminController {
     private TaskControllerHelper taskControllerHelper;
 
     @Autowired
-    public TaskAdminController(TaskRepository taskRepository,
+    public TaskAdminController(
+        TaskRepository taskRepository,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         EntityFinder entityFinder,
-        TaskControllerHelper taskControllerHelper) {
+        TaskControllerHelper taskControllerHelper
+    ) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.entityFinder = entityFinder;
         this.taskControllerHelper = taskControllerHelper;
     }
 
+    @Operation(summary = "Find tasks Admin", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAll(
-        @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
-        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+    public PagedModel<EntityModel<QueryCloudTask>> findAllServiceTaskAdmin(
+        @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
+            name = "rootTasksOnly",
+            defaultValue = "false"
+        ) Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC) @RequestParam(
+            name = "standalone",
+            defaultValue = "false"
+        ) Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = TaskEntity.class
+        ) Predicate predicate,
         VariableSearch variableSearch,
-        Pageable pageable) {
-        return taskControllerHelper.findAll(predicate, variableSearch, pageable,
-            Arrays.asList(new RootTasksFilter(rootTasksOnly),
-                new StandAloneTaskFilter(standalone)));
+        Pageable pageable
+    ) {
+        return taskControllerHelper.findAll(
+            predicate,
+            variableSearch,
+            pageable,
+            Arrays.asList(new RootTasksFilter(rootTasksOnly), new StandAloneTaskFilter(standalone))
+        );
     }
 
+    @Operation(summary = "Find tasks with Process Variables Admin")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
-        @RequestParam(name = "rootTasksOnly", defaultValue = "false") Boolean rootTasksOnly,
-        @RequestParam(name = "standalone", defaultValue = "false") Boolean standalone,
-        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
-        @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> processVariableKeys,
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariablesAdmin(
+        @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
+            name = "rootTasksOnly",
+            defaultValue = "false"
+        ) Boolean rootTasksOnly,
+        @Parameter(description = STANDALONE_TASKS_DESC) @RequestParam(
+            name = "standalone",
+            defaultValue = "false"
+        ) Boolean standalone,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = TaskEntity.class
+        ) Predicate predicate,
+        @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
+            value = "variableKeys",
+            required = false,
+            defaultValue = ""
+        ) List<String> processVariableKeys,
         VariableSearch variableSearch,
-        Pageable pageable) {
-
-        return taskControllerHelper.findAllWithProcessVariables(predicate, variableSearch, pageable, Arrays.asList(new RootTasksFilter(rootTasksOnly),
-            new StandAloneTaskFilter(standalone)), processVariableKeys);
+        Pageable pageable
+    ) {
+        return taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            Arrays.asList(new RootTasksFilter(rootTasksOnly), new StandAloneTaskFilter(standalone)),
+            processVariableKeys
+        );
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(
-        @QuerydslPredicate(root = TaskEntity.class) Predicate predicate,
+    public MappingJacksonValue findAllFromBodyTaskAdmin(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = TaskEntity.class
+        ) Predicate predicate,
         @RequestBody(required = false) TasksQueryBody payload,
         VariableSearch variableSearch,
-        Pageable pageable) {
-
+        Pageable pageable
+    ) {
         TasksQueryBody queryBody = Optional.ofNullable(payload).orElse(new TasksQueryBody());
 
-        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(predicate, variableSearch, pageable,
-            Arrays.asList(new RootTasksFilter(queryBody.isRootTasksOnly()), new StandAloneTaskFilter(queryBody.isStandalone())),
-            queryBody.getVariableKeys());
+        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(
+            predicate,
+            variableSearch,
+            pageable,
+            Arrays.asList(
+                new RootTasksFilter(queryBody.isRootTasksOnly()),
+                new StandAloneTaskFilter(queryBody.isStandalone())
+            ),
+            queryBody.getVariableKeys()
+        );
 
         MappingJacksonValue result = new MappingJacksonValue(pagedModel);
-        if(queryBody.hasVariableKeys()) {
+        if (queryBody.hasVariableKeys()) {
             result.setSerializationView(JsonViews.ProcessVariables.class);
         } else {
             result.setSerializationView(JsonViews.General.class);
@@ -127,35 +173,47 @@ public class TaskAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findById(@PathVariable String taskId) {
-
-        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+    public EntityModel<QueryCloudTask> findByIdTaskAdmin(@PathVariable String taskId) {
+        TaskEntity taskEntity = entityFinder.findById(
+            taskRepository,
             taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'");
+            "Unable to find taskEntity for the given id:'" + taskId + "'"
+        );
 
         return taskRepresentationModelAssembler.toModel(taskEntity);
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
-    public List<String> getTaskCandidateUsers(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+    public List<String> getTaskCandidateUsersAdmin(@PathVariable String taskId) {
+        TaskEntity taskEntity = entityFinder.findById(
+            taskRepository,
             taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'");
+            "Unable to find taskEntity for the given id:'" + taskId + "'"
+        );
 
-        return taskEntity.getTaskCandidateUsers() != null ?
-            taskEntity.getTaskCandidateUsers().stream().map(TaskCandidateUserEntity::getUserId).collect(Collectors.toList()) :
-            null;
+        return taskEntity.getTaskCandidateUsers() != null
+            ? taskEntity
+                .getTaskCandidateUsers()
+                .stream()
+                .map(TaskCandidateUserEntity::getUserId)
+                .collect(Collectors.toList())
+            : null;
     }
 
     @RequestMapping(value = "/{taskId}/candidate-groups", method = RequestMethod.GET)
-    public List<String> getTaskCandidateGroups(@PathVariable String taskId) {
-        TaskEntity taskEntity = entityFinder.findById(taskRepository,
+    public List<String> getTaskCandidateGroupsAdmin(@PathVariable String taskId) {
+        TaskEntity taskEntity = entityFinder.findById(
+            taskRepository,
             taskId,
-            "Unable to find taskEntity for the given id:'" + taskId + "'");
+            "Unable to find taskEntity for the given id:'" + taskId + "'"
+        );
 
-        return taskEntity.getTaskCandidateGroups() != null ?
-            taskEntity.getTaskCandidateGroups().stream().map(TaskCandidateGroupEntity::getGroupId).collect(Collectors.toList()) :
-            null;
+        return taskEntity.getTaskCandidateGroups() != null
+            ? taskEntity
+                .getTaskCandidateGroups()
+                .stream()
+                .map(TaskCandidateGroupEntity::getGroupId)
+                .collect(Collectors.toList())
+            : null;
     }
-
 }

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 package org.activiti.cloud.identity.exceptions;
+
 public class IdentityInvalidGroupException extends IdentityException {
+
     public IdentityInvalidGroupException(String groupName) {
-        super("group {"+ groupName + "} is invalid or doesn't exist");
+        super("group {" + groupName + "} is invalid or doesn't exist");
     }
 }

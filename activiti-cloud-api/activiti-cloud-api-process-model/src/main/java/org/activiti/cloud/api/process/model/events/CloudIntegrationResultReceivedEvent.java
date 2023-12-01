@@ -15,6 +15,4 @@
  */
 package org.activiti.cloud.api.process.model.events;
 
-public interface CloudIntegrationResultReceivedEvent extends CloudIntegrationEvent {
-
-}
+public interface CloudIntegrationResultReceivedEvent extends CloudIntegrationEvent {}

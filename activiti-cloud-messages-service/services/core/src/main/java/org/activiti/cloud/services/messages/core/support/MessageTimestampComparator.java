@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.messages.core.support;
 
 import java.util.Comparator;
-
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -39,6 +38,4 @@ public class MessageTimestampComparator implements Comparator<Message<?>> {
         }
         return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
     }
-
-
 }

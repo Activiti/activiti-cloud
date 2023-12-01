@@ -27,7 +27,7 @@ public class RuntimeBundleMessageBuilderFactory {
 
     public MessageBuilderAppenderChain create() {
         return new MessageBuilderAppenderChain()
-                .routingKeyResolver(new AuditProducerRoutingKeyResolver())
-                .chain(new RuntimeBundleInfoMessageBuilderAppender(properties));
+            .routingKeyResolver(new AuditProducerRoutingKeyResolver())
+            .chain(new RuntimeBundleInfoMessageBuilderAppender(properties));
     }
 }

@@ -17,10 +17,7 @@ package org.activiti.cloud.alfresco.argument.resolver;
 
 public class SkipCountParameter extends AlfrescoParameter<Long> {
 
-    public SkipCountParameter(boolean set,
-                              long value) {
-        super(set,
-              value);
+    public SkipCountParameter(boolean set, long value) {
+        super(set, value);
     }
-
 }

@@ -21,11 +21,9 @@ import static org.mockito.Mockito.mock;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.activiti.cloud.services.notifications.graphql.ws.transport.GraphQLBrokerSubscriptionRegistry.SessionSubscriptionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 
 public class GraphQLBrokerSubscriptionRegistryTest {
 
@@ -50,7 +48,6 @@ public class GraphQLBrokerSubscriptionRegistryTest {
 
         SessionSubscriptionInfo result = testSubject.get("sessionId");
         assertThat(result.getSubscriber("subscriptionId")).isEqualTo(subscriber);
-
     }
 
     @Test
@@ -60,14 +57,13 @@ public class GraphQLBrokerSubscriptionRegistryTest {
         AtomicReference<GraphQLBrokerChannelSubscriber> reference = new AtomicReference<>(null);
 
         // when
-        testSubject.unsubscribe("sessionId", (subscriber) -> reference.set(subscriber));
+        testSubject.unsubscribe("sessionId", subscriber -> reference.set(subscriber));
 
         // then
         assertThat(reference.get()).isNotNull();
 
         SessionSubscriptionInfo result = testSubject.get("sessionId");
         assertThat(result.getSubscriber("subscriptionId")).isNull();
-
     }
 
     @Test
@@ -77,14 +73,13 @@ public class GraphQLBrokerSubscriptionRegistryTest {
         AtomicReference<GraphQLBrokerChannelSubscriber> reference = new AtomicReference<>(null);
 
         // when
-        testSubject.unsubscribe("sessionId", "subscriptionId", (subscriber) -> reference.set(subscriber));
+        testSubject.unsubscribe("sessionId", "subscriptionId", subscriber -> reference.set(subscriber));
 
         // then
         assertThat(reference.get()).isNotNull();
 
         SessionSubscriptionInfo result = testSubject.get("sessionId");
         assertThat(result.getSubscriber("subscriptionId")).isNull();
-
     }
 
     @Test
@@ -98,5 +93,4 @@ public class GraphQLBrokerSubscriptionRegistryTest {
         assertThat(result).isNotNull();
         assertThat(result.getSubscriber("subscriptionId")).isNull();
     }
-
 }

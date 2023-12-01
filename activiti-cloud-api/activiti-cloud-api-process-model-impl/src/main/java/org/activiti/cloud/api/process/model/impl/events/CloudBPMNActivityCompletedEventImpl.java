@@ -19,29 +19,28 @@ import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityCompletedEvent;
 
-public class CloudBPMNActivityCompletedEventImpl extends CloudBPMNActivityEventImpl implements CloudBPMNActivityCompletedEvent {
+public class CloudBPMNActivityCompletedEventImpl
+    extends CloudBPMNActivityEventImpl
+    implements CloudBPMNActivityCompletedEvent {
 
-    public CloudBPMNActivityCompletedEventImpl() {
+    public CloudBPMNActivityCompletedEventImpl() {}
+
+    public CloudBPMNActivityCompletedEventImpl(
+        BPMNActivity entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNActivityCompletedEventImpl(BPMNActivity entity,
-                                               String processDefinitionId,
-                                               String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNActivityCompletedEventImpl(String id,
-                                               Long timestamp,
-                                               BPMNActivity entity,
-                                               String processDefinitionId,
-                                               String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNActivityCompletedEventImpl(
+        String id,
+        Long timestamp,
+        BPMNActivity entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override

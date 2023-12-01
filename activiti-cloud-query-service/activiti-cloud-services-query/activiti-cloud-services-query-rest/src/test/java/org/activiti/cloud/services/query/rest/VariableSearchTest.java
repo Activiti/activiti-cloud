@@ -26,8 +26,7 @@ public class VariableSearchTest {
     @Test
     public void isSet_shouldReturnTrue_when_variableNameAndValueAreSet() {
         //given
-        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>("any"),
-            "string");
+        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>("any"), "string");
 
         //when
         boolean isSet = variableSearch.isSet();
@@ -39,8 +38,7 @@ public class VariableSearchTest {
     @Test
     public void isSet_shouldReturnFalse_when_variableNameIsNotSet() {
         //given
-        VariableSearch variableSearch = new VariableSearch(null, new VariableValue<>("any"),
-            "string");
+        VariableSearch variableSearch = new VariableSearch(null, new VariableValue<>("any"), "string");
 
         //when
         boolean isSet = variableSearch.isSet();
@@ -52,8 +50,7 @@ public class VariableSearchTest {
     @Test
     public void isSet_shouldReturnFalse_when_variableValueIsNotSet() {
         //given
-        VariableSearch variableSearch = new VariableSearch("var", null,
-            "string");
+        VariableSearch variableSearch = new VariableSearch("var", null, "string");
 
         //when
         boolean isSet = variableSearch.isSet();
@@ -65,8 +62,7 @@ public class VariableSearchTest {
     @Test
     public void isSet_shouldReturnFalse_when_variableValueIsWrappingANullValue() {
         //given
-        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>(null),
-            "string");
+        VariableSearch variableSearch = new VariableSearch("var", new VariableValue<>(null), "string");
 
         //when
         boolean isSet = variableSearch.isSet();
@@ -74,5 +70,4 @@ public class VariableSearchTest {
         //then
         assertThat(isSet).isFalse();
     }
-
 }

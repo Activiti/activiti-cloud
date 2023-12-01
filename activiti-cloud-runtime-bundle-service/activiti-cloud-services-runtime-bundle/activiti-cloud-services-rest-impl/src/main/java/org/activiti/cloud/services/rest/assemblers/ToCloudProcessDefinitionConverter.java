@@ -32,9 +32,10 @@ public class ToCloudProcessDefinitionConverter {
         CloudProcessDefinitionImpl cloudProcessDefinition = new CloudProcessDefinitionImpl(processDefinition);
         runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(cloudProcessDefinition);
         if (processDefinition instanceof ExtendedCloudProcessDefinition) {
-            cloudProcessDefinition.setVariableDefinitions(((ExtendedCloudProcessDefinition) processDefinition).getVariableDefinitions());
+            cloudProcessDefinition.setVariableDefinitions(
+                ((ExtendedCloudProcessDefinition) processDefinition).getVariableDefinitions()
+            );
         }
         return cloudProcessDefinition;
     }
-
 }

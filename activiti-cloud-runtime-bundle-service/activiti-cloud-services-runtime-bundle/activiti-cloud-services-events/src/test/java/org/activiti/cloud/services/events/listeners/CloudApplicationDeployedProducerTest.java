@@ -15,6 +15,17 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.activiti.api.process.model.Deployment;
 import org.activiti.api.process.model.events.ApplicationDeployedEvent;
 import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
@@ -37,18 +48,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudApplicationDeployedProducerTest {
@@ -86,25 +85,29 @@ public class CloudApplicationDeployedProducerTest {
         Deployment deployment1 = mock(Deployment.class);
         Deployment deployment2 = mock(Deployment.class);
         List<ApplicationDeployedEvent> applicationDeployedEventList = Arrays.asList(
-                new ApplicationDeployedEventImpl(deployment1),
-                new ApplicationDeployedEventImpl(deployment2));
-        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
+            new ApplicationDeployedEventImpl(deployment1),
+            new ApplicationDeployedEventImpl(deployment2)
+        );
+        given(messageBuilderAppenderChain.withPayload(any()))
+            .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[2]));
 
         //when
-        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(new ApplicationDeployedEvents(applicationDeployedEventList));
+        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(
+            new ApplicationDeployedEvents(applicationDeployedEventList)
+        );
 
         //then
-        verify(runtimeBundleInfoAppender,
-                times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender, times(2)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(auditProducer).send(any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
-                .map(CloudApplicationDeployedEvent.class::cast)
-                .collect(Collectors.toList());
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays
+            .stream(messagePayloadCaptor.getValue())
+            .map(CloudApplicationDeployedEvent.class::cast)
+            .collect(Collectors.toList());
         assertThat(cloudApplicationDeployedEvents)
-                .extracting(CloudApplicationDeployedEvent::getEntity)
-                .containsOnly(deployment1, deployment2);
+            .extracting(CloudApplicationDeployedEvent::getEntity)
+            .containsOnly(deployment1, deployment2);
 
         assertThat(cloudApplicationDeployedEvents)
             .extracting(CloudApplicationDeployedEvent::getEventType)
@@ -115,19 +118,24 @@ public class CloudApplicationDeployedProducerTest {
     public void shouldSendMessageWithRollbackApplication() {
         //given
         Deployment deployment = mock(Deployment.class);
-        List<ApplicationDeployedEvent> applicationDeployedEventList = List.of(new ApplicationDeployedEventImpl(deployment, ApplicationEvents.APPLICATION_ROLLBACK));
-        given(messageBuilderAppenderChain.withPayload(any())).willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
+        List<ApplicationDeployedEvent> applicationDeployedEventList = List.of(
+            new ApplicationDeployedEventImpl(deployment, ApplicationEvents.APPLICATION_ROLLBACK)
+        );
+        given(messageBuilderAppenderChain.withPayload(any()))
+            .willReturn(MessageBuilder.withPayload(new CloudRuntimeEvent<?, ?>[1]));
 
         //when
-        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(new ApplicationDeployedEvents(applicationDeployedEventList));
+        cloudApplicationDeployedProducer.sendApplicationDeployedEvents(
+            new ApplicationDeployedEvents(applicationDeployedEventList)
+        );
 
         //then
-        verify(runtimeBundleInfoAppender,
-               times(1)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
+        verify(runtimeBundleInfoAppender, times(1)).appendRuntimeBundleInfoTo(any(CloudRuntimeEventImpl.class));
         verify(auditProducer).send(any());
 
         verify(messageBuilderAppenderChain).withPayload(messagePayloadCaptor.capture());
-        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays.stream(messagePayloadCaptor.getValue())
+        List<CloudApplicationDeployedEvent> cloudApplicationDeployedEvents = Arrays
+            .stream(messagePayloadCaptor.getValue())
             .map(CloudApplicationDeployedEvent.class::cast)
             .collect(Collectors.toList());
         assertThat(cloudApplicationDeployedEvents)

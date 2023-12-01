@@ -43,8 +43,10 @@ public class ProcessResumedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ProcessResumedAuditEventEntity processResumedAuditEventEntity = (ProcessResumedAuditEventEntity) auditEventEntity;
 
-        return new CloudProcessResumedEventImpl(processResumedAuditEventEntity.getEventId(),
-                                                processResumedAuditEventEntity.getTimestamp(),
-                                                processResumedAuditEventEntity.getProcessInstance());
+        return new CloudProcessResumedEventImpl(
+            processResumedAuditEventEntity.getEventId(),
+            processResumedAuditEventEntity.getTimestamp(),
+            processResumedAuditEventEntity.getProcessInstance()
+        );
     }
 }

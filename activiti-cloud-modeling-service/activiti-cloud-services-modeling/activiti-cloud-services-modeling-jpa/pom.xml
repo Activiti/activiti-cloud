@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-modeling</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-modeling-jpa</artifactId>
   <name>Activiti Cloud Services :: Modeling JPA</name>
@@ -35,10 +35,6 @@
       <artifactId>activiti-cloud-services-common-security-keycloak</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
     </dependency>
@@ -55,6 +51,10 @@
       <artifactId>java-semver</artifactId>
     </dependency>
     <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
-      <scope>test</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>

@@ -15,30 +15,46 @@
  */
 package org.activiti.cloud.services.query.app;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
 import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
-import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public class QueryConsumerChannelHandler {
 
     private final QueryEventHandlerContext eventHandlerContext;
     private final QueryEventHandlerContextOptimizer optimizer;
+    private final EntityManager entityManager;
 
-    public QueryConsumerChannelHandler(QueryEventHandlerContext eventHandlerContext,
-                                       QueryEventHandlerContextOptimizer optimizer) {
+    public QueryConsumerChannelHandler(
+        QueryEventHandlerContext eventHandlerContext,
+        QueryEventHandlerContextOptimizer optimizer,
+        EntityManager entityManager
+    ) {
         this.optimizer = optimizer;
         this.eventHandlerContext = eventHandlerContext;
+        this.entityManager = entityManager;
     }
 
-    @StreamListener(QueryConsumerChannels.QUERY_CONSUMER)
     public synchronized void receive(List<CloudRuntimeEvent<?, ?>> events) {
-        eventHandlerContext.handle(optimizer.optimize(events)
-                                            .toArray(new CloudRuntimeEvent[]{}));
+        afterCompletion(entityManager::clear);
+        eventHandlerContext.handle(optimizer.optimize(events).toArray(new CloudRuntimeEvent[] {}));
     }
 
+    private static void afterCompletion(Runnable action) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    action.run();
+                }
+            }
+        );
+    }
 }

@@ -27,7 +27,10 @@ public class IntegrationRequestBuilder implements Serializable {
     private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
     private final BindingServiceProperties bindingServiceProperties;
 
-    public IntegrationRequestBuilder(RuntimeBundleInfoAppender runtimeBundleInfoAppender, BindingServiceProperties bindingServiceProperties) {
+    public IntegrationRequestBuilder(
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        BindingServiceProperties bindingServiceProperties
+    ) {
         this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
         this.bindingServiceProperties = bindingServiceProperties;
     }
@@ -36,9 +39,11 @@ public class IntegrationRequestBuilder implements Serializable {
         IntegrationRequestImpl integrationRequest = new IntegrationRequestImpl(integrationContext);
 
         String resultDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER);
+            ProcessEngineIntegrationChannels.INTEGRATION_RESULTS_CONSUMER
+        );
         String errorDestination = bindingServiceProperties.getBindingDestination(
-            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER);
+            ProcessEngineIntegrationChannels.INTEGRATION_ERRORS_CONSUMER
+        );
 
         integrationRequest.setErrorDestination(errorDestination);
         integrationRequest.setResultDestination(resultDestination);

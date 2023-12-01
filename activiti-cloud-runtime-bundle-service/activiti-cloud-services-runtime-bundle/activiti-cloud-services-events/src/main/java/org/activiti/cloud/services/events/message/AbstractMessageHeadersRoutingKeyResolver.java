@@ -30,18 +30,24 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
     public abstract String resolve(Map<String, Object> headers);
 
     protected String build(Map<String, Object> headers, String... keys) {
-        return getPrefix() + DELIMITER + Stream.of(keys)
-                     .map(headers::get)
-                     .map(Optional::ofNullable)
-                     .map(this::mapNullOrEmptyValue)
-                     .collect(Collectors.joining(DELIMITER));
+        return (
+            getPrefix() +
+            DELIMITER +
+            Stream
+                .of(keys)
+                .map(headers::get)
+                .map(Optional::ofNullable)
+                .map(this::mapNullOrEmptyValue)
+                .collect(Collectors.joining(DELIMITER))
+        );
     }
 
     private String mapNullOrEmptyValue(Optional<Object> obj) {
-        return obj.map(Object::toString)
-                  .filter(value -> !value.isEmpty())
-                  .map(this::escapeIllegalCharacters)
-                  .orElse(UNDERSCORE);
+        return obj
+            .map(Object::toString)
+            .filter(value -> !value.isEmpty())
+            .map(this::escapeIllegalCharacters)
+            .orElse(UNDERSCORE);
     }
 
     protected String escapeIllegalCharacters(String value) {
@@ -49,5 +55,4 @@ public abstract class AbstractMessageHeadersRoutingKeyResolver implements Routin
     }
 
     public abstract String getPrefix();
-
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 package org.activiti.cloud.api.process.model.events;
+
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-
 public interface CloudBPMNActivityEvent extends CloudRuntimeEvent<BPMNActivity, BPMNActivityEvent.ActivityEvents> {
-
     String getProcessDefinitionId();
 
     String getProcessInstanceId();

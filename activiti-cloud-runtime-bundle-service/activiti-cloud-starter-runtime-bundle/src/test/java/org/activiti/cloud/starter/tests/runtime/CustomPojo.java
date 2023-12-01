@@ -16,6 +16,7 @@
 package org.activiti.cloud.starter.tests.runtime;
 
 public class CustomPojo {
+
     public String field1;
     public String field2;
 

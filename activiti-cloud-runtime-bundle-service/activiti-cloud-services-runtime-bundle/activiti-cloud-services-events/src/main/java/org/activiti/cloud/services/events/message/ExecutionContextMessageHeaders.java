@@ -21,17 +21,17 @@ package org.activiti.cloud.services.events.message;
  */
 public class ExecutionContextMessageHeaders {
 
-    public final static String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
-    public final static String ROOT_BUSINESS_KEY = "rootBusinessKey";
-    public final static String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
-    public final static String ROOT_PROCESS_NAME = "rootProcessName";
-    public final static String ROOT_PROCESS_DEFINITION_ID = "rootProcessDefinitionId";
-    public final static String ROOT_PROCESS_DEFINITION_KEY = "rootProcessDefinitionKey";
-    public final static String ROOT_PROCESS_DEFINITION_VERSION = "rootProcessDefinitionVersion";
-    public final static String ROOT_PROCESS_DEFINITION_NAME = "rootProcessDefinitionName";
-    public final static String DEPLOYMENT_ID = "deploymentId";
-    public final static String DEPLOYMENT_NAME = "deploymentName";
-    public final static String DEPLOYMENT_VERSION = "deploymentVersion";
-    public final static String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
-    public final static String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
+    public static final String MESSAGE_PAYLOAD_TYPE = "messagePayloadType";
+    public static final String ROOT_BUSINESS_KEY = "rootBusinessKey";
+    public static final String ROOT_PROCESS_INSTANCE_ID = "rootProcessInstanceId";
+    public static final String ROOT_PROCESS_NAME = "rootProcessName";
+    public static final String ROOT_PROCESS_DEFINITION_ID = "rootProcessDefinitionId";
+    public static final String ROOT_PROCESS_DEFINITION_KEY = "rootProcessDefinitionKey";
+    public static final String ROOT_PROCESS_DEFINITION_VERSION = "rootProcessDefinitionVersion";
+    public static final String ROOT_PROCESS_DEFINITION_NAME = "rootProcessDefinitionName";
+    public static final String DEPLOYMENT_ID = "deploymentId";
+    public static final String DEPLOYMENT_NAME = "deploymentName";
+    public static final String DEPLOYMENT_VERSION = "deploymentVersion";
+    public static final String PARENT_PROCESS_INSTANCE_ID = "parentProcessInstanceId";
+    public static final String PARENT_PROCESS_INSTANCE_NAME = "parentProcessInstanceName";
 }

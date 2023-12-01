@@ -22,28 +22,30 @@ import org.activiti.cloud.services.modeling.rest.controller.ModelsSchemaControll
 import org.activiti.cloud.services.modeling.rest.controller.ProjectController;
 import org.activiti.cloud.services.modeling.rest.controller.error.attributes.ErrorAttributesModelValidationErrorsBuilder;
 import org.activiti.cloud.services.modeling.rest.validation.ValidationControllerAdvice;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore(ErrorMvcAutoConfiguration.class)
 @PropertySource("classpath:modeling-rest.properties")
-@Import({
-    ModelController.class,
-    ProjectController.class,
-    ModelsSchemaController.class,
-    ModelingRestExceptionHandler.class,
-    ValidationControllerAdvice.class
-})
+@Import(
+    {
+        ModelController.class,
+        ProjectController.class,
+        ModelsSchemaController.class,
+        ModelingRestExceptionHandler.class,
+        ValidationControllerAdvice.class,
+    }
+)
 public class RestControllerAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(name="errorAttributesModelValidationErrorsBuilder")
+    @ConditionalOnMissingBean(name = "errorAttributesModelValidationErrorsBuilder")
     public ErrorAttributesCustomizer errorAttributesModelValidationErrorsBuilder() {
         return new ErrorAttributesModelValidationErrorsBuilder();
     }

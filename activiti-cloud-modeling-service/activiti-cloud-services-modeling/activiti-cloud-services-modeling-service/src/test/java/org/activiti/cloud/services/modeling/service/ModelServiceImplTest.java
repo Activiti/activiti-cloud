@@ -15,19 +15,45 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.Model;
+import org.activiti.cloud.modeling.api.ModelContentConverter;
 import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
+import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.process.ModelScope;
@@ -38,11 +64,11 @@ import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.common.file.FileContent;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
+import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -52,32 +78,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ModelServiceImplTest {
+class ModelServiceImplTest {
 
-    @InjectMocks
     private ModelServiceImpl modelService;
 
     @Mock
@@ -117,10 +121,16 @@ public class ModelServiceImplTest {
     private ModelExtensionsValidator modelExtensionsValidator;
 
     @Mock
-    public Set<ModelUpdateListener> modelUpdateListeners;
+    private Set<ModelUpdateListener> modelUpdateListeners;
 
     @Mock
     private FileMagicNumberValidator fileMagicNumberValidator;
+
+    @Mock
+    private FileContentSanitizer fileContentSanitizer;
+
+    @Mock
+    private ModelContentConverter<?> modelContentConverter;
 
     private Model modelTwo;
 
@@ -133,7 +143,7 @@ public class ModelServiceImplTest {
     private final String PROCESS_MODEL_DEFAULT_CATEGORY = "default-category";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         projectOne = new ProjectImpl();
         projectOne.setId("projectOneId");
         projectOne.setName("projectOne");
@@ -147,10 +157,25 @@ public class ModelServiceImplTest {
         modelTwo.setCategory(PROCESS_MODEL_DEFAULT_CATEGORY);
         modelTwo.setContent("mockContent".getBytes(StandardCharsets.UTF_8));
         modelTwo.addProject(projectOne);
+
+        modelService =
+            spy(
+                new ModelServiceImpl(
+                    modelRepository,
+                    modelTypeService,
+                    modelContentService,
+                    modelExtensionsService,
+                    jsonConverter,
+                    processModelContentConverter,
+                    modelUpdateListeners,
+                    fileMagicNumberValidator,
+                    fileContentSanitizer
+                )
+            );
     }
 
     @Test
-    public void should_returnTasksInAProjectByModelTypeAndTaskType() throws IOException, XMLStreamException {
+    void should_returnTasksInAProjectByModelTypeAndTaskType() {
         UserTask userTaskOne = new UserTask();
         UserTask userTaskTwo = new UserTask();
         UserTask userTaskThree = new UserTask();
@@ -175,14 +200,14 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnException_when_classTypeIsNotSpecified() {
+    void should_returnException_when_classTypeIsNotSpecified() {
         assertThatThrownBy(() -> modelService.getTasksBy(projectOne, modelType, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Class task type it must not be null");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Class task type it must not be null");
     }
 
     @Test
-    public void should_returnProcessesInAProjectByTypeAndModelType() throws IOException, XMLStreamException {
+    void should_returnProcessesInAProjectByTypeAndModelType() {
         Page page = new PageImpl(asList(modelOne));
         Process processOne = new Process();
 
@@ -200,7 +225,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_returnProcessExtensionsFileForTheModelGiven() throws IOException, XMLStreamException {
+    void should_returnProcessExtensionsFileForTheModelGiven() throws IOException {
         ModelImpl extensionModelImpl = createModelImpl();
         when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
@@ -210,39 +235,43 @@ public class ModelServiceImplTest {
         Optional<FileContent> fileContent = modelService.getModelExtensionsFileContent(extensionModelImpl);
         assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-extensions.json");
         assertThat(new String(fileContent.get().getFileContent()))
-            .isEqualToIgnoringCase("{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"type\":\"PROCESS\",\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}");
+            .isEqualToIgnoringCase(
+                "{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"type\":\"PROCESS\"," +
+                "\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}"
+            );
     }
 
     @Test
-    public void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
+    void should_throwModelNameConflictException_when_creatingAModelWithSameNameInAProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
-        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
+            .thenReturn(Optional.of(modelOne));
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
-
 
         assertThatThrownBy(() -> modelService.createModel(projectOne, modelTwo))
             .isInstanceOf(ModelNameConflictException.class);
     }
 
     @Test
-    public void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
+    void should_throwModelNameConflictException_when_updatingAModelWithSameNameInAProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelOne));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
+            .thenReturn(Optional.of(modelOne));
 
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, modelTwo))
             .isInstanceOf(ModelNameConflictException.class);
     }
 
     @Test
-    public void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
+    void should_throwModelScopeIntegrityException_when_creatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
         ModelImpl model = new ModelImpl();
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
@@ -253,7 +282,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() throws Exception {
+    void should_throwModelScopeIntegrityException_when_updatingModelWithProjectScopeAndBelongsToMoreThanOneProject() {
         ModelImpl model = new ModelImpl();
         model.setScope(ModelScope.PROJECT);
         model.addProject(new ProjectImpl());
@@ -264,94 +293,144 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelContentInProjectContext() throws Exception {
+    void should_throwException_when_validatingAnInvalidModelContentInProjectContext() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        when(modelContentService.findModelValidators(modelType.getName()))
+            .thenReturn(List.of(modelContentValidator, modelContentValidator));
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
-        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelContentFileInProjectContext() throws Exception {
+    void should_throwException_when_validatingAnInvalidModelContentFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.txt", "txt", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
-        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidJSONModelContentFileInProjectContext() throws Exception {
+    void should_throwException_when_validatingAnInvalidJSONModelContentFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        doReturn(List.of(new ModelValidationError()))
             .when(modelContentValidator)
-            .validateModelContent(any(), any());
+            .validateModelContent(any(), any(), any(), anyBoolean());
 
-        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelContent(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() throws Exception {
+    void should_returnErrors_when_gettingValidationErrorOfAnInvalidModel() {
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
+        when(modelContentService.findModelValidators(modelType.getName())).thenReturn(List.of(modelContentValidator));
+        doReturn(validationErrors).when(modelContentValidator).validate(any(), any(), any(), anyBoolean());
+
+        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
+    }
+
+    @Test
+    void should_throwException_when_validatingAnInvalidModelExtensionsInProjectContext() {
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator));
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
-        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidModelExtensionsFileInProjectContext() throws Exception {
+    void should_returnErrors_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
+        ConnectorModelType modelType = new ConnectorModelType();
+        when(modelRepository.getModelType()).thenReturn(ModelImpl.class);
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelOne.getType()).thenReturn(modelType.getName());
+        when(modelOne.getId()).thenReturn("modelOneId");
+
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator));
+        doReturn(validationErrors).when(modelExtensionsValidator).validate(any(), any());
+
+        assertThat(modelService.getModelExtensionValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
+    }
+
+    @Test
+    void should_throwException_when_validatingAnInvalidModelExtensionsFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         ConnectorModelType modelType = new ConnectorModelType();
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator));
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
-        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_throwException_when_validatingAnInvalidJSONModelExtensionsFileInProjectContext() throws Exception {
+    void should_throwException_when_validatingAnInvalidJSONModelExtensionsFileInProjectContext() {
         FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
 
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelExtensionsService.findExtensionsValidators(modelType.getName())).thenReturn(List.of(modelExtensionsValidator));
-        doThrow(new SemanticModelValidationException(List.of(new ModelValidationError())))
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator));
+        doReturn(List.of(new ModelValidationError()))
             .when(modelExtensionsValidator)
             .validateModelExtensions(any(), any());
 
-        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne)).isInstanceOf(SemanticModelValidationException.class);
+        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class);
     }
 
     @Test
-    public void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() throws Exception {
+    void should_allowModelsWithAndWithoutProject_when_creatingAModelWithProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
-        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.of(modelTwo));
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
+            .thenReturn(Optional.of(modelTwo));
         when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
         when(modelRepository.createModel(modelOne)).thenReturn(modelOne);
 
@@ -368,7 +447,7 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    void should_setCategoryFromBpmnModel_whenCreatingModel() throws Exception {
+    void should_setCategoryFromBpmnModel_whenCreatingModel() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
         when(modelRepository.createModel(modelTwo)).thenReturn(modelTwo);
 
@@ -382,16 +461,17 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    void should_thrownExecption_whenUpdatingModelContentWithExecutableFile() throws Exception {
+    void should_thrownExecption_whenUpdatingModelContentWithExecutableFile() {
         FileContent fileContent = new FileContent("a.exe", null, "mockContent".getBytes(StandardCharsets.UTF_8));
         when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(true);
 
-        assertThatThrownBy(() -> modelService.updateModelContent(modelTwo, fileContent)).hasMessage("Import the executable file a.exe for type PROCESS is forbidden.");
+        assertThatThrownBy(() -> modelService.updateModelContent(modelTwo, fileContent, emptyMap()))
+            .hasMessage("Import the executable file a.exe for type PROCESS is forbidden.");
     }
 
     @Test
-    void should_updateCategory_whenUpdatingModelContent() throws Exception {
-        FileContent fileContent = new FileContent(null, null,"mockContent".getBytes(StandardCharsets.UTF_8));
+    void should_updateCategory_whenUpdatingModelContent() {
+        FileContent fileContent = new FileContent(null, null, "mockContent".getBytes(StandardCharsets.UTF_8));
         when(modelRepository.updateModelContent(modelTwo, fileContent)).thenReturn(modelTwo);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -399,40 +479,43 @@ public class ModelServiceImplTest {
         when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
 
         when(fileMagicNumberValidator.checkFileIsExecutable(any())).thenReturn(false);
+        when(fileContentSanitizer.sanitizeContent(any())).thenReturn(fileContent);
 
         assertThat(modelTwo.getCategory()).isEqualTo(PROCESS_MODEL_DEFAULT_CATEGORY);
 
-        Model updatedModel = modelService.updateModelContent(modelTwo, fileContent);
+        Model updatedModel = modelService.updateModelContent(modelTwo, fileContent, emptyMap());
 
         assertThat(updatedModel.getCategory()).isEqualTo(PROCESS_MODEL_TEST_CATEGORY);
     }
 
     @Test
-    public void should_updateModelSuccessfully_when_updatingAValidModelWithProject() {
+    void should_updateModelSuccessfully_when_updatingAValidModelWithProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.empty());
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
+            .thenReturn(Optional.empty());
 
         when(modelRepository.updateModel(modelTwo, modelTwo)).thenReturn(modelTwo);
 
         modelService.updateModel(modelTwo, modelTwo);
 
-        verify(modelRepository).updateModel(modelTwo,modelTwo);
+        verify(modelRepository).updateModel(modelTwo, modelTwo);
     }
 
     @Test
-    public void should_updateModelSuccessfully_when_updatingAValidModelWithoutProject() {
+    void should_updateModelSuccessfully_when_updatingAValidModelWithoutProject() {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
         when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
-        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName())).thenReturn(Optional.empty());
+        when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
+            .thenReturn(Optional.empty());
 
         Model modelThree = new ModelImpl();
         modelThree.setId("modelThreeId");
@@ -443,11 +526,11 @@ public class ModelServiceImplTest {
 
         modelService.updateModel(modelThree, modelThree);
 
-        verify(modelRepository).updateModel(modelThree,modelThree);
+        verify(modelRepository).updateModel(modelThree, modelThree);
     }
 
     @Test
-    public void should_getModels_when_searchingByName() {
+    void should_getModels_when_searchingByName() {
         when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class)))
             .thenReturn(new PageImpl(asList(modelTwo)));
 
@@ -460,12 +543,133 @@ public class ModelServiceImplTest {
     }
 
     @Test
-    public void should_getEmptyList_when_searchingWithEmptyString() {
+    void should_getEmptyList_when_searchingWithEmptyString() {
         Page<Model> models = modelService.getModelsByName(projectOne, "", PageRequest.of(0, 50));
 
         assertThat(models.getContent()).hasSize(0);
 
         verify(modelRepository, never()).getModelsByName(any(), any(), any());
+    }
+
+    @Test
+    void should_not_return_duplicated_Errors_when_having_more_validators_registered() {
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        List<ModelValidationError> validationErrors = List.of(
+            new ModelValidationError("Problem 1", "Problem Description 1"),
+            new ModelValidationError("Problem 2", "Problem Description 2")
+        );
+
+        when(modelContentService.findModelValidators(modelType.getName()))
+            .thenReturn(List.of(modelContentValidator, modelContentValidator));
+        doReturn(validationErrors).when(modelContentValidator).validate(any(), any(), any(), anyBoolean());
+
+        assertThat(modelService.getModelValidationErrors(modelOne, ValidationContext.EMPTY_CONTEXT))
+            .isNotEmpty()
+            .containsExactly(validationErrors.toArray(ModelValidationError[]::new));
+    }
+
+    @Test
+    void should_throwException_with_single_validation_issue_when_havingMoreValidatorsRegistered() {
+        FileContent fileContent = new FileContent("testFile.json", "application/json", "".getBytes());
+
+        when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
+        when(modelOne.getType()).thenReturn(modelType.getName());
+
+        when(modelExtensionsService.findExtensionsValidators(modelType.getName()))
+            .thenReturn(List.of(modelExtensionsValidator, modelExtensionsValidator));
+        doReturn(List.of(new ModelValidationError()))
+            .when(modelExtensionsValidator)
+            .validateModelExtensions(any(), any());
+
+        assertThatThrownBy(() -> modelService.validateModelExtensions(modelOne, fileContent, projectOne))
+            .isInstanceOf(SemanticModelValidationException.class)
+            .hasMessage("Semantic model validation errors encountered: 1 schema violations found");
+    }
+
+    @Test
+    void overrideModelContentId_should_returnUpdatedContent_when_aConverterIsFound() {
+        //given
+        ModelImpl model = new ModelImpl();
+        model.setType("any");
+
+        Map<String, String> identifiersToUpdate = Map.of("from", "to");
+
+        given(modelContentService.findModelContentConverter(model.getType()))
+            .willReturn(Optional.of(modelContentConverter));
+
+        FileContent originalContent = mock(FileContent.class);
+        FileContent updatedContent = mock(FileContent.class);
+        given(modelContentConverter.overrideModelId(originalContent, identifiersToUpdate)).willReturn(updatedContent);
+
+        //when
+        FileContent overriddenContent = modelService.overrideModelContentId(
+            model,
+            originalContent,
+            identifiersToUpdate
+        );
+
+        //then
+        assertThat(overriddenContent).isEqualTo(updatedContent);
+    }
+
+    @Test
+    void overrideModelContentId_should_returnOrignalContent_when_noConverterIsFoundForType() {
+        //given
+        ModelImpl model = new ModelImpl();
+        model.setType("any");
+
+        Map<String, String> identifiersToUpdate = Map.of("from", "to");
+
+        given(modelContentService.findModelContentConverter(model.getType())).willReturn(Optional.empty());
+
+        FileContent originalContent = mock(FileContent.class);
+
+        //when
+        FileContent overriddenContent = modelService.overrideModelContentId(
+            model,
+            originalContent,
+            identifiersToUpdate
+        );
+
+        //then
+        assertThat(overriddenContent).isEqualTo(originalContent);
+    }
+
+    @Test
+    void importSingleModel_should_passIdsToUpdate_when_importedModelHaveIdsToUpdate() {
+        //given
+        FileContent fileContent = mock(FileContent.class);
+        doReturn(new ImportedModel(modelTwo, "oldId", "newId"))
+            .when(modelService)
+            .importModel(projectOne, modelType, fileContent);
+
+        Map<String, String> expectedIdentifiersToUpdate = Map.of("oldId", "newId");
+        Model updatedModel = mock(Model.class);
+        doReturn(updatedModel)
+            .when(modelService)
+            .updateModelContent(modelTwo, fileContent, expectedIdentifiersToUpdate);
+
+        //when
+        Model importedModel = modelService.importSingleModel(projectOne, modelType, fileContent);
+
+        //then
+        verify(modelService).updateModelContent(modelTwo, fileContent, expectedIdentifiersToUpdate);
+        assertThat(importedModel).isEqualTo(updatedModel);
+    }
+
+    @Test
+    void importSingleModel_should_sentNullAsIdsToUpdate_when_importedModelDoesntHaveIdsToUpdate() {
+        FileContent fileContent = mock(FileContent.class);
+        doReturn(new ImportedModel(modelTwo)).when(modelService).importModel(projectOne, modelType, fileContent);
+        doReturn(modelTwo).when(modelService).updateModelContent(modelTwo, fileContent, null);
+
+        //when
+        Model importedModel = modelService.importSingleModel(projectOne, modelType, fileContent);
+
+        //then
+        verify(modelService).updateModelContent(modelTwo, fileContent, null);
+        assertThat(importedModel).isEqualTo(modelTwo);
     }
 
     private ModelImpl createModelImpl() {
@@ -483,10 +687,7 @@ public class ModelServiceImplTest {
 
     private Process initProcess(FlowElement... elements) {
         Process process = spy(new Process());
-        Arrays.asList(elements)
-                .forEach(process::addFlowElement);
+        Arrays.asList(elements).forEach(process::addFlowElement);
         return process;
     }
-
-
 }

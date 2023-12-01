@@ -16,14 +16,12 @@
 package org.activiti.cloud.services.modeling.rest.resource;
 
 import org.activiti.cloud.modeling.api.ModelValidationError;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 
 public class ValidationErrorResource extends EntityModel<ModelValidationError> {
 
-    public ValidationErrorResource(ModelValidationError content,
-                                   Iterable<Link> links) {
-        super(content,
-              links);
+    public ValidationErrorResource(ModelValidationError content, Iterable<Link> links) {
+        super(content, links);
     }
 }

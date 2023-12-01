@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -25,17 +27,13 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Optional;
-
 public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TaskCandidateUserRemovedEventHandler.class);
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
 
-    public TaskCandidateUserRemovedEventHandler(EntityManager entityManager,
-                                                EntityManagerFinder entityManagerFinder) {
+    public TaskCandidateUserRemovedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
     }
@@ -49,13 +47,15 @@ public class TaskCandidateUserRemovedEventHandler implements QueryEventHandler {
         if (findResult.isPresent() && !findResult.get().isInFinalState()) {
             // Persist into database
             try {
-                TaskCandidateUserId id = new TaskCandidateUserId(taskCandidateUser.getTaskId(),
-                                                                 taskCandidateUser.getUserId());
-                Optional.ofNullable(entityManager.find(TaskCandidateUserEntity.class, id))
-                        .ifPresent(entityManager::remove);
+                TaskCandidateUserId id = new TaskCandidateUserId(
+                    taskCandidateUser.getTaskId(),
+                    taskCandidateUser.getUserId()
+                );
+                Optional
+                    .ofNullable(entityManager.find(TaskCandidateUserEntity.class, id))
+                    .ifPresent(entityManager::remove);
             } catch (Exception cause) {
-                LOGGER.debug("Error handling TaskCandidateUserRemovedEvent[" + event + "]",
-                             cause);
+                LOGGER.debug("Error handling TaskCandidateUserRemovedEvent[" + event + "]", cause);
             }
         }
     }

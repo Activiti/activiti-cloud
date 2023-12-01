@@ -55,7 +55,11 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
 
     @BeforeEach
     public void setUp() {
-        validator = new BpmnModelServiceTaskCatchBoundaryValidator(flowElementsExtractor, Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK));
+        validator =
+            new BpmnModelServiceTaskCatchBoundaryValidator(
+                flowElementsExtractor,
+                Arrays.asList(ServiceTaskImplementationType.SCRIPT_TASK)
+            );
     }
 
     @Test
@@ -65,20 +69,28 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         BpmnModel model = new BpmnModel();
 
         //when
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //then
         assertThat(validator.validate(model, validationContext))
-            .extracting(ModelValidationError::getProblem,
+            .extracting(
+                ModelValidationError::getProblem,
                 ModelValidationError::getDescription,
                 ModelValidationError::getValidatorSetName,
-                ModelValidationError::isWarning)
-            .contains(tuple(BpmnModelServiceTaskCatchBoundaryValidator.MISSING_BOUNDARY_WARNING,
-                format(BpmnModelServiceTaskCatchBoundaryValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                BpmnModelServiceTaskCatchBoundaryValidator.SERVICE_TASK_VALIDATOR_NAME, true));
+                ModelValidationError::isWarning
+            )
+            .contains(
+                tuple(
+                    BpmnModelServiceTaskCatchBoundaryValidator.MISSING_BOUNDARY_WARNING,
+                    format(
+                        BpmnModelServiceTaskCatchBoundaryValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                        serviceTask.getId()
+                    ),
+                    BpmnModelServiceTaskCatchBoundaryValidator.SERVICE_TASK_VALIDATOR_NAME,
+                    true
+                )
+            );
     }
-
 
     @Test
     public void should_returnWarning_when_scriptHasNoBoundaryEvent() {
@@ -86,21 +98,30 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         ServiceTask serviceTask = buildServiceTask("script.EXECUTE", Collections.emptyList());
         BpmnModel model = new BpmnModel();
 
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //when
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
 
         //then
         assertThat(validationResult)
-            .extracting(ModelValidationError::getProblem,
+            .extracting(
+                ModelValidationError::getProblem,
                 ModelValidationError::getDescription,
                 ModelValidationError::getValidatorSetName,
-                ModelValidationError::isWarning)
-            .contains(tuple(BpmnModelServiceTaskCatchBoundaryValidator.MISSING_BOUNDARY_WARNING,
-                format(BpmnModelServiceTaskCatchBoundaryValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
-                BpmnModelServiceTaskCatchBoundaryValidator.SERVICE_TASK_VALIDATOR_NAME, true));
+                ModelValidationError::isWarning
+            )
+            .contains(
+                tuple(
+                    BpmnModelServiceTaskCatchBoundaryValidator.MISSING_BOUNDARY_WARNING,
+                    format(
+                        BpmnModelServiceTaskCatchBoundaryValidator.INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
+                        serviceTask.getId()
+                    ),
+                    BpmnModelServiceTaskCatchBoundaryValidator.SERVICE_TASK_VALIDATOR_NAME,
+                    true
+                )
+            );
     }
 
     @Test
@@ -109,8 +130,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         ServiceTask serviceTask = buildServiceTask("script.EXECUTE", Arrays.asList(buildErrorBoundaryEvent()));
         BpmnModel model = new BpmnModel();
 
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //when
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);
@@ -126,8 +146,7 @@ public class BpmnModelServiceTaskCatchBoundaryValidatorTest {
         ServiceTask serviceTask = buildServiceTask(implementation, Collections.emptyList());
         BpmnModel model = new BpmnModel();
 
-        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class))
-            .willReturn(singleton(serviceTask));
+        given(flowElementsExtractor.extractFlowElements(model, ServiceTask.class)).willReturn(singleton(serviceTask));
 
         //when
         final Stream<ModelValidationError> validationResult = validator.validate(model, validationContext);

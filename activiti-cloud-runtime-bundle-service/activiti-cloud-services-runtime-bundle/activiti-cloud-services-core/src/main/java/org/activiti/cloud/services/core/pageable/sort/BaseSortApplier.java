@@ -64,7 +64,9 @@ public abstract class BaseSortApplier<T extends Query<?, ?>> implements SortAppl
         if (property != null) {
             query.orderBy(property);
         } else {
-            throw new ActivitiIllegalArgumentException("The property '" + order.getProperty() + "' cannot be used to sort the result.");
+            throw new ActivitiIllegalArgumentException(
+                "The property '" + order.getProperty() + "' cannot be used to sort the result."
+            );
         }
     }
 
@@ -72,11 +74,9 @@ public abstract class BaseSortApplier<T extends Query<?, ?>> implements SortAppl
 
     private void applyDirection(T query, Sort.Direction direction) {
         switch (direction) {
-
             case ASC:
                 query.asc();
                 break;
-
             case DESC:
                 query.desc();
                 break;

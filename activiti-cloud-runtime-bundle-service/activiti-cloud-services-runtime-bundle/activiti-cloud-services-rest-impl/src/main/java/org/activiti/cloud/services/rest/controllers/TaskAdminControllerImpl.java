@@ -63,10 +63,12 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     private final SpringPageConverter pageConverter;
 
     @Autowired
-    public TaskAdminControllerImpl(TaskAdminRuntime taskAdminRuntime,
-                                   TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                   AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
-                                   SpringPageConverter pageConverter) {
+    public TaskAdminControllerImpl(
+        TaskAdminRuntime taskAdminRuntime,
+        TaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
+        SpringPageConverter pageConverter
+    ) {
         this.taskAdminRuntime = taskAdminRuntime;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -76,10 +78,11 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     @Override
     public PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable) {
         Page<Task> tasksPage = taskAdminRuntime.tasks(pageConverter.toAPIPageable(pageable));
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  pageConverter.toSpringPage(pageable,
-                                                                             tasksPage),
-                                                  taskRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            pageConverter.toSpringPage(pageable, tasksPage),
+            taskRepresentationModelAssembler
+        );
     }
 
     @Override
@@ -89,13 +92,12 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public EntityModel<CloudTask> completeTask(@PathVariable String taskId,
-                                            @RequestBody(required = false) CompleteTaskPayload completeTaskPayload) {
+    public EntityModel<CloudTask> completeTask(
+        @PathVariable String taskId,
+        @RequestBody(required = false) CompleteTaskPayload completeTaskPayload
+    ) {
         if (completeTaskPayload == null) {
-            completeTaskPayload = TaskPayloadBuilder
-                    .complete()
-                    .withTaskId(taskId)
-                    .build();
+            completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
         } else {
             completeTaskPayload.setTaskId(taskId);
         }
@@ -106,16 +108,15 @@ public class TaskAdminControllerImpl implements TaskAdminController {
 
     @Override
     public EntityModel<CloudTask> deleteTask(@PathVariable String taskId) {
-        Task task = taskAdminRuntime.delete(TaskPayloadBuilder
-                                           .delete()
-                                           .withTaskId(taskId)
-                                           .build());
+        Task task = taskAdminRuntime.delete(TaskPayloadBuilder.delete().withTaskId(taskId).build());
         return taskRepresentationModelAssembler.toModel(task);
     }
 
     @Override
-    public EntityModel<CloudTask> updateTask(@PathVariable String taskId,
-                                   @RequestBody UpdateTaskPayload updateTaskPayload) {
+    public EntityModel<CloudTask> updateTask(
+        @PathVariable String taskId,
+        @RequestBody UpdateTaskPayload updateTaskPayload
+    ) {
         if (updateTaskPayload != null) {
             updateTaskPayload.setTaskId(taskId);
         }
@@ -123,10 +124,11 @@ public class TaskAdminControllerImpl implements TaskAdminController {
     }
 
     @Override
-    public EntityModel<CloudTask> assign(@PathVariable String taskId,
-                               @RequestBody AssignTaskPayload assignTaskPayload) {
-        if (assignTaskPayload!=null)
-            assignTaskPayload.setTaskId(taskId);
+    public EntityModel<CloudTask> assign(
+        @PathVariable String taskId,
+        @RequestBody AssignTaskPayload assignTaskPayload
+    ) {
+        if (assignTaskPayload != null) assignTaskPayload.setTaskId(taskId);
 
         return taskRepresentationModelAssembler.toModel(taskAdminRuntime.assign(assignTaskPayload));
     }
@@ -136,8 +138,8 @@ public class TaskAdminControllerImpl implements TaskAdminController {
         Page<Task> tasks = taskAdminRuntime.assignMultiple(assignTasksPayload);
         Pageable pageable = tasks.getTotalItems() == 0 ? Pageable.unpaged() : Pageable.ofSize(tasks.getTotalItems());
         return pagedCollectionModelAssembler.toModel(
-                pageConverter.toSpringPage(pageable, tasks),
-                taskRepresentationModelAssembler);
+            pageConverter.toSpringPage(pageable, tasks),
+            taskRepresentationModelAssembler
+        );
     }
-
 }

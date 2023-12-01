@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
@@ -33,6 +34,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,7 +42,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
+@Import({ StreamConfig.class })
+@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
 public class ProcessDefinitionMetaControllerImplIT {
 
     @Autowired
@@ -62,9 +65,7 @@ public class ProcessDefinitionMetaControllerImplIT {
         final BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel("1")).thenReturn(bpmnModel);
 
-        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta",
-                                 1).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(get("/v1/process-definitions/{id}/meta", 1).accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
-
 }

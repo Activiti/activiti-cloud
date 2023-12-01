@@ -22,20 +22,15 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 
 public abstract class CloudProcessInstanceEventImpl extends CloudRuntimeEventImpl<ProcessInstance, ProcessEvents> {
 
-    public CloudProcessInstanceEventImpl() {
-    }
+    public CloudProcessInstanceEventImpl() {}
 
     public CloudProcessInstanceEventImpl(ProcessInstance processInstance) {
         super(processInstance);
         setFlattenInfo(processInstance);
     }
 
-    public CloudProcessInstanceEventImpl(String id,
-                                         Long timestamp,
-                                         ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessInstanceEventImpl(String id, Long timestamp, ProcessInstance processInstance) {
+        super(id, timestamp, processInstance);
         setFlattenInfo(processInstance);
     }
 

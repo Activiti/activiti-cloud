@@ -15,28 +15,32 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.config.BindingProperties;
-
-import java.util.AbstractMap;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {"ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
-                  "ACT_MESSAGING_DEST_TRANSFORMERS=toLowerCase,escapeIllegalChars",
-                  "ACT_MESSAGING_DEST_SEPARATOR=.",
-                  "ACT_MESSAGING_DEST_PREFIX=MQServiceTaskDestinationsIT",
-                  // Connector implementation producer binding. Use [] brackets combined with escaping the whitespace using either \  or \u0020
-                  "spring.cloud.stream.bindings.[Constants\\ Connector.constantsActionName].destination=Constants Connector.constantsActionName",
-                  // Connector implementation consumer binding
-                  "spring.cloud.stream.bindings.constantsIntegrationEventsConsumer.destination=Constants Connector.constantsActionName",
-                  // Configure connector messaging destination with custom value
-                  "activiti.cloud.messaging.destinations.[Constants\\ Connector.constantsActionName].name=constants_connector.constants_action_name",
-    })
+import java.util.AbstractMap;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.test.annotation.DirtiesContext;
+
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {
+        "ACT_MESSAGING_DEST_TRANSFORMERS_ENABLED=true",
+        "ACT_MESSAGING_DEST_TRANSFORMERS=toLowerCase,escapeIllegalChars",
+        "ACT_MESSAGING_DEST_SEPARATOR=.",
+        "ACT_MESSAGING_DEST_PREFIX=MQServiceTaskDestinationsIT",
+        // Connector implementation producer binding. Use [] brackets combined with escaping the whitespace using either \  or \u0020
+        "spring.cloud.stream.bindings.[Constants\\ Connector.constantsActionName].destination=Constants Connector.constantsActionName",
+        // Connector implementation consumer binding
+        "spring.cloud.stream.bindings.constantsIntegrationEventsConsumer.destination=Constants Connector.constantsActionName",
+        // Configure connector messaging destination with custom value
+        "activiti.cloud.messaging.destinations.[Constants\\ Connector.constantsActionName].name=constants_connector.constants_action_name",
+    }
+)
+@DirtiesContext
 public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
     @Test
@@ -48,16 +52,21 @@ public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
-            .contains(entry("mealsConnector", "mqservicetaskdestinationsit.mealsconnector"),
-                      entry("rest.GET", "mqservicetaskdestinationsit.rest.get"),
-                      entry("perfromBusinessTask", "mqservicetaskdestinationsit.perfrombusinesstask"),
-                      entry("anyImplWithoutHandler", "mqservicetaskdestinationsit.anyimplwithouthandler"),
-                      entry("payment", "mqservicetaskdestinationsit.payment"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "mqservicetaskdestinationsit.variable-mapping-connector.variablemappingactionname"),
-                      entry("miCloudConnector", "mqservicetaskdestinationsit.micloudconnector"));
+            .extractingFromEntries(entry ->
+                new AbstractMap.SimpleEntry<String, String>(entry.getKey(), entry.getValue().getDestination())
+            )
+            .contains(
+                entry("mealsConnector", "mqservicetaskdestinationsit.mealsconnector"),
+                entry("rest.GET", "mqservicetaskdestinationsit.rest.get"),
+                entry("perfromBusinessTask", "mqservicetaskdestinationsit.perfrombusinesstask"),
+                entry("anyImplWithoutHandler", "mqservicetaskdestinationsit.anyimplwithouthandler"),
+                entry("payment", "mqservicetaskdestinationsit.payment"),
+                entry(
+                    "Variable Mapping Connector.variableMappingActionName",
+                    "mqservicetaskdestinationsit.variable-mapping-connector.variablemappingactionname"
+                ),
+                entry("miCloudConnector", "mqservicetaskdestinationsit.micloudconnector")
+            );
     }
 
     @Test
@@ -69,11 +78,18 @@ public class MQServiceTaskDestinationsIT extends AbstractMQServiceTaskIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<String, String>(entry.getKey(),
-                                                                                        entry.getValue()
-                                                                                             .getDestination()))
-            .contains(entry("Constants Connector.constantsActionName", "mqservicetaskdestinationsit.constants_connector.constants_action_name"),
-                      entry("constantsIntegrationEventsConsumer", "mqservicetaskdestinationsit.constants_connector.constants_action_name"));
+            .extractingFromEntries(entry ->
+                new AbstractMap.SimpleEntry<String, String>(entry.getKey(), entry.getValue().getDestination())
+            )
+            .contains(
+                entry(
+                    "Constants Connector.constantsActionName",
+                    "mqservicetaskdestinationsit.constants_connector.constants_action_name"
+                ),
+                entry(
+                    "constantsIntegrationEventsConsumer",
+                    "mqservicetaskdestinationsit.constants_connector.constants_action_name"
+                )
+            );
     }
-
 }

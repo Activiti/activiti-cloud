@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.modeling.validation.magicnumber;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(FileMagicNumberList.class)
 public class FileContentValidatorConfiguration {
 
@@ -27,5 +27,4 @@ public class FileContentValidatorConfiguration {
     public FileMagicNumberValidator fileContentValidator(FileMagicNumberList fileMagicNumber) {
         return new FileMagicNumberValidator(fileMagicNumber.getMagicNumber());
     }
-
 }

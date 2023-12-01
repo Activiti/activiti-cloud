@@ -39,58 +39,53 @@ import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
  * Feign Configuration
  */
 @Configuration
-@Import({
-  ObjectMapperConfiguration.class,
-  JacksonAutoConfiguration.class,
-  FeignConfiguration.class
-})
+@Import({ ObjectMapperConfiguration.class, JacksonAutoConfiguration.class, FeignConfiguration.class })
 public class ModelingFeignConfiguration {
 
-  @Autowired
-  private ModelingTestsConfigurationProperties modelingTestsConfigurationProperties;
+    @Autowired
+    private ModelingTestsConfigurationProperties modelingTestsConfigurationProperties;
 
-  public static Encoder modelingEncoder;
+    public static Encoder modelingEncoder;
 
-  public static Decoder modelingDecoder;
+    public static Decoder modelingDecoder;
 
-  @Bean
-  public Module jackson2HalModule() {
-    return new Jackson2HalModule();
-  }
+    @Bean
+    public Module jackson2HalModule() {
+        return new Jackson2HalModule();
+    }
 
-  @Bean
-  public Encoder modelingEncoder(ObjectMapper objectMapper) {
-    return modelingEncoder = new JacksonEncoder(objectMapper);
-  }
+    @Bean
+    public Encoder modelingEncoder(ObjectMapper objectMapper) {
+        return modelingEncoder = new JacksonEncoder(objectMapper);
+    }
 
-  @Bean
-  public Decoder modelingDecoder(ObjectMapper objectMapper) {
-    return modelingDecoder = new JacksonDecoder(objectMapper);
-  }
+    @Bean
+    public Decoder modelingDecoder(ObjectMapper objectMapper) {
+        return modelingDecoder = new JacksonDecoder(objectMapper);
+    }
 
-  @Bean
-  public ModelingProjectsService modelingApplicationsService(Encoder modelingEncoder,
-                                                             Decoder modelingDecoder) {
-    return ModelingProjectsService
-      .build(modelingEncoder,
-        modelingDecoder,
-        modelingTestsConfigurationProperties.getModelingUrl());
-  }
+    @Bean
+    public ModelingProjectsService modelingApplicationsService(Encoder modelingEncoder, Decoder modelingDecoder) {
+        return ModelingProjectsService.build(
+            modelingEncoder,
+            modelingDecoder,
+            modelingTestsConfigurationProperties.getModelingUrl()
+        );
+    }
 
-  @Bean
-  public ModelingModelsService modelingModelsService(Encoder modelingEncoder,
-                                                     Decoder modelingDecoder) {
-    return ModelingModelsService
-      .build(modelingEncoder,
-        modelingDecoder,
-        modelingTestsConfigurationProperties.getModelingUrl());
-  }
+    @Bean
+    public ModelingModelsService modelingModelsService(Encoder modelingEncoder, Decoder modelingDecoder) {
+        return ModelingModelsService.build(
+            modelingEncoder,
+            modelingDecoder,
+            modelingTestsConfigurationProperties.getModelingUrl()
+        );
+    }
 
-  @Bean
-  public SwaggerService modelingSwaggerService(){
-    return FeignRestDataClient
-      .builder(new feign.codec.Encoder.Default(),
-        new feign.codec.Decoder.Default())
-      .target(SwaggerService.class, modelingTestsConfigurationProperties.getModelingUrl());
-  }
+    @Bean
+    public SwaggerService modelingSwaggerService() {
+        return FeignRestDataClient
+            .builder(new feign.codec.Encoder.Default(), new feign.codec.Decoder.Default())
+            .target(SwaggerService.class, modelingTestsConfigurationProperties.getModelingUrl());
+    }
 }

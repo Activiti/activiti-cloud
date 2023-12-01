@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.api.process.model.events.BPMNActivityEvent;
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.process.model.events.BPMNTimerEvent;
@@ -44,6 +44,8 @@ import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
 import org.activiti.api.runtime.model.impl.DeploymentImpl;
 import org.activiti.api.runtime.model.impl.IntegrationContextImpl;
 import org.activiti.api.runtime.model.impl.MessageSubscriptionImpl;
+import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
+import org.activiti.api.runtime.model.impl.ProcessCandidateStarterUserImpl;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
@@ -78,6 +80,10 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationResultReceivedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudMessageSubscriptionCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterGroupRemovedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -95,12 +101,12 @@ import org.activiti.cloud.api.task.model.impl.events.CloudTaskCreatedEventImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
@@ -111,11 +117,12 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 @TestPropertySource("classpath:application.properties")
-@Import(EventsRestTemplate.class)
-@ContextConfiguration(initializers ={ RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
+@Import({ EventsRestTemplate.class, TestChannelBinderConfiguration.class })
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class AuditServiceIT {
 
-    private static final String ERROR_MESSAGE = "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
+    private static final String ERROR_MESSAGE =
+        "An error occurred consuming ACS API with inputs {targetFolder={}, action=CREATE_FILE}. Cause: [405] during [GET] to [https://aae-3734-env.envalfresco.com/alfresco/api/-default-/public/alfresco/versions/1/nodes/] [NodesApiClient#getNode(String,List,String,List)]: [{\"error\":{\"errorKey\":\"framework.exception.UnsupportedResourceOperation\",\"statusCode\":405,\"briefSummary\":\"09070282 The operation is unsupported\",\"stackTrace\":\"For security reasons the stack trace is no longer displayed, but the property is kept for previous versions\",\"descriptionURL\":\"https://api-explorer.alfresco.com\"}}]";
 
     @Autowired
     private EventsRestTemplate eventsRestTemplate;
@@ -126,8 +133,8 @@ public class AuditServiceIT {
     @Autowired
     private MyProducer producer;
 
-    @BeforeEach
-    public void setUp() {
+    @AfterEach
+    public void cleanUp() {
         repository.deleteAll();
     }
 
@@ -137,59 +144,66 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
-            for (CloudRuntimeEvent coveredEvent : coveredEvents) {
-
-                assertThat(retrievedEvents)
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
+                for (CloudRuntimeEvent coveredEvent : coveredEvents) {
+                    assertThat(retrievedEvents)
                         .extracting(
-                                CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getServiceName,
-                                CloudRuntimeEvent::getServiceVersion)
-                        .contains(tuple(coveredEvent.getEventType(),
-                                        coveredEvent.getServiceName(),
-                                        coveredEvent.getServiceVersion()));
-            }
-            assertThatEntityIsSet(retrievedEvents);
-        });
+                            CloudRuntimeEvent::getEventType,
+                            CloudRuntimeEvent::getServiceName,
+                            CloudRuntimeEvent::getServiceVersion
+                        )
+                        .contains(
+                            tuple(
+                                coveredEvent.getEventType(),
+                                coveredEvent.getServiceName(),
+                                coveredEvent.getServiceVersion()
+                            )
+                        );
+                }
+                assertThatEntityIsSet(retrievedEvents);
+            });
     }
 
     @Test
     public void should_supportEventsContainingBigDecimalValues() {
         //given
         CloudVariableCreatedEventImpl variableCreatedEvent = new CloudVariableCreatedEventImpl(
-            new VariableInstanceImpl<>("bigDecimalVar", "bigdecimal",
-                BigDecimal.valueOf(100, 2), UUID.randomUUID().toString(), null));
+            new VariableInstanceImpl<>(
+                "bigDecimalVar",
+                "bigdecimal",
+                BigDecimal.valueOf(100, 2),
+                UUID.randomUUID().toString(),
+                null
+            )
+        );
         producer.send(variableCreatedEvent);
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate
-                .executeFindAll();
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents)
-                .hasSize(1)
-                .hasOnlyElementsOfTypes(CloudVariableCreatedEvent.class);
-            CloudVariableCreatedEvent retrievedEvent = (CloudVariableCreatedEvent) retrievedEvents
-                .iterator().next();
-            assertThat(retrievedEvent)
-                .extracting(event -> event.getEntity().getName(),
-                    event -> event.getEntity().getType(),
-                    event -> event.getEntity().getValue())
-                .containsExactly(
-                   "bigDecimalVar", "bigdecimal", "1.00"
-                );
-
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1).hasOnlyElementsOfTypes(CloudVariableCreatedEvent.class);
+                CloudVariableCreatedEvent retrievedEvent = (CloudVariableCreatedEvent) retrievedEvents
+                    .iterator()
+                    .next();
+                assertThat(retrievedEvent)
+                    .extracting(
+                        event -> event.getEntity().getName(),
+                        event -> event.getEntity().getType(),
+                        event -> event.getEntity().getValue()
+                    )
+                    .containsExactly("bigDecimalVar", "bigdecimal", "1.00");
+            });
     }
 
     @Test
@@ -198,20 +212,21 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    Collections.singletonMap("processInstanceId", "4")
+                );
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("processInstanceId",
-                                                                                                                                             "4"));
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(2);
-            for (CloudRuntimeEvent event : retrievedEvents) {
-                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityEvent) event;
-                assertThat(cloudBPMNActivityEvent.getProcessInstanceId()).isEqualTo("4");
-            }
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(2);
+                for (CloudRuntimeEvent event : retrievedEvents) {
+                    CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityEvent) event;
+                    assertThat(cloudBPMNActivityEvent.getProcessInstanceId()).isEqualTo("4");
+                }
+            });
     }
 
     @Test
@@ -220,24 +235,25 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("processInstanceId", "4");
+                filters.put("eventType", BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("processInstanceId",
-                        "4");
-            filters.put("eventType",
-                        BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name());
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(2);
-            for (CloudRuntimeEvent event : retrievedEvents) {
-                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
-                assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
-            }
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(2);
+                for (CloudRuntimeEvent event : retrievedEvents) {
+                    CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
+                    assertThat(cloudBPMNActivityEvent.getEventType())
+                        .isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
+                }
+            });
     }
 
     @Test
@@ -246,30 +262,31 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("processInstanceId", "47");
+                filters.put("eventType", TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("processInstanceId",
-                        "47");
-            filters.put("eventType",
-                        TaskRuntimeEvent.TaskEvents.TASK_CREATED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
-
-            //then
-            assertThat(eventsPagedModel).isNotNull();
-            assertThat(eventsPagedModel.getBody())
-                .isNotEmpty()
-                .filteredOn(event -> ((CloudTaskCreatedEvent)event).getEntity().getTaskDefinitionKey().equals("taskDefinitionKey"))
-                .extracting(event -> event.getEventType(),
-                            event -> ((CloudTaskCreatedEvent)event).getEntity().getName(),
-                            event -> ((CloudTaskCreatedEvent)event).getEntity().getTaskDefinitionKey())
-                .contains(  tuple(TaskRuntimeEvent.TaskEvents.TASK_CREATED,
-                                  "task created",
-                                  "taskDefinitionKey"));
-
-        });
+                //then
+                assertThat(eventsPagedModel).isNotNull();
+                assertThat(eventsPagedModel.getBody())
+                    .isNotEmpty()
+                    .filteredOn(event ->
+                        ((CloudTaskCreatedEvent) event).getEntity().getTaskDefinitionKey().equals("taskDefinitionKey")
+                    )
+                    .extracting(
+                        event -> event.getEventType(),
+                        event -> ((CloudTaskCreatedEvent) event).getEntity().getName(),
+                        event -> ((CloudTaskCreatedEvent) event).getEntity().getTaskDefinitionKey()
+                    )
+                    .contains(tuple(TaskRuntimeEvent.TaskEvents.TASK_CREATED, "task created", "taskDefinitionKey"));
+            });
     }
 
     @Test
@@ -278,53 +295,57 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestProcessStartedUpdatedCompletedEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[0]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("processInstanceId", "25");
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("processInstanceId",
-                        "25");
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
-            for (CloudRuntimeEvent coveredEvent : coveredEvents) {
-
-                assertThat(retrievedEvents)
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSameSizeAs(coveredEvents);
+                for (CloudRuntimeEvent coveredEvent : coveredEvents) {
+                    assertThat(retrievedEvents)
                         .extracting(
-                                CloudRuntimeEvent::getEventType,
-                                CloudRuntimeEvent::getServiceName,
-                                CloudRuntimeEvent::getServiceVersion)
-                        .contains(tuple(coveredEvent.getEventType(),
-                                        coveredEvent.getServiceName(),
-                                        coveredEvent.getServiceVersion()));
-            }
+                            CloudRuntimeEvent::getEventType,
+                            CloudRuntimeEvent::getServiceName,
+                            CloudRuntimeEvent::getServiceVersion
+                        )
+                        .contains(
+                            tuple(
+                                coveredEvent.getEventType(),
+                                coveredEvent.getServiceName(),
+                                coveredEvent.getServiceVersion()
+                            )
+                        );
+                }
 
-            assertThatEntityIsSet(retrievedEvents);
-            retrievedEvents.forEach(event -> {
-                assertThat(event.getProcessDefinitionId())
+                assertThatEntityIsSet(retrievedEvents);
+                retrievedEvents.forEach(event -> {
+                    assertThat(event.getProcessDefinitionId())
                         .describedAs("Process definition for event " + event.getEventType() + " should not be null!")
                         .isNotNull();
-                assertThat(event.getProcessInstanceId())
+                    assertThat(event.getProcessInstanceId())
                         .describedAs("Process instance for event " + event.getEventType() + " should not be null!")
                         .isNotNull();
+                });
             });
-        });
     }
 
     private void assertThatEntityIsSet(Collection<CloudRuntimeEvent> retrievedEvents) {
-        retrievedEvents.forEach(
-                event -> assertThat(event.getEntity())
-                        .describedAs("Entity for " + event.getEventType() + " should not be null")
-                        .isNotNull()
+        retrievedEvents.forEach(event ->
+            assertThat(event.getEntity())
+                .describedAs("Entity for " + event.getEventType() + " should not be null")
+                .isNotNull()
         );
-        retrievedEvents.forEach(
-                event -> assertThat(event.getEntityId())
-                        .describedAs("EntityId for " + event.getEventType() + " should not be null")
-                        .isNotNull()
+        retrievedEvents.forEach(event ->
+            assertThat(event.getEntityId())
+                .describedAs("EntityId for " + event.getEventType() + " should not be null")
+                .isNotNull()
         );
     }
 
@@ -334,22 +355,23 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTaskCancelledEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("entityId", "1234-abc-5678-def");
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("entityId",
-                        "1234-abc-5678-def");
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(3);
-            for (CloudRuntimeEvent e : retrievedEvents) {
-                assertThat(e.getEntityId()).isEqualTo("1234-abc-5678-def");
-            }
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(3);
+                for (CloudRuntimeEvent e : retrievedEvents) {
+                    assertThat(e.getEntityId()).isEqualTo("1234-abc-5678-def");
+                }
+            });
     }
 
     @Test
@@ -358,20 +380,23 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    Collections.singletonMap("eventType", TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name())
+                );
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
-                                                                                                                                             TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED.name()));
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-            CloudTaskAssignedEvent cloudTaskAssignedEvent = (CloudTaskAssignedEvent) retrievedEvents.iterator().next();
-            assertThat(cloudTaskAssignedEvent.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED);
-            assertThat(cloudTaskAssignedEvent.getEntity().getProcessDefinitionId()).isEqualTo("27");
-            assertThat(cloudTaskAssignedEvent.getEntity().getProcessInstanceId()).isEqualTo("46");
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
+                CloudTaskAssignedEvent cloudTaskAssignedEvent = (CloudTaskAssignedEvent) retrievedEvents
+                    .iterator()
+                    .next();
+                assertThat(cloudTaskAssignedEvent.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_ASSIGNED);
+                assertThat(cloudTaskAssignedEvent.getEntity().getProcessDefinitionId()).isEqualTo("27");
+                assertThat(cloudTaskAssignedEvent.getEntity().getProcessInstanceId()).isEqualTo("46");
+            });
     }
 
     @Test
@@ -380,20 +405,22 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    Collections.singletonMap("eventType", BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name())
+                );
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
-                                                                                                                                             BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED.name()));
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(3);
-            for (CloudRuntimeEvent event : retrievedEvents) {
-                CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
-                assertThat(cloudBPMNActivityEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
-            }
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(3);
+                for (CloudRuntimeEvent event : retrievedEvents) {
+                    CloudBPMNActivityEvent cloudBPMNActivityEvent = (CloudBPMNActivityStartedEvent) event;
+                    assertThat(cloudBPMNActivityEvent.getEventType())
+                        .isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
+                }
+            });
     }
 
     @Test
@@ -402,19 +429,20 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
 
-            //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    Collections.singletonMap("entityId", "1234-abc-5678-def")
+                );
+                //then
+                assertThat(eventsPagedModel.getBody()).isNotNull();
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("entityId",
-                                                                                                                                             "1234-abc-5678-def"));
-            //then
-            assertThat(eventsPagedModel.getBody()).isNotNull();
-
-            assertThat(eventsPagedModel.getBody().getContent())
+                assertThat(eventsPagedModel.getBody().getContent())
                     .extracting(CloudRuntimeEvent::getEntityId)
                     .containsOnly("1234-abc-5678-def");
-        });
+            });
     }
 
     @Test
@@ -423,21 +451,24 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    Collections.singletonMap("eventType", TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name())
+                );
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(Collections.singletonMap("eventType",
-                                                                                                                                             TaskRuntimeEvent.TaskEvents.TASK_CANCELLED.name()));
-
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-            CloudTaskCancelledEvent cloudBPMNTaskCancelled = (CloudTaskCancelledEvent) retrievedEvents.iterator().next();
-            assertThat(cloudBPMNTaskCancelled.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED);
-            assertThat(cloudBPMNTaskCancelled.getEntityId()).isEqualTo("1234-abc-5678-def");
-            assertThat(cloudBPMNTaskCancelled.getEntity()).isInstanceOf(Task.class);
-            assertThat(cloudBPMNTaskCancelled.getEntity().getId()).isEqualTo("1234-abc-5678-def");
-        });
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
+                CloudTaskCancelledEvent cloudBPMNTaskCancelled = (CloudTaskCancelledEvent) retrievedEvents
+                    .iterator()
+                    .next();
+                assertThat(cloudBPMNTaskCancelled.getEventType()).isEqualTo(TaskRuntimeEvent.TaskEvents.TASK_CANCELLED);
+                assertThat(cloudBPMNTaskCancelled.getEntityId()).isEqualTo("1234-abc-5678-def");
+                assertThat(cloudBPMNTaskCancelled.getEntity()).isInstanceOf(Task.class);
+                assertThat(cloudBPMNTaskCancelled.getEntity().getId()).isEqualTo("1234-abc-5678-def");
+            });
     }
 
     @Test
@@ -448,32 +479,35 @@ public class AuditServiceIT {
         BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl();
         bpmnActivityStarted.setActivityName("first step");
         String eventId = "ActivityStartedEventId" + UUID.randomUUID().toString();
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(eventId,
-                                                                                                                System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted,
-                                                                                                                "3",
-                                                                                                                "4");
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(
+            eventId,
+            System.currentTimeMillis(),
+            bpmnActivityStarted,
+            "3",
+            "4"
+        );
 
         events[0] = cloudBPMNActivityStartedEvent;
 
         producer.send(events);
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<CloudRuntimeEvent> responseEntity = eventsRestTemplate.executeFindById(eventId);
 
-            //when
-            ResponseEntity<CloudRuntimeEvent> responseEntity = eventsRestTemplate.executeFindById(eventId);
+                //then
+                CloudRuntimeEvent event = responseEntity.getBody();
 
-            //then
-            CloudRuntimeEvent event = responseEntity.getBody();
+                assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
 
-            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
-
-            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
-            assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
-            assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
-            assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
-            assertThat(cloudProcessStartedEvent.getEntity().getActivityName()).isEqualTo("first step");
-        });
+                CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
+                assertThat(cloudProcessStartedEvent.getEventType())
+                    .isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
+                assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
+                assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
+                assertThat(cloudProcessStartedEvent.getEntity().getActivityName()).isEqualTo("first step");
+            });
     }
 
     @Test
@@ -484,39 +518,44 @@ public class AuditServiceIT {
         BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl();
         bpmnActivityStarted.setActivityName("first step");
         String eventId = "ActivityStartedEventId" + UUID.randomUUID().toString();
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(eventId,
-                                                                                                                System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted,
-                                                                                                                "3",
-                                                                                                                "4");
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(
+            eventId,
+            System.currentTimeMillis(),
+            bpmnActivityStarted,
+            "3",
+            "4"
+        );
 
         events[0] = cloudBPMNActivityStartedEvent;
-        events[1] = new CloudRuntimeEventImpl() {
-            @Override
-            public Enum<?> getEventType() {
-                return IgnoredRuntimeEvent.IgnoredRuntimeEvents.IGNORED;
-            }
-        };
+        events[1] =
+            new CloudRuntimeEventImpl() {
+                @Override
+                public Enum<?> getEventType() {
+                    return IgnoredRuntimeEvent.IgnoredRuntimeEvents.IGNORED;
+                }
+            };
 
         producer.send(events);
 
-        await().untilAsserted(() -> {
-            //then
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
-            assertThat(eventsPagedModel.getBody()).isNotEmpty();
+        await()
+            .untilAsserted(() -> {
+                //then
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+                assertThat(eventsPagedModel.getBody()).isNotEmpty();
 
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-            CloudRuntimeEvent event = retrievedEvents.iterator().next();
-            //when
-            assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
+                CloudRuntimeEvent event = retrievedEvents.iterator().next();
+                //when
+                assertThat(event).isInstanceOf(CloudBPMNActivityStartedEvent.class);
 
-            CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
-            assertThat(cloudProcessStartedEvent.getEventType()).isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
-            assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
-            assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
-            assertThat(cloudProcessStartedEvent.getEntity().getActivityName()).isEqualTo("first step");
-        });
+                CloudBPMNActivityStartedEvent cloudProcessStartedEvent = (CloudBPMNActivityStartedEvent) event;
+                assertThat(cloudProcessStartedEvent.getEventType())
+                    .isEqualTo(BPMNActivityEvent.ActivityEvents.ACTIVITY_STARTED);
+                assertThat(cloudProcessStartedEvent.getProcessDefinitionId()).isEqualTo("3");
+                assertThat(cloudProcessStartedEvent.getProcessInstanceId()).isEqualTo("4");
+                assertThat(cloudProcessStartedEvent.getEntity().getActivityName()).isEqualTo("first step");
+            });
     }
 
     @Test
@@ -525,78 +564,80 @@ public class AuditServiceIT {
         List<CloudRuntimeEvent> coveredEvents = getTestUserCandidatesEvents();
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(2);
 
-             //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(2);
+                CloudRuntimeEvent e = retrievedEvents.iterator().next();
+                assertThat(e.getEventType())
+                    .isIn(
+                        TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED,
+                        TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED
+                    );
+                assertThat(e.getEntityId()).isEqualTo("userId");
 
-            CloudRuntimeEvent e= retrievedEvents.iterator().next();
-            assertThat(e.getEventType()).isIn(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED,TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED);
-            assertThat(e.getEntityId()).isEqualTo("userId");
-
-            e= retrievedEvents.iterator().next();
-            assertThat(e.getEventType()).isIn(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED,TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED);
-            assertThat(e.getEntityId()).isEqualTo("userId");
-
-        });
+                e = retrievedEvents.iterator().next();
+                assertThat(e.getEventType())
+                    .isIn(
+                        TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED,
+                        TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_REMOVED
+                    );
+                assertThat(e.getEntityId()).isEqualTo("userId");
+            });
     }
 
     @Test
     public void eventsShouldHaveSequenceNumberSet() {
         //given
-        List <CloudRuntimeEvent> testEvents= getTaskCancelledEvents();
+        List<CloudRuntimeEvent> testEvents = getTaskCancelledEvents();
 
         producer.send(testEvents.toArray(new CloudRuntimeEvent[testEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                List<CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
+                assertThat(retrievedEvents).hasSameSizeAs(testEvents);
 
-            assertThat(retrievedEvents).hasSameSizeAs(testEvents);
-
-            for(int i = 0; i < testEvents.size(); i++ ){
-                assertThat(retrievedEventsList.get(i).getSequenceNumber())
-                        .isEqualTo(i);
-            }
-
-        });
+                for (int i = 0; i < testEvents.size(); i++) {
+                    assertThat(retrievedEventsList.get(i).getSequenceNumber()).isEqualTo(i);
+                }
+            });
     }
 
     @Test
     public void eventsShouldHaveMessageIdSet() {
         //given
-        List <CloudRuntimeEvent> testEvents= getTaskCancelledEvents();
+        List<CloudRuntimeEvent> testEvents = getTaskCancelledEvents();
 
         producer.send(testEvents.toArray(new CloudRuntimeEvent[testEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                List<CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            List <CloudRuntimeEvent> retrievedEventsList = new ArrayList<>(retrievedEvents);
+                assertThat(retrievedEvents).hasSameSizeAs(testEvents);
+                String commonMessageId = retrievedEventsList.get(0).getMessageId();
 
-            assertThat(retrievedEvents).hasSameSizeAs(testEvents);
-            String commonMessageId = retrievedEventsList.get(0).getMessageId();
-
-            for(int i = 0; i < testEvents.size(); i++ ){
-                assertThat(retrievedEventsList.get(i).getMessageId())
-                        .isNotNull()
-                        .isEqualTo(commonMessageId);
-            }
-
-        });
+                for (int i = 0; i < testEvents.size(); i++) {
+                    assertThat(retrievedEventsList.get(i).getMessageId()).isNotNull().isEqualTo(commonMessageId);
+                }
+            });
     }
 
     @Test
@@ -608,60 +649,66 @@ public class AuditServiceIT {
         signal.setProcessDefinitionId("processDefinitionId");
         signal.setProcessInstanceId("processInstanceId");
 
-        SignalPayload signalPayload = ProcessPayloadBuilder.signal()
-                .withName("SignalName")
-                .withVariable("signal-variable",
-                              "test")
-                .build();
+        SignalPayload signalPayload = ProcessPayloadBuilder
+            .signal()
+            .withName("SignalName")
+            .withVariable("signal-variable", "test")
+            .build();
         signal.setSignalPayload(signalPayload);
 
-
-        CloudBPMNSignalReceivedEventImpl cloudSignalReceivedEvent = new CloudBPMNSignalReceivedEventImpl("eventId",
-                                                                                                         System.currentTimeMillis(),
-                                                                                                         signal,
-                                                                                                         signal.getProcessDefinitionId(),
-                                                                                                         signal.getProcessInstanceId());
+        CloudBPMNSignalReceivedEventImpl cloudSignalReceivedEvent = new CloudBPMNSignalReceivedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            signal,
+            signal.getProcessDefinitionId(),
+            signal.getProcessInstanceId()
+        );
         coveredEvents.add(cloudSignalReceivedEvent);
-
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("entityId", "signalId");
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("entityId",
-                        "signalId");
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-
-            assertThat(retrievedEvents)
-            .extracting(
-                    CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getServiceName,
-                    CloudRuntimeEvent::getServiceVersion,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getEntityId,
-                    event -> ((CloudBPMNSignalReceivedEvent)event).getEntity().getElementId(),
-                    event -> ((CloudBPMNSignalReceivedEvent)event).getEntity().getSignalPayload().getId(),
-                    event -> ((CloudBPMNSignalReceivedEvent)event).getEntity().getSignalPayload().getName(),
-                    event -> ((CloudBPMNSignalReceivedEvent)event).getEntity().getSignalPayload().getVariables())
-            .contains(tuple(cloudSignalReceivedEvent.getEventType(),
-            		        cloudSignalReceivedEvent.getServiceName(),
-            		        cloudSignalReceivedEvent.getServiceVersion(),
-            		        cloudSignalReceivedEvent.getProcessInstanceId(),
-            		        cloudSignalReceivedEvent.getProcessDefinitionId(),
-            		        cloudSignalReceivedEvent.getEntityId(),
-            		        cloudSignalReceivedEvent.getEntity().getElementId(),
-            		        cloudSignalReceivedEvent.getEntity().getSignalPayload().getId(),
-            		        cloudSignalReceivedEvent.getEntity().getSignalPayload().getName(),
-            		        cloudSignalReceivedEvent.getEntity().getSignalPayload().getVariables()));
-        });
+                assertThat(retrievedEvents)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getServiceName,
+                        CloudRuntimeEvent::getServiceVersion,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionId,
+                        CloudRuntimeEvent::getEntityId,
+                        event -> ((CloudBPMNSignalReceivedEvent) event).getEntity().getElementId(),
+                        event -> ((CloudBPMNSignalReceivedEvent) event).getEntity().getSignalPayload().getId(),
+                        event -> ((CloudBPMNSignalReceivedEvent) event).getEntity().getSignalPayload().getName(),
+                        event -> ((CloudBPMNSignalReceivedEvent) event).getEntity().getSignalPayload().getVariables()
+                    )
+                    .contains(
+                        tuple(
+                            cloudSignalReceivedEvent.getEventType(),
+                            cloudSignalReceivedEvent.getServiceName(),
+                            cloudSignalReceivedEvent.getServiceVersion(),
+                            cloudSignalReceivedEvent.getProcessInstanceId(),
+                            cloudSignalReceivedEvent.getProcessDefinitionId(),
+                            cloudSignalReceivedEvent.getEntityId(),
+                            cloudSignalReceivedEvent.getEntity().getElementId(),
+                            cloudSignalReceivedEvent.getEntity().getSignalPayload().getId(),
+                            cloudSignalReceivedEvent.getEntity().getSignalPayload().getName(),
+                            cloudSignalReceivedEvent.getEntity().getSignalPayload().getVariables()
+                        )
+                    );
+            });
     }
 
     @Test
@@ -674,11 +721,13 @@ public class AuditServiceIT {
         timer1.setProcessInstanceId("processInstanceId");
         timer1.setTimerPayload(createTimerPayload());
 
-        CloudBPMNTimerFiredEventImpl cloudTimerFiredEvent = new CloudBPMNTimerFiredEventImpl("eventId1",
-                                                                                             System.currentTimeMillis(),
-                                                                                             timer1,
-                                                                                             timer1.getProcessDefinitionId(),
-                                                                                             timer1.getProcessInstanceId());
+        CloudBPMNTimerFiredEventImpl cloudTimerFiredEvent = new CloudBPMNTimerFiredEventImpl(
+            "eventId1",
+            System.currentTimeMillis(),
+            timer1,
+            timer1.getProcessDefinitionId(),
+            timer1.getProcessInstanceId()
+        );
         coveredEvents.add(cloudTimerFiredEvent);
 
         BPMNTimerImpl timer2 = new BPMNTimerImpl("timerId2");
@@ -686,45 +735,52 @@ public class AuditServiceIT {
         timer2.setProcessInstanceId("processInstanceId");
         timer2.setTimerPayload(createTimerPayload());
 
-        CloudBPMNTimerScheduledEventImpl cloudTimerScheduledEvent = new CloudBPMNTimerScheduledEventImpl("eventId2",
-                                                                                                         System.currentTimeMillis(),
-                                                                                                         timer2,
-                                                                                                         timer2.getProcessDefinitionId(),
-                                                                                                         timer2.getProcessInstanceId());
+        CloudBPMNTimerScheduledEventImpl cloudTimerScheduledEvent = new CloudBPMNTimerScheduledEventImpl(
+            "eventId2",
+            System.currentTimeMillis(),
+            timer2,
+            timer2.getProcessDefinitionId(),
+            timer2.getProcessInstanceId()
+        );
 
         coveredEvents.add(cloudTimerScheduledEvent);
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("eventType", BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("eventType",
-                        BPMNTimerEvent.TimerEvents.TIMER_SCHEDULED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-
-            assertThat(retrievedEvents)
-            .extracting(
-                    CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getServiceName,
-                    CloudRuntimeEvent::getServiceVersion,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getEntityId,
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getElementId(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getProcessInstanceId(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getProcessDefinitionId(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getId(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getMaxIterations(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getRepeat(),
-                    event -> ((CloudBPMNTimerScheduledEvent)event).getEntity().getTimerPayload().getRetries())
-            .contains(tuple(cloudTimerScheduledEvent.getEventType(),
+                assertThat(retrievedEvents)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getServiceName,
+                        CloudRuntimeEvent::getServiceVersion,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionId,
+                        CloudRuntimeEvent::getEntityId,
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getElementId(),
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getProcessInstanceId(),
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getProcessDefinitionId(),
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getTimerPayload().getId(),
+                        event ->
+                            ((CloudBPMNTimerScheduledEvent) event).getEntity().getTimerPayload().getMaxIterations(),
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getTimerPayload().getRepeat(),
+                        event -> ((CloudBPMNTimerScheduledEvent) event).getEntity().getTimerPayload().getRetries()
+                    )
+                    .contains(
+                        tuple(
+                            cloudTimerScheduledEvent.getEventType(),
                             cloudTimerScheduledEvent.getServiceName(),
                             cloudTimerScheduledEvent.getServiceVersion(),
                             cloudTimerScheduledEvent.getProcessInstanceId(),
@@ -736,8 +792,10 @@ public class AuditServiceIT {
                             cloudTimerScheduledEvent.getEntity().getTimerPayload().getId(),
                             cloudTimerScheduledEvent.getEntity().getTimerPayload().getMaxIterations(),
                             cloudTimerScheduledEvent.getEntity().getTimerPayload().getRepeat(),
-                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getRetries()));
-        });
+                            cloudTimerScheduledEvent.getEntity().getTimerPayload().getRetries()
+                        )
+                    );
+            });
     }
 
     @Test
@@ -751,42 +809,48 @@ public class AuditServiceIT {
         error.setErrorCode("errorCode");
         error.setErrorId("errorId");
 
-        CloudBPMNErrorReceivedEventImpl cloudErrorReceivedEvent = new CloudBPMNErrorReceivedEventImpl("eventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       error,
-                                                                                                       error.getProcessDefinitionId(),
-                                                                                                       error.getProcessInstanceId());
+        CloudBPMNErrorReceivedEventImpl cloudErrorReceivedEvent = new CloudBPMNErrorReceivedEventImpl(
+            "eventId",
+            System.currentTimeMillis(),
+            error,
+            error.getProcessDefinitionId(),
+            error.getProcessInstanceId()
+        );
         coveredEvents.add(cloudErrorReceivedEvent);
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("eventType", BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name());
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("eventType",
-                        BPMNErrorReceivedEvent.ErrorEvents.ERROR_RECEIVED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-
-            assertThat(retrievedEvents)
-            .extracting(
-                    CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getServiceName,
-                    CloudRuntimeEvent::getServiceVersion,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getEntityId,
-                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getElementId(),
-                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getProcessInstanceId(),
-                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getProcessDefinitionId(),
-                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getErrorCode(),
-                    event -> ((CloudBPMNErrorReceivedEvent)event).getEntity().getErrorId())
-            .contains(tuple(cloudErrorReceivedEvent.getEventType(),
+                assertThat(retrievedEvents)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getServiceName,
+                        CloudRuntimeEvent::getServiceVersion,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionId,
+                        CloudRuntimeEvent::getEntityId,
+                        event -> ((CloudBPMNErrorReceivedEvent) event).getEntity().getElementId(),
+                        event -> ((CloudBPMNErrorReceivedEvent) event).getEntity().getProcessInstanceId(),
+                        event -> ((CloudBPMNErrorReceivedEvent) event).getEntity().getProcessDefinitionId(),
+                        event -> ((CloudBPMNErrorReceivedEvent) event).getEntity().getErrorCode(),
+                        event -> ((CloudBPMNErrorReceivedEvent) event).getEntity().getErrorId()
+                    )
+                    .contains(
+                        tuple(
+                            cloudErrorReceivedEvent.getEventType(),
                             cloudErrorReceivedEvent.getServiceName(),
                             cloudErrorReceivedEvent.getServiceVersion(),
                             cloudErrorReceivedEvent.getProcessInstanceId(),
@@ -796,8 +860,10 @@ public class AuditServiceIT {
                             cloudErrorReceivedEvent.getEntity().getProcessInstanceId(),
                             cloudErrorReceivedEvent.getEntity().getProcessDefinitionId(),
                             cloudErrorReceivedEvent.getEntity().getErrorCode(),
-                            cloudErrorReceivedEvent.getEntity().getErrorId()));
-        });
+                            cloudErrorReceivedEvent.getEntity().getErrorId()
+                        )
+                    );
+            });
     }
 
     @Test
@@ -805,50 +871,59 @@ public class AuditServiceIT {
         //given
         List<CloudRuntimeEvent> coveredEvents = new ArrayList<>();
 
-        MessageSubscriptionImpl messageSubscription = MessageSubscriptionImpl.builder()
-                .withId("entityId")
-                .withEventName("messageName")
-                .withConfiguration("correlationKey")
-                .withProcessDefinitionId("processDefinitionId")
-                .withProcessInstanceId("processInstanceId")
-                .withBusinessKey("businessKey")
-                .build();
+        MessageSubscriptionImpl messageSubscription = MessageSubscriptionImpl
+            .builder()
+            .withId("entityId")
+            .withEventName("messageName")
+            .withConfiguration("correlationKey")
+            .withProcessDefinitionId("processDefinitionId")
+            .withProcessInstanceId("processInstanceId")
+            .withBusinessKey("businessKey")
+            .build();
 
-        CloudMessageSubscriptionCancelledEventImpl cloudEvent = CloudMessageSubscriptionCancelledEventImpl.builder()
-                                                                                .withEntity(messageSubscription)
-                                                                                .build();
+        CloudMessageSubscriptionCancelledEventImpl cloudEvent = CloudMessageSubscriptionCancelledEventImpl
+            .builder()
+            .withEntity(messageSubscription)
+            .build();
         coveredEvents.add(cloudEvent);
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put(
+                    "eventType",
+                    MessageSubscriptionCancelledEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name()
+                );
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("eventType",
-                        MessageSubscriptionCancelledEvent.MessageSubscriptionEvents.MESSAGE_SUBSCRIPTION_CANCELLED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-
-            assertThat(retrievedEvents)
-            .extracting(
-                    CloudRuntimeEvent::getEventType,
-                    CloudRuntimeEvent::getServiceName,
-                    CloudRuntimeEvent::getServiceVersion,
-                    CloudRuntimeEvent::getProcessInstanceId,
-                    CloudRuntimeEvent::getProcessDefinitionId,
-                    CloudRuntimeEvent::getEntityId,
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getId(),
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getProcessInstanceId(),
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getProcessDefinitionId(),
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getEventName(),
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getConfiguration(),
-                    event -> ((CloudMessageSubscriptionCancelledEvent)event).getEntity().getBusinessKey())
-            .contains(tuple(cloudEvent.getEventType(),
+                assertThat(retrievedEvents)
+                    .extracting(
+                        CloudRuntimeEvent::getEventType,
+                        CloudRuntimeEvent::getServiceName,
+                        CloudRuntimeEvent::getServiceVersion,
+                        CloudRuntimeEvent::getProcessInstanceId,
+                        CloudRuntimeEvent::getProcessDefinitionId,
+                        CloudRuntimeEvent::getEntityId,
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getId(),
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getProcessInstanceId(),
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getProcessDefinitionId(),
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getEventName(),
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getConfiguration(),
+                        event -> ((CloudMessageSubscriptionCancelledEvent) event).getEntity().getBusinessKey()
+                    )
+                    .contains(
+                        tuple(
+                            cloudEvent.getEventType(),
                             cloudEvent.getServiceName(),
                             cloudEvent.getServiceVersion(),
                             cloudEvent.getProcessInstanceId(),
@@ -859,40 +934,42 @@ public class AuditServiceIT {
                             cloudEvent.getEntity().getProcessDefinitionId(),
                             cloudEvent.getEntity().getEventName(),
                             cloudEvent.getEntity().getConfiguration(),
-                            cloudEvent.getEntity().getBusinessKey()));
-        });
+                            cloudEvent.getEntity().getBusinessKey()
+                        )
+                    );
+            });
     }
 
     private List<CloudRuntimeEvent> getTaskCancelledEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
-        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def",
-                                            "my task",
-                                            Task.TaskStatus.CREATED);
+        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def", "my task", Task.TaskStatus.CREATED);
         taskCreated.setProcessDefinitionId("proc-def");
         taskCreated.setProcessInstanceId("100");
-        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
-                                                                                        System.currentTimeMillis(),
-                                                                                        taskCreated);
+        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl(
+            "TaskCreatedEventId",
+            System.currentTimeMillis(),
+            taskCreated
+        );
         testEvents.add(cloudTaskCreatedEvent);
 
-        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def",
-                                             "my task",
-                                             Task.TaskStatus.ASSIGNED);
+        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def", "my task", Task.TaskStatus.ASSIGNED);
         taskAssigned.setProcessDefinitionId("proc-def");
         taskAssigned.setProcessInstanceId("100");
-        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
-                                                                                           System.currentTimeMillis(),
-                                                                                           taskAssigned);
+        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl(
+            "TaskAssignedEventId",
+            System.currentTimeMillis(),
+            taskAssigned
+        );
         testEvents.add(cloudTaskAssignedEvent);
 
-        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def",
-                                              "my task",
-                                              Task.TaskStatus.CANCELLED);
+        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def", "my task", Task.TaskStatus.CANCELLED);
         taskCancelled.setProcessDefinitionId("proc-def");
         taskCancelled.setProcessInstanceId("100");
-        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl("TaskCancelledEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              taskCancelled);
+        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl(
+            "TaskCancelledEventId",
+            System.currentTimeMillis(),
+            taskCancelled
+        );
         testEvents.add(cloudTaskCancelledEvent);
         return testEvents;
     }
@@ -902,68 +979,122 @@ public class AuditServiceIT {
 
         testEvents.add(new CloudProcessDeployedEventImpl(buildDefaultProcessDefinition()));
 
+        testEvents.add(
+            new CloudProcessCandidateStarterUserAddedEventImpl(
+                "CloudProcessCandidateStarterUserAddedEventImpl",
+                System.currentTimeMillis(),
+                new ProcessCandidateStarterUserImpl("pid", "uid")
+            )
+        );
+
+        testEvents.add(
+            new CloudProcessCandidateStarterUserRemovedEventImpl(
+                "CloudProcessCandidateStarterUserRemovedEventImpl",
+                System.currentTimeMillis(),
+                new ProcessCandidateStarterUserImpl("pid", "uid")
+            )
+        );
+
+        testEvents.add(
+            new CloudProcessCandidateStarterGroupAddedEventImpl(
+                "CloudProcessCandidateStarterGroupAddedEventId",
+                System.currentTimeMillis(),
+                new ProcessCandidateStarterGroupImpl("pid", "gid")
+            )
+        );
+
+        testEvents.add(
+            new CloudProcessCandidateStarterGroupRemovedEventImpl(
+                "CloudProcessCandidateStarterGroupRemovedEventImpl",
+                System.currentTimeMillis(),
+                new ProcessCandidateStarterGroupImpl("pid", "gid")
+            )
+        );
+
         BPMNActivityImpl bpmnActivityCancelled = new BPMNActivityImpl();
         bpmnActivityCancelled.setElementId("elementId");
 
-        testEvents.add(new CloudBPMNActivityCancelledEventImpl("ActivityCancelledEventId",
-                                                               System.currentTimeMillis(),
-                                                               bpmnActivityCancelled,
-                                                               "103",
-                                                               "104",
-                                                               "manually cancelled"));
+        testEvents.add(
+            new CloudBPMNActivityCancelledEventImpl(
+                "ActivityCancelledEventId",
+                System.currentTimeMillis(),
+                bpmnActivityCancelled,
+                "103",
+                "104",
+                "manually cancelled"
+            )
+        );
 
-        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl("bpmnActivityStarted1",
-                                                                    "My Service Task",
-                                                                    "Service Task");
+        BPMNActivityImpl bpmnActivityStarted = new BPMNActivityImpl(
+            "bpmnActivityStarted1",
+            "My Service Task",
+            "Service Task"
+        );
 
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId",
-                                                                                                                System.currentTimeMillis(),
-                                                                                                                bpmnActivityStarted,
-                                                                                                                "3",
-                                                                                                                "4");
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent = new CloudBPMNActivityStartedEventImpl(
+            "ActivityStartedEventId",
+            System.currentTimeMillis(),
+            bpmnActivityStarted,
+            "3",
+            "4"
+        );
 
         testEvents.add(cloudBPMNActivityStartedEvent);
 
-        BPMNActivityImpl bpmnActivityStarted2 = new BPMNActivityImpl("bpmnActivityStarted2",
-                                                                     "My User Task",
-                                                                     "User Task");
+        BPMNActivityImpl bpmnActivityStarted2 = new BPMNActivityImpl(
+            "bpmnActivityStarted2",
+            "My User Task",
+            "User Task"
+        );
 
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent2 = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId2",
-                                                                                                                 System.currentTimeMillis(),
-                                                                                                                 bpmnActivityStarted2,
-                                                                                                                 "3",
-                                                                                                                 "4");
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent2 = new CloudBPMNActivityStartedEventImpl(
+            "ActivityStartedEventId2",
+            System.currentTimeMillis(),
+            bpmnActivityStarted2,
+            "3",
+            "4"
+        );
 
         testEvents.add(cloudBPMNActivityStartedEvent2);
 
-        BPMNActivityImpl bpmnActivityStarted3 = new BPMNActivityImpl("bpmnActivityStarted3",
-                                                                     "My User Task",
-                                                                     "User Task");
+        BPMNActivityImpl bpmnActivityStarted3 = new BPMNActivityImpl(
+            "bpmnActivityStarted3",
+            "My User Task",
+            "User Task"
+        );
 
-        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent3 = new CloudBPMNActivityStartedEventImpl("ActivityStartedEventId3",
-                                                                                                                 System.currentTimeMillis(),
-                                                                                                                 bpmnActivityStarted3,
-                                                                                                                 "3",
-                                                                                                                 "5");
+        CloudBPMNActivityStartedEventImpl cloudBPMNActivityStartedEvent3 = new CloudBPMNActivityStartedEventImpl(
+            "ActivityStartedEventId3",
+            System.currentTimeMillis(),
+            bpmnActivityStarted3,
+            "3",
+            "5"
+        );
 
         testEvents.add(cloudBPMNActivityStartedEvent3);
 
         BPMNActivityImpl bpmnActivityCompleted = new BPMNActivityImpl();
         bpmnActivityCompleted.setElementId("elementId");
 
-        testEvents.add(new CloudBPMNActivityCompletedEventImpl("ActivityCompletedEventId",
-                                                               System.currentTimeMillis(),
-                                                               bpmnActivityCompleted,
-                                                               "23",
-                                                               "42"));
+        testEvents.add(
+            new CloudBPMNActivityCompletedEventImpl(
+                "ActivityCompletedEventId",
+                System.currentTimeMillis(),
+                bpmnActivityCompleted,
+                "23",
+                "42"
+            )
+        );
 
         ProcessInstanceImpl processInstanceCompleted = new ProcessInstanceImpl();
         processInstanceCompleted.setId("24");
         processInstanceCompleted.setProcessDefinitionId("43");
 
-        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl("ProcessCompletedEventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       processInstanceCompleted);
+        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl(
+            "ProcessCompletedEventId",
+            System.currentTimeMillis(),
+            processInstanceCompleted
+        );
 
         testEvents.add(cloudProcessCompletedEvent);
 
@@ -971,9 +1102,11 @@ public class AuditServiceIT {
         processInstanceCancelled.setId("124");
         processInstanceCancelled.setProcessDefinitionId("143");
 
-        CloudProcessCancelledEventImpl cloudProcessCancelledEvent = new CloudProcessCancelledEventImpl("ProcessCancelledEventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       processInstanceCancelled);
+        CloudProcessCancelledEventImpl cloudProcessCancelledEvent = new CloudProcessCancelledEventImpl(
+            "ProcessCancelledEventId",
+            System.currentTimeMillis(),
+            processInstanceCancelled
+        );
 
         testEvents.add(cloudProcessCancelledEvent);
 
@@ -981,60 +1114,64 @@ public class AuditServiceIT {
         processInstanceStarted.setId("25");
         processInstanceStarted.setProcessDefinitionId("44");
 
-        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl("ProcessStartedEventId",
-                                                                                                 System.currentTimeMillis(),
-                                                                                                 processInstanceStarted);
+        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(
+            "ProcessStartedEventId",
+            System.currentTimeMillis(),
+            processInstanceStarted
+        );
 
         testEvents.add(cloudProcessStartedEvent);
 
-        testEvents.add(new CloudProcessSuspendedEventImpl("ProcessSuspendedEventId",
-                                           System.currentTimeMillis(),
-                                           processInstanceStarted));
+        testEvents.add(
+            new CloudProcessSuspendedEventImpl(
+                "ProcessSuspendedEventId",
+                System.currentTimeMillis(),
+                processInstanceStarted
+            )
+        );
 
-        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def",
-                                             "task assigned",
-                                             Task.TaskStatus.ASSIGNED);
+        TaskImpl taskAssigned = new TaskImpl("1234-abc-5678-def", "task assigned", Task.TaskStatus.ASSIGNED);
         taskAssigned.setProcessDefinitionId("27");
         taskAssigned.setProcessInstanceId("46");
-        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl("TaskAssignedEventId",
-                                                                                           System.currentTimeMillis(),
-                                                                                           taskAssigned);
+        CloudTaskAssignedEventImpl cloudTaskAssignedEvent = new CloudTaskAssignedEventImpl(
+            "TaskAssignedEventId",
+            System.currentTimeMillis(),
+            taskAssigned
+        );
         testEvents.add(cloudTaskAssignedEvent);
 
         taskAssigned.setPriority(10);
-        testEvents.add(new CloudTaskUpdatedEventImpl("TaskUpdatedEventId",
-                                                     System.currentTimeMillis(),
-                                                     taskAssigned));
+        testEvents.add(new CloudTaskUpdatedEventImpl("TaskUpdatedEventId", System.currentTimeMillis(), taskAssigned));
 
-        TaskImpl taskCompleted = new TaskImpl("1234-abc-5678-def",
-                                              "task completed",
-                                              Task.TaskStatus.COMPLETED);
+        TaskImpl taskCompleted = new TaskImpl("1234-abc-5678-def", "task completed", Task.TaskStatus.COMPLETED);
         taskCompleted.setProcessDefinitionId("28");
         taskCompleted.setProcessInstanceId("47");
-        CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl("TaskCompletedEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              taskCompleted);
+        CloudTaskCompletedEventImpl cloudTaskCompletedEvent = new CloudTaskCompletedEventImpl(
+            "TaskCompletedEventId",
+            System.currentTimeMillis(),
+            taskCompleted
+        );
         testEvents.add(cloudTaskCompletedEvent);
 
-        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def",
-                                            "task created",
-                                            Task.TaskStatus.CREATED);
+        TaskImpl taskCreated = new TaskImpl("1234-abc-5678-def", "task created", Task.TaskStatus.CREATED);
         taskCreated.setProcessDefinitionId("28");
         taskCreated.setProcessInstanceId("47");
         taskCreated.setTaskDefinitionKey("taskDefinitionKey");
-        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl("TaskCreatedEventId",
-                                                                                        System.currentTimeMillis(),
-                                                                                        taskCreated);
+        CloudTaskCreatedEventImpl cloudTaskCreatedEvent = new CloudTaskCreatedEventImpl(
+            "TaskCreatedEventId",
+            System.currentTimeMillis(),
+            taskCreated
+        );
         testEvents.add(cloudTaskCreatedEvent);
 
-        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def",
-                                              "task cancelled",
-                                              Task.TaskStatus.CANCELLED);
+        TaskImpl taskCancelled = new TaskImpl("1234-abc-5678-def", "task cancelled", Task.TaskStatus.CANCELLED);
         taskCancelled.setProcessDefinitionId("28");
         taskCancelled.setProcessInstanceId("47");
-        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl("TaskCancelledEventId",
-                                                                                              System.currentTimeMillis(),
-                                                                                              taskCancelled);
+        CloudTaskCancelledEventImpl cloudTaskCancelledEvent = new CloudTaskCancelledEventImpl(
+            "TaskCancelledEventId",
+            System.currentTimeMillis(),
+            taskCancelled
+        );
         testEvents.add(cloudTaskCancelledEvent);
 
         IntegrationContextImpl integrationContext = new IntegrationContextImpl();
@@ -1044,23 +1181,28 @@ public class AuditServiceIT {
         integrationContext.setClientName("Connector Task");
         integrationContext.setClientType("serviceTask");
 
-        CloudIntegrationRequestedEventImpl cloudIntegrationRequestedEvent = new CloudIntegrationRequestedEventImpl(integrationContext);
+        CloudIntegrationRequestedEventImpl cloudIntegrationRequestedEvent = new CloudIntegrationRequestedEventImpl(
+            integrationContext
+        );
 
         testEvents.add(cloudIntegrationRequestedEvent);
 
-        CloudIntegrationResultReceivedEventImpl cloudIntegrationResultReceivedEvent = new CloudIntegrationResultReceivedEventImpl(integrationContext);
+        CloudIntegrationResultReceivedEventImpl cloudIntegrationResultReceivedEvent = new CloudIntegrationResultReceivedEventImpl(
+            integrationContext
+        );
 
         testEvents.add(cloudIntegrationResultReceivedEvent);
 
         Error cause = new Error(ERROR_MESSAGE);
         CloudBpmnError error = new CloudBpmnError("ERROR_CODE", cause);
 
-        CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(integrationContext,
-                                                                                                                               error.getErrorCode(),
-                                                                                                                               error.getMessage(),
-                                                                                                                               error.getClass().getName(),
-                                                                                                                               Arrays.asList(error.getCause()
-                                                                                                                                                  .getStackTrace()));
+        CloudIntegrationErrorReceivedEventImpl cloudIntegrationErrorReceivedEvent = new CloudIntegrationErrorReceivedEventImpl(
+            integrationContext,
+            error.getErrorCode(),
+            error.getMessage(),
+            error.getClass().getName(),
+            Arrays.asList(error.getCause().getStackTrace())
+        );
         testEvents.add(cloudIntegrationErrorReceivedEvent);
 
         DeploymentImpl deployment = new DeploymentImpl();
@@ -1068,7 +1210,12 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            deployment,
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
         testEvents.add(cloudApplicationDeployedEvent);
 
         return testEvents;
@@ -1089,9 +1236,11 @@ public class AuditServiceIT {
         processInstanceStarted.setId("25");
         processInstanceStarted.setProcessDefinitionId("44");
 
-        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl("ProcessStartedEventId",
-                                                                                                 System.currentTimeMillis(),
-                                                                                                 processInstanceStarted);
+        CloudProcessStartedEventImpl cloudProcessStartedEvent = new CloudProcessStartedEventImpl(
+            "ProcessStartedEventId",
+            System.currentTimeMillis(),
+            processInstanceStarted
+        );
 
         testEvents.add(cloudProcessStartedEvent);
 
@@ -1101,18 +1250,22 @@ public class AuditServiceIT {
         processInstanceUpdated.setBusinessKey("businessKey");
         processInstanceUpdated.setName("name");
 
-        CloudProcessUpdatedEventImpl cloudProcessUpdatedEvent = new CloudProcessUpdatedEventImpl("ProcessUpdatedEventId",
-                                                                                                 System.currentTimeMillis(),
-                                                                                                 processInstanceUpdated);
+        CloudProcessUpdatedEventImpl cloudProcessUpdatedEvent = new CloudProcessUpdatedEventImpl(
+            "ProcessUpdatedEventId",
+            System.currentTimeMillis(),
+            processInstanceUpdated
+        );
         testEvents.add(cloudProcessUpdatedEvent);
 
         ProcessInstanceImpl processInstanceCompleted = new ProcessInstanceImpl();
         processInstanceCompleted.setId("25");
         processInstanceCompleted.setProcessDefinitionId("44");
 
-        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl("ProcessCompletedEventId",
-                                                                                                       System.currentTimeMillis(),
-                                                                                                       processInstanceCompleted);
+        CloudProcessCompletedEventImpl cloudProcessCompletedEvent = new CloudProcessCompletedEventImpl(
+            "ProcessCompletedEventId",
+            System.currentTimeMillis(),
+            processInstanceCompleted
+        );
 
         testEvents.add(cloudProcessCompletedEvent);
 
@@ -1122,18 +1275,22 @@ public class AuditServiceIT {
     private List<CloudRuntimeEvent> getTestUserCandidatesEvents() {
         List<CloudRuntimeEvent> testEvents = new ArrayList<>();
 
-        TaskCandidateUserImpl taskCandidateUser=new TaskCandidateUserImpl("userId", "1234-abc-5678-def");
+        TaskCandidateUserImpl taskCandidateUser = new TaskCandidateUserImpl("userId", "1234-abc-5678-def");
 
-        CloudTaskCandidateUserAddedEventImpl candidateUserAddedEvent = new CloudTaskCandidateUserAddedEventImpl("TaskCandidateUserAddedEventId",
-                                                                                                            System.currentTimeMillis(),
-                                                                                                            taskCandidateUser);
+        CloudTaskCandidateUserAddedEventImpl candidateUserAddedEvent = new CloudTaskCandidateUserAddedEventImpl(
+            "TaskCandidateUserAddedEventId",
+            System.currentTimeMillis(),
+            taskCandidateUser
+        );
 
         testEvents.add(candidateUserAddedEvent);
 
-        taskCandidateUser=new TaskCandidateUserImpl("userId", "1234-abc-5678-def");
-        CloudTaskCandidateUserRemovedEventImpl candidateUserRemovedEvent = new CloudTaskCandidateUserRemovedEventImpl("TaskCandidateUserRemovedEventId",
-                                                                                                                  System.currentTimeMillis(),
-                                                                                                                  taskCandidateUser);
+        taskCandidateUser = new TaskCandidateUserImpl("userId", "1234-abc-5678-def");
+        CloudTaskCandidateUserRemovedEventImpl candidateUserRemovedEvent = new CloudTaskCandidateUserRemovedEventImpl(
+            "TaskCandidateUserRemovedEventId",
+            System.currentTimeMillis(),
+            taskCandidateUser
+        );
         testEvents.add(candidateUserRemovedEvent);
 
         return testEvents;
@@ -1159,35 +1316,46 @@ public class AuditServiceIT {
         deployment.setVersion(1);
         deployment.setName("SpringAutoDeployment");
 
-        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(deployment);
+        CloudApplicationDeployedEventImpl cloudApplicationDeployedEvent = new CloudApplicationDeployedEventImpl(
+            UUID.randomUUID().toString(),
+            System.currentTimeMillis(),
+            deployment,
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
         cloudApplicationDeployedEvent.setAppName("EventApplicationName");
         coveredEvents.add(cloudApplicationDeployedEvent);
 
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
-        await().untilAsserted(() -> {
+        await()
+            .untilAsserted(() -> {
+                //when
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("eventType", ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
 
-            //when
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("eventType",
-                    ApplicationEvent.ApplicationEvents.APPLICATION_DEPLOYED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(
+                    filters
+                );
 
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFind(filters);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents).hasSize(1);
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents).hasSize(1);
-
-            assertThat(retrievedEvents)
+                assertThat(retrievedEvents)
                     .extracting(
-                            CloudRuntimeEvent::getEventType,
-                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getId(),
-                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getName(),
-                            event -> ((CloudApplicationDeployedEvent) event).getEntity().getVersion())
-                    .contains(tuple(cloudApplicationDeployedEvent.getEventType(),
+                        CloudRuntimeEvent::getEventType,
+                        event -> ((CloudApplicationDeployedEvent) event).getEntity().getId(),
+                        event -> ((CloudApplicationDeployedEvent) event).getEntity().getName(),
+                        event -> ((CloudApplicationDeployedEvent) event).getEntity().getVersion()
+                    )
+                    .contains(
+                        tuple(
+                            cloudApplicationDeployedEvent.getEventType(),
                             cloudApplicationDeployedEvent.getEntity().getId(),
                             cloudApplicationDeployedEvent.getEntity().getName(),
-                            cloudApplicationDeployedEvent.getEntity().getVersion()));
-        });
+                            cloudApplicationDeployedEvent.getEntity().getVersion()
+                        )
+                    );
+            });
     }
 }

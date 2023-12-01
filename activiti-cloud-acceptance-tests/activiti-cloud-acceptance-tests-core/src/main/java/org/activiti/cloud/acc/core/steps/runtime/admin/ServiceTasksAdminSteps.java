@@ -28,9 +28,7 @@ public class ServiceTasksAdminSteps {
     private ServiceTasksAdminService serviceTasksAdminService;
 
     @Step
-    public void replayServiceTask(String executionId,
-                                  ReplayServiceTaskRequest request) {
-        serviceTasksAdminService.replayServiceTask(executionId,
-                                                   request);
+    public void replayServiceTask(String executionId, ReplayServiceTaskRequest request) {
+        serviceTasksAdminService.replayServiceTask(executionId, request);
     }
 }

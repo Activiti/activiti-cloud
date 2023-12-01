@@ -22,7 +22,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -31,17 +30,23 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    public static final String SESSION_ID_CLAIM = "sid";
+
+    private static final String SUBJECT_CLAIM = "sub";
+
     private final Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter;
     private ClientRegistration clientRegistration;
-    private OAuth2UserService oAuth2UserService;
+    private OAuth2UserServiceCacheable oAuth2UserServiceCacheable;
     private String usernameClaim = "preferred_username";
 
-    public JwtUserInfoUriAuthenticationConverter(Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
-                                                 ClientRegistration clientRegistration,
-                                                 OAuth2UserService oAuth2UserService) {
+    public JwtUserInfoUriAuthenticationConverter(
+        Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter,
+        ClientRegistration clientRegistration,
+        OAuth2UserServiceCacheable oAuth2UserServiceCacheable
+    ) {
         this.jwtGrantedAuthoritiesConverter = jwtGrantedAuthoritiesConverter;
         this.clientRegistration = clientRegistration;
-        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2UserServiceCacheable = oAuth2UserServiceCacheable;
     }
 
     @Override
@@ -57,15 +62,25 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
 
     public String getPrincipalClaimName(Jwt jwt) {
         String username = jwt.getClaimAsString(usernameClaim);
-        if(username == null) {
+        if (username == null) {
             Instant issuedAt = jwt.getIssuedAt();
             Instant expiresAt = jwt.getExpiresAt();
-            OAuth2AccessToken accessToken = new OAuth2AccessToken(TokenType.BEARER, jwt.getTokenValue(), issuedAt, expiresAt);
+            OAuth2AccessToken accessToken = new OAuth2AccessToken(
+                TokenType.BEARER,
+                jwt.getTokenValue(),
+                issuedAt,
+                expiresAt
+            );
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserService.loadUser(userRequest);
+            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, getCacheKey(jwt));
             username = oAuth2User.getName();
         }
         return username;
     }
 
+    private String getCacheKey(Jwt jwt) {
+        return jwt.hasClaim(SESSION_ID_CLAIM)
+            ? jwt.getClaimAsString(SESSION_ID_CLAIM)
+            : jwt.getClaimAsString(SUBJECT_CLAIM);
+    }
 }

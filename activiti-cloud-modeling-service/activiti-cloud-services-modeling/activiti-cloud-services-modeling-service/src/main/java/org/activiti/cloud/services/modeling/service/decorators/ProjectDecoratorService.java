@@ -16,22 +16,23 @@
 
 package org.activiti.cloud.services.modeling.service.decorators;
 
-import org.activiti.cloud.modeling.api.Project;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.activiti.cloud.modeling.api.Project;
+import org.apache.commons.lang3.StringUtils;
 
 public class ProjectDecoratorService {
 
     private final Map<String, ProjectDecorator> projectDecorators;
 
     public ProjectDecoratorService(List<ProjectDecorator> projectDecorators) {
-        this.projectDecorators = projectDecorators.stream()
-            .collect(Collectors.toMap(ProjectDecorator::decoratorName, projectDecorator -> projectDecorator));
+        this.projectDecorators =
+            projectDecorators
+                .stream()
+                .collect(Collectors.toMap(ProjectDecorator::decoratorName, projectDecorator -> projectDecorator));
     }
 
     public void decorate(Project project, List<String> decoratorNames) {
@@ -43,12 +44,12 @@ public class ProjectDecoratorService {
     }
 
     private void decorate(List<String> decoratorNames, Consumer<ProjectDecorator> projectDecoratorConsumer) {
-        decoratorNames.stream()
+        decoratorNames
+            .stream()
             .filter(StringUtils::isNotBlank)
             .map(String::toLowerCase)
             .map(projectDecorators::get)
             .filter(Objects::nonNull)
             .forEach(projectDecoratorConsumer);
     }
-
 }

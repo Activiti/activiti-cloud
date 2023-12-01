@@ -16,7 +16,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import static org.activiti.cloud.services.query.model.QServiceTaskEntity.serviceTaskEntity;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
+import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
@@ -35,15 +39,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.types.Predicate;
-
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances/{processInstanceId}",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/process-instances/{processInstanceId}",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceServiceTasksAdminController {
 
     private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;
@@ -53,26 +53,27 @@ public class ProcessInstanceServiceTasksAdminController {
     private final ServiceTaskRepository taskRepository;
 
     @Autowired
-    public ProcessInstanceServiceTasksAdminController(ServiceTaskRepository taskRepository,
-                                                      ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
-                                                      AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler) {
+    public ProcessInstanceServiceTasksAdminController(
+        ServiceTaskRepository taskRepository,
+        ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ServiceTaskEntity> pagedCollectionModelAssembler
+    ) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(value = "/service-tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudServiceTask>> getTasks(@PathVariable String processInstanceId,
-                                                              @QuerydslPredicate(root = ServiceTaskEntity.class) Predicate predicate,
-                                                              Pageable pageable) {
+    public PagedModel<EntityModel<CloudServiceTask>> getServiceTasks(
+        @PathVariable String processInstanceId,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ServiceTaskEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        Predicate filter = serviceTaskEntity.processInstanceId.eq(processInstanceId).and(predicate);
 
-        Predicate filter = serviceTaskEntity.processInstanceId.eq(processInstanceId)
-                                                              .and(predicate);
-
-        Page<ServiceTaskEntity> page = taskRepository.findAll(filter,
-                                                              pageable);
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                     page,
-                                                     taskRepresentationModelAssembler);
+        Page<ServiceTaskEntity> page = taskRepository.findAll(filter, pageable);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 }

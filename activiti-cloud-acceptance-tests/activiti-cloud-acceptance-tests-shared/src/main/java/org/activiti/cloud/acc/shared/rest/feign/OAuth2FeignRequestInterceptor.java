@@ -30,9 +30,6 @@ public class OAuth2FeignRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        template.header(AUTHORIZATION,
-                String.format("%s %s",
-                        BEARER,
-                        TokenHolder.getAuthToken()));
+        template.header(AUTHORIZATION, String.format("%s %s", BEARER, TokenHolder.getAuthToken()));
     }
 }

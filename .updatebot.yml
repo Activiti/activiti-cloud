@@ -1,7 +1,0 @@
-github:
-  organisations:
-    - name: activiti
-      repositories:
-        - name: activiti-cloud-application
-          branch: develop
-          useSinglePullRequest: true

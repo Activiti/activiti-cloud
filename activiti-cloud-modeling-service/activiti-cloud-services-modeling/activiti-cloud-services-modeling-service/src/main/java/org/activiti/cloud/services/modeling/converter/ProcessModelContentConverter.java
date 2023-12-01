@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.modeling.converter;
 
-import static org.activiti.bpmn.converter.util.BpmnXMLUtil.createSafeXmlInputFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Optional;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
@@ -48,8 +47,7 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
 
     private final BpmnXMLConverter bpmnConverter;
 
-    public ProcessModelContentConverter(ProcessModelType processModelType,
-                                        BpmnXMLConverter bpmnConverter) {
+    public ProcessModelContentConverter(ProcessModelType processModelType, BpmnXMLConverter bpmnConverter) {
         this.bpmnConverter = bpmnConverter;
         this.processModelType = processModelType;
     }
@@ -65,23 +63,22 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             return Optional.empty();
         }
 
-        return Optional.ofNullable(convertToBpmnModel(bytes))
-                .map(BpmnProcessModelContent::new);
+        return Optional.ofNullable(convertToBpmnModel(bytes)).map(BpmnProcessModelContent::new);
     }
 
     @Override
     public byte[] convertToBytes(BpmnProcessModelContent bpmnProcessModelContent) {
-         return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
+        return bpmnConverter.convertToXML(bpmnProcessModelContent.getBpmnModel());
     }
 
     public Optional<BpmnProcessModelContent> convertToModelContent(BpmnModel bpmnModel) {
-        return Optional.ofNullable(bpmnModel)
-                .map(BpmnProcessModelContent::new);
+        return Optional.ofNullable(bpmnModel).map(BpmnProcessModelContent::new);
     }
 
     public BpmnModel convertToBpmnModel(byte[] modelContent) {
         try (InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(modelContent))) {
-            XMLStreamReader xmlReader = createSafeXmlInputFactory().createXMLStreamReader(reader);
+            XMLInputFactory safeXmlInputFactory = createSafeXmlInputFactory();
+            XMLStreamReader xmlReader = safeXmlInputFactory.createXMLStreamReader(reader);
             return bpmnConverter.convertToBpmnModel(xmlReader);
         } catch (IOException ioError) {
             throw new ModelConversionException(this.XML_CONTENT_NOT_PRESENT, ioError);
@@ -92,11 +89,28 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
         }
     }
 
+    private XMLInputFactory createSafeXmlInputFactory() {
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        if (xif.isPropertySupported("javax.xml.stream.isReplacingEntityReferences")) {
+            xif.setProperty("javax.xml.stream.isReplacingEntityReferences", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.isSupportingExternalEntities")) {
+            xif.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+        }
+
+        if (xif.isPropertySupported("javax.xml.stream.supportDTD")) {
+            xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        }
+
+        return xif;
+    }
+
     @Override
-    public FileContent overrideModelId(FileContent fileContent,
-                                       Map<String, String> modelIdentifiers) {
+    public FileContent overrideModelId(FileContent fileContent, Map<String, String> modelIdentifiers) {
         FileContent newFileContent;
-        Optional<BpmnProcessModelContent> processModelContent = this.convertToModelContent(fileContent.getFileContent());
+        Optional<BpmnProcessModelContent> processModelContent =
+            this.convertToModelContent(fileContent.getFileContent());
 
         if (processModelContent.isPresent()) {
             BpmnProcessModelContent modelContent = processModelContent.get();
@@ -105,22 +119,27 @@ public class ProcessModelContentConverter implements ModelContentConverter<BpmnP
             this.overrideAllProcessDefinition(modelContent, referenceIdOverrider);
             byte[] overriddenContent = this.convertToBytes(modelContent);
 
-            newFileContent = new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
+            newFileContent =
+                new FileContent(fileContent.getFilename(), fileContent.getContentType(), overriddenContent);
         } else {
             newFileContent = fileContent;
         }
         return newFileContent;
     }
 
-    public void overrideAllProcessDefinition(BpmnProcessModelContent processModelContent,
-                                             ReferenceIdOverrider referenceIdOverrider) {
-        processModelContent.getBpmnModel().getProcesses().forEach(process -> {
-            overrideAllIdReferences(process, referenceIdOverrider);
-        });
+    public void overrideAllProcessDefinition(
+        BpmnProcessModelContent processModelContent,
+        ReferenceIdOverrider referenceIdOverrider
+    ) {
+        processModelContent
+            .getBpmnModel()
+            .getProcesses()
+            .forEach(process -> {
+                overrideAllIdReferences(process, referenceIdOverrider);
+            });
     }
 
-    private void overrideAllIdReferences(Process process,
-                                         ReferenceIdOverrider referenceIdOverrider) {
+    private void overrideAllIdReferences(Process process, ReferenceIdOverrider referenceIdOverrider) {
         process.accept(referenceIdOverrider);
     }
 }

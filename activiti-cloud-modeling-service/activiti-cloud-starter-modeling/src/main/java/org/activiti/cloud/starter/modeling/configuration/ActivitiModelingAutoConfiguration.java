@@ -15,11 +15,9 @@
  */
 package org.activiti.cloud.starter.modeling.configuration;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
+@AutoConfiguration
 @Import(ModelingSwaggerConfig.class)
-public class ActivitiModelingAutoConfiguration {
-
-}
+public class ActivitiModelingAutoConfiguration {}

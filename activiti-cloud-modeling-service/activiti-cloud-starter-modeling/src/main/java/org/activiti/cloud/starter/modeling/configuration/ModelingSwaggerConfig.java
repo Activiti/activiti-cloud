@@ -17,7 +17,7 @@ package org.activiti.cloud.starter.modeling.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -28,15 +28,18 @@ public class ModelingSwaggerConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenAPI baseOpenApi(BaseOpenApiBuilder baseOpenApiBuilder,
-                               @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath) {
+    public OpenAPI baseOpenApi(
+        BaseOpenApiBuilder baseOpenApiBuilder,
+        @Value("${activiti.cloud.swagger.modeling-base-path:}") String swaggerBasePath
+    ) {
         return baseOpenApiBuilder.build("Modeling ReST API", swaggerBasePath);
     }
 
     @Bean
     @ConditionalOnMissingBean(name = "modelingApi")
     public GroupedOpenApi modelingApi() {
-        return GroupedOpenApi.builder()
+        return GroupedOpenApi
+            .builder()
             .group("Modeling")
             .packagesToScan("org.activiti.cloud.services.modeling.rest")
             .build();

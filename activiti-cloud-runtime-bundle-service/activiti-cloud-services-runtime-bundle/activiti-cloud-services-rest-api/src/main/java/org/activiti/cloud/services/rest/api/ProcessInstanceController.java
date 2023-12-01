@@ -17,6 +17,7 @@ package org.activiti.cloud.services.rest.api;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 public interface ProcessInstanceController {
-
     @GetMapping("/v1/process-instances")
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);
@@ -45,11 +45,23 @@ public interface ProcessInstanceController {
     @PostMapping(path = "/v1/process-instances", consumes = APPLICATION_JSON_VALUE)
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
-    @GetMapping(value = "/v1/process-instances/{processInstanceId}")
-    EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable(value = "processInstanceId") String processInstanceId);
+    @Deprecated
+    @PostMapping(value = "/v1/process-instances/{processInstanceId}/start", consumes = APPLICATION_JSON_VALUE)
+    EntityModel<CloudProcessInstance> startCreatedProcess(
+        @PathVariable(value = "processInstanceId") String processInstanceId,
+        @RequestBody(required = false) StartProcessPayload payload
+    );
 
-    @GetMapping(value = "/v1/process-instances/{processInstanceId}/model",
-        produces = "image/svg+xml")
+    @Deprecated
+    @PostMapping(value = "/v1/process-instances/create", consumes = APPLICATION_JSON_VALUE)
+    EntityModel<CloudProcessInstance> createProcessInstance(@RequestBody CreateProcessInstancePayload cmd);
+
+    @GetMapping(value = "/v1/process-instances/{processInstanceId}")
+    EntityModel<CloudProcessInstance> getProcessInstanceById(
+        @PathVariable(value = "processInstanceId") String processInstanceId
+    );
+
+    @GetMapping(value = "/v1/process-instances/{processInstanceId}/model", produces = "image/svg+xml")
     @ResponseBody
     String getProcessDiagram(@PathVariable(value = "processInstanceId") String processInstanceId);
 
@@ -69,15 +81,20 @@ public interface ProcessInstanceController {
     EntityModel<CloudProcessInstance> resume(@PathVariable(value = "processInstanceId") String processInstanceId);
 
     @DeleteMapping(value = "/v1/process-instances/{processInstanceId}")
-    EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable(value = "processInstanceId") String processInstanceId);
+    EntityModel<CloudProcessInstance> deleteProcessInstance(
+        @PathVariable(value = "processInstanceId") String processInstanceId
+    );
 
     @PutMapping(value = "/v1/process-instances/{processInstanceId}", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudProcessInstance> updateProcess(@PathVariable(value = "processInstanceId") String processInstanceId,
-        @RequestBody UpdateProcessPayload payload);
+    EntityModel<CloudProcessInstance> updateProcess(
+        @PathVariable(value = "processInstanceId") String processInstanceId,
+        @RequestBody UpdateProcessPayload payload
+    );
 
     @GetMapping(value = "/v1/process-instances/{processInstanceId}/subprocesses")
     @CollectionFormat(feign.CollectionFormat.CSV)
-    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(@PathVariable(value = "processInstanceId") String processInstanceId,
-        Pageable pageable);
-
+    PagedModel<EntityModel<CloudProcessInstance>> subprocesses(
+        @PathVariable(value = "processInstanceId") String processInstanceId,
+        Pageable pageable
+    );
 }

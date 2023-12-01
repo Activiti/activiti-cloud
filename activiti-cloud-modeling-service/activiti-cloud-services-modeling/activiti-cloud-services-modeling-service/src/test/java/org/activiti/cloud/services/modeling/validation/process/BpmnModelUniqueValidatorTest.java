@@ -65,23 +65,23 @@ public class BpmnModelUniqueValidatorTest {
         Model modelWithProcessSharingTheSameId = buildProcessModel(bpmnModelSharingTheSameId);
         Model currentModelProcess = buildProcessModel(bpmnModelUnderValidation);
 
-        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, modelWithProcessSharingTheSameId));
-        given(processModelContentConverter.convertToBpmnModel(modelWithProcessSharingTheSameId.getContent())).willReturn(bpmnModelSharingTheSameId);
-        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent())).willReturn(bpmnModelUnderValidation);
+        given(validationContext.getAvailableModels(any()))
+            .willReturn(List.of(currentModelProcess, modelWithProcessSharingTheSameId));
+        given(processModelContentConverter.convertToBpmnModel(modelWithProcessSharingTheSameId.getContent()))
+            .willReturn(bpmnModelSharingTheSameId);
+        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent()))
+            .willReturn(bpmnModelUnderValidation);
 
-        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelUnderValidation, validationContext);
+        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(
+            bpmnModelUnderValidation,
+            validationContext
+        );
 
         List<ModelValidationError> errorsList = errors.collect(Collectors.toList());
 
         assertThat(errorsList)
-            .extracting(
-                ModelValidationError::getProblem,
-                ModelValidationError::getReferenceId)
-            .contains(
-                tuple(
-                    BpmnModelUniqueIdValidator.DUPLICATED_PROCESS_ID_ERROR,
-                    "Process_sharing_the_same_id"
-                ));
+            .extracting(ModelValidationError::getProblem, ModelValidationError::getReferenceId)
+            .contains(tuple(BpmnModelUniqueIdValidator.DUPLICATED_PROCESS_ID_ERROR, "Process_sharing_the_same_id"));
     }
 
     private Model buildProcessModel(BpmnModel model) {
@@ -98,11 +98,17 @@ public class BpmnModelUniqueValidatorTest {
         Model modelWithProcessWithDifferentId = buildProcessModel(bpmnModelWithDifferentProcessId);
         Model currentModelProcess = buildProcessModel(bpmnModelUnderValidation);
 
-        given(validationContext.getAvailableModels(any())).willReturn(List.of(currentModelProcess, modelWithProcessWithDifferentId));
-        given(processModelContentConverter.convertToBpmnModel(modelWithProcessWithDifferentId.getContent())).willReturn(bpmnModelWithDifferentProcessId);
-        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent())).willReturn(bpmnModelUnderValidation);
+        given(validationContext.getAvailableModels(any()))
+            .willReturn(List.of(currentModelProcess, modelWithProcessWithDifferentId));
+        given(processModelContentConverter.convertToBpmnModel(modelWithProcessWithDifferentId.getContent()))
+            .willReturn(bpmnModelWithDifferentProcessId);
+        given(processModelContentConverter.convertToBpmnModel(currentModelProcess.getContent()))
+            .willReturn(bpmnModelUnderValidation);
 
-        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(bpmnModelUnderValidation, validationContext);
+        Stream<ModelValidationError> errors = bpmnModelUniqueIdValidator.validate(
+            bpmnModelUnderValidation,
+            validationContext
+        );
         List<ModelValidationError> errorsList = errors.collect(Collectors.toList());
         assertThat(errorsList).isEmpty();
     }
@@ -115,5 +121,4 @@ public class BpmnModelUniqueValidatorTest {
         bpmnModel.addProcess(process);
         return bpmnModel;
     }
-
 }

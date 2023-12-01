@@ -15,6 +15,15 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.CONTENT_TYPE_HEADER;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.awaitility.Awaitility.await;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -24,23 +33,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.config.BindingProperties;
-
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate.CONTENT_TYPE_HEADER;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.awaitility.Awaitility.await;
+import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
     @Autowired
@@ -58,17 +59,22 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
 
         //then
         assertThat(bindings)
-            .extractingFromEntries(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
-                entry.getValue()
-                    .getDestination()))
-            .contains(entry("mealsConnector", "mealsConnector"),
-                      entry("rest.GET", "rest.GET"),
-                      entry("perfromBusinessTask", "perfromBusinessTask"),
-                      entry("anyImplWithoutHandler", "anyImplWithoutHandler"),
-                      entry("payment", "payment"),
-                      entry("Constants Connector.constantsActionName", "Constants Connector.constantsActionName"),
-                      entry("Variable Mapping Connector.variableMappingActionName", "Variable Mapping Connector.variableMappingActionName"),
-                      entry("miCloudConnector", "miCloudConnector"));
+            .extractingFromEntries(entry ->
+                new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().getDestination())
+            )
+            .contains(
+                entry("mealsConnector", "mealsConnector"),
+                entry("rest.GET", "rest.GET"),
+                entry("perfromBusinessTask", "perfromBusinessTask"),
+                entry("anyImplWithoutHandler", "anyImplWithoutHandler"),
+                entry("payment", "payment"),
+                entry("Constants Connector.constantsActionName", "Constants Connector.constantsActionName"),
+                entry(
+                    "Variable Mapping Connector.variableMappingActionName",
+                    "Variable Mapping Connector.variableMappingActionName"
+                ),
+                entry("miCloudConnector", "miCloudConnector")
+            );
     }
 
     @Test
@@ -76,41 +82,44 @@ public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
         //given
         Map<String, Object> variables = new HashMap<>();
         variables.put("firstName", "John");
-        ProcessInstance procInst = runtimeService.startProcessInstanceByKey("MQServiceTaskErrorRecoverProcess",
-                                                                            "businessKey",
-                                                                            variables);
+        ProcessInstance procInst = runtimeService.startProcessInstanceByKey(
+            "MQServiceTaskErrorRecoverProcess",
+            "businessKey",
+            variables
+        );
         assertThat(procInst).isNotNull();
-        await("the service task should fail the execution")
-            .untilTrue(canFailConnector.errorSent());
+        await("the service task should fail the execution").untilTrue(canFailConnector.errorSent());
 
-        assertThat(taskService.createTaskQuery()
-                              .processInstanceId(procInst.getProcessInstanceId())
-                              .list()).isEmpty();
+        assertThat(taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list()).isEmpty();
         //when
-        IntegrationContext integrationContext = canFailConnector.getLatestReceivedIntegrationRequest()
-                                                                .getIntegrationContext();
+        IntegrationContext integrationContext = canFailConnector
+            .getLatestReceivedIntegrationRequest()
+            .getIntegrationContext();
         canFailConnector.setShouldSendError(false);
         replayServiceTask(integrationContext);
 
         //then
         await("the execution should arrive in the human tasks which follows the service task")
             .untilAsserted(() -> {
-                    List<Task> tasks = taskService.createTaskQuery().processInstanceId(procInst.getProcessInstanceId()).list();
-                    assertThat(tasks).isNotNull();
-                    assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
-                }
-            );
+                List<Task> tasks = taskService
+                    .createTaskQuery()
+                    .processInstanceId(procInst.getProcessInstanceId())
+                    .list();
+                assertThat(tasks).isNotNull();
+                assertThat(tasks).extracting(Task::getName).containsExactly("Schedule meeting after service");
+            });
     }
 
     private void replayServiceTask(IntegrationContext integrationContext) {
         identityTokenProducer.withTestUser("testadmin");
-        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange("/admin/v1/executions/{executionId}/replay/service-task",
+        final ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            "/admin/v1/executions/{executionId}/replay/service-task",
             HttpMethod.POST,
             new HttpEntity<>(new ReplayServiceTaskRequest(integrationContext.getClientId()), CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<>() {
-            }, integrationContext.getExecutionId());
+            new ParameterizedTypeReference<>() {},
+            integrationContext.getExecutionId()
+        );
         identityTokenProducer.withTestUser(keycloakTestUser);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
-
 }

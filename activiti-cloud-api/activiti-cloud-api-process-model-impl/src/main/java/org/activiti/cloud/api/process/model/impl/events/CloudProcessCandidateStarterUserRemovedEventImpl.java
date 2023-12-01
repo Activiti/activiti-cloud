@@ -20,7 +20,8 @@ import org.activiti.api.process.model.events.ProcessCandidateStarterUserEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterUserRemovedEvent;
 
-public class CloudProcessCandidateStarterUserRemovedEventImpl extends CloudRuntimeEventImpl<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>
+public class CloudProcessCandidateStarterUserRemovedEventImpl
+    extends CloudRuntimeEventImpl<ProcessCandidateStarterUser, ProcessCandidateStarterUserEvent.ProcessCandidateStarterUserEvents>
     implements CloudProcessCandidateStarterUserRemovedEvent {
 
     public CloudProcessCandidateStarterUserRemovedEventImpl() {}
@@ -29,12 +30,12 @@ public class CloudProcessCandidateStarterUserRemovedEventImpl extends CloudRunti
         super(processCandidateStarterUser);
     }
 
-    public CloudProcessCandidateStarterUserRemovedEventImpl(String id,
-                                                            Long timestamp,
-                                                            ProcessCandidateStarterUser processCandidateStarterUser) {
-        super(id,
-              timestamp,
-              processCandidateStarterUser);
+    public CloudProcessCandidateStarterUserRemovedEventImpl(
+        String id,
+        Long timestamp,
+        ProcessCandidateStarterUser processCandidateStarterUser
+    ) {
+        super(id, timestamp, processCandidateStarterUser);
         setEntityId(processCandidateStarterUser.getUserId());
     }
 

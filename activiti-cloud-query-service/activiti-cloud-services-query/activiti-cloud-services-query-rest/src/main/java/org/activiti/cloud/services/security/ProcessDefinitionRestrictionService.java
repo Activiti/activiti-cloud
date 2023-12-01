@@ -27,20 +27,24 @@ public class ProcessDefinitionRestrictionService {
 
     private ProcessDefinitionFilter processDefinitionFilter;
 
-    public ProcessDefinitionRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                               ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
-                                               ProcessDefinitionFilter processDefinitionFilter) {
+    public ProcessDefinitionRestrictionService(
+        SecurityPoliciesManager securityPoliciesManager,
+        ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+        ProcessDefinitionFilter processDefinitionFilter
+    ) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.restrictionBuilder = restrictionBuilder;
         this.processDefinitionFilter = processDefinitionFilter;
     }
 
-    public Predicate restrictProcessDefinitionQuery(Predicate predicate,
-                                                    SecurityPolicyAccess securityPolicyAccess) {
+    public Predicate restrictProcessDefinitionQuery(Predicate predicate, SecurityPolicyAccess securityPolicyAccess) {
         if (!securityPoliciesManager.arePoliciesDefined()) {
             return predicate;
         }
-        return restrictionBuilder.applyProcessDefinitionKeyFilter(predicate,
-                                                                  securityPolicyAccess, processDefinitionFilter);
+        return restrictionBuilder.applyProcessDefinitionKeyFilter(
+            predicate,
+            securityPolicyAccess,
+            processDefinitionFilter
+        );
     }
 }

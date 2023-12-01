@@ -16,56 +16,48 @@
 package org.activiti.cloud.services.modeling.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.process.Extensions;
-
-import java.util.Map;
-
-import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.services.modeling.converter.ConnectorModelContent;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Json converter configuration
  */
-@Configuration
+@AutoConfiguration
 public class JsonConverterConfiguration {
 
     @Bean
     public JsonConverter<Project> projectJsonConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(Project.class,
-                                   objectMapper);
+        return new JsonConverter<>(Project.class, objectMapper);
     }
 
     @Bean
     public JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(ProjectDescriptor.class,
-                objectMapper);
+        return new JsonConverter<>(ProjectDescriptor.class, objectMapper);
     }
 
     @Bean
     public JsonConverter<Model> modelJsonConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(Model.class,
-                                   objectMapper);
+        return new JsonConverter<>(Model.class, objectMapper);
     }
 
     @Bean
     public JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(ConnectorModelContent.class,
-                                   objectMapper);
+        return new JsonConverter<>(ConnectorModelContent.class, objectMapper);
     }
 
     @Bean
     public JsonConverter<Map> jsonMetadataConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(Map.class,
-                                   objectMapper);
+        return new JsonConverter<>(Map.class, objectMapper);
     }
 
     @Bean
     public JsonConverter<Extensions> jsonExtensionsConverter(ObjectMapper objectMapper) {
-        return new JsonConverter<>(Extensions.class,
-                                   objectMapper);
+        return new JsonConverter<>(Extensions.class, objectMapper);
     }
 }

@@ -15,7 +15,19 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityManagerFactory;
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -47,25 +59,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessInstanceController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -113,49 +110,50 @@ public class ProcessInstanceEntityControllerIT {
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
-                                                                              eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                                                                                                             PageRequest.of(1,
-                                                                                                                            10),
-                                                                                                             11));
-
+        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
+            .willReturn(restrictedPredicate);
+        given(processInstanceRepository.findAll(eq(restrictedPredicate), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-instances?skipCount=10&maxItems=10")
-                                .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-instances?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         Predicate restrictedPredicate = mock(Predicate.class);
-        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(),
-                                                                              eq(SecurityPolicyAccess.READ))).willReturn(restrictedPredicate);
-        given(processInstanceRepository.findAll(eq(restrictedPredicate),
-                                                any(Pageable.class))).willReturn(new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()),
-                                                                                                             PageRequest.of(1,
-                                                                                                                            10),
-                                                                                                             11));
-
+        given(processInstanceRestrictionService.restrictProcessInstanceQuery(any(), eq(SecurityPolicyAccess.READ)))
+            .willReturn(restrictedPredicate);
+        given(processInstanceRepository.findAll(eq(restrictedPredicate), any(Pageable.class)))
+            .willReturn(
+                new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
+            );
 
         //when
-        mockMvc.perform(get("/v1/process-instances?page=1&size=10")
-                                .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-instances?page=1&size=10").accept(MediaTypes.HAL_JSON_VALUE))
+            //then
+            .andExpect(status().isOk());
     }
 
-
     private ProcessInstanceEntity buildDefaultProcessInstance() {
-        return new ProcessInstanceEntity("My-app", "My-app", "1", null, null,
-                                         UUID.randomUUID().toString(),
-                                         UUID.randomUUID().toString(),
-                                         ProcessInstance.ProcessInstanceStatus.RUNNING,
-                                         new Date());
+        return new ProcessInstanceEntity(
+            "My-app",
+            "My-app",
+            "1",
+            null,
+            null,
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            ProcessInstance.ProcessInstanceStatus.RUNNING,
+            new Date()
+        );
     }
 
     @Test
@@ -163,16 +161,23 @@ public class ProcessInstanceEntityControllerIT {
         //given
         ProcessInstanceEntity processInstanceEntity = buildDefaultProcessInstance();
         processInstanceEntity.setInitiator("testuser");
-        given(entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any())).willReturn(processInstanceEntity);
-        given(securityPoliciesApplicationService.canRead(processInstanceEntity.getProcessDefinitionKey(), processInstanceEntity.getServiceName()))
-                .willReturn(true);
+        given(entityFinder.findById(eq(processInstanceRepository), eq(processInstanceEntity.getId()), any()))
+            .willReturn(processInstanceEntity);
+        given(
+            securityPoliciesApplicationService.canRead(
+                processInstanceEntity.getProcessDefinitionKey(),
+                processInstanceEntity.getServiceName()
+            )
+        )
+            .willReturn(true);
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
 
         //when
-        this.mockMvc.perform(get("/v1/process-instances/{processInstanceId}",
-                                 processInstanceEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/v1/process-instances/{processInstanceId}", processInstanceEntity.getId())
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
-
 }

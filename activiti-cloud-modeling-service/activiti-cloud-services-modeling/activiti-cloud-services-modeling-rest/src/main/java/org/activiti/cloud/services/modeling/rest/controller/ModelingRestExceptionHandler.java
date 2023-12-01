@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import jakarta.persistence.PersistenceException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.SQLException;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.ModelConversionException;
@@ -32,16 +40,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.persistence.PersistenceException;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.sql.SQLException;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
-
 /**
  * Handler for REST exceptions
  */
@@ -55,55 +53,45 @@ public class ModelingRestExceptionHandler {
 
     public static final String DATA_ACCESS_EXCEPTION_MESSAGE = "Data access error";
 
-    @ExceptionHandler({
+    @ExceptionHandler(
+        {
             UnknownModelTypeException.class,
             SyntacticModelValidationException.class,
             SemanticModelValidationException.class,
             ImportProjectException.class,
             ImportModelException.class,
-            ModelConversionException.class
-    })
-    public void handleBadRequestException(Exception ex,
-                                          HttpServletResponse response) throws IOException {
-        logger.error(ex.getMessage(),
-                     ex);
-        response.sendError(BAD_REQUEST.value(),
-                           ex.getMessage());
+            ModelConversionException.class,
+        }
+    )
+    public void handleBadRequestException(Exception ex, HttpServletResponse response) throws IOException {
+        logger.error(ex.getMessage(), ex);
+        response.sendError(BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public void handleDataIntegrityViolationException(DataIntegrityViolationException ex,
-                                                      HttpServletResponse response) throws IOException {
-        logger.error(DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE,
-                     ex);
-        response.sendError(CONFLICT.value(),
-                           DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE);
+    public void handleDataIntegrityViolationException(DataIntegrityViolationException ex, HttpServletResponse response)
+        throws IOException {
+        logger.error(DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE, ex);
+        response.sendError(CONFLICT.value(), DATA_INTEGRITY_VIOLATION_EXCEPTION_MESSAGE);
     }
 
     @ExceptionHandler(ModelNameConflictException.class)
-    public void handleModelNameConflictException(ModelNameConflictException ex,
-        HttpServletResponse response) throws IOException {
+    public void handleModelNameConflictException(ModelNameConflictException ex, HttpServletResponse response)
+        throws IOException {
         logger.error(ex.getMessage(), ex);
         response.sendError(CONFLICT.value(), ex.getMessage());
     }
 
     @ExceptionHandler(ModelScopeIntegrityException.class)
-    public void handleModelScopeIntegrityException(ModelScopeIntegrityException ex,
-        HttpServletResponse response) throws IOException {
+    public void handleModelScopeIntegrityException(ModelScopeIntegrityException ex, HttpServletResponse response)
+        throws IOException {
         logger.error(ex.getMessage(), ex);
         response.sendError(CONFLICT.value(), ex.getMessage());
     }
 
-    @ExceptionHandler({
-            DataAccessException.class,
-            PersistenceException.class,
-            SQLException.class
-    })
-    public void handleDataAccessException(Exception ex,
-                                          HttpServletResponse response) throws IOException {
-        logger.error(DATA_ACCESS_EXCEPTION_MESSAGE,
-                     ex);
-        response.sendError(INTERNAL_SERVER_ERROR.value(),
-                           DATA_ACCESS_EXCEPTION_MESSAGE);
+    @ExceptionHandler({ DataAccessException.class, PersistenceException.class, SQLException.class })
+    public void handleDataAccessException(Exception ex, HttpServletResponse response) throws IOException {
+        logger.error(DATA_ACCESS_EXCEPTION_MESSAGE, ex);
+        response.sendError(INTERNAL_SERVER_ERROR.value(), DATA_ACCESS_EXCEPTION_MESSAGE);
     }
 }

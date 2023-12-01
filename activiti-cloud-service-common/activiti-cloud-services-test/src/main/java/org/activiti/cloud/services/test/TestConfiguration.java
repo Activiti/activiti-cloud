@@ -26,13 +26,13 @@ import org.activiti.cloud.services.test.identity.interceptor.IdentityTokenInterc
 import org.activiti.cloud.services.test.identity.keycloak.KeycloakTokenProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
@@ -40,7 +40,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore(value = RestTemplateAutoConfiguration.class)
 public class TestConfiguration {
 
@@ -52,24 +52,31 @@ public class TestConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public IdentityTokenProducer keycloakTokenProducer(@Value("${keycloak.auth-server-url:}") String authServerUrl,
-                                                       @Value("${keycloak.realm:}") String realm) {
+    public IdentityTokenProducer keycloakTokenProducer(
+        @Value("${keycloak.auth-server-url:}") String authServerUrl,
+        @Value("${keycloak.realm:}") String realm
+    ) {
         return new KeycloakTokenProducer(authServerUrl, realm);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(value = "identity.test.token-interceptor.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(
+        value = "identity.test.token-interceptor.enabled",
+        havingValue = "true",
+        matchIfMissing = true
+    )
     public IdentityTokenInterceptor identityTokenInterceptor(IdentityTokenProducer keycloakTokenProducer) {
         return new IdentityTokenInterceptor(keycloakTokenProducer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RestTemplateBuilder restTemplateBuilder(@Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor) {
+    public RestTemplateBuilder restTemplateBuilder(
+        @Autowired(required = false) IdentityTokenInterceptor identityTokenInterceptor
+    ) {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                         false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         mapper.registerModule(new Jackson2HalModule());
 
@@ -80,19 +87,21 @@ public class TestConfiguration {
         }
 
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        jackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON));
+        jackson2HttpMessageConverter.setSupportedMediaTypes(
+            Arrays.asList(MediaTypes.HAL_JSON, MediaType.APPLICATION_JSON)
+        );
         jackson2HttpMessageConverter.setObjectMapper(mapper);
 
-        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().additionalMessageConverters(
-            jackson2HttpMessageConverter,
-            new StringHttpMessageConverter(StandardCharsets.UTF_8),
-            new ByteArrayHttpMessageConverter());
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
+            .additionalMessageConverters(
+                jackson2HttpMessageConverter,
+                new StringHttpMessageConverter(StandardCharsets.UTF_8),
+                new ByteArrayHttpMessageConverter()
+            );
         if (identityTokenInterceptor != null) {
-            return restTemplateBuilder
-                .additionalInterceptors(identityTokenInterceptor);
+            return restTemplateBuilder.additionalInterceptors(identityTokenInterceptor);
         } else {
             return restTemplateBuilder;
         }
     }
-
 }

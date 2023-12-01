@@ -26,14 +26,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
 
-public class BpmnMessageSentEventMessageProducer implements BPMNElementEventListener<BPMNMessageSentEvent>  {
+public class BpmnMessageSentEventMessageProducer implements BPMNElementEventListener<BPMNMessageSentEvent> {
+
     private static final Logger logger = LoggerFactory.getLogger(BpmnMessageSentEventMessageProducer.class);
 
     private final BpmnMessageEventMessageBuilderFactory messageBuilderFactory;
     private final MessageEventsDispatcher messageEventsDispatcher;
 
-    public BpmnMessageSentEventMessageProducer(@NonNull MessageEventsDispatcher messageEventsDispatcher,
-                                               @NonNull BpmnMessageEventMessageBuilderFactory messageBuilderFactory) {
+    public BpmnMessageSentEventMessageProducer(
+        @NonNull MessageEventsDispatcher messageEventsDispatcher,
+        @NonNull BpmnMessageEventMessageBuilderFactory messageBuilderFactory
+    ) {
         this.messageEventsDispatcher = messageEventsDispatcher;
         this.messageBuilderFactory = messageBuilderFactory;
     }
@@ -42,16 +45,12 @@ public class BpmnMessageSentEventMessageProducer implements BPMNElementEventList
     public void onEvent(@NonNull BPMNMessageSentEvent event) {
         logger.debug("onEvent: {}", event);
 
-        Message<MessageEventPayload> message = messageBuilderFactory.create(event.getEntity())
-                                                                    .withPayload(event.getEntity()
-                                                                                      .getMessagePayload())
-                                                                    .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE,
-                                                                               event.getEventType()
-                                                                                    .name())
-                                                                    .build();
+        Message<MessageEventPayload> message = messageBuilderFactory
+            .create(event.getEntity())
+            .withPayload(event.getEntity().getMessagePayload())
+            .setHeader(MessageEventHeaders.MESSAGE_EVENT_TYPE, event.getEventType().name())
+            .build();
 
         messageEventsDispatcher.dispatch(message);
-
     }
-
 }

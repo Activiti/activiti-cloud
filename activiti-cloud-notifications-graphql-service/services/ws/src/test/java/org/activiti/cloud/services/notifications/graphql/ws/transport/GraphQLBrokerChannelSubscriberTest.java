@@ -22,14 +22,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import graphql.ExecutionResultImpl;
+import jakarta.websocket.Session;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.websocket.Session;
-
-import graphql.ExecutionResultImpl;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,7 +102,6 @@ public class GraphQLBrokerChannelSubscriberTest {
         verify(messageChannel).send(messageCaptor.capture());
 
         assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.DATA);
-
     }
 
     @Test
@@ -135,7 +132,6 @@ public class GraphQLBrokerChannelSubscriberTest {
         verify(subscription).cancel();
 
         assertThat(messageCaptor.getValue().getPayload().getType()).isEqualTo(GraphQLMessageType.COMPLETE);
-
     }
 
     private Message<GraphQLMessage> startMessage(String operationId) {
@@ -145,9 +141,7 @@ public class GraphQLBrokerChannelSubscriberTest {
         json.put("query", "{}");
         json.put("variables", "{}");
 
-        GraphQLMessage payload = new GraphQLMessage(operationId,
-                                                    GraphQLMessageType.START,
-                                                    json);
+        GraphQLMessage payload = new GraphQLMessage(operationId, GraphQLMessageType.START, json);
 
         return MessageBuilder.createMessage(payload, headerAccessor.getMessageHeaders());
     }
@@ -156,10 +150,7 @@ public class GraphQLBrokerChannelSubscriberTest {
         Session nativeSession = mock(Session.class);
         when(nativeSession.getUserPrincipal()).thenReturn(mock(Principal.class));
 
-        StandardWebSocketSession wsSession = new StandardWebSocketSession(null,
-                                                                          null,
-                                                                          null,
-                                                                          null);
+        StandardWebSocketSession wsSession = new StandardWebSocketSession(null, null, null, null);
         wsSession.initializeNativeSession(nativeSession);
 
         return wsSession;
@@ -175,5 +166,4 @@ public class GraphQLBrokerChannelSubscriberTest {
 
         return headerAccessor;
     }
-
 }

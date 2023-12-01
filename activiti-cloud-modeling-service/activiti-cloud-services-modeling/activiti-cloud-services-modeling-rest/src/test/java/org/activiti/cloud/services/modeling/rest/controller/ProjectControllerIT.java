@@ -28,6 +28,7 @@ import static org.activiti.cloud.services.modeling.mock.MockFactory.processModel
 import static org.activiti.cloud.services.modeling.mock.MockFactory.processVariables;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDescription;
+import static org.activiti.cloud.services.modeling.mock.MockFactory.projectWithDisplayName;
 import static org.activiti.cloud.services.test.asserts.AssertResponseContent.assertThatResponseContent;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -47,13 +48,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ProcessModelType;
@@ -67,6 +69,7 @@ import org.activiti.cloud.services.modeling.entity.ProjectEntity;
 import org.activiti.cloud.services.modeling.jpa.ModelJpaRepository;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +77,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -84,7 +86,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(classes = ModelingRestApplication.class)
 @WebAppConfiguration
-@DirtiesContext
 @WithMockModelerUser
 @Transactional
 public class ProjectControllerIT {
@@ -115,102 +116,107 @@ public class ProjectControllerIT {
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
+    }
+
+    @AfterEach
+    public void cleanUp() {
         modelJpaRepository.deleteAll();
-        ((JpaRepository)projectRepository).deleteAll();
+        ((JpaRepository) projectRepository).deleteAll();
     }
 
     @Test
     public void should_returnExistingProjects_when_gettingProjects() throws Exception {
-
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/v1/projects"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects",
-                                    hasSize(2)))
-                .andExpect(jsonPath("$._embedded.projects[0].name",
-                                    is("project1")))
-                .andExpect(jsonPath("$._embedded.projects[1].name",
-                                    is("project2")));
+        mockMvc
+            .perform(get("/v1/projects"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(2)))
+            .andExpect(jsonPath("$._embedded.projects[0].name", is("project1")))
+            .andExpect(jsonPath("$._embedded.projects[1].name", is("project2")));
     }
 
     @Test
     public void should_returnProjectsMatchingTheExactName_when_gettingProjectsFilteredByName() throws Exception {
-
         projectRepository.createProject(project("project1"));
         projectRepository.createProject(project("project2"));
 
-        mockMvc.perform(get("/v1/projects?name=project1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects",
-                                    hasSize(1)))
-                .andExpect(jsonPath("$._embedded.projects[0].name",
-                                    is("project1")));
+        mockMvc
+            .perform(get("/v1/projects?name=project1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(1)))
+            .andExpect(jsonPath("$._embedded.projects[0].name", is("project1")));
     }
 
     @Test
     public void should_returnProjectsContainingTheName_when_gettingProjectsFilteredByContainingName() throws Exception {
-
         projectRepository.createProject(project("project-main-1"));
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/v1/projects?name=main"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects",
-                                    hasSize(2)))
-                .andExpect(jsonPath("$._embedded.projects[0].name",
-                                    is("project-main-1")))
-                .andExpect(jsonPath("$._embedded.projects[1].name",
-                                    is("project-main-2")));
+        mockMvc
+            .perform(get("/v1/projects?name=main"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(2)))
+            .andExpect(jsonPath("$._embedded.projects[0].name", is("project-main-1")))
+            .andExpect(jsonPath("$._embedded.projects[1].name", is("project-main-2")));
     }
 
     @Test
-    public void should_returnProjectsContainingTheName_when_gettingProjectsFilteredByInsensitiveContainingName() throws Exception {
-
+    public void should_returnProjectsContainingTheName_when_gettingProjectsFilteredByInsensitiveContainingName()
+        throws Exception {
         projectRepository.createProject(project("project-main-1"));
         projectRepository.createProject(project("project-main-2"));
         projectRepository.createProject(project("project-secondary-2"));
 
-        mockMvc.perform(get("/v1/projects?name=MAIN"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.projects",
-                        hasSize(2)))
-                .andExpect(jsonPath("$._embedded.projects[0].name",
-                        is("project-main-1")))
-                .andExpect(jsonPath("$._embedded.projects[1].name",
-                        is("project-main-2")));
+        mockMvc
+            .perform(get("/v1/projects?name=MAIN"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded.projects", hasSize(2)))
+            .andExpect(jsonPath("$._embedded.projects[0].name", is("project-main-1")))
+            .andExpect(jsonPath("$._embedded.projects[1].name", is("project-main-2")));
     }
 
     @Test
     public void should_returnProject_when_gettingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(get("/v1/projects/{projectId}",
-                            project.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name",
-                                    is("existing-project")));
+        mockMvc
+            .perform(get("/v1/projects/{projectId}", project.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("existing-project")));
     }
 
     @Test
     public void should_returnNotFound_when_gettingNotExistingProject() throws Exception {
-        mockMvc.perform(get("/v1/projects/{projectId}", "wrongId"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/v1/projects/{projectId}", "wrongId")).andExpect(status().isNotFound());
     }
 
     @Test
     public void should_returnStatusCreatedAndProjectDetails_when_creatingProject() throws Exception {
-        mockMvc.perform(post("/v1/projects")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(projectWithDescription("new-project",
-                                                                                          "Project description"))))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                                    is("new-project")))
-                .andExpect(jsonPath("$.description",
-                                    is("Project description")));
+        mockMvc
+            .perform(
+                post("/v1/projects")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(projectWithDescription("new-project", "Project description")))
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name", is("new-project")))
+            .andExpect(jsonPath("$.description", is("Project description")));
+    }
+
+    @Test
+    public void should_returnStatusCreatedAndProjectDisplayName_when_creatingProject() throws Exception {
+        mockMvc
+            .perform(
+                post("/v1/projects")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(projectWithDisplayName("new-project", "Project description")))
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name", is("new-project")))
+            .andExpect(jsonPath("$.displayName", is("Project description")));
     }
 
     @Test
@@ -218,28 +224,32 @@ public class ProjectControllerIT {
     public void should_throwConflictException_when_creatingProjectExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
 
-        mockMvc.perform(post("/v1/projects")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project("existing-project"))))
-                .andExpect(status().isConflict());
+        mockMvc
+            .perform(
+                post("/v1/projects")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("existing-project")))
+            )
+            .andExpect(status().isConflict());
     }
 
     @Test
     public void should_returnStatusOk_when_updatingExistingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project("updated-project-name"))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name",
-                                    is("updated-project-name")));
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("updated-project-name")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name", is("updated-project-name")));
 
         assertThat((Optional<Project>) projectRepository.findProjectById(project.getId()))
-                .hasValueSatisfying(updatedProject -> {
-                    assertThat(updatedProject.getName()).isEqualTo("updated-project-name");
-                });
+            .hasValueSatisfying(updatedProject -> {
+                assertThat(updatedProject.getName()).isEqualTo("updated-project-name");
+            });
     }
 
     @Test
@@ -248,65 +258,72 @@ public class ProjectControllerIT {
         projectRepository.createProject(project("existing-project"));
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project("existing-project"))))
-                .andExpect(status().isConflict());
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("existing-project")))
+            )
+            .andExpect(status().isConflict());
     }
 
     @Test
     public void should_returnStatusOk_when_updatingProjectNoName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(projectWithDescription(null,
-                                                                                          "New Description"))))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(projectWithDescription(null, "New Description")))
+            )
+            .andExpect(status().isOk());
     }
 
     @Test
     public void should_throwBadRequestException_when_updatingProjectEmptyName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project(""))))
-                .andExpect(status().isBadRequest());
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("")))
+            )
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void should_throwBadRequestException_when_updatingProjectInvalidName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project("_1-invalid-name"))))
-                .andExpect(status().isBadRequest());
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("_1-invalid-name")))
+            )
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void should_throwBadRequestException_when_updatingProjectLongName() throws Exception {
         Project project = projectRepository.createProject(project("project-to-update"));
 
-        mockMvc.perform(put("/v1/projects/{projectId}",
-                            project.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890"))))
-                .andExpect(status().isBadRequest());
+        mockMvc
+            .perform(
+                put("/v1/projects/{projectId}", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(project("too-long-name-1234567890-1234567890")))
+            )
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void should_returnStatusNoContent_when_deletingProject() throws Exception {
         Project project = projectRepository.createProject(project("project-to-delete"));
 
-        mockMvc.perform(delete("/v1/projects/{projectId}",
-                               project.getId()))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/v1/projects/{projectId}", project.getId())).andExpect(status().isNoContent());
 
         assertThat(projectRepository.findProjectById(project.getId())).isEmpty();
     }
@@ -315,619 +332,738 @@ public class ProjectControllerIT {
     public void should_returnZipFileWithProjectModels_when_exportingProject() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
 
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("Process_RankMovieId",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("Process_RankMovieId", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
 
+        Map<String, Extensions> extensionsMap = Collections.singletonMap(
+            "Process_RankMovieId",
+            extensions(
+                "Task_1spvopd",
+                processVariables("movieName", "movieDescription"),
+                inputsMappings("movieName"),
+                outputsMappings("movieDescription")
+            )
+        );
 
-        Map<String, Extensions> extensionsMap = Collections.singletonMap("Process_RankMovieId",
-            extensions("Task_1spvopd",
-                                    processVariables("movieName",
-                                        "movieDescription"),
-                                    inputsMappings("movieName"),
-                                    outputsMappings("movieDescription")));
+        modelRepository.updateModel(processModel, processModelWithExtensions("Process_RankMovieId", extensionsMap));
 
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId", extensionsMap));
-
-       MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/export",
-                    project.getId()))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/export", project.getId()))
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatResponseContent(response)
-                .isFile()
-                .isZip()
-                .hasName("project-with-models.zip")
-                .hasEntries(
-                        "project-with-models.json",
-                        "processes/",
-                        "processes/Process_RankMovieId.bpmn20.xml",
-                        "processes/Process_RankMovieId-extensions.json",
-                        "connectors/",
-                        "connectors/movies.json")
-                .hasJsonContentSatisfying("project-with-models.json",
-                                          jsonContent -> jsonContent
-                                                  .node("name").isStringEqualTo("project-with-models"))
-                .hasJsonContentSatisfying("project-with-models.json",
-                        jsonContent -> jsonContent
-                                .node("users")
-                                .isArray()
-                                .ofLength(2)
-                                .thatContains("userOne")
-                                .thatContains("userTwo"))
-                .hasJsonContentSatisfying("project-with-models.json",
-                        jsonContent -> jsonContent
-                                .node("groups")
-                                .isArray()
-                                .ofLength(2)
-                                .thatContains("hr")
-                                .thatContains("testgroup"))
-                .hasJsonContentSatisfying("processes/Process_RankMovieId-extensions.json",
-                                          jsonContent -> jsonContent
-                                                  .node("name").isStringEqualTo("Process_RankMovieId")
-                                                  .node("type").isStringEqualTo("PROCESS")
-                                                  .node("extensions.Process_RankMovieId.properties").matches(allOf(hasKey("movieName"),
-                                                                                               hasKey("movieDescription")))
-                                                  .node("extensions.Process_RankMovieId.mappings").matches(
-                                                          hasEntry(equalTo("Task_1spvopd"),
-                                                                   allOf(hasEntry(equalTo("inputs"),
-                                                                                  hasKey("movieName")),
-                                                                         hasEntry(equalTo("outputs"),
-                                                                                  hasKey("movieDescription")))))
-
-                );
+            .isFile()
+            .isZip()
+            .hasName("project-with-models.zip")
+            .hasEntries(
+                "project-with-models.json",
+                "processes/",
+                "processes/Process_RankMovieId.bpmn20.xml",
+                "processes/Process_RankMovieId-extensions.json",
+                "connectors/",
+                "connectors/movies.json"
+            )
+            .hasJsonContentSatisfying(
+                "project-with-models.json",
+                jsonContent -> jsonContent.node("name").isStringEqualTo("project-with-models")
+            )
+            .hasJsonContentSatisfying(
+                "project-with-models.json",
+                jsonContent ->
+                    jsonContent.node("users").isArray().ofLength(2).thatContains("userOne").thatContains("userTwo")
+            )
+            .hasJsonContentSatisfying(
+                "project-with-models.json",
+                jsonContent ->
+                    jsonContent.node("groups").isArray().ofLength(2).thatContains("hr").thatContains("testgroup")
+            )
+            .hasJsonContentSatisfying(
+                "processes/Process_RankMovieId-extensions.json",
+                jsonContent ->
+                    jsonContent
+                        .node("name")
+                        .isStringEqualTo("Process_RankMovieId")
+                        .node("type")
+                        .isStringEqualTo("PROCESS")
+                        .node("extensions.Process_RankMovieId.properties")
+                        .matches(allOf(hasKey("movieName"), hasKey("movieDescription")))
+                        .node("extensions.Process_RankMovieId.mappings")
+                        .matches(
+                            hasEntry(
+                                equalTo("Task_1spvopd"),
+                                allOf(
+                                    hasEntry(equalTo("inputs"), hasKey("movieName")),
+                                    hasEntry(equalTo("outputs"), hasKey("movieDescription"))
+                                )
+                            )
+                        )
+            );
     }
 
     @Test
     public void should_throwBadRequestException_when_validatingProjectWithValidationErrors() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository
-                .createProject(project("project-with-models"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
 
-        modelRepository.createModel(processModelWithContent(project,
-                                                            "process-model",
-                                                            "Invalid process xml"));
+        modelRepository.createModel(processModelWithContent(project, "process-model", "Invalid process xml"));
 
-        List<ModelValidationError> expectedValidationErrors =
-                Arrays.asList(new ModelValidationError(),
-                              new ModelValidationError());
+        List<ModelValidationError> expectedValidationErrors = Arrays.asList(
+            new ModelValidationError(),
+            new ModelValidationError()
+        );
 
-        mockMvc.perform(get("/v1/projects/{projectId}/validate",
-                    project.getId())).andExpect(status().isBadRequest()).andExpect(status().reason("Xml content for the model is not valid."));
-
+        mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason("Xml content for the model is not valid."));
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingEmptyProjectWithValidationErrors() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository
-                .createProject(project("project-without-process"));
+    public void should_throwSemanticModelValidationException_when_validatingEmptyProjectWithValidationErrors()
+        throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-without-process"));
 
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(1)
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription)
-                .containsOnly(tuple("Invalid project",
-                                    "Project must contain at least one process"));
+            .hasSize(1)
+            .extracting(ModelValidationError::getProblem, ModelValidationError::getDescription)
+            .containsOnly(tuple("Invalid project", "Project must contain at least one process"));
     }
 
     @Test
     public void should_returnStatusNoContent_when_ProjectIsValid() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
 
-        modelRepository.createModel(connectorModel(project,
-                "movies",
-                resourceAsByteArray("connector/movies.json")));
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
-        Model processModel = modelService.importSingleModel(project,
-                processModelType,
-                processFileContent("Process_RankMovieId",
-                        resourceAsByteArray("process/RankMovie.bpmn20.xml")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("Process_RankMovieId", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
 
-        Map<String, Extensions> extensionsMap = Collections.singletonMap("Process_RankMovieId",
-            extensions("Task_1spvopd",
-                processVariables("movieName",
-                    "movieDescription"),
+        Map<String, Extensions> extensionsMap = Collections.singletonMap(
+            "Process_RankMovieId",
+            extensions(
+                "Task_1spvopd",
+                processVariables("movieName", "movieDescription"),
                 inputsMappings("movieName"),
-                outputsMappings("movieDescription")));
-        modelRepository.updateModel(processModel,
-                processModelWithExtensions("process-model", extensionsMap));
+                outputsMappings("movieDescription")
+            )
+        );
+        modelRepository.updateModel(processModel, processModelWithExtensions("process-model", extensionsMap));
 
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                        project.getId()))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeShouldReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeShouldReturnErrors()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
-        modelService.importSingleModel(project,
-                                 processModelType,
-                                 processFileContent("process-model",
-                                                    resourceAsByteArray("process/no-assignee.bpmn20.xml")));
+        modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("process-model", resourceAsByteArray("process/no-assignee.bpmn20.xml"))
+        );
 
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(1)
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription,
-                            ModelValidationError::getValidatorSetName)
-                .containsOnly(tuple("No assignee for user task",
-                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
-                                            + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and name: 'x'",
-                                    "BPMN user task assignee validator"));
+            .hasSize(1)
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName
+            )
+            .containsOnly(
+                tuple(
+                    "No assignee for user task",
+                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task " +
+                    "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and name: 'x'",
+                    "BPMN user task assignee validator"
+                )
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeOnTaskInSubProcess() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeOnTaskInSubProcess()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
-        modelService.importSingleModel(project,
-                                 processModelType,
-                                 processFileContent("process-model",
-                                                    resourceAsByteArray("process/no-assignee-subprocess.bpmn20.xml")));
+        modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("process-model", resourceAsByteArray("process/no-assignee-subprocess.bpmn20.xml"))
+        );
 
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription,
-                            ModelValidationError::getValidatorSetName)
-                .containsExactly(tuple("No assignee for user task",
-                                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
-                                            + "with id: 'Task_06l44lk' and name: 'My task'",
-                                    "BPMN user task assignee validator"));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName
+            )
+            .containsExactly(
+                tuple(
+                    "No assignee for user task",
+                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task " +
+                    "with id: 'Task_06l44lk' and name: 'My task'",
+                    "BPMN user task assignee validator"
+                )
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeAndTaskNoNameShouldReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithNoAssigneeAndTaskNoNameShouldReturnErrors()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-models"));
-        modelService.importSingleModel(project,
-                processModelType,
-                processFileContent("process-model",
-                        resourceAsByteArray("process/no-assignee-task-no-name.bpmn20.xml")));
+        modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("process-model", resourceAsByteArray("process/no-assignee-task-no-name.bpmn20.xml"))
+        );
 
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                        project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .hasSize(1)
-                .extracting(ModelValidationError::getProblem,
-                        ModelValidationError::getDescription,
-                        ModelValidationError::getValidatorSetName)
-                .containsOnly(tuple("No assignee for user task",
-                        "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task "
-                                + "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and empty name",
-                        "BPMN user task assignee validator"));
+            .hasSize(1)
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName
+            )
+            .containsOnly(
+                tuple(
+                    "No assignee for user task",
+                    "One of the attributes 'assignee','candidateUsers' or 'candidateGroups' are mandatory on user task " +
+                    "with id: 'sid-2582C722-01AF-413B-B358-4043E6428B77' and empty name",
+                    "BPMN user task assignee validator"
+                )
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidServiceTaskReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_exportingProjectWithInvalidServiceTaskReturnErrors()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-connectors"));
-        modelRepository.createModel(processModelWithContent(project,
-                                                            "Process_InvalidTask",
-                                                            resourceAsByteArray("process/invalid-service-task.bpmn20.xml")));
+        modelRepository.createModel(
+            processModelWithContent(
+                project,
+                "Process_InvalidTask",
+                resourceAsByteArray("process/invalid-service-task.bpmn20.xml")
+            )
+        );
 
-        modelRepository.createModel(connectorModel(project,
-                                                   "invalid-connector-action",
-                                                   resourceAsByteArray("connector/invalid-connector-action.json")));
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        modelRepository.createModel(
+            connectorModel(
+                project,
+                "invalid-connector-action",
+                resourceAsByteArray("connector/invalid-connector-action.json")
+            )
+        );
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription,
-                            ModelValidationError::getValidatorSetName)
-                .contains(tuple("Invalid service implementation",
-                                "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
-                                "BPMN service task validator"));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName
+            )
+            .contains(
+                tuple(
+                    "Invalid service implementation",
+                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                    "BPMN service task validator"
+                )
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithServiceTaskEmptyImplementationReturnErrors() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithServiceTaskEmptyImplementationReturnErrors()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-invalid-task"));
-        modelRepository.createModel(processModelWithContent(project,
-                                                            "invalid-connector-action",
-                                                            resourceAsByteArray("process/no-implementation-service-task.bpmn20.xml")));
+        modelRepository.createModel(
+            processModelWithContent(
+                project,
+                "invalid-connector-action",
+                resourceAsByteArray("process/no-implementation-service-task.bpmn20.xml")
+            )
+        );
 
-        modelRepository.createModel(connectorModel(project,
-                                                   "invalid-connector-action",
-                                                   resourceAsByteArray("connector/invalid-connector-action.json")));
-        MvcResult response = mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
-                .andExpect(status().isBadRequest())
-                .andReturn();
+        modelRepository.createModel(
+            connectorModel(
+                project,
+                "invalid-connector-action",
+                resourceAsByteArray("connector/invalid-connector-action.json")
+            )
+        );
+        MvcResult response = mockMvc
+            .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+            .andExpect(status().isBadRequest())
+            .andReturn();
 
         assertThat(((SemanticModelValidationException) response.getResolvedException()).getValidationErrors())
-                .extracting(ModelValidationError::getProblem,
-                            ModelValidationError::getDescription,
-                            ModelValidationError::getValidatorSetName)
-                .contains(tuple("activiti-servicetask-missing-implementation",
-                                "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
-                                "activiti-executable-process"),
-                          tuple("Invalid service implementation",
-                                "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
-                                "BPMN service task validator"));
+            .extracting(
+                ModelValidationError::getProblem,
+                ModelValidationError::getDescription,
+                ModelValidationError::getValidatorSetName
+            )
+            .contains(
+                tuple(
+                    "activiti-servicetask-missing-implementation",
+                    "One of the attributes 'implementation', 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask.",
+                    "activiti-executable-process"
+                ),
+                tuple(
+                    "Invalid service implementation",
+                    "Invalid service implementation on service 'ServiceTask_1qr4ad0'",
+                    "BPMN service task validator"
+                )
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownTask() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownTask()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-task.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-task.json"))
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
         assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings for an unknown task 'unknown-task'");
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-output-process-variable.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
-
-        assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings for an unknown process variable 'unknown-output-variable'");
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForConnectorWithoutInputsOutputs() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies-without-inputs-outputs.json")));
-
-        assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'");
-    }
-
-    @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessWithInValidMessagePayload() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("message-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("Process_hg2itgWRj",
-                                                                         resourceAsByteArray("process/message-payload.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_hg2itgWRj",
-                                                               extensions(resourceAsByteArray("process-extensions/message-payload-extension.json"))));
-
-        assertThatResponse(
-            mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                    project.getId()))
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
                 .andExpect(status().isBadRequest())
-                .andReturn())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings for an unknown task 'unknown-task'"
+            );
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownOutputProcessVariableMapping()
+        throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(
+                    resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-output-process-variable.json")
+                )
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
+
+        assertThatResponse(
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings for an unknown process variable 'unknown-output-variable'"
+            );
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForConnectorWithoutInputsOutputs()
+        throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))
+            )
+        );
+        modelRepository.createModel(
+            connectorModel(project, "movies", resourceAsByteArray("connector/movies-without-inputs-outputs.json"))
+        );
+
+        assertThatResponse(
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'movieName'",
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'movieDescription'"
+            );
+    }
+
+    @Test
+    public void should_throwSemanticModelValidationException_when_validatingProcessWithInValidMessagePayload()
+        throws Exception {
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("message-project"));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("Process_hg2itgWRj", resourceAsByteArray("process/message-payload.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_hg2itgWRj",
+                extensions(resourceAsByteArray("process-extensions/message-payload-extension.json"))
+            )
+        );
+
+        assertThatResponse(
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
             .isSemanticValidationException()
             .hasValidationErrorMessages(
                 "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'my-message-payload'",
                 "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name 'wrong-payload'",
-                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name '123abc'");
+                "The extensions for process 'Process_hg2itgWRj' contains mappings to element 'IntermediateThrowEvent_1kozj3g' for an invalid payload name '123abc'"
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownConnectorParameterMapping() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownConnectorParameterMapping()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-connector-parameter.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(
+                    resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-connector-parameter.json")
+                )
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
         assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'");
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings to task 'Task_1spvopd' for an unknown inputs connector parameter name 'unknown-input-parameter'",
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings to task 'Task_1spvopd' for an unknown outputs connector parameter name 'unknown-output-parameter'"
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownInputProcessVariableMapping() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithProcessExtensionsForUnknownInputProcessVariableMapping()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-input-process-variable.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(
+                    resourceAsByteArray("process-extensions/RankMovie-extensions-unknown-input-process-variable.json")
+                )
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
         assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "The extensions for process 'Process_RankMovieId' " +
-                            "contains mappings for an unknown process variable 'unknown-input-variable'");
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "The extensions for process 'Process_RankMovieId' " +
+                "contains mappings for an unknown process variable 'unknown-input-variable'"
+            );
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProjectWithInvalidCallActivityReference() throws Exception {
+    public void should_throwSemanticModelValidationException_when_validatingProjectWithInvalidCallActivityReference()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-call-activiti"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("Process_RankMovieId",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("Process_RankMovieId",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("Process_RankMovieId", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "Process_RankMovieId",
+                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
-        Model mainProcessModel = modelService.importSingleModel(project,
-                                                          processModelType,
-                                                          processFileContentWithCallActivity("Process_TwoCall",
-                                                                                             processModel,
-                                                                                             resourceAsByteArray("process/two-call-activities.bpmn20.xml")));
+        Model mainProcessModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContentWithCallActivity(
+                "Process_TwoCall",
+                processModel,
+                resourceAsByteArray("process/two-call-activities.bpmn20.xml")
+            )
+        );
 
         assertThatResponse(
-                mockMvc.perform(
-                        get("/v1/projects/{projectId}/validate",
-                            project.getId()))
-                        .andExpect(status().isBadRequest())
-                        .andReturn())
-                .isSemanticValidationException()
-                .hasValidationErrorMessages(
-                        "Call activity 'Task_1mbp1v0' with call element 'not-present' found in process 'Process_TwoCall' " +
-                            "references a process id that does not exist in the current project.");
+            mockMvc
+                .perform(get("/v1/projects/{projectId}/validate", project.getId()))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+        )
+            .isSemanticValidationException()
+            .hasValidationErrorMessages(
+                "Call activity 'Task_1mbp1v0' with call element 'not-present' found in process 'Process_TwoCall' " +
+                "references a process id that does not exist in the current project."
+            );
     }
 
     @Test
     public void should_returnStatusOk_when_exportingProjectWithValidCallActivity() throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-with-call-activity"));
-        Model processModel = modelService.importSingleModel(project,
-                                                      processModelType,
-                                                      processFileContent("RankMovie",
-                                                                         resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "process-model",
+                extensions(resourceAsByteArray("process-extensions/RankMovie-extensions.json"))
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
-        modelService.importSingleModel(project,
-                                 processModelType,
-                                 processFileContentWithCallActivity("main-process",
-                                                                    processModel,
-                                                                    resourceAsByteArray("process/call-activity.bpmn20.xml")));
+        modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContentWithCallActivity(
+                "main-process",
+                processModel,
+                resourceAsByteArray("process/call-activity.bpmn20.xml")
+            )
+        );
 
-        mockMvc.perform(
-                get("/v1/projects/{projectId}/export",
-                    project.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/projects/{projectId}/export", project.getId())).andExpect(status().isOk());
     }
 
     @Test
     public void should_returnStatusCreated_when_importingProject() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import")
-                                .file(zipFile)
-                                .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.entry.name",
-                                    is("application-xy")));
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is("application-xy")));
     }
 
     @Test
     public void should_throwBadRequestException_when_importingProjectInvalidJsonFile() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy-invalid.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy-invalid.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy-invalid.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy-invalid.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import")
-                                .file(zipFile)
-                                .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason(is("No valid project entry found to import")));
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason(is("No valid project entry found to import")));
     }
 
     @Test
     public void should_throwBadRequestException_when_importingProjectInvalidProcessJsonFile() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy-invalid-process-json.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy-invalid-process-json.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import")
-                                .file(zipFile)
-                                .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(status().reason(containsString("Xml content for the model is not valid.")));
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(status().reason(containsString("Xml content for the model is not valid.")));
     }
 
     @Test
     public void should_returnStatusCreatedAndGivenName_when_importingProjectWithNameProvided() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy.zip")
+        );
 
         String overridingName = "override";
 
-        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
-                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
-                                                                                   is(overridingName)));
+        mockMvc
+            .perform(
+                multipart("/v1/projects/import?name=" + overridingName).file(zipFile).accept(APPLICATION_JSON_VALUE)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is(overridingName)));
     }
 
     @Test
     public void should_returnStatusCreatedAndZipName_when_importingProjectWithNullNameProvided() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import?name=")
-                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
-                                                                                   is("application-xy")));
+        mockMvc
+            .perform(multipart("/v1/projects/import?name=").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is("application-xy")));
     }
 
     @Test
     public void should_returnStatusCreatedAndZipName_when_importingProjectWithBlankNameProvided() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                                                          "project-xy.zip",
-                                                          "project/zip",
-                                                          resourceAsByteArray("project/project-xy.zip"));
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "project-xy.zip",
+            "project/zip",
+            resourceAsByteArray("project/project-xy.zip")
+        );
 
         String overridingName = "      ";
 
-        mockMvc.perform(multipart("/v1/projects/import?name=" + overridingName)
-                                  .file(zipFile).accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated()).andExpect(jsonPath("$.entry.name",
-                                                                                   is("application-xy")));
+        mockMvc
+            .perform(
+                multipart("/v1/projects/import?name=" + overridingName).file(zipFile).accept(APPLICATION_JSON_VALUE)
+            )
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is("application-xy")));
     }
 
     @Test
-    public void should_returnStatusOK_when_exportingProjectWithProcessExtensionsWithValueOutputProcessVariableMapping() throws Exception {
+    public void should_returnStatusOK_when_exportingProjectWithProcessExtensionsWithValueOutputProcessVariableMapping()
+        throws Exception {
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("invalid-project"));
-        Model processModel = modelService.importSingleModel(project,
-                                                            processModelType,
-                                                            processFileContent("RankMovie",
-                                                                               resourceAsByteArray("process/RankMovie.bpmn20.xml")));
-        modelRepository.updateModel(processModel,
-                                    processModelWithExtensions("process-model",
-                                                               extensions(resourceAsByteArray("process-extensions/RankMovie-extensions-value-output-process-variable.json"))));
-        modelRepository.createModel(connectorModel(project,
-                                                   "movies",
-                                                   resourceAsByteArray("connector/movies.json")));
+        Model processModel = modelService.importSingleModel(
+            project,
+            processModelType,
+            processFileContent("RankMovie", resourceAsByteArray("process/RankMovie.bpmn20.xml"))
+        );
+        modelRepository.updateModel(
+            processModel,
+            processModelWithExtensions(
+                "process-model",
+                extensions(
+                    resourceAsByteArray("process-extensions/RankMovie-extensions-value-output-process-variable.json")
+                )
+            )
+        );
+        modelRepository.createModel(connectorModel(project, "movies", resourceAsByteArray("connector/movies.json")));
 
-        mockMvc.perform(get("/v1/projects/{projectId}/export",
-                            project.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/projects/{projectId}/export", project.getId())).andExpect(status().isOk());
     }
 
     @Test
     public void should_throwBadRequestException_when_importingProjectWithInvalidName() throws Exception {
-        MockMultipartFile zipFile = new MockMultipartFile("file",
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
             "e2e-ama-test-dmn-hit-policy-Sh9rw.zip",
             "project/zip",
-            resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip"));
+            resourceAsByteArray("project/e2e-ama-test-dmn-hit-policy-Sh9rw.zip")
+        );
 
-        mockMvc.perform(multipart("/v1/projects/import")
-            .file(zipFile)
-            .accept(APPLICATION_JSON_VALUE))
+        mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(status().reason(is("Validation errors found in project's models")));
     }
 
     @Test
     public void should_returnNewProjectWithNewProjectName_when_copyingProject() throws Exception {
-        ProjectEntity project = (ProjectEntity) projectRepository.createProject(projectWithDescription("project-with-models",
-            "Project with models to be copied"));
+        ProjectEntity project = (ProjectEntity) projectRepository.createProject(
+            projectWithDescription("project-with-models", "Project with models to be copied")
+        );
 
         String projectName = "new-project-name";
 
-        mockMvc.perform(
-            post("/v1/projects/{projectId}/copy?name=" + projectName,
-                project.getId()))
+        mockMvc
+            .perform(post("/v1/projects/{projectId}/copy?name=" + projectName, project.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name",
-                is("new-project-name")))
-            .andExpect(jsonPath("$.description",
-                is("Project with models to be copied")));
+            .andExpect(jsonPath("$.name", is("new-project-name")))
+            .andExpect(jsonPath("$.description", is("Project with models to be copied")));
     }
 
     @Test
@@ -938,35 +1074,28 @@ public class ProjectControllerIT {
 
         String projectName = "existing-project";
 
-        mockMvc.perform(
-                post("/v1/projects/{projectId}/copy?name=" + projectName,
-                        project.getId()))
-                .andExpect(status().isConflict());
+        mockMvc
+            .perform(post("/v1/projects/{projectId}/copy?name=" + projectName, project.getId()))
+            .andExpect(status().isConflict());
     }
 
     @Test
     public void should_ValidateCorrectly_when_importingProjectWithUnusedConnector() throws Exception {
+        MockMultipartFile zipFile = new MockMultipartFile(
+            "file",
+            "unused-connector.zip",
+            "project/zip",
+            resourceAsByteArray("project/unused-connector.zip")
+        );
 
-        MockMultipartFile zipFile = new MockMultipartFile("file",
-                "unused-connector.zip",
-                "project/zip",
-                resourceAsByteArray("project/unused-connector.zip"));
-
-        MvcResult response = mockMvc.perform(multipart("/v1/projects/import")
-                .file(zipFile)
-                .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.entry.name",
-                        is("unused-connector")))
-                .andReturn();
+        MvcResult response = mockMvc
+            .perform(multipart("/v1/projects/import").file(zipFile).accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.entry.name", is("unused-connector")))
+            .andReturn();
 
         String projectId = JsonPath.parse(response.getResponse().getContentAsString()).read("$.entry.id");
 
-        mockMvc.perform(
-                get("/v1/projects/{projectId}/validate",
-                        projectId))
-                .andExpect(status().isOk())
-                .andReturn();
+        mockMvc.perform(get("/v1/projects/{projectId}/validate", projectId)).andExpect(status().isOk()).andReturn();
     }
-
 }

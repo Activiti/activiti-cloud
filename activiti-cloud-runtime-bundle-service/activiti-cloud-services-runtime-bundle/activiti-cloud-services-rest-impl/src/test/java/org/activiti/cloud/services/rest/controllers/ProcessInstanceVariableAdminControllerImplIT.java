@@ -15,24 +15,40 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
-import org.activiti.api.runtime.conf.impl.ProcessModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceVariableRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,30 +67,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessInstanceVariableAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
-        ProcessModelAutoConfiguration.class,
+@Import(
+    {
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
-public class ProcessInstanceVariableAdminControllerImplIT {
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class,
+    }
+)
+class ProcessInstanceVariableAdminControllerImplIT {
 
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -90,7 +98,7 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @Autowired
@@ -105,52 +113,69 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     @MockBean
     private RepositoryService repositoryService;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ProcessInstanceImpl processInstance;
         processInstance = new ProcessInstanceImpl();
         processInstance.setId("1");
         processInstance.setProcessDefinitionKey("1");
 
-        this.mockMvc = MockMvcBuilders
-                .standaloneSetup(new ProcessInstanceVariableAdminControllerImpl(variableRepresentationModelAssembler,
-                                                                                processAdminRuntime,
-                                                                                resourcesAssembler))
+        this.mockMvc =
+            MockMvcBuilders
+                .standaloneSetup(
+                    new ProcessInstanceVariableAdminControllerImpl(
+                        variableRepresentationModelAssembler,
+                        processAdminRuntime,
+                        resourcesAssembler
+                    )
+                )
                 .setControllerAdvice(new RuntimeBundleExceptionHandler())
                 .build();
 
-        given(processAdminRuntime.processInstance(any()))
-                .willReturn(processInstance);
+        given(processAdminRuntime.processInstance(any())).willReturn(processInstance);
     }
 
     @Test
-    public void shouldGetVariables() throws Exception {
-        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
+    void shouldGetVariables() throws Exception {
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
+            "name",
             String.class.getName(),
             "Paul",
-            PROCESS_INSTANCE_ID, null);
-        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
+            PROCESS_INSTANCE_ID,
+            null
+        );
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>(
+            "age",
             Integer.class.getName(),
             12,
-            PROCESS_INSTANCE_ID, null);
-        given(processAdminRuntime.variables(any()))
-            .willReturn(Arrays.asList(name,
-                age));
+            PROCESS_INSTANCE_ID,
+            null
+        );
+        given(processAdminRuntime.variables(any())).willReturn(Arrays.asList(name, age));
 
-        this.mockMvc.perform(get("/admin/v1/process-instances/{processInstanceId}/variables",
-                1,
-                1).accept(MediaTypes.HAL_JSON_VALUE))
+        this.mockMvc.perform(
+                get("/admin/v1/process-instances/{processInstanceId}/variables", 1, 1).accept(MediaTypes.HAL_JSON_VALUE)
+            )
             .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldReturn200WithEmptyErrorListWhenSetVariablesWithCorrectNamesAndTypes() throws Exception {
+    void shouldReturn200WithEmptyErrorListWhenSetVariablesWithCorrectNamesAndTypes() throws Exception {
         //GIVEN
         Map<String, Object> variables = new HashMap<>();
         variables.put("name", "Alice");
@@ -159,15 +184,23 @@ public class ProcessInstanceVariableAdminControllerImplIT {
         String expectedResponseBody = "";
 
         //WHEN
-        ResultActions resultActions = mockMvc.perform(put("/admin/v1/process-instances/1/variables",
-                1).contentType(MediaType.APPLICATION_JSON)
-                .contentType(MediaTypes.HAL_JSON_VALUE)
-                .content(
-                        mapper.writeValueAsString(ProcessPayloadBuilder.setVariables().withProcessInstanceId("1").
-                                withVariables(variables).build())))
-
-                //THEN
-                .andExpect(status().isOk());
+        ResultActions resultActions = mockMvc
+            .perform(
+                put("/admin/v1/process-instances/1/variables", 1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .contentType(MediaTypes.HAL_JSON_VALUE)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder
+                                .setVariables()
+                                .withProcessInstanceId("1")
+                                .withVariables(variables)
+                                .build()
+                        )
+                    )
+            )
+            //THEN
+            .andExpect(status().isOk());
         MvcResult result = resultActions.andReturn();
         String actualResponseBody = result.getResponse().getContentAsString();
 
@@ -176,15 +209,21 @@ public class ProcessInstanceVariableAdminControllerImplIT {
     }
 
     @Test
-    public void deleteVariables() throws Exception {
-        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/variables",
-                "1")
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(ProcessPayloadBuilder.removeVariables().withVariableNames(Arrays.asList("varName1",
-                        "varName2"))
-                        .build())))
-                .andExpect(status().isOk());
+    void deleteVariables() throws Exception {
+        this.mockMvc.perform(
+                delete("/admin/v1/process-instances/{processInstanceId}/variables", "1")
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            ProcessPayloadBuilder
+                                .removeVariables()
+                                .withVariableNames(Arrays.asList("varName1", "varName2"))
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
         verify(processAdminRuntime).removeVariables(any());
     }
 }

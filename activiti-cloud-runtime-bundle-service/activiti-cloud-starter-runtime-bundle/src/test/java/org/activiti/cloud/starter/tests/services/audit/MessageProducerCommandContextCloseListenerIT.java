@@ -40,19 +40,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-                properties = {"spring.activiti.asyncExecutorActivate=true"})
-@TestPropertySource("classpath:application-test.properties")
-@ContextConfiguration(classes = ServicesAuditITConfiguration.class,
-                      initializers = {RabbitMQContainerApplicationInitializer.class,
-                                      KeycloakContainerApplicationInitializer.class}
+@ActiveProfiles({ AuditProducerIT.AUDIT_PRODUCER_IT })
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "spring.cloud.stream.default-binder=rabbit"
 )
-@DirtiesContext
+@TestPropertySource("classpath:application-test.properties")
+@ContextConfiguration(
+    classes = ServicesAuditITConfiguration.class,
+    initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
+)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class MessageProducerCommandContextCloseListenerIT {
 
     @Autowired
@@ -63,6 +68,12 @@ public class MessageProducerCommandContextCloseListenerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @DynamicPropertySource
+    public static void asyncProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.activiti.asyncExecutorActivate", () -> true);
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:msg-producer-test");
+    }
 
     @BeforeEach
     public void setUp() {
@@ -81,51 +92,55 @@ public class MessageProducerCommandContextCloseListenerIT {
 
         // when
         Throwable thrown = catchThrowable(() -> {
-            runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionKey(processDefinitionKey)
-                          .start();
+            runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start();
         });
 
         // then
-        ProcessInstance result = runtimeService.createProcessInstanceQuery()
-                                               .processDefinitionKey(processDefinitionKey)
-                                               .singleResult();
+        ProcessInstance result = runtimeService
+            .createProcessInstanceQuery()
+            .processDefinitionKey(processDefinitionKey)
+            .singleResult();
         assertThat(result).isNull();
         assertThat(thrown).isInstanceOf(ActivitiException.class);
         verify(subject, never()).closed(any(CommandContext.class));
     }
 
+    /*
+     * This test case works just when using RabbitMQ due to the usage of the 'transacted' property
+     * of its binder. So, RabbitMQ container is required.
+     */
     @Test
     public void should_rollbackSentMessages_when_exceptionOccursAfterSent() throws InterruptedException {
         // given
         String processDefinitionKey = "SimpleProcess";
 
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) {
-                CommandContext commandContext = invocation.getArgument(0);
+        doAnswer(
+            new Answer<Void>() {
+                @Override
+                public Void answer(InvocationOnMock invocation) {
+                    CommandContext commandContext = invocation.getArgument(0);
 
-                doCallRealMethod().when(subject)
-                                  .closed(any(CommandContext.class));
+                    doCallRealMethod().when(subject).closed(any(CommandContext.class));
 
-                subject.closed(commandContext);
+                    subject.closed(commandContext);
 
-                throw new MessageDeliveryException("Test exception");
+                    throw new MessageDeliveryException("Test exception");
+                }
             }
-        }).when(subject)
-          .closed(any(CommandContext.class));
+        )
+            .when(subject)
+            .closed(any(CommandContext.class));
 
         // when
         Throwable thrown = catchThrowable(() -> {
-            runtimeService.createProcessInstanceBuilder()
-                          .processDefinitionKey(processDefinitionKey)
-                          .start();
+            runtimeService.createProcessInstanceBuilder().processDefinitionKey(processDefinitionKey).start();
         });
 
         // then
-        ProcessInstance result = runtimeService.createProcessInstanceQuery()
-                                               .processDefinitionKey(processDefinitionKey)
-                                               .singleResult();
+        ProcessInstance result = runtimeService
+            .createProcessInstanceQuery()
+            .processDefinitionKey(processDefinitionKey)
+            .singleResult();
         assertThat(result).isNull();
         assertThat(thrown).isInstanceOf(MessageDeliveryException.class);
 

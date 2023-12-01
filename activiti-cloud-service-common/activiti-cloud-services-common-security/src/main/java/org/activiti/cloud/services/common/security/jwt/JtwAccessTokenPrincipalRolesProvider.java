@@ -26,22 +26,24 @@ public class JtwAccessTokenPrincipalRolesProvider implements PrincipalRolesProvi
     private final JwtAccessTokenProvider jwtAccessTokenProvider;
     private final JwtAccessTokenValidator jwtAccessTokenValidator;
 
-    public JtwAccessTokenPrincipalRolesProvider(@NonNull JwtAccessTokenProvider keycloakSecurityContextProvider,
-                                                     @NonNull JwtAccessTokenValidator jwtAccessTokenValidator) {
+    public JtwAccessTokenPrincipalRolesProvider(
+        @NonNull JwtAccessTokenProvider keycloakSecurityContextProvider,
+        @NonNull JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
         this.jwtAccessTokenProvider = keycloakSecurityContextProvider;
         this.jwtAccessTokenValidator = jwtAccessTokenValidator;
     }
 
     @Override
     public List<String> getRoles(@NonNull Principal principal) {
-        return jwtAccessTokenProvider.accessToken(principal)
-                                          .filter(jwtAccessTokenValidator::isValid)
-                                          .map(JwtAdapter::getRoles)
-                                          .orElseGet(this::empty);
+        return jwtAccessTokenProvider
+            .accessToken(principal)
+            .filter(jwtAccessTokenValidator::isValid)
+            .map(JwtAdapter::getRoles)
+            .orElseGet(this::empty);
     }
 
     protected @Nullable List<String> empty() {
         return null;
     }
-
 }

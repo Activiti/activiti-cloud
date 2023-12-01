@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import java.util.Map;
-import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.cloud.openfeign.CollectionFormat;
@@ -30,35 +30,32 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 public interface ProcessDefinitionController {
-
     @GetMapping("/v1/process-definitions")
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getProcessDefinitions(
-        @Parameter(description = "List of values to include in response")
-        @RequestParam(value = "include", required = false) List<String> include,
-        Pageable pageable);
+        @Parameter(description = "List of values to include in response") @RequestParam(
+            value = "include",
+            required = false
+        ) List<String> include,
+        Pageable pageable
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}")
     EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/xml")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/xml")
     @ResponseBody
     String getProcessModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "application/json")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/json")
     @ResponseBody
     String getBpmnModel(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/model",
-            produces = "image/svg+xml")
+    @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "image/svg+xml")
     @ResponseBody
     String getProcessDiagram(@PathVariable(value = "id") String id);
 
-    @GetMapping(value = "/v1/process-definitions/{id}/static-values",
-        produces = "application/json")
+    @GetMapping(value = "/v1/process-definitions/{id}/static-values", produces = "application/json")
     @ResponseBody
     Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(@PathVariable(value = "id") String id);
-
 }

@@ -6,11 +6,11 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-dependencies</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-audit</artifactId>
-  <name>Activiti Cloud Audit :: Starter :: Audit</name>
+  <name>Activiti Cloud Starter :: Audit</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -86,10 +86,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-tracing</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-logging</artifactId>
     </dependency>
     <dependency>
@@ -141,7 +137,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+      <artifactId>spring-cloud-stream-test-binder</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -221,7 +217,7 @@
       <id>generate-swagger</id>
       <activation>
         <property>
-          <name>!skipSwaggerGen</name>
+          <name>!swagger.skip</name>
         </property>
       </activation>
       <build>

@@ -22,13 +22,14 @@ import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.MessageRestTemplate;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -37,9 +38,12 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
+@ContextConfiguration(
+    classes = { RuntimeITConfiguration.class },
+    initializers = { KeycloakContainerApplicationInitializer.class }
+)
+@Import(TestChannelBinderConfiguration.class)
 @DirtiesContext
-@ContextConfiguration(classes = RuntimeITConfiguration.class,
-    initializers = {RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
 public class MessageIT {
 
     @Autowired
@@ -51,7 +55,8 @@ public class MessageIT {
     @Test
     public void shouldDeliverMessagesViaRestApi() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder.start("startMessage")
+        StartMessagePayload startMessage = MessagePayloadBuilder
+            .start("startMessage")
             .withBusinessKey("businessId")
             .withVariable("correlationKey", "correlationId")
             .build();
@@ -61,16 +66,21 @@ public class MessageIT {
         //then
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(startResponse.getBody()).isNotNull();
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .includeProcessVariables()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).hasSize(1)
+        assertThat(
+            runtimeService
+                .createProcessInstanceQuery()
+                .includeProcessVariables()
+                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                .list()
+        )
+            .hasSize(1)
             .extracting(ProcessInstance::getProcessVariables)
             .extracting("correlationKey")
             .contains("correlationId");
 
         //given
-        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder.receive("boundaryMessage")
+        ReceiveMessagePayload boundaryMessage = MessagePayloadBuilder
+            .receive("boundaryMessage")
             .withCorrelationKey("correlationId")
             .withVariable("customerKey", "customerId")
             .build();
@@ -80,15 +90,20 @@ public class MessageIT {
 
         //then
         assertThat(boundaryResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .includeProcessVariables()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).hasSize(1)
+        assertThat(
+            runtimeService
+                .createProcessInstanceQuery()
+                .includeProcessVariables()
+                .processDefinitionKey("shouldDeliverMessagesViaRestApi")
+                .list()
+        )
+            .hasSize(1)
             .extracting(ProcessInstance::getProcessVariables)
             .extracting("customerKey")
             .contains("customerId");
         //given
-        ReceiveMessagePayload catchMessage = MessagePayloadBuilder.receive("catchMessage")
+        ReceiveMessagePayload catchMessage = MessagePayloadBuilder
+            .receive("catchMessage")
             .withCorrelationKey("customerId")
             .build();
 
@@ -97,15 +112,17 @@ public class MessageIT {
 
         // then
         assertThat(catchResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(runtimeService.createProcessInstanceQuery()
-            .processDefinitionKey("shouldDeliverMessagesViaRestApi")
-            .list()).isEmpty();
+        assertThat(
+            runtimeService.createProcessInstanceQuery().processDefinitionKey("shouldDeliverMessagesViaRestApi").list()
+        )
+            .isEmpty();
     }
 
     @Test
     public void shouldReceive404NotFoundIfWrongMessageName() {
         //given
-        StartMessagePayload startMessage = MessagePayloadBuilder.start("notFound")
+        StartMessagePayload startMessage = MessagePayloadBuilder
+            .start("notFound")
             .withBusinessKey("businessId")
             .withVariable("correlationKey", "correlationId")
             .build();
@@ -115,5 +132,4 @@ public class MessageIT {
         //then
         assertThat(startResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
-
 }

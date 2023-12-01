@@ -17,17 +17,16 @@ package org.activiti.cloud.services.graphql.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
+import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
+import com.introproventures.graphql.jpa.query.web.GraphQLController;
+import graphql.schema.GraphQLSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import com.introproventures.graphql.jpa.query.schema.GraphQLExecutor;
-import com.introproventures.graphql.jpa.query.schema.impl.GraphQLJpaExecutor;
-import com.introproventures.graphql.jpa.query.web.GraphQLController;
-import graphql.schema.GraphQLSchema;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ActivitiGraphQLAutoConfigurationTest {
@@ -45,8 +44,7 @@ public class ActivitiGraphQLAutoConfigurationTest {
     private GraphQLController graphQLController;
 
     @SpringBootApplication
-    static class Application {
-    }
+    static class Application {}
 
     @Test
     public void contextIsAutoConfigured() {
@@ -56,6 +54,5 @@ public class ActivitiGraphQLAutoConfigurationTest {
 
         assertThat(graphQLProperties.getPath()).isEqualTo("/graphql");
         assertThat(graphQLProperties.isEnabled()).isEqualTo(true);
-
     }
 }

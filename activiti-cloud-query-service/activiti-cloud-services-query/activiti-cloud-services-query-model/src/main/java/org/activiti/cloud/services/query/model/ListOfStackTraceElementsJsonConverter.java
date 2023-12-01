@@ -15,22 +15,19 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-import javax.persistence.AttributeConverter;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.AttributeConverter;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class ListOfStackTraceElementsJsonConverter implements AttributeConverter<List<StackTraceElement>, String> {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    public ListOfStackTraceElementsJsonConverter() {
-    }
+    public ListOfStackTraceElementsJsonConverter() {}
 
     public ListOfStackTraceElementsJsonConverter(ObjectMapper objectMapper) {
         ListOfStackTraceElementsJsonConverter.objectMapper = objectMapper;
@@ -48,7 +45,7 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
     @Override
     public List<StackTraceElement> convertToEntityAttribute(String dbData) {
         try {
-            if(dbData != null && dbData.length() > 0) {
+            if (dbData != null && dbData.length() > 0) {
                 return objectMapper.readValue(dbData, new TypeReference<List<StackTraceElement>>() {});
             } else {
                 return Collections.emptyList();
@@ -57,5 +54,4 @@ public class ListOfStackTraceElementsJsonConverter implements AttributeConverter
             throw new QueryException("Unable to deserialize list of StackTraceElements", e);
         }
     }
-
 }

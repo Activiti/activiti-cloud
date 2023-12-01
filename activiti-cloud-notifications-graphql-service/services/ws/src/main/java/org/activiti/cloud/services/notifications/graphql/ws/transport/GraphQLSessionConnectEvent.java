@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import java.security.Principal;
-
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.springframework.messaging.Message;
 
@@ -31,17 +30,16 @@ import org.springframework.messaging.Message;
 @SuppressWarnings("serial")
 public class GraphQLSessionConnectEvent extends AbstractGraphQLSubProtocolEvent {
 
-	/**
-	 * Create a new SessionConnectEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the connect message
-	 */
-	public GraphQLSessionConnectEvent(Object source, Message<GraphQLMessage> message) {
-		super(source, message);
-	}
+    /**
+     * Create a new SessionConnectEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the connect message
+     */
+    public GraphQLSessionConnectEvent(Object source, Message<GraphQLMessage> message) {
+        super(source, message);
+    }
 
-	public GraphQLSessionConnectEvent(Object source, Message<GraphQLMessage> message, Principal user) {
-		super(source, message, user);
-	}
-
+    public GraphQLSessionConnectEvent(Object source, Message<GraphQLMessage> message, Principal user) {
+        super(source, message, user);
+    }
 }

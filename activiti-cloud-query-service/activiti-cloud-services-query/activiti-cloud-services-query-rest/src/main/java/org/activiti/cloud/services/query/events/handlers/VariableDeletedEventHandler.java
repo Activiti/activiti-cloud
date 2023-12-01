@@ -29,8 +29,10 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
 
     private final TaskVariableDeletedEventHandler taskVariableDeletedEventHandler;
 
-    public VariableDeletedEventHandler(ProcessVariableDeletedEventHandler processVariableDeletedHandler,
-                                       TaskVariableDeletedEventHandler taskVariableDeletedEventHandler) {
+    public VariableDeletedEventHandler(
+        ProcessVariableDeletedEventHandler processVariableDeletedHandler,
+        TaskVariableDeletedEventHandler taskVariableDeletedEventHandler
+    ) {
         this.processVariableDeletedHandler = processVariableDeletedHandler;
         this.taskVariableDeletedEventHandler = taskVariableDeletedEventHandler;
     }
@@ -45,8 +47,7 @@ public class VariableDeletedEventHandler implements QueryEventHandler {
                 processVariableDeletedHandler.handle(variableDeletedEvent);
             }
         } catch (Exception cause) {
-            LOGGER.debug("Error handling VariableDeletedEvent[" + event + "]",
-                     cause);
+            LOGGER.debug("Error handling VariableDeletedEvent[" + event + "]", cause);
         }
     }
 

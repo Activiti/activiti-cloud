@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
-import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.springframework.lang.NonNull;
-
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.springframework.lang.NonNull;
 
 public class JwtPrincipalGroupsProviderChain implements PrincipalGroupsProvider {
 
@@ -33,11 +32,12 @@ public class JwtPrincipalGroupsProviderChain implements PrincipalGroupsProvider 
 
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
-        return providers.stream()
-                        .map(provider -> provider.getGroups(principal))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .orElseThrow(this::securityException);
+        return providers
+            .stream()
+            .map(provider -> provider.getGroups(principal))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {

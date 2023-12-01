@@ -29,8 +29,7 @@ public class ModelValidationError {
     private String errorCode;
     private String referenceId;
 
-    public ModelValidationError() {
-    }
+    public ModelValidationError() {}
 
     public ModelValidationError(String problem, String description) {
         this.problem = problem;
@@ -42,8 +41,7 @@ public class ModelValidationError {
         this.validatorSetName = validatorSetName;
     }
 
-    public ModelValidationError(String problem, String description, String validatorSetName,
-        boolean isWarning) {
+    public ModelValidationError(String problem, String description, String validatorSetName, boolean isWarning) {
         this(problem, description, validatorSetName);
         this.isWarning = isWarning;
     }
@@ -106,16 +104,12 @@ public class ModelValidationError {
         }
 
         ModelValidationError error = (ModelValidationError) obj;
-        return Objects.equals(problem,
-                              error.problem) &&
-                Objects.equals(description,
-                               error.description);
+        return Objects.equals(problem, error.problem) && Objects.equals(description, error.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(problem,
-                            description);
+        return Objects.hash(problem, description);
     }
 
     @Override

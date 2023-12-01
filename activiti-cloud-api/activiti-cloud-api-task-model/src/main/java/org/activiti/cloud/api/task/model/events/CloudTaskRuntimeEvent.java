@@ -19,7 +19,5 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudTaskRuntimeEvent extends CloudRuntimeEvent<Task, TaskRuntimeEvent.TaskEvents>,
-                                               TaskRuntimeEvent<Task> {
-
-}
+public interface CloudTaskRuntimeEvent
+    extends CloudRuntimeEvent<Task, TaskRuntimeEvent.TaskEvents>, TaskRuntimeEvent<Task> {}

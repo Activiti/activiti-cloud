@@ -15,11 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import com.querydsl.core.types.dsl.BooleanExpression;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
@@ -31,26 +36,21 @@ import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
-        value = "/v1/process-definitions",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/v1/process-definitions",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessDefinitionController {
 
     private static final String EVERYONE_GROUP = "*";
@@ -64,11 +64,13 @@ public class ProcessDefinitionController {
     private ProcessDefinitionRestrictionService processDefinitionRestrictionService;
     private SecurityManager securityManager;
 
-    public ProcessDefinitionController(ProcessDefinitionRepository repository,
-                                       AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
-                                       ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
-                                       ProcessDefinitionRestrictionService processDefinitionRestrictionService,
-                                       SecurityManager securityManager) {
+    public ProcessDefinitionController(
+        ProcessDefinitionRepository repository,
+        AlfrescoPagedModelAssembler<ProcessDefinitionEntity> pagedCollectionModelAssembler,
+        ProcessDefinitionRepresentationModelAssembler processDefinitionRepresentationModelAssembler,
+        ProcessDefinitionRestrictionService processDefinitionRestrictionService,
+        SecurityManager securityManager
+    ) {
         this.repository = repository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processDefinitionRepresentationModelAssembler = processDefinitionRepresentationModelAssembler;
@@ -77,32 +79,37 @@ public class ProcessDefinitionController {
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudProcessDefinition>> findAll(@QuerydslPredicate(root = ProcessDefinitionEntity.class) Predicate predicate,
-                                                                    Pageable pageable) {
+    public PagedModel<EntityModel<CloudProcessDefinition>> findAllProcess(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessDefinitionEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
         Predicate predicateRestricted = applyRestrictions(predicate);
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  repository.findAll(predicateRestricted,
-                                                                     pageable),
-                                                  processDefinitionRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            repository.findAll(predicateRestricted, pageable),
+            processDefinitionRepresentationModelAssembler
+        );
     }
 
     private Predicate applyRestrictions(Predicate predicate) {
-        Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(Optional.ofNullable(predicate)
-                                                                                                                 .orElseGet(BooleanBuilder::new),
-                                                                                                         SecurityPolicyAccess.READ);
+        Predicate extendedPredicate = processDefinitionRestrictionService.restrictProcessDefinitionQuery(
+            Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new),
+            SecurityPolicyAccess.READ
+        );
 
         String userId = securityManager.getAuthenticatedUserId();
-        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity
-                                                        .processDefinitionEntity
-                                                        .candidateStarterUsers.any()
-                                                        .userId.eq(userId);
+        BooleanExpression candidateStarterExpression = QProcessDefinitionEntity.processDefinitionEntity.candidateStarterUsers
+            .any()
+            .userId.eq(userId);
 
         List<String> groupIds = getCurrentUserGroupsIncludingEveryOneGroup();
         if (!groupIds.isEmpty()) {
-            candidateStarterExpression = candidateStarterExpression.or(QProcessDefinitionEntity
-                                                                       .processDefinitionEntity
-                                                                       .candidateStarterGroups.any()
-                                                                       .groupId.in(groupIds));
+            candidateStarterExpression =
+                candidateStarterExpression.or(
+                    QProcessDefinitionEntity.processDefinitionEntity.candidateStarterGroups.any().groupId.in(groupIds)
+                );
         }
 
         return candidateStarterExpression.and(extendedPredicate);

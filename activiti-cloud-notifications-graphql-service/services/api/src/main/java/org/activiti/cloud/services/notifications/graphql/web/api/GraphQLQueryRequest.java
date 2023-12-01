@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.web.api;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.Map;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * GraphQL JSON HTTP Request Wrapper Class
@@ -35,8 +34,7 @@ public class GraphQLQueryRequest {
         this.variables = builder.variables;
     }
 
-    GraphQLQueryRequest() {
-    }
+    GraphQLQueryRequest() {}
 
     /**
      * @return the query
@@ -64,12 +62,11 @@ public class GraphQLQueryRequest {
      * Definition of a stage for staged builder.
      */
     public interface IQueryStage {
-
         /**
-        * Builder method for query parameter.
-        * @param query field to set
-        * @return builder
-        */
+         * Builder method for query parameter.
+         * @param query field to set
+         * @return builder
+         */
         public IBuildStage withQuery(String query);
     }
 
@@ -77,18 +74,17 @@ public class GraphQLQueryRequest {
      * Definition of a stage for staged builder.
      */
     public interface IBuildStage {
-
         /**
-        * Builder method for variables parameter.
-        * @param variables field to set
-        * @return builder
-        */
+         * Builder method for variables parameter.
+         * @param variables field to set
+         * @return builder
+         */
         public IBuildStage withVariables(Map<String, Object> variables);
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         * @return built class
+         */
         public GraphQLQueryRequest build();
     }
 
@@ -100,8 +96,7 @@ public class GraphQLQueryRequest {
         private String query;
         private Map<String, Object> variables = Collections.emptyMap();
 
-        private Builder() {
-        }
+        private Builder() {}
 
         @Override
         public IBuildStage withQuery(String query) {
@@ -120,5 +115,4 @@ public class GraphQLQueryRequest {
             return new GraphQLQueryRequest(this);
         }
     }
-
 }

@@ -21,19 +21,14 @@ import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 
 public class CloudProcessCreatedEventImpl extends CloudProcessInstanceEventImpl implements CloudProcessCreatedEvent {
 
-    public CloudProcessCreatedEventImpl() {
-    }
+    public CloudProcessCreatedEventImpl() {}
 
     public CloudProcessCreatedEventImpl(ProcessInstance processInstance) {
         super(processInstance);
     }
 
-    public CloudProcessCreatedEventImpl(String id,
-                                        Long timestamp,
-                                        ProcessInstance processInstance) {
-        super(id,
-              timestamp,
-              processInstance);
+    public CloudProcessCreatedEventImpl(String id, Long timestamp, ProcessInstance processInstance) {
+        super(id, timestamp, processInstance);
     }
 
     @Override

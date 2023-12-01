@@ -22,18 +22,19 @@ import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface ProcessInstanceRepository extends PagingAndSortingRepository<ProcessInstanceEntity, String>,
-                                                   QuerydslPredicateExecutor<ProcessInstanceEntity>,
-                                                   QuerydslBinderCustomizer<QProcessInstanceEntity> {
-
+public interface ProcessInstanceRepository
+    extends
+        PagingAndSortingRepository<ProcessInstanceEntity, String>,
+        QuerydslPredicateExecutor<ProcessInstanceEntity>,
+        QuerydslBinderCustomizer<QProcessInstanceEntity>,
+        CrudRepository<ProcessInstanceEntity, String> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QProcessInstanceEntity root) {
-
+    default void customize(QuerydslBindings bindings, QProcessInstanceEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));
         bindings.bind(root.lastModifiedTo).first((path, value) -> root.lastModified.before(value));
@@ -43,7 +44,7 @@ public interface ProcessInstanceRepository extends PagingAndSortingRepository<Pr
         bindings.bind(root.completedTo).first((path, value) -> root.completedDate.before(value));
         bindings.bind(root.suspendedFrom).first((path, value) -> root.suspendedDate.after(value));
         bindings.bind(root.suspendedTo).first((path, value) -> root.suspendedDate.before(value));
-        bindings.bind(root.name).first((path, value) -> path.like("%"+value.toString()+"%"));
+        bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
         bindings.bind(root.initiator).first((path, value) -> root.initiator.in(Arrays.asList(value.split(","))));
         bindings.bind(root.appVersion).first((path, value) -> root.appVersion.in(Arrays.asList(value.split(","))));
     }

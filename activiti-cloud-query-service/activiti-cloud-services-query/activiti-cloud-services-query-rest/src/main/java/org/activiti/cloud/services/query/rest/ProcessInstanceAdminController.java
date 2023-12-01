@@ -15,8 +15,15 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -43,11 +50,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/admin/v1/process-instances",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/admin/v1/process-instances",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class ProcessInstanceAdminController {
 
     private final ProcessInstanceAdminService processInstanceAdminService;
@@ -57,45 +62,76 @@ public class ProcessInstanceAdminController {
     private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
     @Autowired
-    public ProcessInstanceAdminController(ProcessInstanceAdminService processInstanceAdminService,
-                                          ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-                                          AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler) {
+    public ProcessInstanceAdminController(
+        ProcessInstanceAdminService processInstanceAdminService,
+        ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler
+    ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
+    @Operation(summary = "Find process instances", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAll(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-                                                                  Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllProcessInstanceAdmin(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceAdminService.findAll(predicate, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
+    @Operation(summary = "Find process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariables(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-        @RequestParam(value = "variableKeys", required = false, defaultValue = "") List<String> variableKeys,
-        Pageable pageable) {
-        return pagedCollectionModelAssembler.toModel(pageable,
+    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariablesAdmin(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
+            value = "variableKeys",
+            required = false,
+            defaultValue = ""
+        ) List<String> variableKeys,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
             processInstanceAdminService.findAllWithVariables(predicate, variableKeys, pageable),
-            processInstanceRepresentationModelAssembler);
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public MappingJacksonValue findAllFromBody(@QuerydslPredicate(root = ProcessInstanceEntity.class) Predicate predicate,
-        @RequestBody(required = false) ProcessInstanceQueryBody payload, Pageable pageable) {
-
+    public MappingJacksonValue findAllFromBodyProcessAdmin(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate,
+        @RequestBody(required = false) ProcessInstanceQueryBody payload,
+        Pageable pageable
+    ) {
         ProcessInstanceQueryBody queryBody = Optional.ofNullable(payload).orElse(new ProcessInstanceQueryBody());
 
-        PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(pageable,
-            processInstanceAdminService.findAllFromBody(predicate, queryBody.getVariableKeys(), Collections.emptyList(), pageable),
-            processInstanceRepresentationModelAssembler);
+        PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceAdminService.findAllFromBody(
+                predicate,
+                queryBody.getVariableKeys(),
+                Collections.emptyList(),
+                pageable
+            ),
+            processInstanceRepresentationModelAssembler
+        );
 
         MappingJacksonValue result = new MappingJacksonValue(pagedModel);
-        if(queryBody.hasVariableKeys()) {
+        if (queryBody.hasVariableKeys()) {
             result.setSerializationView(JsonViews.ProcessVariables.class);
         } else {
             result.setSerializationView(JsonViews.General.class);
@@ -106,9 +142,9 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findById(@PathVariable String processInstanceId) {
-
-        return processInstanceRepresentationModelAssembler.toModel(processInstanceAdminService.findById(processInstanceId));
+    public EntityModel<CloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
+        return processInstanceRepresentationModelAssembler.toModel(
+            processInstanceAdminService.findById(processInstanceId)
+        );
     }
-
 }

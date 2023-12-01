@@ -18,14 +18,13 @@ package org.activiti.cloud.services.query.model;
 import java.io.Serializable;
 
 public class TaskCandidateUserId implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String taskId;
     private String userId;
 
-    public TaskCandidateUserId() {
-
-    }
+    public TaskCandidateUserId() {}
 
     public TaskCandidateUserId(String taskId, String userId) {
         this.taskId = taskId;
@@ -47,21 +46,14 @@ public class TaskCandidateUserId implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         TaskCandidateUserId other = (TaskCandidateUserId) obj;
         if (taskId == null) {
-            if (other.taskId != null)
-                return false;
-        } else if (!taskId.equals(other.taskId))
-            return false;
-        if (userId != other.userId)
-            return false;
+            if (other.taskId != null) return false;
+        } else if (!taskId.equals(other.taskId)) return false;
+        if (userId != other.userId) return false;
         return true;
     }
-
 }

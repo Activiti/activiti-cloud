@@ -7,6 +7,7 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 indent_style = space
+max_line_length = 120
 indent_size = 2
 
 [*.java]
@@ -14,7 +15,6 @@ indent_size = 4
 
 [*.md]
 max_line_length = off
-trim_trailing_whitespace = false
 
 [Makefile]
 indent_style = tab

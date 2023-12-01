@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.querydsl.core.types.Predicate;
+import java.util.Collections;
+import java.util.Iterator;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -33,9 +35,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Collections;
-import java.util.Iterator;
 
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
@@ -69,7 +68,10 @@ public class RestrictProcessInstanceEntityQueryIT {
     public void shouldGetProcessInstancesWhenPermitted() {
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
@@ -86,11 +88,13 @@ public class RestrictProcessInstanceEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
-
 
     @Test
     public void shouldGetProcessInstancesWhenGroupPermittedByWildcard() {
@@ -105,7 +109,10 @@ public class RestrictProcessInstanceEntityQueryIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("bobinhr");
         when(securityManager.getAuthenticatedUserGroups()).thenReturn(Collections.singletonList("hrgroup"));
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
@@ -122,7 +129,10 @@ public class RestrictProcessInstanceEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         //this user should see proc instances - but not for test-cmd-endpoint-wild
@@ -157,14 +167,18 @@ public class RestrictProcessInstanceEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("testuser");
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
 
         Iterator<ProcessInstanceEntity> iterator = iterable.iterator();
         while (iterator.hasNext()) {
             ProcessInstanceEntity proc = iterator.next();
             assertThat(proc.getServiceName()).isNotEqualToIgnoringCase("test-cmd-endpoint-dontmatchthisone");
-            assertThat(proc.getServiceName().replace("-", "")).isEqualToIgnoringCase("test-cmd-endpoint".replace("-", ""));
+            assertThat(proc.getServiceName().replace("-", ""))
+                .isEqualToIgnoringCase("test-cmd-endpoint".replace("-", ""));
         }
 
         assertThat(processInstanceRepository.count(predicate)).isEqualTo(2);
@@ -172,16 +186,15 @@ public class RestrictProcessInstanceEntityQueryIT {
 
     @Test
     public void shouldNotGetProcessInstancesWhenNotPermitted() {
-
         Predicate predicate = QProcessInstanceEntity.processInstanceEntity.id.isNotNull();
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("intruder");
 
-        predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(predicate, SecurityPolicyAccess.READ);
+        predicate =
+            processInstanceRestrictionService.restrictProcessInstanceQuery(predicate, SecurityPolicyAccess.READ);
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isFalse();
     }
-
 
     @Test
     public void shouldGetProcessInstancesWhenMatchesFullServiceName() {
@@ -195,9 +208,11 @@ public class RestrictProcessInstanceEntityQueryIT {
 
         when(securityManager.getAuthenticatedUserId()).thenReturn("hruser");
 
-        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(null, SecurityPolicyAccess.READ);
+        Predicate predicate = processInstanceRestrictionService.restrictProcessInstanceQuery(
+            null,
+            SecurityPolicyAccess.READ
+        );
         Iterable<ProcessInstanceEntity> iterable = processInstanceRepository.findAll(predicate);
         assertThat(iterable.iterator().hasNext()).isTrue();
     }
-
 }

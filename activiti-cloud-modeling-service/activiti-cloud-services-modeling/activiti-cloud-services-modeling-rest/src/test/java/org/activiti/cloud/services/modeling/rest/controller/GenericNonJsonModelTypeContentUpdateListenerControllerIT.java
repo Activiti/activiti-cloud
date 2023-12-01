@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -33,15 +32,16 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -49,8 +49,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
-@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 @WithMockModelerUser
 public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
 
@@ -73,52 +73,54 @@ public class GenericNonJsonModelTypeContentUpdateListenerControllerIT {
     ContentUpdateListener genericNonJsonContentUpdateListener;
 
     private MockMvc mockMvc;
+    private Model genericNonJsonModel;
 
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
     @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(context).build();
+        genericNonJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        modelRepository.deleteModel(genericNonJsonModel);
     }
 
     @Test
     public void should_notCallJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-        Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                                genericNonJsonModelType.getName()));
+        mockMvc
+            .perform(
+                putMultipart("/v1/models/{modelId}/content", genericNonJsonModel.getId())
+                    .file(
+                        "file",
+                        "simple-model.bin",
+                        "application/octet-stream",
+                        resourceAsByteArray("generic/model-simple.bin")
+                    )
+            )
+            .andExpect(status().isNoContent());
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericNonJsonModel.getId()).file("file",
-                                                                       "simple-model.bin",
-                                                                       "application/octet-stream",
-                                                                       resourceAsByteArray("generic/model-simple.bin")))
-                .andExpect(status().isNoContent());
-
-        verify(genericJsonContentUpdateListener,
-                       times(0))
-                .execute(any(),
-                         any());
-
+        verify(genericJsonContentUpdateListener, times(0)).execute(any(), any());
     }
 
     @Test
     public void should_callNonJsonContentUpdateListener_when_updatingModelContent() throws Exception {
-
-        Model genericNonJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-                                                                                genericNonJsonModelType.getName()));
-
         byte[] fileContent = resourceAsByteArray("generic/model-simple.bin");
 
-        mockMvc.perform(putMultipart("/v1/models/{modelId}/content",
-                                     genericNonJsonModel.getId()).file("file",
-                                                                       "simple-model.json",
-                                                                       "application/octet-stream",
-                                                                       fileContent))
-                .andExpect(status().isNoContent());
+        mockMvc
+            .perform(
+                putMultipart("/v1/models/{modelId}/content", genericNonJsonModel.getId())
+                    .file("file", "simple-model.json", "application/octet-stream", fileContent)
+            )
+            .andExpect(status().isNoContent());
 
-        verify(genericNonJsonContentUpdateListener,
-                       times(1))
-                .execute(argThat(model -> model.getId().equals(genericNonJsonModel.getId())),
-                         argThat(content -> new String(content.getFileContent()).equals(new String(fileContent))));
-
+        verify(genericNonJsonContentUpdateListener, times(1))
+            .execute(
+                argThat(model -> model.getId().equals(genericNonJsonModel.getId())),
+                argThat(content -> new String(content.getFileContent()).equals(new String(fileContent)))
+            );
     }
 }

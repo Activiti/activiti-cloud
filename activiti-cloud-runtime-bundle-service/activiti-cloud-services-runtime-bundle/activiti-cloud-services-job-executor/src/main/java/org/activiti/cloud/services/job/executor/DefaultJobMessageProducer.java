@@ -18,82 +18,82 @@ package org.activiti.cloud.services.job.executor;
 import org.activiti.engine.runtime.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.integration.MessageDispatchingException;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
 public class DefaultJobMessageProducer implements JobMessageProducer {
+
     private static final Logger logger = LoggerFactory.getLogger(DefaultJobMessageProducer.class);
 
     private static final String ROUTING_KEY = "routingKey";
 
-    private final BinderAwareChannelResolver resolver;
+    private final StreamBridge streamBridge;
     private final ApplicationEventPublisher eventPublisher;
     private final JobMessageBuilderFactory jobMessageBuilderFactory;
 
-    public DefaultJobMessageProducer(BinderAwareChannelResolver resolver,
-                                     ApplicationEventPublisher eventPublisher,
-                                     JobMessageBuilderFactory jobMessageBuilderFactory) {
-        this.resolver = resolver;
+    public DefaultJobMessageProducer(
+        StreamBridge streamBridge,
+        ApplicationEventPublisher eventPublisher,
+        JobMessageBuilderFactory jobMessageBuilderFactory
+    ) {
+        this.streamBridge = streamBridge;
         this.eventPublisher = eventPublisher;
         this.jobMessageBuilderFactory = jobMessageBuilderFactory;
     }
 
     @Override
     public void sendMessage(@NonNull String destination, @NonNull Job job) {
-        if(!TransactionSynchronizationManager.isSynchronizationActive()) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException("requires active transaction synchronization");
         }
 
         Assert.hasLength(job.getId(), "job id must not be empty");
         Assert.hasLength(destination, "destination must not be empty");
 
-        Message<String> message = jobMessageBuilderFactory.create(job)
-                                                          .withPayload(job.getId())
-                                                          .setHeader(ROUTING_KEY, destination)
-                                                          .build();
-
-        // Let's try to resolve message channel while inside main Activiti transaction to minimize infrastructure errors
-        MessageChannel messageChannel = resolver.resolveDestination(destination);
+        Message<String> message = jobMessageBuilderFactory
+            .create(job)
+            .withPayload(job.getId())
+            .setHeader(ROUTING_KEY, destination)
+            .build();
 
         // Let's send message right after the main transaction has successfully committed.
-        TransactionSynchronizationManager.registerSynchronization(new JobMessageTransactionSynchronization(message,
-                                                                                                           messageChannel));
+        TransactionSynchronizationManager.registerSynchronization(
+            new JobMessageTransactionSynchronization(message, destination)
+        );
     }
 
     class JobMessageTransactionSynchronization implements TransactionSynchronization {
 
-        private final MessageChannel messageChannel;
+        private final String destination;
         private final Message<String> message;
 
-        public JobMessageTransactionSynchronization(Message<String> message, MessageChannel messageChannel) {
-            this.messageChannel = messageChannel;
+        public JobMessageTransactionSynchronization(Message<String> message, String destination) {
+            this.destination = destination;
             this.message = message;
         }
 
         @Override
         public void afterCommit() {
-            logger.debug("Sending job message '{}' via message channel: {}", message, messageChannel);
+            logger.debug("Sending job message '{}' via stream bridge to: {}", message, destination);
 
             try {
-                boolean sent = messageChannel.send(message);
+                boolean sent = streamBridge.send(destination, message);
 
-                if(!sent) {
+                if (!sent) {
                     throw new MessageDispatchingException(message);
                 }
 
-                eventPublisher.publishEvent(new JobMessageSentEvent(message, messageChannel));
-
-            } catch(Exception cause) {
+                eventPublisher.publishEvent(new JobMessageSentEvent(message, destination));
+            } catch (Exception cause) {
                 logger.error("Sending job message {} failed due to error: {}", message, cause.getMessage());
 
-                eventPublisher.publishEvent(new JobMessageFailedEvent(message, cause, messageChannel));
+                eventPublisher.publishEvent(new JobMessageFailedEvent(message, cause, destination));
             }
         }
     }

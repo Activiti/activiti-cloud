@@ -23,9 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.xml.stream.XMLStreamException;
-
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.CallActivity;
 import org.activiti.cloud.modeling.api.Model;
@@ -40,84 +38,101 @@ public class BpmnModelCallActivityValidator implements BpmnCommonModelValidator 
     private ProcessModelType processModelType;
     private ProcessModelContentConverter processModelContentConverter;
     private final String expressionRegex = "\\$+\\{+.+\\}";
-    private final String INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION = "Call activity '%s' with call element '%s' found in process '%s' references a process id that does not exist in the current project.";
-    private final String INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM = "Call activity element must reference a process id present in the current project.";
+    private final String INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION =
+        "Call activity '%s' with call element '%s' found in process '%s' references a process id that does not exist in the current project.";
+    private final String INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM =
+        "Call activity element must reference a process id present in the current project.";
     private final String INVALID_CALL_ACTIVITY_REFERENCE_NAME = "Invalid call activity reference validator.";
-    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION = "No call element found for call activity '%s' found in process '%s'. Call activity must have a call element that reference a process id present in the current project.";
-    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM = "No call element found for call activity '%s' in process '%s'";
-    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME = "Call activity must have a call element validator.";
+    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION =
+        "No call element found for call activity '%s' found in process '%s'. Call activity must have a call element that reference a process id present in the current project.";
+    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM =
+        "No call element found for call activity '%s' in process '%s'";
+    private final String NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME =
+        "Call activity must have a call element validator.";
 
-    public BpmnModelCallActivityValidator(ProcessModelType processModelType,
-                                          ProcessModelContentConverter processModelContentConverter) {
+    public BpmnModelCallActivityValidator(
+        ProcessModelType processModelType,
+        ProcessModelContentConverter processModelContentConverter
+    ) {
         this.processModelType = processModelType;
         this.processModelContentConverter = processModelContentConverter;
     }
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-                                                 ValidationContext validationContext) {
-        Set<String> availableProcessesIds = validationContext.getAvailableModels(processModelType)
-                .stream()
-                .flatMap(model -> this.retrieveProcessIdFromModel(model))
-                .collect(Collectors.toSet());
-        return validateCallActivities(availableProcessesIds,
-                                      bpmnModel);
+    public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
+        Set<String> availableProcessesIds = validationContext
+            .getAvailableModels(processModelType)
+            .stream()
+            .flatMap(model -> this.retrieveProcessIdFromModel(model))
+            .collect(Collectors.toSet());
+        return validateCallActivities(availableProcessesIds, bpmnModel);
     }
 
     private Stream<String> retrieveProcessIdFromModel(Model model) throws RuntimeException {
-        return processModelContentConverter.convertToBpmnModel(model.getContent())
-                .getProcesses().stream().map(process -> process.getId());
+        return processModelContentConverter
+            .convertToBpmnModel(model.getContent())
+            .getProcesses()
+            .stream()
+            .map(process -> process.getId());
     }
 
-    private Stream<ModelValidationError> validateCallActivities(Set<String> availableProcessesIds,
-                                                                BpmnModel bpmnModel) {
-        return processModelContentConverter.convertToModelContent(bpmnModel)
-                .map(converter ->
-                    this.evaluateProcessCallActivity(converter, availableProcessesIds, bpmnModel))
+    private Stream<ModelValidationError> validateCallActivities(
+        Set<String> availableProcessesIds,
+        BpmnModel bpmnModel
+    ) {
+        return processModelContentConverter
+            .convertToModelContent(bpmnModel)
+            .map(converter -> this.evaluateProcessCallActivity(converter, availableProcessesIds, bpmnModel))
             .orElse(Stream.empty());
     }
 
-    private Stream<ModelValidationError> evaluateProcessCallActivity(BpmnProcessModelContent converter,
-                                                                     Set<String> availableProcessesIds,
-                                                                     BpmnModel bpmnModel) {
+    private Stream<ModelValidationError> evaluateProcessCallActivity(
+        BpmnProcessModelContent converter,
+        Set<String> availableProcessesIds,
+        BpmnModel bpmnModel
+    ) {
         Set<CallActivity> availableActivities = converter.findAllNodes(CallActivity.class);
-        return availableActivities.stream()
-            .map(activity -> validateCallActivity(availableProcessesIds,
-                bpmnModel.getMainProcess().getId(),
-                activity))
+        return availableActivities
+            .stream()
+            .map(activity -> validateCallActivity(availableProcessesIds, bpmnModel.getMainProcess().getId(), activity))
             .filter(Optional::isPresent)
             .map(Optional::get);
     }
 
-
-    private Optional<ModelValidationError> validateCallActivity(Set<String> availableProcessesIds,
-                                                                String mainProcess,
-                                                                CallActivity callActivity) {
+    private Optional<ModelValidationError> validateCallActivity(
+        Set<String> availableProcessesIds,
+        String mainProcess,
+        CallActivity callActivity
+    ) {
         String calledElement = callActivity.getCalledElement();
 
         if (isEmpty(calledElement)) {
             return Optional.of(
-                new ModelValidationError(format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM,
-                    callActivity.getId(),
-                    mainProcess), format(NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION,
-                    callActivity.getId(),
-                    mainProcess), NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME)
+                new ModelValidationError(
+                    format(NO_REFERENCE_FOR_CALL_ACTIVITY_PROBLEM, callActivity.getId(), mainProcess),
+                    format(NO_REFERENCE_FOR_CALL_ACTIVITY_DESCRIPTION, callActivity.getId(), mainProcess),
+                    NO_REFERENCE_FOR_CALL_ACTIVITY_REFERENCE_NAME
+                )
             );
-        }
-        else if (calledElement.matches(expressionRegex)) {
+        } else if (calledElement.matches(expressionRegex)) {
             return Optional.empty();
-        }
-        else {
-            String calledElementId = calledElement.replace("process-",
-                                                           "");
-            return !availableProcessesIds.contains(calledElementId) ?
-                    Optional.of(new ModelValidationError(INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM,
-                        format(INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION,
+        } else {
+            String calledElementId = calledElement.replace("process-", "");
+            return !availableProcessesIds.contains(calledElementId)
+                ? Optional.of(
+                    new ModelValidationError(
+                        INVALID_CALL_ACTIVITY_REFERENCE_PROBLEM,
+                        format(
+                            INVALID_CALL_ACTIVITY_REFERENCE_DESCRIPTION,
                             callActivity.getId(),
                             calledElementId,
                             mainProcess,
-                            INVALID_CALL_ACTIVITY_REFERENCE_NAME),
-                        INVALID_CALL_ACTIVITY_REFERENCE_NAME)) : Optional.empty();
+                            INVALID_CALL_ACTIVITY_REFERENCE_NAME
+                        ),
+                        INVALID_CALL_ACTIVITY_REFERENCE_NAME
+                    )
+                )
+                : Optional.empty();
         }
     }
 }

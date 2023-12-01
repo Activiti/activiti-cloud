@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.api.model;
 
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -31,25 +30,29 @@ public class ProcessDefinitionMeta {
     private int version;
     private Set<String> users;
     private Set<String> groups;
+
     @JsonDeserialize(using = ProcessDefinitionVariable.class)
     private Set<ProcessDefinitionVariable> variables;
+
     @JsonDeserialize(using = ProcessDefinitionUserTask.class)
     private Set<ProcessDefinitionUserTask> userTasks;
+
     @JsonDeserialize(using = ProcessDefinitionServiceTask.class)
     private Set<ProcessDefinitionServiceTask> serviceTasks;
 
-    public ProcessDefinitionMeta() {
-    };
+    public ProcessDefinitionMeta() {}
 
-    public ProcessDefinitionMeta(String id,
-                                 String name,
-                                 String description,
-                                 int version,
-                                 Set<String> users,
-                                 Set<String> groups,
-                                 Set<ProcessDefinitionVariable> variables,
-                                 Set<ProcessDefinitionUserTask> userTasks,
-                                 Set<ProcessDefinitionServiceTask> serviceTasks) {
+    public ProcessDefinitionMeta(
+        String id,
+        String name,
+        String description,
+        int version,
+        Set<String> users,
+        Set<String> groups,
+        Set<ProcessDefinitionVariable> variables,
+        Set<ProcessDefinitionUserTask> userTasks,
+        Set<ProcessDefinitionServiceTask> serviceTasks
+    ) {
         super();
         this.id = id;
         this.name = name;
@@ -97,5 +100,4 @@ public class ProcessDefinitionMeta {
     public Set<ProcessDefinitionServiceTask> getServiceTasks() {
         return serviceTasks;
     }
-
 }

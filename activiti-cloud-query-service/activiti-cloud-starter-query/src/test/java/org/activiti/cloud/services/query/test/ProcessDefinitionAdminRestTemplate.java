@@ -22,10 +22,11 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 @TestComponent
 public class ProcessDefinitionAdminRestTemplate extends BaseProcessDefinitionRestTemplate {
 
-    protected ProcessDefinitionAdminRestTemplate(TestRestTemplate testRestTemplate,
-                                                 IdentityTokenProducer identityTokenProducer) {
-        super(testRestTemplate,
-              identityTokenProducer);
+    protected ProcessDefinitionAdminRestTemplate(
+        TestRestTemplate testRestTemplate,
+        IdentityTokenProducer identityTokenProducer
+    ) {
+        super(testRestTemplate, identityTokenProducer);
     }
 
     @Override

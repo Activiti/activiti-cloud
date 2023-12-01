@@ -15,18 +15,17 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Optional;
-
 public abstract class BaseIntegrationEventHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseIntegrationEventHandler.class);
 
     protected final EntityManager entityManager;
 
@@ -42,5 +41,4 @@ public abstract class BaseIntegrationEventHandler {
 
         return Optional.ofNullable(entity);
     }
-
 }

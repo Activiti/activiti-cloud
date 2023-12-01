@@ -23,16 +23,14 @@ public class EntriesResponseContent<T> {
 
     private PaginationMetadata pagination;
 
-    public EntriesResponseContent() {
-    }
+    public EntriesResponseContent() {}
 
     public EntriesResponseContent(List<EntryResponseContent<T>> entries, PaginationMetadata pagination) {
         this.entries = entries;
         this.pagination = pagination;
     }
 
-    public List<EntryResponseContent<T>> getEntries()
-    {
+    public List<EntryResponseContent<T>> getEntries() {
         return entries;
     }
 

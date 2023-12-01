@@ -25,11 +25,13 @@ public class JobMessageInputChannelFactory {
 
     private final SubscribableChannelBindingTargetFactory bindingTargetFactory;
     private final BindingServiceProperties bindingServiceProperties;
-    private final ConfigurableListableBeanFactory  beanFactory;
+    private final ConfigurableListableBeanFactory beanFactory;
 
-    public JobMessageInputChannelFactory(SubscribableChannelBindingTargetFactory bindingTargetFactory,
-                               BindingServiceProperties bindingServiceProperties,
-                               ConfigurableListableBeanFactory beanFactory) {
+    public JobMessageInputChannelFactory(
+        SubscribableChannelBindingTargetFactory bindingTargetFactory,
+        BindingServiceProperties bindingServiceProperties,
+        ConfigurableListableBeanFactory beanFactory
+    ) {
         this.bindingTargetFactory = bindingTargetFactory;
         this.bindingServiceProperties = bindingServiceProperties;
         this.beanFactory = beanFactory;
@@ -43,5 +45,4 @@ public class JobMessageInputChannelFactory {
 
         return channel;
     }
-
 }

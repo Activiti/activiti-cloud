@@ -16,6 +16,13 @@
 
 package org.activiti.cloud.services.modeling.service.decorators;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,19 +31,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ProjectDecoratorServiceTest {
 
     @Mock
     ProjectDecorator projectDecorator1;
+
     @Mock
     ProjectDecorator projectDecorator2;
 
@@ -96,5 +96,4 @@ class ProjectDecoratorServiceTest {
         verify(projectDecorator1, never()).decorate(any());
         verify(projectDecorator2, never()).decorate(any());
     }
-
 }

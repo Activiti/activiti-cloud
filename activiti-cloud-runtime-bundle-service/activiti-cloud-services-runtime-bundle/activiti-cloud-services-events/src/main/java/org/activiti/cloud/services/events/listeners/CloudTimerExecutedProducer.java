@@ -24,8 +24,10 @@ public class CloudTimerExecutedProducer implements BPMNElementEventListener<BPMN
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTimerExecutedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                      ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTimerExecutedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

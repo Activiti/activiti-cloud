@@ -50,12 +50,13 @@ import org.springframework.web.client.ResponseExtractor;
 @TestComponent
 public class ProcessInstanceRestTemplate {
 
-    public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances/";
+    public static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances";
 
-    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances/";
+    public static final String PROCESS_INSTANCES_ADMIN_RELATIVE_URL = "/admin/v1/process-instances";
 
-    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER =
-        new LinkedMultiValueMap<>(Map.of("Content-type", List.of("application/json")));
+    public static final LinkedMultiValueMap<String, String> CONTENT_TYPE_HEADER = new LinkedMultiValueMap<>(
+        Map.of("Content-type", List.of("application/json"))
+    );
 
     private TestRestTemplate testRestTemplate;
 
@@ -63,68 +64,113 @@ public class ProcessInstanceRestTemplate {
         this.testRestTemplate = testRestTemplate;
     }
 
-    private ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionKey,
-                                                              String processDefinitionId,
-                                                              Map<String, Object> variables,
-                                                              String businessKey) {
-
-        StartProcessPayload startProcess = ProcessPayloadBuilder.start()
-                .withProcessDefinitionId(processDefinitionId)
-                .withVariables(variables)
-                .withProcessDefinitionKey(processDefinitionKey)
-                .withBusinessKey(businessKey)
-                .build();
+    private ResponseEntity<CloudProcessInstance> startProcess(
+        String processDefinitionKey,
+        String processDefinitionId,
+        Map<String, Object> variables,
+        String businessKey
+    ) {
+        StartProcessPayload startProcess = ProcessPayloadBuilder
+            .start()
+            .withProcessDefinitionId(processDefinitionId)
+            .withVariables(variables)
+            .withProcessDefinitionKey(processDefinitionKey)
+            .withBusinessKey(businessKey)
+            .build();
 
         return startProcess(startProcess);
     }
 
+    private ResponseEntity<CloudProcessInstance> createProcess(
+        String processDefinitionKey,
+        String processDefinitionId,
+        String businessKey
+    ) {
+        CreateProcessInstancePayload startProcess = ProcessPayloadBuilder
+            .create()
+            .withProcessDefinitionId(processDefinitionId)
+            .withProcessDefinitionKey(processDefinitionKey)
+            .withBusinessKey(businessKey)
+            .build();
+
+        return createProcess(startProcess);
+    }
+
     public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId) {
-
-        return startProcess(processDefinitionId,
-                            null,
-                            null);
+        return startProcess(processDefinitionId, null, null);
     }
 
-    public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId,
-                                                             Map<String, Object> variables) {
-
-        return startProcess(processDefinitionId,
-                            variables,
-                            null);
+    public ResponseEntity<CloudProcessInstance> startProcess(
+        String processDefinitionId,
+        Map<String, Object> variables
+    ) {
+        return startProcess(processDefinitionId, variables, null);
     }
 
-    public ResponseEntity<CloudProcessInstance> startProcess(String processDefinitionId,
-                                                             Map<String, Object> variables,
-                                                             String businessKey) {
+    public ResponseEntity<CloudProcessInstance> startProcess(
+        String processDefinitionId,
+        Map<String, Object> variables,
+        String businessKey
+    ) {
+        return startProcess(null, processDefinitionId, variables, businessKey);
+    }
 
-        return startProcess(null,
-                            processDefinitionId,
-                            variables,
-                            businessKey);
+    public ResponseEntity<CloudProcessInstance> createProcess(String processDefinitionId, String businessKey) {
+        return createProcess(null, processDefinitionId, businessKey);
     }
 
     public ResponseEntity<CloudProcessInstance> startProcess(StartProcessPayload startProcess) {
-        return startProcess(PROCESS_INSTANCES_RELATIVE_URL,startProcess);
+        return startProcess(PROCESS_INSTANCES_RELATIVE_URL, startProcess);
+    }
+
+    public ResponseEntity<CloudProcessInstance> createProcess(CreateProcessInstancePayload startPayload) {
+        return createProcess(PROCESS_INSTANCES_RELATIVE_URL + "/create", startPayload);
     }
 
     public ResponseEntity<CloudProcessInstance> adminStartProcess(StartProcessPayload startProcess) {
-        return startProcess(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,startProcess);
+        return startProcess(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);
     }
 
-    private ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(String baseURL, StartProcessPayload startProcess) {
-        return  testRestTemplate.exchange(baseURL,
-                                          HttpMethod.POST,
-                                          new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
-                                          new ParameterizedTypeReference<CloudProcessInstance>() {
-                                          });
+    private ResponseEntity<CloudProcessInstance> startProcessWithoutCheck(
+        String baseURL,
+        StartProcessPayload startProcess
+    ) {
+        return testRestTemplate.exchange(
+            baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
     }
 
-    private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(String baseURL, CreateProcessInstancePayload payload) {
-        return  testRestTemplate.exchange(baseURL,
+    private ResponseEntity<CloudProcessInstance> startCreatedProcessCall(String baseURL) {
+        return testRestTemplate.exchange(
+            baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
+    }
+
+    private ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessCallFail(String baseURL) {
+        return testRestTemplate.exchange(
+            baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+        );
+    }
+
+    private ResponseEntity<CloudProcessInstance> createProcessWithoutCheck(
+        String baseURL,
+        CreateProcessInstancePayload payload
+    ) {
+        return testRestTemplate.exchange(
+            baseURL,
             HttpMethod.POST,
             new HttpEntity<>(payload, CONTENT_TYPE_HEADER),
-            new ParameterizedTypeReference<CloudProcessInstance>() {
-            });
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
     }
 
     private ResponseEntity<CloudProcessInstance> startProcess(String baseURL, StartProcessPayload startProcess) {
@@ -136,31 +182,62 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
-    public ResponseEntity<CloudProcessInstance> startProcessByKey(String processDefinitionKey,
-                                                                  Map<String, Object> variables,
-                                                                  String businessKey) {
-        return startProcess(processDefinitionKey,
-                            null,
-                            variables,
-                            businessKey);
+    public ResponseEntity<CloudProcessInstance> startCreatedProcess(String processInstanceId) {
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/start");
+        ResponseEntity<CloudProcessInstance> responseEntity = startCreatedProcessCall(baseURL);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(String baseURL,
-                                                                                  StartProcessPayload startProcess) {
-        return  testRestTemplate.exchange(baseURL,
-                                          HttpMethod.POST,
-                                          new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
-                                          new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
-                                          });
+    public ResponseEntity<ActivitiErrorMessageImpl> startCreatedProcessFailing(String processInstanceId) {
+        String baseURL = PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/start");
+        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = startCreatedProcessCallFail(baseURL);
+        return responseEntity;
+    }
 
+    private ResponseEntity<CloudProcessInstance> createProcess(
+        String baseURL,
+        CreateProcessInstancePayload startProcess
+    ) {
+        ResponseEntity<CloudProcessInstance> responseEntity = createProcessWithoutCheck(baseURL, startProcess);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+        assertThat(responseEntity.getBody().getId()).isNotNull();
+        return responseEntity;
+    }
+
+    public ResponseEntity<CloudProcessInstance> startProcessByKey(
+        String processDefinitionKey,
+        Map<String, Object> variables,
+        String businessKey
+    ) {
+        return startProcess(processDefinitionKey, null, variables, businessKey);
+    }
+
+    public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(
+        String baseURL,
+        StartProcessPayload startProcess
+    ) {
+        return testRestTemplate.exchange(
+            baseURL,
+            HttpMethod.POST,
+            new HttpEntity<>(startProcess, CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+        );
     }
 
     public ResponseEntity<ActivitiErrorMessageImpl> startProcessWithErrorResponse(StartProcessPayload startProcess) {
-        return  startProcessWithErrorResponse(PROCESS_INSTANCES_RELATIVE_URL, startProcess);
+        return startProcessWithErrorResponse(PROCESS_INSTANCES_RELATIVE_URL, startProcess);
     }
 
-    public ResponseEntity<ActivitiErrorMessageImpl> adminStartProcessWithErrorResponse(StartProcessPayload startProcess) {
-        return  startProcessWithErrorResponse(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);
+    public ResponseEntity<ActivitiErrorMessageImpl> adminStartProcessWithErrorResponse(
+        StartProcessPayload startProcess
+    ) {
+        return startProcessWithErrorResponse(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcess);
     }
 
     public ResponseEntity<PagedModel<CloudTask>> getTasks(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
@@ -169,106 +246,122 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<PagedModel<CloudTask>> getTasks(String processInstanceId) {
-        ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/tasks",
-                                                                                             HttpMethod.GET,
-                                                                                             null,
-                                                                                             new ParameterizedTypeReference<PagedModel<CloudTask>>() {
-                                                                                             });
+        ResponseEntity<PagedModel<CloudTask>> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/tasks"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<PagedModel<CloudTask>>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return adminGetVariables(processInstanceEntity.getBody().getId());
     }
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> adminGetVariables(String processInstanceId) {
-        return testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceId + "/variables",
-                                   HttpMethod.GET,
-                                  null,
-                                   new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
-                                   });
+        return testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
+        );
     }
 
-    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getVariables(processInstanceEntity.getBody().getId());
     }
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariables(String processInstanceId) {
-        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = getVariablesNoReplyCheck(processInstanceId);
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = getVariablesNoReplyCheck(
+            processInstanceId
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
     public ResponseEntity<CollectionModel<CloudVariableInstance>> getVariablesNoReplyCheck(String processInstanceId) {
-        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
-                                                                                                    HttpMethod.GET,
-                                                                                                    null,
-                                                                                                    new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {
-                                                                                                    });
+        ResponseEntity<CollectionModel<CloudVariableInstance>> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<CollectionModel<CloudVariableInstance>>() {}
+        );
         return responseEntity;
     }
 
     public ResponseEntity<ActivitiErrorMessageImpl> callGetVariablesWithErrorResponse(String processInstanceId) {
-        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables",
-                                                                                                    HttpMethod.GET,
-                                                                                                    null,
-                                                                                                    new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {
-                                                                                                    });
+        ResponseEntity<ActivitiErrorMessageImpl> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<ActivitiErrorMessageImpl>() {}
+        );
         return responseEntity;
     }
 
-    public ResponseEntity<CloudProcessInstance> getProcessInstance(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CloudProcessInstance> getProcessInstance(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return getProcessInstance(processInstanceEntity.getBody().getId());
     }
 
     public ResponseEntity<CloudProcessInstance> getProcessInstance(String processInstanceId) {
-        return getProcessInstance(PROCESS_INSTANCES_RELATIVE_URL,processInstanceId);
+        return getProcessInstance(PROCESS_INSTANCES_RELATIVE_URL, processInstanceId);
     }
 
-    public ResponseEntity<CloudProcessInstance> adminGetProcessInstance(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
+    public ResponseEntity<CloudProcessInstance> adminGetProcessInstance(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return adminGetProcessInstance(processInstanceEntity.getBody().getId());
     }
 
     public ResponseEntity<CloudProcessInstance> adminGetProcessInstance(String processInstanceId) {
-        return getProcessInstance(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,processInstanceId);
+        return getProcessInstance(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, processInstanceId);
     }
 
-    public ResponseEntity<CloudProcessInstance> getProcessInstance(String baseURL,String processInstanceId) {
-
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(baseURL + processInstanceId,
-                                                                                        HttpMethod.GET,
-                                                                                        null,
-                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                                        });
+    public ResponseEntity<CloudProcessInstance> getProcessInstance(String baseURL, String processInstanceId) {
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            baseURL.concat("/").concat(processInstanceId),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
     public ResponseEntity<CloudProcessInstance> delete(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-
         assertThat(processInstanceEntity.getBody()).isNotNull();
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceEntity.getBody().getId(),
-                                                                        HttpMethod.DELETE,
-                                                                        null,
-                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                        });
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceEntity.getBody().getId()),
+            HttpMethod.DELETE,
+            null,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<CloudProcessInstance> adminDelete(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
-
+    public ResponseEntity<CloudProcessInstance> adminDelete(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity
+    ) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processInstanceEntity.getBody().getId(),
-                                                                        HttpMethod.DELETE,
-                                                                        null,
-                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                        });
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceEntity.getBody().getId()),
+            HttpMethod.DELETE,
+            null,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
@@ -284,151 +377,154 @@ public class ProcessInstanceRestTemplate {
     }
 
     private ResponseEntity<Void> suspend(String baseURL, String processInstanceId) {
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(baseURL + processInstanceId + "/suspend",
-                                                                        HttpMethod.POST,
-                                                                        new HttpEntity<>(CONTENT_TYPE_HEADER),
-                                                                        new ParameterizedTypeReference<Void>() {
-                                                                        });
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            baseURL.concat("/").concat(processInstanceId).concat("/suspend"),
+            HttpMethod.POST,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<Void>() {}
+        );
         return responseEntity;
     }
 
     public ResponseEntity<Void> resume(ResponseEntity<CloudProcessInstance> startProcessEntity) {
         assertThat(startProcessEntity.getBody()).isNotNull();
-        return resume(PROCESS_INSTANCES_RELATIVE_URL,startProcessEntity.getBody().getId());
+        return resume(PROCESS_INSTANCES_RELATIVE_URL, startProcessEntity.getBody().getId());
     }
 
     public ResponseEntity<Void> adminResume(ResponseEntity<CloudProcessInstance> startProcessEntity) {
         assertThat(startProcessEntity.getBody()).isNotNull();
-        return resume(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,startProcessEntity.getBody().getId());
+        return resume(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, startProcessEntity.getBody().getId());
     }
 
     private ResponseEntity<Void> resume(String baseURL, String processInstanceId) {
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(baseURL + processInstanceId + "/resume",
-                                                                        HttpMethod.POST,
-                                                                        new HttpEntity<>(CONTENT_TYPE_HEADER),
-                                                                        new ParameterizedTypeReference<Void>() {
-                                                                        });
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            baseURL.concat("/").concat(processInstanceId).concat("/resume"),
+            HttpMethod.POST,
+            new HttpEntity<>(CONTENT_TYPE_HEADER),
+            new ParameterizedTypeReference<Void>() {}
+        );
         return responseEntity;
     }
 
-    public ResponseEntity<Void> setVariablesDoNotCheckStatus(String processInstanceId,
-                                                             Map<String, Object> variables) {
-        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
-                .withVariables(variables).build();
+    public ResponseEntity<Void> setVariablesDoNotCheckStatus(String processInstanceId, Map<String, Object> variables) {
+        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder
+            .setVariables()
+            .withVariables(variables)
+            .build();
 
-        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
-                setProcessVariablesPayload,
-                null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/variables/",
-                                                                        HttpMethod.POST,
-                                                                        requestEntity,
-                                                                        new ParameterizedTypeReference<Void>() {
-                                                                        });
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
+            HttpMethod.PUT,
+            requestEntity,
+            new ParameterizedTypeReference<Void>() {}
+        );
         return responseEntity;
     }
 
-    public ResponseEntity<Void> setVariables(String processInstanceId,
-                                             Map<String, Object> variables) {
-
-        ResponseEntity<Void> responseEntity = setVariablesDoNotCheckStatus(processInstanceId,
-                                                                           variables);
+    public ResponseEntity<Void> setVariables(String processInstanceId, Map<String, Object> variables) {
+        ResponseEntity<Void> responseEntity = setVariablesDoNotCheckStatus(processInstanceId, variables);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<Void> adminSetVariablesDoNotCheckStatus(String processInstanceId,
-                                                                  Map<String, Object> variables) {
-        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder.setVariables()
-                .withVariables(variables).build();
+    public ResponseEntity<Void> adminSetVariablesDoNotCheckStatus(
+        String processInstanceId,
+        Map<String, Object> variables
+    ) {
+        SetProcessVariablesPayload setProcessVariablesPayload = ProcessPayloadBuilder
+            .setVariables()
+            .withVariables(variables)
+            .build();
 
-        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(
-                setProcessVariablesPayload,
-                null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL
-                        + processInstanceId + "/variables/",
-                HttpMethod.PUT,
-                requestEntity,
-                new ParameterizedTypeReference<Void>() {
-                });
-       return responseEntity;
+        HttpEntity<SetProcessVariablesPayload> requestEntity = new HttpEntity<>(setProcessVariablesPayload, null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/variables"),
+            HttpMethod.PUT,
+            requestEntity,
+            new ParameterizedTypeReference<Void>() {}
+        );
+        return responseEntity;
     }
 
-    public ResponseEntity<Void> adminSetVariables(String processInstanceId,
-                                                  Map<String, Object> variables) {
-        ResponseEntity<Void> responseEntity = adminSetVariablesDoNotCheckStatus(processInstanceId,
-                                                                                variables);
+    public ResponseEntity<Void> adminSetVariables(String processInstanceId, Map<String, Object> variables) {
+        ResponseEntity<Void> responseEntity = adminSetVariablesDoNotCheckStatus(processInstanceId, variables);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         return responseEntity;
     }
 
-    public ResponseEntity<Void> adminRemoveVariables(String processId,
-                                                     List<String> variableNames) {
-        RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder.removeVariables()
-                .withVariableNames(variableNames).build();
+    public ResponseEntity<Void> adminRemoveVariables(String processId, List<String> variableNames) {
+        RemoveProcessVariablesPayload removeProcessVariablesPayload = ProcessPayloadBuilder
+            .removeVariables()
+            .withVariableNames(variableNames)
+            .build();
 
-        HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(
-                removeProcessVariablesPayload,
-                null);
-        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL + processId + "/variables/",
-                                                                        HttpMethod.DELETE,
-                                                                        requestEntity,
-                                                                        new ParameterizedTypeReference<Void>() {
-                                                                        });
+        HttpEntity<RemoveProcessVariablesPayload> requestEntity = new HttpEntity<>(removeProcessVariablesPayload, null);
+        ResponseEntity<Void> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(processId).concat("/variables"),
+            HttpMethod.DELETE,
+            requestEntity,
+            new ParameterizedTypeReference<Void>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
-    public ResponseEntity<CloudProcessInstance> update(ResponseEntity<CloudProcessInstance> processEntity,
-                                                       String businessKey,
-                                                       String name
-                                                       ) {
+    public ResponseEntity<CloudProcessInstance> update(
+        ResponseEntity<CloudProcessInstance> processEntity,
+        String businessKey,
+        String name
+    ) {
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder
+            .update()
+            .withProcessInstanceId(processEntity.getBody().getId())
+            .withBusinessKey(businessKey)
+            .withName(name)
+            .build();
 
-        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
-                .withProcessInstanceId(processEntity.getBody().getId())
-                .withBusinessKey(businessKey)
-                .withName(name)
-                .build();
-
-         return  updateProcess(updateProcessPayload);
+        return updateProcess(updateProcessPayload);
     }
 
     private ResponseEntity<CloudProcessInstance> updateProcess(UpdateProcessPayload updateProcessPayload) {
         HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload, CONTENT_TYPE_HEADER);
 
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_RELATIVE_URL+ updateProcessPayload.getProcessInstanceId(),
-                                                                                        HttpMethod.PUT,
-                                                                                        requestEntity,
-                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                                        });
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(updateProcessPayload.getProcessInstanceId()),
+            HttpMethod.PUT,
+            requestEntity,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getId()).isNotNull();
         return responseEntity;
     }
 
-    public ResponseEntity<CloudProcessInstance> adminUpdate(ResponseEntity<CloudProcessInstance> processEntity,
-                                                       String businessKey,
-                                                       String name
-                                                       ) {
+    public ResponseEntity<CloudProcessInstance> adminUpdate(
+        ResponseEntity<CloudProcessInstance> processEntity,
+        String businessKey,
+        String name
+    ) {
+        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder
+            .update()
+            .withProcessInstanceId(processEntity.getBody().getId())
+            .withBusinessKey(businessKey)
+            .withName(name)
+            .build();
 
-        UpdateProcessPayload updateProcessPayload = ProcessPayloadBuilder.update()
-                .withProcessInstanceId(processEntity.getBody().getId())
-                .withBusinessKey(businessKey)
-                .withName(name)
-                .build();
-
-         return  adminUpdateProcess(updateProcessPayload);
+        return adminUpdateProcess(updateProcessPayload);
     }
 
     private ResponseEntity<CloudProcessInstance> adminUpdateProcess(UpdateProcessPayload updateProcessPayload) {
         HttpEntity<UpdateProcessPayload> requestEntity = new HttpEntity<>(updateProcessPayload);
 
-        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(PROCESS_INSTANCES_ADMIN_RELATIVE_URL+ updateProcessPayload.getProcessInstanceId(),
-                                                                                        HttpMethod.PUT,
-                                                                                        requestEntity,
-                                                                                        new ParameterizedTypeReference<CloudProcessInstance>() {
-                                                                                        });
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL.concat("/").concat(updateProcessPayload.getProcessInstanceId()),
+            HttpMethod.PUT,
+            requestEntity,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().getId()).isNotNull();
@@ -437,46 +533,42 @@ public class ProcessInstanceRestTemplate {
 
     public ResponseEntity<PagedModel<ProcessInstance>> getSubprocesses(String processInstanceId) {
         ResponseEntity<PagedModel<ProcessInstance>> responseEntity = testRestTemplate.exchange(
-                                                                                                   PROCESS_INSTANCES_RELATIVE_URL + processInstanceId+"/subprocesses",
-                                                                                                   HttpMethod.GET,
-                                                                                                   null,
-                                                                                                   new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
-                                                                                                   });
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/subprocesses"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
 
     public String getModel(String processInstanceId) {
         return executeRequest(
-                              PROCESS_INSTANCES_RELATIVE_URL + processInstanceId + "/model",
-                              HttpMethod.GET,
-                              "image/svg+xml");
+            PROCESS_INSTANCES_RELATIVE_URL.concat("/").concat(processInstanceId).concat("/model"),
+            HttpMethod.GET,
+            "image/svg+xml"
+        );
     }
 
-    private String executeRequest(String url,
-                                  HttpMethod method,
-                                  String contentType) {
-        return testRestTemplate.execute(url,
-                                        method,
-                                        new RequestCallback() {
-                                            @Override
-                                            public void doWithRequest(ClientHttpRequest request) throws IOException {
-                                                if (contentType != null && !contentType.isEmpty()) {
-                                                    request.getHeaders().add("Content-Type",
-                                                                             contentType);
-                                                }
-                                            }
-                                        },
-                                        new ResponseExtractor<String>() {
-
-                                            @Override
-                                            public String extractData(ClientHttpResponse response)
-                                                    throws IOException {
-                                                return new String(IoUtil.readInputStream(response.getBody(),
-                                                                                         null),
-                                                                  "UTF-8");
-                                            }
-                                        });
+    private String executeRequest(String url, HttpMethod method, String contentType) {
+        return testRestTemplate.execute(
+            url,
+            method,
+            new RequestCallback() {
+                @Override
+                public void doWithRequest(ClientHttpRequest request) throws IOException {
+                    if (contentType != null && !contentType.isEmpty()) {
+                        request.getHeaders().add("Content-Type", contentType);
+                    }
+                }
+            },
+            new ResponseExtractor<String>() {
+                @Override
+                public String extractData(ClientHttpResponse response) throws IOException {
+                    return new String(IoUtil.readInputStream(response.getBody(), null), "UTF-8");
+                }
+            }
+        );
     }
 
     public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances() {
@@ -484,7 +576,7 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances(String pages) {
-        return getPagedProcessInstances(PROCESS_INSTANCES_RELATIVE_URL,pages);
+        return getPagedProcessInstances(PROCESS_INSTANCES_RELATIVE_URL, pages);
     }
 
     public ResponseEntity<PagedModel<ProcessInstance>> adminGetPagedProcessInstances() {
@@ -492,20 +584,18 @@ public class ProcessInstanceRestTemplate {
     }
 
     public ResponseEntity<PagedModel<ProcessInstance>> adminGetPagedProcessInstances(String pages) {
-        return getPagedProcessInstances(PROCESS_INSTANCES_ADMIN_RELATIVE_URL,pages);
+        return getPagedProcessInstances(PROCESS_INSTANCES_ADMIN_RELATIVE_URL, pages);
     }
 
-    public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances(String baseURL,String pageFilters) {
+    public ResponseEntity<PagedModel<ProcessInstance>> getPagedProcessInstances(String baseURL, String pageFilters) {
         String pages = pageFilters != null ? pageFilters : "page=0&size=2";
         ResponseEntity<PagedModel<ProcessInstance>> responseEntity = testRestTemplate.exchange(
-                                                                                        baseURL + "?" + pages,
-                                                                                        HttpMethod.GET,
-                                                                                        null,
-                                                                                        new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {
-                                                                                        });
+            baseURL + "?" + pages,
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<PagedModel<ProcessInstance>>() {}
+        );
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
-
-
 }

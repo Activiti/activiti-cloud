@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-query</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-services-query-repo</artifactId>
   <name>Activiti Cloud Query :: Services :: Query Repo</name>
@@ -29,6 +29,9 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-apt</artifactId>
+      <version>${querydsl.version}</version>
+      <scope>provided</scope>
+      <classifier>jakarta</classifier>
     </dependency>
     <dependency>
       <groupId>com.querydsl</groupId>
@@ -37,6 +40,7 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-jpa</artifactId>
+      <classifier>jakarta</classifier>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

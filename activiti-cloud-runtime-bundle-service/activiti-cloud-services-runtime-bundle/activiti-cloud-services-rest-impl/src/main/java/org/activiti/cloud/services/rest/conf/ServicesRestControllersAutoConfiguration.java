@@ -29,21 +29,23 @@ import org.activiti.cloud.services.rest.controllers.ProcessInstanceControllerImp
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceTasksControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.ProcessInstanceVariableControllerImpl;
-import org.activiti.cloud.services.rest.controllers.ServiceTaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.RuntimeBundleExceptionHandler;
+import org.activiti.cloud.services.rest.controllers.ServiceTaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskVariableAdminControllerImpl;
 import org.activiti.cloud.services.rest.controllers.TaskVariableControllerImpl;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(ServicesRestWebMvcAutoConfiguration.class)
-@Import({HomeControllerImpl.class,
+@Import(
+    {
+        HomeControllerImpl.class,
         ConnectorDefinitionControllerImpl.class,
         ProcessDefinitionAdminControllerImpl.class,
         ProcessDefinitionControllerImpl.class,
@@ -62,7 +64,7 @@ import org.springframework.context.annotation.Import;
         CandidateUserAdminControllerImpl.class,
         CandidateGroupControllerImpl.class,
         CandidateGroupAdminControllerImpl.class,
-        ServiceTaskAdminControllerImpl.class})
-public class ServicesRestControllersAutoConfiguration {
-
-}
+        ServiceTaskAdminControllerImpl.class,
+    }
+)
+public class ServicesRestControllersAutoConfiguration {}

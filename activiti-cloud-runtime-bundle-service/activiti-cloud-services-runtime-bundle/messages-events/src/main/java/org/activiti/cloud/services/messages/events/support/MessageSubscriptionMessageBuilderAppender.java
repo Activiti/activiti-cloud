@@ -39,11 +39,10 @@ public class MessageSubscriptionMessageBuilderAppender implements MessageBuilder
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
 
-        return request.setHeader(MESSAGE_EVENT_BUSINESS_KEY, messageSubscription.getBusinessKey())
-                      .setHeader(MESSAGE_EVENT_CORRELATION_KEY, messageSubscription.getConfiguration())
-                      .setHeader(MESSAGE_EVENT_NAME, messageSubscription.getEventName())
-                      .setHeader(MESSAGE_EVENT_ID, messageSubscription.getId())
-       ;
+        return request
+            .setHeader(MESSAGE_EVENT_BUSINESS_KEY, messageSubscription.getBusinessKey())
+            .setHeader(MESSAGE_EVENT_CORRELATION_KEY, messageSubscription.getConfiguration())
+            .setHeader(MESSAGE_EVENT_NAME, messageSubscription.getEventName())
+            .setHeader(MESSAGE_EVENT_ID, messageSubscription.getId());
     }
-
 }

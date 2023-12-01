@@ -19,8 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
-import com.nimbusds.jose.shaded.json.JSONObject;
+import com.nimbusds.jose.util.JSONObjectUtils;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,25 +45,22 @@ public class KeycloakJwtAdapterTest {
     }
 
     @Test
-    public void shouldNotThrowAnyExceptionWhenRolesIsNull(){
-        JSONObject rolesParent = new JSONObject();
+    public void shouldNotThrowAnyExceptionWhenRolesIsNull() {
+        Map<String, Object> rolesParent = JSONObjectUtils.newJSONObject();
         rolesParent.put("roles", null);
         when(jwt.hasClaim("realm_access")).thenReturn(true);
         when(jwt.getClaim("realm_access")).thenReturn(rolesParent);
 
-       assertDoesNotThrow(() -> keycloakJwtAdapter.getRoles());
+        assertDoesNotThrow(() -> keycloakJwtAdapter.getRoles());
     }
 
     @Test
-    public void shouldReturnRoles(){
-        JSONObject rolesParent = new JSONObject();
+    public void shouldReturnRoles() {
+        Map<String, Object> rolesParent = JSONObjectUtils.newJSONObject();
         rolesParent.put("roles", List.of("roleA", "roleB"));
         when(jwt.hasClaim("realm_access")).thenReturn(true);
         when(jwt.getClaim("realm_access")).thenReturn(rolesParent);
 
-        assertThat(keycloakJwtAdapter.getRoles())
-            .hasSize(2)
-            .containsExactly("roleA", "roleB");
+        assertThat(keycloakJwtAdapter.getRoles()).hasSize(2).containsExactly("roleA", "roleB");
     }
-
 }

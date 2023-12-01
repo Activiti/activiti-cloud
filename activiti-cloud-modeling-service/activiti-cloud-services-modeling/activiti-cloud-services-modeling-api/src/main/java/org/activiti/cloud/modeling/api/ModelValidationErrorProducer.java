@@ -20,27 +20,27 @@ package org.activiti.cloud.modeling.api;
  * Producer of {@link ModelValidationError}
  */
 public interface ModelValidationErrorProducer {
-
-    default ModelValidationError createModelValidationError(String problem,
-                                                            String description,
-                                                            String schema,
-                                                            String errorCode) {
-        ModelValidationError modelValidationError = new ModelValidationError(problem, description,
-            schema);
+    default ModelValidationError createModelValidationError(
+        String problem,
+        String description,
+        String schema,
+        String errorCode
+    ) {
+        ModelValidationError modelValidationError = new ModelValidationError(problem, description, schema);
         modelValidationError.setErrorCode(errorCode);
         return modelValidationError;
     }
 
-    default ModelValidationError createModelValidationError(String problem,
-                                                            String description,
-                                                            String schema,
-                                                            String errorCode,
-                                                            String referenceId) {
-
+    default ModelValidationError createModelValidationError(
+        String problem,
+        String description,
+        String schema,
+        String errorCode,
+        String referenceId
+    ) {
         ModelValidationError validationError = new ModelValidationError(problem, description, schema);
         validationError.setErrorCode(errorCode);
         validationError.setReferenceId(referenceId);
         return validationError;
     }
-
 }

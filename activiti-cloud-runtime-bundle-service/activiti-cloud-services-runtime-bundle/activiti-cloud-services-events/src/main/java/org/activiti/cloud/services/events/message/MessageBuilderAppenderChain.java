@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -47,8 +46,7 @@ public class MessageBuilderAppenderChain {
         MessageHeaderAccessor accessor = new MessageHeaderAccessor();
         accessor.setLeaveMutable(true);
 
-        MessageBuilder<P> messageBuilder = MessageBuilder.withPayload(payload)
-                                                         .setHeaders(accessor);
+        MessageBuilder<P> messageBuilder = MessageBuilder.withPayload(payload).setHeaders(accessor);
         // Let's resolve payload class name
         messageBuilder.setHeader(MESSAGE_PAYLOAD_TYPE, payload.getClass().getName());
 
@@ -58,7 +56,7 @@ public class MessageBuilderAppenderChain {
 
         // Let's resolve and set routingKey in the message headers if present
         resolveRoutingKey(accessor.getMessageHeaders())
-                .ifPresent(routingKey -> accessor.setHeader(ROUTING_KEY, routingKey));
+            .ifPresent(routingKey -> accessor.setHeader(ROUTING_KEY, routingKey));
 
         return messageBuilder;
     }
@@ -97,8 +95,5 @@ public class MessageBuilderAppenderChain {
         public String getPrefix() {
             return EVENT_MESSAGE;
         }
-
     }
-
-
 }

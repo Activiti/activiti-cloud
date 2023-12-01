@@ -15,6 +15,16 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import jakarta.persistence.EntityManager;
+import java.util.Date;
+import java.util.UUID;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.api.task.model.impl.TaskImpl;
@@ -27,17 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCancelledEventHandlerTest {
@@ -66,9 +65,7 @@ public class TaskEntityCancelledEventHandlerTest {
     }
 
     private CloudTaskCancelledEvent buildTaskCancelledEvent() {
-        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(),
-                                     "to be cancelled",
-                                     Task.TaskStatus.CANCELLED);
+        TaskImpl task = new TaskImpl(UUID.randomUUID().toString(), "to be cancelled", Task.TaskStatus.CANCELLED);
         return new CloudTaskCancelledEventImpl(task);
     }
 

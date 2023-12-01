@@ -43,11 +43,12 @@ public class QueryDslPredicateAggregatorTest {
             .willReturn(initialPredicatePlusFirstAndSecondFilters);
 
         //when
-        Predicate finalPredicate = predicateAggregator
-            .applyFilters(initialPredicate, Arrays.asList(firstFilter, secondFilter));
+        Predicate finalPredicate = predicateAggregator.applyFilters(
+            initialPredicate,
+            Arrays.asList(firstFilter, secondFilter)
+        );
 
         //then
         assertThat(finalPredicate).isEqualTo(initialPredicatePlusFirstAndSecondFilters);
     }
-
 }

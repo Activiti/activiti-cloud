@@ -19,7 +19,6 @@ package org.activiti.cloud.modeling.api;
  * Business logic related with actions to be done when the Model metadata changes
  */
 public interface ModelUpdateListener {
-
     /**
      * Perform an extra action over the model from the data received.
      *

@@ -41,9 +41,7 @@ public class DeleteProcessInstanceCmdExecutorTest {
 
     @Test
     public void startProcessInstanceCmdExecutorTest() {
-        DeleteProcessPayload payload = ProcessPayloadBuilder.delete()
-                                                            .withProcessInstanceId("def key")
-                                                            .build();
+        DeleteProcessPayload payload = ProcessPayloadBuilder.delete().withProcessInstanceId("def key").build();
 
         ProcessInstance fakeProcessInstance = mock(ProcessInstance.class);
 

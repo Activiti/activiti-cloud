@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.graphql.ws.transport;
 
 import java.security.Principal;
-
 import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
@@ -30,61 +29,58 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AbstractGraphQLSubProtocolEvent extends ApplicationEvent {
 
-	private final Message<GraphQLMessage> message;
+    private final Message<GraphQLMessage> message;
 
-	private final Principal user;
+    private final Principal user;
 
+    /**
+     * Create a new AbstractGraphQLSubProtocolEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the incoming message
+     */
+    protected AbstractGraphQLSubProtocolEvent(Object source, Message<GraphQLMessage> message) {
+        super(source);
+        Assert.notNull(message, "Message must not be null");
+        this.message = message;
+        this.user = null;
+    }
 
-	/**
-	 * Create a new AbstractGraphQLSubProtocolEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message
-	 */
-	protected AbstractGraphQLSubProtocolEvent(Object source, Message<GraphQLMessage> message) {
-		super(source);
-		Assert.notNull(message, "Message must not be null");
-		this.message = message;
-		this.user = null;
-	}
+    /**
+     * Create a new AbstractGraphQLSubProtocolEvent.
+     * @param source the component that published the event (never {@code null})
+     * @param message the incoming message
+     */
+    protected AbstractGraphQLSubProtocolEvent(Object source, Message<GraphQLMessage> message, Principal user) {
+        super(source);
+        Assert.notNull(message, "Message must not be null");
+        this.message = message;
+        this.user = user;
+    }
 
-	/**
-	 * Create a new AbstractGraphQLSubProtocolEvent.
-	 * @param source the component that published the event (never {@code null})
-	 * @param message the incoming message
-	 */
-	protected AbstractGraphQLSubProtocolEvent(Object source, Message<GraphQLMessage> message, Principal user) {
-		super(source);
-		Assert.notNull(message, "Message must not be null");
-		this.message = message;
-		this.user = user;
-	}
+    /**
+     * Return the Message associated with the event. Here is an example of
+     * obtaining information about the session id or any headers in the
+     * message:
+     * <pre class="code">
+     * StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
+     * headers.getSessionId();
+     * headers.getSessionAttributes();
+     * headers.getPrincipal();
+     * </pre>
+     */
+    public Message<GraphQLMessage> getMessage() {
+        return this.message;
+    }
 
+    /**
+     * Return the user for the session associated with the event.
+     */
+    public Principal getUser() {
+        return this.user;
+    }
 
-	/**
-	 * Return the Message associated with the event. Here is an example of
-	 * obtaining information about the session id or any headers in the
-	 * message:
-	 * <pre class="code">
-	 * StompHeaderAccessor headers = StompHeaderAccessor.wrap(message);
-	 * headers.getSessionId();
-	 * headers.getSessionAttributes();
-	 * headers.getPrincipal();
-	 * </pre>
-	 */
-	public Message<GraphQLMessage> getMessage() {
-		return this.message;
-	}
-
-	/**
-	 * Return the user for the session associated with the event.
-	 */
-	public Principal getUser() {
-		return this.user;
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[" + this.message + "]";
-	}
-
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + this.message + "]";
+    }
 }

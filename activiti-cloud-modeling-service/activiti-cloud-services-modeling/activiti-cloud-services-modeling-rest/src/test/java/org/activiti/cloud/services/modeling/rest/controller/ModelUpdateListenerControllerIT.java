@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.modeling.api.JsonModelType;
 import org.activiti.cloud.modeling.api.Model;
@@ -31,6 +32,7 @@ import org.activiti.cloud.modeling.repository.ModelRepository;
 import org.activiti.cloud.services.modeling.config.ModelingRestApplication;
 import org.activiti.cloud.services.modeling.entity.ModelEntity;
 import org.activiti.cloud.services.modeling.security.WithMockModelerUser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +42,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration tests for models rest api dealing with Json models
  */
-@ActiveProfiles(profiles = {"test", "generic"})
+@ActiveProfiles(profiles = { "test", "generic" })
 @SpringBootTest(classes = ModelingRestApplication.class)
+@Transactional
 @WebAppConfiguration
 @WithMockModelerUser
 public class ModelUpdateListenerControllerIT {
@@ -71,34 +75,41 @@ public class ModelUpdateListenerControllerIT {
 
     private MockMvc mockMvc;
 
+    private Model genericJsonModel;
+
     private static final String GENERIC_MODEL_NAME = "simple-model";
 
     @BeforeEach
     public void setUp() {
         mockMvc = webAppContextSetup(context).build();
+        genericJsonModel =
+            modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericJsonModelType.getName()));
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        modelRepository.deleteModel(genericJsonModel);
     }
 
     @Test
     public void should_callUpdateListenerMatchingWithModelType_when_updatingModelContent() throws Exception {
         String name = "updated-model-name";
-        Model genericJsonModel = modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME,
-            genericJsonModelType.getName()));
-
         Model updatedModel = new ModelEntity(name, genericJsonModelType.getName());
 
         mockMvc
-            .perform(put("/v1/models/{modelId}", genericJsonModel.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedModel)))
+            .perform(
+                put("/v1/models/{modelId}", genericJsonModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(updatedModel))
+            )
             .andExpect(status().is2xxSuccessful());
 
-        verify(genericJsonModelUpdateListener,
-            times(1))
+        verify(genericJsonModelUpdateListener, times(1))
             .execute(
                 argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
-                argThat(newModel -> newModel.getName().equals(name)));
+                argThat(newModel -> newModel.getName().equals(name))
+            );
 
-        verify(genericNonJsonModelUpdateListener,
-            never())
-            .execute(any(), any());
+        verify(genericNonJsonModelUpdateListener, never()).execute(any(), any());
     }
 }

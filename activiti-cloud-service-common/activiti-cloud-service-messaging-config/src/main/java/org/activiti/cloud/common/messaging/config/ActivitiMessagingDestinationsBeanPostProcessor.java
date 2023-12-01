@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.common.messaging.config;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,14 +24,15 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.core.Ordered;
 
-import java.util.Optional;
-
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
+
     private static final Logger log = LoggerFactory.getLogger(ActivitiMessagingDestinationsBeanPostProcessor.class);
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
-    public ActivitiMessagingDestinationsBeanPostProcessor(ActivitiMessagingDestinationTransformer destinationTransformer) {
+    public ActivitiMessagingDestinationsBeanPostProcessor(
+        ActivitiMessagingDestinationTransformer destinationTransformer
+    ) {
         this.destinationTransformer = destinationTransformer;
     }
 
@@ -40,20 +42,17 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
             log.info("Post-processing messaging destinations for bean {} with name {}", bean, beanName);
 
-            bindingServiceProperties.getBindings()
-                                    .forEach((bindingName, bindingProperties) -> {
-                                        String source = Optional.ofNullable(bindingProperties.getDestination())
-                                                                .orElse(bindingName);
+            bindingServiceProperties
+                .getBindings()
+                .forEach((bindingName, bindingProperties) -> {
+                    String source = Optional.ofNullable(bindingProperties.getDestination()).orElse(bindingName);
 
-                                        String destination = destinationTransformer.apply(source);
+                    String destination = destinationTransformer.apply(source);
 
-                                        bindingProperties.setDestination(destination);
+                    bindingProperties.setDestination(destination);
 
-                                        log.warn("Configured destination '{}' for binding '{}'",
-                                                 destination,
-                                                 bindingName);
-                                    });
-
+                    log.warn("Configured destination '{}' for binding '{}'", destination, bindingName);
+                });
         }
 
         return bean;

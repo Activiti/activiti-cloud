@@ -16,6 +16,11 @@
 
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import jakarta.persistence.EntityManager;
+import java.util.Arrays;
+import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
@@ -47,12 +52,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(MockitoExtension.class)
 class QueryEventHandlerContextOptimizerTest {
 
@@ -63,8 +62,7 @@ class QueryEventHandlerContextOptimizerTest {
     private EntityManager entityManager;
 
     @BeforeEach
-    void setUp() {
-    }
+    void setUp() {}
 
     @Test
     void optimizeTaskVariableEvents() {
@@ -74,7 +72,7 @@ class QueryEventHandlerContextOptimizerTest {
         CloudVariableDeletedEventImpl cloudVariableDeletedEvent = new CloudVariableDeletedEventImpl();
         CloudVariableUpdatedEventImpl cloudVariableUpdatedEvent = new CloudVariableUpdatedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
+        List<CloudRuntimeEvent<?, ?>> events = Arrays.asList(
             cloudVariableCreatedEvent,
             cloudTaskCreatedEvent,
             cloudVariableDeletedEvent,
@@ -82,13 +80,16 @@ class QueryEventHandlerContextOptimizerTest {
         );
 
         //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
         //then
-        assertThat(result).containsExactly(cloudTaskCreatedEvent,
-                                           cloudVariableCreatedEvent,
-                                           cloudVariableUpdatedEvent,
-                                           cloudVariableDeletedEvent);
+        assertThat(result)
+            .containsExactly(
+                cloudTaskCreatedEvent,
+                cloudVariableCreatedEvent,
+                cloudVariableUpdatedEvent,
+                cloudVariableDeletedEvent
+            );
     }
 
     @Test
@@ -104,7 +105,7 @@ class QueryEventHandlerContextOptimizerTest {
         CloudTaskCandidateUserRemovedEventImpl cloudTaskCandidateUserRemovedEvent = new CloudTaskCandidateUserRemovedEventImpl();
         CloudTaskCandidateGroupRemovedEventImpl cloudTaskCandidateGroupRemovedEvent = new CloudTaskCandidateGroupRemovedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
+        List<CloudRuntimeEvent<?, ?>> events = Arrays.asList(
             cloudTaskCandidateUserAddedEvent,
             cloudTaskCandidateGroupAddedEvent,
             cloudTaskCreatedEvent,
@@ -117,18 +118,21 @@ class QueryEventHandlerContextOptimizerTest {
         );
 
         //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
         //then
-        assertThat(result).containsExactly(cloudTaskCreatedEvent,
-                                           cloudTaskCandidateUserAddedEvent,
-                                           cloudTaskCandidateGroupAddedEvent,
-                                           cloudTaskAssignedEvent,
-                                           cloudTaskUpdatedEvent,
-                                           cloudTaskCompletedEvent,
-                                           cloudTaskCancelledEvent,
-                                           cloudTaskCandidateUserRemovedEvent,
-                                           cloudTaskCandidateGroupRemovedEvent);
+        assertThat(result)
+            .containsExactly(
+                cloudTaskCreatedEvent,
+                cloudTaskCandidateUserAddedEvent,
+                cloudTaskCandidateGroupAddedEvent,
+                cloudTaskAssignedEvent,
+                cloudTaskUpdatedEvent,
+                cloudTaskCompletedEvent,
+                cloudTaskCancelledEvent,
+                cloudTaskCandidateUserRemovedEvent,
+                cloudTaskCandidateGroupRemovedEvent
+            );
     }
 
     @Test
@@ -143,7 +147,7 @@ class QueryEventHandlerContextOptimizerTest {
         CloudBPMNActivityCancelledEvent cloudBPMNActivityCancelledEvent = new CloudBPMNActivityCancelledEventImpl();
         CloudBPMNSignalReceivedEvent cloudBPMNSignalReceivedEvent = new CloudBPMNSignalReceivedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
+        List<CloudRuntimeEvent<?, ?>> events = Arrays.asList(
             cloudIntegrationRequestedEvent,
             cloudSequenceFlowTakenEvent,
             cloudBPMNActivityStartedEvent,
@@ -155,17 +159,20 @@ class QueryEventHandlerContextOptimizerTest {
         );
 
         //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
         //then
-        assertThat(result).containsExactly(cloudSequenceFlowTakenEvent,
-                                           cloudBPMNActivityStartedEvent,
-                                           cloudIntegrationRequestedEvent,
-                                           cloudBPMNSignalReceivedEvent,
-                                           cloudBPMNActivityCompletedEvent,
-                                           cloudBPMNActivityCancelledEvent,
-                                           cloudIntegrationResultReceivedEvent,
-                                           cloudIntegrationErrorReceivedEvent);
+        assertThat(result)
+            .containsExactly(
+                cloudSequenceFlowTakenEvent,
+                cloudBPMNActivityStartedEvent,
+                cloudIntegrationRequestedEvent,
+                cloudBPMNSignalReceivedEvent,
+                cloudBPMNActivityCompletedEvent,
+                cloudBPMNActivityCancelledEvent,
+                cloudIntegrationResultReceivedEvent,
+                cloudIntegrationErrorReceivedEvent
+            );
     }
 
     @Test
@@ -191,7 +198,7 @@ class QueryEventHandlerContextOptimizerTest {
         CloudBPMNActivityCancelledEvent cloudBPMNActivityCancelledEvent2 = new CloudBPMNActivityCancelledEventImpl();
         CloudBPMNSignalReceivedEvent cloudBPMNSignalReceivedEvent2 = new CloudBPMNSignalReceivedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = Arrays.asList(
+        List<CloudRuntimeEvent<?, ?>> events = Arrays.asList(
             cloudIntegrationRequestedEvent2,
             cloudIntegrationRequestedEvent1,
             cloudSequenceFlowTakenEvent2,
@@ -211,25 +218,27 @@ class QueryEventHandlerContextOptimizerTest {
         );
 
         //when
-        List<CloudRuntimeEvent<?,?>> result = subject.optimize(events);
+        List<CloudRuntimeEvent<?, ?>> result = subject.optimize(events);
 
         //then
-        assertThat(result).containsExactly(cloudSequenceFlowTakenEvent1,
-                                           cloudSequenceFlowTakenEvent2,
-                                           cloudBPMNActivityStartedEvent1,
-                                           cloudBPMNActivityStartedEvent2,
-                                           cloudIntegrationRequestedEvent1,
-                                           cloudIntegrationRequestedEvent2,
-                                           cloudBPMNSignalReceivedEvent1,
-                                           cloudBPMNSignalReceivedEvent2,
-                                           cloudBPMNActivityCompletedEvent1,
-                                           cloudBPMNActivityCancelledEvent1,
-                                           cloudBPMNActivityCompletedEvent2,
-                                           cloudBPMNActivityCancelledEvent2,
-                                           cloudIntegrationResultReceivedEvent1,
-                                           cloudIntegrationErrorReceivedEvent1,
-                                           cloudIntegrationResultReceivedEvent2,
-                                           cloudIntegrationErrorReceivedEvent2);
+        assertThat(result)
+            .containsExactly(
+                cloudSequenceFlowTakenEvent1,
+                cloudSequenceFlowTakenEvent2,
+                cloudBPMNActivityStartedEvent1,
+                cloudBPMNActivityStartedEvent2,
+                cloudIntegrationRequestedEvent1,
+                cloudIntegrationRequestedEvent2,
+                cloudBPMNSignalReceivedEvent1,
+                cloudBPMNSignalReceivedEvent2,
+                cloudBPMNActivityCompletedEvent1,
+                cloudBPMNActivityCancelledEvent1,
+                cloudBPMNActivityCompletedEvent2,
+                cloudBPMNActivityCancelledEvent2,
+                cloudIntegrationResultReceivedEvent1,
+                cloudIntegrationErrorReceivedEvent1,
+                cloudIntegrationResultReceivedEvent2,
+                cloudIntegrationErrorReceivedEvent2
+            );
     }
-
 }

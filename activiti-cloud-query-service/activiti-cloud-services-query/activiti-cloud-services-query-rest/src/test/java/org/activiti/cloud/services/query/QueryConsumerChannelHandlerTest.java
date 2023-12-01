@@ -15,6 +15,12 @@
  */
 package org.activiti.cloud.services.query;
 
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
@@ -26,12 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.springframework.integration.transaction.PseudoTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class QueryConsumerChannelHandlerTest {
@@ -45,23 +47,25 @@ public class QueryConsumerChannelHandlerTest {
     @Mock
     private QueryEventHandlerContextOptimizer optimizer;
 
+    @Mock
+    private EntityManager entityManager;
+
     @Test
     public void receiveShouldHandleReceivedEvent() {
         //given
         CloudProcessCreatedEventImpl processCreatedEvent = new CloudProcessCreatedEventImpl();
         CloudProcessStartedEventImpl processStartedEvent = new CloudProcessStartedEventImpl();
 
-        List<CloudRuntimeEvent<?,?>> events = asList(processCreatedEvent,
-                                                     processStartedEvent);
+        List<CloudRuntimeEvent<?, ?>> events = asList(processCreatedEvent, processStartedEvent);
 
         when(optimizer.optimize(events)).thenReturn(events);
 
         //when
-        consumer.receive(events);
+        new TransactionTemplate(new PseudoTransactionManager()).executeWithoutResult(tx -> consumer.receive(events));
 
         //then
         verify(optimizer).optimize(events);
         verify(eventHandlerContext).handle(processCreatedEvent, processStartedEvent);
+        verify(entityManager).clear();
     }
-
 }

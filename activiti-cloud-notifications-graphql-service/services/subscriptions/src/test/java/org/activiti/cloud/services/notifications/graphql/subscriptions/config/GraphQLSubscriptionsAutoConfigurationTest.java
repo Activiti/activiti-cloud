@@ -41,9 +41,7 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
 
     @EnableAutoConfiguration
     @Configuration
-    static class GraphQLSubscriptionSchemaTestApplication {
-
-    }
+    static class GraphQLSubscriptionSchemaTestApplication {}
 
     @Test
     public void testGraphQLSubscriptionAutoConfiguration() {
@@ -54,14 +52,16 @@ public class GraphQLSubscriptionsAutoConfigurationTest {
     public void testGraphQLSubscriptionSchemaProperties() {
         assertThat(properties.getGraphqls()).isEqualTo("classpath:activiti.graphqls");
         assertThat(properties.getSubscriptionFieldName()).isEqualTo("engineEvents");
-        assertThat(properties.getSubscriptionArgumentNames()).isEqualTo(new String[]{
-                                                                                "serviceName",
-                                                                                "appName",
-                                                                                "eventType",
-                                                                                "processDefinitionKey",
-                                                                                "processInstanceId",
-                                                                                "businessKey"
-                                                                            });
+        assertThat(properties.getSubscriptionArgumentNames())
+            .isEqualTo(
+                new String[] {
+                    "serviceName",
+                    "appName",
+                    "eventType",
+                    "processDefinitionKey",
+                    "processInstanceId",
+                    "businessKey",
+                }
+            );
     }
-
 }

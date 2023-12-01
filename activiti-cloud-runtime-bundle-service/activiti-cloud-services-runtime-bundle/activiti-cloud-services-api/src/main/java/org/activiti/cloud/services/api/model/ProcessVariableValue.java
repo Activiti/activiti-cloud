@@ -27,18 +27,16 @@ public class ProcessVariableValue implements Serializable {
     private String type;
     private String value;
 
-    ProcessVariableValue() { }
+    ProcessVariableValue() {}
 
     public ProcessVariableValue(String type, String value) {
         this.type = type;
         this.value = value;
     }
 
-
     public String getType() {
         return type;
     }
-
 
     public String getValue() {
         return value;
@@ -75,13 +73,12 @@ public class ProcessVariableValue implements Serializable {
 
     public String toJson() {
         StringBuilder builder = new StringBuilder();
-        builder.append("{\"type\":\"")
-               .append(type)
-               .append("\",\"value\":")
-               .append(Optional.ofNullable(value)
-                               .map(this::escape)
-                               .orElse("null"))
-               .append("}");
+        builder
+            .append("{\"type\":\"")
+            .append(type)
+            .append("\",\"value\":")
+            .append(Optional.ofNullable(value).map(this::escape).orElse("null"))
+            .append("}");
         return builder.toString();
     }
 
@@ -90,29 +87,17 @@ public class ProcessVariableValue implements Serializable {
         return toJson();
     }
 
-    private String escape( String value )
-    {
+    private String escape(String value) {
         StringBuilder builder = new StringBuilder();
-        builder.append( "\"" );
-        for( char c : value.toCharArray() )
-        {
-            if( c == '\'' )
-                builder.append( "\\'" );
-            else if ( c == '\"' )
-                builder.append( "\\\"" );
-            else if( c == '\r' )
-                builder.append( "\\r" );
-            else if( c == '\n' )
-                builder.append( "\\n" );
-            else if( c == '\t' )
-                builder.append( "\\t" );
-            else if( c < 32 || c >= 127 )
-                builder.append( String.format( "\\u%04x", (int)c ) );
-            else
-                builder.append( c );
+        builder.append("\"");
+        for (char c : value.toCharArray()) {
+            if (c == '\'') builder.append("\\'"); else if (c == '\"') builder.append("\\\""); else if (
+                c == '\r'
+            ) builder.append("\\r"); else if (c == '\n') builder.append("\\n"); else if (c == '\t') builder.append(
+                "\\t"
+            ); else if (c < 32 || c >= 127) builder.append(String.format("\\u%04x", (int) c)); else builder.append(c);
         }
-        builder.append( "\"" );
+        builder.append("\"");
         return builder.toString();
     }
-
 }

@@ -24,9 +24,11 @@ public class ProcessInstanceVariableFilter implements ProcessDefinitionKeyBasedF
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
         QProcessInstanceEntity processInstance = QProcessVariableEntity.processVariableEntity.processInstance;
-        return new ProcessDefinitionRestrictionProperties(processInstance.serviceName,
-                                                          processInstance.serviceFullName,
-                                                          processInstance.processDefinitionKey);
+        return new ProcessDefinitionRestrictionProperties(
+            processInstance.serviceName,
+            processInstance.serviceFullName,
+            processInstance.processDefinitionKey
+        );
     }
 
     @Override

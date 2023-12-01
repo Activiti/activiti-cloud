@@ -21,27 +21,20 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNTimerCancelledEvent;
 
 public class CloudBPMNTimerCancelledEventImpl extends CloudBPMNTimerEventImpl implements CloudBPMNTimerCancelledEvent {
 
-    public CloudBPMNTimerCancelledEventImpl() {
+    public CloudBPMNTimerCancelledEventImpl() {}
+
+    public CloudBPMNTimerCancelledEventImpl(BPMNTimer entity, String processDefinitionId, String processInstanceId) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNTimerCancelledEventImpl(BPMNTimer entity,
-                                            String processDefinitionId,
-                                            String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNTimerCancelledEventImpl(String id,
-                                            Long timestamp,
-                                            BPMNTimer entity,
-                                            String processDefinitionId,
-                                            String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNTimerCancelledEventImpl(
+        String id,
+        Long timestamp,
+        BPMNTimer entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override

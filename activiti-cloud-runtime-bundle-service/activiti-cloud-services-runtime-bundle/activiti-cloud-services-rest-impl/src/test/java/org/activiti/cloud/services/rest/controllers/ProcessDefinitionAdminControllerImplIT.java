@@ -15,23 +15,38 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -49,29 +64,23 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(ProcessDefinitionAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
-public class ProcessDefinitionAdminControllerImplIT {
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class,
+    }
+)
+class ProcessDefinitionAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -85,7 +94,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private TaskAdminRuntime taskAdminRuntime;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -94,7 +103,7 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private SecurityManager securityManager;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean
@@ -103,17 +112,24 @@ public class ProcessDefinitionAdminControllerImplIT {
     @MockBean
     private ProcessRuntime processRuntime;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
         assertThat(processRuntime).isNotNull();
     }
 
     @Test
-    public void getProcessDefinitions() throws Exception {
-
+    void getProcessDefinitions() throws Exception {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId("procId");
         processDefinition.setName("my process");
@@ -124,22 +140,23 @@ public class ProcessDefinitionAdminControllerImplIT {
         String this_is_my_process = "this is my process";
         int version = 1;
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
-        processDefinitionList.add(buildProcessDefinition(procId,
-                my_process,
-                this_is_my_process,
-                version));
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                processDefinitionList.size());
+        processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processAdminRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         this.mockMvc.perform(get("/admin/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+            .andExpect(status().isOk());
     }
 
-    private ProcessDefinition buildProcessDefinition(String processDefinitionId,
-                                                     String name,
-                                                     String description,
-                                                     int version) {
+    private ProcessDefinition buildProcessDefinition(
+        String processDefinitionId,
+        String name,
+        String description,
+        int version
+    ) {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId(processDefinitionId);
         processDefinition.setName(name);
@@ -148,9 +165,8 @@ public class ProcessDefinitionAdminControllerImplIT {
         return processDefinition;
     }
 
-
     @Test
-    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
@@ -161,27 +177,39 @@ public class ProcessDefinitionAdminControllerImplIT {
 
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                11);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
         given(processAdminRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(
+                    get("/admin/v1/process-definitions?skipCount=10&maxItems=10")
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
         //then
         String responseContent = result.getResponse().getContentAsString();
         assertThatJson(responseContent)
-                .node("list.pagination.skipCount").isEqualTo(10)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(11);
+            .node("list.pagination.skipCount")
+            .isEqualTo(10)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(11);
         assertThatJson(responseContent)
-                .node("list.entries[0].entry.id").isEqualTo(processDefId)
-                .node("list.entries[0].entry.name").isEqualTo("my process")
-                .node("list.entries[0].entry.description").isEqualTo("This is my process")
-                .node("list.entries[0].entry.version").isEqualTo(1);
+            .node("list.entries[0].entry.id")
+            .isEqualTo(processDefId)
+            .node("list.entries[0].entry.name")
+            .isEqualTo("my process")
+            .node("list.entries[0].entry.description")
+            .isEqualTo("This is my process")
+            .node("list.entries[0].entry.version")
+            .isEqualTo(1);
     }
 }

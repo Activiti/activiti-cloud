@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.util;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class QueryParameters {
 
@@ -41,12 +40,14 @@ public class QueryParameters {
         return variables;
     }
 
-    public static QueryParameters from(String queryMessage) throws JsonParseException, JsonMappingException, IOException {
+    public static QueryParameters from(String queryMessage)
+        throws JsonParseException, JsonMappingException, IOException {
         Map<String, Object> json = JsonConverter.toMap(queryMessage);
         return from(json);
     }
 
-    public static QueryParameters from(Map<String, Object> json) throws JsonParseException, JsonMappingException, IOException {
+    public static QueryParameters from(Map<String, Object> json)
+        throws JsonParseException, JsonMappingException, IOException {
         QueryParameters parameters = new QueryParameters();
         parameters.query = (String) json.get("query");
         parameters.operationName = (String) json.get("operationName");
@@ -54,8 +55,8 @@ public class QueryParameters {
         return parameters;
     }
 
-
-    private static Map<String, Object> getVariables(Object variables) throws JsonParseException, JsonMappingException, IOException {
+    private static Map<String, Object> getVariables(Object variables)
+        throws JsonParseException, JsonMappingException, IOException {
         if (variables instanceof Map) {
             Map<?, ?> inputVars = (Map) variables;
             Map<String, Object> vars = new HashMap<>();
@@ -64,5 +65,4 @@ public class QueryParameters {
         }
         return JsonConverter.toMap(String.valueOf(variables));
     }
-
 }

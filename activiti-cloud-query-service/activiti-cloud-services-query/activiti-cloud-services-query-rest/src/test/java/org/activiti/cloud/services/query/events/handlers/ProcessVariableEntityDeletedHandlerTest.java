@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import jakarta.persistence.EntityManager;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
@@ -57,7 +57,7 @@ public class ProcessVariableEntityDeletedHandlerTest {
         processInstanceEntity.getVariables().add(variableEntity);
 
         given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
-                                 .willReturn(Optional.of(processInstanceEntity));
+            .willReturn(Optional.of(processInstanceEntity));
 
         //when
         handler.handle(event);
@@ -65,11 +65,11 @@ public class ProcessVariableEntityDeletedHandlerTest {
         //then
         verify(entityManager).remove(variableEntity);
         assertThat(processInstanceEntity.getVariables()).isEmpty();
-
     }
 
     private static CloudVariableDeletedEvent buildVariableDeletedEvent() {
-        return new CloudVariableDeletedEventImpl(new VariableInstanceImpl<>("var", "string", "test", "procInstId", null));
+        return new CloudVariableDeletedEventImpl(
+            new VariableInstanceImpl<>("var", "string", "test", "procInstId", null)
+        );
     }
-
 }

@@ -16,7 +16,5 @@
 package org.activiti.cloud.services.notifications.graphql.events;
 
 public interface RoutingKeyResolver {
-
-	String resolveRoutingKey(Object object);
-
+    String resolveRoutingKey(Object object);
 }

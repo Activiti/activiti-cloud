@@ -15,8 +15,14 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.Optional;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
@@ -27,26 +33,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
-
 @RestController
 @RequestMapping(
-        value = "/v1/tasks/{taskId}/variables",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+    value = "/v1/tasks/{td}/variables",
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+)
 public class TaskVariableController {
 
     private final TaskVariableRepository variableRepository;
@@ -55,27 +55,30 @@ public class TaskVariableController {
 
     private AlfrescoPagedModelAssembler<TaskVariableEntity> pagedCollectionModelAssembler;
 
-
     @Autowired
-    public TaskVariableController(TaskVariableRepository variableRepository,
-                                  TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler,
-                                  AlfrescoPagedModelAssembler<TaskVariableEntity> pagedCollectionModelAssembler) {
+    public TaskVariableController(
+        TaskVariableRepository variableRepository,
+        TaskVariableRepresentationModelAssembler variableRepresentationModelAssembler,
+        AlfrescoPagedModelAssembler<TaskVariableEntity> pagedCollectionModelAssembler
+    ) {
         this.variableRepository = variableRepository;
         this.variableRepresentationModelAssembler = variableRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String taskId,
-                                                                        @QuerydslPredicate(root = TaskVariableEntity.class) Predicate predicate,
-                                                                        Pageable pageable) {
-
-        predicate = Optional.ofNullable(predicate)
-                            .orElseGet(BooleanBuilder::new);
+    public PagedModel<EntityModel<CloudVariableInstance>> getVariablesTask(
+        @PathVariable String td,
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = TaskVariableEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
         QTaskVariableEntity variable = QTaskVariableEntity.taskVariableEntity;
 
-        BooleanExpression expression = variable.taskId.eq(taskId);
+        BooleanExpression expression = variable.taskId.eq(td);
 
         if (predicate != null) {
             expression = expression.and(predicate);
@@ -83,13 +86,8 @@ public class TaskVariableController {
 
         Predicate extendedPredicated = expression;
 
+        Page<TaskVariableEntity> variables = variableRepository.findAll(extendedPredicated, pageable);
 
-        Page<TaskVariableEntity> variables = variableRepository.findAll(extendedPredicated,
-                                                                    pageable);
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                                                  variables,
-                                                  variableRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(pageable, variables, variableRepresentationModelAssembler);
     }
-
 }

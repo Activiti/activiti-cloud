@@ -15,7 +15,20 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
+import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityManagerFactory;
+import java.util.Collections;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
@@ -45,26 +58,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import javax.persistence.EntityManagerFactory;
-import java.util.Collections;
-
-import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson;
-import static org.activiti.cloud.services.query.rest.TestTaskEntityBuilder.buildDefaultTask;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(TaskAdminController.class)
-@Import({
-        QueryRestWebMvcAutoConfiguration.class,
-        CommonModelAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class
-})
+@Import(
+    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
@@ -117,68 +114,60 @@ public class TaskEntityAdminControllerIT {
     @Test
     public void allTasksShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11,
-                                                                  10,
-                                                                  PageRequest.of(0,
-                                                                                 20));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           12));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
-        MvcResult result = mockMvc.perform(get("/admin/v1/tasks?skipCount=11&maxItems=10")
-                                                   .accept(MediaType.APPLICATION_JSON))
-                //then
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(get("/admin/v1/tasks?skipCount=11&maxItems=10").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.pagination.skipCount").isEqualTo(11)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(12);
+            .node("list.pagination.skipCount")
+            .isEqualTo(11)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(12);
     }
 
     @Test
     public void allTasksShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        PageRequest pageRequest = PageRequest.of(1,
-                                                 10);
+        PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(),
-                                     eq(pageRequest)))
-                .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()),
-                                           pageRequest,
-                                           11));
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when
-        mockMvc.perform(get("/admin/v1/tasks?page=1&size=10")
-                                                   .accept(MediaTypes.HAL_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
-
+        mockMvc
+            .perform(get("/admin/v1/tasks?page=1&size=10").accept(MediaTypes.HAL_JSON_VALUE))
+            //then
+            .andExpect(status().isOk());
     }
 
     @Test
     public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
-        given(entityFinder.findById(eq(taskRepository),
-                                    eq(taskEntity.getId()),
-                                    anyString()))
-                .willReturn(taskEntity);
+        given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
 
         Predicate restrictionPredicate = mock(Predicate.class);
         given(taskRepository.findAll(restrictionPredicate)).willReturn(Collections.singletonList(taskEntity));
 
         //when
-        this.mockMvc.perform(get("/admin/v1/tasks/{taskId}",
-                                 taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE))
-                //then
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                get("/admin/v1/tasks/{taskId}", taskEntity.getId()).accept(MediaType.APPLICATION_JSON_VALUE)
+            )
+            //then
+            .andExpect(status().isOk());
     }
 }

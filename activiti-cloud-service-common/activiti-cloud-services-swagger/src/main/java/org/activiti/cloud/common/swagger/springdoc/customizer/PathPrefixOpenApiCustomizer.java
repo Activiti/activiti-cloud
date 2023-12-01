@@ -18,10 +18,9 @@ package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
-import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-
 import java.util.ArrayList;
 import java.util.Optional;
+import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 
 public class PathPrefixOpenApiCustomizer implements DefaultOpenApiCustomizer {
 
@@ -40,7 +39,8 @@ public class PathPrefixOpenApiCustomizer implements DefaultOpenApiCustomizer {
 
     private String getServicePrefix(OpenAPI openApi) {
         String servicePrefix = "";
-        final String configuredPrefix = (String) Optional.ofNullable(openApi.getExtensions())
+        final String configuredPrefix = (String) Optional
+            .ofNullable(openApi.getExtensions())
             .map(extensions -> extensions.get(BaseOpenApiBuilder.SERVICE_URL_PREFIX))
             .orElse(null);
         if (configuredPrefix != null) {
@@ -56,5 +56,4 @@ public class PathPrefixOpenApiCustomizer implements DefaultOpenApiCustomizer {
         servers.add(server);
         openApi.setServers(servers);
     }
-
 }

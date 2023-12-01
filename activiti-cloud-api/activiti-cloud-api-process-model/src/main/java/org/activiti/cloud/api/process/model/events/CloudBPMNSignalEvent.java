@@ -19,6 +19,4 @@ import org.activiti.api.process.model.BPMNSignal;
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
-public interface CloudBPMNSignalEvent extends CloudRuntimeEvent<BPMNSignal, BPMNSignalEvent.SignalEvents> {
-
-}
+public interface CloudBPMNSignalEvent extends CloudRuntimeEvent<BPMNSignal, BPMNSignalEvent.SignalEvents> {}

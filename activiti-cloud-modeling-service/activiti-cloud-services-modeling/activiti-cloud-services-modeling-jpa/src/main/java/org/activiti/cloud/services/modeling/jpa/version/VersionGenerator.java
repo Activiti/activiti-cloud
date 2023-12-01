@@ -34,8 +34,7 @@ public class VersionGenerator {
      */
     public String generateNextVersion(VersionEntity latestVersion) {
         return versionGenerationStrategy.generateNextVersion(
-                Optional.ofNullable(latestVersion)
-                        .map(VersionEntity::getVersion)
-                        .orElse(null));
+            Optional.ofNullable(latestVersion).map(VersionEntity::getVersion).orElse(null)
+        );
     }
 }

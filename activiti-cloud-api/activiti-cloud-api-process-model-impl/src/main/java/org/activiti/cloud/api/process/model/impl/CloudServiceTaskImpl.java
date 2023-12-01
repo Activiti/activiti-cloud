@@ -44,5 +44,4 @@ public class CloudServiceTaskImpl extends CloudBPMNActivityImpl implements Cloud
         builder.append("CloudServiceTaskImpl [toString()=").append(super.toString()).append("]");
         return builder.toString();
     }
-
 }

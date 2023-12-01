@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.core.decorator;
 
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.activiti.api.runtime.model.impl.VariableDefinitionImpl;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.model.VariableDefinition;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ProcessDefinitionVariablesDecorator implements ProcessDefinitionDecorator {
 
@@ -40,12 +39,19 @@ public class ProcessDefinitionVariablesDecorator implements ProcessDefinitionDec
 
     @Override
     public ExtendedCloudProcessDefinition decorate(ExtendedCloudProcessDefinition processDefinition) {
-        Map<String, VariableDefinition> variables =
-            processExtensionService.getExtensionsForId(processDefinition.getId()).getProperties();
-        processDefinition.getVariableDefinitions().addAll(variables.values().stream()
-            .filter(variableDefinition -> Boolean.TRUE.equals(variableDefinition.getDisplay()))
-            .map(this::convert)
-            .collect(Collectors.toList()));
+        Map<String, VariableDefinition> variables = processExtensionService
+            .getExtensionsForId(processDefinition.getId())
+            .getProperties();
+        processDefinition
+            .getVariableDefinitions()
+            .addAll(
+                variables
+                    .values()
+                    .stream()
+                    .filter(variableDefinition -> Boolean.TRUE.equals(variableDefinition.getDisplay()))
+                    .map(this::convert)
+                    .collect(Collectors.toList())
+            );
         return processDefinition;
     }
 

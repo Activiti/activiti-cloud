@@ -18,26 +18,30 @@ package org.activiti.cloud.starter.rb.configuration;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.starter.rb.jwt.RuntimeBundleJwtUserInfoUriAuthenticationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-@Configuration
+@AutoConfiguration
 public class RuntimeBundleSecurityAutoConfiguration {
 
     private final Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter;
 
     @Autowired
-    public RuntimeBundleSecurityAutoConfiguration(Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter) {
+    public RuntimeBundleSecurityAutoConfiguration(
+        Converter<Jwt, AbstractAuthenticationToken> jwtUserInfoUriAuthenticationConverter
+    ) {
         this.jwtUserInfoUriAuthenticationConverter = jwtUserInfoUriAuthenticationConverter;
     }
 
     @Primary
     @Bean("runtimeBundleJwtUserInfoUriAuthenticationConverter")
     public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter((JwtUserInfoUriAuthenticationConverter) jwtUserInfoUriAuthenticationConverter);
+        return new RuntimeBundleJwtUserInfoUriAuthenticationConverter(
+            (JwtUserInfoUriAuthenticationConverter) jwtUserInfoUriAuthenticationConverter
+        );
     }
 }

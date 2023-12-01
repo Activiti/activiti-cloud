@@ -17,9 +17,8 @@
 package org.activiti.cloud.common.swagger.springdoc.customizer;
 
 import io.swagger.v3.oas.models.Operation;
-import org.springframework.web.method.HandlerMethod;
-
 import java.util.Optional;
+import org.springframework.web.method.HandlerMethod;
 
 public class NamingOperationCustomizer implements DefaultOperationCustomizer {
 
@@ -27,10 +26,14 @@ public class NamingOperationCustomizer implements DefaultOperationCustomizer {
 
     @Override
     public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-        Optional.ofNullable(operation.getOperationId()).ifPresent(operationId ->
-            operation.setOperationId(operationId.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, "")));
-        Optional.ofNullable(operation.getSummary()).ifPresent(summary ->
-            operation.setSummary(summary.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, "")));
+        Optional
+            .ofNullable(operation.getOperationId())
+            .ifPresent(operationId ->
+                operation.setOperationId(operationId.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, ""))
+            );
+        Optional
+            .ofNullable(operation.getSummary())
+            .ifPresent(summary -> operation.setSummary(summary.replaceAll(DEFAULT_SPRINGDOC_PATTERN_REGEX, "")));
         return operation;
     }
 }

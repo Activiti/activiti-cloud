@@ -22,24 +22,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class CommonSecurityAutoConfigurationIT {
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @Autowired(required = false)
     private CommonSecurityAutoConfiguration commonSecurityAutoConfiguration;
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class Application {
-
-    }
+    static class Application {}
 
     @Test
     public void contextLoads() {
         assertThat(commonSecurityAutoConfiguration).isNotNull();
     }
-
 }

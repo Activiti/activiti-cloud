@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import org.activiti.api.process.model.events.ApplicationEvent;
+import org.activiti.api.process.model.events.ApplicationEvent.ApplicationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudApplicationDeployedEvent;
@@ -42,6 +43,11 @@ public class ApplicationDeployedEventConverter extends BaseEventToEntityConverte
     @Override
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         ApplicationDeployedAuditEventEntity applicationDeployedAuditEventEntity = (ApplicationDeployedAuditEventEntity) auditEventEntity;
-        return new CloudApplicationDeployedEventImpl(applicationDeployedAuditEventEntity.getDeployment());
+        return new CloudApplicationDeployedEventImpl(
+            auditEventEntity.getEventId(),
+            auditEventEntity.getTimestamp(),
+            applicationDeployedAuditEventEntity.getDeployment(),
+            ApplicationEvents.APPLICATION_DEPLOYED
+        );
     }
 }

@@ -4,13 +4,12 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
 
 jobs:
   create-prerelease:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Resolve activiti version
         id: resolve-versions
         run: |
@@ -21,13 +20,13 @@ jobs:
 
       - run: touch release.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@042fc28b3e308e1d1159dfee61bc46c5940ed7b6 # v5.4.0
         with:
           release-descriptor: release.yaml
           project: activiti
           tag: ${{ steps.resolve-versions.outputs.activiti-tag }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v1.21.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@042fc28b3e308e1d1159dfee61bc46c5940ed7b6 # v5.4.0
         with:
           release-descriptor: release.yaml
           project: activitiCloud

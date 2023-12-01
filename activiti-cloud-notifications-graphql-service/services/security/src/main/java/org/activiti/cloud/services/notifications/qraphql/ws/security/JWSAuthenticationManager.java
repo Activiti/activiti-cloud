@@ -16,10 +16,9 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.Collection;
-
 import java.util.Set;
-import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessToken;
+import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -44,8 +43,7 @@ public class JWSAuthenticationManager implements AuthenticationManager {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         JWSAuthentication token = null;
         try {
-            if(authentication instanceof JWSAuthentication) {
-
+            if (authentication instanceof JWSAuthentication) {
                 token = JWSAuthentication.class.cast(authentication);
 
                 String credentials = (String) token.getCredentials();
@@ -54,15 +52,13 @@ public class JWSAuthenticationManager implements AuthenticationManager {
                 Set<String> roles = accessToken.getRoles();
                 String preferredUsername = accessToken.getUsername();
 
-                Collection<? extends GrantedAuthority> authorities = authoritiesMapper
-                    .getGrantedAuthorities(roles);
+                Collection<? extends GrantedAuthority> authorities = authoritiesMapper.getGrantedAuthorities(roles);
 
                 User user = new User(preferredUsername, credentials, authorities);
 
                 token = new JWSAuthentication(credentials, user, authorities);
                 token.setDetails(accessToken);
             }
-
         } catch (Exception e) {
             throw new BadCredentialsException("Invalid token", e);
         }
@@ -73,5 +69,4 @@ public class JWSAuthenticationManager implements AuthenticationManager {
     public void setAuthoritiesMapper(Attributes2GrantedAuthoritiesMapper authoritiesMapper) {
         this.authoritiesMapper = authoritiesMapper;
     }
-
 }

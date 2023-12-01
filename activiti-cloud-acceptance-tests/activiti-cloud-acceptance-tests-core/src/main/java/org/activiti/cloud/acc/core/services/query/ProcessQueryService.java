@@ -24,7 +24,6 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.hateoas.PagedModel;
 
 public interface ProcessQueryService {
-
     @RequestLine("GET /v1/process-instances/{processInstanceId}")
     @Headers("Content-Type: application/json")
     CloudProcessInstance getProcessInstance(@Param("processInstanceId") String processInstanceId);
@@ -45,6 +44,7 @@ public interface ProcessQueryService {
     PagedModel<CloudProcessInstance> getProcessInstancesByName(@Param("processName") String processName);
 
     @RequestLine("GET /v1/process-instances?processDefinitionKey={processDefinitionKey}")
-    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(@Param("processDefinitionKey") String processDefinitionKey);
-
+    PagedModel<CloudProcessInstance> getProcessInstancesByProcessDefinitionKey(
+        @Param("processDefinitionKey") String processDefinitionKey
+    );
 }

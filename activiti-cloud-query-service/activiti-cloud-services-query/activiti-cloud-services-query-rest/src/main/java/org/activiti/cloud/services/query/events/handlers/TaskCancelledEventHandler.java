@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class TaskCancelledEventHandler implements QueryEventHandler {
 
@@ -39,9 +38,9 @@ public class TaskCancelledEventHandler implements QueryEventHandler {
         CloudTaskCancelledEvent taskCancelledEvent = (CloudTaskCancelledEvent) event;
         Task eventTask = taskCancelledEvent.getEntity();
 
-        TaskEntity taskEntity = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                             eventTask.getId()))
-                                        .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
+        TaskEntity taskEntity = Optional
+            .ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()))
+            .orElseThrow(() -> new QueryException("Unable to find task with id: " + eventTask.getId()));
 
         taskEntity.setStatus(Task.TaskStatus.CANCELLED);
         taskEntity.setLastModified(new Date(taskCancelledEvent.getTimestamp()));

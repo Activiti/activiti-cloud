@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class TaskVariableDeletedEventHandler {
 
@@ -30,8 +29,7 @@ public class TaskVariableDeletedEventHandler {
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
 
-    public TaskVariableDeletedEventHandler(EntityManager entityManager,
-                                           EntityManagerFinder entityManagerFinder) {
+    public TaskVariableDeletedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
     }
@@ -45,20 +43,27 @@ public class TaskVariableDeletedEventHandler {
             try {
                 TaskEntity taskEntity = findResult.get();
 
-                taskEntity.getVariable(variableName)
-                         .ifPresentOrElse(variableEntity -> {
-                             // Persist into database
-                             taskEntity.getVariables()
-                                       .remove(variableEntity);
-                             entityManager.remove(variableEntity);
-                         },() -> {
-                             LOGGER.debug("Unable to find variableEntity with name '" + variableName + "' for task instance '" + taskId + "'");
-                         });
+                taskEntity
+                    .getVariable(variableName)
+                    .ifPresentOrElse(
+                        variableEntity -> {
+                            // Persist into database
+                            taskEntity.getVariables().remove(variableEntity);
+                            entityManager.remove(variableEntity);
+                        },
+                        () -> {
+                            LOGGER.debug(
+                                "Unable to find variableEntity with name '" +
+                                variableName +
+                                "' for task instance '" +
+                                taskId +
+                                "'"
+                            );
+                        }
+                    );
             } catch (Exception cause) {
-                LOGGER.debug("Error handling TaskVariableDeletedEvent[" + event + "]",
-                             cause);
+                LOGGER.debug("Error handling TaskVariableDeletedEvent[" + event + "]", cause);
             }
         }
-
     }
 }

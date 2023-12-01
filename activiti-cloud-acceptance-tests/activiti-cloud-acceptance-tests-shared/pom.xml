@@ -5,11 +5,17 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-acceptance-tests-dependencies</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-acceptance-tests-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-shared</artifactId>
+  <name>Activiti Cloud :: Acceptance Tests Shared</name>
   <dependencies>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpclient.version}</version>
+    </dependency>
     <dependency>
       <groupId>net.serenity-bdd</groupId>
       <artifactId>serenity-jbehave</artifactId>
@@ -53,6 +59,11 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-openfeign-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>${commons-fileupload.version}</version>
     </dependency>
   </dependencies>
 </project>

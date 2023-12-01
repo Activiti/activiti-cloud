@@ -24,8 +24,10 @@ public class CloudTaskCandidateUserAddedProducer implements TaskCandidateEventLi
     private ToCloudTaskRuntimeEventConverter converter;
     private ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudTaskCandidateUserAddedProducer(ToCloudTaskRuntimeEventConverter converter,
-                                               ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudTaskCandidateUserAddedProducer(
+        ToCloudTaskRuntimeEventConverter converter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.converter = converter;
         this.eventsAggregator = eventsAggregator;
     }

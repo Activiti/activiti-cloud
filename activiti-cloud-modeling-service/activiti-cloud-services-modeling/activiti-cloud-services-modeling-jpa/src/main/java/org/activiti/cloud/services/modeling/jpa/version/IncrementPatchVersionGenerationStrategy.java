@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
-import java.util.Optional;
-
 import com.github.zafarkhaja.semver.Version;
+import java.util.Optional;
 
 /**
  * Simple version generation strategy by incrementing the patch version
@@ -28,12 +27,11 @@ public class IncrementPatchVersionGenerationStrategy implements VersionGeneratio
 
     @Override
     public String generateNextVersion(String latestVersion) {
-        return Optional.ofNullable(latestVersion)
-                .map(Version::valueOf)
-                .map(Version::incrementPatchVersion)
-                .orElseGet(() -> Version.forIntegers(0,
-                                                     0,
-                                                     1))
-                .toString();
+        return Optional
+            .ofNullable(latestVersion)
+            .map(Version::valueOf)
+            .map(Version::incrementPatchVersion)
+            .orElseGet(() -> Version.forIntegers(0, 0, 1))
+            .toString();
     }
 }

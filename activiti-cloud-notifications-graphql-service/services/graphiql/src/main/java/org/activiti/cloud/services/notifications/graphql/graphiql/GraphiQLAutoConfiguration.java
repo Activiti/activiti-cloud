@@ -15,19 +15,18 @@
  */
 package org.activiti.cloud.services.notifications.graphql.graphiql;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
-@ConditionalOnProperty(name="spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
+@AutoConfiguration
+@ConditionalOnProperty(name = "spring.activiti.cloud.services.graphql.graphiql.enabled", matchIfMissing = true)
 public class GraphiQLAutoConfiguration {
 
     @Configuration
-    @PropertySource(value="classpath:keycloak-json.properties", ignoreResourceNotFound = true)
-    @Import({KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class})
-    public static class DefaultGraphiQLConfiguration {
-
-    }
+    @PropertySource(value = "classpath:keycloak-json.properties", ignoreResourceNotFound = true)
+    @Import({ KeycloakJsonController.class, GraphiQLIndexController.class, GraphiQLConfigController.class })
+    public static class DefaultGraphiQLConfiguration {}
 }

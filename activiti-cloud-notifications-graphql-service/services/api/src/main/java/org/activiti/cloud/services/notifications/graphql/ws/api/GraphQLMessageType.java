@@ -15,54 +15,52 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum GraphQLMessageType {
+    CONNECTION_INIT("connection_init"), // Client -> Server
+    CONNECTION_ACK("connection_ack"), // Server -> Client
+    CONNECTION_ERROR("connection_error"), // Server -> Client
+    // NOTE: The keep alive message type does not follow the standard due to
+    // connection optimizations
+    KA("ka"), // Server -> Client
+    CONNECTION_TERMINATE("connection_terminate"), // Client -> Server
+    START("start"), // Client -> Server
+    DATA("data"), // Server -> Client
+    ERROR("error"), // Server -> Client
+    COMPLETE("complete"), // Server -> Client
+    STOP("stop"); // Client -> Server
 
-	CONNECTION_INIT("connection_init"), // Client -> Server
-	CONNECTION_ACK("connection_ack"), // Server -> Client
-	CONNECTION_ERROR("connection_error"), // Server -> Client
-	// NOTE: The keep alive message type does not follow the standard due to
-	// connection optimizations
-	KA("ka"), // Server -> Client
-	CONNECTION_TERMINATE("connection_terminate"), // Client -> Server
-	START("start"), // Client -> Server
-	DATA("data"), // Server -> Client
-	ERROR("error"), // Server -> Client
-	COMPLETE("complete"), // Server -> Client
-	STOP("stop"); // Client -> Server
+    private final String type;
 
-	private final String type;
+    GraphQLMessageType(String type) {
+        this.type = type;
+    }
 
-	GraphQLMessageType(String type) {
-		this.type = type;
-	}
+    // ****** Reverse Lookup Implementation************//
 
-	// ****** Reverse Lookup Implementation************//
+    // Lookup table
+    private static final Map<String, GraphQLMessageType> lookup = new HashMap<>();
 
-	// Lookup table
-	private static final Map<String, GraphQLMessageType> lookup = new HashMap<>();
+    // Populate the lookup table on loading time
+    static {
+        for (GraphQLMessageType env : GraphQLMessageType.values()) {
+            lookup.put(env.type, env);
+        }
+    }
 
-	// Populate the lookup table on loading time
-	static {
-		for (GraphQLMessageType env : GraphQLMessageType.values()) {
-			lookup.put(env.type, env);
-		}
-	}
+    @JsonCreator
+    // This method can be used for reverse lookup purpose
+    public static GraphQLMessageType get(String type) {
+        return lookup.get(type);
+    }
 
-	@JsonCreator
-	// This method can be used for reverse lookup purpose
-	public static GraphQLMessageType get(String type) {
-		return lookup.get(type);
-	}
-
-	@JsonValue
-	@Override
-	public String toString() {
-		return type;
-	}
+    @JsonValue
+    @Override
+    public String toString() {
+        return type;
+    }
 }

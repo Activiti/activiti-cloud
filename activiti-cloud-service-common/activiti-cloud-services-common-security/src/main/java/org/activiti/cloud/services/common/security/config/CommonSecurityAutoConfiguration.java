@@ -17,6 +17,7 @@ package org.activiti.cloud.services.common.security.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.RequestInterceptor;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
@@ -39,8 +40,12 @@ import org.activiti.cloud.services.common.security.jwt.JwtPrincipalIdentityProvi
 import org.activiti.cloud.services.common.security.jwt.JwtPrincipalRolesProviderChain;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextPrincipalProvider;
 import org.activiti.cloud.services.common.security.jwt.JwtSecurityContextTokenProvider;
+import org.activiti.cloud.services.common.security.jwt.validator.ExpiredValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.IsNotBeforeValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.cache.Cache;
@@ -48,41 +53,44 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 
-@Configuration
+@AutoConfiguration
 @EnableAuthorizationConfiguration
 @ConditionalOnWebApplication
-@ConditionalOnMissingBean(value = {SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class})
+@ConditionalOnMissingBean(value = { SessionAuthenticationStrategy.class, SessionAuthenticationStrategy.class })
 @Import(CommonJwtAuthenticationConverterConfiguration.class)
-public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapter {
+public class CommonSecurityAutoConfiguration {
 
     private final AuthorizationConfigurer authorizationConfigurer;
 
     private final Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter;
 
-    @Value("${authorization.validation.offset:0}" )
+    @Value("${authorization.validation.offset:0}")
     private long offset;
 
-    @Value("${cors.allowedOrigins:*}" )
+    @Value("${cors.allowedOrigins:*}")
     private List<String> allowedOrigins;
 
     @Autowired
-    public CommonSecurityAutoConfiguration(AuthorizationConfigurer authorizationConfigurer,
-        Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter) {
+    public CommonSecurityAutoConfiguration(
+        AuthorizationConfigurer authorizationConfigurer,
+        Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter
+    ) {
         this.authorizationConfigurer = authorizationConfigurer;
         this.jwtAuthenticationConverter = jwtAuthenticationConverter;
     }
@@ -95,58 +103,81 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtAccessTokenValidator jwtAccessTokenValidator() {
-        return new JwtAccessTokenValidator(offset);
+    public JwtAccessTokenValidator jwtAccessTokenValidator(List<ValidationCheck> validationChecks) {
+        return new JwtAccessTokenValidator(validationChecks);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PrincipalIdentityProvider principalIdentityProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
-                                                               JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new JwtPrincipalIdentityProvider(jwtAccessTokenProvider,
-            jwtAccessTokenValidator);
+    public ExpiredValidationCheck expiredValidationCheck() {
+        return new ExpiredValidationCheck(offset);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public IsNotBeforeValidationCheck isNotBeforeValidationCheck() {
+        return new IsNotBeforeValidationCheck(offset);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PrincipalIdentityProvider principalIdentityProvider(
+        JwtAccessTokenProvider jwtAccessTokenProvider,
+        JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
+        return new JwtPrincipalIdentityProvider(jwtAccessTokenProvider, jwtAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public JwtAccessTokenPrincipalGroupsProvider jwtAccessTokenPrincipalGroupsProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
-        JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new JwtAccessTokenPrincipalGroupsProvider(jwtAccessTokenProvider,
-            jwtAccessTokenValidator);
+    public JwtAccessTokenPrincipalGroupsProvider jwtAccessTokenPrincipalGroupsProvider(
+        JwtAccessTokenProvider jwtAccessTokenProvider,
+        JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
+        return new JwtAccessTokenPrincipalGroupsProvider(jwtAccessTokenProvider, jwtAccessTokenValidator);
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @ConditionalOnMissingBean
-    public JtwAccessTokenPrincipalRolesProvider jtwAccessTokenPrincipalRolesProvider(JwtAccessTokenProvider jwtAccessTokenProvider,
-                                                                                               JwtAccessTokenValidator jwtAccessTokenValidator) {
-        return new JtwAccessTokenPrincipalRolesProvider(jwtAccessTokenProvider,
-            jwtAccessTokenValidator);
+    public JtwAccessTokenPrincipalRolesProvider jtwAccessTokenPrincipalRolesProvider(
+        JwtAccessTokenProvider jwtAccessTokenProvider,
+        JwtAccessTokenValidator jwtAccessTokenValidator
+    ) {
+        return new JtwAccessTokenPrincipalRolesProvider(jwtAccessTokenProvider, jwtAccessTokenValidator);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtPrincipalGroupsProviderChain principalGroupsProviderChain(List<PrincipalGroupsProvider> principalGroupsProviders) {
+    public JwtPrincipalGroupsProviderChain principalGroupsProviderChain(
+        List<PrincipalGroupsProvider> principalGroupsProviders
+    ) {
         return new JwtPrincipalGroupsProviderChain(principalGroupsProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtPrincipalRolesProviderChain principalRolesProviderChain(List<PrincipalRolesProvider> principalRolesProviders) {
+    public JwtPrincipalRolesProviderChain principalRolesProviderChain(
+        List<PrincipalRolesProvider> principalRolesProviders
+    ) {
         return new JwtPrincipalRolesProviderChain(principalRolesProviders);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public SecurityManager securityManager(SecurityContextPrincipalProvider authenticatedPrincipalProvider,
-                                           PrincipalIdentityProvider principalIdentityProvider,
-                                           JwtPrincipalGroupsProviderChain principalGroupsProvider,
-                                           JwtPrincipalRolesProviderChain principalRolesProviderChain) {
-        return new SecurityManagerImpl(authenticatedPrincipalProvider,
-                                               principalIdentityProvider,
-                                               principalGroupsProvider,
-                                               principalRolesProviderChain);
+    public SecurityManager securityManager(
+        SecurityContextPrincipalProvider authenticatedPrincipalProvider,
+        PrincipalIdentityProvider principalIdentityProvider,
+        JwtPrincipalGroupsProviderChain principalGroupsProvider,
+        JwtPrincipalRolesProviderChain principalRolesProviderChain
+    ) {
+        return new SecurityManagerImpl(
+            authenticatedPrincipalProvider,
+            principalIdentityProvider,
+            principalGroupsProvider,
+            principalRolesProviderChain
+        );
     }
 
     @Bean
@@ -170,11 +201,18 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
         return new TokenRelayRequestInterceptor(securityContextTokenProvider);
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    @SuppressWarnings({ "java:S4502", "java:S5122" })
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authorizationConfigurer.configure(http);
-        http
-            .authorizeRequests().anyRequest().permitAll()
+        return http
+            .authorizeHttpRequests()
+            .requestMatchers(actuatorEndpointsMatcher())
+            .authenticated()
+            .and()
+            .authorizeHttpRequests()
+            .anyRequest()
+            .permitAll()
             .and()
             .cors()
             .configurationSource(request -> {
@@ -187,11 +225,25 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
             .exceptionHandling()
             .accessDeniedHandler(new CustomBearerTokenAccessDeniedHandler(new BearerTokenAccessDeniedHandler()))
             .and()
-            .csrf().disable()
-            .httpBasic().disable()
+            .httpBasic()
+            .disable()
             .oauth2ResourceServer()
             .jwt()
-            .jwtAuthenticationConverter(jwtAuthenticationConverter);
+            .jwtAuthenticationConverter(jwtAuthenticationConverter)
+            .and()
+            .and()
+            .build();
+    }
+
+    private RequestMatcher actuatorEndpointsMatcher() {
+        RequestMatcher actuatorMatcher = new AntPathRequestMatcher("/actuator/**");
+        RequestMatcher healthMatcher = new AntPathRequestMatcher("/actuator/health/**");
+        RequestMatcher infoMatcher = new AntPathRequestMatcher("/actuator/info/**");
+
+        List<RequestMatcher> excludeMatchers = Arrays.asList(healthMatcher, infoMatcher);
+
+        return request ->
+            actuatorMatcher.matches(request) && excludeMatchers.stream().noneMatch(matcher -> matcher.matches(request));
     }
 
     @Bean
@@ -206,5 +258,4 @@ public class CommonSecurityAutoConfiguration extends WebSecurityConfigurerAdapte
         cacheManager.setCaches(caches);
         return cacheManager;
     }
-
 }

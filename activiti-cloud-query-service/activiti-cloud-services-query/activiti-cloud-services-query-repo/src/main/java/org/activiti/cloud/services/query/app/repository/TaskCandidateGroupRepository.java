@@ -22,20 +22,19 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupId;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface TaskCandidateGroupRepository extends PagingAndSortingRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>,
-    QuerydslPredicateExecutor<TaskCandidateGroupEntity>,
-    QuerydslBinderCustomizer<QTaskCandidateGroupEntity> {
-
+public interface TaskCandidateGroupRepository
+    extends
+        PagingAndSortingRepository<TaskCandidateGroupEntity, TaskCandidateGroupId>,
+        QuerydslPredicateExecutor<TaskCandidateGroupEntity>,
+        QuerydslBinderCustomizer<QTaskCandidateGroupEntity>,
+        CrudRepository<TaskCandidateGroupEntity, TaskCandidateGroupId> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QTaskCandidateGroupEntity root) {
-
-        bindings.bind(String.class).first(
-            (StringPath path, String value) -> path.eq(value));
-
+    default void customize(QuerydslBindings bindings, QTaskCandidateGroupEntity root) {
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }

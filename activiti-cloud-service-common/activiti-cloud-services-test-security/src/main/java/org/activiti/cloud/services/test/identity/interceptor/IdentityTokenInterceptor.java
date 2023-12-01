@@ -26,7 +26,6 @@ import org.springframework.http.client.ClientHttpResponse;
 
 public class IdentityTokenInterceptor implements ClientHttpRequestInterceptor {
 
-
     private IdentityTokenProducer identityTokenProducer;
 
     public IdentityTokenInterceptor(IdentityTokenProducer identityTokenProducer) {
@@ -34,11 +33,12 @@ public class IdentityTokenInterceptor implements ClientHttpRequestInterceptor {
     }
 
     @Override
-    public ClientHttpResponse intercept(HttpRequest httpRequest,
-                                        byte[] bytes,
-                                        ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
+    public ClientHttpResponse intercept(
+        HttpRequest httpRequest,
+        byte[] bytes,
+        ClientHttpRequestExecution clientHttpRequestExecution
+    ) throws IOException {
         httpRequest.getHeaders().set(AUTHORIZATION_HEADER, identityTokenProducer.getTokenString());
         return clientHttpRequestExecution.execute(httpRequest, bytes);
     }
-
 }

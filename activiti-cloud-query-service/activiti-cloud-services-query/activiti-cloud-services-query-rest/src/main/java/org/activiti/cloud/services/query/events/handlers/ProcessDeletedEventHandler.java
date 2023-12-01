@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
 import java.util.Set;
-import javax.persistence.EntityManager;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
@@ -27,13 +27,18 @@ import org.activiti.cloud.services.query.model.QueryException;
 
 public class ProcessDeletedEventHandler implements QueryEventHandler {
 
-    protected final String INVALID_PROCESS_INSTANCE_STATE = "Process Instance %s is not in a valid state: %s. "
-        + "Only process instances in status COMPLETED or CANCELLED can be deleted.";
+    protected final String INVALID_PROCESS_INSTANCE_STATE =
+        "Process Instance %s is not in a valid state: %s. " +
+        "Only process instances in status COMPLETED or CANCELLED can be deleted.";
 
-    private Set<ProcessInstanceStatus> ALLOWED_STATUS = Set.of(ProcessInstanceStatus.CANCELLED, ProcessInstanceStatus.COMPLETED);
+    private Set<ProcessInstanceStatus> ALLOWED_STATUS = Set.of(
+        ProcessInstanceStatus.CANCELLED,
+        ProcessInstanceStatus.COMPLETED
+    );
 
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
+
     public ProcessDeletedEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
         this.entityManagerFinder = new EntityManagerFinder(entityManager);
@@ -45,9 +50,11 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
         ProcessInstance eventProcessInstance = deletedEvent.getEntity();
 
-        ProcessInstanceEntity processInstanceEntity = entityManagerFinder.findProcessInstanceWithRelatedEntities(
-                eventProcessInstance.getId())
-            .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId()));
+        ProcessInstanceEntity processInstanceEntity = entityManagerFinder
+            .findProcessInstanceWithRelatedEntities(eventProcessInstance.getId())
+            .orElseThrow(() ->
+                new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId())
+            );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
             processInstanceEntity.getTasks().stream().forEach(entityManager::remove);
@@ -58,8 +65,13 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
             entityManager.remove(processInstanceEntity);
         } else {
-            throw new IllegalStateException(String.format(INVALID_PROCESS_INSTANCE_STATE, processInstanceEntity.getId(),
-                processInstanceEntity.getStatus().name()));
+            throw new IllegalStateException(
+                String.format(
+                    INVALID_PROCESS_INSTANCE_STATE,
+                    processInstanceEntity.getId(),
+                    processInstanceEntity.getStatus().name()
+                )
+            );
         }
     }
 
@@ -67,5 +79,4 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
     public String getHandledEvent() {
         return ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED.name();
     }
-
 }

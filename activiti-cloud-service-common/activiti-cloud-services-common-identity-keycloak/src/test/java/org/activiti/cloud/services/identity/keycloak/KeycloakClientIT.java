@@ -21,6 +21,7 @@ import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
@@ -33,26 +34,39 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 @SpringBootTest(
-    classes = {KeycloakClientApplication.class},
+    classes = { KeycloakClientApplication.class },
     properties = {
         "keycloak.realm=activiti",
         "keycloak.use-resource-role-mappings=false",
-        "identity.client.cache.cacheExpireAfterWrite=PT5s"}
+        "identity.client.cache.cacheExpireAfterWrite=PT5s",
+    }
 )
-@ContextConfiguration(initializers = {KeycloakContainerApplicationInitializer.class})
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 public class KeycloakClientIT {
 
     public static final String HR_GROUP_ID = "60c6753b-4f1c-498a-96d2-be6790fae09c";
     public static final String TEST_GROUP_NAME = "testgroup";
+    public static final String ADMIN_USER_ID = "5f682999-d11d-4a42-bc42-86b7e6752223";
+    public static final String ACTIVITI_USER_GROUP_ID = "60c6753b-4f1c-498a-96d2-be6790fae09c";
+    public static final String ACTIVITI_MODELER = "ACTIVITI_MODELER";
+    public static final String ACTIVITI_CLIENT_ID = "activiti";
+    public static final String ACTIVITI_ADMIN = "ACTIVITI_ADMIN";
+    public static final String DYNAMIC_GROUP_ID = "51331bf0-00e4-4eff-ad88-bad9511ac919";
+    public static final String DYNAMIC_GROUP_NAME = "dynamic";
+    public static final String DYNAMIC_ROLE_NAME = "DYNAMIC_ROLE";
+    public static final String TEST_USER_PREFIX = "testKeycloakUser";
 
     @Autowired
     private KeycloakClient keycloakClient;
 
     @Autowired
+    private TestKeycloakClient testKeycloakClient;
+
+    @Autowired
     private CacheManager cacheManager;
 
     private final String ACTIVITI_USER_ROLE = "ACTIVITI_USER";
-    private final String ACTIVITI_ADMIN_ROLE = "ACTIVITI_ADMIN";
+    private final String ACTIVITI_ADMIN_ROLE = ACTIVITI_ADMIN;
 
     @Test
     public void should_searchUsers() {
@@ -61,6 +75,14 @@ public class KeycloakClientIT {
         assertThat(users).hasSize(2);
         assertThat(users).extracting("username").contains("hruser");
         assertThat(users).extracting("username").contains("hradmin");
+    }
+
+    @Test
+    public void should_searchUsers_by_username() {
+        List<KeycloakUser> users = keycloakClient.searchUsersByUsername("activiti-keycloak");
+
+        assertThat(users).hasSize(1);
+        assertThat(users).extracting("username").contains("service-account-activiti-keycloak");
     }
 
     @Test
@@ -142,7 +164,6 @@ public class KeycloakClientIT {
         assertThat(cache.get(key)).isNotNull();
         //check if the cache expires
         Awaitility.await().untilAsserted(() -> assertThat(cache.get(key)).isNull());
-
     }
 
     @Test
@@ -188,7 +209,7 @@ public class KeycloakClientIT {
     public void should_getClients() {
         List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(null, 0, 50);
 
-        assertThat(clients).extracting("clientId").contains("activiti");
+        assertThat(clients).extracting("clientId").contains(ACTIVITI_CLIENT_ID);
         assertThat(clients).extracting("clientId").contains("activiti-keycloak");
     }
 
@@ -215,9 +236,12 @@ public class KeycloakClientIT {
     @Test
     public void should_getUserClientRoles() {
         List<KeycloakUser> users = keycloakClient.searchUsers("testActivitiAdmin", 0, 50);
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
 
-        List<KeycloakRoleMapping> roles = keycloakClient.getUserClientRoleMapping(users.get(0).getId(), clients.get(0).getId());
+        List<KeycloakRoleMapping> roles = keycloakClient.getUserClientRoleMapping(
+            users.get(0).getId(),
+            clients.get(0).getId()
+        );
 
         assertThat(roles).hasSize(3);
         assertThat(roles).extracting("name").contains(ACTIVITI_ADMIN_ROLE);
@@ -228,10 +252,12 @@ public class KeycloakClientIT {
     @Test
     public void should_getGroupClientRoles() {
         List<KeycloakGroup> groups = keycloakClient.searchGroups("salesgroup", 0, 50);
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
 
-        List<KeycloakRoleMapping> roles = keycloakClient
-            .getGroupClientRoleMapping(groups.get(0).getId(), clients.get(0).getId());
+        List<KeycloakRoleMapping> roles = keycloakClient.getGroupClientRoleMapping(
+            groups.get(0).getId(),
+            clients.get(0).getId()
+        );
 
         assertThat(roles).hasSize(1);
         assertThat(roles).extracting("name").contains(ACTIVITI_USER_ROLE);
@@ -239,46 +265,51 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getClientRoles() {
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
         List<KeycloakRoleMapping> roles = keycloakClient.getClientRoles(clients.get(0).getId());
         assertThat(roles).isNotEmpty();
     }
 
     @Test
-    public void should_addUserClientRoleMapping() {
-        String testAdminUserId = "5f682999-d11d-4a42-bc42-86b7e6752223";
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+    public void should_addAndRemoveUserClientRoleMapping() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
         String clientId = clients.get(0).getId();
         List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
-        KeycloakRoleMapping kRoleToAdd = kRoles.stream()
+        KeycloakRoleMapping kRoleToAdd = kRoles
+            .stream()
             .filter(kRole -> kRole.getName().equals(ACTIVITI_ADMIN_ROLE))
             .findFirst()
             .get();
 
-        assertThat(userHasClientRole(testAdminUserId, clientId, ACTIVITI_ADMIN_ROLE)).isFalse();
+        assertThat(userHasClientRole(ADMIN_USER_ID, clientId, ACTIVITI_ADMIN_ROLE)).isFalse();
 
-        keycloakClient.addUserClientRoleMapping(testAdminUserId, clientId,
-                                                List.of(kRoleToAdd));
+        keycloakClient.addUserClientRoleMapping(ADMIN_USER_ID, clientId, List.of(kRoleToAdd));
 
-        assertThat(userHasClientRole(testAdminUserId, clientId, ACTIVITI_ADMIN_ROLE)).isTrue();
+        assertThat(userHasClientRole(ADMIN_USER_ID, clientId, ACTIVITI_ADMIN_ROLE)).isTrue();
+
+        keycloakClient.removeUserClientRoleMapping(ADMIN_USER_ID, clientId, List.of(kRoleToAdd));
+        assertThat(userHasClientRole(ADMIN_USER_ID, clientId, ACTIVITI_ADMIN_ROLE)).isFalse();
     }
 
     @Test
-    public void should_addGroupClientRoleMapping() {
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+    public void should_addAndRemoveGroupClientRoleMapping() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
         String clientId = clients.get(0).getId();
         List<KeycloakRoleMapping> kRoles = keycloakClient.getClientRoles(clients.get(0).getId());
-        KeycloakRoleMapping kRoleToAdd = kRoles.stream()
+        KeycloakRoleMapping kRoleToAdd = kRoles
+            .stream()
             .filter(kRole -> kRole.getName().equals(ACTIVITI_USER_ROLE))
             .findFirst()
             .get();
 
-        assertThat(groupHasClientRole(HR_GROUP_ID,clientId,ACTIVITI_USER_ROLE)).isFalse();
+        assertThat(groupHasClientRole(HR_GROUP_ID, clientId, ACTIVITI_USER_ROLE)).isFalse();
 
-        keycloakClient.addGroupClientRoleMapping(HR_GROUP_ID, clientId,
-            List.of(kRoleToAdd));
+        keycloakClient.addGroupClientRoleMapping(HR_GROUP_ID, clientId, List.of(kRoleToAdd));
 
-        assertThat(groupHasClientRole(HR_GROUP_ID,clientId,ACTIVITI_USER_ROLE)).isTrue();
+        assertThat(groupHasClientRole(HR_GROUP_ID, clientId, ACTIVITI_USER_ROLE)).isTrue();
+
+        keycloakClient.removeGroupClientRoleMapping(HR_GROUP_ID, clientId, List.of(kRoleToAdd));
+        assertThat(groupHasClientRole(HR_GROUP_ID, clientId, ACTIVITI_USER_ROLE)).isFalse();
     }
 
     private boolean userHasClientRole(String userId, String clientId, String roleName) {
@@ -297,7 +328,7 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getUsersClientRoleMapping() {
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
         String clientId = clients.get(0).getId();
         List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(clientId, ACTIVITI_ADMIN_ROLE);
 
@@ -307,14 +338,13 @@ public class KeycloakClientIT {
 
     @Test
     public void should_getGroupsClientRoleMapping() {
-        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients("activiti", 0, 50);
+        List<KeycloakClientRepresentation> clients = keycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 50);
         String clientId = clients.get(0).getId();
         List<KeycloakGroup> groups = keycloakClient.getGroupsClientRoleMapping(clientId, ACTIVITI_USER_ROLE);
 
         assertThat(groups).hasSize(1);
         assertThat(groups).extracting("name").contains("salesgroup");
     }
-
 
     @Test
     public void should_getUsers_by_groupId() {
@@ -323,4 +353,158 @@ public class KeycloakClientIT {
         assertThat(users).hasSizeGreaterThanOrEqualTo(1);
     }
 
+    @Test
+    public void should_get101Users_by_groupId() {
+        addUsers(101);
+
+        List<KeycloakUser> users = keycloakClient.getUsersByGroupId(DYNAMIC_GROUP_ID, 0, Integer.MAX_VALUE);
+
+        assertThat(users).hasSize(101);
+
+        users.forEach(user -> testKeycloakClient.deleteUser(user.getId()));
+    }
+
+    @Test
+    public void should_get101Users_by_Role() {
+        addUsers(101);
+        String clientId = testKeycloakClient.searchClients(ACTIVITI_CLIENT_ID, 0, 1).get(0).getId();
+        KeycloakRoleMapping kRoleToAdd = assignRole(clientId);
+
+        List<KeycloakUser> users = keycloakClient.getUsersClientRoleMapping(
+            clientId,
+            kRoleToAdd.getName(),
+            0,
+            Integer.MAX_VALUE
+        );
+
+        assertThat(users).hasSize(101);
+
+        users.forEach(user -> testKeycloakClient.deleteUser(user.getId()));
+    }
+
+    private KeycloakRoleMapping assignRole(String clientId) {
+        KeycloakRoleMapping kRoleToAdd = testKeycloakClient
+            .getClientRoles(clientId)
+            .stream()
+            .filter(kRole -> kRole.getName().equals(DYNAMIC_ROLE_NAME))
+            .findFirst()
+            .get();
+        keycloakClient
+            .searchUsers(TEST_USER_PREFIX, 0, Integer.MAX_VALUE)
+            .forEach(user -> testKeycloakClient.addUserClientRoleMapping(user.getId(), clientId, List.of(kRoleToAdd)));
+        return kRoleToAdd;
+    }
+
+    private void addUsers(int userCount) {
+        for (int i = 0; i < userCount; i++) {
+            TestKeycloakUser user = new TestKeycloakUser();
+            user.setUsername(TEST_USER_PREFIX + i);
+            user.setGroups(List.of(DYNAMIC_GROUP_NAME));
+            testKeycloakClient.addUser(user);
+        }
+    }
+
+    @Test
+    public void should_getUserRoleMappingAvailable_by_userId() {
+        List<KeycloakRoleMapping> roleMappings = keycloakClient.getUserRoleMappingAvailable(ADMIN_USER_ID);
+
+        assertThat(roleMappings).hasSizeGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void should_addUserRoleMapping() {
+        KeycloakMappingsRepresentation userRoles = keycloakClient.getUserRoles(ADMIN_USER_ID);
+        assertThat(userRoles.getRealmMappings())
+            .extracting(KeycloakRoleMapping::getName)
+            .doesNotContain(ACTIVITI_MODELER);
+
+        List<KeycloakRoleMapping> roleMappings = keycloakClient.getUserRoleMappingAvailable(ADMIN_USER_ID);
+        KeycloakRoleMapping activitiModelerRole = roleMappings
+            .stream()
+            .filter(role -> ACTIVITI_MODELER.equals(role.getName()))
+            .findFirst()
+            .get();
+
+        keycloakClient.addRealmLevelUserRoleMapping(ADMIN_USER_ID, List.of(activitiModelerRole));
+
+        Awaitility
+            .await()
+            .untilAsserted(() ->
+                assertThat(keycloakClient.getUserRoles(ADMIN_USER_ID).getRealmMappings())
+                    .extracting(KeycloakRoleMapping::getName)
+                    .contains(ACTIVITI_MODELER)
+            );
+    }
+
+    @Test
+    public void should_getAllGroupRoleMapping_by_groupId() {
+        KeycloakMappingsRepresentation roleMappings = keycloakClient.getAllGroupRoleMapping(ACTIVITI_USER_GROUP_ID);
+
+        assertThat(roleMappings.getRealmMappings()).hasSizeGreaterThanOrEqualTo(1);
+        assertThat(roleMappings.getClientMappings()).isNullOrEmpty();
+    }
+
+    @Test
+    public void should_getServiceAccountUserOfClient_by_clientId() {
+        String idOfClient = getIdOfClient("activiti-keycloak");
+        KeycloakUser userOfClient = keycloakClient.getServiceAccountUserOfClient(idOfClient);
+        assertThat(userOfClient).isNotNull();
+    }
+
+    @Test
+    public void should_searchClient() {
+        List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(ACTIVITI_CLIENT_ID);
+        assertThat(clients).hasSize(1);
+
+        String idOfClient = clients.get(0).getId();
+        KeycloakClientRepresentation clientById = keycloakClient.getClientById(idOfClient);
+
+        assertThat(clientById).isNotNull();
+        assertThat(clientById.getClientId()).isEqualTo(ACTIVITI_CLIENT_ID);
+    }
+
+    @Test
+    public void should_searchGroup() {
+        List<KeycloakGroup> allGroups = keycloakClient.getAllGroups();
+
+        assertThat(allGroups).hasSizeGreaterThan(0);
+
+        KeycloakGroup groupById = keycloakClient.getGroupById(allGroups.get(0).getId());
+        assertThat(groupById).isNotNull();
+    }
+
+    @Test
+    public void should_getGroup_By_Path() {
+        String path = "/hr";
+        KeycloakGroup groupByPath = keycloakClient.getGroupByPath(path);
+
+        assertThat(groupByPath).isNotNull();
+        assertThat(groupByPath.getPath()).isEqualTo(path);
+    }
+
+    @Test
+    public void should_getUsers() {
+        Integer countAllUsers = keycloakClient.countAllUsers();
+        List<KeycloakUser> allUsers = keycloakClient.getAllUsers(countAllUsers);
+
+        assertThat(allUsers).hasSizeGreaterThan(0);
+
+        KeycloakUser userById = keycloakClient.getUserById(allUsers.get(0).getId());
+        assertThat(userById).isNotNull();
+        assertThat(countAllUsers).isEqualTo(allUsers.size());
+    }
+
+    private String getIdOfClient(String clientId) {
+        List<KeycloakClientRepresentation> clients = keycloakClient.findByClientId(clientId);
+        return clients.get(0).getId();
+    }
+
+    @Test
+    public void should_countAllUser() {
+        Integer countAllUsers = keycloakClient.countAllUsers();
+        List<KeycloakUser> users = keycloakClient.searchUsers(null, 0, countAllUsers);
+
+        assertThat(countAllUsers).isGreaterThan(0);
+        assertThat(countAllUsers).isEqualTo(users.size());
+    }
 }

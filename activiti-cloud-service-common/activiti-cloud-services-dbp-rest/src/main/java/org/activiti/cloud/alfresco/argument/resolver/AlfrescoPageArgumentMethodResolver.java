@@ -29,8 +29,10 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
     private final AlfrescoPageParameterParser pageParameterParser;
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
-    public AlfrescoPageArgumentMethodResolver(AlfrescoPageParameterParser pageParameterParser,
-                                              PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver) {
+    public AlfrescoPageArgumentMethodResolver(
+        AlfrescoPageParameterParser pageParameterParser,
+        PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver
+    ) {
         this.pageParameterParser = pageParameterParser;
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
     }
@@ -42,21 +44,29 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
 
     @Nullable
     @Override
-    public Pageable resolveArgument(MethodParameter parameter,
-                                    @Nullable ModelAndViewContainer mavContainer,
-                                    NativeWebRequest webRequest,
-                                    @Nullable WebDataBinderFactory binderFactory) {
-        Pageable basePageable = pageableHandlerMethodArgumentResolver.resolveArgument(parameter,
-                                                                                      mavContainer,
-                                                                                      webRequest,
-                                                                                      binderFactory);
+    public Pageable resolveArgument(
+        MethodParameter parameter,
+        @Nullable ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest,
+        @Nullable WebDataBinderFactory binderFactory
+    ) {
+        Pageable basePageable = pageableHandlerMethodArgumentResolver.resolveArgument(
+            parameter,
+            mavContainer,
+            webRequest,
+            binderFactory
+        );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
-        if (alfrescoQueryParameters.getSkipCountParameter().isSet() || alfrescoQueryParameters.getMaxItemsParameter().isSet()) {
-
-            return new AlfrescoPageRequest(alfrescoQueryParameters.getSkipCountParameter().getValue(),
-                                           alfrescoQueryParameters.getMaxItemsParameter().getValue(),
-                                           basePageable);
+        if (
+            alfrescoQueryParameters.getSkipCountParameter().isSet() ||
+            alfrescoQueryParameters.getMaxItemsParameter().isSet()
+        ) {
+            return new AlfrescoPageRequest(
+                alfrescoQueryParameters.getSkipCountParameter().getValue(),
+                alfrescoQueryParameters.getMaxItemsParameter().getValue(),
+                basePageable
+            );
         } else {
             return basePageable;
         }

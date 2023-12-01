@@ -31,22 +31,20 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
-import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.starters.test.MyProducer;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(EventsRestTemplate.class)
-@ContextConfiguration(initializers ={ RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class})
-@DirtiesContext
+@Import({ EventsRestTemplate.class, TestChannelBinderConfiguration.class })
+@ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
 class AuditVariableEventsIT {
 
     @Autowired
@@ -58,80 +56,110 @@ class AuditVariableEventsIT {
     @Autowired
     private MyProducer producer;
 
-    @BeforeEach
-    public void setUp() {
+    @AfterEach
+    public void cleanUp() {
         repository.deleteAll();
     }
 
     @Test
     void should_supportAllCloudVariableEvents() {
         //given
-        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>("variableName", "string", "initValue", "procInstId", null);
+        VariableInstanceImpl<String> variableInstance = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "initValue",
+            "procInstId",
+            null
+        );
         CloudVariableCreatedEventImpl variableCreatedEvent = new CloudVariableCreatedEventImpl(variableInstance);
-        VariableInstanceImpl<String> variableInstanceUpdate = new VariableInstanceImpl<>("variableName", "string", "updatedValue", "procInstId", null);
-        CloudVariableUpdatedEventImpl<String> variableUpdatedEvent = new CloudVariableUpdatedEventImpl<>(variableInstanceUpdate, "initValue");
+        VariableInstanceImpl<String> variableInstanceUpdate = new VariableInstanceImpl<>(
+            "variableName",
+            "string",
+            "updatedValue",
+            "procInstId",
+            null
+        );
+        CloudVariableUpdatedEventImpl<String> variableUpdatedEvent = new CloudVariableUpdatedEventImpl<>(
+            variableInstanceUpdate,
+            "initValue"
+        );
         CloudVariableDeletedEventImpl variableDeletedEvent = new CloudVariableDeletedEventImpl(variableInstanceUpdate);
 
         producer.send(variableCreatedEvent, variableUpdatedEvent, variableDeletedEvent);
 
-        await().untilAsserted(() -> {
-            //when
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate
-                .executeFindAll();
+        await()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsPagedModel = eventsRestTemplate.executeFindAll();
 
-            //then
-            Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
-            assertThat(retrievedEvents)
-                .hasSize(3)
-                .hasOnlyElementsOfTypes(CloudVariableCreatedEventImpl.class, CloudVariableUpdatedEventImpl.class, CloudVariableDeletedEventImpl.class);
+                //then
+                Collection<CloudRuntimeEvent> retrievedEvents = eventsPagedModel.getBody().getContent();
+                assertThat(retrievedEvents)
+                    .hasSize(3)
+                    .hasOnlyElementsOfTypes(
+                        CloudVariableCreatedEventImpl.class,
+                        CloudVariableUpdatedEventImpl.class,
+                        CloudVariableDeletedEventImpl.class
+                    );
 
-            Map<String, Object> createdFilter = Map.of("eventType", VariableEvents.VARIABLE_CREATED.name());
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> createdEventsPage = eventsRestTemplate.executeFind(createdFilter);
-            Collection<CloudRuntimeEvent> createdEvents = createdEventsPage.getBody().getContent();
-            assertThat(createdEvents)
-                .hasSize(1)
-                .hasOnlyElementsOfType(CloudVariableCreatedEventImpl.class);
+                Map<String, Object> createdFilter = Map.of("eventType", VariableEvents.VARIABLE_CREATED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> createdEventsPage = eventsRestTemplate.executeFind(
+                    createdFilter
+                );
+                Collection<CloudRuntimeEvent> createdEvents = createdEventsPage.getBody().getContent();
+                assertThat(createdEvents).hasSize(1).hasOnlyElementsOfType(CloudVariableCreatedEventImpl.class);
 
-            CloudVariableCreatedEvent createdEvent = (CloudVariableCreatedEventImpl) createdEvents.iterator().next();
-            assertThat(createdEvent)
-                .extracting(event -> event.getEntity().getName(),
-                    event -> event.getEntity().getProcessInstanceId(),
-                    event -> event.getEntity().getType(),
-                    event -> event.getEntity().getValue())
-                .containsExactly("variableName", "procInstId", "string", "initValue");
+                CloudVariableCreatedEvent createdEvent = (CloudVariableCreatedEventImpl) createdEvents
+                    .iterator()
+                    .next();
+                assertThat(createdEvent)
+                    .extracting(
+                        event -> event.getEntity().getName(),
+                        event -> event.getEntity().getProcessInstanceId(),
+                        event -> event.getEntity().getType(),
+                        event -> event.getEntity().getValue()
+                    )
+                    .containsExactly("variableName", "procInstId", "string", "initValue");
 
-            Map<String, Object> updatedFilter = Map.of("eventType", VariableEvents.VARIABLE_UPDATED.name());
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> updatedEventsPage = eventsRestTemplate.executeFind(updatedFilter);
+                Map<String, Object> updatedFilter = Map.of("eventType", VariableEvents.VARIABLE_UPDATED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> updatedEventsPage = eventsRestTemplate.executeFind(
+                    updatedFilter
+                );
 
-            Collection<CloudRuntimeEvent> updatedEvents = updatedEventsPage.getBody().getContent();
-            assertThat(updatedEvents)
-                .hasSize(1)
-                .hasOnlyElementsOfType(CloudVariableUpdatedEventImpl.class);
+                Collection<CloudRuntimeEvent> updatedEvents = updatedEventsPage.getBody().getContent();
+                assertThat(updatedEvents).hasSize(1).hasOnlyElementsOfType(CloudVariableUpdatedEventImpl.class);
 
-            CloudVariableUpdatedEvent updatedEvent = (CloudVariableUpdatedEventImpl) updatedEvents.iterator().next();
-            assertThat(updatedEvent)
-                .extracting(event -> event.getEntity().getName(),
-                    event -> event.getEntity().getProcessInstanceId(),
-                    event -> event.getEntity().getType(),
-                    event -> event.getEntity().getValue(),
-                    event -> event.getPreviousValue())
-                .containsExactly("variableName", "procInstId", "string", "updatedValue", "initValue");
+                CloudVariableUpdatedEvent updatedEvent = (CloudVariableUpdatedEventImpl) updatedEvents
+                    .iterator()
+                    .next();
+                assertThat(updatedEvent)
+                    .extracting(
+                        event -> event.getEntity().getName(),
+                        event -> event.getEntity().getProcessInstanceId(),
+                        event -> event.getEntity().getType(),
+                        event -> event.getEntity().getValue(),
+                        event -> event.getPreviousValue()
+                    )
+                    .containsExactly("variableName", "procInstId", "string", "updatedValue", "initValue");
 
-            Map<String, Object> deletedFilter = Map.of("eventType", VariableEvents.VARIABLE_DELETED.name());
-            ResponseEntity<PagedModel<CloudRuntimeEvent>> deletedEventsPage = eventsRestTemplate.executeFind(deletedFilter);
-            Collection<CloudRuntimeEvent> deletedEvents = deletedEventsPage.getBody().getContent();
-            assertThat(deletedEvents)
-                .hasSize(1)
-                .hasOnlyElementsOfType(CloudVariableDeletedEventImpl.class);
+                Map<String, Object> deletedFilter = Map.of("eventType", VariableEvents.VARIABLE_DELETED.name());
+                ResponseEntity<PagedModel<CloudRuntimeEvent>> deletedEventsPage = eventsRestTemplate.executeFind(
+                    deletedFilter
+                );
+                Collection<CloudRuntimeEvent> deletedEvents = deletedEventsPage.getBody().getContent();
+                assertThat(deletedEvents).hasSize(1).hasOnlyElementsOfType(CloudVariableDeletedEventImpl.class);
 
-            CloudVariableDeletedEvent deletedEvent = (CloudVariableDeletedEventImpl) deletedEvents.iterator().next();
-            assertThat(deletedEvent)
-                .extracting(event -> event.getEntity().getName(),
-                    event -> event.getEntity().getProcessInstanceId(),
-                    event -> event.getEntity().getType(),
-                    event -> event.getEntity().getValue())
-                .containsExactly("variableName", "procInstId", "string", "updatedValue");
-        });
+                CloudVariableDeletedEvent deletedEvent = (CloudVariableDeletedEventImpl) deletedEvents
+                    .iterator()
+                    .next();
+                assertThat(deletedEvent)
+                    .extracting(
+                        event -> event.getEntity().getName(),
+                        event -> event.getEntity().getProcessInstanceId(),
+                        event -> event.getEntity().getType(),
+                        event -> event.getEntity().getValue()
+                    )
+                    .containsExactly("variableName", "procInstId", "string", "updatedValue");
+            });
     }
-
 }

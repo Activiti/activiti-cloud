@@ -15,13 +15,11 @@
  */
 package org.activiti.cloud.starter.query.configuration;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @Import(QuerySwaggerConfig.class)
 @PropertySource("classpath:query-messaging.properties")
-public class ActivitiQueryAutoConfiguration {
-
-}
+public class ActivitiQueryAutoConfiguration {}

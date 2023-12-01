@@ -15,13 +15,9 @@
  */
 package org.activiti.cloud.services.notifications.graphql.ws.config;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
 @ConfigurationProperties(prefix = "spring.activiti.cloud.services.notifications.graphql.ws")
@@ -71,14 +67,6 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
     /* Fixed buffer timespan duration in ms to trigger sending outbound messages to clients. Default is 1000 */
     @NotNull
     private Integer bufferTimeSpanMs;
-
-    @Configuration
-    @PropertySource("classpath:META-INF/graphql-ws.properties")
-    @PropertySource(value = "classpath:graphql-ws.properties", ignoreResourceNotFound = true)
-    @EnableConfigurationProperties(GraphQLWebSocketMessageBrokerConfigurationProperties.class)
-    public static class AutoConfiguration {
-
-    }
 
     public Boolean isEnabled() {
         return enabled;
@@ -136,16 +124,13 @@ public class GraphQLWebSocketMessageBrokerConfigurationProperties {
         this.allowedOrigins = allowedOrigins;
     }
 
-
     public Integer getBufferCount() {
         return bufferCount;
     }
 
-
     public void setBufferCount(Integer bufferCount) {
         this.bufferCount = bufferCount;
     }
-
 
     public Integer getBufferTimeSpanMs() {
         return bufferTimeSpanMs;

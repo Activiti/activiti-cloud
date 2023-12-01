@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.mock;
 
-import org.hamcrest.Matcher;
-
 import static org.hamcrest.core.IsEqual.equalTo;
+
+import org.hamcrest.Matcher;
 
 /**
  * Is the value equal to another value

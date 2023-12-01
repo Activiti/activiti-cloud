@@ -17,17 +17,17 @@ package org.activiti.cloud.services.modeling.validation;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-@Configuration
+@AutoConfiguration
 public class JsonSchemaModelValidatorConfiguration {
 
     @Value("${activiti.validation.connector-schema:schema/connector-schema.json}")
@@ -39,32 +39,33 @@ public class JsonSchemaModelValidatorConfiguration {
     @Value("${activiti.validation.model-extensions-schema:schema/model-extensions-schema.json}")
     private String modelExtensionsSchema;
 
-    @Bean(name = "connectorSchemaLoader")
-    public SchemaLoader getConnectorSchemaLoader() throws IOException {
-        return buildSchemaLoaderFromClasspath(connectorSchema);
+    @Bean(name = "connectorSchema")
+    public Schema getConnectorSchemaLoader() throws IOException {
+        return buildSchemaFromClasspath(connectorSchema);
     }
 
-    @Bean(name = "processExtensionsSchemaLoader")
-    public SchemaLoader getProcessExtensionsSchemaLoader() throws IOException {
-        return buildSchemaLoaderFromClasspath(processExtensionsSchema);
+    @Bean(name = "processExtensionsSchema")
+    public Schema getProcessExtensionsSchemaLoader() throws IOException {
+        return buildSchemaFromClasspath(processExtensionsSchema);
     }
 
-    @Bean(name = "modelExtensionsSchemaLoader")
-    public SchemaLoader getModelExtensionsSchemaLoader() throws IOException {
-        return buildSchemaLoaderFromClasspath(modelExtensionsSchema);
+    @Bean(name = "modelExtensionsSchema")
+    public Schema getModelExtensionsSchemaLoader() throws IOException {
+        return buildSchemaFromClasspath(modelExtensionsSchema);
     }
 
-    private SchemaLoader buildSchemaLoaderFromClasspath(String schemaFileName) throws IOException {
+    private Schema buildSchemaFromClasspath(String schemaFileName) throws IOException {
         try (InputStream schemaInputStream = new ClassPathResource(schemaFileName).getInputStream()) {
             JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaInputStream));
 
             return SchemaLoader
-                    .builder()
-                    .schemaClient(SchemaClient.classPathAwareClient())
-                    .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
-                    .draftV7Support()
-                    .build();
+                .builder()
+                .schemaClient(SchemaClient.classPathAwareClient())
+                .schemaJson(new JsonSchemaFlattener().flatten(jsonSchema))
+                .draftV7Support()
+                .build()
+                .load()
+                .build();
         }
     }
-
 }

@@ -17,26 +17,27 @@ package org.activiti.cloud.services.notifications.graphql.ws.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWebSocketMessageBrokerConfigurationProperties;
+import graphql.schema.GraphQLSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
-@ActiveProfiles({"graphql-ws"})
-@SpringBootTest(webEnvironment=WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = "spring.rabbitmq.host=rabbitmq")
 public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
+
+    @MockBean
+    private GraphQLSchema graphQLSchema;
 
     @Autowired
     private GraphQLWebSocketMessageBrokerConfigurationProperties configurationProperties;
 
     @EnableAutoConfiguration
     @SpringBootConfiguration
-    static class TestConfiguration {
-    }
+    static class TestConfiguration {}
 
     @Test
     public void testConfigurationProperties() {
@@ -52,5 +53,4 @@ public class GraphQLWebSocketMessageBrokerConfigurationPropertiesTest {
         assertThat(configurationProperties.getBufferCount()).isEqualTo(50);
         assertThat(configurationProperties.getBufferTimeSpanMs()).isEqualTo(999); // overrides from graphql-ws.properties
     }
-
 }

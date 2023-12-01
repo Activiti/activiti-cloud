@@ -17,7 +17,4 @@ package org.activiti.cloud.api.process.model.events;
 
 import org.activiti.api.process.model.events.BPMNActivityCompletedEvent;
 
-public interface CloudBPMNActivityCompletedEvent extends CloudBPMNActivityEvent,
-                                                         BPMNActivityCompletedEvent {
-
-}
+public interface CloudBPMNActivityCompletedEvent extends CloudBPMNActivityEvent, BPMNActivityCompletedEvent {}

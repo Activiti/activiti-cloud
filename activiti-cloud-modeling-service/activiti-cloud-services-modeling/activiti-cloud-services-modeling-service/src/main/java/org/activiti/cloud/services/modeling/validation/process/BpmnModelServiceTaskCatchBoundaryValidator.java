@@ -32,25 +32,29 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonModelValidator {
 
     public static final String MISSING_BOUNDARY_WARNING = "Missing Catch Error boundary event";
-    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION = "The service implementation on service '%s' might fail silently";
+    public static final String INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION =
+        "The service implementation on service '%s' might fail silently. " +
+        "Consider adding an Error boundary event to handle failures.";
     public static final String SERVICE_TASK_VALIDATOR_NAME = "BPMN service task catch boundary validator";
 
     private final FlowElementsExtractor flowElementsExtractor;
 
     private final List<ServiceTaskImplementationType> serviceTaskImplementationTypes;
 
-    public BpmnModelServiceTaskCatchBoundaryValidator(FlowElementsExtractor flowElementsExtractor,
-        List<ServiceTaskImplementationType> serviceTaskImplementationTypes) {
+    public BpmnModelServiceTaskCatchBoundaryValidator(
+        FlowElementsExtractor flowElementsExtractor,
+        List<ServiceTaskImplementationType> serviceTaskImplementationTypes
+    ) {
         this.flowElementsExtractor = flowElementsExtractor;
-        this.serviceTaskImplementationTypes = Optional.ofNullable(serviceTaskImplementationTypes)
-            .orElse(Collections.emptyList());
+        this.serviceTaskImplementationTypes =
+            Optional.ofNullable(serviceTaskImplementationTypes).orElse(Collections.emptyList());
     }
 
     @Override
-    public Stream<ModelValidationError> validate(BpmnModel bpmnModel,
-        ValidationContext validationContext) {
-
-        return flowElementsExtractor.extractFlowElements(bpmnModel, ServiceTask.class).stream()
+    public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
+        return flowElementsExtractor
+            .extractFlowElements(bpmnModel, ServiceTask.class)
+            .stream()
             .filter(serviceTask -> serviceTask.getImplementation() != null)
             .map(serviceTask -> validateServiceTaskBoundary(serviceTask))
             .filter(Optional::isPresent)
@@ -60,19 +64,24 @@ public class BpmnModelServiceTaskCatchBoundaryValidator implements BpmnCommonMod
     private Optional<ModelValidationError> validateServiceTaskBoundary(ServiceTask serviceTask) {
         if (requiredBoundaryIsMissing(serviceTask)) {
             return Optional.of(
-                new ModelValidationError(MISSING_BOUNDARY_WARNING,
-                    format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION,
-                        serviceTask.getId()), SERVICE_TASK_VALIDATOR_NAME, true));
+                new ModelValidationError(
+                    MISSING_BOUNDARY_WARNING,
+                    format(INVALID_SERVICE_IMPLEMENTATION_DESCRIPTION, serviceTask.getId()),
+                    SERVICE_TASK_VALIDATOR_NAME,
+                    true
+                )
+            );
         }
 
         return Optional.<ModelValidationError>empty();
     }
 
     private boolean requiredBoundaryIsMissing(ServiceTask serviceTask) {
-        return serviceTaskImplementationTypes.stream()
+        return serviceTaskImplementationTypes
+            .stream()
             .anyMatch(serviceImplementation ->
                 serviceTask.getImplementation().startsWith(serviceImplementation.getPrefix()) &&
-                    !serviceTask.hasBoundaryErrorEvents()
+                !serviceTask.hasBoundaryErrorEvents()
             );
     }
 }

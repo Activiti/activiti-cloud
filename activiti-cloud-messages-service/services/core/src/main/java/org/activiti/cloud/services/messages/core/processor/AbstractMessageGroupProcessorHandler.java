@@ -21,7 +21,6 @@ public abstract class AbstractMessageGroupProcessorHandler implements MessageGro
 
     @Override
     public Object handle(MessageGroup group) {
-
         if (canProcess(group)) {
             return process(group);
         }

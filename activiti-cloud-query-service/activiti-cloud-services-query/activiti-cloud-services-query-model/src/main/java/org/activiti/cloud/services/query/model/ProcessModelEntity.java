@@ -15,11 +15,10 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import jakarta.persistence.*;
+import java.util.Objects;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-
-import javax.persistence.*;
-import java.util.Objects;
 
 @Entity(name = "ProcessModel")
 @Table(name = "PROCESS_MODEL")
@@ -34,15 +33,13 @@ public class ProcessModelEntity {
     @MapsId
     private ProcessDefinitionEntity processDefinition;
 
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private String processModelContent;
 
     //used by persistence framework
-    public ProcessModelEntity() {
-    }
+    public ProcessModelEntity() {}
 
-    public ProcessModelEntity(ProcessDefinitionEntity processDefinition,
-                              String processModelContent) {
+    public ProcessModelEntity(ProcessDefinitionEntity processDefinition, String processModelContent) {
         this.processDefinition = processDefinition;
         this.processModelContent = processModelContent;
     }

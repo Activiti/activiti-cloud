@@ -17,15 +17,15 @@
 package org.activiti.services.connectors.conf;
 
 import org.activiti.engine.RepositoryService;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-@Configuration
-@AutoConfigureAfter(BinderFactoryAutoConfiguration.class)
+@AutoConfiguration(after = BinderFactoryAutoConfiguration.class)
+@Import(ProcessEngineIntegrationChannelsConfiguration.class)
 public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean
@@ -42,12 +42,15 @@ public class CloudConnectorsMessagingAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(BindingServiceProperties bindingServiceProperties,
-                                                                                             ConnectorImplementationsProvider destinationsProvider,
-                                                                                             ConnectorDestinationMappingStrategy destinationMappingStrategy) {
-        return new ConnectorMessagingDestinationsConfigurer(destinationsProvider,
-                                                            destinationMappingStrategy,
-                                                            bindingServiceProperties);
+    public ConnectorMessagingDestinationsConfigurer connectorMessagingDestinationsConfigurer(
+        BindingServiceProperties bindingServiceProperties,
+        ConnectorImplementationsProvider destinationsProvider,
+        ConnectorDestinationMappingStrategy destinationMappingStrategy
+    ) {
+        return new ConnectorMessagingDestinationsConfigurer(
+            destinationsProvider,
+            destinationMappingStrategy,
+            bindingServiceProperties
+        );
     }
-
 }

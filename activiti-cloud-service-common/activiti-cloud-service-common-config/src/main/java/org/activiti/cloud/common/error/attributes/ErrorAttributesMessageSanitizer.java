@@ -21,11 +21,11 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
 public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomizer {
 
     public static final String MESSAGE = "message";
-    public static final String ERROR_NOT_DISCLOSED_MESSAGE = "A technical error occurred. Additional information is not disclosed for security reasons.";
+    public static final String ERROR_NOT_DISCLOSED_MESSAGE =
+        "A technical error occurred. Additional information is not disclosed for security reasons.";
     public static final String[] TECHNICAL_INFO_BLACKLIST = {
         "java.",
         "javax.",
@@ -36,10 +36,9 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
         "net.",
         "io.",
         "dev.",
-        "de."
+        "de.",
     };
     public static final Pattern VALIDATION_REGEX = compileValidationRegex();
-
 
     @Override
     public Map<String, Object> customize(Map<String, Object> errorAttributes, Throwable error) {
@@ -56,9 +55,10 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
         return VALIDATION_REGEX.matcher(message).find();
     }
 
-    private static Pattern compileValidationRegex(){
-        String pipedBlacklist = Arrays.stream(TECHNICAL_INFO_BLACKLIST)
-            .map(s -> s.replaceAll("\\.",""))
+    private static Pattern compileValidationRegex() {
+        String pipedBlacklist = Arrays
+            .stream(TECHNICAL_INFO_BLACKLIST)
+            .map(s -> s.replaceAll("\\.", ""))
             .collect(Collectors.joining("|"));
 
         String regex = "\\W(".concat(pipedBlacklist).concat(")\\.\\w");
@@ -67,5 +67,4 @@ public class ErrorAttributesMessageSanitizer implements ErrorAttributesCustomize
 
         return Pattern.compile(regex);
     }
-
 }

@@ -15,18 +15,15 @@
  */
 package org.activiti.cloud.common.swagger.springdoc.conf;
 
+import io.swagger.v3.oas.models.security.OAuthFlow;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
-import org.activiti.cloud.common.swagger.springdoc.customizer.ErrorResponsesOperationCustomizer;
-import org.activiti.cloud.common.swagger.springdoc.customizer.NamingOperationCustomizer;
-import org.activiti.cloud.common.swagger.springdoc.customizer.PathPrefixOpenApiCustomizer;
-import org.activiti.cloud.common.swagger.springdoc.customizer.SchemaTitleOpenApiCustomizer;
-import org.activiti.cloud.common.swagger.springdoc.customizer.SecurityItemOperationCustomizer;
-import org.activiti.cloud.common.swagger.springdoc.customizer.SummaryOperationCustomizer;
+import org.activiti.cloud.common.swagger.springdoc.customizer.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.PropertySource;
 
 /**
@@ -46,7 +43,7 @@ import org.springframework.context.annotation.PropertySource;
  *     }
  * </pre>
  */
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:swagger-config.properties")
 public class SwaggerAutoConfiguration {
 
@@ -55,8 +52,9 @@ public class SwaggerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public BaseOpenApiBuilder baseOpenApiBuilder(BuildProperties buildProperties) {
-        return new BaseOpenApiBuilder(buildProperties);
+    @DependsOn("swaggerOAuthFlow")
+    public BaseOpenApiBuilder baseOpenApiBuilder(BuildProperties buildProperties, OAuthFlow swaggerOAuthFlow) {
+        return new BaseOpenApiBuilder(buildProperties, swaggerOAuthFlow);
     }
 
     @Bean

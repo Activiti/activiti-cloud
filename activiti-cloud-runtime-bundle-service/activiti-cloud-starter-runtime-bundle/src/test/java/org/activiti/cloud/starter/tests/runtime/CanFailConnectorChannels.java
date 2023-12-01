@@ -16,13 +16,15 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface CanFailConnectorChannels {
-
     String CAN_FAIL_CONNECTOR = "canFailConnector";
-    @Input(CAN_FAIL_CONNECTOR)
-    SubscribableChannel canFailConnector();
 
+    @InputBinding(CAN_FAIL_CONNECTOR)
+    default SubscribableChannel canFailConnector() {
+        return MessageChannels.publishSubscribe(CAN_FAIL_CONNECTOR).getObject();
+    }
 }

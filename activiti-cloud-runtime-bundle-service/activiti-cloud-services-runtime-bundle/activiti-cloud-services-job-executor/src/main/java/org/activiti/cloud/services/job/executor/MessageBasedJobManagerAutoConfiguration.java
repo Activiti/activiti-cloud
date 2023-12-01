@@ -18,18 +18,18 @@ package org.activiti.cloud.services.job.executor;
 import org.activiti.cloud.common.messaging.config.ActivitiMessagingDestinationsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.cloud.stream.binding.BindingService;
 import org.springframework.cloud.stream.binding.SubscribableChannelBindingTargetFactory;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(name = "spring.activiti.asyncExecutorActivate", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(ActivitiMessagingDestinationsAutoConfiguration.class)
 public class MessageBasedJobManagerAutoConfiguration {
@@ -42,27 +42,31 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageInputChannelFactory jobMessageInputChannelFactory(SubscribableChannelBindingTargetFactory bindingTargetFactory,
-                                                                       BindingServiceProperties bindingServiceProperties,
-                                                                       ConfigurableListableBeanFactory beanFactory) {
+    public JobMessageInputChannelFactory jobMessageInputChannelFactory(
+        SubscribableChannelBindingTargetFactory bindingTargetFactory,
+        BindingServiceProperties bindingServiceProperties,
+        ConfigurableListableBeanFactory beanFactory
+    ) {
         return new JobMessageInputChannelFactory(bindingTargetFactory, bindingServiceProperties, beanFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(BindingServiceProperties bindingServiceProperties,
-                                                                       JobMessageProducer jobMessageProducer) {
+    public MessageBasedJobManagerFactory messageBasedJobManagerFactory(
+        BindingServiceProperties bindingServiceProperties,
+        JobMessageProducer jobMessageProducer
+    ) {
         return new DefaultMessageBasedJobManagerFactory(bindingServiceProperties, jobMessageProducer);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public JobMessageProducer jobMessageProducer(BinderAwareChannelResolver resolver,
-                                                 ApplicationEventPublisher eventPublisher,
-                                                 JobMessageBuilderFactory jobMessageBuilderFactory) {
-        return new DefaultJobMessageProducer(resolver,
-                                             eventPublisher,
-                                             jobMessageBuilderFactory);
+    public JobMessageProducer jobMessageProducer(
+        StreamBridge streamBridge,
+        ApplicationEventPublisher eventPublisher,
+        JobMessageBuilderFactory jobMessageBuilderFactory
+    ) {
+        return new DefaultJobMessageProducer(streamBridge, eventPublisher, jobMessageBuilderFactory);
     }
 
     @Bean
@@ -73,17 +77,19 @@ public class MessageBasedJobManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(ConfigurableListableBeanFactory beanFactory,
-                                                                                 BindingService bindingService,
-                                                                                 JobMessageInputChannelFactory jobMessageInputChannelFactory,
-                                                                                 MessageBasedJobManagerFactory messageBasedJobManagerFactory,
-                                                                                 JobMessageHandlerFactory jobMessageHandlerFactory) {
-
-        return new MessageBasedJobManagerConfigurator(beanFactory,
-                                                      bindingService,
-                                                      jobMessageInputChannelFactory,
-                                                      messageBasedJobManagerFactory,
-                                                      jobMessageHandlerFactory);
+    public MessageBasedJobManagerConfigurator messageBasedJobManagerConfigurator(
+        ConfigurableListableBeanFactory beanFactory,
+        BindingService bindingService,
+        JobMessageInputChannelFactory jobMessageInputChannelFactory,
+        MessageBasedJobManagerFactory messageBasedJobManagerFactory,
+        JobMessageHandlerFactory jobMessageHandlerFactory
+    ) {
+        return new MessageBasedJobManagerConfigurator(
+            beanFactory,
+            bindingService,
+            jobMessageInputChannelFactory,
+            messageBasedJobManagerFactory,
+            jobMessageHandlerFactory
+        );
     }
-
 }

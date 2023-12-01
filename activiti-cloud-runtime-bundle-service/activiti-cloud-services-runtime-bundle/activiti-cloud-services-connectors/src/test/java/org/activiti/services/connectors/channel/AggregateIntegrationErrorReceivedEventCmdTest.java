@@ -58,10 +58,12 @@ public class AggregateIntegrationErrorReceivedEventCmdTest {
         when(integrationError.getErrorMessage()).thenReturn("my error message");
         when(integrationError.getErrorClassName()).thenReturn("className");
         final List<StackTraceElement> stackTraceElements = Collections.singletonList(mock(StackTraceElement.class));
-        when(integrationError.getStackTraceElements()).thenReturn(
-            stackTraceElements);
+        when(integrationError.getStackTraceElements()).thenReturn(stackTraceElements);
         final AggregateIntegrationErrorReceivedEventCmd command = new AggregateIntegrationErrorReceivedEventCmd(
-            integrationError, runtimeBundleProperties, processEngineEventsAggregator);
+            integrationError,
+            runtimeBundleProperties,
+            processEngineEventsAggregator
+        );
 
         //when
         command.execute(mock(CommandContext.class));

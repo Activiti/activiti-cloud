@@ -18,18 +18,16 @@ package org.activiti.cloud.services.core.commands;
 import org.activiti.api.model.shared.Payload;
 import org.springframework.core.GenericTypeResolver;
 
-public abstract class AbstractCommandExecutor<T extends Payload> implements CommandExecutor<T>{
+public abstract class AbstractCommandExecutor<T extends Payload> implements CommandExecutor<T> {
 
     private final Class<?> handledType;
 
     public AbstractCommandExecutor() {
-        this.handledType = GenericTypeResolver.resolveTypeArguments(getClass(),
-                                                                    AbstractCommandExecutor.class)[0];
+        this.handledType = GenericTypeResolver.resolveTypeArguments(getClass(), AbstractCommandExecutor.class)[0];
     }
 
     @Override
     public String getHandledType() {
         return handledType.getName();
     }
-
 }

@@ -15,13 +15,12 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.cloud.api.model.shared.events.CloudVariableDeletedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class ProcessVariableDeletedEventHandler {
 
@@ -30,8 +29,7 @@ public class ProcessVariableDeletedEventHandler {
     private final EntityManager entityManager;
     private final EntityManagerFinder entityManagerFinder;
 
-    public ProcessVariableDeletedEventHandler(EntityManager entityManager,
-                                              EntityManagerFinder entityManagerFinder) {
+    public ProcessVariableDeletedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManager = entityManager;
         this.entityManagerFinder = entityManagerFinder;
     }
@@ -39,27 +37,36 @@ public class ProcessVariableDeletedEventHandler {
     public void handle(CloudVariableDeletedEvent event) {
         String variableName = event.getEntity().getName();
         String processInstanceId = event.getEntity().getProcessInstanceId();
-        Optional<ProcessInstanceEntity> findResult = entityManagerFinder.findProcessInstanceWithVariables(processInstanceId);
+        Optional<ProcessInstanceEntity> findResult = entityManagerFinder.findProcessInstanceWithVariables(
+            processInstanceId
+        );
         // if a task was cancelled / completed do not handle this event
         if (findResult.isPresent() && !findResult.get().isInFinalState()) {
             try {
                 ProcessInstanceEntity processInstanceEntity = findResult.get();
 
-                processInstanceEntity.getVariable(variableName)
-                         .ifPresentOrElse(variableEntity -> {
-                             // Persist into database
-                             processInstanceEntity.getVariables()
-                                                  .remove(variableEntity);
+                processInstanceEntity
+                    .getVariable(variableName)
+                    .ifPresentOrElse(
+                        variableEntity -> {
+                            // Persist into database
+                            processInstanceEntity.getVariables().remove(variableEntity);
 
-                             entityManager.remove(variableEntity);
-                         },() -> {
-                             LOGGER.warn("Unable to find variableEntity with name '" + variableName + "' for process instance '" + processInstanceId + "'");
-                         });
+                            entityManager.remove(variableEntity);
+                        },
+                        () -> {
+                            LOGGER.warn(
+                                "Unable to find variableEntity with name '" +
+                                variableName +
+                                "' for process instance '" +
+                                processInstanceId +
+                                "'"
+                            );
+                        }
+                    );
             } catch (Exception cause) {
-                LOGGER.error("Error handling ProcessVariableDeletedEvent[" + event + "]",
-                             cause);
+                LOGGER.error("Error handling ProcessVariableDeletedEvent[" + event + "]", cause);
             }
         }
-
     }
 }

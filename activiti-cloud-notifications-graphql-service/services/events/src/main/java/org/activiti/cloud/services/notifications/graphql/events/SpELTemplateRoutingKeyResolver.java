@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.notifications.graphql.events;
 
 import java.lang.annotation.Annotation;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -26,24 +25,22 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 public class SpELTemplateRoutingKeyResolver implements RoutingKeyResolver {
 
-	private ExpressionParser parser = new SpelExpressionParser();
+    private ExpressionParser parser = new SpelExpressionParser();
 
-	private ParserContext parserContext = new TemplateParserContext();
+    private ParserContext parserContext = new TemplateParserContext();
 
+    @Override
+    public String resolveRoutingKey(Object object) {
+        Annotation annotation = AnnotationUtils.findAnnotation(object.getClass(), SpELTemplateRoutingKey.class);
 
-	@Override
-	public String resolveRoutingKey(Object object) {
+        if (annotation == null) throw new RuntimeException(
+            "Cannot resolve routing key for class: " + object.getClass()
+        );
 
-		Annotation annotation = AnnotationUtils.findAnnotation(object.getClass(), SpELTemplateRoutingKey.class);
+        String value = AnnotationUtils.getValue(annotation).toString();
 
-		if(annotation == null)
-			throw new RuntimeException("Cannot resolve routing key for class: "+object.getClass());
+        Expression expression = parser.parseExpression(value, parserContext);
 
-		String value = AnnotationUtils.getValue(annotation).toString();
-
-		Expression expression = parser.parseExpression(value, parserContext);
-
-		return expression.getValue(object).toString();
+        return expression.getValue(object).toString();
     }
-
 }

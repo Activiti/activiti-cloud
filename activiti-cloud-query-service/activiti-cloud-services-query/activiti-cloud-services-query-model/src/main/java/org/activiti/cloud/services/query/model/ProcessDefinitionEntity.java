@@ -16,32 +16,36 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import javax.persistence.*;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-
 @Entity(name = "ProcessDefinition")
-@Table(name = "PROCESS_DEFINITION",
-        indexes = {
-                @Index(name = "pd_name_idx", columnList = "name"),
-                @Index(name = "pd_key_idx", columnList = "processDefinitionKey")
-        })
+@Table(
+    name = "PROCESS_DEFINITION",
+    indexes = {
+        @Index(name = "pd_name_idx", columnList = "name"),
+        @Index(name = "pd_key_idx", columnList = "processDefinitionKey"),
+    }
+)
 @DynamicInsert
 @DynamicUpdate
 public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements CloudProcessDefinition {
 
     @Id
     private String id;
+
     private String name;
+
     @Column(name = "processDefinitionKey")
     private String key;
+
     private String description;
     private int version;
     private String formKey;
@@ -49,31 +53,38 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false,
-        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+        name = "processDefinitionId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     @Fetch(FetchMode.SUBSELECT)
     private Set<ProcessCandidateStarterUserEntity> candidateStarterUsers = new LinkedHashSet<>();
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "processDefinitionId", referencedColumnName = "id", insertable = false, updatable = false,
-        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none"))
+    @JoinColumn(
+        name = "processDefinitionId",
+        referencedColumnName = "id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
+    )
     @Fetch(FetchMode.SUBSELECT)
     private Set<ProcessCandidateStarterGroupEntity> candidateStarterGroups = new LinkedHashSet<>();
 
-    public ProcessDefinitionEntity() {
-    }
+    public ProcessDefinitionEntity() {}
 
-    public ProcessDefinitionEntity(String serviceName,
-                                   String serviceFullName,
-                                   String serviceVersion,
-                                   String appName,
-                                   String appVersion) {
-        super(serviceName,
-              serviceFullName,
-              serviceVersion,
-              appName,
-              appVersion);
+    public ProcessDefinitionEntity(
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion
+    ) {
+        super(serviceName, serviceFullName, serviceVersion, appName, appVersion);
     }
 
     @Override
@@ -162,12 +173,9 @@ public class ProcessDefinitionEntity extends ActivitiEntityMetadata implements C
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (!super.equals(obj)) return false;
+        if (getClass() != obj.getClass()) return false;
         ProcessDefinitionEntity other = (ProcessDefinitionEntity) obj;
         return id != null && Objects.equals(id, other.id);
     }

@@ -15,14 +15,21 @@
  */
 package org.activiti.cloud.services.test.identity.keycloak;
 
+import java.util.Map;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 public class KeycloakTokenProducer implements IdentityTokenProducer {
+
+    public static final String TOKEN_ENDPOINT = "%s/realms/%s/protocol/openid-connect/token";
+    public static final String TOKEN_FIELD = "access_token";
 
     @Value("${keycloak.resource:}")
     protected String resource;
@@ -51,8 +58,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
 
     @Override
     public String getAccessTokenString() {
-        AccessTokenResponse token = getAccessTokenResponse(testUser, testPassword);
-        return token.getToken();
+        String token = getAccessTokenResponse(testUser, testPassword);
+        return token;
     }
 
     @Override
@@ -101,8 +108,8 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
     }
 
     private String getTokenString(String user, String password) {
-        AccessTokenResponse token = getAccessTokenResponse(user, password);
-        return "Bearer " + token.getToken();
+        String token = getAccessTokenResponse(user, password);
+        return "Bearer " + token;
     }
 
     private HttpHeaders authorizationHeaders(String user, String password) {
@@ -111,12 +118,22 @@ public class KeycloakTokenProducer implements IdentityTokenProducer {
         return headers;
     }
 
-    private AccessTokenResponse getAccessTokenResponse(String user, String password) {
-        return Keycloak.getInstance(authServerUrl,
-                                    realm,
-                                    user,
-                                    password,
-                                    resource).tokenManager().getAccessToken();
+    private String getAccessTokenResponse(String user, String password) {
+        String url = String.format(TOKEN_ENDPOINT, authServerUrl, realm);
+        ResponseEntity<Map> response = callTokenEndpoint(url, user, password);
+        return (String) response.getBody().get(TOKEN_FIELD);
     }
 
+    private ResponseEntity<Map> callTokenEndpoint(String url, String user, String password) {
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
+        requestParams.add("client_id", resource);
+        requestParams.add("username", user);
+        requestParams.add("password", password);
+        requestParams.add("grant_type", "password");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestParams, headers);
+        return restTemplate.postForEntity(url, request, Map.class);
+    }
 }

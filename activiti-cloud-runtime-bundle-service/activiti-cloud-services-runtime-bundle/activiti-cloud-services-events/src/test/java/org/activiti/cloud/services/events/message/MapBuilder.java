@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.events.message;
 
 public class MapBuilder<K, V> extends java.util.HashMap<K, V> {
+
     /**
      *
      */
@@ -33,5 +34,4 @@ public class MapBuilder<K, V> extends java.util.HashMap<K, V> {
     public static <K, V> MapBuilder<K, V> emptyMap() {
         return new MapBuilder<K, V>();
     }
-
 }

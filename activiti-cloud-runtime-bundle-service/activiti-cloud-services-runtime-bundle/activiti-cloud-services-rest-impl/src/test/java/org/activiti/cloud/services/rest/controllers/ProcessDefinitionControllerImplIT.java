@@ -28,18 +28,21 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.model.impl.ProcessDefinitionImpl;
 import org.activiti.api.runtime.shared.query.Page;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
@@ -49,12 +52,15 @@ import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.CachingProcessExtensionService;
@@ -83,15 +89,21 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(ProcessDefinitionControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({RuntimeBundleProperties.class,
+@Import(
+    {
+        RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         ServicesCoreAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class})
-public class ProcessDefinitionControllerImplIT {
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class,
+    }
+)
+@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
+class ProcessDefinitionControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,7 +114,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessDiagramGeneratorWrapper processDiagramGenerator;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -114,7 +126,7 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private ProcessAdminRuntime processAdminRuntime;
 
-    @MockBean
+    @MockBean(name = ProcessEngineChannels.COMMAND_RESULTS)
     private MessageChannel commandResults;
 
     @MockBean
@@ -123,29 +135,40 @@ public class ProcessDefinitionControllerImplIT {
     @MockBean
     private CachingProcessExtensionService cachingProcessExtensionService;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     private final ObjectMapper om = new ObjectMapper();
 
     @Test
-    public void getProcessDefinitions() throws Exception {
-
+    void getProcessDefinitions() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
         int version = 1;
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(buildProcessDefinition(procId, my_process, this_is_my_process, version));
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
-        mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE))
-        .andExpect(status().isOk());
+        mockMvc.perform(get("/v1/process-definitions").accept(MediaTypes.HAL_JSON_VALUE)).andExpect(status().isOk());
     }
 
-    private ProcessDefinition buildProcessDefinition(String processDefinitionId,
-                                                     String name,
-                                                     String description,
-                                                     int version) {
+    private ProcessDefinition buildProcessDefinition(
+        String processDefinitionId,
+        String name,
+        String description,
+        int version
+    ) {
         ProcessDefinitionImpl processDefinition = new ProcessDefinitionImpl();
         processDefinition.setId(processDefinitionId);
         processDefinition.setName(name);
@@ -155,41 +178,52 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionsShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         String processDefId = UUID.randomUUID().toString();
-        ProcessDefinition processDefinition = buildProcessDefinition(processDefId,
-                                                                     "my process",
-                                                                     "This is my process",
-                                                                     1);
+        ProcessDefinition processDefinition = buildProcessDefinition(
+            processDefId,
+            "my process",
+            "This is my process",
+            1
+        );
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList,
-                                                                       11);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(processDefinitionList, 11);
         given(processRuntime.processDefinitions(any())).willReturn(processDefinitionPage);
 
         //when
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions?skipCount=10&maxItems=10").accept(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andReturn();
 
         //then
         String responseContent = result.getResponse().getContentAsString();
         assertThatJson(responseContent)
-                .node("list.pagination.skipCount").isEqualTo(10)
-                .node("list.pagination.maxItems").isEqualTo(10)
-                .node("list.pagination.count").isEqualTo(1)
-                .node("list.pagination.hasMoreItems").isEqualTo(false)
-                .node("list.pagination.totalItems").isEqualTo(11);
+            .node("list.pagination.skipCount")
+            .isEqualTo(10)
+            .node("list.pagination.maxItems")
+            .isEqualTo(10)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(11);
         assertThatJson(responseContent)
-                .node("list.entries[0].entry.id").isEqualTo(processDefId)
-                .node("list.entries[0].entry.name").isEqualTo("my process")
-                .node("list.entries[0].entry.description").isEqualTo("This is my process")
-                .node("list.entries[0].entry.version").isEqualTo(1);
+            .node("list.entries[0].entry.id")
+            .isEqualTo(processDefId)
+            .node("list.entries[0].entry.name")
+            .isEqualTo("my process")
+            .node("list.entries[0].entry.description")
+            .isEqualTo("This is my process")
+            .node("list.entries[0].entry.version")
+            .isEqualTo(1);
     }
 
     @Test
-    public void getProcessDefinitionsWithVariables() throws Exception {
+    void getProcessDefinitionsWithVariables() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -197,8 +231,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         Extension extension = new Extension();
@@ -214,71 +250,67 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
-        mockMvc.perform(get("/v1/process-definitions")
-                .queryParam("include", "variables")
-                .accept(MediaTypes.HAL_JSON_VALUE))
+        mockMvc
+            .perform(
+                get("/v1/process-definitions").queryParam("include", "variables").accept(MediaTypes.HAL_JSON_VALUE)
+            )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$._embedded.processDefinitions[0].variableDefinitions[0].displayName")
-                .value("Var name"));
+            .andExpect(
+                jsonPath("$._embedded.processDefinitions[0].variableDefinitions[0].displayName").value("Var name")
+            );
     }
 
     @Test
-    public void shouldGetProcessDefinitionById() throws Exception {
+    void shouldGetProcessDefinitionById() throws Exception {
         //given
         String processId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(processId))
-                .willReturn(buildProcessDefinition(processId,
-                                                   "my process",
-                                                   "this is my process",
-                                                   1));
+            .willReturn(buildProcessDefinition(processId, "my process", "this is my process", 1));
 
-        mockMvc.perform(get("/v1/process-definitions/{id}",
-                                 processId).accept(MediaTypes.HAL_JSON_VALUE))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}", processId).accept(MediaTypes.HAL_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+    void getProcessDefinitionShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
         String procDefId = UUID.randomUUID().toString();
         given(processRuntime.processDefinition(procDefId))
-                .willReturn(buildProcessDefinition(procDefId,
-                                                   "my process",
-                                                   "This is my process",
-                                                   1));
+            .willReturn(buildProcessDefinition(procDefId, "my process", "This is my process", 1));
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}",
-                                                    procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andReturn();
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}", procDefId).accept(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("entry.id").isEqualTo(procDefId)
-                .node("entry.name").isEqualTo("my process")
-                .node("entry.description").isEqualTo("This is my process")
-                .node("entry.version").isEqualTo(1)
-        ;
+            .node("entry.id")
+            .isEqualTo(procDefId)
+            .node("entry.name")
+            .isEqualTo("my process")
+            .node("entry.description")
+            .isEqualTo("This is my process")
+            .node("entry.version")
+            .isEqualTo(1);
     }
 
     @Test
-    public void shouldGetXMLProcessModel() throws Exception {
+    void shouldGetXMLProcessModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processDefinitionId))
-                .willReturn(mock(ProcessDefinition.class));
+        given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
         InputStream xml = new ByteArrayInputStream("activiti".getBytes());
         when(repositoryService.getProcessModel(processDefinitionId)).thenReturn(xml);
 
-        mockMvc.perform(
-                get("/v1/process-definitions/{id}/model",
-                    processDefinitionId).accept(MediaType.APPLICATION_XML))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}/model", processDefinitionId).accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldGetBpmnJsonModel() throws Exception {
+    void shouldGetBpmnJsonModel() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processDefinitionId))
-                .willReturn(mock(ProcessDefinition.class));
+        given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
         BpmnModel bpmnModel = new BpmnModel();
         Process process = new Process();
@@ -287,53 +319,51 @@ public class ProcessDefinitionControllerImplIT {
         bpmnModel.getProcesses().add(process);
         when(repositoryService.getBpmnModel(processDefinitionId)).thenReturn(bpmnModel);
 
-        mockMvc.perform(
-                get("/v1/process-definitions/{id}/model",
-                    processDefinitionId).accept(APPLICATION_JSON))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}/model", processDefinitionId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void shouldGetSVGProcessDiagram() throws Exception {
+    void shouldGetSVGProcessDiagram() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
-        given(processRuntime.processDefinition(processDefinitionId))
-                .willReturn(mock(ProcessDefinition.class));
+        given(processRuntime.processDefinition(processDefinitionId)).willReturn(mock(ProcessDefinition.class));
 
         BpmnModel bpmnModel = new BpmnModel();
         when(repositoryService.getBpmnModel(processDefinitionId)).thenReturn(bpmnModel);
-        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class)))
-                .thenReturn("img".getBytes());
+        when(processDiagramGenerator.generateDiagram(any(BpmnModel.class))).thenReturn("img".getBytes());
 
-        mockMvc.perform(
-                get("/v1/process-definitions/{id}/model",
-                    processDefinitionId).accept("image/svg+xml"))
-                .andExpect(status().isOk());
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}/model", processDefinitionId).accept("image/svg+xml"))
+            .andExpect(status().isOk());
     }
 
     @Test
-    public void should_getProcessDiagramReturnNotFound_when_processDefinitionIsNotFound() throws Exception {
+    void should_getProcessDiagramReturnNotFound_when_processDefinitionIsNotFound() throws Exception {
         String processDefinitionId = "missingProcessDefinitionId";
         willThrow(new ActivitiObjectNotFoundException("not found"))
-            .given(processRuntime).processDefinition(processDefinitionId);
+            .given(processRuntime)
+            .processDefinition(processDefinitionId);
 
-        mockMvc.perform(get("/v1/process-definitions/{id}/model", processDefinitionId)
-            .accept("image/svg+xml"))
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}/model", processDefinitionId).accept("image/svg+xml"))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("entry.code", is(404)))
             .andExpect(jsonPath("entry.message", is("not found")));
     }
 
     @Test
-    public void should_getProcessDiagramReturnNoContent_when_noInterchangeInfo() throws Exception {
+    void should_getProcessDiagramReturnNoContent_when_noInterchangeInfo() throws Exception {
         String processDefinitionId = UUID.randomUUID().toString();
         BpmnModel bpmnModel = new BpmnModel();
         given(repositoryService.getBpmnModel(processDefinitionId)).willReturn(bpmnModel);
 
         willThrow(new ActivitiInterchangeInfoNotFoundException("No interchange information found."))
-            .given(processDiagramGenerator).generateDiagram(bpmnModel);
+            .given(processDiagramGenerator)
+            .generateDiagram(bpmnModel);
 
-        mockMvc.perform(get("/v1/process-definitions/{id}/model", processDefinitionId)
-            .accept("image/svg+xml"))
+        mockMvc
+            .perform(get("/v1/process-definitions/{id}/model", processDefinitionId).accept("image/svg+xml"))
             .andExpect(status().isNoContent())
             .andExpect(jsonPath("entry.code", is(404)))
             .andExpect(jsonPath("entry.message", is("No interchange information found.")));
@@ -341,7 +371,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getProcessModelStaticValuesMappingForStartEvent_when_hasStartEventFormAndMappings() throws Exception {
+    void should_getProcessModelStaticValuesMappingForStartEvent_when_hasStartEventFormAndMappings() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -349,8 +379,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -366,7 +398,6 @@ public class ProcessDefinitionControllerImplIT {
         bpmnModel.getProcesses().add(process);
         when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
 
-
         ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
         Mapping valueMapping = new Mapping();
         valueMapping.setValue("static value");
@@ -374,7 +405,7 @@ public class ProcessDefinitionControllerImplIT {
         Mapping variableMapping = new Mapping();
         variableMapping.setValue("variableRef");
         variableMapping.setType(SourceMappingType.VARIABLE);
-        startEventMapping.setInputs(Map.of("value",valueMapping,"variable",variableMapping));
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
 
         VariableDefinition givenVariableDefinition = new VariableDefinition();
         givenVariableDefinition.setId("variableRef");
@@ -391,8 +422,8 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}/static-values",procId)
-                .accept(APPLICATION_JSON))
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -402,7 +433,8 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings() throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_startEventHasNoFormAndMappings()
+        throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -410,8 +442,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -433,7 +467,7 @@ public class ProcessDefinitionControllerImplIT {
         Mapping variableMapping = new Mapping();
         variableMapping.setValue("variableRef");
         variableMapping.setType(SourceMappingType.VARIABLE);
-        startEventMapping.setInputs(Map.of("value",valueMapping,"variable",variableMapping));
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
 
         VariableDefinition givenVariableDefinition = new VariableDefinition();
         givenVariableDefinition.setId("variableRef");
@@ -450,8 +484,8 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}/static-values",procId)
-                .accept(APPLICATION_JSON))
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -461,7 +495,8 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent() throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoMappingForStartEvent()
+        throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -469,8 +504,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -500,8 +537,8 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}/static-values",procId)
-                .accept(APPLICATION_JSON))
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -511,7 +548,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoStartEvent() throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoStartEvent() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -519,8 +556,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -542,7 +581,7 @@ public class ProcessDefinitionControllerImplIT {
         Mapping variableMapping = new Mapping();
         variableMapping.setValue("variableRef");
         variableMapping.setType(SourceMappingType.VARIABLE);
-        startEventMapping.setInputs(Map.of("value",valueMapping,"variable",variableMapping));
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
 
         VariableDefinition givenVariableDefinition = new VariableDefinition();
         givenVariableDefinition.setId("variableRef");
@@ -559,8 +598,8 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}/static-values",procId)
-                .accept(APPLICATION_JSON))
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -570,7 +609,7 @@ public class ProcessDefinitionControllerImplIT {
     }
 
     @Test
-    public void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoExtensions() throws Exception {
+    void should_getEmptyMapForProcessModelStaticValuesMappingForStartEvent_when_hasNoExtensions() throws Exception {
         String procId = "procId";
         String my_process = "my process";
         String this_is_my_process = "this is my process";
@@ -578,8 +617,10 @@ public class ProcessDefinitionControllerImplIT {
         ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
         List<ProcessDefinition> processDefinitionList = new ArrayList<>();
         processDefinitionList.add(processDefinition);
-        Page<ProcessDefinition> processDefinitionPage =
-            new PageImpl<>(processDefinitionList, processDefinitionList.size());
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
         when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
 
         BpmnModel bpmnModel = new BpmnModel();
@@ -597,8 +638,8 @@ public class ProcessDefinitionControllerImplIT {
 
         when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(null);
 
-        MvcResult result = mockMvc.perform(get("/v1/process-definitions/{id}/static-values",procId)
-                .accept(APPLICATION_JSON))
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 

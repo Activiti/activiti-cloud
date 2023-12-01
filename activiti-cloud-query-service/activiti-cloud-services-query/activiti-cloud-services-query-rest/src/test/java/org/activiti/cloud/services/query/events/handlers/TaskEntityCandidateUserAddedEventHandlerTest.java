@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import jakarta.persistence.EntityManager;
+import java.util.UUID;
 import org.activiti.api.task.model.events.TaskCandidateUserEvent;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.impl.events.CloudTaskCandidateUserAddedEventImpl;
@@ -26,15 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskEntityCandidateUserAddedEventHandlerTest {
@@ -48,8 +47,10 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
     @Test
     public void handleShouldStoreNewTaskCandidateUser() {
         //given
-        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl(UUID.randomUUID().toString(),
-                                                                        UUID.randomUUID().toString());
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString()
+        );
         CloudTaskCandidateUserAddedEventImpl event = new CloudTaskCandidateUserAddedEventImpl(candidateUser);
 
         //when
@@ -65,12 +66,19 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
     @Test
     public void handleShouldNotStoreTaskCandidateUserIfExists() {
         //given
-        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl(UUID.randomUUID().toString(),
-                                                                        UUID.randomUUID().toString());
+        TaskCandidateUserImpl candidateUser = new TaskCandidateUserImpl(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString()
+        );
         CloudTaskCandidateUserAddedEventImpl event = new CloudTaskCandidateUserAddedEventImpl(candidateUser);
 
         //when
-        when(entityManager.find(TaskCandidateUserEntity.class, new TaskCandidateUserId(candidateUser.getTaskId(), candidateUser.getUserId())))
+        when(
+            entityManager.find(
+                TaskCandidateUserEntity.class,
+                new TaskCandidateUserId(candidateUser.getTaskId(), candidateUser.getUserId())
+            )
+        )
             .thenReturn(new TaskCandidateUserEntity());
         handler.handle(event);
 
@@ -84,7 +92,7 @@ public class TaskEntityCandidateUserAddedEventHandlerTest {
         String handledEvent = handler.getHandledEvent();
 
         //then
-        assertThat(handledEvent).isEqualTo(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
+        assertThat(handledEvent)
+            .isEqualTo(TaskCandidateUserEvent.TaskCandidateUserEvents.TASK_CANDIDATE_USER_ADDED.name());
     }
-
 }

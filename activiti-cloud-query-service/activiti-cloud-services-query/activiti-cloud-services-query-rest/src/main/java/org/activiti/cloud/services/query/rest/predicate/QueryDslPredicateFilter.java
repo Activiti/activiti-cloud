@@ -17,10 +17,8 @@
 package org.activiti.cloud.services.query.rest.predicate;
 
 import com.querydsl.core.types.Predicate;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public interface QueryDslPredicateFilter {
-
     Predicate extend(@NotNull Predicate currentPredicate);
-
 }

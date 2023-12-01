@@ -24,8 +24,10 @@ public class CloudActivityCompletedProducer implements BPMNElementEventListener<
     private final ToCloudProcessRuntimeEventConverter eventConverter;
     private final ProcessEngineEventsAggregator eventsAggregator;
 
-    public CloudActivityCompletedProducer(ToCloudProcessRuntimeEventConverter eventConverter,
-                                          ProcessEngineEventsAggregator eventsAggregator) {
+    public CloudActivityCompletedProducer(
+        ToCloudProcessRuntimeEventConverter eventConverter,
+        ProcessEngineEventsAggregator eventsAggregator
+    ) {
         this.eventConverter = eventConverter;
         this.eventsAggregator = eventsAggregator;
     }

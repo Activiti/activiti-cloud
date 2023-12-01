@@ -16,6 +16,9 @@
 package org.activiti.cloud.alfresco.converter.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Collections;
 import org.activiti.cloud.alfresco.rest.model.EntryResponseContent;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -27,16 +30,15 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.lang.Nullable;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Collections;
-
 public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2HttpMessageConverter {
 
     private final PagedModelConverter pagedCollectionModelConverter;
     private final ObjectMapper objectMapper;
 
-    public AlfrescoJackson2HttpMessageConverter(PagedModelConverter pagedCollectionModelConverter, ObjectMapper objectMapper) {
+    public AlfrescoJackson2HttpMessageConverter(
+        PagedModelConverter pagedCollectionModelConverter,
+        ObjectMapper objectMapper
+    ) {
         super(objectMapper);
         this.pagedCollectionModelConverter = pagedCollectionModelConverter;
         this.objectMapper = objectMapper;
@@ -44,9 +46,8 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
     }
 
     @Override
-    protected void writeInternal(Object object,
-                                 @Nullable Type type,
-                                 HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    protected void writeInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
+        throws IOException, HttpMessageNotWritableException {
         if (object instanceof MappingJacksonValue) {
             MappingJacksonValue mappingJacksonValueObject = ((MappingJacksonValue) object);
             mappingJacksonValueObject.setValue(transformObject(mappingJacksonValueObject.getValue()));
@@ -58,30 +59,26 @@ public class AlfrescoJackson2HttpMessageConverter<T> extends MappingJackson2Http
 
     private Object transformObject(Object object) {
         if (object instanceof PagedModel) {
-            return pagedCollectionModelConverter.pagedCollectionModelToListResponseContent((PagedModel<EntityModel<T>>) object);
+            return pagedCollectionModelConverter.pagedCollectionModelToListResponseContent(
+                (PagedModel<EntityModel<T>>) object
+            );
         } else if (object instanceof CollectionModel) {
-            return pagedCollectionModelConverter.resourcesToListResponseContent((CollectionModel<EntityModel<T>>) object);
+            return pagedCollectionModelConverter.resourcesToListResponseContent(
+                (CollectionModel<EntityModel<T>>) object
+            );
         } else if (object instanceof EntityModel) {
             return new EntryResponseContent<>(((EntityModel<T>) object).getContent());
         }
         return object;
     }
 
-    protected void defaultWriteInternal(Object object,
-                                        @Nullable Type type,
-                                        HttpOutputMessage outputMessage) throws IOException {
-        super.writeInternal(object,
-            type,
-            outputMessage);
+    protected void defaultWriteInternal(Object object, @Nullable Type type, HttpOutputMessage outputMessage)
+        throws IOException {
+        super.writeInternal(object, type, outputMessage);
     }
 
     @Override
-    public boolean canWrite(Type type,
-                            Class<?> clazz,
-                            MediaType mediaType) {
-        return !String.class.equals(type) && super.canWrite(type,
-            clazz,
-            mediaType);
+    public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+        return !String.class.equals(type) && super.canWrite(type, clazz, mediaType);
     }
-
 }

@@ -15,7 +15,13 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
+
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.common.file.FileContent;
@@ -34,13 +40,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.util.List;
-
-import static org.activiti.cloud.services.common.util.HttpUtils.writeFileToResponse;
-
 /**
  * Controller for {@link Project} resources
  */
@@ -54,96 +53,103 @@ public class ProjectController implements ProjectRestApi {
     private final AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler;
 
     @Autowired
-    public ProjectController(ProjectService projectService,
-                             ProjectRepresentationModelAssembler representationModelAssembler,
-                             AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler) {
+    public ProjectController(
+        ProjectService projectService,
+        ProjectRepresentationModelAssembler representationModelAssembler,
+        AlfrescoPagedModelAssembler<Project> pagedCollectionModelAssembler
+    ) {
         this.projectService = projectService;
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
     }
 
     @Override
-    public PagedModel<EntityModel<Project>> getProjects(Pageable pageable,
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
-            @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters,
-            @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include) {
-        return pagedCollectionModelAssembler.toModel(pageable, projectService.getProjects(pageable, name, filters, include),
-            representationModelAssembler);
+    public PagedModel<EntityModel<Project>> getProjects(
+        Pageable pageable,
+        @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name,
+        @RequestParam(name = PROJECT_FILTERS_PARAM_NAME, required = false) List<String> filters,
+        @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            projectService.getProjects(pageable, name, filters, include),
+            representationModelAssembler
+        );
     }
 
     @Override
-    public EntityModel<Project> getProject(@PathVariable String projectId,
-                                           @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false)
-                                               List<String> include) {
+    public EntityModel<Project> getProject(
+        @PathVariable String projectId,
+        @RequestParam(name = PROJECT_INCLUDE_PARAM_NAME, required = false) List<String> include
+    ) {
         return representationModelAssembler.toModel(findProjectById(projectId, include));
     }
 
     @Override
-    public EntityModel<Project> createProject(
-            @RequestBody @Valid Project project) {
+    public EntityModel<Project> createProject(@RequestBody @Valid Project project) {
         return representationModelAssembler.toModel(projectService.createProject(project));
     }
 
     @Override
-    public EntityModel<Project> updateProject(
-            @PathVariable String projectId,
-            @RequestBody @Valid Project project) {
+    public EntityModel<Project> updateProject(@PathVariable String projectId, @RequestBody @Valid Project project) {
         Project projectToUpdate = findProjectById(projectId);
-        return representationModelAssembler.toModel(projectService.updateProject(projectToUpdate,
-                                                                         project));
+        return representationModelAssembler.toModel(projectService.updateProject(projectToUpdate, project));
     }
 
     @Override
-    public void deleteProject(
-            @PathVariable String projectId) {
+    public void deleteProject(@PathVariable String projectId) {
         projectService.deleteProject(findProjectById(projectId));
     }
 
     @Override
     public EntityModel<Project> importProject(
-            @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME,
-                          required = false) String name) throws IOException {
+        @RequestPart(UPLOAD_FILE_PARAM_NAME) MultipartFile file,
+        @RequestParam(name = PROJECT_NAME_PARAM_NAME, required = false) String name
+    ) throws IOException {
         return representationModelAssembler.toModel(projectService.importProject(file, name));
     }
 
     @Override
     public void exportProject(
-            HttpServletResponse response,
-            @PathVariable String projectId,
-            @RequestParam(name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
-                    required = false,
-                    defaultValue = "true") boolean attachment) throws IOException {
+        HttpServletResponse response,
+        @PathVariable String projectId,
+        @RequestParam(
+            name = EXPORT_AS_ATTACHMENT_PARAM_NAME,
+            required = false,
+            defaultValue = "true"
+        ) boolean attachment
+    ) throws IOException {
         Project project = findProjectById(projectId);
         FileContent fileContent = projectService.exportProject(project);
-        writeFileToResponse(response,
-                            fileContent,
-                            attachment);
+        writeFileToResponse(response, fileContent, attachment);
     }
 
     @Override
     public EntityModel<Project> copyProject(
-            @PathVariable String projectId,
-            @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name) {
+        @PathVariable String projectId,
+        @RequestParam(name = PROJECT_NAME_PARAM_NAME) String name
+    ) {
         Project projectToCopy = findProjectById(projectId);
         return representationModelAssembler.toModel(projectService.copyProject(projectToCopy, name));
     }
 
     @Override
     public void validateProject(
-            @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR)
-            @PathVariable String projectId) throws IOException {
+        @Parameter(description = VALIDATE_PROJECT_ID_PARAM_DESCR) @PathVariable String projectId
+    ) throws IOException {
         Project project = findProjectById(projectId);
         projectService.validateProject(project);
     }
 
     public Project findProjectById(String projectId) {
-        return projectService.findProjectById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
+        return projectService
+            .findProjectById(projectId)
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 
     public Project findProjectById(String projectId, List<String> include) {
-        return projectService.findProjectById(projectId, include)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
+        return projectService
+            .findProjectById(projectId, include)
+            .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + projectId));
     }
 }

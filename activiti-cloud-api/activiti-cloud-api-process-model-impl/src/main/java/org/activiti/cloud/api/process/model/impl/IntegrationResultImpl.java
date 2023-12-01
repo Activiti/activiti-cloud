@@ -25,11 +25,9 @@ public class IntegrationResultImpl extends CloudRuntimeEntityImpl implements Int
     private IntegrationRequest integrationRequest;
     private IntegrationContext integrationContext;
 
-    public IntegrationResultImpl() {
-    }
+    public IntegrationResultImpl() {}
 
-    public IntegrationResultImpl(IntegrationRequest integrationRequest,
-                                 IntegrationContext integrationContext) {
+    public IntegrationResultImpl(IntegrationRequest integrationRequest, IntegrationContext integrationContext) {
         this.integrationRequest = integrationRequest;
         this.integrationContext = integrationContext;
     }

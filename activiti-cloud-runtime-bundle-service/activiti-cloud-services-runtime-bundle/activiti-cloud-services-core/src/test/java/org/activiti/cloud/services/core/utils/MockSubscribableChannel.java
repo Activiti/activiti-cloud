@@ -20,6 +20,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
 public class MockSubscribableChannel implements SubscribableChannel {
+
     @Override
     public boolean subscribe(MessageHandler messageHandler) {
         return false;

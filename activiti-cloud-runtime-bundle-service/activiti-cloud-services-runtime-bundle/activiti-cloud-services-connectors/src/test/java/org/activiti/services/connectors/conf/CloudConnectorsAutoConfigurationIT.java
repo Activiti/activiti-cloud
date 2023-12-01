@@ -15,6 +15,11 @@
  */
 package org.activiti.services.connectors.conf;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -33,17 +38,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.MessageChannel;
-
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CloudConnectorsAutoConfigurationIT {
@@ -60,13 +59,10 @@ public class CloudConnectorsAutoConfigurationIT {
     @MockBean
     private RuntimeBundleProperties runtimeBundleProperties;
 
-    @MockBean(name = "auditProducer")
-    private  MessageChannel auditProducer;
-
     @MockBean
     private ApplicationEventPublisher eventPublisher;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
@@ -80,6 +76,9 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private ConnectorImplementationsProvider connectorImplementationsProvider;
+
+    @MockBean
+    private BuildProperties buildProperties;
 
     @BeforeEach
     public void beforeEach() {
@@ -119,6 +118,5 @@ public class CloudConnectorsAutoConfigurationIT {
         public ProcessSecurityPoliciesManager processSecurityPoliciesManager() {
             return mock(ProcessSecurityPoliciesManager.class);
         }
-
     }
 }

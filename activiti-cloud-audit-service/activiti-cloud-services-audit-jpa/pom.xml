@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-dependencies</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-audit-jpa</artifactId>
@@ -15,60 +15,24 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-service-common-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-service-messaging-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-audit-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-model-shared</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-model-shared-impl</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-model-shared</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-model-shared-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-process-model</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-process-model-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-process-model</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-task-model</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-api-task-model-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-task-model</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-task-model-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-api-process-model-impl</artifactId>
+      <artifactId>activiti-cloud-services-audit-model</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -120,15 +84,11 @@
       <artifactId>spring-messaging</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>javax.persistence-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-jpa</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
     </dependency>
     <dependency>
@@ -164,13 +124,13 @@
       <artifactId>activiti-api-runtime-shared</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
       <version>${opencsv.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
@@ -211,51 +171,8 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.mysema.maven</groupId>
-        <artifactId>apt-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>generate-assertions</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <packages>
-            <package>org.activiti.api.process.model</package>
-            <package>org.activiti.api.task.model</package>
-            <package>org.activiti.api.model.shared.model</package>
-            <package>org.activiti.cloud.services.audit.jpa.events</package>
-          </packages>
-          <classes>
-            <class>org.springframework.http.ResponseEntity</class>
-          </classes>
-
-          <!-- whether generated assertions classes can be inherited with consistent assertion chaining -->
-          <hierarchical>true</hierarchical>
-
-          <!-- where to generate assertions entry point classes -->
-          <entryPointClassPackage>${generated-assertions-package}</entryPointClassPackage>
-
-          <excludes>
-            <param>org\.activiti\.services\.core\.model\.converter.*</param>
-            <param>org\.activiti\.services\.core\.model\.commands.*</param>
-          </excludes>
-
-          <targetDir>${generated-assertions-folder}</targetDir>
-          <generateAssertions>true</generateAssertions>
-          <generateBddAssertions>false</generateBddAssertions>
-          <generateSoftAssertions>false</generateSoftAssertions>
-          <generateJUnitSoftAssertions>false</generateJUnitSoftAssertions>
-        </configuration>
       </plugin>
     </plugins>
   </build>

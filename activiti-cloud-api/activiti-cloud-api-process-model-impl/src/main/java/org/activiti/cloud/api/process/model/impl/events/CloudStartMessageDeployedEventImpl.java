@@ -20,20 +20,18 @@ import org.activiti.api.process.model.events.MessageDefinitionEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudStartMessageDeployedEvent;
 
-public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<StartMessageDeploymentDefinition,
-                                                                              MessageDefinitionEvent.MessageDefinitionEvents>
-                                                implements CloudStartMessageDeployedEvent {
+public class CloudStartMessageDeployedEventImpl
+    extends CloudRuntimeEventImpl<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>
+    implements CloudStartMessageDeployedEvent {
 
     private CloudStartMessageDeployedEventImpl(Builder builder) {
         super.setEntity(builder.entity);
     }
 
-    public CloudStartMessageDeployedEventImpl() {
-    }
+    public CloudStartMessageDeployedEventImpl() {}
 
     public CloudStartMessageDeployedEventImpl(StartMessageDeploymentDefinition entity) {
         super(entity);
-
         setEntityId(entity.getMessageSubscription().getId());
 
         setProcessDefinitionId(entity.getProcessDefinition().getId());
@@ -41,11 +39,8 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
         setProcessDefinitionVersion(entity.getProcessDefinition().getVersion());
     }
 
-    public CloudStartMessageDeployedEventImpl(String id,
-                                              Long timestamp,
-                                              StartMessageDeploymentDefinition entity) {
+    public CloudStartMessageDeployedEventImpl(String id, Long timestamp, StartMessageDeploymentDefinition entity) {
         super(id, timestamp, entity);
-
         if (getEntity() != null) {
             setEntityId(getEntity().getMessageSubscription().getId());
         }
@@ -97,30 +92,28 @@ public class CloudStartMessageDeployedEventImpl extends CloudRuntimeEventImpl<St
 
         private StartMessageDeploymentDefinition entity;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         private Builder(CloudStartMessageDeployedEventImpl cloudStartMessageDeployedEventImpl) {
             this.entity = cloudStartMessageDeployedEventImpl.getEntity();
         }
 
         /**
-        * Builder method for entity parameter.
-        * @param entity field to set
-        * @return builder
-        */
+         * Builder method for entity parameter.
+         * @param entity field to set
+         * @return builder
+         */
         public Builder withEntity(StartMessageDeploymentDefinition entity) {
             this.entity = entity;
             return this;
         }
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         * @return built class
+         */
         public CloudStartMessageDeployedEventImpl build() {
             return new CloudStartMessageDeployedEventImpl(this);
         }
     }
-
 }

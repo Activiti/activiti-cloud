@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-notifications-service-graphql-parent</artifactId>
-    <version>7.8.0-SNAPSHOT</version>
+    <version>8.2.0-SNAPSHOT</version>
   </parent>
   <name>Activiti Cloud Notifications :: GraphQL Dependencies (Bill Of Materials)</name>
   <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
@@ -69,6 +69,8 @@
         <groupId>com.querydsl</groupId>
         <artifactId>querydsl-apt</artifactId>
         <version>${querydsl.version}</version>
+        <scope>provided</scope>
+        <classifier>jakarta</classifier>
       </dependency>
       <dependency>
         <groupId>com.querydsl</groupId>
@@ -79,6 +81,7 @@
         <groupId>com.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
         <version>${querydsl.version}</version>
+        <classifier>jakarta</classifier>
       </dependency>
     </dependencies>
   </dependencyManagement>

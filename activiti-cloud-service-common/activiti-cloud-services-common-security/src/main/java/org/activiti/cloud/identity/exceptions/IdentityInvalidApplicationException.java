@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.identity.exceptions;
 
-public class IdentityInvalidApplicationException extends IdentityException{
+public class IdentityInvalidApplicationException extends IdentityException {
+
     public IdentityInvalidApplicationException(String application) {
         super("application {" + application + "} is invalid or doesn't exist");
     }

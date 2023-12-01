@@ -23,9 +23,11 @@ public class ProcessInstanceFilter implements ProcessDefinitionKeyBasedFilter {
     @Override
     public ProcessDefinitionRestrictionProperties getRestrictionProperties() {
         QProcessInstanceEntity qProcessInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
-        return new ProcessDefinitionRestrictionProperties(qProcessInstanceEntity.serviceName,
-                                                          qProcessInstanceEntity.serviceFullName,
-                                                          qProcessInstanceEntity.processDefinitionKey);
+        return new ProcessDefinitionRestrictionProperties(
+            qProcessInstanceEntity.serviceName,
+            qProcessInstanceEntity.serviceFullName,
+            qProcessInstanceEntity.processDefinitionKey
+        );
     }
 
     @Override

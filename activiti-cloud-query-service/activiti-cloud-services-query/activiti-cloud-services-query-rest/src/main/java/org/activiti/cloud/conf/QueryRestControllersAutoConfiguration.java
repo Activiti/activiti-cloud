@@ -42,38 +42,40 @@ import org.activiti.cloud.services.query.rest.TaskVariableAdminController;
 import org.activiti.cloud.services.query.rest.TaskVariableController;
 import org.activiti.image.ProcessDiagramGenerator;
 import org.activiti.image.impl.DefaultProcessDiagramGenerator;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
-@Import({
-    CommonExceptionHandlerQuery.class,
-    ProcessDefinitionAdminController.class,
-    ProcessDefinitionController.class,
-    ProcessInstanceAdminController.class,
-    ProcessInstanceController.class,
-    ProcessInstanceDeleteController.class,
-    ProcessInstanceDiagramAdminController.class,
-    ProcessInstanceDiagramController.class,
-    ProcessInstanceTasksAdminController.class,
-    ProcessInstanceTasksController.class,
-    ProcessInstanceVariableAdminController.class,
-    ProcessInstanceVariableController.class,
-    ProcessModelAdminController.class,
-    ProcessModelController.class,
-    TaskAdminController.class,
-    TaskController.class,
-    TaskDeleteController.class,
-    TaskVariableAdminController.class,
-    TaskVariableController.class,
-    ServiceTaskAdminController.class,
-    ProcessInstanceServiceTasksAdminController.class,
-    ServiceTaskIntegrationContextAdminController.class,
-    ApplicationController.class,
-    ApplicationAdminController.class
-})
+@AutoConfiguration
+@Import(
+    {
+        CommonExceptionHandlerQuery.class,
+        ProcessDefinitionAdminController.class,
+        ProcessDefinitionController.class,
+        ProcessInstanceAdminController.class,
+        ProcessInstanceController.class,
+        ProcessInstanceDeleteController.class,
+        ProcessInstanceDiagramAdminController.class,
+        ProcessInstanceDiagramController.class,
+        ProcessInstanceTasksAdminController.class,
+        ProcessInstanceTasksController.class,
+        ProcessInstanceVariableAdminController.class,
+        ProcessInstanceVariableController.class,
+        ProcessModelAdminController.class,
+        ProcessModelController.class,
+        TaskAdminController.class,
+        TaskController.class,
+        TaskDeleteController.class,
+        TaskVariableAdminController.class,
+        TaskVariableController.class,
+        ServiceTaskAdminController.class,
+        ProcessInstanceServiceTasksAdminController.class,
+        ServiceTaskIntegrationContextAdminController.class,
+        ApplicationController.class,
+        ApplicationAdminController.class,
+    }
+)
 public class QueryRestControllersAutoConfiguration {
 
     @Bean
@@ -84,8 +86,9 @@ public class QueryRestControllersAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(ProcessDiagramGenerator processDiagramGenerator) {
+    public ProcessDiagramGeneratorWrapper processDiagramGeneratorWrapper(
+        ProcessDiagramGenerator processDiagramGenerator
+    ) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
     }
-
 }

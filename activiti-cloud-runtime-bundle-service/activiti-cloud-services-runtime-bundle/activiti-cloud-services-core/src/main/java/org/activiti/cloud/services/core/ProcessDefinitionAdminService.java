@@ -23,9 +23,13 @@ import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.cloud.services.core.decorator.ProcessDefinitionDecorator;
 
 public class ProcessDefinitionAdminService extends BaseProcessDefinitionService {
+
     private final ProcessAdminRuntime processAdminRuntime;
 
-    public ProcessDefinitionAdminService(ProcessAdminRuntime processAdminRuntime, List<ProcessDefinitionDecorator> processDefinitionDecorators) {
+    public ProcessDefinitionAdminService(
+        ProcessAdminRuntime processAdminRuntime,
+        List<ProcessDefinitionDecorator> processDefinitionDecorators
+    ) {
         super(processDefinitionDecorators);
         this.processAdminRuntime = processAdminRuntime;
     }
@@ -35,5 +39,4 @@ public class ProcessDefinitionAdminService extends BaseProcessDefinitionService 
         processDefinitions.getContent().replaceAll(processDefinition -> super.decorateAll(processDefinition, include));
         return processDefinitions;
     }
-
 }

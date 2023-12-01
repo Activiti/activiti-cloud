@@ -33,6 +33,7 @@ import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
 import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.cmd.TriggerCmd;
+import org.activiti.engine.impl.cmd.integration.DeleteIntegrationContextCmd;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 import org.activiti.engine.integration.IntegrationContextService;
@@ -76,21 +77,20 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         given(integrationContextService.findById(integrationContext.getId())).willReturn(integrationContextEntity);
 
         List<Execution> executions = Collections.singletonList(buildExecutionEntity());
-        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list()).thenReturn(executions);
-
+        when(runtimeService.createExecutionQuery().executionId(integrationContext.getExecutionId()).list())
+            .thenReturn(executions);
 
         //when
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
-        verify(integrationContextService).deleteIntegrationContext(integrationContextEntity);
-        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(
-            CompositeCommand.class);
+        final ArgumentCaptor<CompositeCommand> captor = ArgumentCaptor.forClass(CompositeCommand.class);
         verify(managementService).executeCommand(captor.capture());
         final CompositeCommand command = captor.getValue();
-        assertThat(command.getCommands()).hasSize(2);
-        assertThat(command.getCommands().get(0)).isInstanceOf(TriggerCmd.class);
-        assertThat(command.getCommands().get(1)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
+        assertThat(command.getCommands()).hasSize(3);
+        assertThat(command.getCommands().get(0)).isInstanceOf(DeleteIntegrationContextCmd.class);
+        assertThat(command.getCommands().get(1)).isInstanceOf(TriggerCmd.class);
+        assertThat(command.getCommands().get(2)).isInstanceOf(AggregateIntegrationResultReceivedEventCmd.class);
     }
 
     private ExecutionEntity buildExecutionEntity() {
@@ -118,7 +118,7 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         handler.receive(new IntegrationResultImpl(new IntegrationRequestImpl(), integrationContext));
 
         //then
-        verify(integrationContextService, never()).deleteIntegrationContext(any());
+        verify(managementService, never()).executeCommand(any());
     }
 
     private IntegrationContextImpl buildIntegrationContext(Map<String, Object> variables) {
@@ -133,5 +133,4 @@ public class ServiceTaskIntegrationResultEventHandlerTest {
         integrationContext.setClientType(CLIENT_TYPE);
         return integrationContext;
     }
-
 }

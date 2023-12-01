@@ -43,8 +43,10 @@ public class TaskSuspendedEventConverter extends BaseEventToEntityConverter {
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskSuspendedEventEntity taskSuspendedEventEntity = (TaskSuspendedEventEntity) auditEventEntity;
 
-        return new CloudTaskSuspendedEventImpl(taskSuspendedEventEntity.getEventId(),
-                                               taskSuspendedEventEntity.getTimestamp(),
-                                               taskSuspendedEventEntity.getTask());
+        return new CloudTaskSuspendedEventImpl(
+            taskSuspendedEventEntity.getEventId(),
+            taskSuspendedEventEntity.getTimestamp(),
+            taskSuspendedEventEntity.getTask()
+        );
     }
 }

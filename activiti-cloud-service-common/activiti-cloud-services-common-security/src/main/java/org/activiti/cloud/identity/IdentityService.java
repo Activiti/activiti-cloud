@@ -24,7 +24,6 @@ import org.activiti.cloud.identity.model.User;
  * Interface used to handle general purpose interaction with external Identity and Access Management
  */
 public interface IdentityService {
-
     List<User> findUsersByGroupName(String groupName);
 
     User findUserByName(String userName);

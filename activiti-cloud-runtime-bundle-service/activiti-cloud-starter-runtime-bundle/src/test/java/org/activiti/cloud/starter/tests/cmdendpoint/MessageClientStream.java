@@ -15,19 +15,23 @@
  */
 package org.activiti.cloud.starter.tests.cmdendpoint;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.annotation.Output;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.activiti.cloud.common.messaging.functional.OutputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface MessageClientStream {
-
     String MY_CMD_PRODUCER = "myCmdProducer";
     String MY_CMD_RESULTS = "myCmdResults";
 
-    @Output(MY_CMD_PRODUCER)
-    MessageChannel myCmdProducer();
+    @OutputBinding(MY_CMD_PRODUCER)
+    default MessageChannel myCmdProducer() {
+        return MessageChannels.direct(MY_CMD_PRODUCER).getObject();
+    }
 
-    @Input(MY_CMD_RESULTS)
-    SubscribableChannel myCmdResults();
+    @InputBinding(MY_CMD_RESULTS)
+    default SubscribableChannel myCmdResults() {
+        return MessageChannels.publishSubscribe(MY_CMD_RESULTS).getObject();
+    }
 }

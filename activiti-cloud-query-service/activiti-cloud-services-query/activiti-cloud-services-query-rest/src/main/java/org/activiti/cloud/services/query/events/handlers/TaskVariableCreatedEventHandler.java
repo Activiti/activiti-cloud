@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Date;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
@@ -23,9 +25,6 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-
 public class TaskVariableCreatedEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskVariableCreatedEventHandler.class);
@@ -33,8 +32,7 @@ public class TaskVariableCreatedEventHandler {
     private final EntityManagerFinder entityManagerFinder;
     private final EntityManager entityManager;
 
-    public TaskVariableCreatedEventHandler(EntityManager entityManager,
-                                           EntityManagerFinder entityManagerFinder) {
+    public TaskVariableCreatedEventHandler(EntityManager entityManager, EntityManagerFinder entityManagerFinder) {
         this.entityManagerFinder = entityManagerFinder;
         this.entityManager = entityManager;
     }
@@ -44,39 +42,52 @@ public class TaskVariableCreatedEventHandler {
         String taskId = variableCreatedEvent.getEntity().getTaskId();
         String variableName = variableCreatedEvent.getEntity().getName();
 
-        entityManagerFinder.findTaskWithVariables(taskId)
-                           .ifPresentOrElse(taskEntity -> {
-                                taskEntity.getVariable(variableName)
-                                    .ifPresentOrElse(variableEntity -> {
-                                        LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
-                                    }, () -> {
-                                        TaskVariableEntity taskVariableEntity = createTaskVariableEntity(variableCreatedEvent,
-                                                                                                         taskEntity,
-                                                                                                         processInstanceEntity);
-                                        taskEntity.getVariables()
-                                                  .add(taskVariableEntity);
-                                    });
-                           }, () -> {
-                                throw new QueryException("Task '" + taskId + "' not found!");
-                           });
+        entityManagerFinder
+            .findTaskWithVariables(taskId)
+            .ifPresentOrElse(
+                taskEntity -> {
+                    taskEntity
+                        .getVariable(variableName)
+                        .ifPresentOrElse(
+                            variableEntity -> {
+                                LOGGER.warn("Variable " + variableName + " already exists in the task " + taskId + "!");
+                            },
+                            () -> {
+                                TaskVariableEntity taskVariableEntity = createTaskVariableEntity(
+                                    variableCreatedEvent,
+                                    taskEntity,
+                                    processInstanceEntity
+                                );
+                                taskEntity.getVariables().add(taskVariableEntity);
+                            }
+                        );
+                },
+                () -> {
+                    throw new QueryException("Task '" + taskId + "' not found!");
+                }
+            );
     }
 
-    private TaskVariableEntity createTaskVariableEntity(CloudVariableCreatedEvent variableCreatedEvent,
-                                                        TaskEntity taskEntity,
-                                                        ProcessInstanceEntity processInstanceEntity) {
-        TaskVariableEntity taskVariableEntity = new TaskVariableEntity(null,
-                                                                       variableCreatedEvent.getEntity().getType(),
-                                                                       variableCreatedEvent.getEntity().getName(),
-                                                                       variableCreatedEvent.getEntity().getProcessInstanceId(),
-                                                                       variableCreatedEvent.getServiceName(),
-                                                                       variableCreatedEvent.getServiceFullName(),
-                                                                       variableCreatedEvent.getServiceVersion(),
-                                                                       variableCreatedEvent.getAppName(),
-                                                                       variableCreatedEvent.getAppVersion(),
-                                                                       variableCreatedEvent.getEntity().getTaskId(),
-                                                                       new Date(variableCreatedEvent.getTimestamp()),
-                                                                       new Date(variableCreatedEvent.getTimestamp()),
-                                                                       null);
+    private TaskVariableEntity createTaskVariableEntity(
+        CloudVariableCreatedEvent variableCreatedEvent,
+        TaskEntity taskEntity,
+        ProcessInstanceEntity processInstanceEntity
+    ) {
+        TaskVariableEntity taskVariableEntity = new TaskVariableEntity(
+            null,
+            variableCreatedEvent.getEntity().getType(),
+            variableCreatedEvent.getEntity().getName(),
+            variableCreatedEvent.getEntity().getProcessInstanceId(),
+            variableCreatedEvent.getServiceName(),
+            variableCreatedEvent.getServiceFullName(),
+            variableCreatedEvent.getServiceVersion(),
+            variableCreatedEvent.getAppName(),
+            variableCreatedEvent.getAppVersion(),
+            variableCreatedEvent.getEntity().getTaskId(),
+            new Date(variableCreatedEvent.getTimestamp()),
+            new Date(variableCreatedEvent.getTimestamp()),
+            null
+        );
         taskVariableEntity.setValue(variableCreatedEvent.getEntity().getValue());
         taskVariableEntity.setProcessInstance(processInstanceEntity);
         taskVariableEntity.setTask(taskEntity);
@@ -86,13 +97,14 @@ public class TaskVariableCreatedEventHandler {
         return taskVariableEntity;
     }
 
-
     private ProcessInstanceEntity getProcessInstance(CloudVariableCreatedEvent variableCreatedEvent) {
         if (variableCreatedEvent.getEntity().getProcessInstanceId() == null) {
             return null;
         } else {
-            return entityManager.getReference(ProcessInstanceEntity.class,
-                                              variableCreatedEvent.getEntity().getProcessInstanceId());
+            return entityManager.getReference(
+                ProcessInstanceEntity.class,
+                variableCreatedEvent.getEntity().getProcessInstanceId()
+            );
         }
     }
 }

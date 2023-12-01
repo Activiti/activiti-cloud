@@ -32,8 +32,6 @@ public class StartMessageCmdExecutor extends AbstractCommandExecutor<StartMessag
     public ProcessInstanceResult execute(StartMessagePayload command) {
         ProcessInstance result = processAdminRuntime.start(command);
 
-        return new ProcessInstanceResult(command,
-                                         result);
+        return new ProcessInstanceResult(command, result);
     }
-
 }

@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEventImpl;
@@ -29,14 +36,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class VariableEntityCreatedEventHandlerTest {
@@ -64,7 +63,7 @@ public class VariableEntityCreatedEventHandlerTest {
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         when(entityManagerFinder.findProcessInstanceWithVariables(event.getEntity().getProcessInstanceId()))
-                                .thenReturn(Optional.of(processInstanceEntity));
+            .thenReturn(Optional.of(processInstanceEntity));
 
         //when
         processVariableCreatedEventHandler.handle(event);
@@ -75,14 +74,15 @@ public class VariableEntityCreatedEventHandlerTest {
 
         ProcessVariableEntity variableEntity = captor.getValue();
 
-        Assertions.assertThat(variableEntity)
-                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
-                .hasName(event.getEntity().getName())
-                .hasTaskId(event.getEntity().getTaskId())
-                .hasType(event.getEntity().getType())
-                .isNotTaskVariable()
-                .hasProcessInstance(processInstanceEntity)
-                .hasVariableDefinitionId("variableDefId");
+        Assertions
+            .assertThat(variableEntity)
+            .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+            .hasName(event.getEntity().getName())
+            .hasTaskId(event.getEntity().getTaskId())
+            .hasType(event.getEntity().getType())
+            .isNotTaskVariable()
+            .hasProcessInstance(processInstanceEntity)
+            .hasVariableDefinitionId("variableDefId");
     }
 
     private static VariableInstanceImpl<String> buildVariable() {
@@ -96,13 +96,11 @@ public class VariableEntityCreatedEventHandlerTest {
 
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
 
-        when(entityManager.getReference(ProcessInstanceEntity.class,
-                                        event.getEntity().getProcessInstanceId()))
-                .thenReturn(processInstanceEntity);
+        when(entityManager.getReference(ProcessInstanceEntity.class, event.getEntity().getProcessInstanceId()))
+            .thenReturn(processInstanceEntity);
 
         TaskEntity taskEntity = mock(TaskEntity.class);
-        when(entityManagerFinder.findTaskWithVariables("taskId"))
-                                .thenReturn(Optional.of(taskEntity));
+        when(entityManagerFinder.findTaskWithVariables("taskId")).thenReturn(Optional.of(taskEntity));
         //when
         taskVariableCreatedEventHandler.handle(event);
 
@@ -112,13 +110,14 @@ public class VariableEntityCreatedEventHandlerTest {
 
         TaskVariableEntity variableEntity = captor.getValue();
 
-        Assertions.assertThat(variableEntity)
-                .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
-                .hasName(event.getEntity().getName())
-                .hasTaskId(event.getEntity().getTaskId())
-                .hasType(event.getEntity().getType())
-                .hasTask(taskEntity)
-                .hasProcessInstance(processInstanceEntity);
+        Assertions
+            .assertThat(variableEntity)
+            .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
+            .hasName(event.getEntity().getName())
+            .hasTaskId(event.getEntity().getTaskId())
+            .hasType(event.getEntity().getType())
+            .hasTask(taskEntity)
+            .hasProcessInstance(processInstanceEntity);
     }
 
     private static VariableInstanceImpl<String> buildVariableWithTaskId() {

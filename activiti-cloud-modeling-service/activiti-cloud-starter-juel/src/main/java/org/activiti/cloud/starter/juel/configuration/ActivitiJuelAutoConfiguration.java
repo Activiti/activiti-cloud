@@ -16,12 +16,12 @@
 package org.activiti.cloud.starter.juel.configuration;
 
 import org.activiti.cloud.starter.juel.service.JuelExpressionResolverService;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-@Configuration
-@Import({JuelRestConfiguration.class, JuelSwaggerConfig.class})
+@AutoConfiguration
+@Import({ JuelRestConfiguration.class, JuelSwaggerConfig.class })
 public class ActivitiJuelAutoConfiguration {
 
     @Bean

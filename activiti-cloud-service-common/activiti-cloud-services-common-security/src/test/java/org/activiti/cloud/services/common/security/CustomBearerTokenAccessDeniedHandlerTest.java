@@ -22,10 +22,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -41,8 +41,10 @@ class CustomBearerTokenAccessDeniedHandlerTest {
 
     @Mock
     private HttpServletRequest request;
+
     @Mock
     private HttpServletResponse response;
+
     @Mock
     private AccessDeniedException exception;
 
@@ -69,5 +71,4 @@ class CustomBearerTokenAccessDeniedHandlerTest {
         verify(response, never()).sendError(anyInt(), anyString());
         verify(delegated).handle(eq(request), eq(response), eq(exception));
     }
-
 }

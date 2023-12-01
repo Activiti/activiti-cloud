@@ -16,15 +16,14 @@
 package org.activiti.cloud.services.messages.core.support;
 
 import java.lang.reflect.Method;
-
 import org.springframework.cglib.proxy.InvocationHandler;
 import org.springframework.cglib.proxy.Proxy;
 
-
 public class ChainBuilder<T, R> {
+
     private Class<? extends Chain<T, R>> clazz;
 
-    public static <T,R> ChainBuilder<T,R> of(Class<? extends Chain<T, R>> clazz) {
+    public static <T, R> ChainBuilder<T, R> of(Class<? extends Chain<T, R>> clazz) {
         return new ChainBuilder<>(clazz);
     }
 
@@ -40,6 +39,7 @@ public class ChainBuilder<T, R> {
     }
 
     public class SuccessorBuilder {
+
         private HandlerImpl<T, R> current;
 
         private SuccessorBuilder(HandlerImpl<T, R> current) {
@@ -55,9 +55,11 @@ public class ChainBuilder<T, R> {
 
         @SuppressWarnings("unchecked")
         public <I extends Chain<T, R>> I build() {
-            return (I) Proxy.newProxyInstance(ChainBuilder.class.getClassLoader(),
-                                              new Class[] { clazz },
-                                              new ChainInvocationHandler<T,R>(new ChainImpl<T, R>(first)));
+            return (I) Proxy.newProxyInstance(
+                ChainBuilder.class.getClassLoader(),
+                new Class[] { clazz },
+                new ChainInvocationHandler<T, R>(new ChainImpl<T, R>(first))
+            );
         }
     }
 
@@ -75,6 +77,7 @@ public class ChainBuilder<T, R> {
     }
 
     private static class ChainImpl<T, R> implements Chain<T, R> {
+
         private final Handler<T, R> first;
 
         public ChainImpl(Handler<T, R> first) {
@@ -88,6 +91,7 @@ public class ChainBuilder<T, R> {
     }
 
     private static class HandlerImpl<T, R> implements Handler<T, R> {
+
         private final Handler<T, R> delegate;
         private Handler<T, R> successor;
 
@@ -105,8 +109,7 @@ public class ChainBuilder<T, R> {
 
             if (result != null) {
                 return result;
-            }
-            else if (successor != null) {
+            } else if (successor != null) {
                 return successor.handle(t);
             }
 

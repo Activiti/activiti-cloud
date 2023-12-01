@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Date;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -26,12 +28,9 @@ import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import java.util.Date;
-
 public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
-    private final static Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(IntegrationRequestedEventHandler.class);
 
     public IntegrationRequestedEventHandler(EntityManager entityManager) {
         super(entityManager);
@@ -43,15 +42,17 @@ public class IntegrationRequestedEventHandler extends BaseIntegrationEventHandle
         IntegrationContext integrationContext = integrationEvent.getEntity();
         String entityId = IntegrationContextEntity.IdBuilderHelper.from(integrationContext);
 
-
         // Activity can be cyclical, so try to find existing before creating a new one
         IntegrationContextEntity entity = entityManager.find(IntegrationContextEntity.class, entityId);
         if (entity == null) {
-            entity = new IntegrationContextEntity(event.getServiceName(),
-                event.getServiceFullName(),
-                event.getServiceVersion(),
-                event.getAppName(),
-                event.getAppVersion());
+            entity =
+                new IntegrationContextEntity(
+                    event.getServiceName(),
+                    event.getServiceFullName(),
+                    event.getServiceVersion(),
+                    event.getAppName(),
+                    event.getAppVersion()
+                );
             entity.setId(entityId);
             entity.setClientId(integrationContext.getClientId());
         }

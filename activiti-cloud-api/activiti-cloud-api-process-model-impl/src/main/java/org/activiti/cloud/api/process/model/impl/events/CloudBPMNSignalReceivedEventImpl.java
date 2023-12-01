@@ -21,27 +21,20 @@ import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 
 public class CloudBPMNSignalReceivedEventImpl extends CloudBPMNSignalEventImpl implements CloudBPMNSignalReceivedEvent {
 
-    public CloudBPMNSignalReceivedEventImpl() {
+    public CloudBPMNSignalReceivedEventImpl() {}
+
+    public CloudBPMNSignalReceivedEventImpl(BPMNSignal entity, String processDefinitionId, String processInstanceId) {
+        super(entity, processDefinitionId, processInstanceId);
     }
 
-    public CloudBPMNSignalReceivedEventImpl(BPMNSignal entity,
-                                            String processDefinitionId,
-                                            String processInstanceId) {
-        super(entity,
-              processDefinitionId,
-              processInstanceId);
-    }
-
-    public CloudBPMNSignalReceivedEventImpl(String id,
-                                            Long timestamp,
-                                            BPMNSignal entity,
-                                            String processDefinitionId,
-                                            String processInstanceId) {
-        super(id,
-              timestamp,
-              entity,
-              processDefinitionId,
-              processInstanceId);
+    public CloudBPMNSignalReceivedEventImpl(
+        String id,
+        Long timestamp,
+        BPMNSignal entity,
+        String processDefinitionId,
+        String processInstanceId
+    ) {
+        super(id, timestamp, entity, processDefinitionId, processInstanceId);
     }
 
     @Override

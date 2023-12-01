@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.notifications.graphql.subscriptions.datafetcher;
 
+import graphql.schema.DataFetchingEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,15 +25,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import graphql.schema.DataFetchingEnvironment;
-
 public abstract class AbstractDestinationResolver implements DataFetcherDestinationResolver {
 
-    public AbstractDestinationResolver() {
-    }
+    public AbstractDestinationResolver() {}
 
     protected abstract String any();
+
     protected abstract String wildcard();
+
     protected abstract String path();
 
     @Override
@@ -44,18 +44,17 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
         List<String> destinations = new ArrayList<>();
 
         // Build destinations from arguments
-        if(environment.getArguments().size() > 0) {
-
-            List<List<String>> arguments = Stream.of(argumentNames)
+        if (environment.getArguments().size() > 0) {
+            List<List<String>> arguments = Stream
+                .of(argumentNames)
                 .map(name -> resolveArgument(environment, name))
                 .collect(Collectors.toList());
 
             // [[*],[a,b],[*]] => [[*,a,*], [*,b,*]]
-            crossJoin(arguments).stream()
-                          .map(list -> list.stream()
-                                           .collect(Collectors.joining(path())))
-                          .forEach(pattern -> destinations.add(fieldName + path() + pattern));
-
+            crossJoin(arguments)
+                .stream()
+                .map(list -> list.stream().collect(Collectors.joining(path())))
+                .forEach(pattern -> destinations.add(fieldName + path() + pattern));
         } else {
             destinations.add(fieldName + path() + any());
         }
@@ -65,27 +64,25 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
 
     protected String resolveFieldName(DataFetchingEnvironment environment) {
         return environment.getFields().iterator().next().getName();
-
     }
-
 
     protected String[] resolveArgumentNames(DataFetchingEnvironment environment) {
-        return environment.getFieldDefinition()
-                .getArguments()
-                .stream()
-                .map(arg -> arg.getName())
-                .toArray(String[]::new);
+        return environment
+            .getFieldDefinition()
+            .getArguments()
+            .stream()
+            .map(arg -> arg.getName())
+            .toArray(String[]::new);
     }
-
 
     private List<String> resolveArgument(DataFetchingEnvironment environment, String argumentName) {
         List<String> value = new ArrayList<>();
 
         Object argument = environment.getArgument(argumentName);
 
-        if(argument instanceof List) {
+        if (argument instanceof List) {
             value.addAll(environment.getArgument(argumentName));
-        } else if(argument != null ) {
+        } else if (argument != null) {
             value.add(argument.toString());
         } else {
             value.add(wildcard());
@@ -94,17 +91,16 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
         return value;
     }
 
-
     public static <T> List<List<T>> crossJoin(List<List<T>> factors) {
-        return new CartesianProduct<T>(factors).stream()
-                                               .collect(Collectors.toList());
+        return new CartesianProduct<T>(factors).stream().collect(Collectors.toList());
     }
 
-    public static List<List<String>> zip(List<String> list1, List<String> list2 ) {
+    public static List<List<String>> zip(List<String> list1, List<String> list2) {
         return crossJoin(Arrays.asList(list1, list2));
     }
 
     static class CartesianProduct<T> implements Iterable<List<T>> {
+
         private final Iterable<? extends Iterable<T>> factors;
 
         public CartesianProduct(final Iterable<? extends Iterable<T>> factors) {
@@ -122,6 +118,7 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
     }
 
     static class CartesianProductIterator<T> implements Iterator<List<T>> {
+
         private final List<Iterable<T>> factors;
         private final Stack<Iterator<T>> iterators;
         private final Stack<T> current;
@@ -129,8 +126,7 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
         private int index = 0;
 
         public CartesianProductIterator(final Iterable<? extends Iterable<T>> factors) {
-            this.factors = StreamSupport.stream(factors.spliterator(), false)
-                    .collect(Collectors.toList());
+            this.factors = StreamSupport.stream(factors.spliterator(), false).collect(Collectors.toList());
             if (this.factors.size() == 0) {
                 index = -1;
             }
@@ -180,5 +176,4 @@ public abstract class AbstractDestinationResolver implements DataFetcherDestinat
             return result;
         }
     }
-
 }

@@ -29,6 +29,7 @@ import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.cloud.acc.core.rest.PageRequest;
 import org.activiti.cloud.acc.core.rest.RuntimeDirtyContextHandler;
 import org.activiti.cloud.acc.core.rest.feign.EnableRuntimeFeignContext;
 import org.activiti.cloud.acc.shared.service.BaseService;
@@ -36,7 +37,6 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.rest.api.TaskApiClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 
@@ -62,59 +62,50 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void claimTask(String id) {
-        taskApiClient
-            .claimTask(id);
+        taskApiClient.claimTask(id);
     }
 
     @Step
     public void cannotClaimTask(String id) {
-        assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskApiClient.claimTask(id)
-        ).withMessageContaining("Unable to find task for the given id: " + id);
+        assertThatRestNotFoundErrorIsThrownBy(() -> taskApiClient.claimTask(id))
+            .withMessageContaining("Unable to find task for the given id: " + id);
     }
 
     @Step
     public void completeTask(String id, CompleteTaskPayload completeTaskPayload) {
-        taskApiClient
-            .completeTask(id, completeTaskPayload);
+        taskApiClient.completeTask(id, completeTaskPayload);
     }
 
     @Step
     public void saveTask(String id, SaveTaskPayload saveTaskPayload) {
-        taskApiClient
-            .saveTask(id, saveTaskPayload);
+        taskApiClient.saveTask(id, saveTaskPayload);
     }
 
     @Step
     public void cannotCompleteTask(String id, CompleteTaskPayload createTaskPayload) {
-        assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskApiClient.completeTask(id, createTaskPayload)
-        ).withMessageContaining("Unable to find task for the given id: " + id);
+        assertThatRestNotFoundErrorIsThrownBy(() -> taskApiClient.completeTask(id, createTaskPayload))
+            .withMessageContaining("Unable to find task for the given id: " + id);
     }
 
     @Step
     public CloudTask createNewTask() {
-
         CreateTaskPayload createTask = TaskPayloadBuilder
             .create()
             .withName("new-task")
             .withDescription("task-description")
             .withAssignee("testuser")
             .build();
-        return dirtyContextHandler.dirty(
-            taskApiClient.createNewTask(createTask).getContent());
+        return dirtyContextHandler.dirty(taskApiClient.createNewTask(createTask).getContent());
     }
 
     @Step
     public CloudTask createNewUnassignedTask() {
-
         CreateTaskPayload createTask = TaskPayloadBuilder
             .create()
             .withName("unassigned-task")
             .withDescription("unassigned-task-description")
             .build();
-        return dirtyContextHandler.dirty(
-            taskApiClient.createNewTask(createTask).getContent());
+        return dirtyContextHandler.dirty(taskApiClient.createNewTask(createTask).getContent());
     }
 
     public CloudTask createSubtask(String parentTaskId) {
@@ -149,14 +140,14 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void checkTaskNotFound(String taskId) {
-        assertThatRestNotFoundErrorIsThrownBy(
-            () -> taskApiClient.getTaskById(taskId)
-        ).withMessageContaining("Unable to find task");
+        assertThatRestNotFoundErrorIsThrownBy(() -> taskApiClient.getTaskById(taskId))
+            .withMessageContaining("Unable to find task");
     }
 
     @Step
     public Collection<CloudTask> getAllTasks() {
-        return taskApiClient.getTasks(DEFAULT_PAGEABLE)
+        return taskApiClient
+            .getTasks(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -173,30 +164,24 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public CloudTask setTaskName(String taskId, String taskName) {
-        return taskApiClient.updateTask(
-            taskId,
-            TaskPayloadBuilder.update().withName(taskName).build()).getContent();
+        return taskApiClient.updateTask(taskId, TaskPayloadBuilder.update().withName(taskName).build()).getContent();
     }
 
     @Step
     public CloudTask setTaskFormKey(String taskId, String formKey) {
-        return taskApiClient.updateTask(
-            taskId,
-            TaskPayloadBuilder.update().withFormKey(formKey).build()).getContent();
+        return taskApiClient.updateTask(taskId, TaskPayloadBuilder.update().withFormKey(formKey).build()).getContent();
     }
 
     @Step
     public CloudTask setTaskPriority(String taskId, int priority) {
-        return taskApiClient.updateTask(
-            taskId,
-            TaskPayloadBuilder.update().withPriority(priority).build()).getContent();
+        return taskApiClient
+            .updateTask(taskId, TaskPayloadBuilder.update().withPriority(priority).build())
+            .getContent();
     }
 
     @Step
     public CloudTask setTaskDueDate(String taskId, Date dueDate) {
-        return taskApiClient.updateTask(
-            taskId,
-            TaskPayloadBuilder.update().withDueDate(dueDate).build()).getContent();
+        return taskApiClient.updateTask(taskId, TaskPayloadBuilder.update().withDueDate(dueDate).build()).getContent();
     }
 
     @Step
@@ -206,7 +191,8 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public Collection<CloudTask> getTaskWithStandalone(boolean standalone) {
-        return taskApiClient.getTasks(DEFAULT_PAGEABLE)
+        return taskApiClient
+            .getTasks(DEFAULT_PAGEABLE)
             .getContent()
             .stream()
             .filter(cloudTask -> cloudTask.getContent().isStandalone() == standalone)
@@ -221,8 +207,7 @@ public class TaskRuntimeBundleSteps {
 
     @Step
     public void cannotAssignTask(String id, AssignTaskPayload assignTaskPayload) {
-        assertThatRestBadRequestErrorIsThrownBy(
-                () -> taskApiClient.assign(id, assignTaskPayload)
-        ).withMessageContaining("You cannot assign a task to " + assignTaskPayload.getAssignee());
+        assertThatRestBadRequestErrorIsThrownBy(() -> taskApiClient.assign(id, assignTaskPayload))
+            .withMessageContaining("You cannot assign a task to " + assignTaskPayload.getAssignee());
     }
 }

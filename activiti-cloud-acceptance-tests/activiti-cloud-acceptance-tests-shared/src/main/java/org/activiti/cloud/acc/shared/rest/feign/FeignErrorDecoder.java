@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.acc.shared.rest.feign;
 
-import java.io.IOException;
-import java.io.Reader;
+import static feign.FeignException.errorStatus;
+import static org.activiti.cloud.acc.shared.serenity.exception.ExpectedExceptionHandler.isExpectingException;
 
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
+import java.io.IOException;
+import java.io.Reader;
 import org.activiti.cloud.acc.shared.rest.error.ExpectedRestException;
 import org.apache.commons.lang3.StringUtils;
-
-import static feign.FeignException.errorStatus;
-import static org.activiti.cloud.acc.shared.serenity.exception.ExpectedExceptionHandler.isExpectingException;
 
 /**
  * Feign error decoder with support for expected errors
@@ -33,16 +32,12 @@ import static org.activiti.cloud.acc.shared.serenity.exception.ExpectedException
 public class FeignErrorDecoder implements ErrorDecoder {
 
     @Override
-    public Exception decode(String methodKey,
-                            Response response) {
-
+    public Exception decode(String methodKey, Response response) {
         if (isExpectingException()) {
-            return new ExpectedRestException(response.status(),
-                                             responseBody(response));
+            return new ExpectedRestException(response.status(), responseBody(response));
         }
 
-        return errorStatus(methodKey,
-                           response);
+        return errorStatus(methodKey, response);
     }
 
     private String responseBody(Response response) {

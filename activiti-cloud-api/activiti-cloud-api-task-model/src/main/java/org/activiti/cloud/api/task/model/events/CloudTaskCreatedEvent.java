@@ -17,7 +17,4 @@ package org.activiti.cloud.api.task.model.events;
 
 import org.activiti.api.task.runtime.events.TaskCreatedEvent;
 
-public interface CloudTaskCreatedEvent extends CloudTaskRuntimeEvent,
-                                               TaskCreatedEvent {
-
-}
+public interface CloudTaskCreatedEvent extends CloudTaskRuntimeEvent, TaskCreatedEvent {}

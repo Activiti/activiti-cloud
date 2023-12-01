@@ -15,8 +15,13 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudApplication;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
@@ -33,40 +38,38 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @RestController
-@RequestMapping(
-        value = "/v1/applications",
-        produces = {
-                MediaTypes.HAL_JSON_VALUE,
-                MediaType.APPLICATION_JSON_VALUE
-        })
+@RequestMapping(value = "/v1/applications", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class ApplicationController {
+
     private ApplicationRepository repository;
     private AlfrescoPagedModelAssembler<ApplicationEntity> pagedCollectionModelAssembler;
     private ApplicationRepresentationModelAssembler applicationRepresentationModelAssembler;
 
     @Autowired
-    public ApplicationController(ApplicationRepository repository,
-                                 AlfrescoPagedModelAssembler<ApplicationEntity> pagedCollectionModelAssembler,
-                                 ApplicationRepresentationModelAssembler applicationRepresentationModelAssembler) {
+    public ApplicationController(
+        ApplicationRepository repository,
+        AlfrescoPagedModelAssembler<ApplicationEntity> pagedCollectionModelAssembler,
+        ApplicationRepresentationModelAssembler applicationRepresentationModelAssembler
+    ) {
         this.repository = repository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.applicationRepresentationModelAssembler = applicationRepresentationModelAssembler;
     }
 
     @GetMapping
-    public PagedModel<EntityModel<CloudApplication>> findAll(@QuerydslPredicate(root = ApplicationEntity.class) Predicate predicate,
-                                                             Pageable pageable) {
+    public PagedModel<EntityModel<CloudApplication>> findAllApplications(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ApplicationEntity.class
+        ) Predicate predicate,
+        Pageable pageable
+    ) {
+        predicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
 
-        predicate = Optional.ofNullable(predicate)
-                .orElseGet(BooleanBuilder::new);
-
-        return pagedCollectionModelAssembler.toModel(pageable,
-                repository.findAll(predicate,
-                        pageable),
-                applicationRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            repository.findAll(predicate, pageable),
+            applicationRepresentationModelAssembler
+        );
     }
-
 }

@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -22,14 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.List;
-
-import static org.activiti.cloud.services.query.events.handlers.TaskBuilder.aTask;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 public class TaskPermissionsHelperTest {
@@ -45,29 +44,24 @@ public class TaskPermissionsHelperTest {
 
     @Test
     public void should_not_addAnyPermission_when_canNotViewTask() {
-        TaskEntity taskEntity = aTask().withId("task1")
-                .withCandidateUsers(List.of("testuser")).build();
+        TaskEntity taskEntity = aTask().withId("task1").withCandidateUsers(List.of("testuser")).build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(false);
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(0))
-                .setPermissions(any());
+        verify(taskEntity, times(0)).setPermissions(any());
     }
 
     @Test
     public void should_addClaimPermission_when_isCandidateUser() {
-        TaskEntity taskEntity = aTask().withId("task1")
-                .withCandidateUsers(List.of("testuser")).build();
+        TaskEntity taskEntity = aTask().withId("task1").withCandidateUsers(List.of("testuser")).build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.CLAIM));
+        verify(taskEntity, times(1)).setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.CLAIM));
     }
 
     @Test
@@ -88,12 +82,9 @@ public class TaskPermissionsHelperTest {
         given(securityManager.getAuthenticatedUserGroups()).willReturn(List.of("testgroup"));
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
 
-
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.CLAIM));
+        verify(taskEntity, times(1)).setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.CLAIM));
     }
 
     @Test
@@ -104,9 +95,7 @@ public class TaskPermissionsHelperTest {
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.UPDATE));
+        verify(taskEntity, times(1)).setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.UPDATE));
     }
 
     @Test
@@ -117,24 +106,22 @@ public class TaskPermissionsHelperTest {
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
-        verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.UPDATE));
+        verify(taskEntity, times(1)).setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.UPDATE));
     }
 
     @Test
     public void should_addReleasePermission_when_UserIsAssignee() {
-        TaskEntity taskEntity = aTask().withId("task1").withAssignee("testuser")
-                .withCandidateUsers(List.of("user1")).build();
+        TaskEntity taskEntity = aTask()
+            .withId("task1")
+            .withAssignee("testuser")
+            .withCandidateUsers(List.of("user1"))
+            .build();
         given(securityManager.getAuthenticatedUserId()).willReturn("testuser");
         given(taskControllerHelper.canUserViewTask(any())).willReturn(true);
 
         taskPermissionsHelper.setCurrentUserTaskPermissions(taskEntity);
 
         verify(taskEntity, times(1))
-                .setPermissions(List.of(TaskPermissions.VIEW,
-                                        TaskPermissions.RELEASE,
-                                        TaskPermissions.UPDATE));
+            .setPermissions(List.of(TaskPermissions.VIEW, TaskPermissions.RELEASE, TaskPermissions.UPDATE));
     }
-
 }

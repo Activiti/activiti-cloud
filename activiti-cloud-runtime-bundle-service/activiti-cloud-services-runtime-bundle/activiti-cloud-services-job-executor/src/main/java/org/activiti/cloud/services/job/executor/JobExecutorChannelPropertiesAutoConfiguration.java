@@ -15,11 +15,9 @@
  */
 package org.activiti.cloud.services.job.executor;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/job-executor-channel.properties")
-public class JobExecutorChannelPropertiesAutoConfiguration {
-
-}
+public class JobExecutorChannelPropertiesAutoConfiguration {}

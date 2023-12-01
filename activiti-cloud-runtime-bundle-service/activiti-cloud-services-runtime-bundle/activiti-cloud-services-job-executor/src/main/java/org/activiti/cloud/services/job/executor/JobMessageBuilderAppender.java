@@ -34,18 +34,17 @@ public class JobMessageBuilderAppender implements MessageBuilderAppender {
     public <P> MessageBuilder<P> apply(MessageBuilder<P> request) {
         Assert.notNull(request, "request must not be null");
 
-        return request.setHeader(JobMessageHeaders.JOB_TYPE, job.getJobType())
-                      .setHeader(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
-                      .setHeader(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
-                      .setHeader(JobMessageHeaders.JOB_PROCESS_INSTANCE_ID, job.getProcessInstanceId())
-                      .setHeader(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
-                      .setHeader(JobMessageHeaders.JOB_ID, job.getId())
-                      .setHeader(JobMessageHeaders.JOB_RETRIES, job.getRetries())
-                      .setHeader(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
-                      .setHeader(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
-                      .setHeader(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
-                      .setHeader(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration())
-       ;
+        return request
+            .setHeader(JobMessageHeaders.JOB_TYPE, job.getJobType())
+            .setHeader(JobMessageHeaders.JOB_PROCESS_DEFINITION_ID, job.getProcessDefinitionId())
+            .setHeader(JobMessageHeaders.JOB_DUE_DATE, job.getDuedate())
+            .setHeader(JobMessageHeaders.JOB_PROCESS_INSTANCE_ID, job.getProcessInstanceId())
+            .setHeader(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
+            .setHeader(JobMessageHeaders.JOB_ID, job.getId())
+            .setHeader(JobMessageHeaders.JOB_RETRIES, job.getRetries())
+            .setHeader(JobMessageHeaders.JOB_EXECUTION_ID, job.getExecutionId())
+            .setHeader(JobMessageHeaders.JOB_EXCEPTION_MESSAGE, job.getExceptionMessage())
+            .setHeader(JobMessageHeaders.JOB_HANDLER_TYPE, job.getJobHandlerType())
+            .setHeader(JobMessageHeaders.JOB_HANDLER_CONFIGURATION, job.getJobHandlerConfiguration());
     }
-
 }

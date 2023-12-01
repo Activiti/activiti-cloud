@@ -59,6 +59,12 @@
           "name": "ACTIVITI_ADMIN",
           "clientRole": true
         }
+      ],
+      "activiti": [
+        {
+          "name": "DYNAMIC_ROLE",
+          "clientRole": true
+        }
       ]
     }
   },
@@ -72,6 +78,15 @@
     },
     {
       "name": "testgroup"
+    },
+    {
+      "id": "51331bf0-00e4-4eff-ad88-bad9511ac919",
+      "name": "dynamic",
+      "clientRoles": {
+        "activiti": [
+          "DYNAMIC_ROLE"
+        ]
+      }
     },
     {
       "name": "salesgroup",
@@ -92,9 +107,14 @@
       "serviceAccountClientId": "activiti-keycloak",
       "clientRoles": {
         "realm-management": [
+          "manage-authorization",
+          "manage-users",
+          "manage-clients",
           "query-realms",
+          "create-client",
+          "query-clients",
           "view-users",
-          "view-clients"
+          "manage-realm"
         ]
       }
     },

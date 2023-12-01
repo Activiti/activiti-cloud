@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.events.TaskRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskAssignedEvent;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.TaskEntity;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class TaskAssignedEventHandler implements QueryEventHandler {
 
@@ -38,10 +37,9 @@ public class TaskAssignedEventHandler implements QueryEventHandler {
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudTaskAssignedEvent taskAssignedEvent = (CloudTaskAssignedEvent) event;
         Task eventTask = taskAssignedEvent.getEntity();
-        Optional<TaskEntity> findResult = Optional.ofNullable(entityManager.find(TaskEntity.class,
-                                                                                 eventTask.getId()));
-        TaskEntity queryTaskEntity = findResult.orElseThrow(
-                () -> new QueryException("Unable to find task with id: " + eventTask.getId())
+        Optional<TaskEntity> findResult = Optional.ofNullable(entityManager.find(TaskEntity.class, eventTask.getId()));
+        TaskEntity queryTaskEntity = findResult.orElseThrow(() ->
+            new QueryException("Unable to find task with id: " + eventTask.getId())
         );
         queryTaskEntity.setAssignee(eventTask.getAssignee());
         queryTaskEntity.setStatus(Task.TaskStatus.ASSIGNED);

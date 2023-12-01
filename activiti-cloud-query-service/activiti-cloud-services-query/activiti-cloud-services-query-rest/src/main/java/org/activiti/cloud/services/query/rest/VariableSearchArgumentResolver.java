@@ -43,11 +43,12 @@ public class VariableSearchArgumentResolver implements HandlerMethodArgumentReso
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
+    public Object resolveArgument(
+        MethodParameter parameter,
         ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest,
-        WebDataBinderFactory binderFactory) {
-
+        WebDataBinderFactory binderFactory
+    ) {
         String variableType = webRequest.getParameter(VARIABLE_TYPE_KEY);
         Class<?> type = ProcessVariablesMapTypeRegistry.forType(variableType, String.class);
 

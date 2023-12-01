@@ -16,45 +16,37 @@
 
 package org.activiti.cloud.starter.tests.runtime;
 
-import org.activiti.cloud.api.process.model.IntegrationRequest;
-import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.messaging.Message;
 
 @TestComponent
-@EnableBinding(CanFailConnectorChannels.class)
 public class CanFailConnector {
 
     private boolean shouldSendError = true;
     private AtomicBoolean integrationErrorSent = new AtomicBoolean(false);
     private IntegrationRequest latestReceivedIntegrationRequest;
 
-    private final IntegrationResultSender integrationResultSender;
-    private final IntegrationErrorSender integrationErrorSender;
+    @Autowired
+    private IntegrationResultSender integrationResultSender;
 
-    public CanFailConnector(IntegrationResultSender integrationResultSender,
-                            IntegrationErrorSender integrationErrorSender) {
-        this.integrationResultSender = integrationResultSender;
-        this.integrationErrorSender = integrationErrorSender;
-    }
+    @Autowired
+    private IntegrationErrorSender integrationErrorSender;
 
     public void setShouldSendError(boolean shouldSendError) {
         this.shouldSendError = shouldSendError;
     }
 
-    @StreamListener(value = CanFailConnectorChannels.CAN_FAIL_CONNECTOR)
-    public void canFailConnector(IntegrationRequest integrationRequest) {
-        latestReceivedIntegrationRequest = integrationRequest;
+    public void canFailConnector(Message<IntegrationRequest> message) {
+        latestReceivedIntegrationRequest = message.getPayload();
         integrationErrorSent.set(false);
         if (shouldSendError) {
             integrationErrorSent.set(true);
-            integrationErrorSender.send(integrationRequest,
-                                        new RuntimeException("task failed"));
+            integrationErrorSender.send(message.getPayload(), new RuntimeException("task failed"));
         } else {
-            integrationResultSender.send(integrationRequest,
-                integrationRequest.getIntegrationContext());
+            integrationResultSender.send(message.getPayload(), message.getPayload().getIntegrationContext());
         }
     }
 

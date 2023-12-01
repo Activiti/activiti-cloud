@@ -15,20 +15,17 @@
  */
 package org.activiti.cloud.modeling.api.process;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Optional;
 
 public enum TemplateMappingType {
-    FILE,VARIABLE;
+    FILE,
+    VARIABLE;
 
     @JsonCreator
     public static TemplateMappingType fromValue(String value) {
-        return Optional.ofNullable(value)
-                .map(String::toUpperCase)
-                .map(TemplateMappingType::valueOf)
-                .orElse(null);
+        return Optional.ofNullable(value).map(String::toUpperCase).map(TemplateMappingType::valueOf).orElse(null);
     }
 
     @JsonValue

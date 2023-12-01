@@ -15,50 +15,42 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
+import java.util.List;
 import java.util.Optional;
+import org.activiti.cloud.services.common.security.jwt.validator.ValidationCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JwtAccessTokenValidator {
 
-    private final long offset;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtAccessTokenValidator.class);
 
-    public JwtAccessTokenValidator(long offset) {
-        this.offset = offset;
+    private final List<ValidationCheck> validationChecks;
+
+    public JwtAccessTokenValidator(List<ValidationCheck> validationChecks) {
+        this.validationChecks = validationChecks;
     }
 
     public boolean isValid(@NonNull JwtAdapter jwtAdapter) {
-        return Optional.ofNullable(jwtAdapter)
+        return Optional
+            .ofNullable(jwtAdapter)
             .map(JwtAdapter::getJwt)
             .map(this::isValid)
             .orElseThrow(() -> new SecurityException("Invalid access token instance"));
     }
 
     public boolean isValid(Jwt accessToken) {
-        return !isExpired(accessToken) && isNotBefore(accessToken);
+        return !validationChecks
+            .stream()
+            .map(check -> {
+                boolean valid = check.isValid(accessToken);
+                if (!valid) {
+                    LOGGER.error("Token invalid because the {} validation has failed.", check.getClass().toString());
+                }
+                return valid;
+            })
+            .anyMatch(b -> b.equals(false));
     }
-
-    /**
-     * The 'nbf' (NotBefore) claim is used by some auth providers as
-     * a way to set the moment from which a token starts being valid.
-     * A token could not be expired, but if its validity period has not started,
-     * it would be still an invalid token
-     * @param accessToken the Jwt access token
-     * @return if the nbf claim is either in the past or the future
-     */
-    private boolean isNotBefore(Jwt accessToken) {
-        return accessToken.getNotBefore() == null ||
-            currentTime() >= accessToken.getNotBefore().toEpochMilli();
-    }
-
-    private boolean isExpired(Jwt accessToken) {
-        return accessToken.getExpiresAt() != null &&
-            accessToken.getExpiresAt().toEpochMilli() != 0 &&
-            currentTime() > accessToken.getExpiresAt().toEpochMilli();
-    }
-
-    private long currentTime() {
-        return System.currentTimeMillis() + offset;
-    }
-
 }

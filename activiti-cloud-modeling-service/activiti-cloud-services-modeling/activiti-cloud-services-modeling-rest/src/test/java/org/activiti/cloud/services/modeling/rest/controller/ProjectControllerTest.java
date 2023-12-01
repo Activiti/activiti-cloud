@@ -15,6 +15,14 @@
  */
 package org.activiti.cloud.services.modeling.rest.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
@@ -27,20 +35,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.hateoas.EntityModel;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ProjectControllerTest {
 
     @Mock
     private ProjectService projectService;
+
     @Spy
     private ProjectRepresentationModelAssembler representationModelAssembler = new ProjectRepresentationModelAssembler();
 
@@ -60,7 +60,8 @@ class ProjectControllerTest {
     @Test
     void should_throwException_when_projectNotFound() {
         when(projectService.findProjectById("projectId", null)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> projectController.getProject("projectId", null)).isInstanceOf(ResourceNotFoundException.class);
+        assertThatThrownBy(() -> projectController.getProject("projectId", null))
+            .isInstanceOf(ResourceNotFoundException.class);
         verify(projectService, times(1)).findProjectById("projectId", null);
     }
 }

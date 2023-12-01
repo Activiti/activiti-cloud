@@ -15,41 +15,42 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import com.querydsl.core.types.dsl.StringPath;
 import java.util.List;
-
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
 import org.activiti.cloud.services.query.model.QServiceTaskEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import com.querydsl.core.types.dsl.StringPath;
-
 @RepositoryRestResource(exported = false)
-public interface ServiceTaskRepository extends PagingAndSortingRepository<ServiceTaskEntity, String>,
-                                               QuerydslPredicateExecutor<ServiceTaskEntity>,
-                                               QuerydslBinderCustomizer<QServiceTaskEntity> {
-
+public interface ServiceTaskRepository
+    extends
+        PagingAndSortingRepository<ServiceTaskEntity, String>,
+        QuerydslPredicateExecutor<ServiceTaskEntity>,
+        QuerydslBinderCustomizer<QServiceTaskEntity>,
+        CrudRepository<ServiceTaskEntity, String> {
     @Override
-    default void customize(QuerydslBindings bindings,
-                           QServiceTaskEntity root) {
-
-        bindings.bind(String.class).first(
-                (StringPath path, String value) -> path.eq(value));
+    default void customize(QuerydslBindings bindings, QServiceTaskEntity root) {
+        bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 
-    List<ServiceTaskEntity> findByProcessInstanceIdAndStatus(String processInstanceId,
-                                                             CloudBPMNActivity.BPMNActivityStatus status);
+    List<ServiceTaskEntity> findByProcessInstanceIdAndStatus(
+        String processInstanceId,
+        CloudBPMNActivity.BPMNActivityStatus status
+    );
 
     List<ServiceTaskEntity> findByProcessInstanceId(String processInstanceId);
 
-    ServiceTaskEntity findByProcessInstanceIdAndElementId(String processInstanceId,
-                                                           String elementId);
+    ServiceTaskEntity findByProcessInstanceIdAndElementId(String processInstanceId, String elementId);
 
-    ServiceTaskEntity findByProcessInstanceIdAndElementIdAndExecutionId(String processInstanceId,
-                                                                        String elementId,
-                                                                        String executionId);
+    ServiceTaskEntity findByProcessInstanceIdAndElementIdAndExecutionId(
+        String processInstanceId,
+        String elementId,
+        String executionId
+    );
 }

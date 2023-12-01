@@ -15,10 +15,10 @@
  */
 package org.activiti.cloud.services.messages.core.correlation;
 
+import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.*;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-
-import static org.activiti.cloud.services.messages.core.integration.MessageEventHeaders.*;
 
 public class Correlations {
 
@@ -29,13 +29,10 @@ public class Correlations {
         String messageCorrelationKey = headers.get(MESSAGE_EVENT_CORRELATION_KEY, String.class);
 
         StringBuilder builder = new StringBuilder();
-        builder.append(appName)
-               .append(":")
-               .append(messageEventName);
+        builder.append(appName).append(":").append(messageEventName);
 
         if (messageCorrelationKey != null) {
-            builder.append(":")
-                   .append(messageCorrelationKey);
+            builder.append(":").append(messageCorrelationKey);
         }
 
         return builder.toString();

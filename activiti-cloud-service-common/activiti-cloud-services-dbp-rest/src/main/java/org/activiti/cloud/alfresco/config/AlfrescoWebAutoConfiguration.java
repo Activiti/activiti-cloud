@@ -31,8 +31,8 @@ import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
@@ -41,25 +41,42 @@ import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2Http
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:config/alfresco-rest-config.properties")
 public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
+
+    @Value("${SPRING_MVC_REST_USE_TRAILING_SLASH_MATCH:false}")
+    private boolean useTrailingSlashMatch;
 
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
     private final int defaultPageSize;
 
-    public AlfrescoWebAutoConfiguration(@Lazy PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
-                                        @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize) {
+    public AlfrescoWebAutoConfiguration(
+        @Lazy PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
+        @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize
+    ) {
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
         this.defaultPageSize = defaultPageSize;
     }
 
     @Override
+    public void configurePathMatch(PathMatchConfigurer configurer) {
+        configurer.setUseTrailingSlashMatch(useTrailingSlashMatch);
+    }
+
+    @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(0, new AlfrescoPageArgumentMethodResolver(new AlfrescoPageParameterParser(defaultPageSize), pageableHandlerMethodArgumentResolver));
+        resolvers.add(
+            0,
+            new AlfrescoPageArgumentMethodResolver(
+                new AlfrescoPageParameterParser(defaultPageSize),
+                pageableHandlerMethodArgumentResolver
+            )
+        );
     }
 
     @Override
@@ -67,18 +84,20 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         //the property spring.hateoas.use-hal-as-default-json-media-type is not working
         //we need to manually remove application/json from supported mediaTypes
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter ) {
+            if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter) {
                 ArrayList<MediaType> mediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
                 mediaTypes.remove(MediaType.APPLICATION_JSON);
                 ((TypeConstrainedMappingJackson2HttpMessageConverter) converter).setSupportedMediaTypes(mediaTypes);
             }
         }
-
     }
 
     @Bean
     public <T> AlfrescoJackson2HttpMessageConverter<T> alfrescoJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-        return new AlfrescoJackson2HttpMessageConverter<>(new PagedModelConverter(new PageMetadataConverter()), objectMapper);
+        return new AlfrescoJackson2HttpMessageConverter<>(
+            new PagedModelConverter(new PageMetadataConverter()),
+            objectMapper
+        );
     }
 
     @Bean
@@ -87,9 +106,11 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public <T> AlfrescoPagedModelAssembler<T> alfrescoPagedModelAssembler(@Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
-                                                                                  @Autowired(required = false) UriComponents baseUri,
-                                                                                  ExtendedPageMetadataConverter extendedPageMetadataConverter) {
+    public <T> AlfrescoPagedModelAssembler<T> alfrescoPagedModelAssembler(
+        @Autowired(required = false) HateoasPageableHandlerMethodArgumentResolver resolver,
+        @Autowired(required = false) UriComponents baseUri,
+        ExtendedPageMetadataConverter extendedPageMetadataConverter
+    ) {
         return new AlfrescoPagedModelAssembler<>(resolver, baseUri, extendedPageMetadataConverter);
     }
 
@@ -104,8 +125,7 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
         loose the information about the scale, so it can be easily converted back to BigDecimal.
          */
 
-        return () -> objectMapper.configOverride(BigDecimal.class)
-            .setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
+        return () ->
+            objectMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
     }
-
 }

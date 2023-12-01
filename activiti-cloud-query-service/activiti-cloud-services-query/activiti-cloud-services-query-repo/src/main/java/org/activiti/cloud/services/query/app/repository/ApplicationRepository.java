@@ -17,25 +17,25 @@ package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.ApplicationEntity;
+import org.activiti.cloud.services.query.model.QApplicationEntity;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
-import org.activiti.cloud.services.query.model.QApplicationEntity;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface ApplicationRepository extends
+public interface ApplicationRepository
+    extends
         PagingAndSortingRepository<ApplicationEntity, String>,
         QuerydslPredicateExecutor<ApplicationEntity>,
-        QuerydslBinderCustomizer<QApplicationEntity> {
-
+        QuerydslBinderCustomizer<QApplicationEntity>,
+        CrudRepository<ApplicationEntity, String> {
     boolean existsByNameAndVersion(String name, String version);
 
     @Override
-    default void customize(QuerydslBindings bindings,
-            QApplicationEntity root) {
-
+    default void customize(QuerydslBindings bindings, QApplicationEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }

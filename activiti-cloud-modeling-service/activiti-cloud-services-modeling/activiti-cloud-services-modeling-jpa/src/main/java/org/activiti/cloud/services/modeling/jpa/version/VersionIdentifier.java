@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.jpa.version;
 
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
-import javax.persistence.Embeddable;
 
 /**
  * Embeddable version identifier
@@ -29,9 +29,7 @@ public class VersionIdentifier implements Serializable {
 
     private String versionedEntityId;
 
-    public VersionIdentifier() {
-
-    }
+    public VersionIdentifier() {}
 
     public VersionIdentifier(String versionedEntityId, String version) {
         this.versionedEntityId = versionedEntityId;
@@ -64,8 +62,10 @@ public class VersionIdentifier implements Serializable {
         }
 
         VersionIdentifier that = (VersionIdentifier) o;
-        return Objects.equals(getVersionedEntityId(), that.getVersionedEntityId()) &&
-                Objects.equals(getVersion(), that.getVersion());
+        return (
+            Objects.equals(getVersionedEntityId(), that.getVersionedEntityId()) &&
+            Objects.equals(getVersion(), that.getVersion())
+        );
     }
 
     @Override

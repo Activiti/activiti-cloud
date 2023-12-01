@@ -33,5 +33,4 @@ public class ReceiveMessageCmdExecutor extends AbstractCommandExecutor<ReceiveMe
 
         return new EmptyResult(command);
     }
-
 }

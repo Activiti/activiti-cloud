@@ -15,13 +15,15 @@
  */
 package org.activiti.cloud.services.audit.api.streams;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface AuditConsumerChannels {
-
     String AUDIT_CONSUMER = "auditConsumer";
 
-    @Input(AUDIT_CONSUMER)
-    SubscribableChannel auditConsumer();
+    @InputBinding(AUDIT_CONSUMER)
+    default SubscribableChannel auditConsumer() {
+        return MessageChannels.publishSubscribe(AUDIT_CONSUMER).getObject();
+    }
 }

@@ -23,19 +23,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,15 +58,21 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(CandidateGroupAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
+@Import(
+    {
+        CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
-        AlfrescoWebAutoConfiguration.class})
-public class CandidateGroupAdminControllerImplIT {
+        AlfrescoWebAutoConfiguration.class,
+        StreamConfig.class,
+    }
+)
+class CandidateGroupAdminControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,56 +86,61 @@ public class CandidateGroupAdminControllerImplIT {
     @SpyBean
     private SpringPageConverter pageConverter;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assertThat(pageConverter).isNotNull();
         assertThat(processEngineChannels).isNotNull();
         assertThat(processDeployedProducer).isNotNull();
     }
 
     @Test
-    public void getGroupCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
-
-        List<String> stringList = Arrays.asList("hrgroup",
-                                                "testgroup");
+    void getGroupCandidatesShouldUseAlfrescoGuidelineWhenMediaTypeIsApplicationJson() throws Exception {
+        List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups",
-                                                    1).accept(MediaType.APPLICATION_JSON))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[0].entry.group")
-                .isEqualTo("hrgroup");
+            .node("list.entries[0].entry.group")
+            .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("list.entries[1].entry.group")
-                .isEqualTo("testgroup");
+            .node("list.entries[1].entry.group")
+            .isEqualTo("testgroup");
     }
 
     @Test
-    public void getGroupCandidatesShouldHaveProperHALFormat() throws Exception {
-
-        List<String> stringList = Arrays.asList("hrgroup",
-                                                "testgroup");
+    void getGroupCandidatesShouldHaveProperHALFormat() throws Exception {
+        List<String> stringList = Arrays.asList("hrgroup", "testgroup");
         when(taskAdminRuntime.groupCandidates("1")).thenReturn(stringList);
 
-        MvcResult result = this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups",
-                                                    1).accept(MediaTypes.HAL_JSON_VALUE))
+        MvcResult result =
+            this.mockMvc.perform(get("/admin/v1/tasks/{taskId}/candidate-groups", 1).accept(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateGroups[0].group")
-                .isEqualTo("hrgroup");
+            .node("_embedded.candidateGroups[0].group")
+            .isEqualTo("hrgroup");
         assertThatJson(result.getResponse().getContentAsString())
-                .node("_embedded.candidateGroups[1].group")
-                .isEqualTo("testgroup");
+            .node("_embedded.candidateGroups[1].group")
+            .isEqualTo("testgroup");
     }
 }

@@ -15,6 +15,9 @@
  */
 package org.activiti.cloud.services.modeling.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ContentUpdateListener;
 import org.activiti.cloud.modeling.api.Model;
@@ -35,64 +38,66 @@ import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
-import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
+import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
 import org.activiti.cloud.services.modeling.validation.extensions.ExtensionsModelValidator;
+import org.activiti.cloud.services.modeling.validation.magicnumber.FileMagicNumberValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-@Configuration
+@AutoConfiguration
 public class ModelingServiceAutoConfiguration {
 
     @Bean
-    public ModelContentService modelContentService(Set<ModelContentValidator> modelValidators,
-                                                   Set<ModelContentConverter<? extends ModelContent>> modelConverters,
-                                                   Set<ContentUpdateListener> contentUpdateListeners) {
-        return new ModelContentService(modelValidators,
-                                       modelConverters,
-                                       contentUpdateListeners);
+    public ModelContentService modelContentService(
+        Set<ModelContentValidator> modelValidators,
+        Set<ModelContentConverter<? extends ModelContent>> modelConverters,
+        Set<ContentUpdateListener> contentUpdateListeners
+    ) {
+        return new ModelContentService(modelValidators, modelConverters, contentUpdateListeners);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ExtensionsModelValidator extensionsModelValidator(SchemaLoader modelExtensionsSchemaLoader) {
-        return new ExtensionsModelValidator(modelExtensionsSchemaLoader);
+    public ExtensionsModelValidator extensionsModelValidator(Schema modelExtensionsSchema) {
+        return new ExtensionsModelValidator(modelExtensionsSchema);
     }
 
     @Bean
-    public ModelExtensionsService modelExtensionsService(Set<ModelExtensionsValidator> metadataValidators,
-                                                         ExtensionsModelValidator extensionsModelValidator,
-                                                         ModelTypeService modelTypeService) {
-        return new ModelExtensionsService(metadataValidators,
-                                          extensionsModelValidator,
-                                          modelTypeService);
+    public ModelExtensionsService modelExtensionsService(
+        Set<ModelExtensionsValidator> metadataValidators,
+        ExtensionsModelValidator extensionsModelValidator,
+        ModelTypeService modelTypeService
+    ) {
+        return new ModelExtensionsService(metadataValidators, extensionsModelValidator, modelTypeService);
     }
 
     @Bean
-    public ModelService modelService(ModelRepository modelRepository,
-                                     ModelTypeService modelTypeService,
-                                     ModelContentService modelContentService,
-                                     ModelExtensionsService modelExtensionsService,
-                                     JsonConverter<Model> jsonConverter,
-                                     ProcessModelContentConverter processModelContentConverter,
-                                     Set<ModelUpdateListener> modelUpdateListeners,
-                                     FileMagicNumberValidator fileContentValidator) {
-        return new ModelServiceImpl(modelRepository,
-                                    modelTypeService,
-                                    modelContentService,
-                                    modelExtensionsService,
-                                    jsonConverter,
-                                    processModelContentConverter,
-                                    modelUpdateListeners,
-                                    fileContentValidator);
-
+    public ModelService modelService(
+        ModelRepository modelRepository,
+        ModelTypeService modelTypeService,
+        ModelContentService modelContentService,
+        ModelExtensionsService modelExtensionsService,
+        JsonConverter<Model> jsonConverter,
+        ProcessModelContentConverter processModelContentConverter,
+        Set<ModelUpdateListener> modelUpdateListeners,
+        FileMagicNumberValidator fileContentValidator,
+        FileContentSanitizer fileContentSanitizer
+    ) {
+        return new ModelServiceImpl(
+            modelRepository,
+            modelTypeService,
+            modelContentService,
+            modelExtensionsService,
+            jsonConverter,
+            processModelContentConverter,
+            modelUpdateListeners,
+            fileContentValidator,
+            fileContentSanitizer
+        );
     }
 
     @Bean
@@ -101,37 +106,43 @@ public class ModelingServiceAutoConfiguration {
     }
 
     @Bean
-    public ProjectService projectService(ProjectRepository projectRepository,
-                                         ModelService modelService,
-                                         ModelTypeService modelTypeService,
-                                         JsonConverter<Project> jsonConverter,
-                                         JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
-                                         JsonConverter<Map> jsonMetadataConverter,
-                                         Set<ProjectValidator> projectValidators,
-                                         ProjectFilterService projectFilterService,
-                                         ProjectDecoratorService projectDecoratorService) {
-
-        return new ProjectServiceImpl(projectRepository,
-                                      modelService,
-                                      modelTypeService,
-                                      projectDescriptorJsonConverter,
-                                      jsonConverter,
-                                      jsonMetadataConverter,
-                                      projectValidators,
-                                      projectFilterService,
-                                      projectDecoratorService);
-
+    public ProjectService projectService(
+        ProjectRepository projectRepository,
+        ModelService modelService,
+        ModelTypeService modelTypeService,
+        JsonConverter<Project> jsonConverter,
+        JsonConverter<ProjectDescriptor> projectDescriptorJsonConverter,
+        JsonConverter<Map> jsonMetadataConverter,
+        Set<ProjectValidator> projectValidators,
+        ProjectFilterService projectFilterService,
+        ProjectDecoratorService projectDecoratorService
+    ) {
+        return new ProjectServiceImpl(
+            projectRepository,
+            modelService,
+            modelTypeService,
+            projectDescriptorJsonConverter,
+            jsonConverter,
+            jsonMetadataConverter,
+            projectValidators,
+            projectFilterService,
+            projectDecoratorService
+        );
     }
 
     @Bean
     public SchemaProvider processExtensionModelSchemaProvider(
-        @Value("${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}") String processExtensionSchemaFileName) {
+        @Value(
+            "${activiti.validation.process-extensions-schema:schema/process-extensions-schema.json}"
+        ) String processExtensionSchemaFileName
+    ) {
         return new SchemaProvider(SchemaService.PROCESS_EXTENSION, processExtensionSchemaFileName);
     }
 
     @Bean
     public SchemaProvider connectorModelSchemaProvider(
-        @Value("${activiti.validation.connector-schema:schema/connector-schema.json}") String connectorSchemaFileName) {
+        @Value("${activiti.validation.connector-schema:schema/connector-schema.json}") String connectorSchemaFileName
+    ) {
         return new SchemaProvider(ConnectorModelType.NAME, connectorSchemaFileName);
     }
 
@@ -151,5 +162,11 @@ public class ModelingServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public ProjectDecoratorService projectDecoratorService(List<ProjectDecorator> projectDecorators) {
         return new ProjectDecoratorService(projectDecorators);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public FileContentSanitizer fileContentSanitizer() {
+        return new FileContentSanitizer();
     }
 }

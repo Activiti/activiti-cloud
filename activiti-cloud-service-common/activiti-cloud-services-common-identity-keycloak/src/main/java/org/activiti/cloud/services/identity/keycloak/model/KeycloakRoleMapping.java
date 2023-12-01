@@ -17,52 +17,52 @@ package org.activiti.cloud.services.identity.keycloak.model;
 
 public class KeycloakRoleMapping {
 
-  private boolean clientRole;
-  private boolean composite;
-  private String containerId;
-  private String description;
-  private String id;
+    private boolean clientRole;
+    private boolean composite;
+    private String containerId;
+    private String description;
+    private String id;
     private String name;
 
     public boolean isClientRole() {
-    return clientRole;
-  }
+        return clientRole;
+    }
 
-  public void setClientRole(boolean clientRole) {
-    this.clientRole = clientRole;
-  }
+    public void setClientRole(boolean clientRole) {
+        this.clientRole = clientRole;
+    }
 
-  public boolean isComposite() {
-    return composite;
-  }
+    public boolean isComposite() {
+        return composite;
+    }
 
-  public void setComposite(boolean composite) {
-    this.composite = composite;
-  }
+    public void setComposite(boolean composite) {
+        this.composite = composite;
+    }
 
-  public String getContainerId() {
-    return containerId;
-  }
+    public String getContainerId() {
+        return containerId;
+    }
 
-  public void setContainerId(String containerId) {
-    this.containerId = containerId;
-  }
+    public void setContainerId(String containerId) {
+        this.containerId = containerId;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public String getId() {
-    return id;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

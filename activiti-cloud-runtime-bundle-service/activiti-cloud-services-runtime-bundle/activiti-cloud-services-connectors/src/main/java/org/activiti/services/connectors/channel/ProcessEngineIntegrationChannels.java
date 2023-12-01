@@ -15,19 +15,22 @@
  */
 package org.activiti.services.connectors.channel;
 
-import org.springframework.cloud.stream.annotation.Input;
+import org.activiti.cloud.common.messaging.functional.InputBinding;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface ProcessEngineIntegrationChannels {
-
     String INTEGRATION_RESULTS_CONSUMER = "integrationResultsConsumer";
 
     String INTEGRATION_ERRORS_CONSUMER = "integrationErrorsConsumer";
 
-    @Input(INTEGRATION_RESULTS_CONSUMER)
-    SubscribableChannel integrationResultsConsumer();
+    @InputBinding(INTEGRATION_RESULTS_CONSUMER)
+    default SubscribableChannel integrationResultsConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULTS_CONSUMER).getObject();
+    }
 
-    @Input(INTEGRATION_ERRORS_CONSUMER)
-    SubscribableChannel integrationErrorsConsumer();
-
+    @InputBinding(INTEGRATION_ERRORS_CONSUMER)
+    default SubscribableChannel integrationErrorsConsumer() {
+        return MessageChannels.publishSubscribe(INTEGRATION_ERRORS_CONSUMER).getObject();
+    }
 }

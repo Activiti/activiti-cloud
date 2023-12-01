@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.api.task.model.impl.events;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudTaskCreatedEventImplTest {
 

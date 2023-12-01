@@ -48,21 +48,18 @@ public class ProcessRuntimeSteps {
     }
 
     @Step
-    public CloudProcessInstance startProcess(String processDefinitionName){
-
+    public CloudProcessInstance startProcess(String processDefinitionName) {
         StartProcessPayloadBuilder payload = ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(processDefinitionName)
-                .withName("processInstanceName")
-                .withBusinessKey("businessKey");
+            .start()
+            .withProcessDefinitionKey(processDefinitionName)
+            .withName("processInstanceName")
+            .withBusinessKey("businessKey");
 
-        if(Serenity.sessionVariableCalled("variables") != null){
+        if (Serenity.sessionVariableCalled("variables") != null) {
             payload.withVariable("test-variable-name", "test-variable-value");
         }
 
-        return dirtyContextHandler.dirty(processInstanceApiClient
-            .startProcess(payload.build())
-            .getContent());
+        return dirtyContextHandler.dirty(processInstanceApiClient.startProcess(payload.build()).getContent());
     }
 
     @Step
@@ -71,8 +68,7 @@ public class ProcessRuntimeSteps {
     }
 
     @Step
-    public void suspendProcessInstance(String processInstanceId){
+    public void suspendProcessInstance(String processInstanceId) {
         processInstanceApiClient.suspend(processInstanceId);
     }
-
 }

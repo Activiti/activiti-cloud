@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
-
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Objects;
+import org.activiti.cloud.api.model.shared.CloudRuntimeEntity;
 
 @MappedSuperclass
 public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
@@ -30,15 +29,15 @@ public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
     protected String appVersion;
     protected String serviceType;
 
-    public ActivitiEntityMetadata() {
+    public ActivitiEntityMetadata() {}
 
-    }
-
-    public ActivitiEntityMetadata(String serviceName,
-                                  String serviceFullName,
-                                  String serviceVersion,
-                                  String appName,
-                                  String appVersion) {
+    public ActivitiEntityMetadata(
+        String serviceName,
+        String serviceFullName,
+        String serviceVersion,
+        String appName,
+        String appVersion
+    ) {
         this.serviceName = serviceName;
         this.serviceFullName = serviceFullName;
         this.serviceVersion = serviceVersion;
@@ -112,11 +111,13 @@ public abstract class ActivitiEntityMetadata implements CloudRuntimeEntity {
             return false;
         }
         ActivitiEntityMetadata other = (ActivitiEntityMetadata) obj;
-        return Objects.equals(appName, other.appName) &&
-               Objects.equals(appVersion, other.appVersion) &&
-               Objects.equals(serviceFullName, other.serviceFullName) &&
-               Objects.equals(serviceName, other.serviceName) &&
-               Objects.equals(serviceType, other.serviceType) &&
-               Objects.equals(serviceVersion, other.serviceVersion);
+        return (
+            Objects.equals(appName, other.appName) &&
+            Objects.equals(appVersion, other.appVersion) &&
+            Objects.equals(serviceFullName, other.serviceFullName) &&
+            Objects.equals(serviceName, other.serviceName) &&
+            Objects.equals(serviceType, other.serviceType) &&
+            Objects.equals(serviceVersion, other.serviceVersion)
+        );
     }
 }

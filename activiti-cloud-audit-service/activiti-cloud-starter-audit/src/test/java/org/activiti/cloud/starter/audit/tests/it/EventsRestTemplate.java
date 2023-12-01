@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.audit.tests.it;
 import static org.activiti.test.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Map;
 
 @TestComponent
 public class EventsRestTemplate {
@@ -49,42 +48,40 @@ public class EventsRestTemplate {
     private TestRestTemplate restTemplate;
 
     public ResponseEntity<PagedModel<CloudRuntimeEvent>> executeFindAll() {
-        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT,
-                                                                                                 HttpMethod.GET,
-                                                                                                 identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                 new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
-                                                                                                 });
+        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(
+            RELATIVE_EVENTS_ENDPOINT,
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {}
+        );
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);
         return eventsResponse;
     }
 
     public ResponseEntity<PagedModel<CloudRuntimeEvent>> executeFind(Map<String, Object> filters) {
-
         StringBuilder endPointBuilder = new StringBuilder(RELATIVE_EVENTS_ENDPOINT).append("?search=");
         for (String filter : filters.keySet()) {
-            endPointBuilder.append(filter)
-                    .append(":{")
-                    .append(filter)
-                    .append("}")
-                    .append(",");
+            endPointBuilder.append(filter).append(":{").append(filter).append("}").append(",");
         }
 
-        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(endPointBuilder.toString(),
-                                                                                                 HttpMethod.GET,
-                                                                                                 identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                                 new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {
-                                                                                                 },
-                                                                                                 filters);
+        ResponseEntity<PagedModel<CloudRuntimeEvent>> eventsResponse = restTemplate.exchange(
+            endPointBuilder.toString(),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            new ParameterizedTypeReference<PagedModel<CloudRuntimeEvent>>() {},
+            filters
+        );
         assertThat(eventsResponse).hasStatusCode(HttpStatus.OK);
         return eventsResponse;
     }
 
     public ResponseEntity<CloudRuntimeEvent> executeFindById(String id) {
-        ResponseEntity<CloudRuntimeEvent> responseEntity = restTemplate.exchange(RELATIVE_EVENTS_ENDPOINT + "/" + id,
-                                                                                 HttpMethod.GET,
-                                                                                identityTokenProducer.entityWithAuthorizationHeader(),
-                                                                                 new ParameterizedTypeReference<CloudRuntimeEvent>() {
-                                                                                 });
+        ResponseEntity<CloudRuntimeEvent> responseEntity = restTemplate.exchange(
+            RELATIVE_EVENTS_ENDPOINT + "/" + id,
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            new ParameterizedTypeReference<CloudRuntimeEvent>() {}
+        );
         assertThat(responseEntity).hasStatusCode(HttpStatus.OK);
         return responseEntity;
     }

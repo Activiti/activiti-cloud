@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.modeling.rest.config;
 
+import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.ExtendedPageMetadataConverter;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ModelTypeLinkRelationProvider;
@@ -23,8 +24,8 @@ import org.activiti.cloud.services.modeling.rest.assembler.PagedModelTypeAssembl
 import org.activiti.cloud.services.modeling.rest.assembler.ProjectRepresentationModelAssembler;
 import org.activiti.cloud.services.modeling.rest.assembler.ValidationErrorRepresentationModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -34,12 +35,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 
-import java.util.List;
-
 /**
  * Extended WebMvcConfigurer
  */
-@Configuration
+@AutoConfiguration
 public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
     private final Jackson2ObjectMapperBuilder objectMapperBuilder;
@@ -51,12 +50,13 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.stream()
-                .filter(MappingJackson2HttpMessageConverter.class::isInstance)
-                .filter(converter -> !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter))
-                .map(MappingJackson2HttpMessageConverter.class::cast)
-                .map(MappingJackson2HttpMessageConverter::getObjectMapper)
-                .forEach(objectMapperBuilder::configure);
+        converters
+            .stream()
+            .filter(MappingJackson2HttpMessageConverter.class::isInstance)
+            .filter(converter -> !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter))
+            .map(MappingJackson2HttpMessageConverter.class::cast)
+            .map(MappingJackson2HttpMessageConverter::getObjectMapper)
+            .forEach(objectMapperBuilder::configure);
     }
 
     @Bean
@@ -75,12 +75,12 @@ public class ExtendedWebMvcConfigurer implements WebMvcConfigurer {
     }
 
     @Bean
-    public PagedModelTypeAssembler pagedModelTypeAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
-                                                           @Nullable UriComponents baseUri,
-                                                           ExtendedPageMetadataConverter extendedPageMetadataConverter) {
-        return new PagedModelTypeAssembler(resolver,
-                                           baseUri,
-                                           extendedPageMetadataConverter);
+    public PagedModelTypeAssembler pagedModelTypeAssembler(
+        @Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
+        @Nullable UriComponents baseUri,
+        ExtendedPageMetadataConverter extendedPageMetadataConverter
+    ) {
+        return new PagedModelTypeAssembler(resolver, baseUri, extendedPageMetadataConverter);
     }
 
     @Bean

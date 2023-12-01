@@ -15,56 +15,48 @@
  */
 package org.activiti.cloud.services.modeling.service.api;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelContent;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.modeling.service.ImportedModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Business logic related to {@link Model} entities
  */
 public interface ModelService {
-
     List<Model> getAllModels(Project project);
 
-    Page<Model> getModels(Project project,
-                          ModelType modelType,
-                          Pageable pageable);
+    Page<Model> getModels(Project project, ModelType modelType, Pageable pageable);
 
-    Page<Model> getModelsByName(Project project,
-                                String name,
-                                Pageable pageable);
+    Page<Model> getModelsByName(Project project, String name, Pageable pageable);
 
-    Model buildModel(String type,
-                     String name);
+    Model buildModel(String type, String name);
 
-    Model createModel(Project project,
-                      Model model);
+    Model createModel(Project project, Model model);
 
-    Model updateModel(Model modelToBeUpdated,
-                      Model newModel);
+    Model updateModel(Model modelToBeUpdated, Model newModel);
 
-    Model copyModel(Model modelToBeCopied, Project project);
+    Model copyModel(Model modelToBeCopied, Project project, Map<String, String> identifiersToUpdate);
 
     void deleteModel(Model model);
 
     Optional<Model> findModelById(String modelId);
 
     Optional<FileContent> getModelExtensionsFileContent(Model model);
-
-    void cleanModelIdList();
 
     Optional<FileContent> getModelDiagramFile(String modelId);
 
@@ -74,88 +66,60 @@ public interface ModelService {
 
     FileContent exportModel(Model model);
 
-    Model updateModelContent(Model modelToBeUpdate,
-                             FileContent fileContent);
+    Model updateModelContent(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
-    FileContent overrideModelContentId(Model model,
-                                       FileContent fileContent);
+    FileContent overrideModelContentId(Model model, FileContent fileContent, Map<String, String> identifiersToUpdate);
 
-    Optional<ModelContent> createModelContentFromModel(Model model,
-                                                       FileContent fileContent);
+    Optional<ModelContent> createModelContentFromModel(Model model, FileContent fileContent);
 
-    Model importSingleModel(Project project,
-                            ModelType modelType,
-                            FileContent fileContent);
+    Model importSingleModel(Project project, ModelType modelType, FileContent fileContent);
 
-    Model importModel(Project project,
-                      ModelType modelType,
-                      FileContent fileContent);
+    ImportedModel importModel(Project project, ModelType modelType, FileContent fileContent);
 
-    Model importModelFromContent(Project project,
-                                 ModelType modelType,
-                                 FileContent fileContent);
+    ImportedModel importModelFromContent(Project project, ModelType modelType, FileContent fileContent);
 
-    <T extends Task> List<T> getTasksBy(Project project,
-                                        ModelType processModelType,
-                                        @NonNull Class<T> clazz);
+    <T extends Task> List<T> getTasksBy(Project project, ModelType processModelType, @NonNull Class<T> clazz);
 
     List<Process> getProcessesBy(Project project, ModelType type);
 
-    Model convertContentToModel(ModelType modelType,
-                                FileContent fileContent);
+    Model convertContentToModel(ModelType modelType, FileContent fileContent);
 
-    Model createModelFromContent(ModelType modelType,
-                                 FileContent fileContent);
+    Model createModelFromContent(ModelType modelType, FileContent fileContent);
 
-    Optional<String> contentFilenameToModelName(String filename,
-                                                ModelType modelType);
+    Optional<String> contentFilenameToModelName(String filename, ModelType modelType);
 
-    void validateModelContent(Model model,
-                              ValidationContext validationContext);
+    void validateModelContent(Model model, ValidationContext validationContext);
 
-    void validateModelContent(Model model,
-                              Project project);
+    void validateModelContent(Model model, Project project);
 
-    void validateModelContent(Model model,
-                              FileContent fileContent);
+    void validateModelContent(Model model, FileContent fileContent);
 
-    void validateModelContent(Model model,
-                              FileContent fileContent,
-                              boolean validateUsage);
+    void validateModelContent(Model model, FileContent fileContent, boolean validateUsage);
 
-    void validateModelContent(Model model,
-                              FileContent fileContent,
-                              ValidationContext validationContext);
+    void validateModelContent(Model model, FileContent fileContent, ValidationContext validationContext);
 
-    void validateModelContent(Model model,
-                              FileContent fileContent,
-                              Project project);
+    void validateModelContent(Model model, FileContent fileContent, Project project);
 
-    void validateModelContent(Model model,
-                              FileContent fileContent,
-                              Project project,
-                              boolean validateUsage);
+    void validateModelContent(Model model, FileContent fileContent, Project project, boolean validateUsage);
 
-    void validateModelExtensions(Model model,
-                                 ValidationContext validationContext);
+    void validateModelExtensions(Model model, ValidationContext validationContext);
 
-    void validateModelExtensions(Model model,
-                                 Project project);
+    void validateModelExtensions(Model model, Project project);
 
-    void validateModelExtensions(Model model,
-                                 FileContent fileContent);
+    void validateModelExtensions(Model model, FileContent fileContent);
 
-    void validateModelExtensions(Model model,
-                                 FileContent fileContent,
-                                 ValidationContext validationContext);
+    void validateModelExtensions(Model model, FileContent fileContent, ValidationContext validationContext);
 
-    void validateModelExtensions(Model model,
-                                 FileContent fileContent,
-                                 Project project);
+    void validateModelExtensions(Model model, FileContent fileContent, Project project);
 
-    Page<Model> getGlobalModels(ModelType modelType,
-                                boolean includeOrphans,
-                                Pageable pageable);
+    Page<Model> getGlobalModels(ModelType modelType, boolean includeOrphans, Pageable pageable);
+
+    public List<ModelValidationError> getModelValidationErrors(Model model, ValidationContext validationContext);
+
+    public List<ModelValidationError> getModelExtensionValidationErrors(
+        Model model,
+        ValidationContext validationContext
+    );
 
     public List<ModelUpdateListener> findModelUpdateListeners(String modelType);
 

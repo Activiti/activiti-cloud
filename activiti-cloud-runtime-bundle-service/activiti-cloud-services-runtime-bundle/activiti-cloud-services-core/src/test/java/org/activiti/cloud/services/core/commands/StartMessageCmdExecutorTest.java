@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
-
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.junit.jupiter.api.Test;
@@ -39,9 +38,7 @@ public class StartMessageCmdExecutorTest {
 
     @Test
     public void signalProcessInstancesCmdExecutorTest() {
-        StartMessagePayload payload = new StartMessagePayload("messageName",
-                                                              "businessKey",
-                                                              Collections.emptyMap());
+        StartMessagePayload payload = new StartMessagePayload("messageName", "businessKey", Collections.emptyMap());
 
         assertThat(subject.getHandledType()).isEqualTo(StartMessagePayload.class.getName());
 

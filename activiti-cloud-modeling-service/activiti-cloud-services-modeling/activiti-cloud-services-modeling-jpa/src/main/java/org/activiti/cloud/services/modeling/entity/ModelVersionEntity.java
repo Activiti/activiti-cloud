@@ -15,26 +15,24 @@
  */
 package org.activiti.cloud.services.modeling.entity;
 
-import java.util.Map;
-import java.util.Optional;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
-import javax.persistence.Transient;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.activiti.cloud.modeling.api.process.Extensions;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Transient;
+import java.util.Map;
+import java.util.Optional;
 import org.activiti.cloud.services.modeling.jpa.audit.AuditableEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionEntity;
 import org.activiti.cloud.services.modeling.jpa.version.VersionIdentifier;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Model version entity
@@ -49,7 +47,7 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
     private VersionIdentifier versionIdentifier;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = false)
     @MapsId("versionedEntityId")
     private ModelEntity versionedEntity;
 
@@ -61,11 +59,9 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
 
     @Column(columnDefinition = "TEXT")
     @Convert(converter = ExtensionsJsonConverter.class)
-    private Map<String,Object> extensions;
+    private Map<String, Object> extensions;
 
-    public ModelVersionEntity() {
-
-    }
+    public ModelVersionEntity() {}
 
     public ModelVersionEntity(ModelVersionEntity version) {
         setContent(version.getContent());
@@ -107,19 +103,17 @@ public class ModelVersionEntity extends AuditableEntity<String> implements Versi
         this.content = content;
     }
 
-    public Map<String,Object> getExtensions() {
+    public Map<String, Object> getExtensions() {
         return extensions;
     }
 
-    public void setExtensions(Map<String,Object> extensions) {
+    public void setExtensions(Map<String, Object> extensions) {
         this.extensions = extensions;
     }
 
     @Transient
     @Override
     public String getVersion() {
-        return Optional.ofNullable(versionIdentifier)
-                .map(VersionIdentifier::getVersion)
-                .orElse(null);
+        return Optional.ofNullable(versionIdentifier).map(VersionIdentifier::getVersion).orElse(null);
     }
 }

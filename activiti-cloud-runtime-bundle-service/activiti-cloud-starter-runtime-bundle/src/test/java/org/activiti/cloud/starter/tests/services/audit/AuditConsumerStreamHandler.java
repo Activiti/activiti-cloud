@@ -17,31 +17,39 @@ package org.activiti.cloud.starter.tests.services.audit;
 
 import static org.activiti.cloud.starter.tests.services.audit.AuditProducerIT.AUDIT_PRODUCER_IT;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.activiti.cloud.common.messaging.functional.FunctionBinding;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.messaging.handler.annotation.Headers;
-
-import java.util.*;
+import org.springframework.messaging.Message;
 
 @Profile(AUDIT_PRODUCER_IT)
-@TestComponent
-@EnableBinding(AuditConsumer.class)
+@TestConfiguration
+@Import(AuditConsumerConfiguration.class)
 public class AuditConsumerStreamHandler {
 
     private volatile Map<String, Object> receivedHeaders = new HashMap<>();
 
-    private volatile List<CloudRuntimeEvent<?,?>> latestReceivedEvents = new ArrayList<>();
-    private volatile List<CloudRuntimeEvent<?,?>> allReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> latestReceivedEvents = new ArrayList<>();
+    private volatile List<CloudRuntimeEvent<?, ?>> allReceivedEvents = new ArrayList<>();
 
-    @StreamListener(AuditConsumer.AUDIT_CONSUMER)
-    public void receive(@Headers Map<String, Object> headers, CloudRuntimeEvent<?,?> ... events) {
-        latestReceivedEvents = new ArrayList<>(Arrays.asList(events));
-        allReceivedEvents = new ArrayList<>(allReceivedEvents);
-        allReceivedEvents.addAll(latestReceivedEvents);
-        receivedHeaders = new LinkedHashMap<>(headers);
+    @FunctionBinding(input = AuditConsumer.AUDIT_CONSUMER)
+    @Bean
+    public Consumer<Message<List<CloudRuntimeEvent<?, ?>>>> receive() {
+        return message -> {
+            latestReceivedEvents = new ArrayList<>(message.getPayload());
+            allReceivedEvents = new ArrayList<>(allReceivedEvents);
+            allReceivedEvents.addAll(latestReceivedEvents);
+            receivedHeaders = new LinkedHashMap<>(message.getHeaders());
+        };
     }
 
     public List<CloudRuntimeEvent<?, ?>> getLatestReceivedEvents() {

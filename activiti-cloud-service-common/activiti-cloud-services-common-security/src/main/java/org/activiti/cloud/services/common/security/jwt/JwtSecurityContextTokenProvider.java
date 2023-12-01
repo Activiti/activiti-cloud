@@ -26,11 +26,12 @@ public class JwtSecurityContextTokenProvider implements SecurityContextTokenProv
 
     @Override
     public Optional<String> getCurrentToken() {
-        return Optional.ofNullable(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .map(Authentication::getPrincipal)
-                .filter(Jwt.class::isInstance)
-                .map(Jwt.class::cast)
-                .map(Jwt::getTokenValue);
+        return Optional
+            .ofNullable(SecurityContextHolder.getContext())
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getPrincipal)
+            .filter(Jwt.class::isInstance)
+            .map(Jwt.class::cast)
+            .map(Jwt::getTokenValue);
     }
 }

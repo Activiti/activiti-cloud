@@ -17,14 +17,13 @@ package org.activiti.cloud.api.process.model.impl.events;
 
 import java.util.List;
 import java.util.Objects;
-
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.api.process.model.events.IntegrationEvent;
-import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 
-public class CloudIntegrationErrorReceivedEventImpl extends CloudRuntimeEventImpl<IntegrationContext, IntegrationEvent.IntegrationEvents>
-        implements CloudIntegrationErrorReceivedEvent {
+public class CloudIntegrationErrorReceivedEventImpl
+    extends CloudIntegrationEventImpl
+    implements CloudIntegrationErrorReceivedEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,25 +32,32 @@ public class CloudIntegrationErrorReceivedEventImpl extends CloudRuntimeEventImp
     private String errorClassName;
     private List<StackTraceElement> stackTraceElements;
 
-    public CloudIntegrationErrorReceivedEventImpl() {
+    public CloudIntegrationErrorReceivedEventImpl() {}
+
+    public CloudIntegrationErrorReceivedEventImpl(
+        IntegrationContext integrationContext,
+        String errorCode,
+        String errorMessage,
+        String errorClassName,
+        List<StackTraceElement> stackTraceElements
+    ) {
+        super(integrationContext);
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.errorClassName = errorClassName;
+        this.stackTraceElements = stackTraceElements;
     }
 
-    public CloudIntegrationErrorReceivedEventImpl(IntegrationContext integrationContext,
-                                                  String errorCode,
-                                                  String errorMessage,
-                                                  String errorClassName,
-                                                  List<StackTraceElement> stackTraceElements) {
-        super(integrationContext);
-        if (getEntity() != null) {
-            setEntityId(getEntity().getId());
-        }
-
-        setProcessInstanceId(integrationContext.getProcessInstanceId());
-        setProcessDefinitionId(integrationContext.getProcessDefinitionId());
-        setProcessDefinitionVersion(integrationContext.getProcessDefinitionVersion());
-        setProcessDefinitionKey(integrationContext.getProcessDefinitionKey());
-        setBusinessKey(integrationContext.getBusinessKey());
-
+    public CloudIntegrationErrorReceivedEventImpl(
+        String id,
+        Long timestamp,
+        IntegrationContext integrationContext,
+        String errorCode,
+        String errorMessage,
+        String errorClassName,
+        List<StackTraceElement> stackTraceElements
+    ) {
+        super(id, timestamp, integrationContext);
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.errorClassName = errorClassName;
@@ -103,29 +109,34 @@ public class CloudIntegrationErrorReceivedEventImpl extends CloudRuntimeEventImp
             return false;
         }
         CloudIntegrationErrorReceivedEventImpl other = (CloudIntegrationErrorReceivedEventImpl) obj;
-        return Objects.equals(errorClassName, other.errorClassName) &&
-               Objects.equals(errorCode, other.errorCode) &&
-               Objects.equals(errorMessage, other.errorMessage) &&
-               Objects.equals(stackTraceElements, other.stackTraceElements);
+        return (
+            Objects.equals(errorClassName, other.errorClassName) &&
+            Objects.equals(errorCode, other.errorCode) &&
+            Objects.equals(errorMessage, other.errorMessage) &&
+            Objects.equals(stackTraceElements, other.stackTraceElements)
+        );
     }
 
     @Override
     public String toString() {
         final int maxLen = 10;
         StringBuilder builder = new StringBuilder();
-        builder.append("CloudIntegrationErrorReceivedEventImpl [errorCode=")
-               .append(errorCode)
-               .append(", errorMessage=")
-               .append(errorMessage)
-               .append(", errorClassName=")
-               .append(errorClassName)
-               .append(", stackTraceElements=")
-               .append(stackTraceElements != null ? stackTraceElements.subList(0,
-                                                                               Math.min(stackTraceElements.size(),
-                                                                                        maxLen)) : null)
-               .append(", toString()=")
-               .append(super.toString())
-               .append("]");
+        builder
+            .append("CloudIntegrationErrorReceivedEventImpl [errorCode=")
+            .append(errorCode)
+            .append(", errorMessage=")
+            .append(errorMessage)
+            .append(", errorClassName=")
+            .append(errorClassName)
+            .append(", stackTraceElements=")
+            .append(
+                stackTraceElements != null
+                    ? stackTraceElements.subList(0, Math.min(stackTraceElements.size(), maxLen))
+                    : null
+            )
+            .append(", toString()=")
+            .append(super.toString())
+            .append("]");
         return builder.toString();
     }
 }

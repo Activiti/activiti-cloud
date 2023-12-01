@@ -15,6 +15,13 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+
+import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.activiti.api.process.model.events.IntegrationEvent.IntegrationEvents;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity;
@@ -22,10 +29,7 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationC
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
@@ -45,7 +49,7 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
             entity.setErrorCode(integrationEvent.getErrorCode());
             entity.setErrorMessage(integrationEvent.getErrorMessage());
             entity.setErrorClassName(integrationEvent.getErrorClassName());
-            entity.setStackTraceElements(integrationEvent.getStackTraceElements());
+            entity.setStackTraceElements(addFullErrorMessageAsFirstStackTraceElement(integrationEvent));
             entity.setInBoundVariables(integrationEvent.getEntity().getInBoundVariables());
             entity.setOutBoundVariables(integrationEvent.getEntity().getOutBoundVariables());
 
@@ -56,6 +60,31 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
 
             entityManager.persist(serviceTaskEntity);
         });
+    }
+
+    @NotNull
+    private List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(
+        CloudIntegrationErrorReceivedEvent integrationEvent
+    ) {
+        StackTraceElement newTopStackTraceElement = getNewTopStackTraceElement(integrationEvent);
+        List<StackTraceElement> stackTraceElements = new ArrayList<>(List.of(newTopStackTraceElement));
+        stackTraceElements.addAll(integrationEvent.getStackTraceElements());
+        return stackTraceElements;
+    }
+
+    @NotNull
+    private StackTraceElement getNewTopStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
+        if (isNotEmpty(integrationEvent.getStackTraceElements())) {
+            StackTraceElement firstElement = integrationEvent.getStackTraceElements().get(0);
+            return new StackTraceElement(
+                integrationEvent.getErrorMessage(),
+                "",
+                firstElement.getFileName(),
+                firstElement.getLineNumber()
+            );
+        } else {
+            return new StackTraceElement(integrationEvent.getErrorMessage(), "", "", 0);
+        }
     }
 
     @Override

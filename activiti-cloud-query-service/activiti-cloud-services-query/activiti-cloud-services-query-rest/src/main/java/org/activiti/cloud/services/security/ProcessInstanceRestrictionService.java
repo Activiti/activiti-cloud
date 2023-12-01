@@ -33,27 +33,30 @@ public class ProcessInstanceRestrictionService {
 
     private SecurityManager securityManager;
 
-    public ProcessInstanceRestrictionService(SecurityPoliciesManager securityPoliciesManager,
-                                             ProcessInstanceFilter processInstanceFilter,
-                                             ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
-                                             SecurityManager securityManager) {
+    public ProcessInstanceRestrictionService(
+        SecurityPoliciesManager securityPoliciesManager,
+        ProcessInstanceFilter processInstanceFilter,
+        ProcessDefinitionKeyBasedRestrictionBuilder restrictionBuilder,
+        SecurityManager securityManager
+    ) {
         this.securityPoliciesManager = securityPoliciesManager;
         this.processInstanceFilter = processInstanceFilter;
         this.restrictionBuilder = restrictionBuilder;
         this.securityManager = securityManager;
     }
 
-    public Predicate restrictProcessInstanceQuery(Predicate predicate,
-                                                  SecurityPolicyAccess securityPolicyAccess) {
+    public Predicate restrictProcessInstanceQuery(Predicate predicate, SecurityPolicyAccess securityPolicyAccess) {
         Predicate initiatorPredicate = applyInvolvedRestriction(predicate);
 
         if (!securityPoliciesManager.arePoliciesDefined()) {
             return initiatorPredicate;
         }
 
-        return restrictionBuilder.applyProcessDefinitionKeyFilter(initiatorPredicate,
-                                                 securityPolicyAccess,
-                                                 processInstanceFilter);
+        return restrictionBuilder.applyProcessDefinitionKeyFilter(
+            initiatorPredicate,
+            securityPolicyAccess,
+            processInstanceFilter
+        );
     }
 
     private Predicate applyInvolvedRestriction(Predicate predicate) {
@@ -64,14 +67,13 @@ public class ProcessInstanceRestrictionService {
         }
 
         StringPath initiatorPath = QProcessInstanceEntity.processInstanceEntity.initiator;
-        BooleanExpression assigneeExpression = QProcessInstanceEntity.processInstanceEntity
-                                                                      .tasks.any()
-                                                                      .assignee.eq(userId);
-        BooleanExpression candidateExpression = QProcessInstanceEntity.processInstanceEntity
-                                                                      .tasks.any()
-                                                                      .taskCandidateUsers.any()
-                                                                      .userId.eq(userId);
+        BooleanExpression assigneeExpression = QProcessInstanceEntity.processInstanceEntity.tasks
+            .any()
+            .assignee.eq(userId);
+        BooleanExpression candidateExpression = QProcessInstanceEntity.processInstanceEntity.tasks
+            .any()
+            .taskCandidateUsers.any()
+            .userId.eq(userId);
         return initiatorPath.eq(userId).or(assigneeExpression).or(candidateExpression).and(predicate);
     }
-
 }

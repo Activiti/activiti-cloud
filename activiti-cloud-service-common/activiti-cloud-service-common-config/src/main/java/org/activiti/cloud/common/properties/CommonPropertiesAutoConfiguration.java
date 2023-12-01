@@ -15,10 +15,9 @@
  */
 package org.activiti.cloud.common.properties;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 
-@Configuration
+@AutoConfiguration
 @PropertySource("classpath:conf/common-configuration.properties")
-public class CommonPropertiesAutoConfiguration {
-}
+public class CommonPropertiesAutoConfiguration {}

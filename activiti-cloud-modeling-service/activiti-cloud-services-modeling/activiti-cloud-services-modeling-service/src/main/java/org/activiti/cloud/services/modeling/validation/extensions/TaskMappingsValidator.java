@@ -18,7 +18,6 @@ package org.activiti.cloud.services.modeling.validation.extensions;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
 import org.activiti.cloud.modeling.api.ModelValidationError;
 import org.activiti.cloud.modeling.api.ModelValidationErrorProducer;
 import org.activiti.cloud.modeling.api.ValidationContext;
@@ -31,7 +30,6 @@ import org.activiti.cloud.modeling.api.process.Constant;
  * implemented in {@link ModelExtensionsValidator}
  */
 public interface TaskMappingsValidator extends ModelValidationErrorProducer {
-
     /**
      * Validate the given list of task mappings.
      * @param taskMappings the list of task mappings to validate
@@ -39,7 +37,9 @@ public interface TaskMappingsValidator extends ModelValidationErrorProducer {
      * @param taskConstants the constants associated to the task
      * @return the stream of validation errors
      */
-    Stream<ModelValidationError> validateTaskMappings(List<MappingModel> taskMappings,
-                                                      Map<String, Constant> taskConstants,
-                                                      ValidationContext validationContext);
+    Stream<ModelValidationError> validateTaskMappings(
+        List<MappingModel> taskMappings,
+        Map<String, Constant> taskConstants,
+        ValidationContext validationContext
+    );
 }

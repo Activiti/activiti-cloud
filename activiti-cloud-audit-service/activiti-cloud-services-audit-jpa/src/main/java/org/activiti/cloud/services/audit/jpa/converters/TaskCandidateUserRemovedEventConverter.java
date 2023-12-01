@@ -43,8 +43,10 @@ public class TaskCandidateUserRemovedEventConverter extends BaseEventToEntityCon
     protected CloudRuntimeEventImpl<?, ?> createAPIEvent(AuditEventEntity auditEventEntity) {
         TaskCandidateUserRemovedEventEntity eventEntity = (TaskCandidateUserRemovedEventEntity) auditEventEntity;
 
-        return new CloudTaskCandidateUserRemovedEventImpl(eventEntity.getEventId(),
-                                                          eventEntity.getTimestamp(),
-                                                          eventEntity.getCandidateUser());
+        return new CloudTaskCandidateUserRemovedEventImpl(
+            eventEntity.getEventId(),
+            eventEntity.getTimestamp(),
+            eventEntity.getCandidateUser()
+        );
     }
 }

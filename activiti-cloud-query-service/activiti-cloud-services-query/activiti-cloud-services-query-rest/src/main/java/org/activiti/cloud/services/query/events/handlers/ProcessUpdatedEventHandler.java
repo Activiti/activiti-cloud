@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Date;
+import java.util.Optional;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessUpdatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
-import java.util.Date;
-import java.util.Optional;
 
 public class ProcessUpdatedEventHandler implements QueryEventHandler {
 
@@ -40,9 +39,11 @@ public class ProcessUpdatedEventHandler implements QueryEventHandler {
 
         ProcessInstance eventProcessInstance = updatedEvent.getEntity();
 
-        ProcessInstanceEntity processInstanceEntity = Optional.ofNullable(entityManager.find(ProcessInstanceEntity.class,
-                                                                                             eventProcessInstance.getId()))
-                                                              .orElseThrow(() -> new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId()));
+        ProcessInstanceEntity processInstanceEntity = Optional
+            .ofNullable(entityManager.find(ProcessInstanceEntity.class, eventProcessInstance.getId()))
+            .orElseThrow(() ->
+                new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId())
+            );
 
         processInstanceEntity.setBusinessKey(eventProcessInstance.getBusinessKey());
         processInstanceEntity.setName(eventProcessInstance.getName());

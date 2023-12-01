@@ -24,9 +24,9 @@ import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 @EnableRuntimeFeignContext
 public class TaskQueryAdminSteps {
@@ -43,41 +43,38 @@ public class TaskQueryAdminSteps {
         assertThat(baseService.isServiceUp()).isTrue();
     }
 
-
     @Step
-    public PagedModel<CloudTask> getAllTasks(){
+    public PagedModel<CloudTask> getAllTasks() {
         return taskQueryAdminService.getTasks();
     }
 
     @Step
-    public CloudTask getTaskById(String id){
+    public CloudTask getTaskById(String id) {
         return taskQueryAdminService.getTask(id);
     }
 
-
     @Step
-    public PagedModel<CloudTask> getRootTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getRootTasksByProcessInstance(String processInstanceId) {
         return taskQueryAdminService.getRootTasksByProcessInstance(processInstanceId);
     }
 
     @Step
-    public PagedModel<CloudTask> getStandaloneTasks(){
+    public PagedModel<CloudTask> getStandaloneTasks() {
         return taskQueryAdminService.getStandaloneTasks();
     }
 
     @Step
-    public PagedModel<CloudTask> getNonStandaloneTasks(){
+    public PagedModel<CloudTask> getNonStandaloneTasks() {
         return taskQueryAdminService.getNonStandaloneTasks();
     }
 
     @Step
-    public CollectionModel<EntityModel<CloudTask>> deleteTasks(){
+    public CollectionModel<EntityModel<CloudTask>> deleteTasks() {
         return taskQueryAdminService.deleteTasks();
     }
 
     @Step
-    public PagedModel<CloudTask> getTasksByProcessInstance(String processInstanceId){
+    public PagedModel<CloudTask> getTasksByProcessInstance(String processInstanceId) {
         return taskQueryAdminService.getTasksByProcessInstance(processInstanceId);
     }
-
 }

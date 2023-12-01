@@ -1,0 +1,2 @@
+org.activiti.cloud.services.job.executor.JobExecutorChannelPropertiesAutoConfiguration
+org.activiti.cloud.services.job.executor.MessageBasedJobManagerAutoConfiguration

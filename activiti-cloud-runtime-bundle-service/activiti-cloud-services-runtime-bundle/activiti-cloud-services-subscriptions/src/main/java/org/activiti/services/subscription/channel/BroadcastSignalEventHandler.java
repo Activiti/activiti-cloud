@@ -15,11 +15,14 @@
  */
 package org.activiti.services.subscription.channel;
 
+import java.util.function.Consumer;
 import org.activiti.api.process.model.payloads.SignalPayload;
+import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.RuntimeService;
-import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
-public class BroadcastSignalEventHandler {
+public class BroadcastSignalEventHandler implements Consumer<SignalPayload> {
 
     private final RuntimeService runtimeService;
 
@@ -27,13 +30,17 @@ public class BroadcastSignalEventHandler {
         this.runtimeService = runtimeService;
     }
 
-    @StreamListener(ProcessEngineSignalChannels.SIGNAL_CONSUMER)
-    public void receive(SignalPayload signalPayload) {
+    @Retryable(
+        value = ActivitiOptimisticLockingException.class,
+        maxAttemptsExpression = "${activiti.cloud.subscription.retry.max-attempts:3}",
+        backoff = @Backoff(delayExpression = "${activiti.cloud.subscription.retry.backoff.delay:0}")
+    )
+    @Override
+    public void accept(SignalPayload signalPayload) {
         if ((signalPayload.getVariables() == null) || (signalPayload.getVariables().isEmpty())) {
             runtimeService.signalEventReceived(signalPayload.getName());
         } else {
-            runtimeService.signalEventReceived(signalPayload.getName(),
-                                               signalPayload.getVariables());
+            runtimeService.signalEventReceived(signalPayload.getName(), signalPayload.getVariables());
         }
     }
 }

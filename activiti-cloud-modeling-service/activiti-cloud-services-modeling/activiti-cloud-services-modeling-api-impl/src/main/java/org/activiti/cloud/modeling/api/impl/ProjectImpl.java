@@ -15,13 +15,13 @@
  */
 package org.activiti.cloud.modeling.api.impl;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.services.auditable.AbstractAuditable;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Implementation for {@link Project}
@@ -37,18 +37,18 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Schema(description = "The name of the project")
     private String name;
 
+    @Schema(description = "The display name of the project")
+    private String displayName;
+
     @Schema(description = "The description of the project")
     private String description;
 
     @Schema(description = "The version of the project")
     private String version;
 
-    public ProjectImpl() {
+    public ProjectImpl() {}
 
-    }
-
-    public ProjectImpl(String id,
-                       String name) {
+    public ProjectImpl(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -71,6 +71,16 @@ public class ProjectImpl extends AbstractAuditable<String> implements Project<St
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

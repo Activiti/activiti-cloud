@@ -16,7 +16,8 @@
 package org.activiti.cloud.identity.exceptions;
 
 public class IdentityInvalidUserException extends IdentityException {
+
     public IdentityInvalidUserException(String username) {
-        super("user {"+ username + "} is invalid or doesn't exist");
+        super("user {" + username + "} is invalid or doesn't exist");
     }
 }

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
@@ -32,10 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 public interface TaskController {
-
     @GetMapping("/v1/tasks")
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
@@ -50,12 +49,13 @@ public interface TaskController {
     EntityModel<CloudTask> releaseTask(@PathVariable(value = "taskId") String taskId);
 
     @PostMapping(value = "/v1/tasks/{taskId}/complete", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudTask> completeTask(@PathVariable(value = "taskId") String taskId,
-        @RequestBody CompleteTaskPayload completeTaskPayload);
+    EntityModel<CloudTask> completeTask(
+        @PathVariable(value = "taskId") String taskId,
+        @RequestBody CompleteTaskPayload completeTaskPayload
+    );
 
     @PostMapping(value = "/v1/tasks/{taskId}/save", consumes = APPLICATION_JSON_VALUE)
-    void saveTask(@PathVariable(value = "taskId") String taskId,
-        @RequestBody SaveTaskPayload saveTaskPayload);
+    void saveTask(@PathVariable(value = "taskId") String taskId, @RequestBody SaveTaskPayload saveTaskPayload);
 
     @DeleteMapping(value = "/v1/tasks/{taskId}")
     EntityModel<CloudTask> deleteTask(@PathVariable(value = "taskId") String taskId);
@@ -64,14 +64,18 @@ public interface TaskController {
     EntityModel<CloudTask> createNewTask(@RequestBody CreateTaskPayload createTaskPayload);
 
     @PutMapping(value = "/v1/tasks/{taskId}", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudTask> updateTask(@PathVariable(value = "taskId") String taskId,
-        @RequestBody UpdateTaskPayload updateTaskPayload);
+    EntityModel<CloudTask> updateTask(
+        @PathVariable(value = "taskId") String taskId,
+        @RequestBody UpdateTaskPayload updateTaskPayload
+    );
 
     @GetMapping(value = "/v1/tasks/{taskId}/subtasks")
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getSubtasks(Pageable pageable, @PathVariable(value = "taskId") String taskId);
 
     @PostMapping(value = "/v1/tasks/{taskId}/assign", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudTask> assign(@PathVariable("taskId") String taskId,
-                                  @RequestBody AssignTaskPayload assignTaskPayload);
+    EntityModel<CloudTask> assign(
+        @PathVariable("taskId") String taskId,
+        @RequestBody AssignTaskPayload assignTaskPayload
+    );
 }

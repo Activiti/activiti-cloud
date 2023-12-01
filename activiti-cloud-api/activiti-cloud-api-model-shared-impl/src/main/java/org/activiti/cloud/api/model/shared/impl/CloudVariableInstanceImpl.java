@@ -26,8 +26,7 @@ public class CloudVariableInstanceImpl<T> extends CloudRuntimeEntityImpl impleme
     private String taskId;
     private T value;
 
-    public CloudVariableInstanceImpl() {
-    }
+    public CloudVariableInstanceImpl() {}
 
     public CloudVariableInstanceImpl(VariableInstance variableInstance) {
         name = variableInstance.getName();

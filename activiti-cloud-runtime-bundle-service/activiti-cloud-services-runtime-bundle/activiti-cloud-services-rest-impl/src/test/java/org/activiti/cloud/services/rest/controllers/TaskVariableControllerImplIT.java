@@ -15,21 +15,38 @@
  */
 package org.activiti.cloud.services.rest.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.UUID;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
+import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
+import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
+import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.assemblers.TaskVariableInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,30 +61,23 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(TaskVariableControllerImpl.class)
-@EnableSpringDataWebSupport()
+@EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({CommonModelAutoConfiguration.class,
+@Import(
+    {
+        CommonModelAutoConfiguration.class,
         TaskModelAutoConfiguration.class,
         RuntimeBundleProperties.class,
         CloudEventsAutoConfiguration.class,
+        ProcessEngineChannelsConfiguration.class,
         ActivitiCoreCommonUtilAutoConfiguration.class,
         ProcessExtensionsAutoConfiguration.class,
-        ServicesRestWebMvcAutoConfiguration.class})
-public class TaskVariableControllerImplIT {
+        ServicesRestWebMvcAutoConfiguration.class,
+        StreamConfig.class,
+    }
+)
+class TaskVariableControllerImplIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -87,17 +97,26 @@ public class TaskVariableControllerImplIT {
     @SpyBean
     private CollectionModelAssembler resourcesAssembler;
 
-    @MockBean
+    @Autowired
     private ProcessEngineChannels processEngineChannels;
 
     @MockBean
     private CloudProcessDeployedProducer processDeployedProducer;
 
+    @MockBean
+    private SecurityContextPrincipalProvider securityContextPrincipalProvider;
+
+    @MockBean
+    private RuntimeService runtimeService;
+
+    @MockBean
+    private PrincipalIdentityProvider principalIdentityProvider;
+
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         //this assertion is not really necessary. It's only here to remove warning
         //telling that resourcesAssembler is never used. Even if we are not directly
         //using it in the test we need to to declare it as @SpyBean so it get inject
@@ -109,44 +128,67 @@ public class TaskVariableControllerImplIT {
     }
 
     @Test
-    public void getVariables() throws Exception {
-        VariableInstanceImpl<String> name = new VariableInstanceImpl<>("name",
-                                                                       String.class.getName(),
-                                                                       "Paul",
-                                                                       PROCESS_INSTANCE_ID, TASK_ID);
-        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>("age",
-                                                                       Integer.class.getName(),
-                                                                       12,
-                                                                       PROCESS_INSTANCE_ID, TASK_ID);
-        given(taskRuntime.variables(any())).willReturn(Arrays.asList(name,
-                                                                     age));
-        this.mockMvc.perform(get("/v1/tasks/{taskId}/variables",
-                                 TASK_ID).accept(MediaTypes.HAL_JSON_VALUE)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk());
+    void getVariables() throws Exception {
+        VariableInstanceImpl<String> name = new VariableInstanceImpl<>(
+            "name",
+            String.class.getName(),
+            "Paul",
+            PROCESS_INSTANCE_ID,
+            TASK_ID
+        );
+        VariableInstanceImpl<Integer> age = new VariableInstanceImpl<>(
+            "age",
+            Integer.class.getName(),
+            12,
+            PROCESS_INSTANCE_ID,
+            TASK_ID
+        );
+        given(taskRuntime.variables(any())).willReturn(Arrays.asList(name, age));
+        this.mockMvc.perform(
+                get("/v1/tasks/{taskId}/variables", TASK_ID)
+                    .accept(MediaTypes.HAL_JSON_VALUE)
+                    .contentType(APPLICATION_JSON)
+            )
+            .andExpect(status().isOk());
     }
 
-
     @Test
-    public void createVariable() throws Exception {
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/variables/",
-                                  TASK_ID).contentType(MediaType.APPLICATION_JSON).content(
-                mapper.writeValueAsString(TaskPayloadBuilder.createVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
-                .andExpect(status().isOk());
+    void createVariable() throws Exception {
+        this.mockMvc.perform(
+                post("/v1/tasks/{taskId}/variables", TASK_ID)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder
+                                .createVariable()
+                                .withTaskId(TASK_ID)
+                                .withVariable("name", "Alice")
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
 
         verify(taskRuntime).createVariable(any());
     }
 
     @Test
-    public void updateVariable() throws Exception {
+    void updateVariable() throws Exception {
         //WHEN
-        this.mockMvc.perform(put("/v1/tasks/{taskId}/variables/{variableName}",
-                                  TASK_ID,
-                                 "name").contentType(MediaType.APPLICATION_JSON).content(
-                mapper.writeValueAsString(TaskPayloadBuilder.updateVariable().withTaskId(TASK_ID)
-                                          .withVariable("name","Alice").build())))
-                .andExpect(status().isOk());
+        this.mockMvc.perform(
+                put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        mapper.writeValueAsString(
+                            TaskPayloadBuilder
+                                .updateVariable()
+                                .withTaskId(TASK_ID)
+                                .withVariable("name", "Alice")
+                                .build()
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
 
         verify(taskRuntime).updateVariable(any());
     }

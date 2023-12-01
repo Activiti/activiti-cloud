@@ -17,52 +17,72 @@ package org.activiti.cloud.services.audit.jpa.controllers.csv;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvCustomBindByName;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 
 public class CsvLogEntry implements CloudRuntimeEvent {
 
     @CsvBindByName
     private String time;
+
     @CsvBindByName
     private Integer sequenceNumber;
+
     @CsvBindByName
     private String messageId;
+
     @CsvBindByName
     private String entityId;
+
     @CsvBindByName
     private String id;
+
     @CsvCustomBindByName(converter = ObjectToJsonConvertor.class)
     private Object entity;
+
     @CsvBindByName
     private Enum<?> eventType;
+
     @CsvBindByName
     private String appVersion;
+
     @CsvBindByName
     private String serviceVersion;
+
     @CsvBindByName
     private String serviceType;
+
     @CsvBindByName
     private String serviceFullName;
+
     @CsvBindByName
     private String processInstanceId;
+
     @CsvBindByName
     private String appName;
+
     @CsvBindByName
     private String serviceName;
+
     @CsvBindByName
     private String businessKey;
+
     @CsvBindByName
     private String parentProcessInstanceId;
+
     @CsvBindByName
     private String processDefinitionId;
+
     @CsvBindByName
     private String processDefinitionKey;
+
     @CsvBindByName
     private Integer processDefinitionVersion;
+
+    @CsvBindByName
+    private String actor;
 
     public CsvLogEntry(CloudRuntimeEvent event) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -87,6 +107,7 @@ public class CsvLogEntry implements CloudRuntimeEvent {
         this.processDefinitionId = event.getProcessDefinitionId();
         this.processDefinitionKey = event.getProcessDefinitionKey();
         this.processDefinitionVersion = event.getProcessDefinitionVersion();
+        this.actor = event.getActor();
     }
 
     public String getTime() {
@@ -106,6 +127,11 @@ public class CsvLogEntry implements CloudRuntimeEvent {
     @Override
     public String getEntityId() {
         return this.entityId;
+    }
+
+    @Override
+    public String getActor() {
+        return this.actor;
     }
 
     @Override

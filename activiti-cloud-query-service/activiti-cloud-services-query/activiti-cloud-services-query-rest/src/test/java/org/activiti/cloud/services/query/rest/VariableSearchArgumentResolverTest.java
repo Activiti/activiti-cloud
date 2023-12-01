@@ -84,12 +84,10 @@ public class VariableSearchArgumentResolverTest {
         given(conversionService.convert(variableValue, Integer.class)).willReturn(10);
 
         //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        Object resolvedArgument = argumentResolver.resolveArgument(mock(MethodParameter.class), null, webRequest, null);
 
         //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
         assertThat(variableSearch.getValue().getValue()).isEqualTo(10);
@@ -105,12 +103,10 @@ public class VariableSearchArgumentResolverTest {
         NativeWebRequest webRequest = buildWebRequest(variableName, variableValue, variableType);
 
         //when
-        Object resolvedArgument = argumentResolver
-            .resolveArgument(mock(MethodParameter.class), null, webRequest, null);
+        Object resolvedArgument = argumentResolver.resolveArgument(mock(MethodParameter.class), null, webRequest, null);
 
         //then
-        assertThat(resolvedArgument)
-            .isInstanceOf(VariableSearch.class);
+        assertThat(resolvedArgument).isInstanceOf(VariableSearch.class);
         VariableSearch variableSearch = (VariableSearch) resolvedArgument;
         assertThat(variableSearch.getName()).isEqualTo(variableName);
         assertThat(variableSearch.getValue().getValue()).isEqualTo(variableValue);
@@ -119,8 +115,7 @@ public class VariableSearchArgumentResolverTest {
         verifyNoInteractions(conversionService);
     }
 
-    private NativeWebRequest buildWebRequest(String variableName, String variableValue,
-        String variableType) {
+    private NativeWebRequest buildWebRequest(String variableName, String variableValue, String variableType) {
         NativeWebRequest webRequest = buildWebRequest(variableName, variableValue);
         given(webRequest.getParameter(VARIABLES_TYPE_KEY)).willReturn(variableType);
         return webRequest;

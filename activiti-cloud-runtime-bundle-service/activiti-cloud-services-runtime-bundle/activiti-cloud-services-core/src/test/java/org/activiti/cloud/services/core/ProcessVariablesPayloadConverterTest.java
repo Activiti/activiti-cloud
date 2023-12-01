@@ -15,27 +15,25 @@
  */
 package org.activiti.cloud.services.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
-import org.activiti.cloud.services.core.utils.TestProcessEngineConfiguration;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestProcessEngineConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
 @TestPropertySource("classpath:application-test.properties")
-public class ProcessVariablesPayloadConverterTest {
+class ProcessVariablesPayloadConverterTest {
 
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
@@ -46,7 +44,7 @@ public class ProcessVariablesPayloadConverterTest {
     private DateFormatterProvider dateFormatterProvider;
 
     @Test
-    public void testProcessVariablesPayloadConverter() {
+    void testProcessVariablesPayloadConverter() {
         // given
         Map<String, Object> input = new HashMap<>();
 
@@ -67,25 +65,23 @@ public class ProcessVariablesPayloadConverterTest {
         input.put("jsonNodeValue2", new ProcessVariableValue("json", "{}"));
 
         // when
-        StartProcessPayload result = subject.convert(ProcessPayloadBuilder.start()
-                                                                          .withVariables(input)
-                                                                          .build());
+        StartProcessPayload result = subject.convert(ProcessPayloadBuilder.start().withVariables(input).build());
         // then
-        assertThat(result.getVariables()).containsEntry("int", 123)
-                          .containsEntry("string", "123")
-                          .containsEntry("bool", true)
-                          .containsEntry("nullValue", null)
-                          .containsEntry("stringValue", "name")
-                          .containsEntry("quoteValue", "\"")
-                          .containsEntry("intValue", 10)
-                          .containsEntry("longValue", 10L)
-                          .containsEntry("booleanValue", true)
-                          .containsEntry("doubleValue", 10.00)
-                          .containsEntry("localDateValue", LocalDate.of(2020, 4, 20))
-                          .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
-                          .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
-                          .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
-                          .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
+        assertThat(result.getVariables())
+            .containsEntry("int", 123)
+            .containsEntry("string", "123")
+            .containsEntry("bool", true)
+            .containsEntry("nullValue", null)
+            .containsEntry("stringValue", "name")
+            .containsEntry("quoteValue", "\"")
+            .containsEntry("intValue", 10)
+            .containsEntry("longValue", 10L)
+            .containsEntry("booleanValue", true)
+            .containsEntry("doubleValue", 10.00)
+            .containsEntry("localDateValue", LocalDate.of(2020, 4, 20))
+            .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
+            .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
+            .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
+            .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
     }
-
 }

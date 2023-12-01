@@ -29,7 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
-@ContextConfiguration(classes = {FileContentValidatorConfiguration.class, ModelingApiAutoConfiguration.class})
+@ContextConfiguration(classes = { FileContentValidatorConfiguration.class, ModelingApiAutoConfiguration.class })
 class FileMagicNumberValidatorTest {
 
     @Autowired
@@ -37,7 +37,7 @@ class FileMagicNumberValidatorTest {
 
     @Test
     void checkFileIsNotExecutableIfSizeIsLessMinMagicNumberSize() {
-        byte[] firstBytes = new byte[]{22};
+        byte[] firstBytes = new byte[] { 22 };
         assertThat(fileContentValidator.checkFileIsExecutable(firstBytes)).isFalse();
     }
 

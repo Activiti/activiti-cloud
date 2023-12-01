@@ -19,31 +19,25 @@ package org.activiti.cloud.starter.tests.runtime;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
 @TestComponent
 public class IntegrationErrorSender {
 
-    private final BinderAwareChannelResolver resolver;
+    private final StreamBridge streamBridge;
 
-    public IntegrationErrorSender(BinderAwareChannelResolver resolver) {
-        this.resolver = resolver;
+    public IntegrationErrorSender(StreamBridge streamBridge) {
+        this.streamBridge = streamBridge;
     }
 
-    public void send(IntegrationRequest integrationRequest,
-                     Exception error) {
-        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(integrationRequest,
-                                                                          error);
-        Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationResult)
-            .build();
+    public void send(IntegrationRequest integrationRequest, Exception error) {
+        IntegrationErrorImpl integrationResult = new IntegrationErrorImpl(integrationRequest, error);
+        Message<IntegrationErrorImpl> message = MessageBuilder.withPayload(integrationResult).build();
 
         String destination = integrationRequest.getErrorDestination();
 
-        resolver
-            .resolveDestination(destination)
-            .send(message);
+        streamBridge.send(destination, message);
     }
-
 }

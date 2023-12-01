@@ -15,15 +15,14 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
+import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import org.activiti.api.process.model.events.ProcessCandidateStarterGroupEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupRemovedEvent;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterGroupEntity;
 import org.activiti.cloud.services.query.model.ProcessCandidateStarterGroupId;
 import org.activiti.cloud.services.query.model.QueryException;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
 
 public class ProcessCandidateStarterGroupRemovedEventHandler implements QueryEventHandler {
 
@@ -38,14 +37,16 @@ public class ProcessCandidateStarterGroupRemovedEventHandler implements QueryEve
         CloudProcessCandidateStarterGroupRemovedEvent processCandidateStarterGroupRemovedEvent = (CloudProcessCandidateStarterGroupRemovedEvent) event;
         org.activiti.api.process.model.ProcessCandidateStarterGroup processCandidateStarterGroup = processCandidateStarterGroupRemovedEvent.getEntity();
 
-        ProcessCandidateStarterGroupId id = new ProcessCandidateStarterGroupId(processCandidateStarterGroup.getProcessDefinitionId(),
-                                                                                processCandidateStarterGroup.getGroupId());
+        ProcessCandidateStarterGroupId id = new ProcessCandidateStarterGroupId(
+            processCandidateStarterGroup.getProcessDefinitionId(),
+            processCandidateStarterGroup.getGroupId()
+        );
         try {
-            Optional.ofNullable(entityManager.find(ProcessCandidateStarterGroupEntity.class, id))
+            Optional
+                .ofNullable(entityManager.find(ProcessCandidateStarterGroupEntity.class, id))
                 .ifPresent(entityManager::remove);
         } catch (Exception cause) {
-            throw new QueryException("Error handling ProcessCandidateStarterGroupRemovedEvent[" + event + "]",
-                                     cause);
+            throw new QueryException("Error handling ProcessCandidateStarterGroupRemovedEvent[" + event + "]", cause);
         }
     }
 

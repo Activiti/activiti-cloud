@@ -25,7 +25,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "type": "string"
                 }
@@ -91,7 +91,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentString"
                 }
@@ -126,7 +126,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "type": "string"
                 }
@@ -192,7 +192,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentString"
                 }
@@ -227,7 +227,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntryResponseContentString"
                 }
@@ -262,9 +262,44 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentString"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/test/jsonDeserializer": {
+      "get": {
+        "tags": [
+          "test-controller"
+        ],
+        "summary": "getExtendedJsonDeserializer",
+        "operationId": "getExtendedJsonDeserializer",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentExtendedJsonDeserializerWrapper"
                 }
               }
             }
@@ -297,7 +332,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EntryResponseContentString"
                 }
@@ -332,7 +367,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListResponseContentString"
                 }
@@ -416,6 +451,411 @@
             "format": "int64"
           }
         }
+      },
+      "AnnotatedMember": {
+        "title": "AnnotatedMember",
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "member": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "modifiers": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "synthetic": {
+                "type": "boolean"
+              }
+            }
+          },
+          "typeContext": {
+            "$ref": "#/components/schemas/TypeResolutionContext"
+          },
+          "allAnnotations": {
+            "$ref": "#/components/schemas/AnnotationMap"
+          },
+          "name": {
+            "type": "string"
+          },
+          "public": {
+            "type": "boolean"
+          },
+          "annotated": {
+            "type": "object",
+            "properties": {
+              "annotations": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "declaredAnnotations": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AnnotationMap": {
+        "title": "AnnotationMap",
+        "type": "object"
+      },
+      "EntryResponseContentExtendedJsonDeserializerWrapper": {
+        "title": "EntryResponseContentExtendedJsonDeserializerWrapper",
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/ExtendedJsonDeserializerWrapper"
+          }
+        }
+      },
+      "ExtendedJsonDeserializer": {
+        "title": "ExtendedJsonDeserializer",
+        "type": "object",
+        "properties": {
+          "knownPropertyNames": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "nullAccessPattern": {
+            "type": "string",
+            "enum": [
+              "ALWAYS_NULL",
+              "CONSTANT",
+              "DYNAMIC"
+            ]
+          },
+          "emptyAccessPattern": {
+            "type": "string",
+            "enum": [
+              "ALWAYS_NULL",
+              "CONSTANT",
+              "DYNAMIC"
+            ]
+          },
+          "delegatee": {
+            "$ref": "#/components/schemas/JsonDeserializerObject"
+          },
+          "cachable": {
+            "type": "boolean"
+          },
+          "nullValue": {
+            "uniqueItems": true,
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/ExtendedJsonDeserializer"
+            }
+          },
+          "emptyValue": {
+            "type": "object",
+            "deprecated": true
+          },
+          "objectIdReader": {
+            "$ref": "#/components/schemas/ObjectIdReader"
+          },
+          "test": {
+            "type": "string"
+          }
+        }
+      },
+      "ExtendedJsonDeserializerWrapper": {
+        "title": "ExtendedJsonDeserializerWrapper",
+        "type": "object",
+        "properties": {
+          "jsonDeserializers": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtendedJsonDeserializer"
+            }
+          }
+        }
+      },
+      "JsonDeserializerObject": {
+        "title": "JsonDeserializerObject",
+        "type": "object",
+        "properties": {
+          "knownPropertyNames": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "nullAccessPattern": {
+            "type": "string",
+            "enum": [
+              "ALWAYS_NULL",
+              "CONSTANT",
+              "DYNAMIC"
+            ]
+          },
+          "emptyAccessPattern": {
+            "type": "string",
+            "enum": [
+              "ALWAYS_NULL",
+              "CONSTANT",
+              "DYNAMIC"
+            ]
+          },
+          "delegatee": {
+            "$ref": "#/components/schemas/JsonDeserializerObject"
+          },
+          "cachable": {
+            "type": "boolean"
+          },
+          "nullValue": {
+            "type": "object",
+            "deprecated": true
+          },
+          "emptyValue": {
+            "type": "object",
+            "deprecated": true
+          },
+          "objectIdReader": {
+            "$ref": "#/components/schemas/ObjectIdReader"
+          }
+        }
+      },
+      "MergeInfo": {
+        "title": "MergeInfo",
+        "type": "object",
+        "properties": {
+          "getter": {
+            "$ref": "#/components/schemas/AnnotatedMember"
+          },
+          "fromDefaults": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NullValueProvider": {
+        "title": "NullValueProvider",
+        "type": "object",
+        "properties": {
+          "nullAccessPattern": {
+            "type": "string",
+            "enum": [
+              "ALWAYS_NULL",
+              "CONSTANT",
+              "DYNAMIC"
+            ]
+          }
+        }
+      },
+      "ObjectIdGeneratorObject": {
+        "title": "ObjectIdGeneratorObject",
+        "type": "object"
+      },
+      "ObjectIdInfo": {
+        "title": "ObjectIdInfo",
+        "type": "object",
+        "properties": {
+          "propertyName": {
+            "$ref": "#/components/schemas/PropertyName"
+          },
+          "alwaysAsId": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ObjectIdReader": {
+        "title": "ObjectIdReader",
+        "type": "object",
+        "properties": {
+          "propertyName": {
+            "$ref": "#/components/schemas/PropertyName"
+          },
+          "generator": {
+            "$ref": "#/components/schemas/ObjectIdGeneratorObject"
+          },
+          "resolver": {
+            "$ref": "#/components/schemas/ObjectIdResolver"
+          },
+          "idProperty": {
+            "$ref": "#/components/schemas/SettableBeanProperty"
+          },
+          "deserializer": {
+            "$ref": "#/components/schemas/JsonDeserializerObject"
+          }
+        }
+      },
+      "ObjectIdResolver": {
+        "title": "ObjectIdResolver",
+        "type": "object"
+      },
+      "PropertyMetadata": {
+        "title": "PropertyMetadata",
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mergeInfo": {
+            "$ref": "#/components/schemas/MergeInfo"
+          },
+          "valueNulls": {
+            "type": "string",
+            "enum": [
+              "SET",
+              "SKIP",
+              "FAIL",
+              "AS_EMPTY",
+              "DEFAULT"
+            ]
+          },
+          "contentNulls": {
+            "type": "string",
+            "enum": [
+              "SET",
+              "SKIP",
+              "FAIL",
+              "AS_EMPTY",
+              "DEFAULT"
+            ]
+          }
+        }
+      },
+      "PropertyName": {
+        "title": "PropertyName",
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "simpleName": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          }
+        }
+      },
+      "SettableBeanProperty": {
+        "title": "SettableBeanProperty",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "fullName": {
+            "$ref": "#/components/schemas/PropertyName"
+          },
+          "ignorable": {
+            "type": "boolean"
+          },
+          "managedReferenceName": {
+            "type": "string"
+          },
+          "objectIdInfo": {
+            "$ref": "#/components/schemas/ObjectIdInfo"
+          },
+          "wrapperName": {
+            "$ref": "#/components/schemas/PropertyName"
+          },
+          "member": {
+            "$ref": "#/components/schemas/AnnotatedMember"
+          },
+          "valueTypeDeserializer": {
+            "$ref": "#/components/schemas/TypeDeserializer"
+          },
+          "injectableValueId": {
+            "type": "object"
+          },
+          "nullValueProvider": {
+            "$ref": "#/components/schemas/NullValueProvider"
+          },
+          "valueDeserializer": {
+            "$ref": "#/components/schemas/JsonDeserializerObject"
+          },
+          "injectionOnly": {
+            "type": "boolean"
+          },
+          "creatorIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "propertyIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "virtual": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/PropertyMetadata"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TypeDeserializer": {
+        "title": "TypeDeserializer",
+        "type": "object",
+        "properties": {
+          "propertyName": {
+            "type": "string"
+          },
+          "typeInclusion": {
+            "type": "string",
+            "enum": [
+              "PROPERTY",
+              "WRAPPER_OBJECT",
+              "WRAPPER_ARRAY",
+              "EXTERNAL_PROPERTY",
+              "EXISTING_PROPERTY"
+            ]
+          },
+          "typeIdResolver": {
+            "$ref": "#/components/schemas/TypeIdResolver"
+          }
+        }
+      },
+      "TypeIdResolver": {
+        "title": "TypeIdResolver",
+        "type": "object",
+        "properties": {
+          "descForKnownTypeIds": {
+            "type": "string"
+          },
+          "mechanism": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "CLASS",
+              "MINIMAL_CLASS",
+              "NAME",
+              "DEDUCTION",
+              "CUSTOM"
+            ]
+          }
+        }
+      },
+      "TypeResolutionContext": {
+        "title": "TypeResolutionContext",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -424,8 +864,9 @@
         "description": "Authorizing with SSO",
         "flows": {
           "implicit": {
-            "authorizationUrl": "http://authserver.mock/realms/activiti/protocol/openid-connect/auth",
-            "scopes": {}
+            "authorizationUrl": "http://dummy/token/url",
+            "scopes": {
+            }
           }
         }
       }

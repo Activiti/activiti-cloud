@@ -21,9 +21,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
+import org.activiti.cloud.services.common.security.jwt.validator.ExpiredValidationCheck;
+import org.activiti.cloud.services.common.security.jwt.validator.IsNotBeforeValidationCheck;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -33,7 +36,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 @ExtendWith(MockitoExtension.class)
 public class JwtAccessTokenValidatorTest {
 
-    private final JwtAccessTokenValidator validator = new JwtAccessTokenValidator(0);
+    private final JwtAccessTokenValidator validator = new JwtAccessTokenValidator(
+        List.of(new ExpiredValidationCheck(0), new IsNotBeforeValidationCheck(0))
+    );
 
     @Mock
     private JwtAdapter jwtAdapter;
@@ -118,10 +123,6 @@ public class JwtAccessTokenValidatorTest {
             claims.put("nbf", Instant.now().minusSeconds(10));
         }
 
-        return new Jwt(TOKEN_VALUE,
-            issuedAt,
-            expiresAt,
-            headers,
-            claims);
+        return new Jwt(TOKEN_VALUE, issuedAt, expiresAt, headers, claims);
     }
 }

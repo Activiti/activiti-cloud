@@ -19,13 +19,13 @@ import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration for process model validator
  */
-@Configuration
+@AutoConfiguration
 public class ProcessModelConverterConfiguration {
 
     @Bean
@@ -34,16 +34,18 @@ public class ProcessModelConverterConfiguration {
     }
 
     @Bean
-    public ConnectorModelContentConverter connectorModelContentConverter(ConnectorModelType connectorModelType,
-                                                                         JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter) {
-        return new ConnectorModelContentConverter(connectorModelType,
-                                                  connectorModelContentJsonConverter);
+    public ConnectorModelContentConverter connectorModelContentConverter(
+        ConnectorModelType connectorModelType,
+        JsonConverter<ConnectorModelContent> connectorModelContentJsonConverter
+    ) {
+        return new ConnectorModelContentConverter(connectorModelType, connectorModelContentJsonConverter);
     }
 
     @Bean
-    public ProcessModelContentConverter processModelContentConverter(ProcessModelType processModelType,
-                                                                     BpmnXMLConverter bpmnConverter) {
-        return new ProcessModelContentConverter(processModelType,
-                                                bpmnConverter);
+    public ProcessModelContentConverter processModelContentConverter(
+        ProcessModelType processModelType,
+        BpmnXMLConverter bpmnConverter
+    ) {
+        return new ProcessModelContentConverter(processModelType, bpmnConverter);
     }
 }

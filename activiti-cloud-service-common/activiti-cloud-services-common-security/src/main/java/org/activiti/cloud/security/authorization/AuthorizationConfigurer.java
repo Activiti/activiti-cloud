@@ -17,6 +17,7 @@ package org.activiti.cloud.security.authorization;
 
 import static java.util.function.Predicate.not;
 
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,9 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.stereotype.Component;
-import javax.annotation.PostConstruct;
 
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
@@ -51,7 +51,6 @@ public class AuthorizationConfigurer {
     private final AuthorizationProperties authorizationProperties;
     private final Environment environment;
 
-
     @Autowired
     public AuthorizationConfigurer(AuthorizationProperties authorizationProperties, Environment environment) {
         this.authorizationProperties = authorizationProperties;
@@ -61,14 +60,20 @@ public class AuthorizationConfigurer {
     @PostConstruct
     public void checkKeycloakConfig() {
         //if there is a Keycloak security constraint defined it could be configuration issue
-        String securityConstraintProperty = environment.getProperty("keycloak.security-constraints[0].securityCollections[0].patterns[0]");
-        if(securityConstraintProperty != null) {
-            LOGGER.warn("A Keycloak security configuration was found, it could override Spring Security configuration, please check if we have properties starting with \"keycloak.security-constraints\".");
+        String securityConstraintProperty = environment.getProperty(
+            "keycloak.security-constraints[0].securityCollections[0].patterns[0]"
+        );
+        if (securityConstraintProperty != null) {
+            LOGGER.warn(
+                "A Keycloak security configuration was found, it could override Spring Security configuration, please check if we have properties starting with \"keycloak.security-constraints\"."
+            );
         }
     }
 
     public void configure(HttpSecurity http) throws Exception {
-        List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(authorizationProperties.getSecurityConstraints());
+        List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
+            authorizationProperties.getSecurityConstraints()
+        );
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
             String[] roles = securityConstraint.getAuthRoles();
             configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
@@ -76,9 +81,10 @@ public class AuthorizationConfigurer {
         http.anonymous();
     }
 
-    private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection) throws Exception {
+    private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
+        throws Exception {
         boolean rolesNotEmpty = isNotEmpty(roles);
-        Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
+        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
         if (rolesNotEmpty) {
             authorizedUrlConsumer = a -> a.hasAnyRole(roles);
         } else {
@@ -90,18 +96,20 @@ public class AuthorizationConfigurer {
         }
     }
 
-    private void buildAntMatchers(HttpSecurity http,
-                                  SecurityCollection[] securityCollections,
-                                  Consumer<ExpressionUrlAuthorizationConfigurer<HttpSecurity>.AuthorizedUrl> f) throws Exception {
+    private void buildAntMatchers(
+        HttpSecurity http,
+        SecurityCollection[] securityCollections,
+        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> f
+    ) throws Exception {
         for (SecurityCollection securityCollection : securityCollections) {
             String[] patterns = getPatterns(securityCollection.getPatterns());
-            if(isNotEmpty(securityCollection.getOmittedMethods())){
+            if (isNotEmpty(securityCollection.getOmittedMethods())) {
                 List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
                 for (HttpMethod method : methods) {
-                    f.accept(http.authorizeRequests().antMatchers(method, patterns));
+                    f.accept(http.authorizeHttpRequests().requestMatchers(method, patterns));
                 }
             } else {
-                f.accept(http.authorizeRequests().antMatchers(patterns));
+                f.accept(http.authorizeHttpRequests().requestMatchers(patterns));
             }
         }
     }
@@ -129,7 +137,8 @@ public class AuthorizationConfigurer {
     }
 
     private String[] getPatterns(String[] patterns) {
-        return Stream.of(patterns)
+        return Stream
+            .of(patterns)
             .map(pattern -> pattern.endsWith("/*") ? pattern + "*" : pattern)
             .toArray(String[]::new);
     }
@@ -142,5 +151,4 @@ public class AuthorizationConfigurer {
     private boolean isNotEmpty(String[] array) {
         return array != null && array.length > 0;
     }
-
 }

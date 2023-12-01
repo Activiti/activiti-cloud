@@ -18,22 +18,16 @@ package org.activiti.cloud.api.task.model.impl.events;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.events.CloudTaskUpdatedEvent;
 
-public class CloudTaskUpdatedEventImpl extends CloudTaskEventImpl
-        implements CloudTaskUpdatedEvent {
+public class CloudTaskUpdatedEventImpl extends CloudTaskEventImpl implements CloudTaskUpdatedEvent {
 
-    public CloudTaskUpdatedEventImpl() {
-    }
+    public CloudTaskUpdatedEventImpl() {}
 
     public CloudTaskUpdatedEventImpl(Task task) {
         super(task);
     }
 
-    public CloudTaskUpdatedEventImpl(String id,
-                                     Long timestamp,
-                                     Task task) {
-        super(id,
-              timestamp,
-              task);
+    public CloudTaskUpdatedEventImpl(String id, Long timestamp, Task task) {
+        super(id, timestamp, task);
     }
 
     @Override
