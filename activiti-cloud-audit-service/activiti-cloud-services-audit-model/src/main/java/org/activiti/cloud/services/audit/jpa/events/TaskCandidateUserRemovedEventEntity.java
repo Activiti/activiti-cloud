@@ -23,11 +23,9 @@ import org.activiti.api.task.model.TaskCandidateUser;
 import org.activiti.api.task.model.impl.TaskCandidateUserImpl;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.TaskCandidateUserJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateUserRemovedEventEntity.TASK_CANDIDATE_USER_REMOVED_EVENT)
-@DynamicInsert
 public class TaskCandidateUserRemovedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_USER_REMOVED_EVENT = "TaskCandidateUserRemovedEvent";

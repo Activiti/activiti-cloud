@@ -27,7 +27,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
 @DiscriminatorValue(value = TaskCandidateGroupRemovedEventEntity.TASK_CANDIDATE_GROUP_REMOVED_EVENT)
-@DynamicInsert
 public class TaskCandidateGroupRemovedEventEntity extends AuditEventEntity {
 
     protected static final String TASK_CANDIDATE_GROUP_REMOVED_EVENT = "TaskCandidateGroupRemovedEvent";

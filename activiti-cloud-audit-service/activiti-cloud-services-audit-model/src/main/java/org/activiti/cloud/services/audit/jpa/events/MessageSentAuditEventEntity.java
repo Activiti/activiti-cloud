@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = MessageSentAuditEventEntity.MESSAGE_SENT_EVENT)
 @DiscriminatorValue(value = MessageSentAuditEventEntity.MESSAGE_SENT_EVENT)
-@DynamicInsert
 public class MessageSentAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_SENT_EVENT = "MessageSentEvent";

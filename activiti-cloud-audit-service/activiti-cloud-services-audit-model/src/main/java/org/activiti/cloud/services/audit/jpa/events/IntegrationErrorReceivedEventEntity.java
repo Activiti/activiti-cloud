@@ -22,11 +22,9 @@ import jakarta.persistence.Entity;
 import java.util.List;
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ListOfStackTraceElementsJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
 @DiscriminatorValue(value = IntegrationErrorReceivedEventEntity.INTEGRATION_ERROR_RECEIVED_EVENT)
-@DynamicInsert
 public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity {
 
     private static final int ERROR_MESSAGE_LENGTH = 255;
@@ -44,7 +42,7 @@ public class IntegrationErrorReceivedEventEntity extends IntegrationEventEntity 
     @Column(columnDefinition = "text")
     private List<StackTraceElement> stackTraceElements;
 
-    IntegrationErrorReceivedEventEntity() {}
+    protected IntegrationErrorReceivedEventEntity() {}
 
     public IntegrationErrorReceivedEventEntity(CloudIntegrationErrorReceivedEvent event) {
         super(event);

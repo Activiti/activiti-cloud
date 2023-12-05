@@ -26,7 +26,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
 @DiscriminatorValue(value = SequenceFlowAuditEventEntity.SEQUENCE_FLOW_TAKEN_EVENT)
-@DynamicInsert
 public class SequenceFlowAuditEventEntity extends AuditEventEntity {
 
     protected static final String SEQUENCE_FLOW_TAKEN_EVENT = "SequenceFlowTakenEvent";

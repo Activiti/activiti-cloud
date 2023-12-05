@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessDeletedAuditEventEntity.PROCESS_DELETED_EVENT)
 @DiscriminatorValue(value = ProcessDeletedAuditEventEntity.PROCESS_DELETED_EVENT)
-@DynamicInsert
 public class ProcessDeletedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_DELETED_EVENT = "ProcessDeletedEvent";
