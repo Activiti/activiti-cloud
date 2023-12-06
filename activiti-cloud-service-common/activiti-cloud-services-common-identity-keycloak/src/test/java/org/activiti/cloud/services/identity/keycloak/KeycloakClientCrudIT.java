@@ -61,7 +61,7 @@ public class KeycloakClientCrudIT {
             .withWebOrigins(Collections.emptyList())
             .publicClient(true)
             .implicitFlowEnabled(true)
-            .withAccessTokenLifespanInMinutes(1)
+            .withAccessTokenLifespanInSeconds(120)
             .build();
         Response response = keycloakClient.createClient(client);
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
@@ -70,7 +70,7 @@ public class KeycloakClientCrudIT {
         KeycloakClientRepresentation clientCreated = keycloakClient.getClientById(idOfClient);
         assertThat(clientCreated).isNotNull();
         assertThat(clientCreated.getClientId()).isEqualTo(clientId);
-        assertThat(clientCreated.getAttributes().accessTokenLifetime()).isEqualTo(1);
+        assertThat(clientCreated.getAttributes().accessTokenLifetime()).isEqualTo(120);
 
         clientCreated.setDirectAccessGrantsEnabled(false);
         clientCreated.setAttributes(new KeycloakClientRepresentation.ClientAttributes(null));

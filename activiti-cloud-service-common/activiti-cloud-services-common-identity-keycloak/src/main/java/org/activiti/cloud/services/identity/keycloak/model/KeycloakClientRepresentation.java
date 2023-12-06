@@ -230,7 +230,7 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
             return this;
         }
 
-        public Builder withAccessTokenLifespanInMinutes(Integer accessTokenLifespan) {
+        public Builder withAccessTokenLifespanInSeconds(Integer accessTokenLifespan) {
             this.accessTokenLifespan = accessTokenLifespan;
             return this;
         }
