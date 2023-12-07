@@ -135,5 +135,17 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
         // then
         assertThat(result).asString().isEqualTo("1970-01-01T00:00:00Z");
+
+        // when
+        result = subject.serialize(Date.from(Instant.parse("1970-01-01T00:00:00.000Z")));
+
+        // then
+        assertThat(result).asString().isEqualTo("1970-01-01T00:00:00Z");
+
+        // when
+        result = subject.serialize(Date.from(Instant.parse("1970-01-01T00:00:00.001Z")));
+
+        // then
+        assertThat(result).asString().isEqualTo("1970-01-01T00:00:00.001Z");
     }
 }
