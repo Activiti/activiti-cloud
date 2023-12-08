@@ -172,11 +172,16 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model buildModel(String type, String name) {
+        return buildModel(type, name, null);
+    }
+
+    @Override
+    public Model buildModel(String type, String name, String key) {
         try {
             Model model = (Model) modelRepository.getModelType().getConstructor().newInstance();
             model.setType(type);
-            model.setDisplayName(name); // TODO add key?
-            //            model.setKey();
+            model.setDisplayName(name);
+            model.setKey(key);
             return model;
         } catch (
             InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e
@@ -303,7 +308,7 @@ public class ModelServiceImpl implements ModelService {
         }
 
         Model fullModel = findModelById(model.getId()).orElse(model);
-        Model modelToFile = buildModel(fullModel.getType(), fullModel.getDisplayName());
+        Model modelToFile = buildModel(fullModel.getType(), fullModel.getDisplayName(), fullModel.getKey());
         modelToFile.setId(fullModel.getType().toLowerCase().concat(MODEL_IDENTIFIER_SEPARATOR).concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
         modelToFile.setScope(null);
@@ -531,7 +536,6 @@ public class ModelServiceImpl implements ModelService {
         Model model = jsonConverter
             .tryConvertToEntity(fileContent.getFileContent())
             .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
-        //TODO check if behavior is expected
         var key = removeEnd(removeExtension(fileContent.getFilename(), JSON), modelType.getExtensionsFileSuffix());
         model.setKey(key);
         if (StringUtils.isBlank(model.getDisplayName())) {
@@ -545,7 +549,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public Model createModelFromContent(ModelType modelType, FileContent fileContent) {
         return contentFilenameToModelName(fileContent.getFilename(), modelType)
-            .map(modelName -> buildModel(modelType.getName(), modelName))
+            .map(modelName -> buildModel(modelType.getName(), modelName, modelName))
             .orElseThrow(() ->
                 new ImportModelException(
                     MessageFormat.format(

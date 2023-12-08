@@ -34,6 +34,10 @@ import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.converter.ProcessModelContentConverter;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
+import org.activiti.cloud.services.modeling.service.decorators.DefaultModelExtensionsImportDecorator;
+import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecorator;
+import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecoratorService;
+import org.activiti.cloud.services.modeling.service.decorators.WrapperExtensionsImportDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
@@ -121,7 +125,8 @@ public class ModelingServiceAutoConfiguration {
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
         ProjectDecoratorService projectDecoratorService,
-        KeyGenerator keyGenerator
+        KeyGenerator keyGenerator,
+        ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService
     ) {
         return new ProjectServiceImpl(
             projectRepository,
@@ -133,7 +138,8 @@ public class ModelingServiceAutoConfiguration {
             projectValidators,
             projectFilterService,
             projectDecoratorService,
-                keyGenerator
+            keyGenerator,
+            modelExtensionsImportDecoratorService
         );
     }
 
@@ -181,5 +187,29 @@ public class ModelingServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public KeyGenerator projectKeyGenerator(ProjectNameValidator projectNameValidator) {
         return new KeyGeneratorImpl(projectNameValidator);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator() {
+        return new DefaultModelExtensionsImportDecorator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public WrapperExtensionsImportDecorator processExtensionsImportDecorator() {
+        return new WrapperExtensionsImportDecorator();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService(
+        List<ModelExtensionsImportDecorator> modelExtensionsImportDecorators,
+        DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator
+    ) {
+        return new ModelExtensionsImportDecoratorService(
+            modelExtensionsImportDecorators,
+            defaultModelExtensionsImportDecorator
+        );
     }
 }

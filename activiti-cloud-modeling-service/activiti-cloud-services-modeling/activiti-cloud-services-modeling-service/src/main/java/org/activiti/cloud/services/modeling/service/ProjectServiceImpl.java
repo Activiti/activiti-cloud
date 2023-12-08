@@ -53,6 +53,7 @@ import org.activiti.cloud.services.common.zip.ZipStream;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
 import org.activiti.cloud.services.modeling.service.api.ProjectService;
+import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecoratorService;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
@@ -95,6 +96,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final KeyGenerator keyGenerator;
 
+    private final ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService;
+
     public ProjectServiceImpl(
         ProjectRepository projectRepository,
         ModelService modelService,
@@ -105,7 +108,8 @@ public class ProjectServiceImpl implements ProjectService {
         Set<ProjectValidator> projectValidators,
         ProjectFilterService projectFilterService,
         ProjectDecoratorService projectDecoratorService,
-        KeyGenerator keyGenerator
+        KeyGenerator keyGenerator,
+        ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService
     ) {
         this.projectRepository = projectRepository;
         this.modelService = modelService;
@@ -117,6 +121,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.projectFilterService = projectFilterService;
         this.projectDecoratorService = projectDecoratorService;
         this.keyGenerator = keyGenerator;
+        this.modelExtensionsImportDecoratorService = modelExtensionsImportDecoratorService;
     }
 
     /**
@@ -388,7 +393,7 @@ public class ProjectServiceImpl implements ProjectService {
             .ifPresent(fileMetadata -> {
                 jsonMetadataConverter
                     .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> model.setExtensions(getExtensionsValueMapFromJson(extensions)));
+                    .ifPresent(extensions -> modelExtensionsImportDecoratorService.decorate(model, extensions));
                 modelService.updateModel(model, model);
             });
     }
@@ -435,13 +440,9 @@ public class ProjectServiceImpl implements ProjectService {
             .ifPresent(fileMetadata -> {
                 jsonMetadataConverter
                     .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> model.setExtensions(getExtensionsValueMapFromJson(extensions)));
+                    .ifPresent(extensions -> modelExtensionsImportDecoratorService.decorate(model, extensions));
                 modelService.updateModel(model, model);
             });
-    }
-
-    private Map<String, Object> getExtensionsValueMapFromJson(Map<String, Object> extensions) {
-        return ((Map<String, Object>) extensions.get("extensions"));
     }
 
     private void processZipEntryFile(ProjectHolder projectHolder, FileContent fileContent, ModelType modelType) {
