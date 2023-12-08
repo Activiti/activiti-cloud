@@ -46,6 +46,8 @@ public interface ModelService {
 
     Model buildModel(String type, String name);
 
+    Model buildModel(String type, String name, String key);
+
     Model createModel(Project project, Model model);
 
     Model createModelForImport(Project project, Model model);
