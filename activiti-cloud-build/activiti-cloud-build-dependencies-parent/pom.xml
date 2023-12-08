@@ -23,13 +23,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-platform</artifactId>
-        <version>${hibernate.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
         <version>${graphql-java.version}</version>
@@ -68,6 +61,13 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
         <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-platform</artifactId>
+        <version>${hibernate.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
