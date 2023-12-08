@@ -18,7 +18,7 @@
     <graphql-java.version>21.3</graphql-java.version>
     <postgresql.version>42.5.1</postgresql.version>
     <liquibase.version>4.24.0</liquibase.version>
-    <hibernate.version>6.2.7.Final</hibernate.version>
+    <hibernate.version>6.3.1.Final</hibernate.version>
   </properties>
   <dependencyManagement>
     <dependencies>
