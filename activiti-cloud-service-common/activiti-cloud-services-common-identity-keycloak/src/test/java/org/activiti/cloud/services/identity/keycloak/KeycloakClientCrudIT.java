@@ -61,6 +61,7 @@ public class KeycloakClientCrudIT {
             .withWebOrigins(Collections.emptyList())
             .publicClient(true)
             .implicitFlowEnabled(true)
+            .withAccessTokenLifespanInSeconds(120)
             .build();
         Response response = keycloakClient.createClient(client);
         assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
@@ -69,11 +70,14 @@ public class KeycloakClientCrudIT {
         KeycloakClientRepresentation clientCreated = keycloakClient.getClientById(idOfClient);
         assertThat(clientCreated).isNotNull();
         assertThat(clientCreated.getClientId()).isEqualTo(clientId);
+        assertThat(clientCreated.getAttributes().accessTokenLifespan()).isEqualTo(120);
 
         clientCreated.setDirectAccessGrantsEnabled(false);
+        clientCreated.setAttributes(new KeycloakClientRepresentation.ClientAttributes(null));
         keycloakClient.updateClient(idOfClient, clientCreated);
         KeycloakClientRepresentation clientUpdated = keycloakClient.getClientById(idOfClient);
         assertThat(clientUpdated.getDirectAccessGrantsEnabled()).isFalse();
+        assertThat(clientUpdated.getAttributes().accessTokenLifespan()).isNull();
 
         keycloakClient.deleteClient(idOfClient);
         Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));
