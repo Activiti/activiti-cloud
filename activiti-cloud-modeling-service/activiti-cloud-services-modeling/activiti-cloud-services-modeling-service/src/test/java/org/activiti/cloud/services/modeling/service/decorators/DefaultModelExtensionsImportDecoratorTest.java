@@ -17,23 +17,41 @@
 package org.activiti.cloud.services.modeling.service.decorators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
+import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.modeling.service.ProjectHolder;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 class DefaultModelExtensionsImportDecoratorTest {
 
+    private final JsonConverter<Map> jsonConverter = Mockito.mock(JsonConverter.class);
+
     private final DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator =
-        new DefaultModelExtensionsImportDecorator();
+        new DefaultModelExtensionsImportDecorator(jsonConverter);
 
     @Test
     void should_decorateModel() {
         var model = getModel();
-        defaultModelExtensionsImportDecorator.decorate(
-            model,
-            Map.of("extensions", Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key"))
+        var projectHolder = new ProjectHolder();
+        FileContent fileContent = Mockito.mock(FileContent.class);
+        projectHolder.addModelExtension(model.getKey(), new ConnectorModelType(), fileContent);
+        Map<String, Map<String, String>> extensions = Map.of(
+            "extensions",
+            Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key")
         );
+        when(fileContent.getFileContent()).thenReturn(new byte[0]);
+        when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
+
+        defaultModelExtensionsImportDecorator.decorate(model, projectHolder);
+
         assertThat(model.getName()).isEqualTo("ext name");
         assertThat(model.getDisplayName()).isEqualTo("ext name");
         assertThat(model.getKey()).isEqualTo("ext-key");
@@ -42,10 +60,18 @@ class DefaultModelExtensionsImportDecoratorTest {
     @Test
     void should_notDecorateModelWithoutExtensions() {
         var model = getModel();
-        defaultModelExtensionsImportDecorator.decorate(
-            model,
-            Map.of("sthElse", Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key"))
+        var projectHolder = new ProjectHolder();
+        FileContent fileContent = Mockito.mock(FileContent.class);
+        projectHolder.addModelExtension(model.getKey(), new ConnectorModelType(), fileContent);
+        Map<String, Map<String, String>> extensions = Map.of(
+            "sthElse",
+            Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key")
         );
+        when(fileContent.getFileContent()).thenReturn(new byte[0]);
+        when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
+
+        defaultModelExtensionsImportDecorator.decorate(model, projectHolder);
+
         assertThat(model.getName()).isEqualTo("name");
         assertThat(model.getDisplayName()).isEqualTo("name");
         assertThat(model.getKey()).isEqualTo("key");
@@ -56,6 +82,7 @@ class DefaultModelExtensionsImportDecoratorTest {
         model.setName("name");
         model.setDisplayName("name");
         model.setKey("key");
+        model.setType(ConnectorModelType.NAME);
         return model;
     }
 }

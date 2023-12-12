@@ -17,32 +17,47 @@
 package org.activiti.cloud.services.modeling.service.decorators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
+import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.services.common.file.FileContent;
+import org.activiti.cloud.services.modeling.service.ProjectHolder;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 class WrapperExtensionsImportDecoratorTest {
 
+    private final JsonConverter<Map> jsonConverter = Mockito.mock(JsonConverter.class);
+
     private final WrapperExtensionsImportDecorator wrapperExtensionsImportDecorator =
-        new WrapperExtensionsImportDecorator();
+        new WrapperExtensionsImportDecorator(jsonConverter, new ProcessModelType());
 
     @Test
     void should_decorateModel_withWrapperModel() {
         var model = getModel();
-        wrapperExtensionsImportDecorator.decorate(
-            model,
-            Map.of(
-                "name",
-                "ext name",
-                "displayName",
-                "ext name",
-                "key",
-                "ext-key",
-                "extensions",
-                Map.of("name", "other name", "displayName", "other name", "key", "other-key")
-            )
+        var projectHolder = new ProjectHolder();
+        FileContent fileContent = Mockito.mock(FileContent.class);
+        projectHolder.addModelExtension(model.getKey(), new ProcessModelType(), fileContent);
+        Map<String, Object> extensions = Map.of(
+            "name",
+            "ext name",
+            "displayName",
+            "ext name",
+            "key",
+            "ext-key",
+            "extensions",
+            Map.of("name", "other name", "displayName", "other name", "key", "other-key")
         );
+        when(fileContent.getFileContent()).thenReturn(new byte[0]);
+        when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
+
+        wrapperExtensionsImportDecorator.decorate(model, projectHolder);
+
         assertThat(model.getName()).isEqualTo("ext name");
         assertThat(model.getDisplayName()).isEqualTo("ext name");
         assertThat(model.getKey()).isEqualTo("ext-key");
@@ -53,6 +68,7 @@ class WrapperExtensionsImportDecoratorTest {
         model.setName("name");
         model.setDisplayName("name");
         model.setKey("key");
+        model.setType(ProcessModelType.PROCESS);
         return model;
     }
 }

@@ -17,25 +17,22 @@
 package org.activiti.cloud.services.modeling.service.decorators;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
-import org.activiti.cloud.modeling.api.ProcessModelType;
+import org.activiti.cloud.modeling.converter.JsonConverter;
 
-public class WrapperExtensionsImportDecorator implements ModelExtensionsImportDecorator {
+public class WrapperExtensionsImportDecorator extends ModelExtensionsImportDecorator {
 
-    @Override
-    public Set<ModelType> getHandledModelTypes() {
-        return Set.of(new ProcessModelType());
+    public WrapperExtensionsImportDecorator(JsonConverter<Map> jsonMetadataConverter, ModelType... modelTypes) {
+        super(jsonMetadataConverter, Set.of(modelTypes));
     }
 
     @Override
-    public void decorate(Model model, Map<String, Object> extensions) {
-        Map<String, Object> extensionsValueMap = getExtensionsValueMapFromJson(extensions);
-        model.setExtensions(extensionsValueMap);
-        Optional.ofNullable(extensions).map(map -> (String) map.get("name")).ifPresent(model::setName);
-        Optional.ofNullable(extensions).map(map -> (String) map.get("displayName")).ifPresent(model::setDisplayName);
-        Optional.ofNullable(extensions).map(map -> (String) map.get("key")).ifPresent(model::setKey);
+    protected void decorate(Model model, Map<String, Object> extensions) {
+        model.setExtensions(getExtensionsValueMapFromJson(extensions));
+        getNotBlankValue(extensions, "name").ifPresent(model::setName);
+        getNotBlankValue(extensions, "displayName").ifPresent(model::setDisplayName);
+        getNotBlankValue(extensions, "key").ifPresent(model::setKey);
     }
 }

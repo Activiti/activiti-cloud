@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.activiti.cloud.modeling.api.Model;
 import org.activiti.cloud.modeling.api.ModelType;
+import org.activiti.cloud.services.modeling.service.ProjectHolder;
 
 public class ModelExtensionsImportDecoratorService {
 
@@ -53,9 +54,9 @@ public class ModelExtensionsImportDecoratorService {
         this.defaultModelExtensionsImportDecorator = defaultModelExtensionsImportDecorator;
     }
 
-    public void decorate(Model model, Map<String, Object> extensions) {
+    public void decorate(Model model, ProjectHolder projectHolder) {
         modelExtensionsImportDecorators
             .getOrDefault(model.getType(), defaultModelExtensionsImportDecorator)
-            .decorate(model, extensions);
+            .decorate(model, projectHolder);
     }
 }
