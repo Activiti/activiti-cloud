@@ -16,27 +16,28 @@
 
 package org.activiti.cloud.services.modeling.service.decorators;
 
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.activiti.cloud.modeling.api.ConnectorModelType;
 import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.impl.ModelImpl;
+import org.activiti.cloud.services.modeling.service.ProjectHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 class ModelExtensionsImportDecoratorServiceTest {
 
-    private final DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator = Mockito.spy(
-        new DefaultModelExtensionsImportDecorator()
+    private final DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator = Mockito.mock(
+        DefaultModelExtensionsImportDecorator.class
     );
+
     private final ModelExtensionsImportDecorator mockDecorator = Mockito.mock(ModelExtensionsImportDecorator.class);
 
     private ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService;
@@ -55,16 +56,16 @@ class ModelExtensionsImportDecoratorServiceTest {
     void should_callModelDecorator() {
         var model = new ModelImpl();
         model.setType(new ConnectorModelType().getName());
-        modelExtensionsImportDecoratorService.decorate(model, Map.of());
-        verify(mockDecorator).decorate(eq(model), anyMap());
+        modelExtensionsImportDecoratorService.decorate(model, new ProjectHolder());
+        verify(mockDecorator).decorate(eq(model), any(ProjectHolder.class));
     }
 
     @Test
     void should_callDefaultDecorator_when_noDecoratorFoundForModelType() {
         var model = new ModelImpl();
         model.setType(new ProcessModelType().getName());
-        modelExtensionsImportDecoratorService.decorate(model, Map.of());
-        verify(defaultModelExtensionsImportDecorator).decorate(eq(model), anyMap());
-        verify(mockDecorator, never()).decorate(eq(model), anyMap());
+        modelExtensionsImportDecoratorService.decorate(model, new ProjectHolder());
+        verify(defaultModelExtensionsImportDecorator).decorate(eq(model), any(ProjectHolder.class));
+        verify(mockDecorator, never()).decorate(eq(model), any(ProjectHolder.class));
     }
 }

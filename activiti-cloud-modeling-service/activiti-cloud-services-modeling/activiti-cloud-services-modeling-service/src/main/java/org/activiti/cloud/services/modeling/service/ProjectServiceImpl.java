@@ -388,14 +388,8 @@ public class ProjectServiceImpl implements ProjectService {
         );
 
         Model model = createdModel.getModel();
-        projectHolder
-            .getModelExtension(model)
-            .ifPresent(fileMetadata -> {
-                jsonMetadataConverter
-                    .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> modelExtensionsImportDecoratorService.decorate(model, extensions));
-                modelService.updateModel(model, model);
-            });
+        modelExtensionsImportDecoratorService.decorate(model, projectHolder);
+        modelService.updateModel(model, model);
     }
 
     private Map<ImportedModel, FileContent> createXMLModelFiles(ProjectHolder projectHolder, Project createdProject) {
@@ -435,35 +429,29 @@ public class ProjectServiceImpl implements ProjectService {
 
         Model model = importedModel.getModel();
 
-        projectHolder
-            .getModelExtension(model)
-            .ifPresent(fileMetadata -> {
-                jsonMetadataConverter
-                    .tryConvertToEntity(fileMetadata.getFileContent())
-                    .ifPresent(extensions -> modelExtensionsImportDecoratorService.decorate(model, extensions));
-                modelService.updateModel(model, model);
-            });
+        modelExtensionsImportDecoratorService.decorate(model, projectHolder);
+        modelService.updateModel(model, model);
     }
 
     private void processZipEntryFile(ProjectHolder projectHolder, FileContent fileContent, ModelType modelType) {
-        String modelName = removeExtension(fileContent.getFilename(), JSON);
+        String modelKey = removeExtension(fileContent.getFilename(), JSON);
 
-        if (isProjectExtension(modelName, modelType, fileContent)) {
-            modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
-            projectHolder.addModelExtension(modelName, modelType, fileContent);
-        } else if (isProcessContent(modelName, modelType, fileContent)) {
+        if (isProjectExtension(modelKey, modelType, fileContent)) {
+            modelKey = StringUtils.removeEnd(modelKey, modelType.getExtensionsFileSuffix());
+            projectHolder.addModelExtension(modelKey, modelType, fileContent);
+        } else if (isProcessContent(modelKey, modelType, fileContent)) {
             modelService
-                .contentFilenameToModelName(modelName, modelType)
+                .contentFilenameToModelName(modelKey, modelType)
                 .ifPresent(fixedModelName -> projectHolder.addProcess(fixedModelName, modelType, fileContent));
-        } else if (isModelContent(modelName, modelType, fileContent)) {
+        } else if (isModelContent(modelKey, modelType, fileContent)) {
             modelService
-                .contentFilenameToModelName(modelName, modelType)
+                .contentFilenameToModelName(modelKey, modelType)
                 .ifPresent(fixedModelName -> projectHolder.addModelContent(fixedModelName, modelType, fileContent));
         } else {
-            if (modelName.endsWith(modelType.getExtensionsFileSuffix())) {
-                modelName = StringUtils.removeEnd(modelName, modelType.getExtensionsFileSuffix());
+            if (modelKey.endsWith(modelType.getExtensionsFileSuffix())) {
+                modelKey = StringUtils.removeEnd(modelKey, modelType.getExtensionsFileSuffix());
             }
-            projectHolder.addModelJsonFile(modelName, modelType, fileContent);
+            projectHolder.addModelJsonFile(modelKey, modelType, fileContent);
         }
     }
 

@@ -92,6 +92,10 @@ public class ProjectHolder {
         return modelContent.values();
     }
 
+    public Optional<ModelJsonFile> getModelJsonFile(Model model) {
+        return Optional.ofNullable(model.getKey()).map(name -> key(name, model.getType())).map(modelJsonFilesMap::get);
+    }
+
     public Optional<FileContent> getModelExtension(Model model) {
         return Optional.ofNullable(model.getKey()).map(name -> key(name, model.getType())).map(extensionFilesMap::get);
     }
@@ -152,7 +156,7 @@ public class ProjectHolder {
         }
     }
 
-    class ModelJsonFile {
+    public class ModelJsonFile {
 
         private final ModelType modelType;
 

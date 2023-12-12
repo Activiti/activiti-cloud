@@ -27,6 +27,7 @@ import org.activiti.cloud.modeling.api.ModelContentValidator;
 import org.activiti.cloud.modeling.api.ModelExtensionsValidator;
 import org.activiti.cloud.modeling.api.ModelType;
 import org.activiti.cloud.modeling.api.ModelUpdateListener;
+import org.activiti.cloud.modeling.api.ProcessModelType;
 import org.activiti.cloud.modeling.api.Project;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -37,9 +38,9 @@ import org.activiti.cloud.services.modeling.service.api.ProjectService;
 import org.activiti.cloud.services.modeling.service.decorators.DefaultModelExtensionsImportDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecoratorService;
-import org.activiti.cloud.services.modeling.service.decorators.WrapperExtensionsImportDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecorator;
 import org.activiti.cloud.services.modeling.service.decorators.ProjectDecoratorService;
+import org.activiti.cloud.services.modeling.service.decorators.WrapperExtensionsImportDecorator;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilter;
 import org.activiti.cloud.services.modeling.service.filters.ProjectFilterService;
 import org.activiti.cloud.services.modeling.service.utils.FileContentSanitizer;
@@ -191,14 +192,19 @@ public class ModelingServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator() {
-        return new DefaultModelExtensionsImportDecorator();
+    public DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator(
+        JsonConverter<Map> jsonMetadataConverter
+    ) {
+        return new DefaultModelExtensionsImportDecorator(jsonMetadataConverter);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public WrapperExtensionsImportDecorator processExtensionsImportDecorator() {
-        return new WrapperExtensionsImportDecorator();
+    public WrapperExtensionsImportDecorator processExtensionsImportDecorator(
+        JsonConverter<Map> jsonMetadataConverter,
+        ProcessModelType processModelType
+    ) {
+        return new WrapperExtensionsImportDecorator(jsonMetadataConverter, processModelType);
     }
 
     @Bean
