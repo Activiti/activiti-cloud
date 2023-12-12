@@ -19,7 +19,7 @@
     <module>activiti-cloud-acceptance-tests-modeling</module>
   </modules>
   <properties>
-    <activiti.version>8.2.0-alpha.11</activiti.version>
+    <activiti.version>0.0.1-PR-4510-1683-SNAPSHOT</activiti.version>
     <everit-json-schema.version>1.14.3</everit-json-schema.version>
     <commons-collections4.version>4.4</commons-collections4.version>
     <json-java.version>20231013</json-java.version>
