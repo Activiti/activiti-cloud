@@ -70,14 +70,14 @@ public class KeycloakClientCrudIT {
         KeycloakClientRepresentation clientCreated = keycloakClient.getClientById(idOfClient);
         assertThat(clientCreated).isNotNull();
         assertThat(clientCreated.getClientId()).isEqualTo(clientId);
-        assertThat(clientCreated.getAttributes().accessTokenLifetime()).isEqualTo(120);
+        assertThat(clientCreated.getAttributes().accessTokenLifespan()).isEqualTo(120);
 
         clientCreated.setDirectAccessGrantsEnabled(false);
         clientCreated.setAttributes(new KeycloakClientRepresentation.ClientAttributes(null));
         keycloakClient.updateClient(idOfClient, clientCreated);
         KeycloakClientRepresentation clientUpdated = keycloakClient.getClientById(idOfClient);
         assertThat(clientUpdated.getDirectAccessGrantsEnabled()).isFalse();
-        assertThat(clientUpdated.getAttributes().accessTokenLifetime()).isNull();
+        assertThat(clientUpdated.getAttributes().accessTokenLifespan()).isNull();
 
         keycloakClient.deleteClient(idOfClient);
         Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));
