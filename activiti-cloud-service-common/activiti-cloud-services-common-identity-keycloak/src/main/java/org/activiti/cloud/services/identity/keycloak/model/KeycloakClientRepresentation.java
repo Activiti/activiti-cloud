@@ -21,7 +21,7 @@ import org.activiti.cloud.identity.IdentityClientRepresentation;
 
 public class KeycloakClientRepresentation implements IdentityClientRepresentation {
 
-    public record ClientAttributes(@JsonProperty("access.token.lifespan") Integer accessTokenLifetime) {}
+    public record ClientAttributes(@JsonProperty("access.token.lifespan") Integer accessTokenLifespan) {}
 
     private String id;
     private String clientId;
