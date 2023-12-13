@@ -117,7 +117,9 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(
                 post("/v1/projects/{projectId}/models", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -132,7 +134,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -151,7 +155,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -170,16 +176,16 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn())
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
-            .hasValidationErrorMessages(
-                    String.format("The model name length cannot be greater than 100: '%s'", name)
-            );
+            .hasValidationErrorMessages(String.format("The model name length cannot be greater than 100: '%s'", name));
     }
 
     @Test
@@ -191,7 +197,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isCreated());
@@ -206,7 +214,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             post("/v1/projects/{projectId}/models", project.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isCreated());
@@ -223,7 +233,9 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(
                 put("/v1/models/{modelId}", genericNonJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
@@ -240,7 +252,9 @@ public class GenericNonJsonModelTypeControllerIT {
             .perform(
                 put("/v1/models/{modelId}", genericNonJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -256,7 +270,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isBadRequest());
@@ -276,16 +292,16 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isBadRequest());
         assertThatResponse(resultActions.andReturn())
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
-            .hasValidationErrorMessages(
-                    String.format("The model name length cannot be greater than 100: '%s'", name)
-            );
+            .hasValidationErrorMessages(String.format("The model name length cannot be greater than 100: '%s'", name));
     }
 
     @Test
@@ -298,7 +314,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isOk());
@@ -314,7 +332,9 @@ public class GenericNonJsonModelTypeControllerIT {
         ResultActions resultActions = mockMvc.perform(
             put("/v1/models/{modelId}", genericNonJsonModel.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName())))
+                .content(
+                    objectMapper.writeValueAsString(new ModelEntity(name, "key", genericNonJsonModelType.getName()))
+                )
         );
 
         resultActions.andExpect(status().isOk());

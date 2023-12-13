@@ -255,7 +255,7 @@ public class ConnectorModelControllerIT {
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
             .hasValidationErrorMessages(
-                    String.format("The model name length cannot be greater than 100: '%s'", connectorName)
+                String.format("The model name length cannot be greater than 100: '%s'", connectorName)
             );
     }
 

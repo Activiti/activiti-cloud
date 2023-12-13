@@ -124,7 +124,9 @@ public class GenericJsonModelTypeControllerIT {
             .perform(
                 post("/v1/projects/{projectId}/models", project.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -184,9 +186,7 @@ public class GenericJsonModelTypeControllerIT {
         assertThatResponse(resultActions.andReturn())
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
-            .hasValidationErrorMessages(
-                    String.format("The model name length cannot be greater than 100: '%s'", name)
-            );
+            .hasValidationErrorMessages(String.format("The model name length cannot be greater than 100: '%s'", name));
     }
 
     @Test
@@ -230,7 +230,9 @@ public class GenericJsonModelTypeControllerIT {
             .perform(
                 put("/v1/models/{modelId}", genericJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo("updated-connector-name")));
@@ -247,7 +249,9 @@ public class GenericJsonModelTypeControllerIT {
             .perform(
                 put("/v1/models/{modelId}", genericJsonModel.getId())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName())))
+                    .content(
+                        objectMapper.writeValueAsString(new ModelEntity(name, "key", genericJsonModelType.getName()))
+                    )
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name", equalTo(GENERIC_MODEL_NAME)));
@@ -290,9 +294,7 @@ public class GenericJsonModelTypeControllerIT {
         assertThatResponse(resultActions.andReturn())
             .isValidationException()
             .hasValidationErrorCodes("length.greater")
-            .hasValidationErrorMessages(
-                    String.format("The model name length cannot be greater than 100: '%s'", name)
-            );
+            .hasValidationErrorMessages(String.format("The model name length cannot be greater than 100: '%s'", name));
     }
 
     @Test

@@ -47,12 +47,12 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
     );
 
     @Query(
-            "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND m.key=:modelKey AND m.type=:modelTypeFilter"
+        "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND m.key=:modelKey AND m.type=:modelTypeFilter"
     )
     List<ModelEntity> findModelByProjectIdAndKeyEqualsAndTypeEquals(
-            @Param("projectId") String projectId,
-            @Param("modelKey") String modelKey,
-            @Param("modelTypeFilter") String modelTypeFilter
+        @Param("projectId") String projectId,
+        @Param("modelKey") String modelKey,
+        @Param("modelTypeFilter") String modelTypeFilter
     );
 
     @Query("SELECT m FROM Model m WHERE m.displayName=:modelName AND m.scope=:scope AND m.type=:modelTypeFilter")

@@ -34,8 +34,10 @@ class WrapperExtensionsImportDecoratorTest {
 
     private final JsonConverter<Map> jsonConverter = Mockito.mock(JsonConverter.class);
 
-    private final WrapperExtensionsImportDecorator wrapperExtensionsImportDecorator =
-        new WrapperExtensionsImportDecorator(jsonConverter, new ProcessModelType());
+    private final WrapperExtensionsImportDecorator wrapperExtensionsImportDecorator = new WrapperExtensionsImportDecorator(
+        jsonConverter,
+        new ProcessModelType()
+    );
 
     @Test
     void should_decorateModel_withWrapperModel() {

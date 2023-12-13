@@ -183,7 +183,11 @@ public class ModelRepositoryImplTest {
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByNameAndScopeAndTypeEquals(model.getDisplayName(), ModelScope.GLOBAL, processModelType.getName());
+            .findModelByNameAndScopeAndTypeEquals(
+                model.getDisplayName(),
+                ModelScope.GLOBAL,
+                processModelType.getName()
+            );
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId()).isEqualTo(model.getId());
     }
@@ -205,7 +209,11 @@ public class ModelRepositoryImplTest {
         );
 
         verify(modelJpaRepository, times(1))
-            .findModelByNameAndScopeAndTypeEquals(model.getDisplayName(), ModelScope.GLOBAL, processModelType.getName());
+            .findModelByNameAndScopeAndTypeEquals(
+                model.getDisplayName(),
+                ModelScope.GLOBAL,
+                processModelType.getName()
+            );
         assertThat(result.isPresent()).isFalse();
     }
 
