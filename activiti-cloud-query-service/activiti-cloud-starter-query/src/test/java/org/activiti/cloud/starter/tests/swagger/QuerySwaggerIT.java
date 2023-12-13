@@ -30,13 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.Charset;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,6 +55,9 @@ public class QuerySwaggerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Value("classpath:swagger-expected.json")
+    private Resource swaggerExpectedResource;
 
     @Test
     public void should_swaggerDefinitionHavePathsAndDefinitionsAndInfo() throws Exception {
@@ -84,9 +90,12 @@ public class QuerySwaggerIT {
             .andExpect(jsonPath("$.paths[*].[*].operationId").value(not(hasItem(matchesRegex("\\w*(_[0-9])+$")))))
             .andReturn();
 
-        assertThatJson(result.getResponse().getContentAsString())
+        String generatedAPIDoc = result.getResponse().getContentAsString();
+        assertThatJson(generatedAPIDoc)
             .inPath("$.paths./v1/tasks.get.parameters[*].['name', 'required']")
             .isArray()
             .contains("{name: \"variables.name\", required: false}", "{name: \"variables.value\", required: false}");
+
+        assertThatJson(generatedAPIDoc).isEqualTo(swaggerExpectedResource.getContentAsString(Charset.defaultCharset()));
     }
 }

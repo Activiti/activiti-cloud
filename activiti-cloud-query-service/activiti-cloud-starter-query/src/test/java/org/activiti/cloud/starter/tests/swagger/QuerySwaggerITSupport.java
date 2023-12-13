@@ -50,9 +50,6 @@ public class QuerySwaggerITSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("classpath:swagger-expected.json")
-    private Resource swaggerExpectedResource;
-
     /**
      * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
      */
@@ -68,12 +65,5 @@ public class QuerySwaggerITSupport {
                 );
                 Files.write(new File("target/swagger.yaml").toPath(), new YAMLMapper().writeValueAsBytes(jsonNodeTree));
             });
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        JsonNode generatedSwagger = mapper.readTree(new File("target/swagger.json"));
-        JsonNode expectedSwagger = mapper.readTree(swaggerExpectedResource.getFile());
-
-        assertThat(generatedSwagger).isEqualTo(expectedSwagger);
     }
 }
