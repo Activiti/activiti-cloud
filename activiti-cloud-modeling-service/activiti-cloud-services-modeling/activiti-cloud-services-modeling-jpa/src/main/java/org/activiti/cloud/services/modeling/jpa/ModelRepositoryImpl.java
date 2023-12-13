@@ -135,7 +135,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity copyModel(ModelEntity model, ProjectEntity project) {
-        ModelEntity modelEntityClone = new ModelEntity(model.getDisplayName(), "key", model.getType());
+        ModelEntity modelEntityClone = new ModelEntity(model.getDisplayName(), model.getKey(), model.getType());
         modelEntityClone.setExtensions(model.getExtensions());
         modelEntityClone.setContentType(model.getContentType());
         modelEntityClone.setContent(model.getContent());
