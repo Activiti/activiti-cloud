@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests.swagger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,10 +26,12 @@ import java.nio.file.Files;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,6 +50,9 @@ public class QuerySwaggerITSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("classpath:swagger-expected.json")
+    private Resource swaggerExpectedResource;
+
     /**
      * This is not a test. It's actually generating the swagger.json and yaml definition of the service. It is used by maven generate-swagger profile build.
      */
@@ -62,5 +68,12 @@ public class QuerySwaggerITSupport {
                 );
                 Files.write(new File("target/swagger.yaml").toPath(), new YAMLMapper().writeValueAsBytes(jsonNodeTree));
             });
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        JsonNode generatedSwagger = mapper.readTree(new File("target/swagger.json"));
+        JsonNode expectedSwagger = mapper.readTree(swaggerExpectedResource.getFile());
+
+        assertThat(generatedSwagger).isEqualTo(expectedSwagger);
     }
 }

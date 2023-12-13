@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
+
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
@@ -39,6 +41,8 @@ public interface ProcessInstanceRepository
         CrudRepository<ProcessInstanceEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QProcessInstanceEntity root) {
+        whitelist(root).apply(bindings);
+
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));
         bindings.bind(root.lastModifiedTo).first((path, value) -> root.lastModified.before(value));
