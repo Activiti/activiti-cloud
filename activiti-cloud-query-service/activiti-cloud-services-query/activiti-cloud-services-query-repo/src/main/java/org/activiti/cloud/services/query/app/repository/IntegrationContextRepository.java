@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
+
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.QIntegrationContextEntity;
@@ -34,6 +36,8 @@ public interface IntegrationContextRepository
         CrudRepository<IntegrationContextEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QIntegrationContextEntity root) {
+        whitelist(root).apply(bindings);
+
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 

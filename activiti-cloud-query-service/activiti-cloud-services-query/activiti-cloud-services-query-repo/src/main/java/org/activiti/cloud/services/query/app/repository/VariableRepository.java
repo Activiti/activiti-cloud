@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
+
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
@@ -34,6 +36,8 @@ public interface VariableRepository
         CrudRepository<ProcessVariableEntity, Long> {
     @Override
     default void customize(QuerydslBindings bindings, QProcessVariableEntity root) {
+        whitelist(root).apply(bindings);
+
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
 }
