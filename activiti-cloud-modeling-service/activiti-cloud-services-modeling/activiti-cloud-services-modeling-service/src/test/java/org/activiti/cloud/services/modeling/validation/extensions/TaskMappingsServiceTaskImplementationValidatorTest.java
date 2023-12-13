@@ -80,7 +80,8 @@ class TaskMappingsServiceTaskImplementationValidatorTest {
         connectorModelContent = new ConnectorModelContent();
         connectorModelContent.setName(CONNECTOR_NAME);
         connectorModelContent.setActions(Map.of("id", action));
-        lenient().when(connectorModelContentConverter.convertToModelContent(any()))
+        lenient()
+            .when(connectorModelContentConverter.convertToModelContent(any()))
             .thenReturn(Optional.of(connectorModelContent));
     }
 

@@ -34,8 +34,9 @@ class DefaultModelExtensionsImportDecoratorTest {
 
     private final JsonConverter<Map> jsonConverter = Mockito.mock(JsonConverter.class);
 
-    private final DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator =
-        new DefaultModelExtensionsImportDecorator(jsonConverter);
+    private final DefaultModelExtensionsImportDecorator defaultModelExtensionsImportDecorator = new DefaultModelExtensionsImportDecorator(
+        jsonConverter
+    );
 
     @Test
     void should_decorateModel() {
