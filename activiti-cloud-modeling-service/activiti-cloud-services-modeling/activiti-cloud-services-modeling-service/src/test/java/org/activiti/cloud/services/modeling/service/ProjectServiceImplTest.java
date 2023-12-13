@@ -48,6 +48,7 @@ import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.repository.ProjectRepository;
 import org.activiti.cloud.services.modeling.service.api.ModelService;
 import org.activiti.cloud.services.modeling.service.api.ModelService.ProjectAccessControl;
+import org.activiti.cloud.services.modeling.service.decorators.ModelExtensionsImportDecoratorService;
 import org.activiti.cloud.services.modeling.service.utils.KeyGenerator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectNameValidator;
 import org.activiti.cloud.services.modeling.validation.project.ProjectValidator;
@@ -94,6 +95,9 @@ public class ProjectServiceImplTest {
 
     @Mock
     private KeyGenerator keyGenerator;
+
+    @Mock
+    private ModelExtensionsImportDecoratorService modelExtensionsImportDecoratorService;
 
     @BeforeEach
     void setUp() {

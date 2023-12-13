@@ -125,7 +125,6 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity updateModel(ModelEntity modelToBeUpdated, ModelEntity newModel) {
-        // TODO add key?
         Optional.ofNullable(newModel.getDisplayName()).ifPresent(modelToBeUpdated::setDisplayName);
         Optional.ofNullable(newModel.getExtensions()).ifPresent(modelToBeUpdated::setExtensions);
         if (!modelToBeUpdated.equals(newModel)) {
