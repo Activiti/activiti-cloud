@@ -53,9 +53,7 @@ import org.springframework.util.StringUtils;
  */
 public class MockFactory {
 
-    private static final KeyGenerator KEY_GENERATOR = new KeyGeneratorImpl(
-        new ProjectNameValidator()
-    );
+    private static final KeyGenerator KEY_GENERATOR = new KeyGeneratorImpl(new ProjectNameValidator());
 
     public static ProjectEntity project(String name) {
         return new ProjectEntity(name, generateKey(name));
@@ -103,7 +101,6 @@ public class MockFactory {
         Extensions extensions,
         byte[] content
     ) {
-        //TODO change null to generated key
         ModelEntity processModel = new ModelEntity(name, null, PROCESS);
         processModel.addProject(parentProject);
         processModel.setExtensions(extensions != null ? buildExtensions(name, extensions) : null);
@@ -267,7 +264,6 @@ public class MockFactory {
     }
 
     public static ModelEntity connectorModel(String name) {
-        //TODO change null to generated key
         return new ModelEntity(name, null, ConnectorModelType.NAME);
     }
 
