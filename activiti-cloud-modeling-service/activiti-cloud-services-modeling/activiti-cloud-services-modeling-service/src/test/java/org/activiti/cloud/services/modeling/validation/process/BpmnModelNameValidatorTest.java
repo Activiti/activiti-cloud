@@ -89,9 +89,6 @@ class BpmnModelNameValidatorTest {
         Stream<ModelValidationError> errors = bpmnModelNameValidator.validate(bpmnModel, validationContext);
         assertThat(errors)
             .flatExtracting(ModelValidationError::getErrorCode, ModelValidationError::getDescription)
-            .containsOnly(
-                "length.greater",
-                "The process name length cannot be greater than 100: '%s'".formatted(name)
-            );
+            .containsOnly("length.greater", "The process name length cannot be greater than 100: '%s'".formatted(name));
     }
 }
