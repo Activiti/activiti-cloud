@@ -29,6 +29,11 @@ import org.activiti.cloud.services.modeling.validation.NameValidator;
 public class BpmnModelNameValidator implements BpmnCommonModelValidator, NameValidator {
 
     @Override
+    public int getNameMaxLength() {
+        return 100;
+    }
+
+    @Override
     public Stream<ModelValidationError> validate(BpmnModel bpmnModel, ValidationContext validationContext) {
         return validateName(
             Optional.ofNullable(bpmnModel).map(BpmnModel::getMainProcess).map(Process::getName).orElse(null),
