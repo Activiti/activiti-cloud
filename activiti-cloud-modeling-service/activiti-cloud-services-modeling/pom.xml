@@ -17,9 +17,7 @@
     <module>activiti-cloud-services-modeling-jpa</module>
     <module>activiti-cloud-services-modeling-rest</module>
     <module>activiti-cloud-services-modeling-repository</module>
-    <module>activiti-cloud-services-modeling-api</module>
     <module>activiti-cloud-services-modeling-service</module>
-    <module>activiti-cloud-services-modeling-api-impl</module>
     <module>activiti-cloud-services-modeling-liquibase</module>
   </modules>
 </project>
