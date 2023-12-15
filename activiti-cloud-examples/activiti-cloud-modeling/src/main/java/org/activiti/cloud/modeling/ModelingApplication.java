@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.modeling;
 
-import org.activiti.cloud.starter.juel.configuration.EnableActivitiJuel;
 import org.activiti.cloud.starter.modeling.configuration.EnableActivitiModeling;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,7 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @EnableActivitiModeling
-@EnableActivitiJuel
 public class ModelingApplication {
 
     public static void main(String[] args) {
