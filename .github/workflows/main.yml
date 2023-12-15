@@ -109,9 +109,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Build Example Runtime Bundle
-        run: make docker/example-runtime-bundle
-
       - name: Build Activiti Cloud Query
         run: make docker/activiti-cloud-query
 
