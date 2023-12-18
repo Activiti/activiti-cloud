@@ -16,10 +16,7 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.HEAD;
 import static org.springframework.http.HttpMethod.OPTIONS;
@@ -36,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationConfigurerTest {
@@ -48,6 +46,9 @@ class AuthorizationConfigurerTest {
 
     @Mock
     private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl;
+
+    @Mock
+    private CsrfConfigurer<HttpSecurity> csrfConfigurer;
 
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
@@ -98,6 +99,22 @@ class AuthorizationConfigurerTest {
 
         inOrder.verify(authorizeRequests).requestMatchers(eq("/c"));
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+    }
+
+    @Test
+    public void should_disableCSRF_when_aURLisPublic() throws Exception {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        String[] patterns = { "/public1", "/public2" };
+        authorizationProperties.setSecurityConstraints(asList(createSecurityConstraint(new String[] {}, patterns)));
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
+        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
+        when(http.csrf()).thenReturn(csrfConfigurer);
+
+        authorizationConfigurer.configure(http);
+
+        verify(http.csrf()).ignoringRequestMatchers(eq(patterns));
     }
 
     @Test
