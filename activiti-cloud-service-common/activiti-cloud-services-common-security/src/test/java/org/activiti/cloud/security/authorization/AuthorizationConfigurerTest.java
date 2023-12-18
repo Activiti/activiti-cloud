@@ -63,6 +63,7 @@ class AuthorizationConfigurerTest {
 
         when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
+        when(http.csrf()).thenReturn(csrfConfigurer);
 
         authorizationConfigurer.configure(http);
 
@@ -88,6 +89,7 @@ class AuthorizationConfigurerTest {
 
         when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.requestMatchers(any(String.class))).thenReturn(authorizedUrl);
+        when(http.csrf()).thenReturn(csrfConfigurer);
 
         authorizationConfigurer.configure(http);
 
@@ -133,6 +135,7 @@ class AuthorizationConfigurerTest {
 
         when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
         when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
+        when(http.csrf()).thenReturn(csrfConfigurer);
 
         authorizationConfigurer.configure(http);
 
