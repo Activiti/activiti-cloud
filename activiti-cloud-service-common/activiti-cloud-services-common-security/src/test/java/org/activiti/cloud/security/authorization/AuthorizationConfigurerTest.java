@@ -51,7 +51,7 @@ class AuthorizationConfigurerTest {
     private CsrfConfigurer<HttpSecurity> csrfConfigurer;
 
     @Test
-    public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
+    void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(
             asList(
@@ -77,7 +77,7 @@ class AuthorizationConfigurerTest {
     }
 
     @Test
-    public void should_configureAuth_when_aURLiSPublic() throws Exception {
+    void should_configureAuth_when_aURLiSPublic() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(
             asList(
@@ -104,7 +104,7 @@ class AuthorizationConfigurerTest {
     }
 
     @Test
-    public void should_disableCSRF_when_aURLisPublic() throws Exception {
+    void should_disableCSRF_when_aURLisPublic() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         String[] patterns = { "/public1", "/public2" };
         authorizationProperties.setSecurityConstraints(asList(createSecurityConstraint(new String[] {}, patterns)));
@@ -116,11 +116,11 @@ class AuthorizationConfigurerTest {
 
         authorizationConfigurer.configure(http);
 
-        verify(http.csrf()).ignoringRequestMatchers(eq(patterns));
+        verify(http.csrf()).ignoringRequestMatchers(patterns);
     }
 
     @Test
-    public void should_configureAuth_when_everythingIsAuthenticatedMethods() throws Exception {
+    void should_configureAuth_when_everythingIsAuthenticatedMethods() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(
             asList(
