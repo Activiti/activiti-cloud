@@ -20,6 +20,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -75,9 +76,21 @@ public class AuthorizationConfigurer {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
             authorizationProperties.getSecurityConstraints()
         );
+        List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
             String[] roles = securityConstraint.getAuthRoles();
+            if (roles.length == 0) {
+                List<String> patterns = Arrays
+                    .stream(securityConstraint.getSecurityCollections())
+                    .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
+                    .toList();
+                publicUrls.addAll(patterns);
+            }
             configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
+        }
+        if (!publicUrls.isEmpty()) {
+            LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
+            http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(new CsrfProtectionMatcher(publicUrls)));
         }
         http.anonymous(withDefaults());
     }
