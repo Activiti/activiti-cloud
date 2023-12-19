@@ -16,10 +16,10 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.function.Predicate.not;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -75,21 +75,11 @@ public class AuthorizationConfigurer {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
             authorizationProperties.getSecurityConstraints()
         );
-        List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
             String[] roles = securityConstraint.getAuthRoles();
-            if (roles.length == 0) {
-                List<String> patterns = Arrays
-                    .stream(securityConstraint.getSecurityCollections())
-                    .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
-                    .toList();
-                publicUrls.addAll(patterns);
-            }
             configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
         }
-        LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
-        http.csrf().ignoringRequestMatchers(publicUrls.toArray(new String[] {}));
-        http.anonymous();
+        http.anonymous(withDefaults());
     }
 
     private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
@@ -117,10 +107,10 @@ public class AuthorizationConfigurer {
             if (isNotEmpty(securityCollection.getOmittedMethods())) {
                 List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
                 for (HttpMethod method : methods) {
-                    f.accept(http.authorizeHttpRequests().requestMatchers(method, patterns));
+                    http.authorizeHttpRequests(spec -> f.accept(spec.requestMatchers(method, patterns)));
                 }
             } else {
-                f.accept(http.authorizeHttpRequests().requestMatchers(patterns));
+                http.authorizeHttpRequests(spec -> f.accept(spec.requestMatchers(patterns)));
             }
         }
     }
@@ -155,7 +145,7 @@ public class AuthorizationConfigurer {
     }
 
     private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
-        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::resolve).collect(Collectors.toList());
+        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::valueOf).toList();
         return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
     }
 

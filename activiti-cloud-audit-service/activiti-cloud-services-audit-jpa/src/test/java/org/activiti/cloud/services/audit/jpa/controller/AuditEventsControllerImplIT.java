@@ -331,7 +331,7 @@ public class AuditEventsControllerImplIT {
         Class<? extends MessageAuditEventEntity> clazz,
         BPMNMessageEvent.MessageEvents eventType
     ) throws Exception {
-        MessageAuditEventEntity eventEntity = clazz.newInstance();
+        MessageAuditEventEntity eventEntity = clazz.getDeclaredConstructor().newInstance();
 
         eventEntity.setEventId("eventId");
         eventEntity.setTimestamp(System.currentTimeMillis());

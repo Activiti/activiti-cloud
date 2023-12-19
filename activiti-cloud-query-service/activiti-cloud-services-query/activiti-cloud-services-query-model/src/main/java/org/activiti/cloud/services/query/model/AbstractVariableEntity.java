@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -24,6 +26,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -37,9 +40,11 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String name;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Temporal(TIMESTAMP)
     private Date createTime;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Temporal(TIMESTAMP)
     private Date lastUpdatedTime;
 
     private String executionId;
