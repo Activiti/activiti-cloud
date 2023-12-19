@@ -16,7 +16,8 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
@@ -30,10 +31,13 @@ import org.activiti.cloud.security.authorization.AuthorizationProperties.Securit
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 
@@ -49,6 +53,12 @@ class AuthorizationConfigurerTest {
     @Mock
     private AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl;
 
+    @Captor
+    private ArgumentCaptor<Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>> authorizeHttpRequestsCustomizer;
+
+    @Captor
+    private ArgumentCaptor<String[]> requestMatchers;
+
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
@@ -60,10 +70,13 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
+        when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
+        when(authorizeRequests.requestMatchers(requestMatchers.capture())).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
+
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
+        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
@@ -85,10 +98,13 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
-        when(authorizeRequests.requestMatchers(any(String.class))).thenReturn(authorizedUrl);
+        when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
+        when(authorizeRequests.requestMatchers(requestMatchers.capture())).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
+
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
+        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
@@ -114,10 +130,13 @@ class AuthorizationConfigurerTest {
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
-        when(http.authorizeHttpRequests()).thenReturn(authorizeRequests);
+        when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
         when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
+
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(5);
+        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 

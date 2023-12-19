@@ -27,11 +27,11 @@ public interface ProcessRuntimeChannels {
 
     @OutputBinding(RUNTIME_CMD_PRODUCER)
     default MessageChannel runtimeCmdProducer() {
-        return MessageChannels.direct(RUNTIME_CMD_PRODUCER).get();
+        return MessageChannels.direct(RUNTIME_CMD_PRODUCER).getObject();
     }
 
     @InputBinding(RUNTIME_CMD_RESULTS)
     default SubscribableChannel runtimeCmdResults() {
-        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).get();
+        return MessageChannels.publishSubscribe(RUNTIME_CMD_RESULTS).getObject();
     }
 }

@@ -12,13 +12,13 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Dependencies Parent</name>
   <properties>
-    <spring-cloud.version>2022.0.4</spring-cloud.version>
+    <spring-cloud.version>2023.0.0</spring-cloud.version>
     <testcontainers.version>1.19.1</testcontainers.version>
-    <h2.version>2.2.220</h2.version>
+    <h2.version>2.2.224</h2.version>
     <graphql-java.version>21.3</graphql-java.version>
     <postgresql.version>42.5.1</postgresql.version>
-    <liquibase.version>4.20.0</liquibase.version>
-    <hibernate.version>6.2.7.Final</hibernate.version>
+    <liquibase.version>4.24.0</liquibase.version>
+    <hibernate.version>6.3.1.Final</hibernate.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -79,7 +79,7 @@
       <dependency>
         <groupId>org.yaml</groupId>
         <artifactId>snakeyaml</artifactId>
-        <version>2.0</version>
+        <version>2.2</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

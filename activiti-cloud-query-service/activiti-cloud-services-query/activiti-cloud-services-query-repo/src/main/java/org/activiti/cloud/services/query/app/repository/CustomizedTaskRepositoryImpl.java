@@ -52,7 +52,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
 
         Predicate condition = variableEntity.name
             .eq(name)
-            .and(Expressions.booleanTemplate("{0} like {1}", variableEntity.value, value));
+            .and(Expressions.booleanTemplate("{0} = {1}", variableEntity.value, value));
 
         JPQLQuery<TaskEntity> from = from(taskEntity)
             .innerJoin(taskEntity.variables, variableEntity)
