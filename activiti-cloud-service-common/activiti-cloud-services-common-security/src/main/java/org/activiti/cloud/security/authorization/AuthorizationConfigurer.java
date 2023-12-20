@@ -90,7 +90,7 @@ public class AuthorizationConfigurer {
         }
         if (!publicUrls.isEmpty()) {
             LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
-            http.csrf(csrf -> csrf.requireCsrfProtectionMatcher(new CsrfProtectionMatcher(publicUrls)));
+            http.csrf(csrf -> csrf.ignoringRequestMatchers(new CsrfIgnoreMatcher(publicUrls)));
         }
         http.anonymous(withDefaults());
     }

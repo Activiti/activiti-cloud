@@ -21,19 +21,19 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
-public class CsrfProtectionMatcher implements RequestMatcher {
+public class CsrfIgnoreMatcher implements RequestMatcher {
 
     private final List<String> publicUrls;
 
     private final PathMatcher matcher;
 
-    public CsrfProtectionMatcher(List<String> publicUrls) {
+    public CsrfIgnoreMatcher(List<String> publicUrls) {
         this.publicUrls = publicUrls;
         this.matcher = new AntPathMatcher();
     }
 
     @Override
     public boolean matches(HttpServletRequest request) {
-        return publicUrls.stream().noneMatch(url -> matcher.match(url, request.getRequestURI()));
+        return publicUrls.stream().anyMatch(url -> matcher.match(url, request.getRequestURI()));
     }
 }

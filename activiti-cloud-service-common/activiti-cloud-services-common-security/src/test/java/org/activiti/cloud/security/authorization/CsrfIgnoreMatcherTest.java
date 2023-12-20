@@ -22,20 +22,20 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-class CsrfProtectionMatcherTest {
+class CsrfIgnoreMatcherTest {
 
-    List<String> publicUrlsPatterns = asList("/public", "/public/**");
-    List<String> nonPublicUrlsPatterns = asList("/non-public", "/non-public/**");
+    private final List<String> publicUrlsPatterns = asList("/public", "/public/**");
+    private final List<String> nonPublicUrlsPatterns = asList("/non-public", "/non-public/**");
+    private final CsrfIgnoreMatcher matcher = new CsrfIgnoreMatcher(publicUrlsPatterns);
 
     @Test
-    void should_matchNonPublicURLsPatterns() {
-        CsrfProtectionMatcher matcher = new CsrfProtectionMatcher(publicUrlsPatterns);
-        nonPublicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isTrue());
+    void should_matchPublicURLsPatterns() {
+        nonPublicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse()
+        );
     }
 
     @Test
-    void should_not_matchPublicURLsPatterns() {
-        CsrfProtectionMatcher matcher = new CsrfProtectionMatcher(publicUrlsPatterns);
-        publicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isFalse());
+    void should_not_matchNonPublicURLsPatterns() {
+        publicUrlsPatterns.forEach(url -> assertThat(matcher.matches(new MockHttpServletRequest("", url))).isTrue());
     }
 }
