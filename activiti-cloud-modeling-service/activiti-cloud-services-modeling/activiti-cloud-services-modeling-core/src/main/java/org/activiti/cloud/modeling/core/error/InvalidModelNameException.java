@@ -15,19 +15,19 @@
  */
 package org.activiti.cloud.modeling.core.error;
 
-public class ModelNameInvalidException extends ModelingException {
+public class InvalidModelNameException extends ModelingException {
 
-    public ModelNameInvalidException() {}
+    public InvalidModelNameException() {}
 
-    public ModelNameInvalidException(Throwable cause) {
+    public InvalidModelNameException(Throwable cause) {
         super(cause);
     }
 
-    public ModelNameInvalidException(String message) {
+    public InvalidModelNameException(String message) {
         super(message);
     }
 
-    public ModelNameInvalidException(String message, Throwable cause) {
+    public InvalidModelNameException(String message, Throwable cause) {
         super(message, cause);
     }
 }

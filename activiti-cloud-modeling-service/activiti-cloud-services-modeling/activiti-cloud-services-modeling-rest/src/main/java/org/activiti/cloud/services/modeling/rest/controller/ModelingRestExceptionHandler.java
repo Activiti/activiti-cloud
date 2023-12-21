@@ -27,7 +27,7 @@ import org.activiti.cloud.modeling.core.error.ImportModelException;
 import org.activiti.cloud.modeling.core.error.ImportProjectException;
 import org.activiti.cloud.modeling.core.error.ModelConversionException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
-import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
+import org.activiti.cloud.modeling.core.error.InvalidModelNameException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.SyntacticModelValidationException;
@@ -83,9 +83,8 @@ public class ModelingRestExceptionHandler {
         response.sendError(CONFLICT.value(), ex.getMessage());
     }
 
-    @ExceptionHandler({ ModelNameInvalidException.class })
-    public void handleModelNameInvalidException(ModelNameInvalidException ex, HttpServletResponse response)
-        throws IOException {
+    @ExceptionHandler({ InvalidModelNameException.class })
+    public void handleModelNameInvalidException(InvalidModelNameException ex, HttpServletResponse response) {
         logger.error(ex.getMessage(), ex);
         response.sendError(BAD_REQUEST.value(), ex.getMessage());
     }
