@@ -58,8 +58,8 @@ import org.activiti.cloud.modeling.api.impl.ModelImpl;
 import org.activiti.cloud.modeling.api.impl.ProjectImpl;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
+import org.activiti.cloud.modeling.core.error.InvalidModelNameException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
-import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.repository.ModelRepository;
@@ -219,7 +219,7 @@ class ModelServiceImplTest {
         wrongNameModel.setName("wrong-name-");
         wrongNameModel.setType("model-type");
         assertThatThrownBy(() -> modelService.createModel(projectOne, wrongNameModel))
-            .isInstanceOf(ModelNameInvalidException.class)
+            .isInstanceOf(InvalidModelNameException.class)
             .hasMessage(
                 "The model name should follow DNS-1035 conventions:" +
                 " it must consist of lower case alphanumeric characters or '-'," +
@@ -233,7 +233,7 @@ class ModelServiceImplTest {
         wrongNameModel.setName("-wrong-name");
         wrongNameModel.setType("model-type");
         assertThatThrownBy(() -> modelService.createModel(projectOne, wrongNameModel))
-            .isInstanceOf(ModelNameInvalidException.class)
+            .isInstanceOf(InvalidModelNameException.class)
             .hasMessage(
                 "The model name should follow DNS-1035 conventions:" +
                 " it must consist of lower case alphanumeric characters or '-'," +
@@ -333,7 +333,7 @@ class ModelServiceImplTest {
         wrongNameModel.setName("-wrong-name");
         modelTwo.setType("model-type");
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
-            .isInstanceOf(ModelNameInvalidException.class)
+            .isInstanceOf(InvalidModelNameException.class)
             .hasMessage(
                 "The model name should follow DNS-1035 conventions:" +
                 " it must consist of lower case alphanumeric characters or '-'," +
@@ -347,7 +347,7 @@ class ModelServiceImplTest {
         wrongNameModel.setName("wrong-name-");
         modelTwo.setType("model-type");
         assertThatThrownBy(() -> modelService.updateModel(modelTwo, wrongNameModel))
-            .isInstanceOf(ModelNameInvalidException.class)
+            .isInstanceOf(InvalidModelNameException.class)
             .hasMessage(
                 "The model name should follow DNS-1035 conventions:" +
                 " it must consist of lower case alphanumeric characters or '-'," +

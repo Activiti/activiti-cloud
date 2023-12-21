@@ -58,8 +58,8 @@ import org.activiti.cloud.modeling.api.ValidationContext;
 import org.activiti.cloud.modeling.api.process.ModelScope;
 import org.activiti.cloud.modeling.converter.JsonConverter;
 import org.activiti.cloud.modeling.core.error.ImportModelException;
+import org.activiti.cloud.modeling.core.error.InvalidModelNameException;
 import org.activiti.cloud.modeling.core.error.ModelNameConflictException;
-import org.activiti.cloud.modeling.core.error.ModelNameInvalidException;
 import org.activiti.cloud.modeling.core.error.ModelScopeIntegrityException;
 import org.activiti.cloud.modeling.core.error.SemanticModelValidationException;
 import org.activiti.cloud.modeling.core.error.UnknownModelTypeException;
@@ -226,7 +226,7 @@ public class ModelServiceImpl implements ModelService {
     private void throwModelNameInvalidException(ModelValidationError error) {
         String errorDescription = error.getDescription();
         logger.info(errorDescription);
-        throw new ModelNameInvalidException(errorDescription);
+        throw new InvalidModelNameException(errorDescription);
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
