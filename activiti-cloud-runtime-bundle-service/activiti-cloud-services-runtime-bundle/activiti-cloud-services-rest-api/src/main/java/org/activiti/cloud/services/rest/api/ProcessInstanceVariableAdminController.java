@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @RequestMapping(
     value = "/admin/v1/process-instances/{processInstanceId}/variables",
-    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
 )
 public interface ProcessInstanceVariableAdminController {
     @RequestMapping(method = RequestMethod.GET)
