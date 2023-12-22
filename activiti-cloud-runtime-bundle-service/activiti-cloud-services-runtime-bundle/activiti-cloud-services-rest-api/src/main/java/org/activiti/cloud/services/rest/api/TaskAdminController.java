@@ -30,7 +30,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+@RequestMapping(value = "/admin/v1/tasks", produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
 public interface TaskAdminController {
     @RequestMapping(method = RequestMethod.GET)
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
