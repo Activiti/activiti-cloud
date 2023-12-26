@@ -40,7 +40,7 @@ public class FeignConfiguration {
             .encoder(new FormEncoder())
             .decoder(new GsonDecoder())
             .logger(new Logger.ErrorLogger())
-            .logLevel(Logger.Level.BASIC)
+            .logLevel(Logger.Level.FULL)
             .target(AuthenticationService.class, baseTestsConfigurationProperties.getAuthUrl());
     }
 }
