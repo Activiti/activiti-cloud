@@ -30,7 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping(
     value = "/admin/v1/process-definitions",
-    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
+//    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public interface ProcessDefinitionAdminController {
     @RequestMapping(method = RequestMethod.GET)
