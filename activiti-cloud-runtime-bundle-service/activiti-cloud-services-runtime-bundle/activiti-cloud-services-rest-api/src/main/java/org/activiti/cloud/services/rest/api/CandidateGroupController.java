@@ -29,10 +29,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @RequestMapping(
     value = "/v1/tasks/{taskId}/candidate-groups",
-//    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
+    //    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-
 public interface CandidateGroupController {
     @RequestMapping(method = RequestMethod.POST)
     void addCandidateGroups(
