@@ -33,7 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@RequestMapping(value = "/admin/v1/tasks", produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+//@RequestMapping(value = "/admin/v1/tasks", produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+@RequestMapping(value = "/admin/v1/tasks", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public interface TaskAdminController {
     @RequestMapping(method = RequestMethod.GET)
     PagedModel<EntityModel<CloudTask>> getTasks(Pageable pageable);
