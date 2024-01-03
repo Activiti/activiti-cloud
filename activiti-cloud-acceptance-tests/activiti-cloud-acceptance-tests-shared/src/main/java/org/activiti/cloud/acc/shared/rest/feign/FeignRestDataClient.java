@@ -115,7 +115,7 @@ public interface FeignRestDataClient<C extends FeignRestDataClient, R> {
             .decoder(decoder)
             .errorDecoder(new FeignErrorDecoder())
             .logger(new Logger.ErrorLogger())
-            .logLevel(Logger.Level.FULL)
+            .logLevel(Logger.Level.BASIC)
             .requestInterceptor(new OAuth2FeignRequestInterceptor());
     }
 }
