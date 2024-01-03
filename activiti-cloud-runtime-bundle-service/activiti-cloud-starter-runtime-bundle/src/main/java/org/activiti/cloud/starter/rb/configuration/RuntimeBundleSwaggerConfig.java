@@ -61,37 +61,31 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
 
     public OpenApiCustomizer openApiCustomizer() {
         return openAPI -> {
-            System.out.println(openAPI.getServers().toString());
             openAPI
-                .getServers()
-                .forEach(server -> {
-                    System.out.println(server.toString());
-                    openAPI
-                        .getPaths()
-                        .values()
-                        .forEach(val -> {
-                            val
-                                .readOperations()
-                                .forEach(operation -> {
-                                    operation
-                                        .getResponses()
-                                        .forEach((key, value) -> {
-                                            if (key.matches("200")) {
-                                                Content contents = value.getContent();
-                                                String applicationHal = "application/hal+json";
-                                                String applicationJson = "application/json";
-                                                if (
-                                                    contents != null &&
-                                                    contents.containsKey(applicationHal) &&
-                                                    contents.containsKey(applicationJson)
-                                                ) {
-                                                    MediaType applicationHalValue = contents.remove(applicationHal);
-                                                    MediaType applicationJsonValue = contents.remove(applicationJson);
-                                                    contents.put(applicationJson, applicationJsonValue);
-                                                    contents.put(applicationHal, applicationHalValue);
-                                                }
-                                            }
-                                        });
+                .getPaths()
+                .values()
+                .forEach(val -> {
+                    val
+                        .readOperations()
+                        .forEach(operation -> {
+                            operation
+                                .getResponses()
+                                .forEach((key, value) -> {
+                                    if (key.matches("200")) {
+                                        Content contents = value.getContent();
+                                        String applicationHal = "application/hal+json";
+                                        String applicationJson = "application/json";
+                                        if (
+                                            contents != null &&
+                                            contents.containsKey(applicationHal) &&
+                                            contents.containsKey(applicationJson)
+                                        ) {
+                                            MediaType applicationHalValue = contents.remove(applicationHal);
+                                            MediaType applicationJsonValue = contents.remove(applicationJson);
+                                            contents.put(applicationJson, applicationJsonValue);
+                                            contents.put(applicationHal, applicationHalValue);
+                                        }
+                                    }
                                 });
                         });
                 });
