@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping(
     value = "/admin/v1/executions",
-    //    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public interface ServiceTaskAdminController {

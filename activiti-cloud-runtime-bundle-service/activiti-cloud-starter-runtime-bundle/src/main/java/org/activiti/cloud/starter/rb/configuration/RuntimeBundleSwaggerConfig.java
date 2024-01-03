@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
@@ -32,6 +34,7 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +55,47 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
             .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )
+            .addOpenApiCustomizer(openApiCustomizer())
             .build();
+    }
+
+    public OpenApiCustomizer openApiCustomizer() {
+        return openAPI -> {
+            System.out.println(openAPI.getServers().toString());
+            openAPI
+                .getServers()
+                .forEach(server -> {
+                    System.out.println(server.toString());
+                    openAPI
+                        .getPaths()
+                        .values()
+                        .forEach(val -> {
+                            val
+                                .readOperations()
+                                .forEach(operation -> {
+                                    operation
+                                        .getResponses()
+                                        .forEach((key, value) -> {
+                                            if (key.matches("200")) {
+                                                Content contents = value.getContent();
+                                                String applicationHal = "application/hal+json";
+                                                String applicationJson = "application/json";
+                                                if (
+                                                    contents != null &&
+                                                    contents.containsKey(applicationHal) &&
+                                                    contents.containsKey(applicationJson)
+                                                ) {
+                                                    MediaType applicationHalValue = contents.remove(applicationHal);
+                                                    MediaType applicationJsonValue = contents.remove(applicationJson);
+                                                    contents.put(applicationJson, applicationJsonValue);
+                                                    contents.put(applicationHal, applicationHalValue);
+                                                }
+                                            }
+                                        });
+                                });
+                        });
+                });
+        };
     }
 
     @Override

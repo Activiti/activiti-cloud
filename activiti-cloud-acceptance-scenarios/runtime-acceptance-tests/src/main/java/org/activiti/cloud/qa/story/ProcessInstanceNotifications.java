@@ -182,7 +182,6 @@ public class ProcessInstanceNotifications {
         assertThat(processInstanceRef.get()).isNotNull();
 
         try {
-            System.out.println(processInstanceRef.toString());
             processQuerySteps.checkProcessInstanceStatus(
                 processInstanceRef.get().getId(),
                 ProcessInstance.ProcessInstanceStatus.COMPLETED
