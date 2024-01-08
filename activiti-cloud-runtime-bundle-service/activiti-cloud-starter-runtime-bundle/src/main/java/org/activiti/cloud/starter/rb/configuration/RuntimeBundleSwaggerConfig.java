@@ -81,8 +81,6 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                                             contents.containsKey(applicationJson)
                                         ) {
                                             MediaType applicationHalValue = contents.remove(applicationHal);
-                                            MediaType applicationJsonValue = contents.remove(applicationJson);
-                                            contents.put(applicationJson, applicationJsonValue);
                                             contents.put(applicationHal, applicationHalValue);
                                         }
                                     }
