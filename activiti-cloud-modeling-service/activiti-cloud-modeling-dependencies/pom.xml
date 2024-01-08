@@ -64,11 +64,6 @@
       </dependency>
       <dependency>
         <groupId>org.activiti.cloud</groupId>
-        <artifactId>activiti-cloud-starter-juel</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.activiti.cloud</groupId>
         <artifactId>activiti-cloud-starter-modeling</artifactId>
         <version>${project.version}</version>
       </dependency>
