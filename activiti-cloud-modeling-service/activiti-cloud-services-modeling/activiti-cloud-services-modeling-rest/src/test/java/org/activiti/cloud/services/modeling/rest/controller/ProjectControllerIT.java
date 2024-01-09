@@ -1096,7 +1096,7 @@ public class ProjectControllerIT {
     @Transactional(propagation = Propagation.NEVER)
     public void should_throwConflictException_when_copyingProjectWithExistingName() throws Exception {
         projectRepository.createProject(project("existing-project"));
-        Project project = projectRepository.createProject(project("project-to-copy"));
+        Project project = projectRepository.createProject(project("project-being-copied"));
 
         String projectName = "existing-project";
 
