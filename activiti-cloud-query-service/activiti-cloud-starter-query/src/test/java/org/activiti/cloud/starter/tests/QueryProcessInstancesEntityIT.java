@@ -1118,7 +1118,7 @@ public class QueryProcessInstancesEntityIT {
         assertThat(responseEntityFiltered.getBody().getContent())
             .flatExtracting(ProcessInstanceEntity::getVariables)
             .extracting(AbstractVariableEntity::getValue)
-            .containsOnly("111", "222");
+            .containsExactly("111", "222");
     }
 
     @Test

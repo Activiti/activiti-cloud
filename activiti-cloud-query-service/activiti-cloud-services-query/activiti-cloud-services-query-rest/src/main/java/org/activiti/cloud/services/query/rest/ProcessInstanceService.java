@@ -98,7 +98,7 @@ public class ProcessInstanceService {
         filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
         var ids = processInstanceEntities.map(ProcessInstanceEntity::getId).toList();
-        var result = processInstanceRepository.findByIdIsIn(ids);
+        var result = processInstanceRepository.findByIdIsIn(ids, pageable.getSort());
 
         return new PageImpl<>(result, pageable, processInstanceEntities.getTotalElements());
     }

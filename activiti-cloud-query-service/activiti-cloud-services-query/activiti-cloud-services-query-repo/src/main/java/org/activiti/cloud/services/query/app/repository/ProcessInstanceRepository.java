@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -57,5 +58,5 @@ public interface ProcessInstanceRepository
     }
 
     @EntityGraph(value = "ProcessInstances.withVariables", type = EntityGraph.EntityGraphType.LOAD)
-    List<ProcessInstanceEntity> findByIdIsIn(Collection<String> ids);
+    List<ProcessInstanceEntity> findByIdIsIn(Collection<String> ids, Sort sort);
 }
