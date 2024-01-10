@@ -28,9 +28,9 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -86,12 +86,10 @@ public class ProcessInstanceAdminService {
         Filter filter = session.enableFilter("variablesFilter");
         filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
-        // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
-        // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
-        processInstanceEntities.forEach(processInstanceEntity ->
-            Hibernate.initialize(processInstanceEntity.getVariables())
-        );
-        return processInstanceEntities;
+        var ids = processInstanceEntities.map(ProcessInstanceEntity::getId).toList();
+        var result = processInstanceRepository.findByIdIsIn(ids);
+
+        return new PageImpl<>(result, pageable, processInstanceEntities.getTotalElements());
     }
 
     public ProcessInstanceEntity findById(@PathVariable String processInstanceId) {
