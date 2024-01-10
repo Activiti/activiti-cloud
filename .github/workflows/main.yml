@@ -118,9 +118,6 @@ jobs:
       - name: Build Example Cloud Connector
         run: make docker/example-cloud-connector
 
-      - name: Build Activiti Cloud Modeling
-        run: make docker/activiti-cloud-modeling
-
       - name: Build Activiti Cloud Identity Adapter
         run: make docker/activiti-cloud-identity-adapter
 
