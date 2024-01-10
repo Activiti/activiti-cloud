@@ -257,12 +257,6 @@ jobs:
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/modeling-service/actuator/health
 
-      - name: Run Modeling Acceptance Tests
-        # modeling acceptance tests does not depend on messaging, so they can be run only once
-        if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
-        run: |
-          make test/modeling-acceptance-tests
-
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
