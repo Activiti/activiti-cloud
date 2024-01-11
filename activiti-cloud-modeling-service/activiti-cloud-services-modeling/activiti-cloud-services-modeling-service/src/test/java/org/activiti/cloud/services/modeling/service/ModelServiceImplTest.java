@@ -244,7 +244,7 @@ class ModelServiceImplTest {
         assertThat(fileContent.get().getFilename()).isEqualTo("fake-process-model-asdfg-extensions.json");
         assertThat(new String(fileContent.get().getFileContent()))
             .isEqualToIgnoringCase(
-                "{\"id\":\"12345678\",\"name\":\"fake-process-model\",\"displayName\":\"fake-process-model\"," +
+                "{\"id\":\"12345678\",\"name\":\"fake-process-model\"," +
                 "\"key\":\"fake-process-model-asdfg\",\"type\":\"PROCESS\"," +
                 "\"extensions\":{\"mappings\":\"\",\"constants\":\"\",\"properties\":\"\"}}"
             );
@@ -257,7 +257,7 @@ class ModelServiceImplTest {
             .thenReturn(Optional.of(modelOne));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getDisplayName()).thenReturn("name");
+        when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         assertThatThrownBy(() -> modelService.createModel(projectOne, modelTwo))
@@ -269,7 +269,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getDisplayName()).thenReturn("name");
+        when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -448,7 +448,7 @@ class ModelServiceImplTest {
         when(processModelContentConverter.convertToBpmnModel(any())).thenReturn(bpmnModel);
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getDisplayName()).thenReturn("name");
+        when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         assertThat(modelService.createModel(projectOne, modelTwo)).isEqualTo(modelTwo);
@@ -502,7 +502,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getDisplayName()).thenReturn("name");
+        when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -520,7 +520,7 @@ class ModelServiceImplTest {
         when(modelTypeService.findModelTypeByName(any())).thenReturn(Optional.of(modelType));
 
         when(modelOne.getId()).thenReturn("modelOneId");
-        when(modelOne.getDisplayName()).thenReturn("name");
+        when(modelOne.getName()).thenReturn("name");
         when(modelOne.getType()).thenReturn(modelType.getName());
 
         when(modelRepository.findModelByNameInProject(projectOne, "name", modelType.getName()))
@@ -528,7 +528,7 @@ class ModelServiceImplTest {
 
         Model modelThree = new ModelImpl();
         modelThree.setId("modelThreeId");
-        modelThree.setDisplayName("name");
+        modelThree.setName("name");
         modelThree.setKey("key");
         modelThree.setType(modelType.getName());
 
@@ -541,15 +541,15 @@ class ModelServiceImplTest {
 
     @Test
     void should_getModels_when_searchingByName() {
-        when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getDisplayName()), any(Pageable.class)))
+        when(modelRepository.getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class)))
             .thenReturn(new PageImpl(asList(modelTwo)));
 
-        Page<Model> models = modelService.getModelsByName(projectOne, modelTwo.getDisplayName(), PageRequest.of(0, 50));
+        Page<Model> models = modelService.getModelsByName(projectOne, modelTwo.getName(), PageRequest.of(0, 50));
 
         assertThat(models.getContent()).hasSize(1);
         assertThat(models.getContent().get(0)).isEqualTo(modelTwo);
 
-        verify(modelRepository).getModelsByName(eq(projectOne), eq(modelTwo.getDisplayName()), any(Pageable.class));
+        verify(modelRepository).getModelsByName(eq(projectOne), eq(modelTwo.getName()), any(Pageable.class));
     }
 
     @Test
@@ -689,7 +689,7 @@ class ModelServiceImplTest {
         extension.put("constants", "");
         extension.put("properties", "");
         transformationModelImpl.setExtensions(extension);
-        transformationModelImpl.setDisplayName("fake-process-model");
+        transformationModelImpl.setName("fake-process-model");
         transformationModelImpl.setKey("fake-process-model-asdfg");
         transformationModelImpl.setType("PROCESS");
         transformationModelImpl.setId("12345678");

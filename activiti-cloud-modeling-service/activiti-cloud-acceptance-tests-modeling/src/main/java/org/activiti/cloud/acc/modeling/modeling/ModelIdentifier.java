@@ -52,7 +52,7 @@ public class ModelIdentifier<M> implements ModelingIdentifier<M> {
     }
 
     private boolean testModelName(Model model) {
-        return modelName.equals(model.getDisplayName());
+        return modelName.equals(model.getName());
     }
 
     private boolean testModelType(Model model) {

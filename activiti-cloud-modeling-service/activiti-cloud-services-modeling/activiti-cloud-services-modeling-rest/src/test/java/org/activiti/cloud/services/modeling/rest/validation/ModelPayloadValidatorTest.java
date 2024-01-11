@@ -47,7 +47,7 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnEmptyStream_when_theInputIsValid() {
-        when(model.getDisplayName()).thenReturn("This is a test!");
+        when(model.getName()).thenReturn("This is a test!");
 
         modelPayloadValidator.validatePayload(model, this.errors);
 
@@ -56,7 +56,7 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnFieldRequiredError_when_itIsNull() {
-        when(model.getDisplayName()).thenReturn(null);
+        when(model.getName()).thenReturn(null);
 
         modelPayloadValidator.validatePayload(model, this.errors);
 
@@ -65,14 +65,14 @@ class ModelPayloadValidatorTest {
 
     @Test
     public void should_returnFieldEmptyError_when_itIsAnEmptyString() {
-        when(model.getDisplayName()).thenReturn("");
+        when(model.getName()).thenReturn("");
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
     }
 
     @Test
     public void should_returnFieldEmptyError_when_itContainsOnlyBlankSpaces() {
-        when(model.getDisplayName()).thenReturn("   ");
+        when(model.getName()).thenReturn("   ");
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors).rejectValue("name", "field.empty", "The model name cannot be empty");
     }
@@ -80,7 +80,7 @@ class ModelPayloadValidatorTest {
     @Test
     public void should_returnLengthGreaterError_when_textIsTooLong() {
         String name = "a".repeat(101);
-        when(model.getDisplayName()).thenReturn(name);
+        when(model.getName()).thenReturn(name);
         modelPayloadValidator.validatePayload(model, this.errors);
         verify(errors)
             .rejectValue(

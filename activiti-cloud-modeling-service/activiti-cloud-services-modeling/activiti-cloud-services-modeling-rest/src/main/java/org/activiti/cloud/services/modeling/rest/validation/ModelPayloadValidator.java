@@ -34,7 +34,7 @@ public class ModelPayloadValidator extends GenericPayloadValidator<Model> implem
 
     @Override
     public void validatePayload(Model model, Errors errors) {
-        if (validateRequiredFields || model.getDisplayName() != null) {
+        if (validateRequiredFields || model.getName() != null) {
             modelNameValidator
                 .validateName(model)
                 .forEach(error -> errors.rejectValue("name", error.getErrorCode(), error.getDescription()));

@@ -107,7 +107,7 @@ public class ModelUpdateListenerControllerIT {
         verify(genericJsonModelUpdateListener, times(1))
             .execute(
                 argThat(modelToBeUpdated -> modelToBeUpdated.getId().equals(genericJsonModel.getId())),
-                argThat(newModel -> newModel.getName().equals(name) && newModel.getDisplayName().equals(name))
+                argThat(newModel -> newModel.getName().equals(name))
             );
 
         verify(genericNonJsonModelUpdateListener, never()).execute(any(), any());

@@ -38,7 +38,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
     );
 
     @Query(
-        "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND m.displayName=:modelName AND m.type=:modelTypeFilter"
+        "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND m.name=:modelName AND m.type=:modelTypeFilter"
     )
     List<ModelEntity> findModelByProjectIdAndNameEqualsAndTypeEquals(
         @Param("projectId") String projectId,
@@ -55,7 +55,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
         @Param("modelTypeFilter") String modelTypeFilter
     );
 
-    @Query("SELECT m FROM Model m WHERE m.displayName=:modelName AND m.scope=:scope AND m.type=:modelTypeFilter")
+    @Query("SELECT m FROM Model m WHERE m.name=:modelName AND m.scope=:scope AND m.type=:modelTypeFilter")
     List<ModelEntity> findModelByNameAndScopeAndTypeEquals(
         @Param("modelName") String modelName,
         @Param("scope") ModelScope scope,
@@ -74,7 +74,7 @@ public interface ModelJpaRepository extends JpaRepository<ModelEntity, String> {
     );
 
     @Query(
-        "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND lower(m.displayName) LIKE lower(concat('%', :name, '%'))"
+        "SELECT m FROM Model m LEFT JOIN m.projects p WHERE p.id=:projectId AND lower(m.name) LIKE lower(concat('%', :name, '%'))"
     )
     Page<ModelEntity> findAllByProjectIdAndNameLike(
         @Param("projectId") String projectId,

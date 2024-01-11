@@ -470,7 +470,7 @@ public class ModelControllerIT {
 
         Optional<Model> optionalModel = modelRepository.findModelById(processModel.getId());
         assertThat(optionalModel)
-            .hasValueSatisfying(model -> assertThat(model.getDisplayName()).isEqualTo("new-process-model"));
+            .hasValueSatisfying(model -> assertThat(model.getName()).isEqualTo("new-process-model"));
     }
 
     @Test
@@ -1286,7 +1286,7 @@ public class ModelControllerIT {
 
         String subjectModelString = mapper.writeValueAsString(modelTwo);
         Model deserializedStringModel = mapper.readValue(subjectModelString, Model.class);
-        deserializedStringModel.setDisplayName("model-1");
+        deserializedStringModel.setName("model-1");
         deserializedStringModel.setKey("key");
         deserializedStringModel.addProject(projectOne);
         deserializedStringModel.addProject(projectTwo);

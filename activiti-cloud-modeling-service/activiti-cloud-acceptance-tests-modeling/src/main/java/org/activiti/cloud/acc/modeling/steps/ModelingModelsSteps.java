@@ -84,7 +84,6 @@ public class ModelingModelsSteps extends ModelingContextSteps<Model> {
     public EntityModel<Model> create(String modelName, String modelType, List<String> processVariables) {
         Model model = mock(Model.class);
         doReturn(modelType.toUpperCase()).when(model).getType();
-        doReturn(modelName).when(model).getDisplayName();
         doReturn(modelName).when(model).getName();
         if (processVariables != null) {
             Map<String, Extensions> processExtension = Collections.singletonMap(

@@ -57,7 +57,6 @@ public abstract class ModelExtensionsImportDecorator {
         Map<String, Object> extensionsValueMap = getExtensionsValueMapFromJson(extensions);
         model.setExtensions(extensionsValueMap);
         getNotBlankValue(extensionsValueMap, "name").ifPresent(model::setName);
-        getNotBlankValue(extensionsValueMap, "displayName").ifPresent(model::setDisplayName);
         getNotBlankValue(extensionsValueMap, "key").ifPresent(model::setKey);
     }
 

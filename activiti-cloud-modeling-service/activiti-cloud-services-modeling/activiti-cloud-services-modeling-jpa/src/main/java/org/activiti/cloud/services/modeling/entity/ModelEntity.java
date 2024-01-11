@@ -84,13 +84,10 @@ public class ModelEntity
 
     private String type;
 
-    @Transient
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "disp_name")
-    private String displayName;
-
-    @Column(name = "name")
+    @Column(name = "key")
     private String key;
 
     private String template;
@@ -105,7 +102,6 @@ public class ModelEntity
 
     public ModelEntity(String name, String key, String type) {
         this.name = name;
-        this.displayName = name;
         this.key = key;
         this.type = type;
     }
@@ -122,30 +118,12 @@ public class ModelEntity
 
     @Override
     public String getName() {
-        if (StringUtils.hasText(name)) {
-            return name;
-        }
-        return displayName;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.displayName = name;
-        this.name = name;
-    }
-
-    @Override
-    public String getDisplayName() {
-        if (StringUtils.hasText(displayName)) {
-            return displayName;
-        }
         return name;
     }
 
     @Override
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-        this.name = displayName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

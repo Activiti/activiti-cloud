@@ -117,4 +117,20 @@
       splitStatements="true"
       stripComments="true" />
   </changeSet>
+
+  <changeSet id="model-rename-columns-name-key" author="aae-modeling">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="model"/>
+      <columnExists tableName="model" columnName="disp_name"/>
+      <not>
+        <columnExists tableName="model" columnName="key"/>
+      </not>
+    </preConditions>
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/09.pg.update.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true" />
+  </changeSet>
 </databaseChangeLog>

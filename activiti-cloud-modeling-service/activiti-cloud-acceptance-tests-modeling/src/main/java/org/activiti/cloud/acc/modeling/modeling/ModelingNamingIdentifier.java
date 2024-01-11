@@ -68,7 +68,7 @@ public abstract class ModelingNamingIdentifier<M> implements ModelingIdentifier<
         return new ModelingNamingIdentifier<Model>(name) {
             @Override
             protected String getName(Model project) {
-                return project.getDisplayName();
+                return project.getName();
             }
         };
     }

@@ -32,7 +32,6 @@ public class WrapperExtensionsImportDecorator extends ModelExtensionsImportDecor
     protected void decorate(Model model, Map<String, Object> extensions) {
         model.setExtensions(getExtensionsValueMapFromJson(extensions));
         getNotBlankValue(extensions, "name").ifPresent(model::setName);
-        getNotBlankValue(extensions, "displayName").ifPresent(model::setDisplayName);
         getNotBlankValue(extensions, "key").ifPresent(model::setKey);
     }
 }

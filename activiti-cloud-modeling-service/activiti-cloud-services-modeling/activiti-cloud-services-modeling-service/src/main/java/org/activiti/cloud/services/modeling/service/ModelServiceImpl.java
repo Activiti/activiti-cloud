@@ -180,7 +180,7 @@ public class ModelServiceImpl implements ModelService {
         try {
             Model model = (Model) modelRepository.getModelType().getConstructor().newInstance();
             model.setType(type);
-            model.setDisplayName(name);
+            model.setName(name);
             model.setKey(key);
             return model;
         } catch (
@@ -192,7 +192,7 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public Model createModel(Project project, Model model) {
-        String key = keyGenerator.generate(model.getDisplayName());
+        String key = keyGenerator.generate(model.getName());
         return createModelWithKey(project, model, key);
     }
 
@@ -228,7 +228,7 @@ public class ModelServiceImpl implements ModelService {
     }
 
     private void checkIfModelNameExistsInProject(Project project, Model model) {
-        String name = model.getDisplayName();
+        String name = model.getName();
         Optional<Model> existingModel = modelRepository.findModelByNameInProject(project, name, model.getType());
         if (!existingModel.isEmpty() && !existingModel.get().getId().equals(model.getId())) {
             throw new ModelNameConflictException(
@@ -308,7 +308,7 @@ public class ModelServiceImpl implements ModelService {
         }
 
         Model fullModel = findModelById(model.getId()).orElse(model);
-        Model modelToFile = buildModel(fullModel.getType(), fullModel.getDisplayName(), fullModel.getKey());
+        Model modelToFile = buildModel(fullModel.getType(), fullModel.getName(), fullModel.getKey());
         modelToFile.setId(fullModel.getType().toLowerCase().concat(MODEL_IDENTIFIER_SEPARATOR).concat(model.getId()));
         modelToFile.setExtensions(fullModel.getExtensions());
         modelToFile.setScope(null);
@@ -538,8 +538,8 @@ public class ModelServiceImpl implements ModelService {
             .orElseThrow(() -> new ImportModelException("Cannot convert json file content to model: " + fileContent));
         var key = removeEnd(removeExtension(fileContent.getFilename(), JSON), modelType.getExtensionsFileSuffix());
         model.setKey(key);
-        if (StringUtils.isBlank(model.getDisplayName())) {
-            model.setDisplayName(key);
+        if (StringUtils.isBlank(model.getName())) {
+            model.setName(key);
         }
         model.setType(modelType.getName());
 

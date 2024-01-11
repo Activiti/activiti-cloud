@@ -48,12 +48,10 @@ class WrapperExtensionsImportDecoratorTest {
         Map<String, Object> extensions = Map.of(
             "name",
             "ext name",
-            "displayName",
-            "ext name",
             "key",
             "ext-key",
             "extensions",
-            Map.of("name", "other name", "displayName", "other name", "key", "other-key")
+            Map.of("name", "other name", "key", "other-key")
         );
         when(fileContent.getFileContent()).thenReturn(new byte[0]);
         when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
@@ -61,14 +59,12 @@ class WrapperExtensionsImportDecoratorTest {
         wrapperExtensionsImportDecorator.decorate(model, projectHolder);
 
         assertThat(model.getName()).isEqualTo("ext name");
-        assertThat(model.getDisplayName()).isEqualTo("ext name");
         assertThat(model.getKey()).isEqualTo("ext-key");
     }
 
     private ModelImpl getModel() {
         var model = new ModelImpl();
         model.setName("name");
-        model.setDisplayName("name");
         model.setKey("key");
         model.setType(ProcessModelType.PROCESS);
         return model;

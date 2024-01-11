@@ -46,7 +46,7 @@ class DefaultModelExtensionsImportDecoratorTest {
         projectHolder.addModelExtension(model.getKey(), new ConnectorModelType(), fileContent);
         Map<String, Map<String, String>> extensions = Map.of(
             "extensions",
-            Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key")
+            Map.of("name", "ext name", "key", "ext-key")
         );
         when(fileContent.getFileContent()).thenReturn(new byte[0]);
         when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
@@ -54,7 +54,6 @@ class DefaultModelExtensionsImportDecoratorTest {
         defaultModelExtensionsImportDecorator.decorate(model, projectHolder);
 
         assertThat(model.getName()).isEqualTo("ext name");
-        assertThat(model.getDisplayName()).isEqualTo("ext name");
         assertThat(model.getKey()).isEqualTo("ext-key");
     }
 
@@ -66,7 +65,7 @@ class DefaultModelExtensionsImportDecoratorTest {
         projectHolder.addModelExtension(model.getKey(), new ConnectorModelType(), fileContent);
         Map<String, Map<String, String>> extensions = Map.of(
             "sthElse",
-            Map.of("name", "ext name", "displayName", "ext name", "key", "ext-key")
+            Map.of("name", "ext name", "key", "ext-key")
         );
         when(fileContent.getFileContent()).thenReturn(new byte[0]);
         when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
@@ -74,14 +73,12 @@ class DefaultModelExtensionsImportDecoratorTest {
         defaultModelExtensionsImportDecorator.decorate(model, projectHolder);
 
         assertThat(model.getName()).isEqualTo("name");
-        assertThat(model.getDisplayName()).isEqualTo("name");
         assertThat(model.getKey()).isEqualTo("key");
     }
 
     private ModelImpl getModel() {
         var model = new ModelImpl();
         model.setName("name");
-        model.setDisplayName("name");
         model.setKey("key");
         model.setType(ConnectorModelType.NAME);
         return model;

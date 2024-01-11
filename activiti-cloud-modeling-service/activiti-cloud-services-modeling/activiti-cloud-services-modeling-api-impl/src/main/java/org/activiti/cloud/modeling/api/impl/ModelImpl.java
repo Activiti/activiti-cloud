@@ -43,9 +43,6 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
     @Schema(description = "The name of the model")
     private String name;
 
-    @Schema(description = "The display name of the model")
-    private String displayName;
-
     @Schema(description = "The key (technical name) of the model")
     private String key;
 
@@ -106,22 +103,7 @@ public class ModelImpl extends AbstractAuditable<String> implements Model<Projec
 
     @Override
     public void setName(String name) {
-        this.displayName = name;
         this.name = name;
-    }
-
-    @Override
-    public String getDisplayName() {
-        if (StringUtils.hasText(displayName)) {
-            return displayName;
-        }
-        return name;
-    }
-
-    @Override
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-        this.name = displayName;
     }
 
     @Override

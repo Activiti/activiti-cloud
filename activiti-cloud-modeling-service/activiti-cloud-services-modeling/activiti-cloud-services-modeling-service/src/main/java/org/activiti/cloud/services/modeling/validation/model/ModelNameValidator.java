@@ -37,7 +37,7 @@ public class ModelNameValidator implements DNSNameValidator {
     }
 
     public Stream<ModelValidationError> validateName(Model model) {
-        return validateName(model.getDisplayName(), "model");
+        return validateName(model.getName(), "model");
     }
 
     public Stream<ModelValidationError> validateKey(Model model) {

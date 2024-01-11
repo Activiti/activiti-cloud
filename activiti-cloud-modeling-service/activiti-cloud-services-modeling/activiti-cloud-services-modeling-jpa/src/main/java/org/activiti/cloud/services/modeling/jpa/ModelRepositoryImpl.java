@@ -125,7 +125,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity updateModel(ModelEntity modelToBeUpdated, ModelEntity newModel) {
-        Optional.ofNullable(newModel.getDisplayName()).ifPresent(modelToBeUpdated::setDisplayName);
+        Optional.ofNullable(newModel.getName()).ifPresent(modelToBeUpdated::setName);
         Optional.ofNullable(newModel.getExtensions()).ifPresent(modelToBeUpdated::setExtensions);
         if (!modelToBeUpdated.equals(newModel)) {
             versionGenerationHelper.generateNextVersion(modelToBeUpdated);
@@ -135,7 +135,7 @@ public class ModelRepositoryImpl implements ModelRepository<ProjectEntity, Model
 
     @Override
     public ModelEntity copyModel(ModelEntity model, ProjectEntity project) {
-        ModelEntity modelEntityClone = new ModelEntity(model.getDisplayName(), model.getKey(), model.getType());
+        ModelEntity modelEntityClone = new ModelEntity(model.getName(), model.getKey(), model.getType());
         modelEntityClone.setExtensions(model.getExtensions());
         modelEntityClone.setContentType(model.getContentType());
         modelEntityClone.setContent(model.getContent());
