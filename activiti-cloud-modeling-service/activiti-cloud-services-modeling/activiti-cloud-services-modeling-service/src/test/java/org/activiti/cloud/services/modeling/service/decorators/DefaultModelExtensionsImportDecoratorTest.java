@@ -63,10 +63,7 @@ class DefaultModelExtensionsImportDecoratorTest {
         var projectHolder = new ProjectHolder();
         FileContent fileContent = Mockito.mock(FileContent.class);
         projectHolder.addModelExtension(model.getKey(), new ConnectorModelType(), fileContent);
-        Map<String, Map<String, String>> extensions = Map.of(
-            "sthElse",
-            Map.of("name", "ext name", "key", "ext-key")
-        );
+        Map<String, Map<String, String>> extensions = Map.of("sthElse", Map.of("name", "ext name", "key", "ext-key"));
         when(fileContent.getFileContent()).thenReturn(new byte[0]);
         when(jsonConverter.tryConvertToEntity(ArgumentMatchers.any(byte[].class))).thenReturn(Optional.of(extensions));
 
