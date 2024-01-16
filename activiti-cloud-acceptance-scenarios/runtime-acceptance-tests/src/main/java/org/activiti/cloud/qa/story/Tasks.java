@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.awaitility.Awaitility.await;
 
 import feign.FeignException;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -391,23 +390,21 @@ public class Tasks {
         await()
             .pollInterval(Duration.ofMillis(250L))
             .pollInSameThread()
-            .untilAsserted(
-                () -> {
-                    Map<String, Object> generatedMapRuntime = new HashMap<>();
-                    Map<String, Object> generatedMapQuery = new HashMap<>();
+            .untilAsserted(() -> {
+                Map<String, Object> generatedMapRuntime = new HashMap<>();
+                Map<String, Object> generatedMapQuery = new HashMap<>();
 
-                    taskVariableRuntimeBundleSteps
-                        .getVariables(newTask.getId())
-                        .forEach(element -> generatedMapRuntime.put(element.getName(), element.getValue()));
+                taskVariableRuntimeBundleSteps
+                    .getVariables(newTask.getId())
+                    .forEach(element -> generatedMapRuntime.put(element.getName(), element.getValue()));
 
-                    taskQuerySteps
-                        .getVariables(newTask.getId())
-                        .forEach(element -> generatedMapQuery.put(element.getName(), element.getValue()));
+                taskQuerySteps
+                    .getVariables(newTask.getId())
+                    .forEach(element -> generatedMapQuery.put(element.getName(), element.getValue()));
 
-                    assertThat(generatedMapRuntime).isEqualTo(VariableGenerator.variables);
-                    assertThat(generatedMapQuery).isEqualTo(VariableGenerator.variables);
-                }
-            );
+                assertThat(generatedMapRuntime).isEqualTo(VariableGenerator.variables);
+                assertThat(generatedMapQuery).isEqualTo(VariableGenerator.variables);
+            });
     }
 
     @When("the user claims the standalone task")
