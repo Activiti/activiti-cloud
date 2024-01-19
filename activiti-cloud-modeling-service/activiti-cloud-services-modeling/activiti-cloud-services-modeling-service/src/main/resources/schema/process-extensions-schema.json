@@ -116,6 +116,7 @@
             "datetime",
             "string",
             "integer",
+            "bigdecimal",
             "boolean",
             "json",
             "file",
@@ -266,6 +267,37 @@
                     "type": "integer",
                     "message": {
                       "type": "Mismatch value type - {{name}}({{id}}). Expected type is integer"
+                    }
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\$\\{(.*)[\\}]$",
+                    "message": {
+                      "pattern": "Value format in {{name}}({{id}}) is not a valid expression",
+                      "type": "Value format in {{name}}({{id}}) is not a valid expression"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bigdecimal"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "message": {
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is decimal"
                     }
                   },
                   {
