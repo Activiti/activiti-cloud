@@ -32,8 +32,8 @@
       "properties": {
         "c297ec88-0ecf-4841-9b0f-2ae814957c68": {
           "id": "c297ec88-0ecf-4841-9b0f-2ae814957c68",
-          "name": "decimalVariable",
-          "type": "decimal",
+          "name": "bigdecimalVariable",
+          "type": "bigdecimal",
           "required": false,
           "value": "hello"
         }

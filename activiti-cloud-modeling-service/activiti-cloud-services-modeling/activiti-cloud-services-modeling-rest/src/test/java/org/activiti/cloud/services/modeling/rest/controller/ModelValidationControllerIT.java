@@ -609,7 +609,7 @@ public class ModelValidationControllerIT {
     @Test
     public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidBigdecimalVariableContent()
         throws Exception {
-        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-decimal-variable-extensions.json");
+        byte[] invalidContent = resourceAsByteArray("process-extensions/invalid-bigdecimal-variable-extensions.json");
         MockMultipartFile file = new MockMultipartFile("file", "extensions.json", CONTENT_TYPE_JSON, invalidContent);
 
         ProjectEntity project = (ProjectEntity) projectRepository.createProject(project("project-test"));
@@ -630,12 +630,12 @@ public class ModelValidationControllerIT {
             .containsExactly(
                 tuple(
                     "expected type: Number, found: String",
-                    "Mismatch value type - decimalVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
-                    "Expected type is decimal"
+                    "Mismatch value type - bigdecimalVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68). " +
+                    "Expected type is bigdecimal"
                 ),
                 tuple(
                     "string [hello] does not match pattern ^\\$\\{(.*)[\\}]$",
-                    "Value format in decimalVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
+                    "Value format in bigdecimalVariable(c297ec88-0ecf-4841-9b0f-2ae814957c68) is not a " +
                     "valid expression"
                 )
             );
@@ -1078,10 +1078,10 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidExpressionAsDecimalVariableType()
+    public void should_returnStatusNoContent_when_validatingProcessExtensionsWithValidExpressionAsBigdecimalVariableType()
         throws Exception {
         byte[] invalidContent = resourceAsByteArray(
-            "process-extensions/valid-extensions-with-variable-decimal-as-expression.json"
+            "process-extensions/valid-extensions-with-variable-bigdecimal-as-expression.json"
         );
         MockMultipartFile file = new MockMultipartFile("file", "extensions.json", CONTENT_TYPE_JSON, invalidContent);
 
@@ -1134,10 +1134,10 @@ public class ModelValidationControllerIT {
     }
 
     @Test
-    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidExpressionAsDecimalVariableType()
+    public void should_throwSemanticModelValidationException_when_validatingProcessExtensionsWithInvalidExpressionAsBigdecimalVariableType()
         throws Exception {
         byte[] invalidContent = resourceAsByteArray(
-            "process-extensions/invalid-extensions-with-incomplete-decimal-expression.json"
+            "process-extensions/invalid-extensions-with-incomplete-bigdecimal-expression.json"
         );
         MockMultipartFile file = new MockMultipartFile("file", "extensions.json", CONTENT_TYPE_JSON, invalidContent);
 
@@ -1166,7 +1166,7 @@ public class ModelValidationControllerIT {
                 ),
                 tuple(
                     "expected type: Number, found: String",
-                    "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is " + "decimal"
+                    "Mismatch value type - var1(8b9ac008-8a76-4ebd-8221-04452add5f22). Expected type is " + "bigdecimal"
                 )
             );
     }

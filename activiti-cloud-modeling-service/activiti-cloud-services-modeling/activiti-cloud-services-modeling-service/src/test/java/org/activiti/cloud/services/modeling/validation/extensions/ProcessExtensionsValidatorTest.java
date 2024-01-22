@@ -61,7 +61,7 @@ public class ProcessExtensionsValidatorTest {
 
     @Test
     public void shouldNotReturnValidationErrors_whenValidatingProcessWithBigdecimalVariable() throws IOException {
-        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-decimal-variable.json");
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-bigdecimal-variable.json");
         Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
             fileContent,
             ValidationContext.EMPTY_CONTEXT

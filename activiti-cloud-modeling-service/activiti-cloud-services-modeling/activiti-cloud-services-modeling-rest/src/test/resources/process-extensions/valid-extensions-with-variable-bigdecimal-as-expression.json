@@ -8,8 +8,8 @@
         "8b9ac008-8a76-4ebd-8221-04452add5f22": {
           "id": "8b9ac008-8a76-4ebd-8221-04452add5f22",
           "name": "var1",
-          "type": "decimal",
-          "value": "${error",
+          "type": "bigdecimal",
+          "value": "${expression.test}",
           "required": false
         }
       }

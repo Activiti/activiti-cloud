@@ -116,7 +116,7 @@
             "datetime",
             "string",
             "integer",
-            "decimal",
+            "bigdecimal",
             "boolean",
             "json",
             "file",
@@ -286,7 +286,7 @@
           "if": {
             "properties": {
               "type": {
-                "const": "decimal"
+                "const": "bigdecimal"
               }
             }
           },
@@ -297,7 +297,7 @@
                   {
                     "type": "number",
                     "message": {
-                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is decimal"
+                      "type": "Mismatch value type - {{name}}({{id}}). Expected type is bigdecimal"
                     }
                   },
                   {
