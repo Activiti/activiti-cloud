@@ -95,7 +95,11 @@ public class ProcessExtensionsValidatorTest {
         byte[] fileContent = FileUtils.resourceAsByteArray(
             "extensions/process-with-displayable-variable-with-name" + ".json"
         );
-        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
     }
 
     @Test
@@ -103,19 +107,31 @@ public class ProcessExtensionsValidatorTest {
         byte[] fileContent = FileUtils.resourceAsByteArray(
             "extensions/process-with-display-process-variable-false" + ".json"
         );
-        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
     }
 
     @Test
     public void shouldBeValidABasicProcess() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/basic-process.json");
-        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
     }
 
     @Test
     public void shouldBeValidWhenAnalyticsIsPresent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-analytics-variable.json");
-        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
     }
 
     @Test
@@ -141,7 +157,11 @@ public class ProcessExtensionsValidatorTest {
     @Test
     public void shouldBeValidTaskAssignments() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-valid-assignments.json");
-        processExtensionsValidator.validateModelExtensions(fileContent, ValidationContext.EMPTY_CONTEXT);
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
     }
 
     @Test
