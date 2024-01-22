@@ -50,6 +50,26 @@ public class ProcessExtensionsValidatorTest {
     private ProcessExtensionsModelValidator processExtensionsValidator;
 
     @Test
+    public void shouldReturnValidationErrors_whenValidatingProcessWithInvalidVariableType() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-invalid-variable-type.json");
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isNotEmpty();
+    }
+
+    @Test
+    public void shouldNotReturnValidationErrors_whenValidatingProcessWithBigdecimalVariable() throws IOException {
+        byte[] fileContent = FileUtils.resourceAsByteArray("extensions/process-with-decimal-variable.json");
+        Collection<ModelValidationError> validationErrors = processExtensionsValidator.validateModelExtensions(
+            fileContent,
+            ValidationContext.EMPTY_CONTEXT
+        );
+        assertThat(validationErrors).isEmpty();
+    }
+
+    @Test
     public void shouldNotBeValidWhenDisplayIsTrueAndDisplayNameIsAbsent() throws IOException {
         byte[] fileContent = FileUtils.resourceAsByteArray(
             "extensions/process-with-displayable-variable-without-name.json"

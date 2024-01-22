@@ -17,6 +17,13 @@
           "required": false,
           "value": 12
         },
+        "n584kj77-0ecf-4841-9b0f-2ae814957c68": {
+          "id": "n584kj77-0ecf-4841-9b0f-2ae814957c48",
+          "name": "decimalVariable",
+          "type": "decimal",
+          "required": false,
+          "value": 1.2
+        },
         "c297ec88-0ecf-4841-9b0f-2ae814957c69": {
           "id": "c297ec88-0ecf-4841-9b0f-2ae814957c38",
           "name": "stringVariable",

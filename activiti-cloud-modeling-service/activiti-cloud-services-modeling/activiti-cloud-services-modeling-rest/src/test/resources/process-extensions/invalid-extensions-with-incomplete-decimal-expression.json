@@ -1,0 +1,18 @@
+{
+  "id": "process-id",
+  "type": "PROCESS",
+  "name": "process-test",
+  "extensions": {
+    "Process_test": {
+      "properties": {
+        "8b9ac008-8a76-4ebd-8221-04452add5f22": {
+          "id": "8b9ac008-8a76-4ebd-8221-04452add5f22",
+          "name": "var1",
+          "type": "decimal",
+          "value": "${error",
+          "required": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "process-baa8aa57-7cbb-40bc-bd70-a1da5f7b0311",
+  "extensions": {
+    "Process_jEKhhV0rp": {
+      "constants": {},
+      "mappings": {},
+      "properties": {
+        "6b1feabe-fb23-11ec-b939-0242ac120002": {
+          "id": "9j1fjgbn-fb23-34rt-b939-0242ac120002",
+          "name": "var_decimal",
+          "type": "decimal",
+          "required": true
+        }
+      }
+    }
+  }
+}
