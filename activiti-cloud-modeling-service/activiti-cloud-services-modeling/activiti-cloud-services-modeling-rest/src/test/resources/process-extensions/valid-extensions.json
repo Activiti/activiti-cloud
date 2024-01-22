@@ -19,8 +19,8 @@
         },
         "n584kj77-0ecf-4841-9b0f-2ae814957c68": {
           "id": "n584kj77-0ecf-4841-9b0f-2ae814957c48",
-          "name": "decimalVariable",
-          "type": "decimal",
+          "name": "bigdecimalVariable",
+          "type": "bigdecimal",
           "required": false,
           "value": 1.2
         },
