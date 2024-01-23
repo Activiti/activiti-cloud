@@ -24,7 +24,6 @@ import graphql.schema.Coercing;
 import graphql.schema.GraphQLSchema;
 import java.time.Instant;
 import java.util.Date;
-import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -128,20 +127,25 @@ class ActivitiGraphQLSchemaAutoConfigurationTest {
 
     @Test
     void correctlyCoercesDateToISO8601FormatWithTimeAndZoneOffset() {
-        TimeZone timeZone = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        // given
+        Coercing<?, ?> subject = JavaScalars.of(Date.class).getCoercing();
 
-        try {
-            // given
-            Coercing<?, ?> subject = JavaScalars.of(Date.class).getCoercing();
+        // when
+        Object result = subject.serialize(Date.from(Instant.EPOCH));
 
-            // when
-            Object result = subject.parseValue(Date.from(Instant.EPOCH));
+        // then
+        assertThat(result).asString().isEqualTo("1970-01-01T00:00:00Z");
 
-            // then
-            assertThat(result).isEqualTo("1970-01-01T00:00:00.000Z");
-        } finally {
-            TimeZone.setDefault(timeZone);
-        }
+        // when
+        result = subject.serialize(Date.from(Instant.parse("1970-01-01T00:00:00.000Z")));
+
+        // then
+        assertThat(result).asString().isEqualTo("1970-01-01T00:00:00Z");
+
+        // when
+        result = subject.serialize(Date.from(Instant.parse("1970-01-01T00:00:00.001Z")));
+
+        // then
+        assertThat(result).asString().isEqualTo("1970-01-01T00:00:00.001Z");
     }
 }

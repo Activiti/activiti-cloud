@@ -41,16 +41,12 @@ import org.springframework.hateoas.server.mvc.TypeConstrainedMappingJackson2Http
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 
 @AutoConfiguration
 @PropertySource("classpath:config/alfresco-rest-config.properties")
 public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
-
-    @Value("${SPRING_MVC_REST_USE_TRAILING_SLASH_MATCH:false}")
-    private boolean useTrailingSlashMatch;
 
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
     private final int defaultPageSize;
@@ -61,11 +57,6 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
     ) {
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
         this.defaultPageSize = defaultPageSize;
-    }
-
-    @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.setUseTrailingSlashMatch(useTrailingSlashMatch);
     }
 
     @Override

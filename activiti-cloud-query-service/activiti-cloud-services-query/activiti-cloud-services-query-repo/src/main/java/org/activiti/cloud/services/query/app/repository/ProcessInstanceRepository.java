@@ -17,13 +17,13 @@ package org.activiti.cloud.services.query.app.repository;
 
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -57,7 +57,6 @@ public interface ProcessInstanceRepository
         bindings.bind(root.appVersion).first((path, value) -> root.appVersion.in(Arrays.asList(value.split(","))));
     }
 
-    @Override
     @EntityGraph(value = "ProcessInstances.withVariables", type = EntityGraph.EntityGraphType.LOAD)
-    Page<ProcessInstanceEntity> findAll(Predicate predicate, Pageable pageable);
+    List<ProcessInstanceEntity> findByIdIsIn(Collection<String> ids, Sort sort);
 }

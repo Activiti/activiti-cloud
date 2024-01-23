@@ -6,7 +6,7 @@
   <artifactId>activiti-cloud-mono-aggregator</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud Mono :: Parent</name>
-  <version>8.2.0-SNAPSHOT</version>
+  <version>8.3.0-SNAPSHOT</version>
   <description>Activiti Cloud Mono :: Aggregator</description>
   <url>http://activiti.org</url>
   <inceptionYear>2017</inceptionYear>
@@ -196,7 +196,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>3.1.6</spring-boot.version>
+    <spring-boot.version>3.2.0</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>

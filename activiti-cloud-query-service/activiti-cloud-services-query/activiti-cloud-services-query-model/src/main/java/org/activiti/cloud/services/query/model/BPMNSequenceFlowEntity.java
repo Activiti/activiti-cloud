@@ -15,7 +15,14 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import jakarta.persistence.*;
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.api.process.model.BPMNSequenceFlow;
@@ -52,6 +59,7 @@ public class BPMNSequenceFlowEntity extends ActivitiEntityMetadata implements BP
     /** The date/time of the sequence flow was taken */
     @Column(name = "taken_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date date;
 
     /** The XML tag of the source activity as in the process file */

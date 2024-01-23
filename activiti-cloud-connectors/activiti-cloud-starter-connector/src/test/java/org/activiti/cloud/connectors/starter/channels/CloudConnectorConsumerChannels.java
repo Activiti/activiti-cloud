@@ -24,6 +24,6 @@ public interface CloudConnectorConsumerChannels {
 
     @InputBinding(INTEGRATION_EVENT_CONSUMER)
     default SubscribableChannel integrationEventsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_EVENT_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_EVENT_CONSUMER).getObject();
     }
 }

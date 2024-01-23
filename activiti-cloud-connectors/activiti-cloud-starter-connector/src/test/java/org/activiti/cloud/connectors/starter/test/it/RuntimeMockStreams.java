@@ -28,16 +28,16 @@ public interface RuntimeMockStreams {
 
     @InputBinding(INTEGRATION_RESULT_CONSUMER)
     default SubscribableChannel integrationResultsConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_RESULT_CONSUMER).getObject();
     }
 
     @OutputBinding(INTEGRATION_EVENT_PRODUCER)
     default MessageChannel integrationEventsProducer() {
-        return MessageChannels.direct(INTEGRATION_EVENT_PRODUCER).get();
+        return MessageChannels.direct(INTEGRATION_EVENT_PRODUCER).getObject();
     }
 
     @InputBinding(INTEGRATION_ERROR_CONSUMER)
     default SubscribableChannel integrationErrorConsumer() {
-        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).get();
+        return MessageChannels.publishSubscribe(INTEGRATION_ERROR_CONSUMER).getObject();
     }
 }
