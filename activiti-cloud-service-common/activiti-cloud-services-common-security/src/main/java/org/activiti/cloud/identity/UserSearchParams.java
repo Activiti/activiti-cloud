@@ -16,13 +16,14 @@
 package org.activiti.cloud.identity;
 
 import java.util.Set;
+import org.activiti.cloud.identity.model.UserType;
 
 public class UserSearchParams {
 
     private String search;
     private Set<String> groups;
     private Set<String> roles;
-    private Set<String> types;
+    private Set<UserType> types;
     private String application;
 
     public String getSearchKey() {
@@ -49,11 +50,11 @@ public class UserSearchParams {
         this.roles = roles;
     }
 
-    public Set<String> getTypes() {
+    public Set<UserType> getTypes() {
         return types;
     }
 
-    public void setTypes(Set<String> types) {
+    public void setTypes(Set<UserType> types) {
         this.types = types;
     }
 
