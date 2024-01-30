@@ -22,6 +22,7 @@ public class UserSearchParams {
     private String search;
     private Set<String> groups;
     private Set<String> roles;
+    private Set<String> types;
     private String application;
 
     public String getSearchKey() {
@@ -46,6 +47,14 @@ public class UserSearchParams {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public Set<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(Set<String> types) {
+        this.types = types;
     }
 
     public String getApplication() {
