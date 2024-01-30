@@ -15,8 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
@@ -35,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.UserSearchParams;
+import org.activiti.cloud.identity.UserTypeSearchParam;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;
@@ -109,9 +109,13 @@ class KeycloakManagementServiceTest {
         roleB.setId("b");
 
         userOne.setId("one");
+        userOne.setUsername("one");
         userTwo.setId("two");
+        userTwo.setUsername("two");
         userThree.setId("three");
+        userThree.setUsername("three");
         userFour.setId("four");
+        userFour.setUsername("four");
 
         groupOne.setId("one");
         groupOne.setName("groupOne");
@@ -725,6 +729,34 @@ class KeycloakManagementServiceTest {
             .hasMessage("Invalid Security data: group {groupOne} is invalid or doesn't exist");
     }
 
+    @Test
+    void should_searchByUsername_whenUserTypeSearchParamIsAll() {
+        defineSearchUsersByUsernameFromKeycloak();
+        setUpUsersRealmRoles();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setType(UserTypeSearchParam.ALL);
+        String searchKey = "o";
+        userSearchParams.setSearch(searchKey);
+
+        keycloakManagementService.findUsers(userSearchParams);
+
+        verify(keycloakClient).searchUsersByUsername(eq(searchKey));
+    }
+
+    @Test
+    void should_searchByKeyword_whenUserTypeSearchParamIsInteractive() {
+        defineSearchUsersFromKeycloak();
+        setUpUsersRealmRoles();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setType(UserTypeSearchParam.INTERACTIVE);
+        String searchKey = "o";
+        userSearchParams.setSearch(searchKey);
+
+        keycloakManagementService.findUsers(userSearchParams);
+
+        verify(keycloakClient).searchUsers(eq(searchKey), eq(0), eq(50));
+    }
+
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(
             groupsToCompare
@@ -746,6 +778,10 @@ class KeycloakManagementServiceTest {
     private void defineSearchUsersFromKeycloak() {
         when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50)))
             .thenReturn(List.of(kUserOne, kUserTwo, kUserThree, kUserFour));
+    }
+
+    private void defineSearchUsersByUsernameFromKeycloak() {
+        when(keycloakClient.searchUsersByUsername(eq("o"))).thenReturn(List.of(kUserOne, kUserTwo, kUserFour));
     }
 
     private void defineSearchUsersByGroupsFromKeycloak() {

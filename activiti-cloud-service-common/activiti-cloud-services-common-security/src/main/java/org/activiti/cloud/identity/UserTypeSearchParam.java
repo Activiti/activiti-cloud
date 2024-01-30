@@ -13,15 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity.exceptions;
+package org.activiti.cloud.identity;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class IdentityInvalidUserTypeException extends IdentityException {
-
-    public IdentityInvalidUserTypeException(String userType) {
-        super("userType {" + userType + "} is invalid or doesn't exist");
-    }
+public enum UserTypeSearchParam {
+    ALL,
+    INTERACTIVE,
 }

@@ -29,6 +29,7 @@ import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
 import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.identity.UserSearchParams;
+import org.activiti.cloud.identity.UserTypeSearchParam;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;
@@ -55,6 +56,8 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     public static final int PAGE_START = 0;
     public static final int PAGE_SIZE = 50;
 
+    public static final UserTypeSearchParam DEFAULT_USERTYPE = UserTypeSearchParam.INTERACTIVE;
+
     private final KeycloakClient keycloakClient;
 
     public KeycloakManagementService(KeycloakClient keycloakClient) {
@@ -64,7 +67,10 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
-            ? searchUsers(userSearchParams.getSearchKey())
+            ? searchUsers(
+                userSearchParams.getSearchKey(),
+                userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType()
+            )
             : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
         if (!StringUtils.isEmpty(userSearchParams.getApplication())) {
@@ -74,9 +80,24 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         }
     }
 
+    private List<User> searchUsers(String searchKey, UserTypeSearchParam userType) {
+        return switch (userType) {
+            case INTERACTIVE -> searchUsers(searchKey);
+            case ALL -> searchUsersByUsername(searchKey);
+        };
+    }
+
     private List<User> searchUsers(String searchKey) {
         return keycloakClient
             .searchUsers(searchKey, PAGE_START, PAGE_SIZE)
+            .stream()
+            .map(KeycloakUserToUser::toUser)
+            .collect(Collectors.toList());
+    }
+
+    private List<User> searchUsersByUsername(String searchKey) {
+        return keycloakClient
+            .searchUsersByUsername(searchKey)
             .stream()
             .map(KeycloakUserToUser::toUser)
             .collect(Collectors.toList());
