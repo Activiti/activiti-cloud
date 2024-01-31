@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/v1/process-instances/{processInstanceId}/diagram")
+@Tag(name = "Process Instance Diagram Controller")
 public class ProcessInstanceDiagramController extends ProcessInstanceDiagramControllerBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessInstanceDiagramController.class);

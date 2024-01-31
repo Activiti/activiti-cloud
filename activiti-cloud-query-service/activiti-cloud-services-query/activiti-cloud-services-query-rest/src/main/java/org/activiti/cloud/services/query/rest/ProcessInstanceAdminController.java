@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/admin/v1/process-instances",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Instance Admin Controller")
 public class ProcessInstanceAdminController {
 
     private final ProcessInstanceAdminService processInstanceAdminService;
