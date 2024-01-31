@@ -754,7 +754,7 @@ class KeycloakManagementServiceTest {
 
         keycloakManagementService.findUsers(userSearchParams);
 
-        verify(keycloakClient).searchUsers(eq(searchKey), 0, 50);
+        verify(keycloakClient).searchUsers(searchKey, 0, 50);
     }
 
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
