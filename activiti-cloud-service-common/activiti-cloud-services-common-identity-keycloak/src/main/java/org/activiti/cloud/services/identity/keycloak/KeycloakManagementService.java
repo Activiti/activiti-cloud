@@ -82,7 +82,9 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     private List<User> searchUsers(String searchKey, UserTypeSearchParam userType) {
         return switch (userType) {
+            //UserType=INTERACTIVE: search only users
             case INTERACTIVE -> searchUsers(searchKey);
+            //UserType=ALL: search both users and service accounts. Due to Keycloak search params behavior, search must be done by username.
             case ALL -> searchUsersByUsername(searchKey);
         };
     }

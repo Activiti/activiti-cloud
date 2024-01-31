@@ -36,7 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
     }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
-public class KeycloakManagementServiceIT {
+class KeycloakManagementServiceIT {
 
     @Autowired
     private KeycloakManagementService keycloakManagementService;

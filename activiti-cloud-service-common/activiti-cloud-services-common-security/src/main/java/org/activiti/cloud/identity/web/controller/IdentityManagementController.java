@@ -27,12 +27,7 @@ import org.activiti.cloud.identity.model.SecurityResponseRepresentation;
 import org.activiti.cloud.identity.model.User;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "${activiti.cloud.services.identity.url:/v1}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +39,7 @@ public class IdentityManagementController {
         this.identityManagementService = identityManagementService;
     }
 
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @GetMapping(value = "/users")
     @Cacheable("userSearch")
     public List<User> getUsers(
         @RequestParam(value = "search", required = false) String search,
@@ -63,7 +58,7 @@ public class IdentityManagementController {
         return identityManagementService.findUsers(userSearchParams);
     }
 
-    @RequestMapping(value = "/groups", method = RequestMethod.GET)
+    @GetMapping(value = "/groups")
     @Cacheable("groupSearch")
     public List<Group> getGroups(
         @RequestParam(value = "search", required = false) String search,
@@ -78,7 +73,7 @@ public class IdentityManagementController {
         return identityManagementService.findGroups(groupSearchParams);
     }
 
-    @RequestMapping(value = "/permissions/{application}", method = RequestMethod.POST)
+    @PostMapping(value = "/permissions/{application}")
     public void addApplicationPermissions(
         @PathVariable String application,
         @RequestBody List<SecurityRequestBodyRepresentation> securityRequestBodyRepresentations
@@ -86,7 +81,7 @@ public class IdentityManagementController {
         identityManagementService.addApplicationPermissions(application, securityRequestBodyRepresentations);
     }
 
-    @RequestMapping(value = "/permissions/{application}", method = RequestMethod.GET)
+    @GetMapping(value = "/permissions/{application}")
     public List<SecurityResponseRepresentation> getApplicationPermissions(
         @PathVariable String application,
         @RequestParam(value = "role", required = false) Set<String> roles
@@ -94,7 +89,7 @@ public class IdentityManagementController {
         return identityManagementService.getApplicationPermissions(application, roles);
     }
 
-    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+    @GetMapping(value = "/users/{id}")
     public User getUsersById(@PathVariable String id) {
         return identityManagementService.findUserById(id);
     }
