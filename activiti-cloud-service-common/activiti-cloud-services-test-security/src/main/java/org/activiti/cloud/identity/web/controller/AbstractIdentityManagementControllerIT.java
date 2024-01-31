@@ -382,11 +382,19 @@ public abstract class AbstractIdentityManagementControllerIT {
 
         mockMvc.perform(get("/v1/users?search=search&role=role&group=group")).andExpect(status().isOk());
 
+        mockMvc.perform(get("/v1/users?search=search&type=INTERACTIVE")).andExpect(status().isOk());
+
         Cache cache = cacheManager.getCache("userSearch");
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null)))
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null)))
             .isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null))).isNotNull();
+    }
+
+    @Test
+    public void should_returnBadRequest_whenWrongUserTypeIsPassed() throws Exception {
+        mockMvc.perform(get("/v1/users?search=search&type=WRONG")).andExpect(status().isBadRequest());
     }
 }

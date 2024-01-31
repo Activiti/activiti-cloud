@@ -50,13 +50,13 @@ public class IdentityManagementController {
         @RequestParam(value = "search", required = false) String search,
         @RequestParam(value = "role", required = false) Set<String> roles,
         @RequestParam(value = "group", required = false) Set<String> groups,
-        @RequestParam(value = "type", required = false) UserTypeSearchParam type,
+        @RequestParam(value = "type", required = false) String type,
         @RequestParam(value = "application", required = false) String application
     ) {
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch(search);
         userSearchParams.setGroups(groups);
-        userSearchParams.setType(type);
+        userSearchParams.setType(type == null ? null : UserTypeSearchParam.convertFromStringOrThrow(type));
         userSearchParams.setRoles(roles);
         userSearchParams.setApplication(application);
 

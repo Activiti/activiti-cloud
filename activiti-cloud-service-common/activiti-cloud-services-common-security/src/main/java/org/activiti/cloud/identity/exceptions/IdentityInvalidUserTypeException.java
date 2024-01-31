@@ -13,20 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.identity;
+package org.activiti.cloud.identity.exceptions;
 
-import java.util.Arrays;
-import org.activiti.cloud.identity.exceptions.IdentityInvalidUserTypeException;
+public class IdentityInvalidUserTypeException extends IdentityException {
 
-public enum UserTypeSearchParam {
-    ALL,
-    INTERACTIVE;
-
-    public static UserTypeSearchParam convertFromStringOrThrow(String stringValue) {
-        return Arrays
-            .stream(UserTypeSearchParam.values())
-            .filter(ut -> ut.name().equals(stringValue))
-            .findAny()
-            .orElseThrow(() -> new IdentityInvalidUserTypeException(stringValue));
+    public IdentityInvalidUserTypeException(String userType) {
+        super("User type {" + userType + "} is invalid or doesn't exist");
     }
 }
