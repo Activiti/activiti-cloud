@@ -16,6 +16,8 @@
 
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.hateoas.MediaTypes;
@@ -30,10 +32,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
     value = "/admin/v1/executions",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Service Task Admin Controller")
 public interface ServiceTaskAdminController {
     @PostMapping(value = "/{executionId}/replay/service-task", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Void> replayServiceTask(
-        @PathVariable @NotEmpty String executionId,
+        @Parameter(
+            description = "Enter the executionId to replay service task"
+        ) @PathVariable @NotEmpty String executionId,
         @RequestBody @Valid ReplayServiceTaskRequest replayServiceTaskRequest
     );
 }

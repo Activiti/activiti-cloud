@@ -16,10 +16,9 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.cloud.openfeign.CollectionFormat;
@@ -44,21 +43,33 @@ public interface ProcessDefinitionController {
     );
 
     @GetMapping(value = "/v1/process-definitions/{id}")
-    EntityModel<CloudProcessDefinition> getProcessDefinition(@PathVariable(value = "id") String id);
+    EntityModel<CloudProcessDefinition> getProcessDefinition(
+        @Parameter(description = "Enter the id to get process definition") @PathVariable(value = "id") String id
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/xml")
     @ResponseBody
-    String getProcessModel(@PathVariable(value = "id") String id);
+    String getProcessModel(
+        @Parameter(description = "Enter the id to get process model") @PathVariable(value = "id") String id
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "application/json")
     @ResponseBody
-    String getBpmnModel(@PathVariable(value = "id") String id);
+    String getBpmnModel(
+        @Parameter(description = "Enter the id to get Bpmn model") @PathVariable(value = "id") String id
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}/model", produces = "image/svg+xml")
     @ResponseBody
-    String getProcessDiagram(@PathVariable(value = "id") String id);
+    String getProcessDiagram(
+        @Parameter(description = "Enter the id to get process diagram") @PathVariable(value = "id") String id
+    );
 
     @GetMapping(value = "/v1/process-definitions/{id}/static-values", produces = "application/json")
     @ResponseBody
-    Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(@PathVariable(value = "id") String id);
+    Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(
+        @Parameter(
+            description = "Enter the id to get process model static values mapping for start event"
+        ) @PathVariable(value = "id") String id
+    );
 }

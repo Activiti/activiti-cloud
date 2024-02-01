@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/admin/v1/process-instances/{processInstanceId}",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Instance Service Task Admin Controller")
 public class ProcessInstanceServiceTasksAdminController {
 
     private final ServiceTaskRepresentationModelAssembler taskRepresentationModelAssembler;

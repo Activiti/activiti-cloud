@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +25,14 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@Tag(name = "Process Instance Tasks Controller")
 public interface ProcessInstanceTasksController {
     @GetMapping(value = "/v1/process-instances/{processInstanceId}/tasks")
     @CollectionFormat(feign.CollectionFormat.CSV)
     PagedModel<EntityModel<CloudTask>> getTasks(
-        @PathVariable(value = "processInstanceId") String processInstanceId,
+        @Parameter(description = "Enter the processInstanceId to get tasks") @PathVariable(
+            value = "processInstanceId"
+        ) String processInstanceId,
         Pageable pageable
     );
 }

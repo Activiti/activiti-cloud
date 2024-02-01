@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
     value = "/admin/v1/process-definitions",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Definition Admin Controller")
 public interface ProcessDefinitionAdminController {
     @RequestMapping(method = RequestMethod.GET)
     PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
