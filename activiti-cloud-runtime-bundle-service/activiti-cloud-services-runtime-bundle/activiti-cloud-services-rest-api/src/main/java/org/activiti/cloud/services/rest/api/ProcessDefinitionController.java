@@ -18,6 +18,8 @@ package org.activiti.cloud.services.rest.api;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import java.util.Map;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.cloud.openfeign.CollectionFormat;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Tag(name = "Process Definition Controller")
 public interface ProcessDefinitionController {
     @GetMapping("/v1/process-definitions")
     @CollectionFormat(feign.CollectionFormat.CSV)

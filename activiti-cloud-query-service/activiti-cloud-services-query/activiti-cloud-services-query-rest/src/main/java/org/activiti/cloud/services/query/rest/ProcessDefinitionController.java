@@ -52,7 +52,6 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/v1/process-definitions",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Definition Controller")
 public class ProcessDefinitionController {
 
     private static final String EVERYONE_GROUP = "*";
