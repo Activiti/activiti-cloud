@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = " Tas Variable Controller")
+@Tag(name = "Task Variable Controller")
 public interface TaskVariableController {
     @GetMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
     CollectionModel<EntityModel<CloudVariableInstance>> getVariables(

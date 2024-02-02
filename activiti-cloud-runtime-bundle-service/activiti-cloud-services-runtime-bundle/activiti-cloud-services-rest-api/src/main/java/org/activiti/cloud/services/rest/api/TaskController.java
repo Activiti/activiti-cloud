@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = " Task Controller")
+@Tag(name = "Task Controller")
 public interface TaskController {
     @GetMapping("/v1/tasks")
     @CollectionFormat(feign.CollectionFormat.CSV)
