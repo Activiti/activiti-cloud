@@ -21,7 +21,6 @@ import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_
 
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudServiceTask;
 import org.activiti.cloud.services.query.app.repository.ServiceTaskRepository;
