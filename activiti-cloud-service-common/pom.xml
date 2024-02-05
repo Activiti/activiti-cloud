@@ -34,7 +34,7 @@
     <module>activiti-cloud-service-messaging-starter</module>
   </modules>
   <properties>
-    <activiti.version>8.1.1-alpha.1</activiti.version>
+    <activiti.version>8.1.1-alpha.2</activiti.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
