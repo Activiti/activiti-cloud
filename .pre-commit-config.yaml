@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-merge-conflict
       - id: fix-byte-order-marker
@@ -13,7 +13,7 @@ repos:
         exclude: ^.*invalid.*\.json$
       - id: check-xml
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.6
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         types_or:
@@ -23,13 +23,13 @@ repos:
           - prettier@2.7.1
           - prettier-plugin-java@1.4.0
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.22.0
+    rev: 0.27.4
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/returntocorp/semgrep
-    rev: v1.31.2
+    rev: v1.59.1
     hooks:
       - id: semgrep
         types: [java]
