@@ -2679,7 +2679,9 @@ public class QueryTasksIT {
         result.append("&size=").append(pageable.getPageSize());
 
         // No sorting
-        if (pageable.getSort().isUnsorted()) return result.toString();
+        if (pageable.getSort().isUnsorted()) {
+            return result.toString();
+        }
 
         // Sorting is specified
         for (Sort.Order o : pageable.getSort()) {
