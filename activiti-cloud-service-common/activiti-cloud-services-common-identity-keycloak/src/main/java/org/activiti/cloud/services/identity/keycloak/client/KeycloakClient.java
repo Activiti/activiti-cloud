@@ -19,6 +19,8 @@ import feign.Headers;
 import feign.Response;
 import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakCredentialRepresentation;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakCredentialRequestRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakGroup;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakMappingsRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
@@ -237,5 +239,23 @@ public interface KeycloakClient {
     void updateClient(
         @PathVariable("id") String id,
         @RequestBody KeycloakClientRepresentation keycloakClientRepresentation
+    );
+
+    @RequestMapping(method = RequestMethod.POST, value = "/clients/{id}/client-secret")
+    @Headers("Content-Type: application/json")
+    KeycloakCredentialRepresentation generateNewClientSecret(
+        @RequestBody KeycloakCredentialRequestRepresentation requestRepresentation,
+        @PathVariable("id") String id
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = "/clients/{id}/client-secret")
+    @Headers("Content-Type: application/json")
+    KeycloakCredentialRepresentation getClientSecretById(@PathVariable("id") String id);
+
+    @RequestMapping(method = RequestMethod.GET, value = "/users/{id}/role-mappings/clients/{client}/available")
+    @Headers("Content-Type: application/json")
+    List<KeycloakRoleMapping> getClientLevelRoleMappingAvailable(
+        @PathVariable("id") String id,
+        @PathVariable("client") String clientId
     );
 }
