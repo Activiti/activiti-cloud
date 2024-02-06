@@ -274,14 +274,16 @@ public class QueryTasksIT {
     public void should_getTasksFilteredOnVariableNameAndValueWithPagedRequest() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
-        Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
-        Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected", runningProcessInstance);
-        Task createdTask = taskEventContainedBuilder.aCreatedTask("Task Created", runningProcessInstance);
+        Task task1 = taskEventContainedBuilder.aCompletedTask("Task1", runningProcessInstance);
+        Task task2 = taskEventContainedBuilder.aCompletedTask("Task2", runningProcessInstance);
+        Task task3 = taskEventContainedBuilder.aCompletedTask("Task3", runningProcessInstance);
+        Task task4 = taskEventContainedBuilder.aCompletedTask("Task4", runningProcessInstance);
 
-        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(taskApproved);
-        variableEventContainedBuilder.aCreatedVariable("intValue", 40).onTask(taskApproved);
-        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(createdTask);
-        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(taskRejected);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task1);
+        variableEventContainedBuilder.aCreatedVariable("intValue", 40).onTask(task1);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task3);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task2);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "rejected").onTask(task4);
 
         eventsAggregator.sendAll();
 
@@ -299,7 +301,7 @@ public class QueryTasksIT {
                 assertThat(approvedTasks.getContent())
                     .hasSize(2)
                     .extracting(Task::getName)
-                    .containsExactly(taskRejected.getName(), taskApproved.getName());
+                    .containsExactly(task3.getName(), task2.getName());
                 assertThat(approvedTasks.getMetadata())
                     .extracting(
                         PagedModel.PageMetadata::getTotalElements,
