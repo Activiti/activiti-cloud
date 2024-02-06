@@ -19,9 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -2668,11 +2668,7 @@ public class QueryTasksIT {
     }
 
     private static String encodeURLComponent(Object component) {
-        try {
-            return URLEncoder.encode(component.toString(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return URLEncoder.encode(component.toString(), StandardCharsets.UTF_8);
     }
 
     private static String queryStringFromPageable(Pageable pageable) {
