@@ -18,6 +18,9 @@ package org.activiti.cloud.services.identity.keycloak.config;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.Feign;
 import java.time.Duration;
+
+import feign.Logger;
+import feign.slf4j.Slf4jLogger;
 import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.identity.keycloak.ActivitiKeycloakProperties;
@@ -159,13 +162,14 @@ public class ActivitiKeycloakAutoConfiguration {
             clientRegistrationRepository,
             clientRegistration
         );
-        KeycloakClient keycloakClient = Feign
+        return Feign
             .builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters, customizers))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
+            .logLevel(Logger.Level.FULL)
+            .logger(new Slf4jLogger())
             .target(KeycloakClient.class, url);
-        return keycloakClient;
     }
 }

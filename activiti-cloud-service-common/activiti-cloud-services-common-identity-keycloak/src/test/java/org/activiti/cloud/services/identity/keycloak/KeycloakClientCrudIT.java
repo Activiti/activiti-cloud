@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.services.identity.keycloak.client.KeycloakClient;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakCredentialRepresentation;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakCredentialRequestRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.junit.jupiter.api.Test;
@@ -111,6 +113,63 @@ public class KeycloakClientCrudIT {
             keycloakRoleMapping.getName()
         );
         assertThat(roleRepresentationForClient).isNotNull();
+    }
+
+
+    @Test
+    public void should_handleClientWithServiceAccountEnabledCRUD() {
+        String clientId = "crudClientWithServiceAccountId";
+        KeycloakClientRepresentation client = KeycloakClientRepresentation.Builder
+            .newKeycloakClientRepresentationBuilder()
+            .withClientId(clientId)
+            .withClientName(clientId)
+            .enabled(true)
+            .directAccessGrantsEnabled(true)
+            .withRedirectUris(Collections.emptyList())
+            .withWebOrigins(Collections.emptyList())
+            .publicClient(true)
+            .implicitFlowEnabled(true)
+            .withAccessTokenLifespanInSeconds(120)
+            .build();
+        Response response = keycloakClient.createClient(client);
+        assertThat(HttpStatus.valueOf(response.status()).is2xxSuccessful()).isTrue();
+
+        String idOfClient = getIdOfClient(client.getClientId());
+        KeycloakClientRepresentation clientCreated = keycloakClient.getClientById(idOfClient);
+        assertThat(clientCreated).isNotNull();
+        assertThat(clientCreated.getClientId()).isEqualTo(clientId);
+        assertThat(clientCreated.getAttributes().accessTokenLifespan()).isEqualTo(120);
+
+        clientCreated.setDirectAccessGrantsEnabled(false);
+        clientCreated.setServiceAccountsEnabled(true);
+        clientCreated.setPublicClient(false);
+        clientCreated.setAttributes(new KeycloakClientRepresentation.ClientAttributes(null));
+        keycloakClient.updateClient(idOfClient, clientCreated);
+        KeycloakClientRepresentation clientUpdated = keycloakClient.getClientById(idOfClient);
+        assertThat(clientUpdated.getDirectAccessGrantsEnabled()).isFalse();
+        assertThat(clientUpdated.getServiceAccountsEnabled()).isTrue();
+        assertThat(clientUpdated.getPublicClient()).isFalse();
+        assertThat(clientUpdated.getAttributes().accessTokenLifespan()).isNull();
+
+        KeycloakCredentialRequestRepresentation requestRepresentation = new KeycloakCredentialRequestRepresentation.Builder().withId(idOfClient).withRealm("activiti").build();
+
+        KeycloakCredentialRepresentation clientSecret = keycloakClient.createClientSecretById(requestRepresentation, idOfClient);
+        assertThat(clientSecret).isNotNull();
+        assertThat(clientSecret.getType()).isEqualTo("secret");
+        assertThat(clientSecret.getValue()).isNotNull();
+        assertThat(clientSecret.getValue()).isNotBlank();
+
+        clientSecret = keycloakClient.getClientSecretById(idOfClient);
+        assertThat(clientSecret).isNotNull();
+        assertThat(clientSecret.getType()).isEqualTo("secret");
+        assertThat(clientSecret.getValue()).isNotNull();
+        assertThat(clientSecret.getValue()).isNotBlank();
+
+
+
+        keycloakClient.deleteClient(idOfClient);
+        Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));
+        assertThat(exception).isInstanceOf(FeignException.NotFound.class);
     }
 
     private String getIdOfClient(String clientId) {
