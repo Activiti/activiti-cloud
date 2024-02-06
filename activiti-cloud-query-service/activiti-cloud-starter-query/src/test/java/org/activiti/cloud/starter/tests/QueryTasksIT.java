@@ -143,7 +143,7 @@ public class QueryTasksIT {
     private VariableEventContainedBuilder variableEventContainedBuilder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
@@ -154,7 +154,7 @@ public class QueryTasksIT {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskVariableRepository.deleteAll();
@@ -164,7 +164,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasksAndFilterOnStatus() {
+    void shouldGetAvailableTasksAndFilterOnStatus() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
         Task assignedTask = taskEventContainedBuilder.anAssignedTask(
@@ -241,7 +241,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnVariableNameAndValue() {
+    void should_getTasksFilteredOnVariableNameAndValue() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -271,7 +271,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnVariableNameAndValueWithPagedRequest() {
+    void should_getTasksFilteredOnVariableNameAndValueWithPagedRequest() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task task1 = taskEventContainedBuilder.aCompletedTask("Task1", runningProcessInstance);
@@ -313,7 +313,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnIntegerVariables() {
+    void should_getTasksFilteredOnIntegerVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskForties = taskEventContainedBuilder.aCompletedTask("Task forties", runningProcessInstance);
@@ -339,7 +339,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnBooleanVariables() {
+    void should_getTasksFilteredOnBooleanVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -365,7 +365,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnBigDecimalVariables() {
+    void should_getTasksFilteredOnBigDecimalVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskScale2 = taskEventContainedBuilder.aCompletedTask("Task scale 2", runningProcessInstance);
@@ -456,7 +456,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskWithUpdatedInfo() {
+    void shouldGetTaskWithUpdatedInfo() {
         //given
         Task assignedTask = taskEventContainedBuilder.anAssignedTask(
             "Assigned task",
@@ -498,7 +498,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasksAndFilterParentId() {
+    void shouldGetAvailableTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("Created task with parent");
 
@@ -522,7 +522,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetStandaloneAssignedTasksAndFilterParentId() {
+    void shouldGetStandaloneAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneAssignedTaskWithParent(
             "Created task with parent",
@@ -535,7 +535,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAssignedTasksAndFilterParentId() {
+    void shouldGetAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.anAssignedTaskWithParent(
             "Created task with parent",
@@ -549,7 +549,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableRootTasksWithStatus() {
+    void shouldGetAvailableRootTasksWithStatus() {
         //given
         TaskImpl rootTaskNoSubtask = new TaskImpl(
             UUID.randomUUID().toString(),
@@ -593,7 +593,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableStandaloneTasksWithStatus() {
+    void shouldGetAvailableStandaloneTasksWithStatus() {
         //given
         TaskImpl processTask = new TaskImpl(UUID.randomUUID().toString(), "Task1", TaskStatus.CREATED);
         processTask.setProcessInstanceId(runningProcessInstance.getId());
@@ -643,7 +643,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithUserPermission() {
+    void shouldGetRestrictedTasksWithUserPermission() {
         //given
         identityTokenProducer.withTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
@@ -659,7 +659,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutUserPermission() {
+    void shouldNotGetRestrictedTasksWithoutUserPermission() {
         //given
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with candidate",
@@ -675,7 +675,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithGroupPermission() {
+    void shouldGetRestrictedTasksWithGroupPermission() {
         //given
         //we are logged in as testuser who belongs to testgroup, so it should be able to see the task
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate(
@@ -692,7 +692,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAdminTask() {
+    void shouldGetAdminTask() {
         //given
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
@@ -737,7 +737,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnVariableNameAndValue_when_loggedAsAdmin() {
+    void should_getTasksFilteredOnVariableNameAndValue_when_loggedAsAdmin() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -769,7 +769,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutGroupPermission() {
+    void shouldNotGetRestrictedTasksWithoutGroupPermission() {
         //given
         //we are logged in as test user who does not belong to hrgroup, so it should not be available
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate(
@@ -785,7 +785,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAddRemoveTaskUserCandidates() {
+    void shouldGetAddRemoveTaskUserCandidates() {
         //given
         Task createdTask = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with user candidate",
@@ -846,7 +846,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAddRemoveTaskGroupCandidates() {
+    void shouldGetAddRemoveTaskGroupCandidates() {
         //given
         Task createdTask = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task with group candidate",
@@ -913,7 +913,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void adminShouldAssignTask() {
+    void adminShouldAssignTask() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
         eventsAggregator.sendAll();
@@ -971,7 +971,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetCorrectCompletedDateAndDurationWhenCompleted() {
+    void shouldGetCorrectCompletedDateAndDurationWhenCompleted() {
         //given
 
         Date now = new Date(System.currentTimeMillis());
@@ -1135,7 +1135,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTaskByCreatedDateFromTo() {
+    void shouldFilterTaskByCreatedDateFromTo() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -1247,7 +1247,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldHaveCreatedStatusAfterBeingReleased() {
+    void shouldHaveCreatedStatusAfterBeingReleased() {
         Task releasedTask = taskEventContainedBuilder.aReleasedTask("released-task");
 
         eventsAggregator.sendAll();
@@ -1270,7 +1270,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
+    void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
         //given
         Task task1 = taskEventContainedBuilder.aCreatedTask("Task 1 for filter", runningProcessInstance);
         Task task2 = taskEventContainedBuilder.aCreatedTask("Task 2 not filter", null);
@@ -1327,7 +1327,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
+    void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
         //given
         //event with process definition version set
         TaskImpl task1 = aCreatedTask("Task1");
@@ -1386,7 +1386,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByTaskDefinitionKey() {
+    void should_getTask_when_queryFilteredByTaskDefinitionKey() {
         //given
         CloudTaskCreatedEventImpl task1Created = buildTaskCreatedEvent("Task1", "taskDefinitionKey");
         CloudTaskCreatedEventImpl task2Created = buildTaskCreatedEvent("Task2", null);
@@ -1451,7 +1451,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
+    void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
         //given
         Task task = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task with group candidate",
@@ -1524,7 +1524,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskUserCandidatesAfterTaskCompleted() {
+    void shouldGetTaskUserCandidatesAfterTaskCompleted() {
         //given
         Task task = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with user candidate",
@@ -1599,7 +1599,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksForDueDate() {
+    void shouldFilterTasksForDueDate() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -1676,7 +1676,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByProcessDefinitionName() {
+    void should_getTask_when_queryFilteredByProcessDefinitionName() {
         //given
         Task task1 = taskEventContainedBuilder.aCreatedTask("Task1", runningProcessInstance);
 
@@ -1720,7 +1720,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
+    void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
         identityTokenProducer.withTestUser(HRUSER);
         taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "fakeUser", runningProcessInstance);
 
@@ -1742,7 +1742,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
+    void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
@@ -1780,7 +1780,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
+    void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
         identityTokenProducer.withTestUser(HRUSER);
 
         //given
@@ -1819,7 +1819,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
+    void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
@@ -1856,7 +1856,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
+    void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
             "Task1",
@@ -1886,7 +1886,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getAllTasks_by_ProcessInstance_whenUserIsAdmin() {
+    void should_getAllTasks_by_ProcessInstance_whenUserIsAdmin() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "user", runningProcessInstance);
         Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2", "group", runningProcessInstance);
@@ -1945,7 +1945,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
+    void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "testuser", runningProcessInstance);
 
@@ -1971,7 +1971,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksForCompletedBy() {
+    void shouldFilterTasksForCompletedBy() {
         //Given
         String completedByFirstUser = "hruser1";
         String completedBySecondUser = "userXyz";
@@ -2010,7 +2010,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByPriority() {
+    void should_getTask_when_queryFilteredByPriority() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithPriority("Task1", 20, runningProcessInstance);
 
@@ -2040,7 +2040,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskListFilteredByCompletedDate() {
+    void shouldGetTaskListFilteredByCompletedDate() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -2105,7 +2105,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
+    void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
         //given
         Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task one",
@@ -2169,7 +2169,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCompletedTaskWithProcessVariables() {
+    void should_getCompletedTaskWithProcessVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2204,7 +2204,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithProcessVariables() {
+    void should_getCreatedTaskWithProcessVariables() {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
@@ -2239,7 +2239,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
+    void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
         //given
         variableEventContainedBuilder
             .aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
@@ -2273,7 +2273,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getOnlyTasksWithProcessVariablesRequested() {
+    void should_getOnlyTasksWithProcessVariablesRequested() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2320,7 +2320,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetProcessVariablesWhenNotRequested() {
+    void should_notGetProcessVariablesWhenNotRequested() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2366,7 +2366,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCompletedTaskWithProcessVariablesForProcessInstance() {
+    void should_getCompletedTaskWithProcessVariablesForProcessInstance() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2402,7 +2402,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithProcessVariablesForProcessInstance() {
+    void should_getCreatedTaskWithProcessVariablesForProcessInstance() {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
@@ -2438,7 +2438,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariablesForProcessInstance() {
+    void should_getCreatedTaskWithPreviouslyCreatedProcessVariablesForProcessInstance() {
         //given
         variableEventContainedBuilder
             .aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
@@ -2473,7 +2473,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getOnlyTasksWithProcessVariablesRequestedForProcessInstance() {
+    void should_getOnlyTasksWithProcessVariablesRequestedForProcessInstance() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2519,7 +2519,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetProcessVariablesWhenNotRequestedForProcessInstance() {
+    void should_notGetProcessVariablesWhenNotRequestedForProcessInstance() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2558,7 +2558,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_migrateTaskProcessVariables() throws Exception {
+    void should_migrateTaskProcessVariables() throws Exception {
         //given
         Task task = taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2638,7 +2638,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithUserPermissionOnDuplicateCandidateEvents() {
+    void shouldGetRestrictedTasksWithUserPermissionOnDuplicateCandidateEvents() {
         //given
         identityTokenProducer.withTestUser(TESTUSER);
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
