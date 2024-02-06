@@ -167,8 +167,6 @@ public class ActivitiKeycloakAutoConfiguration {
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters, customizers))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
-            .logLevel(Logger.Level.FULL)
-            .logger(new Slf4jLogger())
             .target(KeycloakClient.class, url);
     }
 }
