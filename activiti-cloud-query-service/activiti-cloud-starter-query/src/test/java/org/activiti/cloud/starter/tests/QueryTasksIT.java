@@ -19,7 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -70,6 +72,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -266,6 +271,46 @@ public class QueryTasksIT {
     }
 
     @Test
+    public void should_getTasksFilteredOnVariableNameAndValueWithPagedRequest() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
+        Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
+        Task taskRejected = taskEventContainedBuilder.aCompletedTask("Task rejected", runningProcessInstance);
+        Task createdTask = taskEventContainedBuilder.aCreatedTask("Task Created", runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(taskApproved);
+        variableEventContainedBuilder.aCreatedVariable("intValue", 40).onTask(taskApproved);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(createdTask);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(taskRejected);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                PagedModel<QueryCloudTask> approvedTasks = executeGetTasksWithVariablePagedRequest(
+                    TASKS_URL,
+                    "outcome",
+                    "approved",
+                    PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "name")
+                );
+
+                //then
+                assertThat(approvedTasks.getContent())
+                    .hasSize(2)
+                    .extracting(Task::getName)
+                    .containsExactly(taskRejected.getName(), taskApproved.getName());
+                assertThat(approvedTasks.getMetadata())
+                    .extracting(
+                        PagedModel.PageMetadata::getTotalElements,
+                        PagedModel.PageMetadata::getNumber,
+                        PagedModel.PageMetadata::getSize
+                    )
+                    .containsExactly(3L, 0L, 2L);
+            });
+    }
+
+    @Test
     public void should_getTasksFilteredOnIntegerVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
@@ -381,6 +426,31 @@ public class QueryTasksIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         return responseEntity.getBody().getContent();
+    }
+
+    private <T> PagedModel<QueryCloudTask> executeGetTasksWithVariablePagedRequest(
+        String tasksUrl,
+        String variableName,
+        T variableValue,
+        Pageable pageable
+    ) {
+        ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = testRestTemplate.exchange(
+            tasksUrl +
+            "?variables.name={name}&variables.value={outcome}&variables.type={type}&" +
+            queryStringFromPageable(pageable),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            variableName,
+            variableValue,
+            variableValue.getClass().getSimpleName().toLowerCase()
+        );
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+
+        return responseEntity.getBody();
     }
 
     @Test
@@ -2584,5 +2654,41 @@ public class QueryTasksIT {
 
         //then
         assertCanRetrieveTask(taskWithCandidate);
+    }
+
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasks(Pageable pageable) {
+        return testRestTemplate.exchange(
+            TASKS_URL + "?".concat(queryStringFromPageable(pageable)),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE
+        );
+    }
+
+    private static String encodeURLComponent(Object component) {
+        try {
+            return URLEncoder.encode(component.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String queryStringFromPageable(Pageable pageable) {
+        StringBuilder result = new StringBuilder();
+        result.append("page=").append(encodeURLComponent(pageable.getPageNumber()));
+        result.append("&size=").append(pageable.getPageSize());
+
+        // No sorting
+        if (pageable.getSort().isUnsorted()) return result.toString();
+
+        // Sorting is specified
+        for (Sort.Order o : pageable.getSort()) {
+            result.append("&sort=");
+            result.append(encodeURLComponent(o.getProperty()));
+            result.append(",");
+            result.append(encodeURLComponent(o.getDirection().name()));
+        }
+
+        return result.toString();
     }
 }
