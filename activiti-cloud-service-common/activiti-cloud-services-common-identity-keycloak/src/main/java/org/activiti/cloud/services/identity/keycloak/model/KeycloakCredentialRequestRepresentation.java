@@ -20,7 +20,6 @@ public class KeycloakCredentialRequestRepresentation {
     private String id;
     private String realm;
 
-
     public String getId() {
         return id;
     }
@@ -55,7 +54,6 @@ public class KeycloakCredentialRequestRepresentation {
             this.realm = realm;
             return this;
         }
-
 
         public KeycloakCredentialRequestRepresentation build() {
             KeycloakCredentialRequestRepresentation keycloakClientRepresentation = new KeycloakCredentialRequestRepresentation();

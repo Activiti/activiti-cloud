@@ -115,7 +115,6 @@ public class KeycloakClientCrudIT {
         assertThat(roleRepresentationForClient).isNotNull();
     }
 
-
     @Test
     public void should_handleClientWithServiceAccountEnabledCRUD() {
         String clientId = "crudClientWithServiceAccountId";
@@ -151,9 +150,15 @@ public class KeycloakClientCrudIT {
         assertThat(clientUpdated.getPublicClient()).isFalse();
         assertThat(clientUpdated.getAttributes().accessTokenLifespan()).isNull();
 
-        KeycloakCredentialRequestRepresentation requestRepresentation = new KeycloakCredentialRequestRepresentation.Builder().withId(idOfClient).withRealm("activiti").build();
+        KeycloakCredentialRequestRepresentation requestRepresentation = new KeycloakCredentialRequestRepresentation.Builder()
+            .withId(idOfClient)
+            .withRealm("activiti")
+            .build();
 
-        KeycloakCredentialRepresentation clientSecret = keycloakClient.createClientSecretById(requestRepresentation, idOfClient);
+        KeycloakCredentialRepresentation clientSecret = keycloakClient.createClientSecretById(
+            requestRepresentation,
+            idOfClient
+        );
         assertThat(clientSecret).isNotNull();
         assertThat(clientSecret.getType()).isEqualTo("secret");
         assertThat(clientSecret.getValue()).isNotNull();
@@ -164,8 +169,6 @@ public class KeycloakClientCrudIT {
         assertThat(clientSecret.getType()).isEqualTo("secret");
         assertThat(clientSecret.getValue()).isNotNull();
         assertThat(clientSecret.getValue()).isNotBlank();
-
-
 
         keycloakClient.deleteClient(idOfClient);
         Throwable exception = catchThrowable(() -> keycloakClient.getClientById(idOfClient));

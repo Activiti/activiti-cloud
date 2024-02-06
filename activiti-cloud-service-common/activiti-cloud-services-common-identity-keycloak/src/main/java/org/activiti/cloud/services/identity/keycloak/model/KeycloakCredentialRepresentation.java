@@ -16,15 +16,13 @@
 package org.activiti.cloud.services.identity.keycloak.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import org.activiti.cloud.identity.IdentityClientRepresentation;
 
-import java.util.List;
-
-public class KeycloakCredentialRepresentation  {
+public class KeycloakCredentialRepresentation {
 
     private String type;
     private String value;
-
 
     public String getType() {
         return type;
@@ -60,7 +58,6 @@ public class KeycloakCredentialRepresentation  {
             this.value = value;
             return this;
         }
-
 
         public KeycloakCredentialRepresentation build() {
             KeycloakCredentialRepresentation keycloakClientRepresentation = new KeycloakCredentialRepresentation();
