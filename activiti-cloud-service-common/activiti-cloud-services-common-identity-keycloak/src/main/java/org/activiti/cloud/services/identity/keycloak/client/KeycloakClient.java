@@ -243,7 +243,7 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/clients/{id}/client-secret")
     @Headers("Content-Type: application/json")
-    KeycloakCredentialRepresentation createClientSecretById(
+    KeycloakCredentialRepresentation generateNewClientSecret(
         @RequestBody KeycloakCredentialRequestRepresentation requestRepresentation,
         @PathVariable("id") String id
     );

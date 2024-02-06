@@ -155,7 +155,7 @@ public class KeycloakClientCrudIT {
             .withRealm("activiti")
             .build();
 
-        KeycloakCredentialRepresentation clientSecret = keycloakClient.createClientSecretById(
+        KeycloakCredentialRepresentation clientSecret = keycloakClient.generateNewClientSecret(
             requestRepresentation,
             idOfClient
         );
