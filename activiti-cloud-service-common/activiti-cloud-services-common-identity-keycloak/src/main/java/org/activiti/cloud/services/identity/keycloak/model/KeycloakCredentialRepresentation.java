@@ -15,10 +15,6 @@
  */
 package org.activiti.cloud.services.identity.keycloak.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import org.activiti.cloud.identity.IdentityClientRepresentation;
-
 public class KeycloakCredentialRepresentation {
 
     private String type;

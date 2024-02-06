@@ -17,8 +17,6 @@ package org.activiti.cloud.services.identity.keycloak.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import feign.Feign;
-import feign.Logger;
-import feign.slf4j.Slf4jLogger;
 import java.time.Duration;
 import org.activiti.cloud.security.feign.AuthTokenRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
