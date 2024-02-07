@@ -103,12 +103,18 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     @Override
     public Page<TaskEntity> findInProcessInstanceScope(Predicate predicate, Pageable pageable) {
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        final Querydsl querydsl = getQuerydsl();
 
-        JPQLQuery<TaskEntity> from = buildLeftJoin(taskEntity, predicate);
-        final JPQLQuery<?> countQuery = from.select(taskEntity.count());
-        JPQLQuery<TaskEntity> tasks = from.select(taskEntity);
+        JPQLQuery<String> taskIdsQuery = buildLeftJoin(taskEntity).select(taskEntity.id).where(predicate);
+        final long totalElements = taskIdsQuery.fetchCount();
+        List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
+        JPQLQuery<TaskEntity> tasks = buildLeftJoin(taskEntity).select(taskEntity).where(taskEntity.id.in(taskIds));
 
-        return PageableExecutionUtils.getPage(tasks.fetch(), pageable, countQuery::fetchCount);
+        return PageableExecutionUtils.getPage(
+            querydsl.applySorting(pageable.getSort(), tasks).fetch(),
+            pageable,
+            () -> totalElements
+        );
     }
 
     @Override
@@ -120,11 +126,13 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     }
 
     private JPQLQuery<TaskEntity> buildLeftJoin(QTaskEntity taskEntity, Predicate predicate) {
-        Assert.notNull(predicate, "Predicate must not be null!");
+        return buildLeftJoin(taskEntity).where(predicate);
+    }
 
+    private JPQLQuery<TaskEntity> buildLeftJoin(QTaskEntity taskEntity) {
         QProcessInstanceEntity processInstanceEntity = QProcessInstanceEntity.processInstanceEntity;
         Predicate condition = processInstanceEntity.id.eq(taskEntity.processInstanceId);
 
-        return from(taskEntity).leftJoin(processInstanceEntity).on(condition).where(predicate);
+        return from(taskEntity).leftJoin(processInstanceEntity).on(condition);
     }
 }

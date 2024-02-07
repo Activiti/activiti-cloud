@@ -1098,6 +1098,19 @@ public class QueryTasksIT {
         );
     }
 
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasks(
+        ProcessInstance processInstance,
+        Pageable pageable
+    ) {
+        return testRestTemplate.exchange(
+            "/v1/process-instances/{processInstanceId}/tasks?" + queryStringFromPageable(pageable),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            processInstance.getId()
+        );
+    }
+
     private ResponseEntity<Task> executeRequestGetAdminTasksById(String id) {
         return testRestTemplate.exchange(
             ADMIN_TASKS_URL + "/" + id,
@@ -1971,6 +1984,46 @@ public class QueryTasksIT {
     }
 
     @Test
+    void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance_for_pagedRequest() {
+        //given
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "testuser", runningProcessInstance);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task2", "testuser", runningProcessInstance);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task3", "testuser", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .forever()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                    runningProcessInstance,
+                    PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "name")
+                );
+
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getMetadata())
+                    .extracting(
+                        PagedModel.PageMetadata::getTotalElements,
+                        PagedModel.PageMetadata::getNumber,
+                        PagedModel.PageMetadata::getSize
+                    )
+                    .containsExactly(3L, 0L, 2L);
+                Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
+                assertThat(tasks)
+                    .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                    .containsExactly(
+                        tuple("Task3", Collections.singletonList("testuser"), Collections.emptyList()),
+                        tuple("Task2", Collections.singletonList("testuser"), Collections.emptyList())
+                    );
+            });
+    }
+
+    @Test
     void shouldFilterTasksForCompletedBy() {
         //Given
         String completedByFirstUser = "hruser1";
@@ -2553,7 +2606,7 @@ public class QueryTasksIT {
                         Task::getName,
                         QueryCloudTask -> CollectionUtils.isEmpty((QueryCloudTask.getProcessVariables()))
                     )
-                    .containsExactly(tuple("Created task", true), tuple("Completed task", true));
+                    .containsOnly(tuple("Created task", true), tuple("Completed task", true));
             });
     }
 
