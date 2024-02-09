@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.task.model.impl;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +43,13 @@ public class CloudTaskImpl extends CloudRuntimeEntityImpl implements CloudTask {
     private Date completedDate;
     private Long duration;
     private Integer processDefinitionVersion;
+
+    @Schema(
+        description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
+        readOnly = true
+    )
     private String businessKey;
+
     private String taskDefinitionKey;
     private List<String> candidateUsers;
     private List<String> candidateGroups;

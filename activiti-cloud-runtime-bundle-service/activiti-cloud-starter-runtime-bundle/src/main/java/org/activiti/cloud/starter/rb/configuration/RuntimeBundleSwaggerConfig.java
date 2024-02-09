@@ -21,6 +21,7 @@ import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
@@ -30,9 +31,14 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
+import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
+import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,6 +47,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
+    static {
+        SpringDocUtils.getConfig().replaceWithClass(CloudTask.class, CloudTaskImpl.class);
+        SpringDocUtils.getConfig().replaceWithClass(CloudProcessInstance.class, CloudProcessInstanceImpl.class);
+    }
 
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
@@ -48,7 +58,11 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
         return GroupedOpenApi
             .builder()
             .group("Runtime Bundle")
-            .packagesToScan("org.activiti.cloud.services.rest")
+            .packagesToScan(
+                "com.alfresco.process.runtime.controller",
+                "org.activiti.cloud.services.rest",
+                "org.activiti.cloud.services.query.model"
+            )
             .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )

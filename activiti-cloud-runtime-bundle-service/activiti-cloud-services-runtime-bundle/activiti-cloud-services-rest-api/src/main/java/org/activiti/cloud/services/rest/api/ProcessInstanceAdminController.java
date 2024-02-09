@@ -69,7 +69,9 @@ public interface ProcessInstanceAdminController {
 
     @RequestMapping(value = "/{processInstanceId}/destroy", method = RequestMethod.DELETE)
     ResponseEntity<Void> destroyProcessInstance(
-        @Parameter(description = "Enter the processInstanceId to destroy") @PathVariable String processInstanceId
+        @Parameter(
+            description = "Enter the processInstanceId to delete a process instance"
+        ) @PathVariable String processInstanceId
     );
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)

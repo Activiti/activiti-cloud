@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -80,13 +81,22 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     private String name;
     private String processDefinitionId;
+
+    @Schema(
+        description = "It identifies uniquely the process. In the BPMN process definition file it is the id attribute of a process and in the Modeling application it is usually called as Process ID."
+    )
     private String processDefinitionKey;
+
     private String initiator;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Temporal(TIMESTAMP)
     private Date startDate;
 
+    @Schema(
+        description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
+        readOnly = true
+    )
     private String businessKey;
 
     @Enumerated(EnumType.STRING)
