@@ -16,7 +16,6 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.Date;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
