@@ -17,6 +17,8 @@ package org.activiti.cloud.services.modeling.validation;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 import org.activiti.cloud.modeling.api.ModelValidationError;
 
@@ -25,7 +27,7 @@ import org.activiti.cloud.modeling.api.ModelValidationError;
  */
 public interface DNSNameValidator extends NameValidator {
     String DNS_LABEL_REGEX = "^[a-z]([-a-z0-9]{0,24}[a-z0-9])?$";
-
+    String DNS_LABEL_REGEX_WITHOUT_LENGTH = "^[a-z]([-a-z0-9]*[a-z0-9])?$";
     String DNS_NAME_VALIDATOR = "DNS name validator";
     String INVALID_DNS_NAME_PROBLEM = "The name is not a valid DNS name";
 
@@ -46,5 +48,19 @@ public interface DNSNameValidator extends NameValidator {
             validationErrors = Stream.concat(validationErrors, Stream.of(dnsNameValidatorError));
         }
         return validationErrors;
+    }
+
+    default Stream<ModelValidationError> validateDNSNameCharacters(String name, String type) {
+        List<ModelValidationError> validationErrors = new ArrayList<>();
+        if (name != null && !name.matches(DNS_LABEL_REGEX_WITHOUT_LENGTH)) {
+            ModelValidationError dnsNameValidatorError = createModelValidationError(
+                INVALID_DNS_NAME_PROBLEM,
+                format(INVALID_DNS_NAME_DESCRIPTION, type, name),
+                DNS_NAME_VALIDATOR,
+                "regex.mismatch"
+            );
+            validationErrors.add(dnsNameValidatorError);
+        }
+        return validationErrors.stream();
     }
 }

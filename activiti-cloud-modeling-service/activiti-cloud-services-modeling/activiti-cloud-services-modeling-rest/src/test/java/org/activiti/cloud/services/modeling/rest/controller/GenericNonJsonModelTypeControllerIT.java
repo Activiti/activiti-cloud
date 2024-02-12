@@ -17,6 +17,7 @@ package org.activiti.cloud.services.modeling.rest.controller;
 
 import static org.activiti.cloud.services.modeling.asserts.AssertResponse.assertThatResponse;
 import static org.activiti.cloud.services.modeling.mock.MockFactory.project;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
@@ -183,33 +184,49 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_update_when_creatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_throwModelNameInvalidException_when_creatingGenericNonJsonModelWithNameWithUnderscore()
+        throws Exception {
         String name = "name_with_underscore";
 
         project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
-        ResultActions resultActions = mockMvc.perform(
-            post("/v1/projects/{projectId}/models", project.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
-        );
+        ResultActions resultActions = mockMvc
+            .perform(
+                post("/v1/projects/{projectId}/models", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+            )
+            .andExpect(status().isBadRequest());
 
-        resultActions.andExpect(status().isCreated());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'name_with_underscore'"
+            );
     }
 
     @Test
-    public void should_create_when_creatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
+    public void should_throwModelNameInvalidException_when_creatingGenericNonJsonModelWithNameWithUppercase()
+        throws Exception {
         String name = "NameWithUppercase";
 
         project = projectRepository.createProject(project(GENERIC_PROJECT_NAME));
 
-        ResultActions resultActions = mockMvc.perform(
-            post("/v1/projects/{projectId}/models", project.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
-        );
+        ResultActions resultActions = mockMvc
+            .perform(
+                post("/v1/projects/{projectId}/models", project.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+            )
+            .andExpect(status().isBadRequest());
 
-        resultActions.andExpect(status().isCreated());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'NameWithUppercase'"
+            );
     }
 
     @Test
@@ -289,35 +306,51 @@ public class GenericNonJsonModelTypeControllerIT {
     }
 
     @Test
-    public void should_update_when_updatingGenericNonJsonModelWithNameWithUnderscore() throws Exception {
+    public void should_throwModelNameInvalidException_when_updatingGenericNonJsonModelWithNameWithUnderscore()
+        throws Exception {
         String name = "name_with_underscore";
 
         genericNonJsonModel =
             modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
 
-        ResultActions resultActions = mockMvc.perform(
-            put("/v1/models/{modelId}", genericNonJsonModel.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
-        );
+        ResultActions resultActions = mockMvc
+            .perform(
+                put("/v1/models/{modelId}", genericNonJsonModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+            )
+            .andExpect(status().isBadRequest());
 
-        resultActions.andExpect(status().isOk());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'name_with_underscore'"
+            );
     }
 
     @Test
-    public void should_update_when_updatingGenericNonJsonModelWithNameWithUppercase() throws Exception {
+    public void should_throwModelNameInvalidException_when_updatingGenericNonJsonModelWithNameWithUppercase()
+        throws Exception {
         String name = "NameWithUppercase";
 
         genericNonJsonModel =
             modelRepository.createModel(new ModelEntity(GENERIC_MODEL_NAME, genericNonJsonModelType.getName()));
 
-        ResultActions resultActions = mockMvc.perform(
-            put("/v1/models/{modelId}", genericNonJsonModel.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
-        );
+        ResultActions resultActions = mockMvc
+            .perform(
+                put("/v1/models/{modelId}", genericNonJsonModel.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(new ModelEntity(name, genericNonJsonModelType.getName())))
+            )
+            .andExpect(status().isBadRequest());
 
-        resultActions.andExpect(status().isOk());
+        assertThat(resultActions.andReturn().getResponse().getErrorMessage())
+            .isEqualTo(
+                "The model name should follow DNS-1035 conventions:" +
+                " it must consist of lower case alphanumeric characters or '-'," +
+                " and must start and end with an alphanumeric character: 'NameWithUppercase'"
+            );
     }
 
     @Test
