@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.notifications.graphql.graphiql;
+package org.activiti.cloud.identity;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Arrays;
+import org.activiti.cloud.identity.exceptions.IdentityInvalidUserTypeException;
 
-@Controller
-@ConditionalOnWebApplication
-public class GraphiQLIndexController {
+public enum UserTypeSearchParam {
+    ALL,
+    INTERACTIVE;
 
-    @Value("${graphiql.index:graphiql/graphiql.html}")
-    private String graphiqlHtml;
-
-    @GetMapping("/graphiql")
-    public String getIndex() {
-        return "forward:/" + graphiqlHtml;
+    public static UserTypeSearchParam convertFromStringOrThrow(String stringValue) {
+        return Arrays
+            .stream(UserTypeSearchParam.values())
+            .filter(ut -> ut.name().equals(stringValue))
+            .findAny()
+            .orElseThrow(() -> new IdentityInvalidUserTypeException(stringValue));
     }
 }

@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
@@ -70,6 +72,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -138,7 +143,7 @@ public class QueryTasksIT {
     private VariableEventContainedBuilder variableEventContainedBuilder;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         eventsAggregator = new EventsAggregator(producer);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         taskEventContainedBuilder = new TaskEventContainedBuilder(eventsAggregator);
@@ -149,7 +154,7 @@ public class QueryTasksIT {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         taskCandidateUserRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskVariableRepository.deleteAll();
@@ -159,7 +164,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasksAndFilterOnStatus() {
+    void shouldGetAvailableTasksAndFilterOnStatus() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
         Task assignedTask = taskEventContainedBuilder.anAssignedTask(
@@ -236,7 +241,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnVariableNameAndValue() {
+    void should_getTasksFilteredOnVariableNameAndValue() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -266,7 +271,49 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnIntegerVariables() {
+    void should_getTasksFilteredOnVariableNameAndValueWithPagedRequest() {
+        //given
+        taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
+        Task task1 = taskEventContainedBuilder.aCompletedTask("Task1", runningProcessInstance);
+        Task task2 = taskEventContainedBuilder.aCompletedTask("Task2", runningProcessInstance);
+        Task task3 = taskEventContainedBuilder.aCompletedTask("Task3", runningProcessInstance);
+        Task task4 = taskEventContainedBuilder.aCompletedTask("Task4", runningProcessInstance);
+
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task1);
+        variableEventContainedBuilder.aCreatedVariable("intValue", 40).onTask(task1);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task3);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "approved").onTask(task2);
+        variableEventContainedBuilder.aCreatedVariable("outcome", "rejected").onTask(task4);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                //when
+                PagedModel<QueryCloudTask> approvedTasks = executeGetTasksWithVariablePagedRequest(
+                    TASKS_URL,
+                    "outcome",
+                    "approved",
+                    PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "name")
+                );
+
+                //then
+                assertThat(approvedTasks.getContent())
+                    .hasSize(2)
+                    .extracting(Task::getName)
+                    .containsExactly(task3.getName(), task2.getName());
+                assertThat(approvedTasks.getMetadata())
+                    .extracting(
+                        PagedModel.PageMetadata::getTotalElements,
+                        PagedModel.PageMetadata::getNumber,
+                        PagedModel.PageMetadata::getSize
+                    )
+                    .containsExactly(3L, 0L, 2L);
+            });
+    }
+
+    @Test
+    void should_getTasksFilteredOnIntegerVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskForties = taskEventContainedBuilder.aCompletedTask("Task forties", runningProcessInstance);
@@ -292,7 +339,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnBooleanVariables() {
+    void should_getTasksFilteredOnBooleanVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -318,7 +365,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnBigDecimalVariables() {
+    void should_getTasksFilteredOnBigDecimalVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskScale2 = taskEventContainedBuilder.aCompletedTask("Task scale 2", runningProcessInstance);
@@ -383,8 +430,33 @@ public class QueryTasksIT {
         return responseEntity.getBody().getContent();
     }
 
+    private <T> PagedModel<QueryCloudTask> executeGetTasksWithVariablePagedRequest(
+        String tasksUrl,
+        String variableName,
+        T variableValue,
+        Pageable pageable
+    ) {
+        ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = testRestTemplate.exchange(
+            tasksUrl +
+            "?variables.name={name}&variables.value={outcome}&variables.type={type}&" +
+            queryStringFromPageable(pageable),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            variableName,
+            variableValue,
+            variableValue.getClass().getSimpleName().toLowerCase()
+        );
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+
+        return responseEntity.getBody();
+    }
+
     @Test
-    public void shouldGetTaskWithUpdatedInfo() {
+    void shouldGetTaskWithUpdatedInfo() {
         //given
         Task assignedTask = taskEventContainedBuilder.anAssignedTask(
             "Assigned task",
@@ -426,7 +498,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableTasksAndFilterParentId() {
+    void shouldGetAvailableTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneTaskWithParent("Created task with parent");
 
@@ -450,7 +522,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetStandaloneAssignedTasksAndFilterParentId() {
+    void shouldGetStandaloneAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedStandaloneAssignedTaskWithParent(
             "Created task with parent",
@@ -463,7 +535,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAssignedTasksAndFilterParentId() {
+    void shouldGetAssignedTasksAndFilterParentId() {
         //given
         Task createdTask = taskEventContainedBuilder.anAssignedTaskWithParent(
             "Created task with parent",
@@ -477,7 +549,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableRootTasksWithStatus() {
+    void shouldGetAvailableRootTasksWithStatus() {
         //given
         TaskImpl rootTaskNoSubtask = new TaskImpl(
             UUID.randomUUID().toString(),
@@ -521,7 +593,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableStandaloneTasksWithStatus() {
+    void shouldGetAvailableStandaloneTasksWithStatus() {
         //given
         TaskImpl processTask = new TaskImpl(UUID.randomUUID().toString(), "Task1", TaskStatus.CREATED);
         processTask.setProcessInstanceId(runningProcessInstance.getId());
@@ -571,7 +643,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithUserPermission() {
+    void shouldGetRestrictedTasksWithUserPermission() {
         //given
         identityTokenProducer.withTestUser("testuser");
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
@@ -587,7 +659,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutUserPermission() {
+    void shouldNotGetRestrictedTasksWithoutUserPermission() {
         //given
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with candidate",
@@ -603,7 +675,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithGroupPermission() {
+    void shouldGetRestrictedTasksWithGroupPermission() {
         //given
         //we are logged in as testuser who belongs to testgroup, so it should be able to see the task
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate(
@@ -620,7 +692,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAdminTask() {
+    void shouldGetAdminTask() {
         //given
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
@@ -665,7 +737,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasksFilteredOnVariableNameAndValue_when_loggedAsAdmin() {
+    void should_getTasksFilteredOnVariableNameAndValue_when_loggedAsAdmin() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task with no var", runningProcessInstance);
         Task taskApproved = taskEventContainedBuilder.aCompletedTask("Task approved", runningProcessInstance);
@@ -697,7 +769,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldNotGetRestrictedTasksWithoutGroupPermission() {
+    void shouldNotGetRestrictedTasksWithoutGroupPermission() {
         //given
         //we are logged in as test user who does not belong to hrgroup, so it should not be available
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithGroupCandidate(
@@ -713,7 +785,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAddRemoveTaskUserCandidates() {
+    void shouldGetAddRemoveTaskUserCandidates() {
         //given
         Task createdTask = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with user candidate",
@@ -774,7 +846,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAddRemoveTaskGroupCandidates() {
+    void shouldGetAddRemoveTaskGroupCandidates() {
         //given
         Task createdTask = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task with group candidate",
@@ -841,7 +913,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void adminShouldAssignTask() {
+    void adminShouldAssignTask() {
         //given
         Task createdTask = taskEventContainedBuilder.aCreatedTask("Created task", runningProcessInstance);
         eventsAggregator.sendAll();
@@ -899,7 +971,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetCorrectCompletedDateAndDurationWhenCompleted() {
+    void shouldGetCorrectCompletedDateAndDurationWhenCompleted() {
         //given
 
         Date now = new Date(System.currentTimeMillis());
@@ -1026,6 +1098,19 @@ public class QueryTasksIT {
         );
     }
 
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasks(
+        ProcessInstance processInstance,
+        Pageable pageable
+    ) {
+        return testRestTemplate.exchange(
+            "/v1/process-instances/{processInstanceId}/tasks?" + queryStringFromPageable(pageable),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE,
+            processInstance.getId()
+        );
+    }
+
     private ResponseEntity<Task> executeRequestGetAdminTasksById(String id) {
         return testRestTemplate.exchange(
             ADMIN_TASKS_URL + "/" + id,
@@ -1063,7 +1148,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTaskByCreatedDateFromTo() {
+    void shouldFilterTaskByCreatedDateFromTo() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -1175,7 +1260,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldHaveCreatedStatusAfterBeingReleased() {
+    void shouldHaveCreatedStatusAfterBeingReleased() {
         Task releasedTask = taskEventContainedBuilder.aReleasedTask("released-task");
 
         eventsAggregator.sendAll();
@@ -1198,7 +1283,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
+    void shouldGetAvailableStandaloneTasksFilteredByNameDescription() {
         //given
         Task task1 = taskEventContainedBuilder.aCreatedTask("Task 1 for filter", runningProcessInstance);
         Task task2 = taskEventContainedBuilder.aCreatedTask("Task 2 not filter", null);
@@ -1255,7 +1340,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
+    void shouldSetProcessDefinitionVersionAndBusinessKeyOnTaskWhenThisInformationIsAvailableInTheEvent() {
         //given
         //event with process definition version set
         TaskImpl task1 = aCreatedTask("Task1");
@@ -1314,7 +1399,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByTaskDefinitionKey() {
+    void should_getTask_when_queryFilteredByTaskDefinitionKey() {
         //given
         CloudTaskCreatedEventImpl task1Created = buildTaskCreatedEvent("Task1", "taskDefinitionKey");
         CloudTaskCreatedEventImpl task2Created = buildTaskCreatedEvent("Task2", null);
@@ -1379,7 +1464,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
+    void shouldGetTaskGroupCandidatesAfterTaskCompleted() {
         //given
         Task task = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task with group candidate",
@@ -1452,7 +1537,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskUserCandidatesAfterTaskCompleted() {
+    void shouldGetTaskUserCandidatesAfterTaskCompleted() {
         //given
         Task task = taskEventContainedBuilder.aTaskWithUserCandidate(
             "task with user candidate",
@@ -1527,7 +1612,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksForDueDate() {
+    void shouldFilterTasksForDueDate() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -1604,7 +1689,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByProcessDefinitionName() {
+    void should_getTask_when_queryFilteredByProcessDefinitionName() {
         //given
         Task task1 = taskEventContainedBuilder.aCreatedTask("Task1", runningProcessInstance);
 
@@ -1648,7 +1733,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
+    void should_notGetTasks_by_ProcessInstance_userIsNotInvolved() {
         identityTokenProducer.withTestUser(HRUSER);
         taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "fakeUser", runningProcessInstance);
 
@@ -1670,7 +1755,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
+    void should_getTasks_by_ProcessInstance_when_userIsCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
@@ -1708,7 +1793,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
+    void should_getTasks_by_ProcessInstance_when_userIsAssignee() {
         identityTokenProducer.withTestUser(HRUSER);
 
         //given
@@ -1747,7 +1832,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
+    void should_getTasks_by_ProcessInstance_when_userIsInGroupCandidate() {
         identityTokenProducer.withTestUser(HRUSER);
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
@@ -1784,7 +1869,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
+    void should_getTasks_by_ProcessInstance_when_userIsInitiator() {
         //given
         QueryCloudTask task1 = taskEventContainedBuilder.aQueryCloudTaskWithUserCandidate(
             "Task1",
@@ -1814,7 +1899,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getAllTasks_by_ProcessInstance_whenUserIsAdmin() {
+    void should_getAllTasks_by_ProcessInstance_whenUserIsAdmin() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "user", runningProcessInstance);
         Task task2 = taskEventContainedBuilder.aTaskWithGroupCandidate("Task2", "group", runningProcessInstance);
@@ -1873,7 +1958,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
+    void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "testuser", runningProcessInstance);
 
@@ -1899,7 +1984,47 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksForCompletedBy() {
+    void should_getTasks_withCandidateUsersAndGroups_by_ProcessInstance_for_pagedRequest() {
+        //given
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task1", "testuser", runningProcessInstance);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task2", "testuser", runningProcessInstance);
+        taskEventContainedBuilder.aTaskWithUserCandidate("Task3", "testuser", runningProcessInstance);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .forever()
+            .untilAsserted(() -> {
+                //when
+                ResponseEntity<PagedModel<QueryCloudTask>> responseEntity = executeRequestGetTasks(
+                    runningProcessInstance,
+                    PageRequest.of(0, 2).withSort(Sort.Direction.DESC, "name")
+                );
+
+                //then
+                assertThat(responseEntity).isNotNull();
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getMetadata())
+                    .extracting(
+                        PagedModel.PageMetadata::getTotalElements,
+                        PagedModel.PageMetadata::getNumber,
+                        PagedModel.PageMetadata::getSize
+                    )
+                    .containsExactly(3L, 0L, 2L);
+                Collection<QueryCloudTask> tasks = responseEntity.getBody().getContent();
+                assertThat(tasks)
+                    .extracting(Task::getName, Task::getCandidateUsers, Task::getCandidateGroups)
+                    .containsExactly(
+                        tuple("Task3", Collections.singletonList("testuser"), Collections.emptyList()),
+                        tuple("Task2", Collections.singletonList("testuser"), Collections.emptyList())
+                    );
+            });
+    }
+
+    @Test
+    void shouldFilterTasksForCompletedBy() {
         //Given
         String completedByFirstUser = "hruser1";
         String completedBySecondUser = "userXyz";
@@ -1938,7 +2063,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getTask_when_queryFilteredByPriority() {
+    void should_getTask_when_queryFilteredByPriority() {
         //given
         Task task1 = taskEventContainedBuilder.aTaskWithPriority("Task1", 20, runningProcessInstance);
 
@@ -1968,7 +2093,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetTaskListFilteredByCompletedDate() {
+    void shouldGetTaskListFilteredByCompletedDate() {
         //given
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -2033,7 +2158,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
+    void shouldFilterTasksBySingleCandidateGroupIdOrListOfCandidateGroupIds() {
         //given
         Task firstTaskWithCandidateGroupInFilter = taskEventContainedBuilder.aTaskWithGroupCandidate(
             "task one",
@@ -2097,7 +2222,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCompletedTaskWithProcessVariables() {
+    void should_getCompletedTaskWithProcessVariables() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2132,7 +2257,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithProcessVariables() {
+    void should_getCreatedTaskWithProcessVariables() {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
@@ -2167,7 +2292,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
+    void should_getCreatedTaskWithPreviouslyCreatedProcessVariables() {
         //given
         variableEventContainedBuilder
             .aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
@@ -2201,7 +2326,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getOnlyTasksWithProcessVariablesRequested() {
+    void should_getOnlyTasksWithProcessVariablesRequested() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2248,7 +2373,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetProcessVariablesWhenNotRequested() {
+    void should_notGetProcessVariablesWhenNotRequested() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2294,7 +2419,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCompletedTaskWithProcessVariablesForProcessInstance() {
+    void should_getCompletedTaskWithProcessVariablesForProcessInstance() {
         //given
         taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2330,7 +2455,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithProcessVariablesForProcessInstance() {
+    void should_getCreatedTaskWithProcessVariablesForProcessInstance() {
         //given
         taskEventContainedBuilder.aCreatedTask("Task", runningProcessInstance);
 
@@ -2366,7 +2491,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getCreatedTaskWithPreviouslyCreatedProcessVariablesForProcessInstance() {
+    void should_getCreatedTaskWithPreviouslyCreatedProcessVariablesForProcessInstance() {
         //given
         variableEventContainedBuilder
             .aCreatedVariableWithProcessDefinitionKey("varAName", "varAValue", "string", "varAProcessDefinitionKey")
@@ -2401,7 +2526,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_getOnlyTasksWithProcessVariablesRequestedForProcessInstance() {
+    void should_getOnlyTasksWithProcessVariablesRequestedForProcessInstance() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2447,7 +2572,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void should_notGetProcessVariablesWhenNotRequestedForProcessInstance() {
+    void should_notGetProcessVariablesWhenNotRequestedForProcessInstance() {
         //given
         final ProcessInstance otherProcessInstance = processInstanceBuilder.aRunningProcessInstanceWithInitiator(
             "ProcessInstanceWithInitiator",
@@ -2481,12 +2606,12 @@ public class QueryTasksIT {
                         Task::getName,
                         QueryCloudTask -> CollectionUtils.isEmpty((QueryCloudTask.getProcessVariables()))
                     )
-                    .containsExactly(tuple("Created task", true), tuple("Completed task", true));
+                    .containsOnly(tuple("Created task", true), tuple("Completed task", true));
             });
     }
 
     @Test
-    public void should_migrateTaskProcessVariables() throws Exception {
+    void should_migrateTaskProcessVariables() throws Exception {
         //given
         Task task = taskEventContainedBuilder.aCompletedTask("Task", runningProcessInstance);
 
@@ -2566,7 +2691,7 @@ public class QueryTasksIT {
     }
 
     @Test
-    public void shouldGetRestrictedTasksWithUserPermissionOnDuplicateCandidateEvents() {
+    void shouldGetRestrictedTasksWithUserPermissionOnDuplicateCandidateEvents() {
         //given
         identityTokenProducer.withTestUser(TESTUSER);
         Task taskWithCandidate = taskEventContainedBuilder.aTaskWithUserCandidate(
@@ -2584,5 +2709,39 @@ public class QueryTasksIT {
 
         //then
         assertCanRetrieveTask(taskWithCandidate);
+    }
+
+    private ResponseEntity<PagedModel<QueryCloudTask>> executeRequestGetTasks(Pageable pageable) {
+        return testRestTemplate.exchange(
+            TASKS_URL + "?".concat(queryStringFromPageable(pageable)),
+            HttpMethod.GET,
+            identityTokenProducer.entityWithAuthorizationHeader(),
+            PAGED_TASKS_RESPONSE_TYPE
+        );
+    }
+
+    private static String encodeURLComponent(Object component) {
+        return URLEncoder.encode(component.toString(), StandardCharsets.UTF_8);
+    }
+
+    private static String queryStringFromPageable(Pageable pageable) {
+        StringBuilder result = new StringBuilder();
+        result.append("page=").append(encodeURLComponent(pageable.getPageNumber()));
+        result.append("&size=").append(pageable.getPageSize());
+
+        // No sorting
+        if (pageable.getSort().isUnsorted()) {
+            return result.toString();
+        }
+
+        // Sorting is specified
+        for (Sort.Order o : pageable.getSort()) {
+            result.append("&sort=");
+            result.append(encodeURLComponent(o.getProperty()));
+            result.append(",");
+            result.append(encodeURLComponent(o.getDirection().name()));
+        }
+
+        return result.toString();
     }
 }

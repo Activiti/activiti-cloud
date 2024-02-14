@@ -36,20 +36,23 @@ public class GraphiQLAutoConfigurationTest {
     @Autowired
     private GraphiQLConfigController graphiQLConfigController;
 
+    @Autowired
+    private GraphiQLIndexController graphiQLIndexController;
+
     @SpringBootApplication
     static class Application {
         //
     }
 
     @Test
-    public void contextLoads() {
+    void contextLoads() {
         assertThat(keycloakJsonController.get().getBody()).isNotNull();
         assertThat(graphiQLConfigController.getGraphQLWebPath()).isEqualTo("/default-app/graphql");
         assertThat(graphiQLConfigController.getGraphQLWsPath()).isEqualTo("/default-app/ws/graphql");
     }
 
     @Test
-    public void testContextPath() {
+    void testContextPath() {
         assertThat(graphiQLConfigController.appendSegmentToPath("", "/graphql")).isEqualTo("/graphql");
         assertThat(graphiQLConfigController.appendSegmentToPath("/", "/graphql")).isEqualTo("/graphql");
         assertThat(graphiQLConfigController.appendSegmentToPath(null, "/graphql")).isEqualTo("/graphql");
@@ -59,5 +62,10 @@ public class GraphiQLAutoConfigurationTest {
             .isEqualTo("/default-app/graphql");
         assertThat(graphiQLConfigController.appendSegmentToPath("/default-app", "graphql"))
             .isEqualTo("/default-app/graphql");
+    }
+
+    @Test
+    void testGraphiQLIndexController() {
+        assertThat(graphiQLIndexController.getIndex()).isEqualTo("forward:/graphiql/graphiql.html");
     }
 }

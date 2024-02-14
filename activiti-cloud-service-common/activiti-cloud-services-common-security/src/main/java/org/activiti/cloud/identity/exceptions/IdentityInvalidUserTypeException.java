@@ -13,22 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.notifications.graphql.graphiql;
+package org.activiti.cloud.identity.exceptions;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+public class IdentityInvalidUserTypeException extends IdentityException {
 
-@Controller
-@ConditionalOnWebApplication
-public class GraphiQLIndexController {
-
-    @Value("${graphiql.index:graphiql/graphiql.html}")
-    private String graphiqlHtml;
-
-    @GetMapping("/graphiql")
-    public String getIndex() {
-        return "forward:/" + graphiqlHtml;
+    public IdentityInvalidUserTypeException(String userType) {
+        super("User type {" + userType + "} is invalid or doesn't exist");
     }
 }
