@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/v1/process-instances",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Instance Controller")
 public class ProcessInstanceController {
 
     private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;

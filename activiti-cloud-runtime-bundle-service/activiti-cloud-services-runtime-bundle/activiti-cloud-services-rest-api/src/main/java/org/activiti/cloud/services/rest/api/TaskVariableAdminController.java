@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -32,19 +34,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/admin/v1/tasks/{taskId}/variables",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Task Variable Admin Controller")
 public interface TaskVariableAdminController {
     @RequestMapping(method = RequestMethod.GET)
-    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String taskId);
+    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
+        @Parameter(description = "Enter the taskId to get variables") @PathVariable String taskId
+    );
 
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<Void> createVariable(
-        @PathVariable String taskId,
+        @Parameter(description = "Enter the taskId to create variable") @PathVariable String taskId,
         @RequestBody CreateTaskVariablePayload createTaskVariablePayload
     );
 
     @RequestMapping(value = "/{variableName}", method = RequestMethod.PUT)
     ResponseEntity<Void> updateVariable(
-        @PathVariable String taskId,
+        @Parameter(description = "Enter the taskId to update variable") @PathVariable String taskId,
         @PathVariable String variableName,
         @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload
     );

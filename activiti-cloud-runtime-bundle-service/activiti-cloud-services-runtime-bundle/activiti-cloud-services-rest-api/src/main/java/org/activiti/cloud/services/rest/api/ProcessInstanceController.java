@@ -17,6 +17,8 @@ package org.activiti.cloud.services.rest.api;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Tag(name = "Process Instance Controller")
 public interface ProcessInstanceController {
     @GetMapping("/v1/process-instances")
     @CollectionFormat(feign.CollectionFormat.CSV)
@@ -75,19 +78,31 @@ public interface ProcessInstanceController {
     ResponseEntity<Void> receive(@RequestBody ReceiveMessagePayload receiveMessagePayload);
 
     @PostMapping(value = "/v1/process-instances/{processInstanceId}/suspend", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudProcessInstance> suspend(@PathVariable(value = "processInstanceId") String processInstanceId);
+    EntityModel<CloudProcessInstance> suspend(
+        @Parameter(description = "Enter the processInstanceId to suspend") @PathVariable(
+            value = "processInstanceId"
+        ) String processInstanceId
+    );
 
     @PostMapping(value = "/v1/process-instances/{processInstanceId}/resume", consumes = APPLICATION_JSON_VALUE)
-    EntityModel<CloudProcessInstance> resume(@PathVariable(value = "processInstanceId") String processInstanceId);
+    EntityModel<CloudProcessInstance> resume(
+        @Parameter(description = "Enter the processInstanceId to resume") @PathVariable(
+            value = "processInstanceId"
+        ) String processInstanceId
+    );
 
     @DeleteMapping(value = "/v1/process-instances/{processInstanceId}")
     EntityModel<CloudProcessInstance> deleteProcessInstance(
-        @PathVariable(value = "processInstanceId") String processInstanceId
+        @Parameter(description = "Enter the processInstanceId to delete") @PathVariable(
+            value = "processInstanceId"
+        ) String processInstanceId
     );
 
     @PutMapping(value = "/v1/process-instances/{processInstanceId}", consumes = APPLICATION_JSON_VALUE)
     EntityModel<CloudProcessInstance> updateProcess(
-        @PathVariable(value = "processInstanceId") String processInstanceId,
+        @Parameter(description = "Enter the processInstanceId to update") @PathVariable(
+            value = "processInstanceId"
+        ) String processInstanceId,
         @RequestBody UpdateProcessPayload payload
     );
 

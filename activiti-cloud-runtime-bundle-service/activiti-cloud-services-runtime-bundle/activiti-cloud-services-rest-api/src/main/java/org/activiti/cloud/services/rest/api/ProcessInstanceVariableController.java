@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
@@ -31,13 +33,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/v1/process-instances/{processInstanceId}/variables",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Instance Variable Controller")
 public interface ProcessInstanceVariableController {
     @RequestMapping(method = RequestMethod.GET)
-    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable String processInstanceId);
+    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
+        @Parameter(description = "Enter the processInstanceId to get variables") @PathVariable String processInstanceId
+    );
 
     @RequestMapping(method = RequestMethod.PUT)
     ResponseEntity<Void> updateVariables(
-        @PathVariable String processInstanceId,
+        @Parameter(
+            description = "Enter the processInstanceId to update variables"
+        ) @PathVariable String processInstanceId,
         @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
     );
 }

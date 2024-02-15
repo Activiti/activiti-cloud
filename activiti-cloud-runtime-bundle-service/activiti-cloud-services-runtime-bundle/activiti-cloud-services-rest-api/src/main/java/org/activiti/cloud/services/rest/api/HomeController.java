@@ -15,10 +15,12 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+@Tag(name = "Home Controller")
 @RequestMapping(value = "/v1")
 public interface HomeController {
     @RequestMapping(method = RequestMethod.GET)

@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.cloud.api.process.model.impl.CandidateUser;
 import org.springframework.hateoas.CollectionModel;
@@ -30,19 +32,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/admin/v1/tasks/{taskId}/candidate-users",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Candidate User Admin Controller")
 public interface CandidateUserAdminController {
     @RequestMapping(method = RequestMethod.POST)
     void addCandidateUsers(
-        @PathVariable("taskId") String taskId,
+        @Parameter(description = "Enter the taskId to add candidate users") @PathVariable("taskId") String taskId,
         @RequestBody CandidateUsersPayload candidateUsersPayload
     );
 
     @RequestMapping(method = RequestMethod.DELETE)
     void deleteCandidateUsers(
-        @PathVariable("taskId") String taskId,
+        @Parameter(description = "Enter the taskId to delete candidate users") @PathVariable("taskId") String taskId,
         @RequestBody CandidateUsersPayload candidateUsersPayload
     );
 
     @RequestMapping(method = RequestMethod.GET)
-    CollectionModel<EntityModel<CandidateUser>> getUserCandidates(@PathVariable("taskId") String taskId);
+    CollectionModel<EntityModel<CandidateUser>> getUserCandidates(
+        @Parameter(description = "Enter the taskId to get user candidates") @PathVariable("taskId") String taskId
+    );
 }

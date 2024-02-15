@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.springframework.hateoas.CollectionModel;
@@ -30,19 +32,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/admin/v1/tasks/{taskId}/candidate-groups",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Candidate Group Admin Controller")
 public interface CandidateGroupAdminController {
     @RequestMapping(method = RequestMethod.POST)
     void addCandidateGroups(
-        @PathVariable("taskId") String taskId,
+        @Parameter(description = "Enter the taskId to add candidate groups") @PathVariable("taskId") String taskId,
         @RequestBody CandidateGroupsPayload candidateGroupsPayload
     );
 
     @RequestMapping(method = RequestMethod.DELETE)
     void deleteCandidateGroups(
-        @PathVariable("taskId") String taskId,
+        @Parameter(description = "Enter the taskId to delete candidate groups") @PathVariable("taskId") String taskId,
         @RequestBody CandidateGroupsPayload candidateGroupsPayload
     );
 
     @RequestMapping(method = RequestMethod.GET)
-    CollectionModel<EntityModel<CandidateGroup>> getGroupCandidates(@PathVariable("taskId") String taskId);
+    CollectionModel<EntityModel<CandidateGroup>> getGroupCandidates(
+        @Parameter(description = "Enter the taskId to get candidate groups") @PathVariable("taskId") String taskId
+    );
 }

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Tag(name = "Process Instance Diagram Controller Base")
 public abstract class ProcessInstanceDiagramControllerBase {
 
     public static final String IMAGE_SVG_XML = "image/svg+xml";

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.api.process.model.impl;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Date;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.api.model.shared.impl.CloudRuntimeEntityImpl;
@@ -26,10 +27,21 @@ public class CloudProcessInstanceImpl extends CloudRuntimeEntityImpl implements 
     private String name;
     private Date startDate;
     private String initiator;
+
+    @Schema(
+        description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
+        readOnly = true
+    )
     private String businessKey;
+
     private ProcessInstanceStatus status;
     private String processDefinitionId;
+
+    @Schema(
+        description = "It identifies uniquely the process. In the BPMN process definition file it is the id attribute of a process and in the Modeling application it is usually called as Process ID."
+    )
     private String processDefinitionKey;
+
     private String parentId;
     private Integer processDefinitionVersion;
     private String processDefinitionName;

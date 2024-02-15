@@ -21,6 +21,7 @@ import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +53,7 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/admin/v1/process-instances",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Instance Delete Controller")
 public class ProcessInstanceDeleteController {
 
     private final ProcessInstanceRepository processInstanceRepository;

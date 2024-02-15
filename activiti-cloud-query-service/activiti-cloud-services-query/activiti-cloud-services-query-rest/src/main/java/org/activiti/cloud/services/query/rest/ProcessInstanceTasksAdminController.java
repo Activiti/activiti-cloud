@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/admin/v1/process-instances/{processInstanceId}",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
+@Tag(name = "Process Instance Tasks Admin Controller")
 public class ProcessInstanceTasksAdminController {
 
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
