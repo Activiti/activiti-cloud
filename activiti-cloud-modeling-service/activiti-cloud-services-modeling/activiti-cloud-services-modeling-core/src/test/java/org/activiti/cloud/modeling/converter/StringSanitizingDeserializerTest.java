@@ -43,7 +43,7 @@ class StringSanitizingDeserializerTest {
         "z/CBcCBeAvUFA7pPWPBo/E9kEK+EsrFawkSluARZEoMUHwzUtoAByScMtLIAK2AhIQmTBQbUB8iADZoy4qH8hUBcD8S/qGVBExCXI/Er" +
         "oEFYQa0giiVSjP5xQKwFi4kUIzsO6qBFB3okU80CUGqphGKKkuljaIn6n4Jgf4yvPrgBxPZAzEem4U+AOA2I74zW5UQDACHHHaj63Wy2" +
         "AAAAAElFTkSuQmCC";
-    //change2
+
     private static final String SIMPLE_TEXT = "simple text";
 
     private static final String WRONG_SVG = "data:image/svg+xml;base64,SGVsbG8gdGhlcmUK";
