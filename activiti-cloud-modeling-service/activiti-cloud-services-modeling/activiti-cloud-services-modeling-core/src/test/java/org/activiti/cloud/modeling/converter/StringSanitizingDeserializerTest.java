@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 class StringSanitizingDeserializerTest {
 
+    //change
     private static final String SVG =
         "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmci" +
         "IHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48ZyBpZD0ic2F2ZS0yNHB4XzFfIiBkYXRhLW5hbWU9InNh" +
