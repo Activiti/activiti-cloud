@@ -10,7 +10,7 @@
   <artifactId>activiti-cloud-starter-messages-hazelcast</artifactId>
   <name>Activiti Cloud Starter :: Messages Hazelcast</name>
   <properties>
-    <hazelcast.version>5.3.0</hazelcast.version>
+    <hazelcast.version>5.3.5</hazelcast.version>
   </properties>
   <dependencyManagement>
     <dependencies>
