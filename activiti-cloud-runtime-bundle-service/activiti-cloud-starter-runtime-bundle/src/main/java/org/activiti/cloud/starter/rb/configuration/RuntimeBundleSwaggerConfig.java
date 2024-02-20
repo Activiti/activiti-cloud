@@ -57,11 +57,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
         return GroupedOpenApi
             .builder()
             .group("Runtime Bundle")
-            .packagesToScan(
-                "com.alfresco.process.runtime.controller",
-                "org.activiti.cloud.services.rest",
-                "org.activiti.cloud.services.query.model"
-            )
+            .packagesToScan("org.activiti.cloud.services.rest")
             .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )
