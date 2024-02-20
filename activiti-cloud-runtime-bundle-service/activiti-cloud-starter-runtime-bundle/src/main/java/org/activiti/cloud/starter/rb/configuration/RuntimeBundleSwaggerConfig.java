@@ -57,9 +57,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
         return GroupedOpenApi
             .builder()
             .group("Runtime Bundle")
-            .packagesToScan(
-                "org.activiti.cloud.services.rest"
-            )
+            .packagesToScan("org.activiti.cloud.services.rest")
             .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )
