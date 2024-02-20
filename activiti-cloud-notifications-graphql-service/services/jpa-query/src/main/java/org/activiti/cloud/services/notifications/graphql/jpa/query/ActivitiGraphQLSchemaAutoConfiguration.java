@@ -19,7 +19,6 @@ import static graphql.schema.GraphQLScalarType.newScalar;
 
 import com.introproventures.graphql.jpa.query.autoconfigure.EnableGraphQLJpaQuerySchema;
 import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLJPASchemaBuilderCustomizer;
-import com.introproventures.graphql.jpa.query.autoconfigure.GraphQLSchemaBuilderAutoConfiguration;
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
 import graphql.GraphQL;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -32,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 /**
  * Spring Boot auto configuration of Activiti GraphQL Query Service components
  */
-@AutoConfiguration(before = GraphQLSchemaBuilderAutoConfiguration.class)
+@AutoConfiguration
 @ConditionalOnClass({ GraphQL.class, ProcessInstanceEntity.class })
 @ConditionalOnProperty(
     name = "spring.activiti.cloud.services.notifications.graphql.jpa-query.enabled",
