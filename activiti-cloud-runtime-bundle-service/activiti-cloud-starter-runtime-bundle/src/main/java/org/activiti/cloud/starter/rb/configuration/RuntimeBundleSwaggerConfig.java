@@ -30,14 +30,9 @@ import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
-import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.api.task.model.impl.CloudTaskImpl;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -46,10 +41,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
-    static {
-        SpringDocUtils.getConfig().replaceWithClass(CloudTask.class, CloudTaskImpl.class);
-        SpringDocUtils.getConfig().replaceWithClass(CloudProcessInstance.class, CloudProcessInstanceImpl.class);
-    }
 
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
