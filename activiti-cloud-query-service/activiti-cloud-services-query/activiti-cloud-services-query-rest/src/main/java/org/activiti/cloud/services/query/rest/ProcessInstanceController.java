@@ -49,7 +49,6 @@ import org.springframework.web.bind.annotation.RestController;
     value = "/v1/process-instances",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Instance Controller")
 public class ProcessInstanceController {
 
     private final ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler;

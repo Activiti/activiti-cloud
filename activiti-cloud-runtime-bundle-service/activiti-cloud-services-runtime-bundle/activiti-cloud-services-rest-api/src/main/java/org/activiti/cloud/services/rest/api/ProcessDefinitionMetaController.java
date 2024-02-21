@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/v1/process-definitions/{id}/meta",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Definition Meta Controller")
 public interface ProcessDefinitionMetaController {
     @RequestMapping(method = RequestMethod.GET)
     EntityModel<ProcessDefinitionMeta> getProcessDefinitionMetadata(
