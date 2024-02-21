@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -37,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/admin/v1/process-instances",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Instance Admin Controller")
 public interface ProcessInstanceAdminController {
     @RequestMapping(method = RequestMethod.GET)
     PagedModel<EntityModel<CloudProcessInstance>> getProcessInstances(Pageable pageable);

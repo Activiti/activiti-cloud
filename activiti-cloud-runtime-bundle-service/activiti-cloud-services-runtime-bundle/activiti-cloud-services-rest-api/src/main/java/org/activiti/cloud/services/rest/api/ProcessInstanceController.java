@@ -15,31 +15,18 @@
  */
 package org.activiti.cloud.services.rest.api;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
-import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
-import org.activiti.api.process.model.payloads.SignalPayload;
-import org.activiti.api.process.model.payloads.StartMessagePayload;
-import org.activiti.api.process.model.payloads.StartProcessPayload;
-import org.activiti.api.process.model.payloads.UpdateProcessPayload;
+import org.activiti.api.process.model.payloads.*;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.springframework.cloud.openfeign.CollectionFormat;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Process Instance Controller")
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 public interface ProcessInstanceController {
     @GetMapping("/v1/process-instances")
     @CollectionFormat(feign.CollectionFormat.CSV)

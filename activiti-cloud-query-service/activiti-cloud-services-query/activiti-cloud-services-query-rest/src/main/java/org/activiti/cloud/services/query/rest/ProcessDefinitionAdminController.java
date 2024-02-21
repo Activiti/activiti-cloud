@@ -15,15 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
-
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
@@ -40,13 +35,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
 @RestController
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
     value = "/admin/v1/process-definitions",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Definition Admin Controller")
 public class ProcessDefinitionAdminController {
 
     private ProcessDefinitionRepository repository;

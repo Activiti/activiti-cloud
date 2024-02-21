@@ -15,23 +15,13 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.services.query.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
-import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
+import org.activiti.cloud.services.query.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/admin/v1/process-instances/{processInstanceId}/diagram")
-@Tag(name = "Process Instance Diagram Admin Controller")
 public class ProcessInstanceDiagramAdminController extends ProcessInstanceDiagramControllerBase {
 
     @Autowired
