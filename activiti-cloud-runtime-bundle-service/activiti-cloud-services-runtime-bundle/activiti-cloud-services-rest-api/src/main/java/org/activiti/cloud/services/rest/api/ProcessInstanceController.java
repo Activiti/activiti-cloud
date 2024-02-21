@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.process.model.payloads.*;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
@@ -24,8 +26,6 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public interface ProcessInstanceController {
     @GetMapping("/v1/process-instances")

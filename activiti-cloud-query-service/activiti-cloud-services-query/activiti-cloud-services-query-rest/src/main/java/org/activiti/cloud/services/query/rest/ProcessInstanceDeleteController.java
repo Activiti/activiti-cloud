@@ -15,10 +15,16 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Optional;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.app.repository.*;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -34,13 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
-import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
 
 @ConditionalOnProperty(name = "activiti.rest.enable-deletion", matchIfMissing = true)
 @RestController

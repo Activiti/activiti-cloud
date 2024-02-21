@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
@@ -23,8 +25,6 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 public interface TaskVariableController {
     @GetMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
