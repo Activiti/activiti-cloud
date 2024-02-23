@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.rest.conf;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
@@ -157,7 +159,9 @@ public class ServicesRestWebMvcAutoConfiguration implements WebMvcConfigurer {
                 converter instanceof MappingJackson2HttpMessageConverter &&
                 !(converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter)
             ) {
-                objectMapperBuilder.configure(((MappingJackson2HttpMessageConverter) converter).getObjectMapper());
+                ObjectMapper mapper = ((MappingJackson2HttpMessageConverter) converter).getObjectMapper();
+                mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+                objectMapperBuilder.configure(mapper);
             }
         }
     }
