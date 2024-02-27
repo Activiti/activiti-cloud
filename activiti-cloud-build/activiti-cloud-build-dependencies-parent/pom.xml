@@ -16,7 +16,7 @@
     <testcontainers.version>1.19.1</testcontainers.version>
     <h2.version>2.2.224</h2.version>
     <graphql-java.version>21.3</graphql-java.version>
-    <postgresql.version>42.5.1</postgresql.version>
+    <postgresql.version>42.7.2</postgresql.version>
     <liquibase.version>4.24.0</liquibase.version>
     <hibernate.version>6.3.1.Final</hibernate.version>
   </properties>

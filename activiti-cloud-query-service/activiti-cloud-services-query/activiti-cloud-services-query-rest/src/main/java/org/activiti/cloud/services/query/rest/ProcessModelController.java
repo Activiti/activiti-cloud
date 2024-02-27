@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @ExposesResourceFor(ProcessModelEntity.class)
 @RequestMapping("/v1/process-definitions/{processDefinitionId}/model")
-@Tag(name = "Process Model Controller")
 public class ProcessModelController {
 
     private ProcessModelRepository processModelRepository;

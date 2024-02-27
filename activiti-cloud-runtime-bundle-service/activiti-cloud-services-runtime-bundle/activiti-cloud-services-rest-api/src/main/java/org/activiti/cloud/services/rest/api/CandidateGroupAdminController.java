@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.cloud.api.process.model.impl.CandidateGroup;
 import org.springframework.hateoas.CollectionModel;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
     value = "/admin/v1/tasks/{taskId}/candidate-groups",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Candidate Group Admin Controller")
 public interface CandidateGroupAdminController {
     @RequestMapping(method = RequestMethod.POST)
     void addCandidateGroups(

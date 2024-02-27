@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
     value = "/admin/v1/process-definitions",
     produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
-@Tag(name = "Process Definition Admin Controller")
 public interface ProcessDefinitionAdminController {
     @RequestMapping(method = RequestMethod.GET)
     PagedModel<EntityModel<ExtendedCloudProcessDefinition>> getAllProcessDefinitions(
