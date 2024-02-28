@@ -24,6 +24,8 @@ import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.springframework.util.Assert;
 
@@ -51,6 +53,14 @@ public class ProcessVariablesPayloadConverter {
                     .withVariables(mapVariableValues(variables))
                     .build()
             )
+            .orElse(payload);
+    }
+
+    public CompleteTaskPayload convert(CompleteTaskPayload payload) {
+        return Optional
+            .ofNullable(payload)
+            .map(CompleteTaskPayload::getVariables)
+            .map(variables -> TaskPayloadBuilder.complete().withVariables(mapVariableValues(variables)).build())
             .orElse(payload);
     }
 
