@@ -39,8 +39,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
+import org.springframework.integration.dsl.Channels;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowBuilder;
+import org.springframework.integration.dsl.MessageChannelSpec;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
 import org.springframework.messaging.Message;
@@ -52,6 +54,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
 
     public static final String FUNCTION_BINDING_SELECTOR_DISCARD_FLOW = "functionBindingSelectorDiscardFlow";
     public static final String FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL = "functionBindingSelectorDiscardChannel";
+    public static final String NULL_CHANNEL = "nullChannel";
 
     @Bean
     public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties) {
@@ -93,7 +96,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         return IntegrationFlow
             .from(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
             .log(DEBUG, FUNCTION_BINDING_SELECTOR_DISCARD_FLOW)
-            .channel("nullChannel")
+            .channel(NULL_CHANNEL)
             .get();
     }
 
