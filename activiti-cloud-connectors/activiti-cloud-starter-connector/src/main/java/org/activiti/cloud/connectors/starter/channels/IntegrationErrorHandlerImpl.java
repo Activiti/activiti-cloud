@@ -79,7 +79,9 @@ public class IntegrationErrorHandlerImpl implements IntegrationErrorHandler {
         byte[] data = (byte[]) errorMessage.getOriginalMessage().getPayload();
         try {
             IntegrationRequest integrationRequest = objectMapper.readValue(data, IntegrationRequest.class);
-            Throwable cause = errorMessage.getPayload().getCause();
+            Throwable cause = Optional
+                .ofNullable(errorMessage.getPayload().getCause())
+                .orElse(errorMessage.getPayload());
 
             Message<IntegrationError> message = IntegrationErrorBuilder
                 .errorFor(integrationRequest, connectorProperties, cause)
