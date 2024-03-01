@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
+
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,6 +47,19 @@ import org.springframework.util.StringUtils;
     before = FunctionConfiguration.class
 )
 public class ConnectorConfiguration extends AbstractFunctionalBindingConfiguration {
+
+    public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW = "connectorBindingSelectorDiscardFlow";
+    public static final String CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL = "connectorBindingSelectorDiscardChannel";
+    public static final String NULL_CHANNEL = "nullChannel";
+
+    @Bean(name = CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
+    IntegrationFlow functionBindingSelectorDiscardFlow() {
+        return IntegrationFlow
+            .from(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+            .log(DEBUG, CONNECTOR_BINDING_SELECTOR_DISCARD_FLOW)
+            .channel(NULL_CHANNEL)
+            .get();
+    }
 
     @Bean(name = "connectorBindingPostProcessor")
     public BeanPostProcessor connectorBindingPostProcessor(
@@ -99,12 +114,15 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
                             IntegrationFlow connectorFlow = IntegrationFlow
                                 .from(
                                     getGatewayInterface(Function.class.isInstance(bean)),
-                                    gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
+                                    gateway -> gateway.replyTimeout(0L)
                                 )
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationRequest")
                                 .filter(
                                     selector,
-                                    filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                    filter ->
+                                        filter
+                                            .discardChannel(CONNECTOR_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                            .throwExceptionOnRejection(false)
                                 )
                                 .handle(Message.class, handler)
                                 .log(LoggingHandler.Level.DEBUG, beanName + ".integrationResult")
@@ -115,7 +133,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
 
                             IntegrationFlow inputChannelFlow = IntegrationFlow
                                 .from(inputChannel)
-                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L).errorChannel("errorChannel"))
+                                .gateway(connectorFlow, spec -> spec.replyTimeout(0L))
                                 .get();
 
                             integrationFlowContext.registration(inputChannelFlow).register();
