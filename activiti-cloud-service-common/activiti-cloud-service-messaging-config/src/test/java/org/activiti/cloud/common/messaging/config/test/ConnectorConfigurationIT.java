@@ -18,16 +18,24 @@ package org.activiti.cloud.common.messaging.config.test;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.AUDIT_CONSUMER;
 import static org.activiti.cloud.common.messaging.config.test.TestBindingsChannels.COMMAND_RESULTS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.function.context.FunctionRegistration.REGISTRATION_NAME_SUFFIX;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.activiti.cloud.common.messaging.config.FunctionBindingConfiguration.BindingResolver;
 import org.activiti.cloud.common.messaging.config.FunctionBindingPropertySource;
 import org.activiti.cloud.common.messaging.functional.Connector;
 import org.activiti.cloud.common.messaging.functional.ConnectorBinding;
 import org.activiti.cloud.common.messaging.functional.ConsumerConnector;
 import org.assertj.core.api.Assertions;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +44,13 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.cloud.stream.binder.test.InputDestination;
 import org.springframework.cloud.stream.binder.test.OutputDestination;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.cloud.stream.config.BindingProperties;
+import org.springframework.cloud.stream.config.BindingServiceProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -48,6 +59,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 @SpringBootTest(
@@ -64,6 +76,7 @@ import org.springframework.messaging.support.MessageBuilder;
         "spring.cloud.stream.bindings.auditConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.queryConsumer.destination=engineEvents",
         "spring.cloud.stream.bindings.commandResults.destination=commandResults",
+        "spring.cloud.stream.default.error-handler-definition=myErrorHandler",
     }
 )
 @Import({ TestChannelBinderConfiguration.class, TestBindingsChannelsConfiguration.class })
@@ -72,8 +85,10 @@ public class ConnectorConfigurationIT {
     private static final String FUNCTION_NAME_A = "auditConsumerHandlerA";
     private static final String FUNCTION_NAME_B = "auditConsumerHandlerB";
     private static final String FUNCTION_NAME_C = "auditProcessorHandler";
+    private static final String FUNCTION_NAME_ERROR = "connectorTestMyErrorHandler";
 
     private static final String FUNCTION_NAME_D = "auditProcessorVersionHandler";
+    public static final String MY_ERROR_HANDLER = "myErrorHandler";
 
     @Autowired
     private StandardEvaluationContext evaluationContext;
@@ -95,6 +110,12 @@ public class ConnectorConfigurationIT {
 
     @Autowired
     private OutputDestination output;
+
+    @Autowired
+    private BindingServiceProperties bindingServiceProperties;
+
+    @SpyBean
+    private MyErrorHandler myErrorHandler;
 
     @Value("${application.min.version}")
     private String minVersion;
@@ -140,12 +161,27 @@ public class ConnectorConfigurationIT {
             };
         }
 
+        @Bean(FUNCTION_NAME_ERROR)
+        @ConnectorBinding(
+            input = AUDIT_CONSUMER,
+            output = COMMAND_RESULTS,
+            condition = "headers['type']=='myErrorHandler'"
+        )
+        public Connector<?, ?> connectorTestMyErrorHandler() {
+            return payload -> {
+                throw new IllegalArgumentException("Test Audit Consumer Error");
+            };
+        }
+
         @Bean(FUNCTION_NAME_D)
         @ConnectorBinding(input = AUDIT_CONSUMER, output = COMMAND_RESULTS)
         public Connector<?, ?> auditProcessorVersionHandler() {
-            return payload -> {
-                return "TestVersion";
-            };
+            return payload -> "TestVersion";
+        }
+
+        @Bean
+        public MyErrorHandler myErrorHandler() {
+            return new MyErrorHandler();
         }
     }
 
@@ -153,6 +189,13 @@ public class ConnectorConfigurationIT {
     public void setUp() {
         expression = resolveExpression(condition);
         output.clear();
+    }
+
+    @Test
+    void defaultErrorHandlerDefinition() {
+        assertThat(bindingServiceProperties.getBindingProperties(AUDIT_CONSUMER))
+            .extracting(BindingProperties::getErrorHandlerDefinition)
+            .isEqualTo(MY_ERROR_HANDLER);
     }
 
     @Test
@@ -305,6 +348,31 @@ public class ConnectorConfigurationIT {
             .isEqualTo("TestReply".getBytes(StandardCharsets.UTF_8));
     }
 
+    @Test
+    public void testConnectorMyErrorHandler() {
+        // given
+        Message<String> message = MessageBuilder
+            .withPayload("TestC")
+            .setHeader("type", "myErrorHandler")
+            .setHeader("appVersion", "1")
+            .setHeader("resultDestination", "commandResults")
+            .build();
+        // when
+        input.send(message, "engineEvents");
+
+        await().untilAtomic(myErrorHandler.get(), Matchers.notNullValue());
+
+        // then
+        verify(myErrorHandler, times(1)).accept(any(ErrorMessage.class));
+
+        assertThat(myErrorHandler.get())
+            .extracting(AtomicReference::get)
+            .extracting(ErrorMessage::getPayload)
+            .extracting(Throwable::getCause)
+            .extracting(Throwable::getMessage)
+            .isEqualTo("Test Audit Consumer Error");
+    }
+
     private String resolveExpression(String value) {
         BeanExpressionResolver resolver = this.applicationContext.getBeanFactory().getBeanExpressionResolver();
         BeanExpressionContext expressionContext = new BeanExpressionContext(applicationContext.getBeanFactory(), null);
@@ -320,5 +388,20 @@ public class ConnectorConfigurationIT {
         evaluationContext.setRootObject(message);
 
         return parser.parseExpression(expression).getValue(evaluationContext, Boolean.class);
+    }
+
+    static class MyErrorHandler implements Consumer<ErrorMessage>, Supplier<AtomicReference<ErrorMessage>> {
+
+        private final AtomicReference<ErrorMessage> reference = new AtomicReference<>();
+
+        @Override
+        public void accept(ErrorMessage errorMessage) {
+            reference.set(errorMessage);
+        }
+
+        @Override
+        public AtomicReference<ErrorMessage> get() {
+            return reference;
+        }
     }
 }
