@@ -26,14 +26,15 @@ import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.springframework.util.Assert;
 
-public class ProcessVariablesPayloadConverter {
+public class VariablesPayloadConverter {
 
-    private final ProcessVariableValueConverter variableValueConverter;
+    private final VariableValueConverter variableValueConverter;
 
-    public ProcessVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
+    public VariablesPayloadConverter(VariableValueConverter variableValueConverter) {
         Assert.notNull(variableValueConverter, "VariableValueConverter must not be null");
 
         this.variableValueConverter = variableValueConverter;
@@ -60,7 +61,27 @@ public class ProcessVariablesPayloadConverter {
         return Optional
             .ofNullable(payload)
             .map(CompleteTaskPayload::getVariables)
-            .map(variables -> TaskPayloadBuilder.complete().withVariables(mapVariableValues(variables)).build())
+            .map(variables ->
+                TaskPayloadBuilder
+                    .complete()
+                    .withTaskId(payload.getTaskId())
+                    .withVariables(mapVariableValues(variables))
+                    .build()
+            )
+            .orElse(payload);
+    }
+
+    public SaveTaskPayload convert(SaveTaskPayload payload) {
+        return Optional
+            .ofNullable(payload)
+            .map(SaveTaskPayload::getVariables)
+            .map(variables ->
+                TaskPayloadBuilder
+                    .save()
+                    .withTaskId(payload.getTaskId())
+                    .withVariables(mapVariableValues(variables))
+                    .build()
+            )
             .orElse(payload);
     }
 

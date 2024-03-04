@@ -32,9 +32,9 @@ import org.activiti.cloud.services.core.ProcessDefinitionService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.ProcessVariableDateConverter;
 import org.activiti.cloud.services.core.ProcessVariableJsonNodeConverter;
-import org.activiti.cloud.services.core.ProcessVariableValueConverter;
 import org.activiti.cloud.services.core.ProcessVariableValueSpringConverter;
-import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
+import org.activiti.cloud.services.core.VariableValueConverter;
+import org.activiti.cloud.services.core.VariablesPayloadConverter;
 import org.activiti.cloud.services.core.commands.ClaimTaskCmdExecutor;
 import org.activiti.cloud.services.core.commands.CommandEndpoint;
 import org.activiti.cloud.services.core.commands.CommandExecutor;
@@ -229,7 +229,7 @@ public class ServicesCoreAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariableValueConverter processVariableValueConverter(
+    public VariableValueConverter variableValueConverter(
         List<ProcessVariableValueSpringConverter<?>> converters,
         DateFormatterProvider dateFormatterProvider
     ) {
@@ -242,15 +242,13 @@ public class ServicesCoreAutoConfiguration {
         registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern(dateFormatterProvider.getDateFormatPattern()));
         registrar.registerFormatters(conversionService);
 
-        return new ProcessVariableValueConverter(conversionService);
+        return new VariableValueConverter(conversionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ProcessVariablesPayloadConverter processVariablesPayloadConverter(
-        ProcessVariableValueConverter variableValueConverter
-    ) {
-        return new ProcessVariablesPayloadConverter(variableValueConverter);
+    public VariablesPayloadConverter variablesPayloadConverter(VariableValueConverter variableValueConverter) {
+        return new VariablesPayloadConverter(variableValueConverter);
     }
 
     @Bean

@@ -41,7 +41,7 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
+import org.activiti.cloud.services.core.VariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
@@ -68,7 +68,7 @@ public class TaskControllerImpl implements TaskController {
 
     private final TaskRuntime taskRuntime;
 
-    private final ProcessVariablesPayloadConverter payloadConverter;
+    private final VariablesPayloadConverter payloadConverter;
 
     @Autowired
     public TaskControllerImpl(
@@ -76,7 +76,7 @@ public class TaskControllerImpl implements TaskController {
         AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         TaskRuntime taskRuntime,
-        ProcessVariablesPayloadConverter payloadConverter
+        VariablesPayloadConverter payloadConverter
     ) {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
@@ -124,7 +124,7 @@ public class TaskControllerImpl implements TaskController {
             completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
         } else {
             completeTaskPayload.setTaskId(taskId);
-            payloadConverter.convert(completeTaskPayload);
+            completeTaskPayload = payloadConverter.convert(completeTaskPayload);
         }
 
         Task task = taskRuntime.complete(completeTaskPayload);
@@ -172,7 +172,7 @@ public class TaskControllerImpl implements TaskController {
         if (saveTaskPayload != null) {
             saveTaskPayload.setTaskId(taskId);
         }
-
+        saveTaskPayload = payloadConverter.convert(saveTaskPayload);
         taskRuntime.save(saveTaskPayload);
     }
 
