@@ -28,11 +28,15 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 public class VariablesPayloadConverter {
 
     private final VariableValueConverter variableValueConverter;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariablesPayloadConverter.class);
 
     public VariablesPayloadConverter(VariableValueConverter variableValueConverter) {
         Assert.notNull(variableValueConverter, "VariableValueConverter must not be null");
@@ -105,8 +109,8 @@ public class VariablesPayloadConverter {
         Object entryValue = entry.getValue();
 
         try {
-            if (Map.class.isInstance(entryValue)) {
-                Map<String, String> valuesMap = Map.class.cast(entryValue);
+            if (entryValue instanceof Map) {
+                Map<String, String> valuesMap = (Map) entryValue;
 
                 if (valuesMap.containsKey("type") && valuesMap.containsKey("value")) {
                     String type = valuesMap.get("type");
@@ -114,10 +118,12 @@ public class VariablesPayloadConverter {
 
                     entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
                 }
-            } else if (ProcessVariableValue.class.isInstance(entryValue)) {
-                entryValue = variableValueConverter.convert(ProcessVariableValue.class.cast(entryValue));
+            } else if (entryValue instanceof ProcessVariableValue) {
+                entryValue = variableValueConverter.convert((ProcessVariableValue) entryValue);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            LOGGER.warn("Error while trying to parse variable: {} - variable data: {}", e.getMessage(), entry);
+        }
 
         return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entryValue);
     }
