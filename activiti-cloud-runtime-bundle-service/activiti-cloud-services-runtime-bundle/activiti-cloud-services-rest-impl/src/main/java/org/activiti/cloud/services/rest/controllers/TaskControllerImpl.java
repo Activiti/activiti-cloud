@@ -172,8 +172,7 @@ public class TaskControllerImpl implements TaskController {
         if (saveTaskPayload != null) {
             saveTaskPayload.setTaskId(taskId);
         }
-        saveTaskPayload = payloadConverter.convert(saveTaskPayload);
-        taskRuntime.save(saveTaskPayload);
+        taskRuntime.save(payloadConverter.convert(saveTaskPayload));
     }
 
     @Override
