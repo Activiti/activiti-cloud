@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.common.messaging.config;
 
+import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
+
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -41,13 +43,16 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
 import org.springframework.integration.filter.ExpressionEvaluatingSelector;
-import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.util.StringUtils;
 
 @AutoConfiguration(after = BinderFactoryAutoConfiguration.class, before = FunctionConfiguration.class)
 @ConditionalOnClass(BindingServiceProperties.class)
 public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfiguration {
+
+    public static final String FUNCTION_BINDING_SELECTOR_DISCARD_FLOW = "functionBindingSelectorDiscardFlow";
+    public static final String FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL = "functionBindingSelectorDiscardChannel";
+    public static final String NULL_CHANNEL = "nullChannel";
 
     @Bean
     public BindingResolver bindingResolver(BindingServiceProperties bindingServiceProperties) {
@@ -82,6 +87,15 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
             }
             return resolvedValue;
         };
+    }
+
+    @Bean(name = FUNCTION_BINDING_SELECTOR_DISCARD_FLOW)
+    IntegrationFlow functionBindingSelectorDiscardFlow() {
+        return IntegrationFlow
+            .from(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+            .log(DEBUG, FUNCTION_BINDING_SELECTOR_DISCARD_FLOW)
+            .channel(NULL_CHANNEL)
+            .get();
     }
 
     @Bean(name = "functionBindingBeanPostProcessor")
@@ -123,9 +137,12 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                     .fromSupplier(supplier)
                                     .filter(
                                         selector,
-                                        filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                        filter ->
+                                            filter
+                                                .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                                .throwExceptionOnRejection(false)
                                     )
-                                    .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
+                                    .log(DEBUG, beanName + "." + functionBinding.output())
                                     .channel(functionBinding.output());
                                 integrationFlowContext.registration(supplierFlowBuilder.get()).register();
                             } else {
@@ -137,27 +154,27 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
                                 IntegrationFlowBuilder functionFlowBuilder = IntegrationFlow
                                     .from(
                                         getGatewayInterface(Function.class.isInstance(bean)),
-                                        gateway -> gateway.replyTimeout(0L).errorChannel("errorChannel")
+                                        gateway -> gateway.replyTimeout(0L)
                                     )
-                                    .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.input())
+                                    .log(DEBUG, beanName + "." + functionBinding.input())
                                     .filter(
                                         selector,
-                                        filter -> filter.discardChannel("nullChannel").throwExceptionOnRejection(true)
+                                        filter ->
+                                            filter
+                                                .discardChannel(FUNCTION_BINDING_SELECTOR_DISCARD_CHANNEL)
+                                                .throwExceptionOnRejection(false)
                                     )
                                     .handle(Message.class, handler);
                                 if (Function.class.isInstance(bean)) {
                                     functionFlowBuilder
                                         .bridge()
-                                        .log(LoggingHandler.Level.DEBUG, beanName + "." + functionBinding.output())
+                                        .log(DEBUG, beanName + "." + functionBinding.output())
                                         .channel(functionBinding.output());
                                 }
 
                                 IntegrationFlow inputChannelFlow = IntegrationFlow
                                     .from(functionBinding.input())
-                                    .gateway(
-                                        functionFlowBuilder.get(),
-                                        spec -> spec.replyTimeout(0L).errorChannel("errorChannel")
-                                    )
+                                    .gateway(functionFlowBuilder.get(), spec -> spec.replyTimeout(0L))
                                     .get();
 
                                 integrationFlowContext.registration(inputChannelFlow).register();
