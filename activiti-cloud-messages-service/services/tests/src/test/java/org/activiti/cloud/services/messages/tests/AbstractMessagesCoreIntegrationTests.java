@@ -639,7 +639,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         assertThat(peek()).isNull();
 
-        assertThat(errorQueue.receive(0)).isNotNull();
+        assertThat(discardQueue.receive(0)).isNotNull();
 
         assertThat(messageGroup(correlationId).getMessages()).isNotNull().hasSize(1);
         // given
@@ -652,7 +652,7 @@ public abstract class AbstractMessagesCoreIntegrationTests {
         // then
         assertThat(peek()).isNull();
 
-        assertThat(errorQueue.receive(0)).isNotNull();
+        assertThat(discardQueue.receive(0)).isNotNull();
 
         assertThat(messageGroup(correlationId).getMessages()).hasSize(0);
     }
