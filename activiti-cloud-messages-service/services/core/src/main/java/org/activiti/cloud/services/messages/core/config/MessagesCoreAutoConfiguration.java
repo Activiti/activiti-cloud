@@ -229,7 +229,8 @@ public class MessagesCoreAutoConfiguration {
     public IdempotentReceiverInterceptor idempotentReceiverInterceptor(MetadataStoreSelector metadataStoreSelector) {
         IdempotentReceiverInterceptor interceptor = new IdempotentReceiverInterceptor(metadataStoreSelector);
 
-        interceptor.setDiscardChannelName("errorChannel");
+        interceptor.setDiscardChannelName(DISCARD_CHANNEL);
+        interceptor.setThrowExceptionOnRejection(false);
 
         return interceptor;
     }
