@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>8.3.0-alpha.21</version>
+    <version>8.3.0</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-query-service-parent</artifactId>
@@ -18,7 +18,7 @@
     <module>activiti-cloud-starter-query</module>
   </modules>
   <properties>
-    <activiti.version>8.3.0-alpha.12</activiti.version>
+    <activiti.version>8.3.0</activiti.version>
   </properties>
   <!-- BoM Marker Dependencies -->
   <dependencies>
