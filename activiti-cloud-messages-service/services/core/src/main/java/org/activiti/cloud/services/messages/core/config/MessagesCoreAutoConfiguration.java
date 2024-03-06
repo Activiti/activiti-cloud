@@ -61,6 +61,7 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.config.EnableIntegrationManagement;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.handler.MessageProcessor;
 import org.springframework.integration.handler.advice.IdempotentReceiverInterceptor;
 import org.springframework.integration.metadata.ConcurrentMetadataStore;
@@ -92,6 +93,7 @@ public class MessagesCoreAutoConfiguration {
     private static final String CONTROL_BUS = "controlBus";
     private static final String CONTROL_BUS_FLOW = "controlBusFlow";
     private static final String MESSAGE_CONNECTOR_INTEGRATION_FLOW = "messageConnectorIntegrationFlow";
+    public static final String DISCARD_CHANNEL_INTEGRATION_FLOW = "discardChannelIntegrationFlow";
 
     @Autowired
     private MessageAggregatorProperties properties;
@@ -149,6 +151,12 @@ public class MessagesCoreAutoConfiguration {
     @ConditionalOnMissingBean(name = DISCARD_CHANNEL)
     public MessageChannel discardChannel() {
         return MessageChannels.direct(DISCARD_CHANNEL).getObject();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = DISCARD_CHANNEL_INTEGRATION_FLOW)
+    public IntegrationFlow discardChannelIntegrationFlow() {
+        return IntegrationFlow.from(DISCARD_CHANNEL).log(LoggingHandler.Level.DEBUG).get();
     }
 
     @Bean
