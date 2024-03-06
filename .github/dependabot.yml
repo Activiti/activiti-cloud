@@ -18,7 +18,6 @@ updates:
       - dependency-name: "org.activiti.cloud:activiti-cloud-build-dependencies-parent"
       - dependency-name: "org.activiti.cloud:activiti-cloud-connectors-dependencies"
       - dependency-name: "org.activiti.cloud:activiti-cloud-messages-dependencies"
-      - dependency-name: "org.activiti.cloud:activiti-cloud-modeling-dependencies"
       - dependency-name: "org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies"
       - dependency-name: "org.activiti.cloud:activiti-cloud-query-dependencies"
       - dependency-name: "org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies"
