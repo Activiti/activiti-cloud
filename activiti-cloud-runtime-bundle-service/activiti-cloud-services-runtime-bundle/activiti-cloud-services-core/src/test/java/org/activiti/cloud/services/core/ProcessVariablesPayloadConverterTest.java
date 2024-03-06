@@ -42,7 +42,7 @@ class ProcessVariablesPayloadConverterTest {
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
     @Autowired
-    private VariablesPayloadConverter subject;
+    private ProcessVariablesPayloadConverter subject;
 
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
@@ -89,7 +89,7 @@ class ProcessVariablesPayloadConverterTest {
     }
 
     @Test
-    void should_convertStartProcessPayload() {
+    void shouldConvertStartProcessPayload() {
         StartProcessPayload payload = subject.convert(
             ProcessPayloadBuilder.start().withVariables(variablesToConvert).build()
         );
@@ -97,7 +97,7 @@ class ProcessVariablesPayloadConverterTest {
     }
 
     @Test
-    void should_convertCompleteTaskPayload() {
+    void shouldConvertCompleteTaskPayload() {
         CompleteTaskPayload result = subject.convert(
             TaskPayloadBuilder.complete().withVariables(variablesToConvert).build()
         );
@@ -105,7 +105,7 @@ class ProcessVariablesPayloadConverterTest {
     }
 
     @Test
-    void should_convertSaveTaskPayload() {
+    void shouldConvertSaveTaskPayload() {
         SaveTaskPayload result = subject.convert(TaskPayloadBuilder.save().withVariables(variablesToConvert).build());
         assertConvertedVariables(result.getVariables());
     }

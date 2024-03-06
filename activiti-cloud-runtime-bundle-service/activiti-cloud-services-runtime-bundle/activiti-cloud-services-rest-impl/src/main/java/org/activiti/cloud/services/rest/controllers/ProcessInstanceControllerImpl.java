@@ -48,7 +48,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
-import org.activiti.cloud.services.core.VariablesPayloadConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.ProcessInstanceController;
 import org.activiti.cloud.services.rest.assemblers.ProcessInstanceRepresentationModelAssembler;
@@ -82,7 +82,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
 
     private final SpringPageConverter pageConverter;
 
-    private final VariablesPayloadConverter variablesPayloadConverter;
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
     @Autowired
     public ProcessInstanceControllerImpl(
@@ -92,7 +92,7 @@ public class ProcessInstanceControllerImpl implements ProcessInstanceController 
         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
         ProcessRuntime processRuntime,
         SpringPageConverter pageConverter,
-        VariablesPayloadConverter variablesPayloadConverter
+        ProcessVariablesPayloadConverter variablesPayloadConverter
     ) {
         this.repositoryService = repositoryService;
         this.processDiagramGenerator = processDiagramGenerator;

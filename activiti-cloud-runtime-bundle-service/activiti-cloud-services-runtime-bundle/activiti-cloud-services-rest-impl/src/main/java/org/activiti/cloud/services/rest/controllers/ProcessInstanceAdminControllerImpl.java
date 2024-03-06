@@ -44,7 +44,7 @@ import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.services.core.VariablesPayloadConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
@@ -82,7 +82,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final SpringPageConverter pageConverter;
 
-    private final VariablesPayloadConverter variablesPayloadConverter;
+    private final ProcessVariablesPayloadConverter variablesPayloadConverter;
 
     private final CloudProcessDeletedService cloudProcessDeletedService;
 
@@ -91,7 +91,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
         ProcessAdminRuntime processAdminRuntime,
         SpringPageConverter pageConverter,
-        VariablesPayloadConverter variablesPayloadConverter,
+        ProcessVariablesPayloadConverter variablesPayloadConverter,
         CloudProcessDeletedService cloudProcessDeletedService
     ) {
         this.representationModelAssembler = representationModelAssembler;
