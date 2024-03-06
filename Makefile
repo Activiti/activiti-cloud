@@ -125,6 +125,9 @@ docker-delete/%:
 		https://hub.docker.com/v2/logout/; \
 	exit $$e
 
+docker-delete-all: docker-delete/example-runtime-bundle docker-delete/activiti-cloud-query \
+	docker-delete/example-cloud-connector
+
 version:
 	mvn ${MAVEN_CLI_OPTS} versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$(RELEASE_VERSION)
 
