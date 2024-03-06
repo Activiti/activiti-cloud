@@ -36,7 +36,7 @@ class ProcessVariableValueConverterTest {
     private static final String DATE_1970_01_01T01_01_01_001Z = "1970-01-01T01:01:01.001Z";
 
     @Autowired
-    private VariableValueConverter variableValueConverter;
+    private ProcessVariableValueConverter processVariableValueConverter;
 
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
@@ -44,7 +44,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterNullValue() {
         // when
-        String nullValue = variableValueConverter.convert(new ProcessVariableValue("String", null));
+        String nullValue = processVariableValueConverter.convert(new ProcessVariableValue("String", null));
 
         // then
         assertThat(nullValue).isNull();
@@ -53,7 +53,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterStringValue() {
         // when
-        String stringValue = variableValueConverter.convert(new ProcessVariableValue("string", "name"));
+        String stringValue = processVariableValueConverter.convert(new ProcessVariableValue("string", "name"));
 
         // then
         assertThat(stringValue).isEqualTo("name");
@@ -62,7 +62,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterIntValue() {
         // when
-        Integer intValue = variableValueConverter.convert(new ProcessVariableValue("int", "10"));
+        Integer intValue = processVariableValueConverter.convert(new ProcessVariableValue("int", "10"));
 
         // then
         assertThat(intValue).isEqualTo(10);
@@ -71,7 +71,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterLongValue() {
         // when
-        Long longValue = variableValueConverter.convert(new ProcessVariableValue("long", "10"));
+        Long longValue = processVariableValueConverter.convert(new ProcessVariableValue("long", "10"));
 
         // then
         assertThat(longValue).isEqualTo(10L);
@@ -80,7 +80,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterBooleanValue() {
         // when
-        Boolean booleanValue = variableValueConverter.convert(new ProcessVariableValue("boolean", "true"));
+        Boolean booleanValue = processVariableValueConverter.convert(new ProcessVariableValue("boolean", "true"));
 
         // then
         assertThat(booleanValue).isTrue();
@@ -89,7 +89,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterDoubleValue() {
         // when
-        Double doubleValue = variableValueConverter.convert(new ProcessVariableValue("double", "10.00"));
+        Double doubleValue = processVariableValueConverter.convert(new ProcessVariableValue("double", "10.00"));
 
         // then
         assertThat(doubleValue).isEqualTo(10.00);
@@ -98,7 +98,9 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterLocalDateValue() {
         // when
-        LocalDate localDateValue = variableValueConverter.convert(new ProcessVariableValue("LocalDate", "2020-04-20"));
+        LocalDate localDateValue = processVariableValueConverter.convert(
+            new ProcessVariableValue("LocalDate", "2020-04-20")
+        );
 
         // then
         assertThat(localDateValue).isEqualTo(LocalDate.of(2020, 4, 20));
@@ -107,7 +109,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterDateValue() {
         // when
-        Date dateValue = variableValueConverter.convert(
+        Date dateValue = processVariableValueConverter.convert(
             new ProcessVariableValue("Date", DATE_1970_01_01T01_01_01_001Z)
         );
 
@@ -118,7 +120,9 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterBigDecimalValue() {
         // when
-        BigDecimal bigDecimalValue = variableValueConverter.convert(new ProcessVariableValue("BigDecimal", "10.00"));
+        BigDecimal bigDecimalValue = processVariableValueConverter.convert(
+            new ProcessVariableValue("BigDecimal", "10.00")
+        );
 
         // then
         assertThat(bigDecimalValue).isEqualTo(BigDecimal.valueOf(1000, 2));
@@ -127,7 +131,7 @@ class ProcessVariableValueConverterTest {
     @Test
     void testProcessVariableValueConverterJsonNodeValue() {
         // when
-        JsonNode jsonNodeValue = variableValueConverter.convert(new ProcessVariableValue("json", "{}"));
+        JsonNode jsonNodeValue = processVariableValueConverter.convert(new ProcessVariableValue("json", "{}"));
 
         // then
         assertThat(jsonNodeValue).isEqualTo(JsonNodeFactory.instance.objectNode());

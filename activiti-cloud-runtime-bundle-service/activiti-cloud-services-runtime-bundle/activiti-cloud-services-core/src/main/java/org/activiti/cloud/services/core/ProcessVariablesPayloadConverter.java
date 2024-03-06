@@ -32,16 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-public class VariablesPayloadConverter {
+public class ProcessVariablesPayloadConverter {
 
-    private final VariableValueConverter variableValueConverter;
+    private final ProcessVariableValueConverter processVariableValueConverter;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VariablesPayloadConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessVariablesPayloadConverter.class);
 
-    public VariablesPayloadConverter(VariableValueConverter variableValueConverter) {
-        Assert.notNull(variableValueConverter, "VariableValueConverter must not be null");
+    public ProcessVariablesPayloadConverter(ProcessVariableValueConverter processVariableValueConverter) {
+        Assert.notNull(processVariableValueConverter, "ProcessVariableValueConverter must not be null");
 
-        this.variableValueConverter = variableValueConverter;
+        this.processVariableValueConverter = processVariableValueConverter;
     }
 
     public StartProcessPayload convert(StartProcessPayload payload) {
@@ -107,19 +107,13 @@ public class VariablesPayloadConverter {
 
     private Map.Entry<String, Object> parseValue(Map.Entry<String, Object> entry) {
         Object entryValue = entry.getValue();
-
         try {
-            if (entryValue instanceof Map) {
-                Map<String, String> valuesMap = (Map) entryValue;
-
-                if (valuesMap.containsKey("type") && valuesMap.containsKey("value")) {
-                    String type = valuesMap.get("type");
-                    String value = valuesMap.get("value");
-
-                    entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
-                }
-            } else if (entryValue instanceof ProcessVariableValue) {
-                entryValue = variableValueConverter.convert((ProcessVariableValue) entryValue);
+            if (entryValue instanceof Map mapValue && mapValue.containsKey("type") && mapValue.containsKey("value")) {
+                String type = (String) mapValue.get("type");
+                String value = (String) mapValue.get("value");
+                entryValue = processVariableValueConverter.convert(new ProcessVariableValue(type, value));
+            } else if (entryValue instanceof ProcessVariableValue processVariableValue) {
+                entryValue = processVariableValueConverter.convert(processVariableValue);
             }
         } catch (Exception e) {
             LOGGER.warn("Error while trying to parse variable: {} - variable data: {}", e.getMessage(), entry);

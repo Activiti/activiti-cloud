@@ -26,7 +26,7 @@ import org.activiti.engine.ActivitiException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 
-public class VariableValueConverter {
+public class ProcessVariableValueConverter {
 
     private static final Map<String, Class<?>> typeRegistry = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class VariableValueConverter {
 
     private final ConversionService conversionService;
 
-    public VariableValueConverter(ConversionService conversionService) {
+    public ProcessVariableValueConverter(ConversionService conversionService) {
         Assert.notNull(conversionService, "ConversionService must not be null");
         this.conversionService = conversionService;
     }

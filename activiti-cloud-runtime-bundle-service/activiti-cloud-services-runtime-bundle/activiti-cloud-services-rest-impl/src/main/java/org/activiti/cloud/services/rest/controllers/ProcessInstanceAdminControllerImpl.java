@@ -44,7 +44,7 @@ import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
-import org.activiti.cloud.services.core.VariablesPayloadConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.api.ProcessInstanceAdminController;
@@ -82,7 +82,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     private final SpringPageConverter pageConverter;
 
-    private final VariablesPayloadConverter variablesPayloadConverter;
+    private final ProcessVariablesPayloadConverter processVariablesPayloadConverter;
 
     private final CloudProcessDeletedService cloudProcessDeletedService;
 
@@ -91,14 +91,14 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
         AlfrescoPagedModelAssembler<ProcessInstance> pagedCollectionModelAssembler,
         ProcessAdminRuntime processAdminRuntime,
         SpringPageConverter pageConverter,
-        VariablesPayloadConverter variablesPayloadConverter,
+        ProcessVariablesPayloadConverter processVariablesPayloadConverter,
         CloudProcessDeletedService cloudProcessDeletedService
     ) {
         this.representationModelAssembler = representationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.processAdminRuntime = processAdminRuntime;
         this.pageConverter = pageConverter;
-        this.variablesPayloadConverter = variablesPayloadConverter;
+        this.processVariablesPayloadConverter = processVariablesPayloadConverter;
         this.cloudProcessDeletedService = cloudProcessDeletedService;
     }
 
@@ -116,7 +116,9 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     @Override
     public EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload startProcessPayload) {
-        StartProcessPayload convertedStartProcessPayload = variablesPayloadConverter.convert(startProcessPayload);
+        StartProcessPayload convertedStartProcessPayload = processVariablesPayloadConverter.convert(
+            startProcessPayload
+        );
 
         return representationModelAssembler.toModel(processAdminRuntime.start(convertedStartProcessPayload));
     }
@@ -192,7 +194,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
 
     @Override
     public EntityModel<CloudProcessInstance> start(@RequestBody StartMessagePayload startMessagePayload) {
-        startMessagePayload = variablesPayloadConverter.convert(startMessagePayload);
+        startMessagePayload = processVariablesPayloadConverter.convert(startMessagePayload);
 
         ProcessInstance processInstance = processAdminRuntime.start(startMessagePayload);
 

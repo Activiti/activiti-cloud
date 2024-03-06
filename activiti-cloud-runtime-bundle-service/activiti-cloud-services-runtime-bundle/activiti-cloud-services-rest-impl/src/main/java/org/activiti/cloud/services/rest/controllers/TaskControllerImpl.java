@@ -41,7 +41,7 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.services.core.VariablesPayloadConverter;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
@@ -68,7 +68,7 @@ public class TaskControllerImpl implements TaskController {
 
     private final TaskRuntime taskRuntime;
 
-    private final VariablesPayloadConverter payloadConverter;
+    private final ProcessVariablesPayloadConverter payloadConverter;
 
     @Autowired
     public TaskControllerImpl(
@@ -76,7 +76,7 @@ public class TaskControllerImpl implements TaskController {
         AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
         TaskRuntime taskRuntime,
-        VariablesPayloadConverter payloadConverter
+        ProcessVariablesPayloadConverter payloadConverter
     ) {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
