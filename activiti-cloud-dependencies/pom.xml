@@ -56,12 +56,6 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-modeling-dependencies</artifactId>
-      <version>${activiti-cloud.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-runtime-bundle-dependencies</artifactId>
       <version>${activiti-cloud.version}</version>
       <type>pom</type>
