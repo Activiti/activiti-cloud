@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
   <name>Activiti Cloud :: Acceptance Scenarios Parent</name>
   <modules>
-    <module>modeling-acceptance-tests</module>
     <module>runtime-acceptance-tests</module>
     <module>multiple-runtime-acceptance-tests</module>
     <module>security-policies-acceptance-tests</module>
