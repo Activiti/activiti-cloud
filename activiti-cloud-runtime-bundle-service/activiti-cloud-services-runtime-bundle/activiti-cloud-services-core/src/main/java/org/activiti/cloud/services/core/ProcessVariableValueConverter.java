@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 public class ProcessVariableValueConverter {
 
-    private static Map<String, Class<?>> typeRegistry = new HashMap<>();
+    private static final Map<String, Class<?>> typeRegistry = new HashMap<>();
 
     static {
         typeRegistry.put("string", String.class);

@@ -41,6 +41,7 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.core.ProcessVariablesPayloadConverter;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.rest.api.TaskController;
 import org.activiti.cloud.services.rest.assemblers.TaskRepresentationModelAssembler;
@@ -67,17 +68,21 @@ public class TaskControllerImpl implements TaskController {
 
     private final TaskRuntime taskRuntime;
 
+    private final ProcessVariablesPayloadConverter payloadConverter;
+
     @Autowired
     public TaskControllerImpl(
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         AlfrescoPagedModelAssembler<Task> pagedCollectionModelAssembler,
         SpringPageConverter pageConverter,
-        TaskRuntime taskRuntime
+        TaskRuntime taskRuntime,
+        ProcessVariablesPayloadConverter payloadConverter
     ) {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.pageConverter = pageConverter;
         this.taskRuntime = taskRuntime;
+        this.payloadConverter = payloadConverter;
     }
 
     @Override
@@ -119,6 +124,7 @@ public class TaskControllerImpl implements TaskController {
             completeTaskPayload = TaskPayloadBuilder.complete().withTaskId(taskId).build();
         } else {
             completeTaskPayload.setTaskId(taskId);
+            completeTaskPayload = payloadConverter.convert(completeTaskPayload);
         }
 
         Task task = taskRuntime.complete(completeTaskPayload);
@@ -166,8 +172,7 @@ public class TaskControllerImpl implements TaskController {
         if (saveTaskPayload != null) {
             saveTaskPayload.setTaskId(taskId);
         }
-
-        taskRuntime.save(saveTaskPayload);
+        taskRuntime.save(payloadConverter.convert(saveTaskPayload));
     }
 
     @Override

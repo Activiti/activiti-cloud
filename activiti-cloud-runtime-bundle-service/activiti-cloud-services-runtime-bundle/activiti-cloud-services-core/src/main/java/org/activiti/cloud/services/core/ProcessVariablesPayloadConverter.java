@@ -24,12 +24,19 @@ import org.activiti.api.process.model.builders.MessagePayloadBuilder;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
+import org.activiti.api.task.model.builders.TaskPayloadBuilder;
+import org.activiti.api.task.model.payloads.CompleteTaskPayload;
+import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 public class ProcessVariablesPayloadConverter {
 
     private final ProcessVariableValueConverter variableValueConverter;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessVariablesPayloadConverter.class);
 
     public ProcessVariablesPayloadConverter(ProcessVariableValueConverter variableValueConverter) {
         Assert.notNull(variableValueConverter, "VariableValueConverter must not be null");
@@ -54,6 +61,34 @@ public class ProcessVariablesPayloadConverter {
             .orElse(payload);
     }
 
+    public CompleteTaskPayload convert(CompleteTaskPayload payload) {
+        return Optional
+            .ofNullable(payload)
+            .map(CompleteTaskPayload::getVariables)
+            .map(variables ->
+                TaskPayloadBuilder
+                    .complete()
+                    .withTaskId(payload.getTaskId())
+                    .withVariables(mapVariableValues(variables))
+                    .build()
+            )
+            .orElse(payload);
+    }
+
+    public SaveTaskPayload convert(SaveTaskPayload payload) {
+        return Optional
+            .ofNullable(payload)
+            .map(SaveTaskPayload::getVariables)
+            .map(variables ->
+                TaskPayloadBuilder
+                    .save()
+                    .withTaskId(payload.getTaskId())
+                    .withVariables(mapVariableValues(variables))
+                    .build()
+            )
+            .orElse(payload);
+    }
+
     public StartMessagePayload convert(StartMessagePayload payload) {
         return Optional
             .ofNullable(payload)
@@ -72,21 +107,17 @@ public class ProcessVariablesPayloadConverter {
 
     private Map.Entry<String, Object> parseValue(Map.Entry<String, Object> entry) {
         Object entryValue = entry.getValue();
-
         try {
-            if (Map.class.isInstance(entryValue)) {
-                Map<String, String> valuesMap = Map.class.cast(entryValue);
-
-                if (valuesMap.containsKey("type") && valuesMap.containsKey("value")) {
-                    String type = valuesMap.get("type");
-                    String value = valuesMap.get("value");
-
-                    entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
-                }
-            } else if (ProcessVariableValue.class.isInstance(entryValue)) {
-                entryValue = variableValueConverter.convert(ProcessVariableValue.class.cast(entryValue));
+            if (entryValue instanceof Map mapValue && mapValue.containsKey("type") && mapValue.containsKey("value")) {
+                String type = (String) mapValue.get("type");
+                String value = (String) mapValue.get("value");
+                entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
+            } else if (entryValue instanceof ProcessVariableValue processVariableValue) {
+                entryValue = variableValueConverter.convert(processVariableValue);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            LOGGER.warn("Error while trying to parse variable: {} - variable data: {}", e.getMessage(), entry);
+        }
 
         return new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entryValue);
     }
