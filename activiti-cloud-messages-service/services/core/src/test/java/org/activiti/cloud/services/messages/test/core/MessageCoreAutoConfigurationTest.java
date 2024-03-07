@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 
 @SpringBootTest(properties = "activiti.cloud.application.name=my-activiti-rb-app")
@@ -41,6 +42,9 @@ public class MessageCoreAutoConfigurationTest {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private DirectChannel discardChannel;
+
     @SpringBootApplication
     static class Application {}
 
@@ -51,6 +55,11 @@ public class MessageCoreAutoConfigurationTest {
 
         assertProperty("spring.cloud.stream.bindings.messageConnectorInput.destination").isEqualTo("messageEvents");
         assertProperty("spring.cloud.stream.bindings.messageConnectorOutput.destination").isEqualTo("commandConsumer");
+    }
+
+    @Test
+    void discardChannelSubscriberCount() {
+        assertThat(discardChannel.getSubscriberCount()).isEqualTo(1);
     }
 
     private AbstractStringAssert<?> assertProperty(String name) {
