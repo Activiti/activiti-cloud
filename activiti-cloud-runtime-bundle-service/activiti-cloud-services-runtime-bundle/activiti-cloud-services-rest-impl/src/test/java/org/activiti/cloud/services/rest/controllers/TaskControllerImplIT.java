@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
+import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
@@ -49,8 +51,10 @@ import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskPayload;
+import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -93,6 +97,7 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        ServicesCoreAutoConfiguration.class,
     }
 )
 class TaskControllerImplIT {
@@ -111,6 +116,15 @@ class TaskControllerImplIT {
 
     @MockBean
     private TaskRuntime taskRuntime;
+
+    @MockBean
+    private TaskAdminRuntime taskAdminRuntime;
+
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+
+    @MockBean
+    private ProcessRuntime processRuntime;
 
     @SpyBean
     private SpringPageConverter springPageConverter;
