@@ -117,12 +117,6 @@ docker-delete/%:
 		echo "::warning title=Image not found::Image not found: $(MODULE):$(RELEASE_VERSION)"; \
 		e=0; \
 	fi
-	@echo "Delete token"
-	@curl --silent --show-error --fail \
-		-X POST \
-		-H "Accept: application/json" \
-		-H "Authorization: JWT $(TOKEN)" \
-		https://hub.docker.com/v2/logout/; \
 	exit $$e
 
 docker-delete-all: docker-delete/example-runtime-bundle docker-delete/activiti-cloud-query \
