@@ -26,6 +26,7 @@ public class ProcessVariableValue implements Serializable {
     private static final long serialVersionUID = 1L;
     private String type;
     private String value;
+    private Object rawValue;
 
     ProcessVariableValue() {}
 
@@ -34,12 +35,22 @@ public class ProcessVariableValue implements Serializable {
         this.value = value;
     }
 
+    public ProcessVariableValue(String type, String value, Object rawValue) {
+        this.type = type;
+        this.value = value;
+        this.rawValue = rawValue;
+    }
+
     public String getType() {
         return type;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public Object getRawValue() {
+        return rawValue;
     }
 
     @Override

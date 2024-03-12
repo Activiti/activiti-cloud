@@ -52,11 +52,12 @@ public class ProcessVariableValueConverter {
 
     @SuppressWarnings("unchecked")
     public <T> T convert(ProcessVariableValue variableValue) {
-        Class<?> type = typeRegistry.getOrDefault(variableValue.getType().toLowerCase(), Object.class);
-        Object value = variableValue.getValue();
-
         try {
-            return (T) type.cast(this.conversionService.convert(value, type));
+            String typeKey = variableValue.getType().toLowerCase();
+            if (typeRegistry.containsKey(typeKey)) {
+                return (T) this.conversionService.convert(variableValue.getValue(), typeRegistry.get(typeKey));
+            }
+            return (T) variableValue.getRawValue();
         } catch (Exception ex) {
             throw new ActivitiException("VariableValue conversion error", ex);
         }

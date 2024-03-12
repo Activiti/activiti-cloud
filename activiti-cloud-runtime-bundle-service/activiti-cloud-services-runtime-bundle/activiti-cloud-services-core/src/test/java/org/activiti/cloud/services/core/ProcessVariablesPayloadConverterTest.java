@@ -53,7 +53,7 @@ class ProcessVariablesPayloadConverterTest {
     static void buildVariablesMap() {
         variablesToConvert = new HashMap<>();
         variablesToConvert.put("int", 123);
-        variablesToConvert.put("string", "123");
+        variablesToConvert.put("string", "a string");
         variablesToConvert.put("bool", true);
         variablesToConvert.put("nullValue", new ProcessVariableValue("String", null).toMap());
         variablesToConvert.put("stringValue", new ProcessVariableValue("string", "name").toMap());
@@ -72,7 +72,7 @@ class ProcessVariablesPayloadConverterTest {
     private void assertConvertedVariables(Map<String, Object> convertedVariables) {
         assertThat(convertedVariables)
             .containsEntry("int", 123)
-            .containsEntry("string", "123")
+            .containsEntry("string", "a string")
             .containsEntry("bool", true)
             .containsEntry("nullValue", null)
             .containsEntry("stringValue", "name")
