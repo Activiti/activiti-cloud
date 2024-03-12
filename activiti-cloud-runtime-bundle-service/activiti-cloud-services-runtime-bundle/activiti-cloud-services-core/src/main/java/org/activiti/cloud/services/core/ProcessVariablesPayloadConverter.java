@@ -111,7 +111,8 @@ public class ProcessVariablesPayloadConverter {
             if (entryValue instanceof Map mapValue && mapValue.containsKey("type") && mapValue.containsKey("value")) {
                 String type = (String) mapValue.get("type");
                 String value = (String) mapValue.get("value");
-                entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
+                entryValue =
+                    variableValueConverter.convert(new ProcessVariableValue(type, value, mapValue.get("rawValue")));
             } else if (entryValue instanceof ProcessVariableValue processVariableValue) {
                 entryValue = variableValueConverter.convert(processVariableValue);
             }
