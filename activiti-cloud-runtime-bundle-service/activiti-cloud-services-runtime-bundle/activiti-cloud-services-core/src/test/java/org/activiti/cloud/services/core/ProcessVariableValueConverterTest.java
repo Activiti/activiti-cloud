@@ -105,7 +105,7 @@ class ProcessVariableValueConverterTest {
     void testProcessVariableValueConverterDoubleValue() {
         assertThat(
             Stream
-                .of("10", 10, 10.0, 10L, 10f)
+                .of("10", "10.0", 10, 10.0, 10L, 10f)
                 .map(value -> new ProcessVariableValue("double", value))
                 .map(variableValueConverter::convert)
         )
