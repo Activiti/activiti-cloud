@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.stream.Stream;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.Test;
@@ -60,39 +61,55 @@ class ProcessVariableValueConverterTest {
     }
 
     @Test
-    void testProcessVariableValueConverterIntValue() {
-        // when
-        Integer intValue = variableValueConverter.convert(new ProcessVariableValue("int", "10"));
+    void testProcessVariableValueConverterIntegerValue() {
+        assertThat(
+            Stream
+                .of("10", 10, 10.0, 10L, 10f)
+                .map(value -> new ProcessVariableValue("int", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
 
-        // then
-        assertThat(intValue).isEqualTo(10);
+        assertThat(
+            Stream
+                .of("10", 10, 10.0, 10L, 10f)
+                .map(value -> new ProcessVariableValue("integer", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10));
     }
 
     @Test
     void testProcessVariableValueConverterLongValue() {
-        // when
-        Long longValue = variableValueConverter.convert(new ProcessVariableValue("long", "10"));
-
-        // then
-        assertThat(longValue).isEqualTo(10L);
+        assertThat(
+            Stream
+                .of("10", 10, 10.0, 10L, 10f)
+                .map(value -> new ProcessVariableValue("long", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10L));
     }
 
     @Test
     void testProcessVariableValueConverterBooleanValue() {
-        // when
-        Boolean booleanValue = variableValueConverter.convert(new ProcessVariableValue("boolean", "true"));
-
-        // then
-        assertThat(booleanValue).isTrue();
+        assertThat(
+            Stream
+                .of(true, "true")
+                .map(value -> new ProcessVariableValue("boolean", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(true));
     }
 
     @Test
     void testProcessVariableValueConverterDoubleValue() {
-        // when
-        Double doubleValue = variableValueConverter.convert(new ProcessVariableValue("double", "10.00"));
-
-        // then
-        assertThat(doubleValue).isEqualTo(10.00);
+        assertThat(
+            Stream
+                .of("10", 10, 10.0, 10L, 10f)
+                .map(value -> new ProcessVariableValue("double", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10L));
     }
 
     @Test
@@ -117,11 +134,15 @@ class ProcessVariableValueConverterTest {
 
     @Test
     void testProcessVariableValueConverterBigDecimalValue() {
-        // when
-        BigDecimal bigDecimalValue = variableValueConverter.convert(new ProcessVariableValue("BigDecimal", "10.00"));
-
-        // then
-        assertThat(bigDecimalValue).isEqualTo(BigDecimal.valueOf(1000, 2));
+        assertThat(
+            Stream
+                .of("10", 10, 10.0, 10L, 10f)
+                .map(value -> new ProcessVariableValue("bigdecimal", value))
+                .map(variableValueConverter::convert)
+        )
+            .allSatisfy(convertedValue ->
+                assertThat((BigDecimal) convertedValue).isEqualByComparingTo(BigDecimal.valueOf(10))
+            );
     }
 
     @Test
@@ -131,5 +152,14 @@ class ProcessVariableValueConverterTest {
 
         // then
         assertThat(jsonNodeValue).isEqualTo(JsonNodeFactory.instance.objectNode());
+    }
+
+    @Test
+    void testProcessVariableValueConverterTypeNotPresentInRegistry() {
+        // when
+        Integer amountValue = 20;
+        Object converted = variableValueConverter.convert(new ProcessVariableValue("amount", amountValue));
+        // then
+        assertThat(amountValue).isEqualTo(converted);
     }
 }

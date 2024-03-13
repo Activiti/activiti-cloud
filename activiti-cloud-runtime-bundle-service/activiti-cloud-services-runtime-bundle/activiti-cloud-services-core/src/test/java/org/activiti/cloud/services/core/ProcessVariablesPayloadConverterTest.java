@@ -54,7 +54,7 @@ class ProcessVariablesPayloadConverterTest {
         variablesToConvert = new HashMap<>();
         variablesToConvert.put("int", 123);
         variablesToConvert.put("string", "a string");
-        variablesToConvert.put("bool", true);
+        variablesToConvert.put("boolean", true);
         variablesToConvert.put("nullValue", new ProcessVariableValue("String", null).toMap());
         variablesToConvert.put("stringValue", new ProcessVariableValue("string", "name").toMap());
         variablesToConvert.put("quoteValue", new ProcessVariableValue("string", "\"").toMap());
@@ -67,13 +67,15 @@ class ProcessVariablesPayloadConverterTest {
         variablesToConvert.put("bigDecimalValue", new ProcessVariableValue("BigDecimal", "10.00").toMap());
         variablesToConvert.put("jsonNodeValue", new ProcessVariableValue("json", "{}").toMap());
         variablesToConvert.put("jsonNodeValue2", new ProcessVariableValue("json", "{}"));
+        variablesToConvert.put("integerAmount", new ProcessVariableValue("amount", 20));
+        variablesToConvert.put("doubleAmount", new ProcessVariableValue("amount", 30.2));
     }
 
     private void assertConvertedVariables(Map<String, Object> convertedVariables) {
         assertThat(convertedVariables)
             .containsEntry("int", 123)
             .containsEntry("string", "a string")
-            .containsEntry("bool", true)
+            .containsEntry("boolean", true)
             .containsEntry("nullValue", null)
             .containsEntry("stringValue", "name")
             .containsEntry("quoteValue", "\"")
@@ -85,7 +87,9 @@ class ProcessVariablesPayloadConverterTest {
             .containsEntry("dateValue", dateFormatterProvider.parse(DATE_1970_01_01T01_01_01_001Z))
             .containsEntry("bigDecimalValue", BigDecimal.valueOf(1000, 2))
             .containsEntry("jsonNodeValue", JsonNodeFactory.instance.objectNode())
-            .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode());
+            .containsEntry("jsonNodeValue2", JsonNodeFactory.instance.objectNode())
+            .containsEntry("integerAmount", 20)
+            .containsEntry("doubleAmount", 30.2);
     }
 
     @Test

@@ -19,38 +19,26 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class ProcessVariableValue implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private String type;
-    private String value;
-    private Object rawValue;
+    private Serializable value;
 
     ProcessVariableValue() {}
 
-    public ProcessVariableValue(String type, String value) {
+    public ProcessVariableValue(String type, Serializable value) {
         this.type = type;
         this.value = value;
-    }
-
-    public ProcessVariableValue(String type, String value, Object rawValue) {
-        this.type = type;
-        this.value = value;
-        this.rawValue = rawValue;
     }
 
     public String getType() {
         return type;
     }
 
-    public String getValue() {
+    public Serializable getValue() {
         return value;
-    }
-
-    public Object getRawValue() {
-        return rawValue;
     }
 
     @Override
@@ -73,8 +61,8 @@ public class ProcessVariableValue implements Serializable {
         return Objects.equals(type, other.type) && Objects.equals(value, other.value);
     }
 
-    public Map<String, String> toMap() {
-        Map<String, String> result = new LinkedHashMap<>(2);
+    public Map<String, Serializable> toMap() {
+        Map<String, Serializable> result = new LinkedHashMap<>(3);
 
         result.put("type", type);
         result.put("value", value);
@@ -84,31 +72,12 @@ public class ProcessVariableValue implements Serializable {
 
     public String toJson() {
         StringBuilder builder = new StringBuilder();
-        builder
-            .append("{\"type\":\"")
-            .append(type)
-            .append("\",\"value\":")
-            .append(Optional.ofNullable(value).map(this::escape).orElse("null"))
-            .append("}");
+        builder.append("{\"type\":\"").append(type).append("\",\"value\":").append(value).append("}");
         return builder.toString();
     }
 
     @Override
     public String toString() {
         return toJson();
-    }
-
-    private String escape(String value) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\"");
-        for (char c : value.toCharArray()) {
-            if (c == '\'') builder.append("\\'"); else if (c == '\"') builder.append("\\\""); else if (
-                c == '\r'
-            ) builder.append("\\r"); else if (c == '\n') builder.append("\\n"); else if (c == '\t') builder.append(
-                "\\t"
-            ); else if (c < 32 || c >= 127) builder.append(String.format("\\u%04x", (int) c)); else builder.append(c);
-        }
-        builder.append("\"");
-        return builder.toString();
     }
 }
