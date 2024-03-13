@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ProcessVariableValue implements Serializable {
 
@@ -72,12 +73,31 @@ public class ProcessVariableValue implements Serializable {
 
     public String toJson() {
         StringBuilder builder = new StringBuilder();
-        builder.append("{\"type\":\"").append(type).append("\",\"value\":").append(value).append("}");
+        builder
+            .append("{\"type\":\"")
+            .append(type)
+            .append("\",\"value\":")
+            .append(Optional.ofNullable(value).map(Object::toString).map(this::escape).orElse("null"))
+            .append("}");
         return builder.toString();
     }
 
     @Override
     public String toString() {
         return toJson();
+    }
+
+    private String escape(String value) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\"");
+        for (char c : value.toCharArray()) {
+            if (c == '\'') builder.append("\\'"); else if (c == '\"') builder.append("\\\""); else if (
+                c == '\r'
+            ) builder.append("\\r"); else if (c == '\n') builder.append("\\n"); else if (c == '\t') builder.append(
+                "\\t"
+            ); else if (c < 32 || c >= 127) builder.append(String.format("\\u%04x", (int) c)); else builder.append(c);
+        }
+        builder.append("\"");
+        return builder.toString();
     }
 }
