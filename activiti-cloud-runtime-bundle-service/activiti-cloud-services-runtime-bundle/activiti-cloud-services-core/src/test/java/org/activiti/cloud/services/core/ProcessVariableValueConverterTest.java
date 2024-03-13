@@ -109,7 +109,7 @@ class ProcessVariableValueConverterTest {
                 .map(value -> new ProcessVariableValue("double", value))
                 .map(variableValueConverter::convert)
         )
-            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10L));
+            .allSatisfy(convertedValue -> assertThat(convertedValue).isEqualTo(10.0));
     }
 
     @Test
