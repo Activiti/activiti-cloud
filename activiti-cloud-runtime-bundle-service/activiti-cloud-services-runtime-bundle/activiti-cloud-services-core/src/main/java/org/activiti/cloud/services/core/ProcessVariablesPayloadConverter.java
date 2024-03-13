@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.core;
 
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -110,7 +111,7 @@ public class ProcessVariablesPayloadConverter {
         try {
             if (entryValue instanceof Map mapValue && mapValue.containsKey("type") && mapValue.containsKey("value")) {
                 String type = (String) mapValue.get("type");
-                String value = (String) mapValue.get("value");
+                Serializable value = (Serializable) mapValue.get("value");
                 entryValue = variableValueConverter.convert(new ProcessVariableValue(type, value));
             } else if (entryValue instanceof ProcessVariableValue processVariableValue) {
                 entryValue = variableValueConverter.convert(processVariableValue);

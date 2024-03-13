@@ -25,11 +25,11 @@ public class ProcessVariableValue implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private String type;
-    private String value;
+    private Serializable value;
 
     ProcessVariableValue() {}
 
-    public ProcessVariableValue(String type, String value) {
+    public ProcessVariableValue(String type, Serializable value) {
         this.type = type;
         this.value = value;
     }
@@ -38,7 +38,7 @@ public class ProcessVariableValue implements Serializable {
         return type;
     }
 
-    public String getValue() {
+    public Serializable getValue() {
         return value;
     }
 
@@ -62,8 +62,8 @@ public class ProcessVariableValue implements Serializable {
         return Objects.equals(type, other.type) && Objects.equals(value, other.value);
     }
 
-    public Map<String, String> toMap() {
-        Map<String, String> result = new LinkedHashMap<>(2);
+    public Map<String, Serializable> toMap() {
+        Map<String, Serializable> result = new LinkedHashMap<>(2);
 
         result.put("type", type);
         result.put("value", value);
@@ -77,7 +77,7 @@ public class ProcessVariableValue implements Serializable {
             .append("{\"type\":\"")
             .append(type)
             .append("\",\"value\":")
-            .append(Optional.ofNullable(value).map(this::escape).orElse("null"))
+            .append(Optional.ofNullable(value).map(Object::toString).map(this::escape).orElse("null"))
             .append("}");
         return builder.toString();
     }
