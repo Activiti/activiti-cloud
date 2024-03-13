@@ -63,7 +63,7 @@ public class ProcessVariableValue implements Serializable {
     }
 
     public Map<String, Serializable> toMap() {
-        Map<String, Serializable> result = new LinkedHashMap<>(3);
+        Map<String, Serializable> result = new LinkedHashMap<>(2);
 
         result.put("type", type);
         result.put("value", value);
