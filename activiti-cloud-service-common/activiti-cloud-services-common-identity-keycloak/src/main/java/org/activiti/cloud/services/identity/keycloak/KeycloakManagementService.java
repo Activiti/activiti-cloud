@@ -47,6 +47,7 @@ import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakRoleMappingT
 import org.activiti.cloud.services.identity.keycloak.mapper.KeycloakUserToUser;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakClientRepresentation;
 import org.activiti.cloud.services.identity.keycloak.model.KeycloakRoleMapping;
+import org.activiti.cloud.services.identity.keycloak.model.KeycloakUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -69,7 +70,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
             ? searchUsers(
                 userSearchParams.getSearchKey(),
-                userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType()
+                userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType(), userSearchParams.isFilterDeactivatedUsers()
             )
             : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
@@ -80,19 +81,23 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         }
     }
 
-    private List<User> searchUsers(String searchKey, UserTypeSearchParam userType) {
+    private List<User> searchUsers(String searchKey, UserTypeSearchParam userType, boolean filterDeactivatedUsers) {
         return switch (userType) {
             //UserType=INTERACTIVE: search only users
-            case INTERACTIVE -> searchUsers(searchKey);
+            case INTERACTIVE -> searchUsers(searchKey, filterDeactivatedUsers);
             //UserType=ALL: search both users and service accounts. Due to Keycloak search params behavior, search must be done by username.
             case ALL -> searchUsersByUsername(searchKey);
         };
     }
 
-    private List<User> searchUsers(String searchKey) {
-        return keycloakClient
+    private List<User> searchUsers(String searchKey, boolean filterDeactivatedUsers) {
+        Predicate<KeycloakUser> shouldFilterUser = user ->
+            !filterDeactivatedUsers || user.isEnabled();
+
+       return keycloakClient
             .searchUsers(searchKey, PAGE_START, PAGE_SIZE)
             .stream()
+            .filter(shouldFilterUser)
             .map(KeycloakUserToUser::toUser)
             .collect(Collectors.toList());
     }
@@ -276,7 +281,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         Predicate<User> username = user -> user.getUsername().equalsIgnoreCase(userName);
         Predicate<User> email = user -> user.getEmail().equalsIgnoreCase(userName);
 
-        return searchUsers(userName)
+        return searchUsers(userName, true)
             .stream()
             .filter(username.or(email))
             .findFirst()
@@ -392,7 +397,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private User getUserFromUsername(String username) {
-        return searchUsers(username)
+        return searchUsers(username, true)
             .stream()
             .filter(u -> u.getUsername().equals(username))
             .findFirst()

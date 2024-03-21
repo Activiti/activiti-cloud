@@ -24,6 +24,7 @@ public class UserSearchParams {
     private Set<String> roles;
     private UserTypeSearchParam type;
     private String application;
+    private boolean filterDeactivatedUsers;
 
     public String getSearchKey() {
         return search;
@@ -63,5 +64,13 @@ public class UserSearchParams {
 
     public void setApplication(String application) {
         this.application = application;
+    }
+
+    public boolean isFilterDeactivatedUsers() {
+        return filterDeactivatedUsers;
+    }
+
+    public void setFilterDeactivatedUsers(boolean filterDeactivatedUsers) {
+        this.filterDeactivatedUsers = filterDeactivatedUsers;
     }
 }

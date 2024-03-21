@@ -64,16 +64,16 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_returnUsers_when_searchByUsername() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
     }
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
         this.mockMvc.perform(get("/v1/users?group=hr"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow")));
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow", "userdisabled")));
     }
 
     @Test
@@ -114,11 +114,13 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/users?application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(jsonPath("$", hasSize(5)))
             .andExpect(jsonPath("$[0].username", is("hruser")))
             .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
             .andExpect(jsonPath("$[2].username", is("testmanager")))
-            .andExpect(jsonPath("$[3].username", is("testuser")));
+            .andExpect(jsonPath("$[3].username", is("testuser")))
+            .andExpect(jsonPath("$[4].username", is("userdisabled")));
+
     }
 
     @Test
@@ -143,8 +145,9 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/users?group=hr&application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].username", is("hruser")))
+            .andExpect(jsonPath("$[1].username", is("userdisabled")));
     }
 
     @Test
@@ -328,7 +331,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
-            .andExpect(jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser")))
+            .andExpect(jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser", "userdisabled")))
             .andExpect(jsonPath("$[0].groups[?(@.name)].name", containsInAnyOrder("salesgroup")));
     }
 
@@ -397,5 +400,29 @@ public abstract class AbstractIdentityManagementControllerIT {
     @Test
     public void should_returnBadRequest_whenWrongUserTypeIsPassed() throws Exception {
         mockMvc.perform(get("/v1/users?search=search&type=WRONG")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void should_returnDeactivatedUsers_when_notSpecified() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
+    }
+
+    @Test
+    public void should_filterDeactivatedUsers_when_specifiedTrue() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
+    }
+
+    @Test
+    public void should_returnDeactivatedUsers_when_specifiedFalse() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=false"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
     }
 }
