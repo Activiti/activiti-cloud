@@ -47,7 +47,7 @@ public class IdentityManagementController {
         @RequestParam(value = "group", required = false) Set<String> groups,
         @RequestParam(value = "type", required = false) String type,
         @RequestParam(value = "application", required = false) String application,
-        @RequestParam(value = "hideDeactivatedUser", required = false) boolean filterDeactivatedUsers
+        @RequestParam(value = "hideDeactivatedUser", required = false) Boolean filterDeactivatedUsers
     ) {
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch(search);
@@ -55,7 +55,7 @@ public class IdentityManagementController {
         userSearchParams.setType(type == null ? null : UserTypeSearchParam.convertFromStringOrThrow(type));
         userSearchParams.setRoles(roles);
         userSearchParams.setApplication(application);
-        userSearchParams.setFilterDeactivatedUsers(filterDeactivatedUsers);
+        userSearchParams.setFilterDeactivatedUsers(filterDeactivatedUsers != null ? filterDeactivatedUsers : false);
 
         return identityManagementService.findUsers(userSearchParams);
     }

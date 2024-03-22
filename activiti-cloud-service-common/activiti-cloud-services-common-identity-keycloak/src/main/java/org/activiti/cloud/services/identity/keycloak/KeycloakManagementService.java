@@ -285,7 +285,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
         Predicate<User> username = user -> user.getUsername().equalsIgnoreCase(userName);
         Predicate<User> email = user -> user.getEmail().equalsIgnoreCase(userName);
 
-        return searchUsers(userName, true)
+        return searchUsers(userName, false)
             .stream()
             .filter(username.or(email))
             .findFirst()
@@ -401,7 +401,7 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private User getUserFromUsername(String username) {
-        return searchUsers(username, true)
+        return searchUsers(username, false)
             .stream()
             .filter(u -> u.getUsername().equals(username))
             .findFirst()
