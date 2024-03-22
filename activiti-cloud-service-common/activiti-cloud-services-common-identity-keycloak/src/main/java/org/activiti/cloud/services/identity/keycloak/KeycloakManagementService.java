@@ -67,10 +67,13 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
+        UserTypeSearchParam userTypeSearchParam = userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType();
+
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
             ? searchUsers(
                 userSearchParams.getSearchKey(),
-                userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType(), userSearchParams.isFilterDeactivatedUsers()
+                userTypeSearchParam,
+                userSearchParams.isFilterDeactivatedUsers()
             )
             : searchUsers(userSearchParams.getGroups(), userSearchParams.getSearchKey());
 
