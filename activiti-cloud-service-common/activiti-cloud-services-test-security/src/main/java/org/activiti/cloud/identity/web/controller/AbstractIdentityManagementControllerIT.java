@@ -73,7 +73,12 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?group=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow", "userdisabled")));
+            .andExpect(
+                jsonPath(
+                    "$[?(@.username)].username",
+                    containsInAnyOrder("hradmin", "hruser", "johnsnow", "userdisabled")
+                )
+            );
     }
 
     @Test
@@ -120,7 +125,6 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(jsonPath("$[2].username", is("testmanager")))
             .andExpect(jsonPath("$[3].username", is("testuser")))
             .andExpect(jsonPath("$[4].username", is("userdisabled")));
-
     }
 
     @Test
@@ -331,7 +335,9 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
-            .andExpect(jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser", "userdisabled")))
+            .andExpect(
+                jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser", "userdisabled"))
+            )
             .andExpect(jsonPath("$[0].groups[?(@.name)].name", containsInAnyOrder("salesgroup")));
     }
 

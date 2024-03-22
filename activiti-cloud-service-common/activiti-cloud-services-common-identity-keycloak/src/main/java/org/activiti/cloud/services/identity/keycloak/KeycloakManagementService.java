@@ -67,7 +67,9 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
 
     @Override
     public List<User> findUsers(UserSearchParams userSearchParams) {
-        UserTypeSearchParam userTypeSearchParam = userSearchParams.getType() == null ? DEFAULT_USERTYPE : userSearchParams.getType();
+        UserTypeSearchParam userTypeSearchParam = userSearchParams.getType() == null
+            ? DEFAULT_USERTYPE
+            : userSearchParams.getType();
 
         List<User> users = ObjectUtils.isEmpty(userSearchParams.getGroups())
             ? searchUsers(
@@ -94,10 +96,9 @@ public class KeycloakManagementService implements IdentityManagementService, Ide
     }
 
     private List<User> searchUsers(String searchKey, boolean filterDeactivatedUsers) {
-        Predicate<KeycloakUser> shouldFilterUser = user ->
-            !filterDeactivatedUsers || user.isEnabled();
+        Predicate<KeycloakUser> shouldFilterUser = user -> !filterDeactivatedUsers || user.isEnabled();
 
-       return keycloakClient
+        return keycloakClient
             .searchUsers(searchKey, PAGE_START, PAGE_SIZE)
             .stream()
             .filter(shouldFilterUser)
