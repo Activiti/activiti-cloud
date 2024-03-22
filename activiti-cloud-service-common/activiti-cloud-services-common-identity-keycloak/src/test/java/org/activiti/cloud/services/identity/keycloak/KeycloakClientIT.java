@@ -72,9 +72,10 @@ public class KeycloakClientIT {
     public void should_searchUsers() {
         List<KeycloakUser> users = keycloakClient.searchUsers("hr", 0, 50);
 
-        assertThat(users).hasSize(2);
+        assertThat(users).hasSize(3);
         assertThat(users).extracting("username").contains("hruser");
         assertThat(users).extracting("username").contains("hradmin");
+        assertThat(users).extracting("username").contains("userdisabled");
     }
 
     @Test
