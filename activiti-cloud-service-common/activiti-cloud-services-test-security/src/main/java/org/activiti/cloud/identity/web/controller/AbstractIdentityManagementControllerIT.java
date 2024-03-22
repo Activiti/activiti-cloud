@@ -395,12 +395,17 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc.perform(get("/v1/users?search=search&type=INTERACTIVE")).andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache("userSearch");
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null)))
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null, null))).isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null, null)))
             .isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null))).isNotNull();
+        assertThat(
+            cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null, null))
+        )
+            .isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null, null)))
+            .isNotNull();
+        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null, null)))
+            .isNotNull();
     }
 
     @Test
