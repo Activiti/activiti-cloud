@@ -39,6 +39,11 @@ import org.springframework.web.context.WebApplicationContext;
 @SuppressWarnings("java:S5960")
 public abstract class AbstractIdentityManagementControllerIT {
 
+    public static final String HRADMIN = "hradmin";
+    public static final String HRUSER = "hruser";
+    public static final String USERDISABLED = "userdisabled";
+    public static final String JOHNSNOW = "johnsnow";
+    public static final String JSON_PATH_USERNAME = "$[0].users[?(@.username)].username";
     private MockMvc mockMvc;
 
     @Autowired
@@ -65,7 +70,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
     }
 
     @Test
@@ -74,10 +79,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(
-                jsonPath(
-                    "$[?(@.username)].username",
-                    containsInAnyOrder("hradmin", "hruser", "johnsnow", "userdisabled")
-                )
+                jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, JOHNSNOW, USERDISABLED))
             );
     }
 
@@ -86,7 +88,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$[0].username", is(HRUSER)));
     }
 
     @Test
@@ -94,7 +96,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=snow"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -102,7 +104,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=john"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -111,7 +113,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=johnsnow&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -120,11 +122,11 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(5)))
-            .andExpect(jsonPath("$[0].username", is("hruser")))
+            .andExpect(jsonPath("$[0].username", is(HRUSER)))
             .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
             .andExpect(jsonPath("$[2].username", is("testmanager")))
             .andExpect(jsonPath("$[3].username", is("testuser")))
-            .andExpect(jsonPath("$[4].username", is("userdisabled")));
+            .andExpect(jsonPath("$[4].username", is(USERDISABLED)));
     }
 
     @Test
@@ -141,7 +143,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=hruser&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$[0].username", is(HRUSER)));
     }
 
     @Test
@@ -150,8 +152,8 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?group=hr&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[0].username", is("hruser")))
-            .andExpect(jsonPath("$[1].username", is("userdisabled")));
+            .andExpect(jsonPath("$[0].username", is(HRUSER)))
+            .andExpect(jsonPath("$[1].username", is(USERDISABLED)));
     }
 
     @Test
@@ -169,7 +171,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=hr&role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hradmin")));
+            .andExpect(jsonPath("$[0].username", is(HRADMIN)));
     }
 
     @Test
@@ -179,7 +181,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[0].username", is("admin")))
-            .andExpect(jsonPath("$[1].username", is("hradmin")))
+            .andExpect(jsonPath("$[1].username", is(HRADMIN)))
             .andExpect(jsonPath("$[2].username", is("testactivitiadmin")))
             .andExpect(jsonPath("$[3].username", is("testadmin")));
     }
@@ -335,9 +337,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
-            .andExpect(
-                jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser", "userdisabled"))
-            )
+            .andExpect(jsonPath(JSON_PATH_USERNAME, containsInAnyOrder(HRUSER, "testuser", USERDISABLED)))
             .andExpect(jsonPath("$[0].groups[?(@.name)].name", containsInAnyOrder("salesgroup")));
     }
 
@@ -409,26 +409,26 @@ public abstract class AbstractIdentityManagementControllerIT {
     }
 
     @Test
-    public void should_returnDeactivatedUsers_when_notSpecified() throws Exception {
+    public void should_returnDeactivatedUsers_whenNotSpecified() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
     }
 
     @Test
-    public void should_filterDeactivatedUsers_when_specifiedTrue() throws Exception {
+    public void should_filterDeactivatedUsers_whenSpecifiedTrue() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=true"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER)));
     }
 
     @Test
-    public void should_returnDeactivatedUsers_when_specifiedFalse() throws Exception {
+    public void should_returnDeactivatedUsers_whenSpecifiedFalse() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=false"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "userdisabled")));
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
     }
 }
