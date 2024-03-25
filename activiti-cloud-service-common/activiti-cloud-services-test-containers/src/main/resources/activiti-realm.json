@@ -220,6 +220,34 @@
       ]
     },
     {
+      "username": "userDisabled",
+      "enabled": false,
+      "firstName": "user",
+      "lastName": "Disabled",
+      "email": "hr.dis@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ],
+      "realmRoles": [
+        "ACTIVITI_USER",
+        "uma_authorization",
+        "offline_access"
+      ],
+      "clientRoles": {
+        "activiti": [
+          "uma_authorization",
+          "ACTIVITI_USER",
+          "offline_access"
+        ]
+      },
+      "groups": [
+        "/hr"
+      ]
+    },
+    {
       "username": "hruser",
       "enabled": true,
       "firstName": "HR",

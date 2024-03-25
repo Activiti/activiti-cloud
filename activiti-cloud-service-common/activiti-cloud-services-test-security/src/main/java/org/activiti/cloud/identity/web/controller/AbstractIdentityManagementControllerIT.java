@@ -39,6 +39,11 @@ import org.springframework.web.context.WebApplicationContext;
 @SuppressWarnings("java:S5960")
 public abstract class AbstractIdentityManagementControllerIT {
 
+    public static final String HRADMIN = "hradmin";
+    public static final String HRUSER = "hruser";
+    public static final String USERDISABLED = "userdisabled";
+    public static final String JOHNSNOW = "johnsnow";
+    public static final String JSON_PATH_USERNAME = "$[0].users[?(@.username)].username";
     private MockMvc mockMvc;
 
     @Autowired
@@ -64,16 +69,18 @@ public abstract class AbstractIdentityManagementControllerIT {
     public void should_returnUsers_when_searchByUsername() throws Exception {
         this.mockMvc.perform(get("/v1/users?search=hr"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(2)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser")));
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
     }
 
     @Test
     public void should_returnUsers_when_searchByGroup() throws Exception {
         this.mockMvc.perform(get("/v1/users?group=hr"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(3)))
-            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder("hradmin", "hruser", "johnsnow")));
+            .andExpect(jsonPath("$", hasSize(4)))
+            .andExpect(
+                jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, JOHNSNOW, USERDISABLED))
+            );
     }
 
     @Test
@@ -81,7 +88,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=hr@example.com"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$[0].username", is(HRUSER)));
     }
 
     @Test
@@ -89,7 +96,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=snow"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -97,7 +104,7 @@ public abstract class AbstractIdentityManagementControllerIT {
         this.mockMvc.perform(get("/v1/users?search=john"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -106,7 +113,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=johnsnow&role=ACTIVITI_USER"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("johnsnow")));
+            .andExpect(jsonPath("$[0].username", is(JOHNSNOW)));
     }
 
     @Test
@@ -114,11 +121,12 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/users?application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(4)))
-            .andExpect(jsonPath("$[0].username", is("hruser")))
+            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$[0].username", is(HRUSER)))
             .andExpect(jsonPath("$[1].username", is("testactivitiadmin")))
             .andExpect(jsonPath("$[2].username", is("testmanager")))
-            .andExpect(jsonPath("$[3].username", is("testuser")));
+            .andExpect(jsonPath("$[3].username", is("testuser")))
+            .andExpect(jsonPath("$[4].username", is(USERDISABLED)));
     }
 
     @Test
@@ -135,7 +143,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=hruser&application=activiti"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$[0].username", is(HRUSER)));
     }
 
     @Test
@@ -143,8 +151,9 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc
             .perform(get("/v1/users?group=hr&application=activiti"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hruser")));
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].username", is(HRUSER)))
+            .andExpect(jsonPath("$[1].username", is(USERDISABLED)));
     }
 
     @Test
@@ -162,7 +171,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .perform(get("/v1/users?search=hr&role=ACTIVITI_ADMIN"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$[0].username", is("hradmin")));
+            .andExpect(jsonPath("$[0].username", is(HRADMIN)));
     }
 
     @Test
@@ -172,7 +181,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(4)))
             .andExpect(jsonPath("$[0].username", is("admin")))
-            .andExpect(jsonPath("$[1].username", is("hradmin")))
+            .andExpect(jsonPath("$[1].username", is(HRADMIN)))
             .andExpect(jsonPath("$[2].username", is("testactivitiadmin")))
             .andExpect(jsonPath("$[3].username", is("testadmin")));
     }
@@ -328,7 +337,7 @@ public abstract class AbstractIdentityManagementControllerIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].role", is("ACTIVITI_USER")))
-            .andExpect(jsonPath("$[0].users[?(@.username)].username", containsInAnyOrder("hruser", "testuser")))
+            .andExpect(jsonPath(JSON_PATH_USERNAME, containsInAnyOrder(HRUSER, "testuser", USERDISABLED)))
             .andExpect(jsonPath("$[0].groups[?(@.name)].name", containsInAnyOrder("salesgroup")));
     }
 
@@ -386,16 +395,47 @@ public abstract class AbstractIdentityManagementControllerIT {
         mockMvc.perform(get("/v1/users?search=search&type=INTERACTIVE")).andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache("userSearch");
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null)))
-            .isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null))).isNotNull();
-        assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null))).isNotNull();
+        if (cache != null) {
+            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, null, null, null))).isNotNull();
+            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), null, null, null, null)))
+                .isNotNull();
+            assertThat(
+                cache.get(SimpleKeyGenerator.generateKey("search", Set.of("role"), Set.of("group"), null, null, null))
+            )
+                .isNotNull();
+            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, Set.of("group"), null, null, null)))
+                .isNotNull();
+            assertThat(cache.get(SimpleKeyGenerator.generateKey("search", null, null, "INTERACTIVE", null, null)))
+                .isNotNull();
+        }
     }
 
     @Test
     public void should_returnBadRequest_whenWrongUserTypeIsPassed() throws Exception {
         mockMvc.perform(get("/v1/users?search=search&type=WRONG")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void should_returnDeactivatedUsers_whenNotSpecified() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
+    }
+
+    @Test
+    public void should_filterDeactivatedUsers_whenSpecifiedTrue() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER)));
+    }
+
+    @Test
+    public void should_returnDeactivatedUsers_whenSpecifiedFalse() throws Exception {
+        this.mockMvc.perform(get("/v1/users?search=hr&hideDeactivatedUser=false"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)))
+            .andExpect(jsonPath("$[?(@.username)].username", containsInAnyOrder(HRADMIN, HRUSER, USERDISABLED)));
     }
 }

@@ -16,6 +16,7 @@
 package org.activiti.cloud.identity.web.controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.IdentityManagementService;
@@ -46,7 +47,8 @@ public class IdentityManagementController {
         @RequestParam(value = "role", required = false) Set<String> roles,
         @RequestParam(value = "group", required = false) Set<String> groups,
         @RequestParam(value = "type", required = false) String type,
-        @RequestParam(value = "application", required = false) String application
+        @RequestParam(value = "application", required = false) String application,
+        @RequestParam(value = "hideDeactivatedUser", required = false) Boolean filterDeactivatedUsers
     ) {
         UserSearchParams userSearchParams = new UserSearchParams();
         userSearchParams.setSearch(search);
@@ -54,6 +56,7 @@ public class IdentityManagementController {
         userSearchParams.setType(type == null ? null : UserTypeSearchParam.convertFromStringOrThrow(type));
         userSearchParams.setRoles(roles);
         userSearchParams.setApplication(application);
+        userSearchParams.setFilterDeactivatedUsers(Optional.ofNullable(filterDeactivatedUsers).orElse(false));
 
         return identityManagementService.findUsers(userSearchParams);
     }

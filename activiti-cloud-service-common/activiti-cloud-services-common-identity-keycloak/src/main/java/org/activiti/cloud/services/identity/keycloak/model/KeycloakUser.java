@@ -23,6 +23,8 @@ public class KeycloakUser {
     private String firstName;
     private String lastName;
 
+    private boolean enabled;
+
     public String getId() {
         return id;
     }
@@ -61,5 +63,13 @@ public class KeycloakUser {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
