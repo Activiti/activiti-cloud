@@ -221,6 +221,8 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <hibernate.version>6.3.1.Final</hibernate.version>
+
 
     <!-- Tests Config -->
     <unitTests.parallel>false</unitTests.parallel>
@@ -446,6 +448,11 @@ limitations under the License.]]>
               </configuration>
             </execution>
           </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.hibernate.orm.tooling</groupId>
+          <artifactId>hibernate-enhance-maven-plugin</artifactId>
+          <version>${hibernate.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
