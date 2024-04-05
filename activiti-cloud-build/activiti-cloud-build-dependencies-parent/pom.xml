@@ -18,7 +18,6 @@
     <graphql-java.version>21.3</graphql-java.version>
     <postgresql.version>42.7.2</postgresql.version>
     <liquibase.version>4.24.0</liquibase.version>
-    <hibernate.version>6.3.1.Final</hibernate.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -88,15 +87,4 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.hibernate.orm.tooling</groupId>
-          <artifactId>hibernate-enhance-maven-plugin</artifactId>
-          <version>${hibernate.version}</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
