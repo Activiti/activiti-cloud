@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-examples</artifactId>
-    <version>8.4.0-alpha.15</version>
+    <version>8.4.0</version>
   </parent>
   <artifactId>activiti-cloud-query</artifactId>
   <name>Activiti Cloud :: Query</name>
