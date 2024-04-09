@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
-    <version>8.4.0-alpha.15</version>
+    <version>8.4.0-mock</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-common-identity-keycloak</artifactId>
