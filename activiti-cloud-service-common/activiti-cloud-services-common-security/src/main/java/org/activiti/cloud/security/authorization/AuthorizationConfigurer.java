@@ -40,7 +40,9 @@ import org.springframework.stereotype.Component;
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
  * <p>
- * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/* authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
+ * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER
+ * authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/*
+ * authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
  * authorizations.security-constraints[1].securityCollections[0].patterns[0]=/admin/*
  * <p>
  * This configuration schema is similar to the security constraint configurations used by other systems like Keycloak.
@@ -51,6 +53,7 @@ public class AuthorizationConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationConfigurer.class);
 
     private final AuthorizationProperties authorizationProperties;
+
     private final Environment environment;
 
     @Autowired
@@ -61,7 +64,7 @@ public class AuthorizationConfigurer {
 
     @PostConstruct
     public void checkKeycloakConfig() {
-        //if there is a Keycloak security constraint defined it could be configuration issue
+        // if there is a Keycloak security constraint defined it could be configuration issue
         String securityConstraintProperty = environment.getProperty(
             "keycloak.security-constraints[0].securityCollections[0].patterns[0]"
         );
@@ -78,15 +81,20 @@ public class AuthorizationConfigurer {
         );
         List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
-            String[] roles = securityConstraint.getAuthRoles();
-            if (roles.length == 0) {
+            String[] rolesAndPermissions = Stream
+                .concat(
+                    Arrays.stream(securityConstraint.getAuthRoles()),
+                    Arrays.stream(securityConstraint.getAuthPermissions())
+                )
+                .toArray(String[]::new);
+            if (rolesAndPermissions.length == 0) {
                 List<String> patterns = Arrays
                     .stream(securityConstraint.getSecurityCollections())
                     .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
                     .toList();
                 publicUrls.addAll(patterns);
             }
-            configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
+            configureAuthorization(http, rolesAndPermissions, securityConstraint);
         }
         if (!publicUrls.isEmpty()) {
             LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
@@ -95,18 +103,26 @@ public class AuthorizationConfigurer {
         http.anonymous(withDefaults());
     }
 
-    private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
-        throws Exception {
-        boolean rolesNotEmpty = isNotEmpty(roles);
+    private void configureAuthorization(
+        HttpSecurity http,
+        String[] rolesAndPermissions,
+        SecurityConstraint securityConstraint
+    ) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
-        if (rolesNotEmpty) {
-            authorizedUrlConsumer = a -> a.hasAnyRole(roles);
+
+        if (isNotEmpty(rolesAndPermissions)) {
+            authorizedUrlConsumer = a -> a.hasAnyAuthority(rolesAndPermissions);
         } else {
-            authorizedUrlConsumer = a -> a.permitAll();
+            authorizedUrlConsumer = AuthorizeHttpRequestsConfigurer.AuthorizedUrl::permitAll;
         }
+        SecurityCollection[] securityCollection = securityConstraint.getSecurityCollections();
         buildAntMatchers(http, securityCollection, authorizedUrlConsumer);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Setting access {} to {}", securityCollection, rolesNotEmpty ? roles : "anonymous");
+            LOGGER.debug(
+                "Setting access {} to {}",
+                securityCollection,
+                isNotEmpty(rolesAndPermissions) ? securityConstraint.getAuthRoles() : "anonymous"
+            );
         }
     }
 
@@ -130,8 +146,8 @@ public class AuthorizationConfigurer {
 
     /**
      * If a security constraint hasn't any roles it means that it can accessible from anyone. It must be the first one
-     * in order to avoid being overridden by other rules. The order is reversed because in order
-     * to mimic the security-constraint behaviour.
+     * in order to avoid being overridden by other rules. The order is reversed because in order to mimic the
+     * security-constraint behaviour.
      *
      * @param securityConstraints
      * @return

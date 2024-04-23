@@ -34,8 +34,11 @@ public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<G
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
         Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        for (String authority : jwtAccessTokenProvider.accessToken(jwt).getRoles()) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(this.authorityPrefix + authority));
+        for (String role : jwtAccessTokenProvider.accessToken(jwt).getRoles()) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(this.authorityPrefix + role));
+        }
+        for (String permission : jwtAccessTokenProvider.accessToken(jwt).getPermissions()) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(this.authorityPrefix + permission));
         }
         return grantedAuthorities;
     }

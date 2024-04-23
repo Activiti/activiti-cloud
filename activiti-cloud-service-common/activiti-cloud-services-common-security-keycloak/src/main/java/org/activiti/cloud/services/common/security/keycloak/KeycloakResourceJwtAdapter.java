@@ -51,6 +51,14 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
     }
 
     @Override
+    public List<String> getPermissions() {
+        if (jwt.hasClaim("permissions")) {
+            return jwt.getClaimAsStringList("permissions");
+        }
+        return null;
+    }
+
+    @Override
     public String getUserName() {
         return jwt.getClaim("preferred_username");
     }

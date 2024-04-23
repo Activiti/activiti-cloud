@@ -26,4 +26,6 @@ public interface JwtAdapter {
     List<String> getRoles();
 
     List<String> getGroups();
+
+    List<String> getPermissions();
 }
