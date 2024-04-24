@@ -56,14 +56,6 @@ public class KeycloakJwtAdapter implements JwtAdapter {
         }
     }
 
-    @Override
-    public List<String> getPermissions() {
-        if (jwt.hasClaim("permissions")) {
-            return jwt.getClaimAsStringList("permissions");
-        }
-        return null;
-    }
-
     private List<String> getRoles(Map<String, Object> getRolesParent) {
         return (List<String>) getRolesParent.get("roles");
     }

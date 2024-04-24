@@ -109,18 +109,16 @@ public class AuthorizationConfigurer {
         SecurityConstraint securityConstraint
     ) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
-
         if (isNotEmpty(rolesAndPermissions)) {
-            authorizedUrlConsumer = a -> a.hasAnyAuthority(rolesAndPermissions);
+            authorizedUrlConsumer = a -> a.hasAnyRole(rolesAndPermissions);
         } else {
             authorizedUrlConsumer = AuthorizeHttpRequestsConfigurer.AuthorizedUrl::permitAll;
         }
-        SecurityCollection[] securityCollection = securityConstraint.getSecurityCollections();
-        buildAntMatchers(http, securityCollection, authorizedUrlConsumer);
+        buildAntMatchers(http, securityConstraint.getSecurityCollections(), authorizedUrlConsumer);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
                 "Setting access {} to {}",
-                securityCollection,
+                securityConstraint.getSecurityCollections(),
                 isNotEmpty(rolesAndPermissions) ? securityConstraint.getAuthRoles() : "anonymous"
             );
         }
@@ -145,9 +143,8 @@ public class AuthorizationConfigurer {
     }
 
     /**
-     * If a security constraint hasn't any roles it means that it can accessible from anyone. It must be the first one
-     * in order to avoid being overridden by other rules. The order is reversed because in order to mimic the
-     * security-constraint behaviour.
+     * If a security constraint hasn't any roles it means that it can be accessed from anyone. It must be the first one
+     * in order to avoid being overridden by other rules. The order is reversed to mimic the security-constraint behaviour.
      *
      * @param securityConstraints
      * @return
@@ -157,7 +154,7 @@ public class AuthorizationConfigurer {
         Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
         reversed.forEach(securityConstraint -> {
-            if (isNotEmpty(securityConstraint.getAuthRoles())) {
+            if (isNotEmpty(securityConstraint.getAuthRoles()) || isNotEmpty(securityConstraint.getAuthPermissions())) {
                 result.add(securityConstraint);
             } else {
                 result.add(0, securityConstraint);

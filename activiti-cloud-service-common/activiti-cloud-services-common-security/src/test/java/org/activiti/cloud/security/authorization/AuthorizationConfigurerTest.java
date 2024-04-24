@@ -27,6 +27,7 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.PATCH;
 import static org.springframework.http.HttpMethod.TRACE;
 
+import java.util.List;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.junit.jupiter.api.Test;
@@ -62,16 +63,18 @@ class AuthorizationConfigurerTest {
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        authorizationProperties.setSecurityConstraints(
-            asList(
-                createSecurityConstraint(new String[] { "ROLE_1", "ROLE_2" }, new String[] { "/a", "/b" }),
-                createSecurityConstraint(new String[] { "ROLE_3" }, new String[] { "/c" })
-            )
+        List<SecurityConstraint> securityConstraints = asList(
+            createSecurityConstraintWithRolesAndPatterns(
+                new String[] { "ROLE_1", "ROLE_2" },
+                new String[] { "/a", "/b" }
+            ),
+            createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" })
         );
+        authorizationProperties.setSecurityConstraints(securityConstraints);
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
-        when(authorizeRequests.requestMatchers(requestMatchers.capture())).thenReturn(authorizedUrl);
+        when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String.class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
@@ -80,11 +83,47 @@ class AuthorizationConfigurerTest {
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
+        for (HttpMethod method : HttpMethod.values()) {
+            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
+            inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+
+            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/a"));
+            inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
+
+            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/b"));
+            inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
+        }
+    }
+
+    @Test
+    public void should_configureAuth_usingPermissions_when_everythingIsAuthenticated() throws Exception {
+        AuthorizationProperties authorizationProperties = new AuthorizationProperties();
+        List<SecurityConstraint> securityConstraints = asList(
+            createSecurityConstraintWithPermissionsAndPatterns(
+                new String[] { "PERMISSION_1", "PERMISSION_2" },
+                new String[] { "/a", "/b" }
+            ),
+            createSecurityConstraintWithPermissionsAndPatterns(new String[] { "PERMISSION_3" }, new String[] { "/c" })
+        );
+        authorizationProperties.setSecurityConstraints(securityConstraints);
+        AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
+
+        when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
+        when(authorizeRequests.requestMatchers(requestMatchers.capture())).thenReturn(authorizedUrl);
+
+        authorizationConfigurer.configure(http);
+
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues())
+            .hasSize(HttpMethod.values().length * securityConstraints.size());
+        authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
+
+        InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
+
         inOrder.verify(authorizeRequests).requestMatchers(eq("/c"));
-        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("PERMISSION_3"));
 
         inOrder.verify(authorizeRequests).requestMatchers(eq("/a"), eq("/b"));
-        inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
+        inOrder.verify(authorizedUrl).hasAnyRole(eq("PERMISSION_1"), eq("PERMISSION_2"));
     }
 
     @Test
@@ -92,8 +131,8 @@ class AuthorizationConfigurerTest {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
         authorizationProperties.setSecurityConstraints(
             asList(
-                createSecurityConstraint(new String[] { "ROLE_3" }, new String[] { "/c" }),
-                createSecurityConstraint(new String[] {}, new String[] { "/d" })
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/d" })
             )
         );
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
@@ -123,6 +162,7 @@ class AuthorizationConfigurerTest {
             asList(
                 createSecurityConstraint(
                     new String[] { "ROLE_1" },
+                    new String[] {},
                     new String[] { "/c" },
                     new String[] { "POST", "DELETE", "PUT" }
                 )
@@ -152,13 +192,26 @@ class AuthorizationConfigurerTest {
         inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
     }
 
-    private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns) {
-        return createSecurityConstraint(roles, patterns, new String[] {});
+    private SecurityConstraint createSecurityConstraintWithRolesAndPatterns(String[] roles, String[] patterns) {
+        return createSecurityConstraint(roles, new String[] {}, patterns, new String[] {});
     }
 
-    private SecurityConstraint createSecurityConstraint(String[] roles, String[] patterns, String[] omittedMethods) {
+    private SecurityConstraint createSecurityConstraintWithPermissionsAndPatterns(
+        String[] permissions,
+        String[] patterns
+    ) {
+        return createSecurityConstraint(new String[] {}, permissions, patterns, new String[] {});
+    }
+
+    private SecurityConstraint createSecurityConstraint(
+        String[] roles,
+        String[] permissions,
+        String[] patterns,
+        String[] omittedMethods
+    ) {
         SecurityConstraint securityConstraint = new SecurityConstraint();
         securityConstraint.setAuthRoles(roles);
+        securityConstraint.setAuthPermissions(permissions);
         SecurityCollection securityCollection = new SecurityCollection();
         securityCollection.setPatterns(patterns);
         securityCollection.setOmittedMethods(omittedMethods);
