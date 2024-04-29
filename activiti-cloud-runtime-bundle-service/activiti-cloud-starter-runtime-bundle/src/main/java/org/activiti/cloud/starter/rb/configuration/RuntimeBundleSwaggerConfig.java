@@ -42,6 +42,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
@@ -68,7 +69,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                 .stream()
                 .flatMap(val -> val.readOperations().stream())
                 .flatMap(operation -> operation.getResponses().entrySet().stream())
-                .filter(entry -> entry.getKey().matches("200"))
+                .filter(entry -> entry.getKey().matches(String.valueOf(HttpStatus.OK.value())))
                 .forEach(entry -> {
                     Content contents = entry.getValue().getContent();
                     String applicationHal = MediaTypes.HAL_JSON_VALUE;
