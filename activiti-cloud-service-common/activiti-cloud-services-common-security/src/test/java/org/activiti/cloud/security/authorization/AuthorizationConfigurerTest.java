@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
+import org.activiti.cloud.services.common.security.CustomAuthorizationManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +38,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class AuthorizationConfigurerTest {
 
@@ -55,6 +58,9 @@ class AuthorizationConfigurerTest {
 
     @Captor
     private ArgumentCaptor<String[]> requestMatchers;
+
+    @Captor
+    private ArgumentCaptor<CustomAuthorizationManager<RequestAuthorizationContext>> argumentCaptor;
 
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
@@ -82,12 +88,24 @@ class AuthorizationConfigurerTest {
 
         for (HttpMethod method : HttpMethod.values()) {
             inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
-            inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_3"));
+            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue())
+                .isInstanceOfSatisfying(
+                    CustomAuthorizationManager.class,
+                    manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+                );
         }
 
         for (HttpMethod method : HttpMethod.values()) {
             inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/a", "/b" }));
-            inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"), eq("ROLE_2"));
+            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue())
+                .isInstanceOfSatisfying(
+                    CustomAuthorizationManager.class,
+                    manager ->
+                        assertThat(manager.getAuthoritiesWithAccess())
+                            .containsExactlyInAnyOrder("ROLE_ROLE_1", "ROLE_ROLE_2")
+                );
         }
     }
 
@@ -118,12 +136,26 @@ class AuthorizationConfigurerTest {
 
         for (HttpMethod method : HttpMethod.values()) {
             inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/c" }));
-            inOrder.verify(authorizedUrl).hasAnyRole(eq(new String[] { "PERMISSION_3" }));
+            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue())
+                .isInstanceOfSatisfying(
+                    CustomAuthorizationManager.class,
+                    manager ->
+                        assertThat(manager.getAuthoritiesWithAccess())
+                            .containsExactlyInAnyOrder("PERMISSION_PERMISSION_3")
+                );
         }
 
         for (HttpMethod method : HttpMethod.values()) {
             inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/a", "/b" }));
-            inOrder.verify(authorizedUrl).hasAnyRole(eq(new String[] { "PERMISSION_1", "PERMISSION_2" }));
+            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue())
+                .isInstanceOfSatisfying(
+                    CustomAuthorizationManager.class,
+                    manager ->
+                        assertThat(manager.getAuthoritiesWithAccess())
+                            .containsExactlyInAnyOrder("PERMISSION_PERMISSION_1", "PERMISSION_PERMISSION_2")
+                );
         }
     }
 
@@ -156,7 +188,12 @@ class AuthorizationConfigurerTest {
 
         for (HttpMethod method : HttpMethod.values()) {
             inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/c" }));
-            inOrder.verify(authorizedUrl).hasAnyRole(eq(new String[] { "ROLE_3" }));
+            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+            assertThat(argumentCaptor.getValue())
+                .isInstanceOfSatisfying(
+                    CustomAuthorizationManager.class,
+                    manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+                );
         }
     }
 
@@ -188,7 +225,13 @@ class AuthorizationConfigurerTest {
         for (HttpMethod method : HttpMethod.values()) {
             if (!asList("POST", "DELETE", "PUT").contains(method.name())) {
                 inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
-                inOrder.verify(authorizedUrl).hasAnyRole(eq("ROLE_1"));
+                inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+                assertThat(argumentCaptor.getValue())
+                    .isInstanceOfSatisfying(
+                        CustomAuthorizationManager.class,
+                        manager ->
+                            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+                    );
             } else {
                 inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
                 inOrder.verify(authorizedUrl).denyAll();

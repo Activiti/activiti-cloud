@@ -23,9 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
+import org.activiti.cloud.services.common.security.CustomAuthorizationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -79,20 +82,14 @@ public class AuthorizationConfigurer {
         );
         List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
-            String[] rolesAndPermissions = Stream
-                .concat(
-                    Arrays.stream(securityConstraint.getAuthRoles()),
-                    Arrays.stream(securityConstraint.getAuthPermissions())
-                )
-                .toArray(String[]::new);
-            if (rolesAndPermissions.length == 0) {
+            if (!hasRoleOrPermissionConstraint(securityConstraint)) {
                 List<String> patterns = Arrays
                     .stream(securityConstraint.getSecurityCollections())
                     .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
                     .toList();
                 publicUrls.addAll(patterns);
             }
-            configureAuthorization(http, rolesAndPermissions, securityConstraint);
+            configureAuthorization(http, securityConstraint);
         }
         if (!publicUrls.isEmpty()) {
             LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
@@ -101,14 +98,17 @@ public class AuthorizationConfigurer {
         http.anonymous(withDefaults());
     }
 
-    private void configureAuthorization(
-        HttpSecurity http,
-        String[] rolesAndPermissions,
-        SecurityConstraint securityConstraint
-    ) throws Exception {
+    private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
-        if (isNotEmpty(rolesAndPermissions)) {
-            authorizedUrlConsumer = a -> a.hasAnyRole(rolesAndPermissions);
+        if (hasRoleOrPermissionConstraint(securityConstraint)) {
+            authorizedUrlConsumer =
+                a ->
+                    a.access(
+                        new CustomAuthorizationManager<RequestAuthorizationContext>(
+                            securityConstraint.getAuthRoles(),
+                            securityConstraint.getAuthPermissions()
+                        )
+                    );
         } else {
             authorizedUrlConsumer = AuthorizeHttpRequestsConfigurer.AuthorizedUrl::permitAll;
         }
@@ -117,7 +117,14 @@ public class AuthorizationConfigurer {
             LOGGER.debug(
                 "Setting access {} to {}",
                 securityConstraint.getSecurityCollections(),
-                isNotEmpty(rolesAndPermissions) ? securityConstraint.getAuthRoles() : "anonymous"
+                hasRoleOrPermissionConstraint(securityConstraint)
+                    ? Stream
+                        .concat(
+                            Arrays.stream(securityConstraint.getAuthRoles()),
+                            Arrays.stream(securityConstraint.getAuthPermissions())
+                        )
+                        .collect(Collectors.joining(", "))
+                    : "anonymous"
             );
         }
     }
@@ -156,7 +163,7 @@ public class AuthorizationConfigurer {
         Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
         reversed.forEach(securityConstraint -> {
-            if (isNotEmpty(securityConstraint.getAuthRoles()) || isNotEmpty(securityConstraint.getAuthPermissions())) {
+            if (hasRoleOrPermissionConstraint(securityConstraint)) {
                 result.add(securityConstraint);
             } else {
                 result.add(0, securityConstraint);
@@ -174,5 +181,9 @@ public class AuthorizationConfigurer {
 
     private boolean isNotEmpty(String[] array) {
         return array != null && array.length > 0;
+    }
+
+    private boolean hasRoleOrPermissionConstraint(SecurityConstraint securityConstraint) {
+        return isNotEmpty(securityConstraint.getAuthRoles()) || isNotEmpty(securityConstraint.getAuthPermissions());
     }
 }

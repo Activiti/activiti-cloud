@@ -17,6 +17,7 @@ package org.activiti.cloud.services.common.security.jwt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.activiti.cloud.services.common.security.CustomAuthorizationManager;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +25,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
-    private final String authorityPrefix = "ROLE_";
     private final JwtAccessTokenProvider jwtAccessTokenProvider;
 
     public JwtGrantedAuthorityConverter(JwtAccessTokenProvider jwtAccessTokenProvider) {
@@ -35,10 +35,12 @@ public class JwtGrantedAuthorityConverter implements Converter<Jwt, Collection<G
     public Collection<GrantedAuthority> convert(Jwt jwt) {
         Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         for (String role : jwtAccessTokenProvider.accessToken(jwt).getRoles()) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(this.authorityPrefix + role));
+            grantedAuthorities.add(new SimpleGrantedAuthority(CustomAuthorizationManager.ROLE_PREFIX + role));
         }
         for (String permission : jwtAccessTokenProvider.accessToken(jwt).getPermissions()) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(this.authorityPrefix + permission));
+            grantedAuthorities.add(
+                new SimpleGrantedAuthority(CustomAuthorizationManager.PERMISSION_PREFIX + permission)
+            );
         }
         return grantedAuthorities;
     }
