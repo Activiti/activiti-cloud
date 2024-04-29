@@ -15,7 +15,6 @@
  */
 package org.activiti.cloud.services.common.security.jwt;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.security.oauth2.jwt.Jwt;
