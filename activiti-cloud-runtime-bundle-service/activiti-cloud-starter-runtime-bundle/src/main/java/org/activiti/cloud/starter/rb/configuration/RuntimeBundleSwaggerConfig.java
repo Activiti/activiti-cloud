@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.starter.rb.configuration;
 
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import org.activiti.api.process.model.payloads.CreateProcessInstancePayload;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
@@ -32,12 +34,15 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
@@ -52,7 +57,32 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
             .addOpenApiCustomizer(openApi ->
                 openApi.addExtension(BaseOpenApiBuilder.SERVICE_URL_PREFIX, swaggerBasePath)
             )
+            .addOpenApiCustomizer(openApiCustomizer())
             .build();
+    }
+
+    public OpenApiCustomizer openApiCustomizer() {
+        return openAPI ->
+            openAPI
+                .getPaths()
+                .values()
+                .stream()
+                .flatMap(val -> val.readOperations().stream())
+                .flatMap(operation -> operation.getResponses().entrySet().stream())
+                .filter(entry -> entry.getKey().matches(String.valueOf(HttpStatus.OK.value())))
+                .forEach(entry -> {
+                    Content contents = entry.getValue().getContent();
+                    String applicationHal = MediaTypes.HAL_JSON_VALUE;
+                    String applicationJson = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+                    if (
+                        contents != null &&
+                        contents.containsKey(applicationHal) &&
+                        contents.containsKey(applicationJson)
+                    ) {
+                        MediaType applicationHalValue = contents.remove(applicationHal);
+                        contents.put(applicationHal, applicationHalValue);
+                    }
+                });
     }
 
     @Override
