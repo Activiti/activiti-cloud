@@ -1,7 +1,10 @@
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
+
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
+import java.util.*;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -21,10 +24,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static org.assertj.core.api.Java6Assertions.assertThat;
-
 @SpringBootTest(properties = "spring.main.banner-mode=off")
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
@@ -38,8 +37,10 @@ public class TaskControllerHelperIT {
 
     @Autowired
     TaskVariableRepository taskVariableRepository;
+
     @Autowired
     private ProcessInstanceRepository processInstanceRepository;
+
     @Autowired
     private org.activiti.cloud.services.query.app.repository.VariableRepository variableRepository;
 
@@ -62,7 +63,7 @@ public class TaskControllerHelperIT {
         processVariableEntity.setName("name");
         processVariableEntity.setValue("id");
         processVariableEntity.setProcessInstanceId("15");
-        processVariableEntity.setProcessInstance(processInstanceEntity);
+        processVariableEntity.setProcessInstance(processInstanceRepository.findById("15").orElseThrow());
         variableRepository.save(processVariableEntity);
 
         TaskEntity taskEntity = new TaskEntity();
@@ -71,7 +72,6 @@ public class TaskControllerHelperIT {
         taskEntity.setProcessInstance(processInstanceEntity);
         taskEntity.setProcessInstanceId("15");
         taskRepository.save(taskEntity);
-
 
         Set<ProcessVariableEntity> variables = processInstanceRepository.findById("15").get().getVariables();
         //Long id = variables.iterator().next().getId();
