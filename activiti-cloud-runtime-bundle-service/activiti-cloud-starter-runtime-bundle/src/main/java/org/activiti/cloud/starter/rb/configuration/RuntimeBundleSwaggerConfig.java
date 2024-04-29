@@ -60,34 +60,27 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     }
 
     public OpenApiCustomizer openApiCustomizer() {
-        return openAPI -> {
+        return openAPI ->
             openAPI
                 .getPaths()
                 .values()
-                .forEach(val -> {
-                    val
-                        .readOperations()
-                        .forEach(operation -> {
-                            operation
-                                .getResponses()
-                                .forEach((key, value) -> {
-                                    if (key.matches("200")) {
-                                        Content contents = value.getContent();
-                                        String applicationHal = "application/hal+json";
-                                        String applicationJson = "application/json";
-                                        if (
-                                            contents != null &&
-                                            contents.containsKey(applicationHal) &&
-                                            contents.containsKey(applicationJson)
-                                        ) {
-                                            MediaType applicationHalValue = contents.remove(applicationHal);
-                                            contents.put(applicationHal, applicationHalValue);
-                                        }
-                                    }
-                                });
-                        });
+                .stream()
+                .flatMap(val -> val.readOperations().stream())
+                .flatMap(operation -> operation.getResponses().entrySet().stream())
+                .filter(entry -> entry.getKey().matches("200"))
+                .forEach(entry -> {
+                    Content contents = entry.getValue().getContent();
+                    String applicationHal = "application/hal+json";
+                    String applicationJson = "application/json";
+                    if (
+                        contents != null &&
+                        contents.containsKey(applicationHal) &&
+                        contents.containsKey(applicationJson)
+                    ) {
+                        MediaType applicationHalValue = contents.remove(applicationHal);
+                        contents.put(applicationHal, applicationHalValue);
+                    }
                 });
-        };
     }
 
     @Override
