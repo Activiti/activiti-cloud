@@ -14,6 +14,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -22,9 +23,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(properties = "spring.main.banner-mode=off")
+@SpringBootTest(
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
+        "logging.level.org.hibernate.collection.spi=warn",
+    }
+)
 @TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
 public class TaskControllerHelperIT {
@@ -44,9 +52,6 @@ public class TaskControllerHelperIT {
     @Autowired
     private org.activiti.cloud.services.query.app.repository.VariableRepository variableRepository;
 
-    @Autowired
-    EntityManager entityManager;
-
     @Test
     @Transactional
     public void shouldtest() {
@@ -64,7 +69,9 @@ public class TaskControllerHelperIT {
         processVariableEntity.setValue("id");
         processVariableEntity.setProcessInstanceId("15");
         processVariableEntity.setProcessInstance(processInstanceRepository.findById("15").orElseThrow());
+        processInstanceEntity.setVariables(Set.of(processVariableEntity));
         variableRepository.save(processVariableEntity);
+        processInstanceRepository.save(processInstanceEntity);
 
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("1");
@@ -73,8 +80,13 @@ public class TaskControllerHelperIT {
         taskEntity.setProcessInstanceId("15");
         taskRepository.save(taskEntity);
 
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+
         Set<ProcessVariableEntity> variables = processInstanceRepository.findById("15").get().getVariables();
-        //Long id = variables.iterator().next().getId();
+
+        assertThat(variables).isNotEmpty();
+        // Long id = variables.iterator().next().getId();
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
         Pageable pageable = Pageable.ofSize(10);
