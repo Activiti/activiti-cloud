@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.MediaTypes;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
@@ -70,8 +71,8 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                 .filter(entry -> entry.getKey().matches("200"))
                 .forEach(entry -> {
                     Content contents = entry.getValue().getContent();
-                    String applicationHal = "application/hal+json";
-                    String applicationJson = "application/json";
+                    String applicationHal = MediaTypes.HAL_JSON_VALUE;
+                    String applicationJson = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                     if (
                         contents != null &&
                         contents.containsKey(applicationHal) &&
