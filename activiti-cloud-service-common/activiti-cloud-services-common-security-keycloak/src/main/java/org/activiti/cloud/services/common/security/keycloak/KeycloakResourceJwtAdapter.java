@@ -38,7 +38,12 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
 
     @Override
     public List<String> getRoles() {
-        return getFromClient(resourceId, jwt);
+        return getFromClient(resourceId, "roles", jwt);
+    }
+
+    @Override
+    public List<String> getPermissions() {
+        return getFromClient(resourceId, "permissions", jwt);
     }
 
     @Override
@@ -55,17 +60,14 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
         return jwt.getClaim("preferred_username");
     }
 
-    private List<String> getFromClient(String clientId, Jwt jwt) {
+    private List<String> getFromClient(String clientId, String key, Jwt jwt) {
         if (jwt.hasClaim("resource_access")) {
             Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
             if (resourceAccess.get(clientId) != null) {
-                return getRoles((Map<String, Object>) resourceAccess.get(clientId));
+                Map<String, Object> resource = (Map<String, Object>) resourceAccess.get(clientId);
+                return (List<String>) resource.get(key);
             }
         }
         return Collections.emptyList();
-    }
-
-    private List<String> getRoles(Map<String, Object> getRolesParent) {
-        return (List<String>) getRolesParent.get("roles");
     }
 }
