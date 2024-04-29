@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.common.security;
+package org.activiti.cloud.security.authorization;
 
 import java.util.Set;
 import java.util.function.Supplier;

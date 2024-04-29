@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
-import org.activiti.cloud.services.common.security.CustomAuthorizationManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
