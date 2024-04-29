@@ -34,6 +34,9 @@ The configuration below contains a mixed case for properties to check if it does
         "authorizations.security-constraints[0].securityCollections[1].patterns[0]=/v1/def/*",
         "authorizations.security-constraints[1].authRoles[0]=ACTIVITI_DEVOPS",
         "authorizations.security-constraints[1].securityCollections[0].patterns[0]=/v1/ghi/*",
+        "authorizations.security-constraints[2].authPermissions[0]=permissionA",
+        "authorizations.security-constraints[2].auth-permissions[1]=permissionB",
+        "authorizations.security-constraints[2].securityCollections[0].patterns[0]=/v1/jkl/*",
     },
     classes = { AuthorizationProperties.class }
 )
@@ -45,7 +48,7 @@ class AuthorizationPropertiesTest {
 
     @Test
     public void configurationLoadTest() {
-        assertEquals(2, authorizationProperties.getSecurityConstraints().size());
+        assertEquals(3, authorizationProperties.getSecurityConstraints().size());
         assertEquals(2, authorizationProperties.getSecurityConstraints().get(0).getAuthRoles().length);
         assertEquals("ACTIVITI_USER", authorizationProperties.getSecurityConstraints().get(0).getAuthRoles()[0]);
         assertEquals("ACTIVITI_ADMIN", authorizationProperties.getSecurityConstraints().get(0).getAuthRoles()[1]);
@@ -79,6 +82,17 @@ class AuthorizationPropertiesTest {
         assertEquals(
             "/v1/ghi/*",
             authorizationProperties.getSecurityConstraints().get(1).getSecurityCollections()[0].getPatterns()[0]
+        );
+        assertEquals("permissionA", authorizationProperties.getSecurityConstraints().get(2).getAuthPermissions()[0]);
+        assertEquals("permissionB", authorizationProperties.getSecurityConstraints().get(2).getAuthPermissions()[1]);
+        assertEquals(1, authorizationProperties.getSecurityConstraints().get(2).getSecurityCollections().length);
+        assertEquals(
+            1,
+            authorizationProperties.getSecurityConstraints().get(2).getSecurityCollections()[0].getPatterns().length
+        );
+        assertEquals(
+            "/v1/jkl/*",
+            authorizationProperties.getSecurityConstraints().get(2).getSecurityCollections()[0].getPatterns()[0]
         );
     }
 }
