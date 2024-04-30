@@ -3,6 +3,7 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,7 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
         "logging.level.org.hibernate.collection.spi=warn",
     }
 )
@@ -86,8 +87,8 @@ public class TaskControllerHelperIT {
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
         Pageable pageable = Pageable.ofSize(10);
-        List<QueryDslPredicateFilter> filters = Collections.emptyList();
-        List<String> processVariableKeys = List.of("defKey1/name");
+        List<QueryDslPredicateFilter> filters = new ArrayList<>();
+        List<String> processVariableKeys = List.of("name");
 
         PagedModel<EntityModel<QueryCloudTask>> allWithProcessVariables = taskControllerHelper.findAllWithProcessVariables(
             predicate,

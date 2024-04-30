@@ -175,7 +175,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
     @JsonView(JsonViews.ProcessVariables.class)
-    @Filter(name = "variablesFilter")
+    //@Filter(name = "variablesFilter")
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "processInstanceId",
