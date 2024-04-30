@@ -63,9 +63,11 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
     private List<String> getFromClient(String clientId, String key, Jwt jwt) {
         if (jwt.hasClaim("resource_access")) {
             Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
-            if (resourceAccess.get(clientId) != null) {
+            if (resourceAccess.containsKey(clientId)) {
                 Map<String, Object> resource = (Map<String, Object>) resourceAccess.get(clientId);
-                return (List<String>) resource.get(key);
+                if (resource.containsKey(key)) {
+                    return (List<String>) resource.get(key);
+                }
             }
         }
         return Collections.emptyList();
