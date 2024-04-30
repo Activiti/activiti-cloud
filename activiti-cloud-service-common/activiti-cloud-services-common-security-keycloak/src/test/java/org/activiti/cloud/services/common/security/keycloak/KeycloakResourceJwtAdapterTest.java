@@ -74,13 +74,13 @@ public class KeycloakResourceJwtAdapterTest {
     }
 
     @Test
-    public void shouldNotThrowAnyExceptionWhenPermissionsIsNull() {
+    public void shouldReturnEmptyListWhenPermissionsIsNull() {
         Map<String, Object> permissionsParent = JSONObjectUtils.newJSONObject();
         permissionsParent.put("permissions", null);
         when(jwt.hasClaim("resource_access")).thenReturn(true);
         when(jwt.getClaim("resource_access")).thenReturn(permissionsParent);
 
-        assertDoesNotThrow(() -> keycloakResourceJwtAdapter.getPermissions());
+        assertThat(keycloakResourceJwtAdapter.getPermissions()).isEmpty();
     }
 
     @Test
