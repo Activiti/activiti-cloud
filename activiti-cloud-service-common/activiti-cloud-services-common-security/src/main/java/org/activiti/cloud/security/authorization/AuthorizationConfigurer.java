@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.security.authorization;
 
+import static java.util.function.Predicate.not;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import jakarta.annotation.PostConstruct;
@@ -135,19 +136,20 @@ public class AuthorizationConfigurer {
     ) throws Exception {
         for (SecurityCollection securityCollection : securityCollections) {
             String[] patterns = getPatterns(securityCollection.getPatterns());
-            List<HttpMethod> omittedMethods = Arrays
-                .stream(securityCollection.getOmittedMethods())
-                .map(HttpMethod::valueOf)
-                .toList();
-
-            for (HttpMethod method : HttpMethod.values()) {
-                if (omittedMethods.contains(method)) {
-                    http.authorizeHttpRequests(spec -> spec.requestMatchers(method, patterns).denyAll());
-                } else {
+            if (isNotEmpty(securityCollection.getOmittedMethods())) {
+                List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
+                for (HttpMethod method : methods) {
                     http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(method, patterns)));
                 }
+            } else {
+                http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(patterns)));
             }
         }
+    }
+
+    private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
+        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::valueOf).toList();
+        return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
     }
 
     /**

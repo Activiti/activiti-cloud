@@ -48,9 +48,14 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "authorizations.security-constraints[1].authPermissions[0]=DUMMY_PERMISSION",
         "authorizations.security-constraints[1].securityCollections[0].patterns[0]=/permission/*",
         "authorizations.security-constraints[2].securityCollections[0].patterns[0]=/public/*",
-        "authorizations.security-constraints[3].authPermissions[0]=DUMMY_PERMISSION",
-        "authorizations.security-constraints[3].securityCollections[0].patterns[0]=/dummy-endpoint/*",
-        "authorizations.security-constraints[3].securityCollections[0].omittedMethods[0]=POST",
+        "authorizations.security-constraints[3].authRoles[0]=DUMMY_ROLE",
+        "authorizations.security-constraints[3].authRoles[1]=OTHER_DUMMY_ROLE",
+        "authorizations.security-constraints[3].securityCollections[0].patterns[0]=/role/dummy-endpoint/*",
+        "authorizations.security-constraints[3].securityCollections[0].omittedMethods[0]=DELETE",
+        "authorizations.security-constraints[4].authPermissions[0]=DUMMY_PERMISSION",
+        "authorizations.security-constraints[4].authPermissions[1]=OTHER_DUMMY_PERMISSION",
+        "authorizations.security-constraints[4].securityCollections[0].patterns[0]=/permission/dummy-endpoint/*",
+        "authorizations.security-constraints[4].securityCollections[0].omittedMethods[0]=DELETE",
     }
 )
 @EnableWebMvc
@@ -149,14 +154,58 @@ public class AuthorizationConfigurerIT {
     }
 
     @Test
-    void should_return405_whenJwtContainsCorrectPermissionButMethodIsOmitted() throws Exception {
+    void should_Allow_RestrictedEndpoint_WhenMethodIsGet() throws Exception {
+        MockMvc mockMvc = mockMvcBuilder.build();
+        when(jwtAdapterMock.getPermissions()).thenReturn(List.of("OTHER_DUMMY_PERMISSION"));
+        when(jwtAdapterMock.getRoles()).thenReturn(List.of("OTHER_DUMMY_ROLE"));
+        mockMvc
+            .perform(
+                get(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
+                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
+            .andExpect(status().isOk());
+        mockMvc
+            .perform(
+                get(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED).header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_AllowDeleteMethod_OnlyWhenPermissionIsDefinedByHigherPriorityRule() throws Exception {
         MockMvc mockMvc = mockMvcBuilder.build();
         when(jwtAdapterMock.getPermissions()).thenReturn(List.of("DUMMY_PERMISSION"));
         mockMvc
-            .perform(get(AuthorizationTestController.DUMMY_ENDPOINT).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .perform(
+                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
+                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
             .andExpect(status().isOk());
+        when(jwtAdapterMock.getPermissions()).thenReturn(List.of("OTHER_DUMMY_PERMISSION"));
         mockMvc
-            .perform(post(AuthorizationTestController.DUMMY_ENDPOINT).header(AUTH_HEADER_NAME, DUMMY_BEARER))
+            .perform(
+                delete(AuthorizationTestController.PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
+                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void should_AllowDeleteMethod_OnlyWhenRoleIsDefinedByHigherPriorityRule() throws Exception {
+        MockMvc mockMvc = mockMvcBuilder.build();
+        when(jwtAdapterMock.getRoles()).thenReturn(List.of("DUMMY_ROLE"));
+        mockMvc
+            .perform(
+                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED)
+                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
+            .andExpect(status().isOk());
+        when(jwtAdapterMock.getRoles()).thenReturn(List.of("OTHER_DUMMY_ROLE"));
+        mockMvc
+            .perform(
+                delete(AuthorizationTestController.ROLE_DUMMY_ENDPOINT_RESTRICTED)
+                    .header(AUTH_HEADER_NAME, DUMMY_BEARER)
+            )
             .andExpect(status().isForbidden());
     }
 

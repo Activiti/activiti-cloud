@@ -18,6 +18,7 @@ package org.activiti.cloud.security.authorization;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,10 @@ public class AuthorizationTestController {
     public static final String PERMISSION_POST = "/permission/post";
     public static final String PERMISSION_PUT = "/permission/put";
     public static final String PERMISSION_DELETE = "/permission/delete";
-    public static final String DUMMY_ENDPOINT = "/dummy-endpoint";
+    public static final String ROLE_DUMMY_ENDPOINT = "/role/dummy-endpoint";
+    public static final String PERMISSION_DUMMY_ENDPOINT = "/permission/dummy-endpoint";
+    public static final String ROLE_DUMMY_ENDPOINT_RESTRICTED = ROLE_DUMMY_ENDPOINT + "/restricted";
+    public static final String PERMISSION_DUMMY_ENDPOINT_RESTRICTED = PERMISSION_DUMMY_ENDPOINT + "/restricted";
 
     @GetMapping(PUBLIC_GET)
     public ResponseEntity<Void> publicGet() {
@@ -99,13 +103,43 @@ public class AuthorizationTestController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(DUMMY_ENDPOINT)
-    public ResponseEntity<Void> dummyEndpointGet() {
+    @GetMapping(ROLE_DUMMY_ENDPOINT)
+    public ResponseEntity<Void> roleDummyEndpointGet() {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(DUMMY_ENDPOINT)
-    public ResponseEntity<Void> dummyEndpointPost() {
+    @DeleteMapping(ROLE_DUMMY_ENDPOINT)
+    public ResponseEntity<Void> roleDummyEndpointDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(PERMISSION_DUMMY_ENDPOINT)
+    public ResponseEntity<Void> permissionDummyEndpointGet() {
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(PERMISSION_DUMMY_ENDPOINT)
+    public ResponseEntity<Void> permissionDummyEndpointDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(ROLE_DUMMY_ENDPOINT_RESTRICTED)
+    public ResponseEntity<Void> roleDummyEndpointRestrictedGet() {
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(ROLE_DUMMY_ENDPOINT_RESTRICTED)
+    public ResponseEntity<Void> roleDummyEndpointRestrictedDelete() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
+    public ResponseEntity<Void> permissionDummyEndpointRestrictedGet() {
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping(PERMISSION_DUMMY_ENDPOINT_RESTRICTED)
+    public ResponseEntity<Void> permissionDummyEndpointRestrictedDelete() {
         return ResponseEntity.ok().build();
     }
 }
