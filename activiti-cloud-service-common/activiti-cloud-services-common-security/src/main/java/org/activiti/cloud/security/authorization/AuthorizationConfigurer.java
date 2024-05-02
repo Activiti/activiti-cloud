@@ -142,7 +142,7 @@ public class AuthorizationConfigurer {
 
             for (HttpMethod method : HttpMethod.values()) {
                 if (omittedMethods.contains(method)) {
-                    http.authorizeHttpRequests(spec -> spec.requestMatchers(method, patterns).denyAll());
+                    http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(patterns)));
                 } else {
                     http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(method, patterns)));
                 }
