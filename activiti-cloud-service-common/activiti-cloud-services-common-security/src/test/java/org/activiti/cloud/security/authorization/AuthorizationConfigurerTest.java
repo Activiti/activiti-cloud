@@ -22,8 +22,12 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.HEAD;
+import static org.springframework.http.HttpMethod.OPTIONS;
+import static org.springframework.http.HttpMethod.PATCH;
+import static org.springframework.http.HttpMethod.TRACE;
 
-import java.util.List;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityCollection;
 import org.activiti.cloud.security.authorization.AuthorizationProperties.SecurityConstraint;
 import org.junit.jupiter.api.Test;
@@ -64,136 +68,132 @@ class AuthorizationConfigurerTest {
     @Test
     public void should_configureAuth_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        List<SecurityConstraint> securityConstraints = asList(
-            createSecurityConstraintWithRolesAndPatterns(
-                new String[] { "ROLE_1", "ROLE_2" },
-                new String[] { "/a", "/b" }
-            ),
-            createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" })
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(
+                    new String[] { "ROLE_1", "ROLE_2" },
+                    new String[] { "/a", "/b" }
+                ),
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" })
+            )
         );
-        authorizationProperties.setSecurityConstraints(securityConstraints);
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
-        doReturn(authorizedUrl).when(authorizeRequests).requestMatchers(any(HttpMethod.class), any(String[].class));
+        doReturn(authorizedUrl).when(authorizeRequests).requestMatchers(any(String[].class));
 
         authorizationConfigurer.configure(http);
 
-        assertThat(authorizeHttpRequestsCustomizer.getAllValues())
-            .hasSize(HttpMethod.values().length * securityConstraints.size());
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
         authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
-            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue())
-                .isInstanceOfSatisfying(
-                    CustomAuthorizationManager.class,
-                    manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
-                );
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+            );
 
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/a", "/b" }));
-            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue())
-                .isInstanceOfSatisfying(
-                    CustomAuthorizationManager.class,
-                    manager ->
-                        assertThat(manager.getAuthoritiesWithAccess())
-                            .containsExactlyInAnyOrder("ROLE_ROLE_1", "ROLE_ROLE_2")
-                );
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/a", "/b");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager ->
+                    assertThat(manager.getAuthoritiesWithAccess())
+                        .containsExactlyInAnyOrder("ROLE_ROLE_1", "ROLE_ROLE_2")
+            );
     }
 
     @Test
     public void should_configureAuth_usingPermissions_when_everythingIsAuthenticated() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        List<SecurityConstraint> securityConstraints = asList(
-            createSecurityConstraintWithPermissionsAndPatterns(
-                new String[] { "PERMISSION_1", "PERMISSION_2" },
-                new String[] { "/a", "/b" }
-            ),
-            createSecurityConstraintWithPermissionsAndPatterns(new String[] { "PERMISSION_3" }, new String[] { "/c" })
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithPermissionsAndPatterns(
+                    new String[] { "PERMISSION_1", "PERMISSION_2" },
+                    new String[] { "/a", "/b" }
+                ),
+                createSecurityConstraintWithPermissionsAndPatterns(
+                    new String[] { "PERMISSION_3" },
+                    new String[] { "/c" }
+                )
+            )
         );
-        authorizationProperties.setSecurityConstraints(securityConstraints);
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
-        when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String[].class))).thenReturn(authorizedUrl);
+        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
-        assertThat(authorizeHttpRequestsCustomizer.getAllValues())
-            .hasSize(HttpMethod.values().length * securityConstraints.size());
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
 
         authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/c" }));
-            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue())
-                .isInstanceOfSatisfying(
-                    CustomAuthorizationManager.class,
-                    manager ->
-                        assertThat(manager.getAuthoritiesWithAccess())
-                            .containsExactlyInAnyOrder("PERMISSION_PERMISSION_3")
-                );
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager ->
+                    assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("PERMISSION_PERMISSION_3")
+            );
 
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/a", "/b" }));
-            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue())
-                .isInstanceOfSatisfying(
-                    CustomAuthorizationManager.class,
-                    manager ->
-                        assertThat(manager.getAuthoritiesWithAccess())
-                            .containsExactlyInAnyOrder("PERMISSION_PERMISSION_1", "PERMISSION_PERMISSION_2")
-                );
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/a", "/b");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager ->
+                    assertThat(manager.getAuthoritiesWithAccess())
+                        .containsExactlyInAnyOrder("PERMISSION_PERMISSION_1", "PERMISSION_PERMISSION_2")
+            );
     }
 
     @Test
     public void should_configureAuth_when_aURLiSPublic() throws Exception {
         AuthorizationProperties authorizationProperties = new AuthorizationProperties();
-        List<SecurityConstraint> securityConstraints = asList(
-            createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" }),
-            createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/d" })
+        authorizationProperties.setSecurityConstraints(
+            asList(
+                createSecurityConstraintWithRolesAndPatterns(new String[] { "ROLE_3" }, new String[] { "/c" }),
+                createSecurityConstraintWithRolesAndPatterns(new String[] {}, new String[] { "/d" })
+            )
         );
-        authorizationProperties.setSecurityConstraints(securityConstraints);
         AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer(authorizationProperties, null);
 
         when(http.authorizeHttpRequests(authorizeHttpRequestsCustomizer.capture())).thenReturn(http);
-        when(authorizeRequests.requestMatchers(any(HttpMethod.class), any(String[].class))).thenReturn(authorizedUrl);
+        when(authorizeRequests.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
 
         authorizationConfigurer.configure(http);
 
-        assertThat(authorizeHttpRequestsCustomizer.getAllValues())
-            .hasSize(HttpMethod.values().length * securityConstraints.size());
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(2);
         authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
         //URLs with permitAll must be defined first in order to avoid being overridden
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/d" }));
-            inOrder.verify(authorizedUrl).permitAll();
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/d");
+        inOrder.verify(authorizedUrl).permitAll();
 
-        for (HttpMethod method : HttpMethod.values()) {
-            inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq(new String[] { "/c" }));
-            inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue())
-                .isInstanceOfSatisfying(
-                    CustomAuthorizationManager.class,
-                    manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
-                );
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(requestMatchers.capture());
+        assertThat(requestMatchers.getValue()).containsExactlyInAnyOrder("/c");
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_3")
+            );
     }
 
     @Test
@@ -216,26 +216,50 @@ class AuthorizationConfigurerTest {
 
         authorizationConfigurer.configure(http);
 
-        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(HttpMethod.values().length);
+        assertThat(authorizeHttpRequestsCustomizer.getAllValues()).hasSize(5);
         authorizeHttpRequestsCustomizer.getAllValues().forEach($ -> $.customize(authorizeRequests));
 
         InOrder inOrder = inOrder(authorizeRequests, authorizedUrl);
 
-        for (HttpMethod method : HttpMethod.values()) {
-            if (!asList("POST", "DELETE", "PUT").contains(method.name())) {
-                inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
-                inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
-                assertThat(argumentCaptor.getValue())
-                    .isInstanceOfSatisfying(
-                        CustomAuthorizationManager.class,
-                        manager ->
-                            assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
-                    );
-            } else {
-                inOrder.verify(authorizeRequests).requestMatchers(eq(method), eq("/c"));
-                inOrder.verify(authorizedUrl).denyAll();
-            }
-        }
+        inOrder.verify(authorizeRequests).requestMatchers(eq(GET), eq("/c"));
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+            );
+
+        inOrder.verify(authorizeRequests).requestMatchers(eq(HEAD), eq("/c"));
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+            );
+
+        inOrder.verify(authorizeRequests).requestMatchers(eq(PATCH), eq("/c"));
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+            );
+
+        inOrder.verify(authorizeRequests).requestMatchers(eq(OPTIONS), eq("/c"));
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+            );
+
+        inOrder.verify(authorizeRequests).requestMatchers(eq(TRACE), eq("/c"));
+        inOrder.verify(authorizedUrl).access(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .isInstanceOfSatisfying(
+                CustomAuthorizationManager.class,
+                manager -> assertThat(manager.getAuthoritiesWithAccess()).containsExactlyInAnyOrder("ROLE_ROLE_1")
+            );
     }
 
     private SecurityConstraint createSecurityConstraintWithRolesAndPatterns(String[] roles, String[] patterns) {
