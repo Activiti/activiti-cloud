@@ -17,6 +17,7 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -32,6 +33,7 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.hibernate.graph.RootGraph;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -82,7 +84,7 @@ public class TaskControllerHelper {
     ) {
         addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-        initializeProcessVariables(page);
+        //initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -118,7 +120,7 @@ public class TaskControllerHelper {
     }
 
     private void initializeProcessVariables(Page<TaskEntity> page) {
-        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
+        //page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
     }
 
     private void addProcessVariablesFilter(List<String> processVariableKeys) {
