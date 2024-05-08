@@ -26,7 +26,6 @@ import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.predicate.ProcessVariableFilter;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -81,10 +80,9 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        //addProcessVariablesFilter(processVariableKeys);
-        filters.add(new ProcessVariableFilter(processVariableKeys));
+        addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-        //initializeProcessVariables(page);
+        initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 

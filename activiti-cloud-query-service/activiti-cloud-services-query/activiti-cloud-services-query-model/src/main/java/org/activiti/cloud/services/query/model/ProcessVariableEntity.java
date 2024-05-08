@@ -30,11 +30,11 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 
-//@FilterDef(
-//    name = "variablesFilter",
-//    parameters = { @ParamDef(name = "variableKeys", type = String.class) },
-//    defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)"
-//)
+@FilterDef(
+    name = "variablesFilter",
+    parameters = { @ParamDef(name = "variableKeys", type = String.class) },
+    defaultCondition = "concat(process_definition_key, '/', name) in (:variableKeys)"
+)
 @Entity(name = "ProcessVariable")
 @Table(
     name = "PROCESS_VARIABLE",
