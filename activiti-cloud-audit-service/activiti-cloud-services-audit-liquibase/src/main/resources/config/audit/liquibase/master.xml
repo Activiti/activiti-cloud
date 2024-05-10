@@ -214,7 +214,7 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-  <changeSet author="activiti-audit" id="alter12-schema-7.17.0" dbms="postgresql">
+  <changeSet author="activiti-audit" runInTransaction="false" id="alter12-schema-7.17.0" dbms="postgresql">
     <sqlFile dbms="postgresql"
              encoding="utf8"
              path="changelog/12-alter.pg.schema.7.17.0.sql"
