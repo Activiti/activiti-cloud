@@ -17,25 +17,36 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.querydsl.core.types.Predicate;
-import java.util.Collections;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.IntStream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
+import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
+import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
@@ -43,9 +54,9 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
         "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=true",
+        "spring.jpa.show-sql=false",
         "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
@@ -68,6 +79,12 @@ public class TaskControllerHelperIT {
     @Autowired
     private org.activiti.cloud.services.query.app.repository.VariableRepository variableRepository;
 
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
     @Test
     public void shouldtest() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
@@ -79,32 +96,67 @@ public class TaskControllerHelperIT {
         processInstanceEntity.setServiceName("test-cmd-endpoint");
         processInstanceRepository.save(processInstanceEntity);
 
-        ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-        processVariableEntity.setName("name");
-        processVariableEntity.setValue("id");
-        processVariableEntity.setProcessInstanceId("15");
-        processVariableEntity.setProcessDefinitionKey("defKey1");
-        processVariableEntity.setProcessInstance(processInstanceRepository.findById("15").orElseThrow());
-        processInstanceEntity.setVariables(Set.of(processVariableEntity));
-        variableRepository.save(processVariableEntity);
+        int numberOfVariables = 16;
+
+        Set<ProcessVariableEntity> variables = new HashSet<>();
+
+        for (int i = 0; i < numberOfVariables; i++) {
+            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
+            processVariableEntity.setName("name" + i);
+            processVariableEntity.setValue("id");
+            processVariableEntity.setProcessInstanceId("15");
+            processVariableEntity.setProcessDefinitionKey("defKey1");
+            processVariableEntity.setProcessInstance(processInstanceRepository.findById("15").orElseThrow());
+            variables.add(processVariableEntity);
+        }
+        variableRepository.saveAll(variables);
+
+        processInstanceEntity.setVariables(variables);
         processInstanceRepository.save(processInstanceEntity);
 
-        TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setId("1");
-        taskEntity.setProcessVariables(Set.of(processVariableEntity));
-        taskEntity.setProcessInstance(processInstanceEntity);
-        taskEntity.setProcessInstanceId("15");
-        taskRepository.save(taskEntity);
+        int numberOfTasks = 2000;
+        int batchSize = 1000;
 
-        //Set<ProcessVariableEntity> variables = processInstanceRepository.findById("15").get().getVariables();
+        List<TaskEntity> taskEntities = new ArrayList<>();
 
-        //assertThat(variables).isNotEmpty();
+        //Create candidate users
+
+        for (int i = 0; i < numberOfTasks; i++) {
+            TaskEntity taskEntity = new TaskEntity();
+            taskEntity.setId("id" + i);
+            TaskCandidateGroupEntity groupCand = new TaskCandidateGroupEntity("id" + i, "group" + i);
+            taskEntity.setTaskCandidateGroups(Set.of(groupCand));
+            TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity("id" + i, "user" + i);
+            taskEntity.setTaskCandidateUsers(Set.of(usrCand));
+            taskEntity.setProcessVariables(variables);
+            taskEntity.setProcessInstance(processInstanceEntity);
+            taskEntity.setProcessInstanceId("15");
+            taskEntities.add(taskEntity);
+
+            taskCandidateGroupRepository.save(groupCand);
+            taskCandidateUserRepository.save(usrCand);
+
+            if (i > 0 && i % batchSize == 0) {
+                taskRepository.saveAll(taskEntities);
+                taskEntities.clear();
+            }
+        }
+
+        if (!taskEntities.isEmpty()) {
+            taskRepository.saveAll(taskEntities);
+        }
 
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
-        Pageable pageable = Pageable.ofSize(10);
-        List<QueryDslPredicateFilter> filters = Collections.emptyList();
-        List<String> processVariableKeys = List.of("defKey1/name");
+        int pageSize = 200;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+        List<String> processVariableKeys = IntStream
+            .range(0, numberOfVariables)
+            .mapToObj(i -> "defKey1/name" + i)
+            .toList();
+
+        enableSqlLogging();
 
         PagedModel<EntityModel<QueryCloudTask>> allWithProcessVariables = taskControllerHelper.findAllWithProcessVariables(
             predicate,
@@ -115,28 +167,14 @@ public class TaskControllerHelperIT {
         );
         List<EntityModel<QueryCloudTask>> entityModels = allWithProcessVariables.getContent().stream().toList();
         assertThat(entityModels).isNotEmpty();
-        assertThat(entityModels).hasSize(1);
+        assertThat(entityModels).hasSize(pageSize);
         EntityModel<QueryCloudTask> queryCloudTaskEntityModel = entityModels.get(0);
-        assertThat(queryCloudTaskEntityModel.getContent().getProcessVariables().stream().toList().get(0).getName())
-            .isEqualTo("name");
+        assertThat(queryCloudTaskEntityModel.getContent().getProcessVariables()).hasSize(numberOfVariables);
     }
 
-    private ProcessVariableEntity buildVariable() {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-            1L,
-            String.class.getName(),
-            "firstName",
-            UUID.randomUUID().toString(),
-            "My app",
-            "My app",
-            "1",
-            null,
-            null,
-            new Date(),
-            new Date(),
-            UUID.randomUUID().toString()
-        );
-        variableEntity.setValue("John");
-        return variableEntity;
+    private static void enableSqlLogging() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.Logger logger = loggerContext.getLogger("org.hibernate.SQL");
+        logger.setLevel(Level.DEBUG);
     }
 }

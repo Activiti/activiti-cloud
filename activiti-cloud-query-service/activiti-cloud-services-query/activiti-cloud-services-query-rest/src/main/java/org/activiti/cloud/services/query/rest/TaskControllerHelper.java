@@ -17,23 +17,31 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskProcessVariableQueryProjection;
+import org.activiti.cloud.services.query.app.repository.TaskProcessVariableRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.graph.RootGraph;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -46,6 +54,15 @@ public class TaskControllerHelper {
     private final QueryDslPredicateAggregator predicateAggregator;
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
     private final TaskLookupRestrictionService taskLookupRestrictionService;
+
+    @Autowired
+    private TaskProcessVariableRepository taskProcessVariableRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -70,7 +87,7 @@ public class TaskControllerHelper {
         Pageable pageable,
         List<QueryDslPredicateFilter> filters
     ) {
-        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
+        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters, List.of());
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -82,8 +99,8 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        addProcessVariablesFilter(processVariableKeys);
-        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
+        //addProcessVariablesFilter(processVariableKeys);
+        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters, processVariableKeys);
         //initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
@@ -143,7 +160,8 @@ public class TaskControllerHelper {
         Predicate predicate,
         VariableSearch variableSearch,
         Pageable pageable,
-        List<QueryDslPredicateFilter> filters
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys
     ) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 
@@ -158,6 +176,38 @@ public class TaskControllerHelper {
                 );
         } else {
             page = taskRepository.findAll(extendedPredicate, pageable);
+            addProcessVariablesFilter(processVariableKeys);
+            List<String> taskIds = page.getContent().stream().map(TaskEntity::getId).toList();
+            List<TaskProcessVariableQueryProjection> byTaskIdsGroupedByTaskId = taskProcessVariableRepository.findByTaskIdIn(
+                taskIds,
+                processVariableKeys
+            );
+
+            Map<String, Set<ProcessVariableEntity>> processVariablesByTaskId = byTaskIdsGroupedByTaskId
+                .stream()
+                .collect(
+                    Collectors.groupingBy(
+                        TaskProcessVariableQueryProjection::getTaskId,
+                        Collectors.mapping(TaskProcessVariableQueryProjection::getProcessVariable, Collectors.toSet())
+                    )
+                );
+
+            Map<String, Set<TaskCandidateGroupEntity>> taskCandidateGroupsByTaskId = taskCandidateGroupRepository
+                .findByTaskIdIn(taskIds)
+                .stream()
+                .collect(Collectors.groupingBy(TaskCandidateGroupEntity::getTaskId, Collectors.toSet()));
+
+            Map<String, Set<TaskCandidateUserEntity>> taskCandidateUsersByTaskId = taskCandidateUserRepository
+                .findByTaskIdIn(taskIds)
+                .stream()
+                .collect(Collectors.groupingBy(TaskCandidateUserEntity::getTaskId, Collectors.toSet()));
+
+            page.forEach(taskEntity -> {
+                entityManager.detach(taskEntity);
+                taskEntity.setTaskCandidateUsers(taskCandidateUsersByTaskId.get(taskEntity.getId()));
+                taskEntity.setTaskCandidateGroups(taskCandidateGroupsByTaskId.get(taskEntity.getId()));
+                taskEntity.setProcessVariables(processVariablesByTaskId.get(taskEntity.getId()));
+            });
         }
         return page;
     }
