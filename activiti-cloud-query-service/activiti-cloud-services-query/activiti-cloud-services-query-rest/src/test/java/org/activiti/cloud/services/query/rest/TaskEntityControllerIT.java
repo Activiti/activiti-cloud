@@ -71,7 +71,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 @WithMockUser
 @TestPropertySource("classpath:application-test.properties")
-public class TaskEntityControllerIT {
+class TaskEntityControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -114,7 +114,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
@@ -142,7 +142,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
@@ -157,7 +157,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
@@ -174,7 +174,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnCandidates_when_invokeGetTaskById() throws Exception {
+    void should_returnCandidates_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
@@ -227,7 +227,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
+    void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
@@ -252,12 +252,12 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void testPaginationResolverWithoutSettingMaxOnRequest() throws Exception {
+    void testPaginationResolverWithoutSettingMaxOnRequest() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(6, 5, PageRequest.of(0, 5));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1001, 1000, PageRequest.of(0, 1000));
 
         given(taskRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 5));
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1000));
 
         //when
         MvcResult result = mockMvc
@@ -268,43 +268,42 @@ public class TaskEntityControllerIT {
 
         assertThatJson(result.getResponse().getContentAsString())
             .node("list.pagination.skipCount")
-            .isEqualTo(6)
+            .isEqualTo(1001)
             .node("list.pagination.maxItems")
-            .isEqualTo(5)
+            .isEqualTo(1000)
             .node("list.pagination.count")
             .isEqualTo(1)
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(7);
+            .isEqualTo(1002);
     }
 
     @Test
-    public void testPaginationResolverWithMaxRequestExceedingLimit() throws Exception {
+    void testPaginationResolverWithMaxRequestExceedingLimit() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(6, 5, PageRequest.of(0, 5));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1001, 1000, PageRequest.of(0, 1000));
 
         given(taskRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 5));
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1000));
 
         //when
         MvcResult result = mockMvc
-            .perform(get("/v1/tasks?skipCount=1001&maxItems=1000").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/tasks?skipCount=2001&maxItems=2000").accept(MediaType.APPLICATION_JSON))
             //then
             .andExpect(status().isOk())
             .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .node("list.pagination.skipCount")
-            .isEqualTo(6)
+            .isEqualTo(1001)
             .node("list.pagination.maxItems")
-            .isEqualTo(5)
+            .isEqualTo(1000)
             .node("list.pagination.count")
             .isEqualTo(1)
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(7);
+            .isEqualTo(1002);
     }
-
 }

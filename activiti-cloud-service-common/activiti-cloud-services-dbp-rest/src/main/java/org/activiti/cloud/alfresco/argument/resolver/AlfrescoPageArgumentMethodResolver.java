@@ -62,11 +62,13 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
-        boolean isMaxItemsExceedingLimit = !alfrescoQueryParameters.getMaxItemsParameter().isSet() || alfrescoQueryParameters.getMaxItemsParameter().getValue() > MAX_ITEMS_LIMIT;
+        boolean isMaxItemsExceedingLimit =
+            !alfrescoQueryParameters.getMaxItemsParameter().isSet() ||
+            alfrescoQueryParameters.getMaxItemsParameter().getValue() > MAX_ITEMS_LIMIT;
 
-        if(isMaxItemsExceedingLimit && MAX_ITEMS_LIMIT_ENABLED){
+        if (isMaxItemsExceedingLimit && MAX_ITEMS_LIMIT_ENABLED) {
             Pageable limitedPageable = PageRequest.of(0, MAX_ITEMS_LIMIT);
-            return new AlfrescoPageRequest(MAX_ITEMS_LIMIT + 1 , MAX_ITEMS_LIMIT, limitedPageable);
+            return new AlfrescoPageRequest(MAX_ITEMS_LIMIT + 1L, MAX_ITEMS_LIMIT, limitedPageable);
         }
 
         if (
@@ -78,8 +80,7 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
                 alfrescoQueryParameters.getMaxItemsParameter().getValue(),
                 basePageable
             );
-        }
-        else {
+        } else {
             return basePageable;
         }
     }
