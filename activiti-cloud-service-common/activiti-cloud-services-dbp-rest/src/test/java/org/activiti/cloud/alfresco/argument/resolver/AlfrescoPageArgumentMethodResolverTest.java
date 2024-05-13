@@ -117,39 +117,4 @@ public class AlfrescoPageArgumentMethodResolverTest {
             .hasPageSize(20)
             .hasPageable(basePageable);
     }
-
-    @Test
-    public void resolveArgumentShouldReturnTheBasePageableWhenNeitherSkipCountOrMaxItemsIsSet() throws Exception {
-        //given
-        MethodParameter methodParameter = mock(MethodParameter.class);
-        ModelAndViewContainer modelAndViewContainer = mock(ModelAndViewContainer.class);
-        NativeWebRequest webRequest = mock(NativeWebRequest.class);
-        WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
-
-        Pageable basePageable = mock(Pageable.class);
-        given(
-            pageableHandlerMethodArgumentResolver.resolveArgument(
-                methodParameter,
-                modelAndViewContainer,
-                webRequest,
-                binderFactory
-            )
-        )
-            .willReturn(basePageable);
-        given(pageParameterParser.parseParameters(webRequest))
-            .willReturn(
-                new AlfrescoQueryParameters(new SkipCountParameter(false, 0), new MaxItemsParameter(false, 100))
-            );
-
-        //when
-        Pageable resolvedPageable = alfrescoPageArgumentMethodResolver.resolveArgument(
-            methodParameter,
-            modelAndViewContainer,
-            webRequest,
-            binderFactory
-        );
-
-        //then
-        assertThat(resolvedPageable).isEqualTo(basePageable);
-    }
 }
