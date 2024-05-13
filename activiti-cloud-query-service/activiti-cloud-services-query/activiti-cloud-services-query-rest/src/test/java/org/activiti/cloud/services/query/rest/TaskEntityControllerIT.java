@@ -250,4 +250,61 @@ public class TaskEntityControllerIT {
             .ofLength(1)
             .thatContains(TaskPermissions.VIEW);
     }
+
+    @Test
+    public void testPaginationResolverWithoutSettingMaxOnRequest() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(6, 5, PageRequest.of(0, 5));
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 5));
+
+        //when
+        MvcResult result = mockMvc
+            .perform(get("/v1/tasks").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThatJson(result.getResponse().getContentAsString())
+            .node("list.pagination.skipCount")
+            .isEqualTo(6)
+            .node("list.pagination.maxItems")
+            .isEqualTo(5)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(7);
+    }
+
+    @Test
+    public void testPaginationResolverWithMaxRequestExceedingLimit() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(6, 5, PageRequest.of(0, 5));
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 5));
+
+        //when
+        MvcResult result = mockMvc
+            .perform(get("/v1/tasks?skipCount=1001&maxItems=1000").accept(MediaType.APPLICATION_JSON))
+            //then
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertThatJson(result.getResponse().getContentAsString())
+            .node("list.pagination.skipCount")
+            .isEqualTo(6)
+            .node("list.pagination.maxItems")
+            .isEqualTo(5)
+            .node("list.pagination.count")
+            .isEqualTo(1)
+            .node("list.pagination.hasMoreItems")
+            .isEqualTo(false)
+            .node("list.pagination.totalItems")
+            .isEqualTo(7);
+    }
+
 }

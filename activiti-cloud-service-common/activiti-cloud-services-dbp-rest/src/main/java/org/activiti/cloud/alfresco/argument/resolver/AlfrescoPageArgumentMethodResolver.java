@@ -16,6 +16,7 @@
 package org.activiti.cloud.alfresco.argument.resolver;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
@@ -28,6 +29,9 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
 
     private final AlfrescoPageParameterParser pageParameterParser;
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
+
+    private static final int MAX_ITEMS_LIMIT = 1000; // add parameter
+    private static final boolean MAX_ITEMS_LIMIT_ENABLED = true; // add parameter
 
     public AlfrescoPageArgumentMethodResolver(
         AlfrescoPageParameterParser pageParameterParser,
@@ -58,6 +62,13 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
+        boolean isMaxItemsExceedingLimit = !alfrescoQueryParameters.getMaxItemsParameter().isSet() || alfrescoQueryParameters.getMaxItemsParameter().getValue() > MAX_ITEMS_LIMIT;
+
+        if(isMaxItemsExceedingLimit && MAX_ITEMS_LIMIT_ENABLED){
+            Pageable limitedPageable = PageRequest.of(0, MAX_ITEMS_LIMIT);
+            return new AlfrescoPageRequest(MAX_ITEMS_LIMIT + 1 , MAX_ITEMS_LIMIT, limitedPageable);
+        }
+
         if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
             alfrescoQueryParameters.getMaxItemsParameter().isSet()
@@ -67,7 +78,8 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
                 alfrescoQueryParameters.getMaxItemsParameter().getValue(),
                 basePageable
             );
-        } else {
+        }
+        else {
             return basePageable;
         }
     }
