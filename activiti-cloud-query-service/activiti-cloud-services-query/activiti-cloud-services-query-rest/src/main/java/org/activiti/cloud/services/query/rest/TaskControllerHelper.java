@@ -17,14 +17,15 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -33,11 +34,13 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.graph.RootGraph;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.transaction.annotation.Transactional;
 
 public class TaskControllerHelper {
 
@@ -74,7 +77,7 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
         Predicate predicate,
         VariableSearch variableSearch,
@@ -84,7 +87,6 @@ public class TaskControllerHelper {
     ) {
         addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-        //initializeProcessVariables(page);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -120,7 +122,7 @@ public class TaskControllerHelper {
     }
 
     private void initializeProcessVariables(Page<TaskEntity> page) {
-        //page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
+        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
     }
 
     private void addProcessVariablesFilter(List<String> processVariableKeys) {
@@ -157,7 +159,15 @@ public class TaskControllerHelper {
                     pageable
                 );
         } else {
-            page = taskRepository.findAll(extendedPredicate, pageable);
+            JPAQuery<TaskEntity> query = new JPAQuery<>(entityManager);
+            query.from(QTaskEntity.taskEntity).where(extendedPredicate);
+            query.offset(pageable.getOffset());
+            query.limit(pageable.getPageSize());
+            List<String> taskIds = query.select(QTaskEntity.taskEntity.id).fetch();
+            long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
+
+            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds);
+            page = new PageImpl<>(results, pageable, count);
         }
         return page;
     }

@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
+import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.domain.Page;
@@ -40,14 +41,6 @@ public interface TaskRepository
         QuerydslBinderCustomizer<QTaskEntity>,
         CustomizedTaskRepository,
         CrudRepository<TaskEntity, String> {
-    @Override
-    @EntityGraph(
-        attributePaths = {
-            "processVariables", "taskCandidateUsers", "taskCandidateGroups", "variables", "processInstance",
-        }
-    )
-    Page<TaskEntity> findAll(Predicate predicate, Pageable pageable);
-
     @Override
     default void customize(QuerydslBindings bindings, QTaskEntity root) {
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
@@ -74,4 +67,9 @@ public interface TaskRepository
             .excluding(root.standalone)
             .apply(bindings);
     }
+
+    @EntityGraph(
+        attributePaths = { "processVariables", "processVariables.value", "taskCandidateUsers", "taskCandidateGroups" }
+    )
+    List<TaskEntity> findAllByIdIn(List<String> taskIds);
 }

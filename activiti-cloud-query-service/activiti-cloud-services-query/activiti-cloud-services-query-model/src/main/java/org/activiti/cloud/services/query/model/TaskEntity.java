@@ -72,7 +72,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 )
 @DynamicInsert
 @DynamicUpdate
-@NamedEntityGraph(name = "Task.processVariables", attributeNodes = { @NamedAttributeNode("processVariables") })
 public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask, Serializable {
 
     /**
