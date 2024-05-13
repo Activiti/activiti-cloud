@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.app.repository;
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
 import com.querydsl.core.types.dsl.StringPath;
-import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserId;
@@ -42,6 +41,4 @@ public interface TaskCandidateUserRepository
 
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
     }
-
-    List<TaskCandidateUserEntity> findByTaskIdIn(List<String> taskIds);
 }

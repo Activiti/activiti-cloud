@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -40,6 +41,11 @@ public interface TaskRepository
         CustomizedTaskRepository,
         CrudRepository<TaskEntity, String> {
     @Override
+    @EntityGraph(
+        attributePaths = {
+            "processVariables", "taskCandidateUsers", "taskCandidateGroups", "variables", "processInstance",
+        }
+    )
     Page<TaskEntity> findAll(Predicate predicate, Pageable pageable);
 
     @Override
