@@ -16,9 +16,12 @@
 
 package org.activiti.cloud.services.query.rest;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.jpa.impl.JPAQuery;
-import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
@@ -34,6 +37,7 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -159,16 +163,27 @@ public class TaskControllerHelper {
                     pageable
                 );
         } else {
-            JPAQuery<TaskEntity> query = new JPAQuery<>(entityManager);
-            query.from(QTaskEntity.taskEntity).where(extendedPredicate);
-            query.offset(pageable.getOffset());
-            query.limit(pageable.getPageSize());
-            List<String> taskIds = query.select(QTaskEntity.taskEntity.id).fetch();
+            JPAQuery<TaskEntity> searchQuery = getSearchQuery(pageable, extendedPredicate);
+            List<String> taskIds = searchQuery.select(QTaskEntity.taskEntity.id).fetch();
             long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
-
             List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds);
             page = new PageImpl<>(results, pageable, count);
         }
         return page;
+    }
+
+    @NotNull
+    private JPAQuery<TaskEntity> getSearchQuery(Pageable pageable, Predicate extendedPredicate) {
+        JPAQuery<TaskEntity> query = new JPAQuery<>(entityManager);
+        query.from(QTaskEntity.taskEntity).where(extendedPredicate);
+        query.offset(pageable.getOffset());
+        query.limit(pageable.getPageSize());
+        pageable
+            .getSort()
+            .forEach(order -> {
+                SimplePath<Object> path = Expressions.path(Object.class, QTaskEntity.taskEntity, order.getProperty());
+                query.orderBy(new OrderSpecifier(order.isAscending() ? Order.ASC : Order.DESC, path));
+            });
+        return query;
     }
 }
