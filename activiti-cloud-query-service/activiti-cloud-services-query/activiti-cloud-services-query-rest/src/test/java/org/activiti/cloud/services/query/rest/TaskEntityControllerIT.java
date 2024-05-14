@@ -252,9 +252,9 @@ class TaskEntityControllerIT {
     }
 
     @Test
-    void testPaginationResolverWithoutSettingMaxOnRequest() throws Exception {
+    void should_returnMaxItemsLimits_when_invokeWithoutPagingParameters() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1001, 1000, PageRequest.of(0, 1000));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 1000));
 
         given(taskRepository.findAll(any(), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1000));
@@ -268,7 +268,7 @@ class TaskEntityControllerIT {
 
         assertThatJson(result.getResponse().getContentAsString())
             .node("list.pagination.skipCount")
-            .isEqualTo(1001)
+            .isEqualTo(0)
             .node("list.pagination.maxItems")
             .isEqualTo(1000)
             .node("list.pagination.count")
@@ -276,27 +276,27 @@ class TaskEntityControllerIT {
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(1002);
+            .isEqualTo(1000);
     }
 
     @Test
-    void testPaginationResolverWithMaxRequestExceedingLimit() throws Exception {
+    void should_returnMaxItemsLimits_when_invokeWithPagingParametersExceedingLimits() throws Exception {
         //given
-        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1001, 1000, PageRequest.of(0, 1000));
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
         given(taskRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1000));
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
         MvcResult result = mockMvc
-            .perform(get("/v1/tasks?skipCount=2001&maxItems=2000").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON))
             //then
             .andExpect(status().isOk())
             .andReturn();
 
         assertThatJson(result.getResponse().getContentAsString())
             .node("list.pagination.skipCount")
-            .isEqualTo(1001)
+            .isEqualTo(1000)
             .node("list.pagination.maxItems")
             .isEqualTo(1000)
             .node("list.pagination.count")
@@ -304,6 +304,6 @@ class TaskEntityControllerIT {
             .node("list.pagination.hasMoreItems")
             .isEqualTo(false)
             .node("list.pagination.totalItems")
-            .isEqualTo(1002);
+            .isEqualTo(2000);
     }
 }

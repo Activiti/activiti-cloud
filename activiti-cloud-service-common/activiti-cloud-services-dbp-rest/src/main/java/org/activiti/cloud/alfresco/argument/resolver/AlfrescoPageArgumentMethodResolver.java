@@ -62,16 +62,17 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
-        boolean isMaxItemsExceedingLimit =
-            !alfrescoQueryParameters.getMaxItemsParameter().isSet() ||
-            alfrescoQueryParameters.getMaxItemsParameter().getValue() > MAX_ITEMS_LIMIT;
 
-        if (isMaxItemsExceedingLimit && MAX_ITEMS_LIMIT_ENABLED) {
+        if (isPaginationValueExceedinglimit(alfrescoQueryParameters)) {
             Pageable limitedPageable = PageRequest.of(0, MAX_ITEMS_LIMIT);
-            return new AlfrescoPageRequest(MAX_ITEMS_LIMIT + 1L, MAX_ITEMS_LIMIT, limitedPageable);
-        }
-
-        if (
+            return new AlfrescoPageRequest(
+                alfrescoQueryParameters.getSkipCountParameter().isSet()
+                    ? alfrescoQueryParameters.getSkipCountParameter().getValue()
+                    : 0L,
+                MAX_ITEMS_LIMIT,
+                limitedPageable
+            );
+        } else if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
             alfrescoQueryParameters.getMaxItemsParameter().isSet()
         ) {
@@ -83,5 +84,15 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         } else {
             return basePageable;
         }
+    }
+
+    private boolean isPaginationValueExceedinglimit(AlfrescoQueryParameters alfrescoQueryParameters) {
+        return (
+            MAX_ITEMS_LIMIT_ENABLED &&
+            (
+                !alfrescoQueryParameters.getMaxItemsParameter().isSet() ||
+                alfrescoQueryParameters.getMaxItemsParameter().getValue() > MAX_ITEMS_LIMIT
+            )
+        );
     }
 }
