@@ -49,9 +49,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskControllerHelper {
 
     private final TaskRepository taskRepository;
+
     private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
+
     private final QueryDslPredicateAggregator predicateAggregator;
+
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
+
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
     @PersistenceContext
@@ -166,7 +170,7 @@ public class TaskControllerHelper {
             JPAQuery<TaskEntity> searchQuery = getSearchQuery(pageable, extendedPredicate);
             List<String> taskIds = searchQuery.select(QTaskEntity.taskEntity.id).fetch();
             long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
-            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds);
+            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds, pageable);
             page = new PageImpl<>(results, pageable, count);
         }
         return page;
@@ -175,13 +179,15 @@ public class TaskControllerHelper {
     @NotNull
     private JPAQuery<TaskEntity> getSearchQuery(Pageable pageable, Predicate extendedPredicate) {
         JPAQuery<TaskEntity> query = new JPAQuery<>(entityManager);
-        query.from(QTaskEntity.taskEntity).where(extendedPredicate);
-        query.offset(pageable.getOffset());
-        query.limit(pageable.getPageSize());
+        query
+            .from(QTaskEntity.taskEntity)
+            .where(extendedPredicate)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize());
         pageable
             .getSort()
             .forEach(order -> {
-                SimplePath<Object> path = Expressions.path(Object.class, QTaskEntity.taskEntity, order.getProperty());
+                SimplePath path = Expressions.path(Object.class, QTaskEntity.taskEntity, order.getProperty());
                 query.orderBy(new OrderSpecifier(order.isAscending() ? Order.ASC : Order.DESC, path));
             });
         return query;

@@ -17,13 +17,11 @@ package org.activiti.cloud.services.query.app.repository;
 
 import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -69,7 +67,9 @@ public interface TaskRepository
     }
 
     @EntityGraph(
-        attributePaths = { "processVariables", "processVariables.value", "taskCandidateUsers", "taskCandidateGroups" }
+        attributePaths = {
+            "processVariables", "processVariables.value", "taskCandidateUsers", "taskCandidateGroups", "variables",
+        }
     )
-    List<TaskEntity> findAllByIdIn(List<String> taskIds);
+    List<TaskEntity> findAllByIdIn(List<String> taskIds, Pageable pageRequest);
 }

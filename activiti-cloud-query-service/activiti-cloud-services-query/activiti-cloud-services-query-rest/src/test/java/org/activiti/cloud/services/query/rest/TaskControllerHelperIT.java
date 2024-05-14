@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,6 +112,7 @@ public class TaskControllerHelperIT {
             TaskEntity taskEntity = new TaskEntity();
             String taskId = "id" + i;
             taskEntity.setId(taskId);
+            taskEntity.setCreatedDate(new Date());
             TaskCandidateGroupEntity groupCand = new TaskCandidateGroupEntity(taskId, "group" + i);
             taskEntity.setTaskCandidateGroups(Set.of(groupCand));
             TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity(taskId, "user" + i);
@@ -134,7 +136,7 @@ public class TaskControllerHelperIT {
             .toList();
 
         int pageSize = 30;
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").ascending());
 
         PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
