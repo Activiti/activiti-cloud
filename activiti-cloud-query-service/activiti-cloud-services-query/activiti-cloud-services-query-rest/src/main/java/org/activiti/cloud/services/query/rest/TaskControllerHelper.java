@@ -170,7 +170,7 @@ public class TaskControllerHelper {
             JPAQuery<TaskEntity> searchQuery = getSearchQuery(pageable, extendedPredicate);
             List<String> taskIds = searchQuery.select(QTaskEntity.taskEntity.id).fetch();
             long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
-            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds, pageable);
+            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds, pageable.getSort());
             page = new PageImpl<>(results, pageable, count);
         }
         return page;

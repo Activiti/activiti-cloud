@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
@@ -71,5 +71,5 @@ public interface TaskRepository
             "processVariables", "processVariables.value", "taskCandidateUsers", "taskCandidateGroups", "variables",
         }
     )
-    List<TaskEntity> findAllByIdIn(List<String> taskIds, Pageable pageRequest);
+    List<TaskEntity> findAllByIdIn(List<String> taskIds, Sort pageRequest);
 }
