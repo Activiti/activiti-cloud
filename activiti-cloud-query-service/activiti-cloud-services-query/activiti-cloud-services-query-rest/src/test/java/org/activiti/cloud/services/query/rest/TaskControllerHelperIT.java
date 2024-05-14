@@ -31,6 +31,7 @@ import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupReposi
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
@@ -75,7 +76,7 @@ public class TaskControllerHelperIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
-    private org.activiti.cloud.services.query.app.repository.VariableRepository variableRepository;
+    private VariableRepository variableRepository;
 
     @Autowired
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
