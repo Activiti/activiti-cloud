@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-acceptance-scenarios-parent</artifactId>
-    <version>8.5.0-SNAPSHOT</version>
+    <version>8.5.0-alpha.11</version>
   </parent>
   <artifactId>multiple-runtime-acceptance-tests</artifactId>
   <name>Activiti Cloud :: Acceptance Scenarios Multi-Runtime</name>
