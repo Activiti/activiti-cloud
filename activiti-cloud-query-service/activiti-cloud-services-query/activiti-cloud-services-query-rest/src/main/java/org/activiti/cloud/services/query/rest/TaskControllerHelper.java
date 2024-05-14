@@ -94,7 +94,7 @@ public class TaskControllerHelper {
         List<String> processVariableKeys
     ) {
         addProcessVariablesFilter(processVariableKeys);
-        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
+        Page<TaskEntity> page = findPageWithProcessVariables(predicate, variableSearch, pageable, filters);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -103,6 +103,7 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(
         Predicate predicate,
         VariableSearch variableSearch,
@@ -117,7 +118,7 @@ public class TaskControllerHelper {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(
         Predicate predicate,
         List<String> processVariableKeys,
@@ -167,13 +168,33 @@ public class TaskControllerHelper {
                     pageable
                 );
         } else {
+            page = taskRepository.findAll(extendedPredicate, pageable);
+        }
+        return page;
+    }
+
+    private Page<TaskEntity> findPageWithProcessVariables(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters
+    ) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+
+        if (variableSearch.isSet()) {
+            return taskRepository.findByVariableNameAndValue(
+                variableSearch.getName(),
+                variableSearch.getValue(),
+                extendedPredicate,
+                pageable
+            );
+        } else {
             JPAQuery<TaskEntity> searchQuery = getSearchQuery(pageable, extendedPredicate);
             List<String> taskIds = searchQuery.select(QTaskEntity.taskEntity.id).fetch();
             long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
             List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds, pageable.getSort());
-            page = new PageImpl<>(results, pageable, count);
+            return new PageImpl<>(results, pageable, count);
         }
-        return page;
     }
 
     @NotNull
