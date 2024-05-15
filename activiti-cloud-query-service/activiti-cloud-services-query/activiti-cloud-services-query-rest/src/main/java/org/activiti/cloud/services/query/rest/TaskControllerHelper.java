@@ -16,19 +16,13 @@
 
 package org.activiti.cloud.services.query.rest;
 
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.SimplePath;
-import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -37,11 +31,8 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,8 +84,13 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        addProcessVariablesFilter(processVariableKeys);
-        Page<TaskEntity> page = findPageWithProcessVariables(predicate, variableSearch, pageable, filters);
+        Page<TaskEntity> page = findPageWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -177,11 +173,13 @@ public class TaskControllerHelper {
         Predicate predicate,
         VariableSearch variableSearch,
         Pageable pageable,
-        List<QueryDslPredicateFilter> filters
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys
     ) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
 
         if (variableSearch.isSet()) {
+            addProcessVariablesFilter(processVariableKeys);
             return taskRepository.findByVariableNameAndValue(
                 variableSearch.getName(),
                 variableSearch.getValue(),
@@ -189,28 +187,7 @@ public class TaskControllerHelper {
                 pageable
             );
         } else {
-            JPAQuery<TaskEntity> searchQuery = getSearchQuery(pageable, extendedPredicate);
-            List<String> taskIds = searchQuery.select(QTaskEntity.taskEntity.id).fetch();
-            long count = taskRepository.findBy(extendedPredicate, FluentQuery.FetchableFluentQuery::count);
-            List<TaskEntity> results = taskRepository.findAllByIdIn(taskIds, pageable.getSort());
-            return new PageImpl<>(results, pageable, count);
+            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
         }
-    }
-
-    @NotNull
-    private JPAQuery<TaskEntity> getSearchQuery(Pageable pageable, Predicate extendedPredicate) {
-        JPAQuery<TaskEntity> query = new JPAQuery<>(entityManager);
-        query
-            .from(QTaskEntity.taskEntity)
-            .where(extendedPredicate)
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize());
-        pageable
-            .getSort()
-            .forEach(order -> {
-                SimplePath path = Expressions.path(Object.class, QTaskEntity.taskEntity, order.getProperty());
-                query.orderBy(new OrderSpecifier(order.isAscending() ? Order.ASC : Order.DESC, path));
-            });
-        return query;
     }
 }

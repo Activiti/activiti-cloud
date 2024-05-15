@@ -41,6 +41,7 @@ import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,6 @@ import org.springframework.test.context.TestPropertySource;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -100,9 +99,7 @@ public class TaskControllerHelperIT {
     @Test
     public void should_returnTasks_withProcessVariablesByKeys() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
-
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
 
         Predicate predicate = null;
@@ -145,9 +142,7 @@ public class TaskControllerHelperIT {
     @Test
     public void should_return_PaginatedTasks_WithProcessVariables() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
-
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
 
         Predicate predicate = null;
@@ -218,7 +213,6 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnTask_evenIfItHashNoMatchingProcessVariables() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
 
         TaskEntity taskEntity = new TaskEntity();
@@ -430,11 +424,12 @@ public class TaskControllerHelperIT {
     ) {
         List<TaskEntity> taskEntities = new ArrayList<>();
 
+        LocalDateTime start = LocalDateTime.fromDateFields(new Date());
         for (int i = 0; i < 100; i++) {
             TaskEntity taskEntity = new TaskEntity();
             String taskId = "id" + i;
             taskEntity.setId(taskId);
-            taskEntity.setCreatedDate(new Date());
+            taskEntity.setCreatedDate(start.plusSeconds(i).toDate());
             TaskCandidateGroupEntity groupCand = new TaskCandidateGroupEntity(taskId, "group" + i);
             taskEntity.setTaskCandidateGroups(Set.of(groupCand));
             TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity(taskId, "user" + i);
@@ -454,11 +449,12 @@ public class TaskControllerHelperIT {
     private List<TaskEntity> createStandaloneTasks() {
         List<TaskEntity> taskEntities = new ArrayList<>();
 
+        LocalDateTime start = LocalDateTime.fromDateFields(new Date());
         for (int i = 0; i < 10; i++) {
             TaskEntity taskEntity = new TaskEntity();
             String taskId = "standalone" + i;
             taskEntity.setId(taskId);
-            taskEntity.setCreatedDate(new Date());
+            taskEntity.setCreatedDate(start.plusSeconds(i).toDate());
             taskEntities.add(taskEntity);
             taskRepository.save(taskEntity);
         }

@@ -19,11 +19,8 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
-import java.util.List;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -65,11 +62,4 @@ public interface TaskRepository
             .excluding(root.standalone)
             .apply(bindings);
     }
-
-    @EntityGraph(
-        attributePaths = {
-            "processVariables", "processVariables.value", "taskCandidateUsers", "taskCandidateGroups", "variables",
-        }
-    )
-    List<TaskEntity> findAllByIdIn(List<String> taskIds, Sort pageRequest);
 }
