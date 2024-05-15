@@ -41,6 +41,7 @@ import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -57,6 +58,8 @@ import org.springframework.test.context.TestPropertySource;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "logging.level.org.hibernate.collection.spi=warn",
+        "spring.jpa.show-sql=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -83,6 +86,16 @@ public class TaskControllerHelperIT {
 
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @BeforeEach
+    public void setUp() {
+        taskRepository.deleteAll();
+        taskVariableRepository.deleteAll();
+        processInstanceRepository.deleteAll();
+        variableRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
+        taskCandidateUserRepository.deleteAll();
+    }
 
     @Test
     public void should_returnTasks_withProcessVariablesByKeys() {
@@ -244,11 +257,170 @@ public class TaskControllerHelperIT {
             processVariableKeys
         );
 
-        assertThat(response.getContent()).hasSize(pageSize);
-        assertThat(response.getPreviousLink()).isEmpty();
-        assertThat(response.getNextLink()).isPresent();
+        assertThat(response.getContent()).hasSize(1);
 
         assertThat(response.getContent().stream().toList().getFirst().getContent().getProcessVariables()).isEmpty();
+    }
+
+    @Test
+    void should_returnOnlyStandaloneTasks_whenStandAloneFilterIsTrue() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        List<TaskEntity> tasksWithProcessInstance = createTasks(variables, processInstanceEntity);
+        List<TaskEntity> standaloneTasks = createStandaloneTasks();
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(true));
+
+        int pageSize = 1000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        List<String> processVariableKeys = variables
+            .stream()
+            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+            .toList();
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
+
+        assertThat(response.getContent()).hasSize(standaloneTasks.size());
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .doesNotContainAnyElementsOf(tasksWithProcessInstance);
+    }
+
+    @Test
+    void should_returnAllTasks_whenStandAloneFilterIsFalse() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        List<TaskEntity> tasksWithProcessInstance = createTasks(variables, processInstanceEntity);
+        List<TaskEntity> standaloneTasks = createStandaloneTasks();
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+
+        int pageSize = 1000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        List<String> processVariableKeys = variables
+            .stream()
+            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+            .toList();
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
+
+        assertThat(response.getContent()).hasSize(standaloneTasks.size() + tasksWithProcessInstance.size());
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .containsAll(tasksWithProcessInstance);
+    }
+
+    @Test
+    void should_returnOnlyRootTasks_whenRootTaskFilterIsTrue() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        List<TaskEntity> rootTasks = createTasks(variables, processInstanceEntity);
+
+        List<TaskEntity> childTasks = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            TaskEntity childTask = new TaskEntity();
+            String taskId = "child" + i;
+            childTask.setId(taskId);
+            childTask.setCreatedDate(new Date());
+            childTask.setProcessInstance(processInstanceEntity);
+            childTask.setProcessInstanceId(processInstanceEntity.getId());
+            childTask.setParentTaskId(rootTasks.get(i).getId());
+            childTasks.add(childTask);
+            taskRepository.save(childTask);
+        }
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(true), new StandAloneTaskFilter(false));
+
+        int pageSize = 1000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        List<String> processVariableKeys = variables
+            .stream()
+            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+            .toList();
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
+
+        assertThat(response.getContent()).hasSize(rootTasks.size());
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .doesNotContainAnyElementsOf(childTasks);
+    }
+
+    @Test
+    void should_returnRootTasksAndChildTasks_whenRootTaskFilterIsFalse() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        List<TaskEntity> rootTasks = createTasks(variables, processInstanceEntity);
+
+        List<TaskEntity> childTasks = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            TaskEntity childTask = new TaskEntity();
+            String taskId = "child" + i;
+            childTask.setId(taskId);
+            childTask.setCreatedDate(new Date());
+            childTask.setProcessInstance(processInstanceEntity);
+            childTask.setProcessInstanceId(processInstanceEntity.getId());
+            childTask.setParentTaskId(rootTasks.get(i).getId());
+            childTasks.add(childTask);
+            taskRepository.save(childTask);
+        }
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+
+        int pageSize = 1000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        List<String> processVariableKeys = variables
+            .stream()
+            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+            .toList();
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
+
+        assertThat(response.getContent()).hasSize(rootTasks.size() + childTasks.size());
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(childTasks);
     }
 
     @NotNull
@@ -273,6 +445,21 @@ public class TaskControllerHelperIT {
             taskEntities.add(taskEntity);
             taskCandidateGroupRepository.save(groupCand);
             taskCandidateUserRepository.save(usrCand);
+            taskRepository.save(taskEntity);
+        }
+        return taskEntities;
+    }
+
+    @NotNull
+    private List<TaskEntity> createStandaloneTasks() {
+        List<TaskEntity> taskEntities = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            TaskEntity taskEntity = new TaskEntity();
+            String taskId = "standalone" + i;
+            taskEntity.setId(taskId);
+            taskEntity.setCreatedDate(new Date());
+            taskEntities.add(taskEntity);
             taskRepository.save(taskEntity);
         }
         return taskEntities;
