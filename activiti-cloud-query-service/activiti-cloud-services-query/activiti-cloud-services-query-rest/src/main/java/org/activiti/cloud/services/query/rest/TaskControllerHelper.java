@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -36,13 +35,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.transaction.annotation.Transactional;
 
 public class TaskControllerHelper {
 
     private final TaskRepository taskRepository;
+
     private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
+
     private final QueryDslPredicateAggregator predicateAggregator;
+
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
+
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
     @PersistenceContext
@@ -72,7 +76,7 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
         Predicate predicate,
         VariableSearch variableSearch,
@@ -80,9 +84,13 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        addProcessVariablesFilter(processVariableKeys);
-        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-        initializeProcessVariables(page);
+        Page<TaskEntity> page = findPageWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys
+        );
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -91,6 +99,7 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllFromBody(
         Predicate predicate,
         VariableSearch variableSearch,
@@ -105,7 +114,7 @@ public class TaskControllerHelper {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQueryWithProcessVariables(
         Predicate predicate,
         List<String> processVariableKeys,
@@ -158,5 +167,27 @@ public class TaskControllerHelper {
             page = taskRepository.findAll(extendedPredicate, pageable);
         }
         return page;
+    }
+
+    private Page<TaskEntity> findPageWithProcessVariables(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys
+    ) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+
+        if (variableSearch.isSet()) {
+            addProcessVariablesFilter(processVariableKeys);
+            return taskRepository.findByVariableNameAndValue(
+                variableSearch.getName(),
+                variableSearch.getValue(),
+                extendedPredicate,
+                pageable
+            );
+        } else {
+            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
+        }
     }
 }
