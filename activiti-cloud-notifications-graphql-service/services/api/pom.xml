@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-notifications-graphql</artifactId>
-    <version>8.3.1-alpha.4</version>
+    <version>8.3.1</version>
   </parent>
   <artifactId>activiti-cloud-services-notifications-graphql-api</artifactId>
   <name>Activiti Cloud Notifications :: Services :: GraphQL Api</name>

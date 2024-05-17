@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-examples</artifactId>
-    <version>8.3.1-alpha.4</version>
+    <version>8.3.1</version>
   </parent>
   <artifactId>example-runtime-bundle</artifactId>
   <name>Activiti Cloud :: Runtime Bundle</name>
