@@ -5,7 +5,7 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>8.3.1-SNAPSHOT</version>
+    <version>8.3.1-alpha.3</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-auditable</artifactId>

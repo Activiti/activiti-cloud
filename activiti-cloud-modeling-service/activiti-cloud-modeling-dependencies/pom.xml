@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-modeling-service-parent</artifactId>
-    <version>8.3.1-SNAPSHOT</version>
+    <version>8.3.1-alpha.3</version>
   </parent>
   <artifactId>activiti-cloud-modeling-dependencies</artifactId>
   <packaging>pom</packaging>
