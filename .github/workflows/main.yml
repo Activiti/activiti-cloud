@@ -373,7 +373,7 @@ jobs:
     if: github.event_name == 'push'
     env:
       VERSION: ${{ needs.build.outputs.version }}
-      DEVELOPMENT_BRANCH: ${{ github.ref_name }}
+      DEVELOPMENT_BRANCH: 7.15.x
     steps:
       - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
       - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a3f5a4ae53302e9a1f9dc728dee0f4069c1bc584 # v5.22.1
