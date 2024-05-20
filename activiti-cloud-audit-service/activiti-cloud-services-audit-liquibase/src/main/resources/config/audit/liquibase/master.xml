@@ -222,4 +222,12 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
+  <changeSet author="activiti-audit" runInTransaction="false" id="alter13-schema-7.17.0" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/13-alter.pg.schema.7.17.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
