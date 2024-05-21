@@ -75,9 +75,8 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                 .flatMap(operation -> operation.getResponses().entrySet().stream())
                 .filter(entry -> entry.getKey().matches(String.valueOf(HttpStatus.OK.value())))
                 .forEach(entry -> {
-                    LOGGER.info("-------------------------------");
+                    LOGGER.info(entry.toString());
                     Content contents = entry.getValue().getContent();
-                    LOGGER.info(contents.toString());
                     String applicationHal = MediaTypes.HAL_JSON_VALUE;
                     String applicationJson = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                     if (
@@ -85,11 +84,13 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                         contents.containsKey(applicationHal) &&
                         contents.containsKey(applicationJson)
                     ) {
+                        LOGGER.info("-------------------------------");
+                        LOGGER.info(contents.toString());
                         MediaType applicationHalValue = contents.remove(applicationHal);
                         contents.put(applicationHal, applicationHalValue);
+                        LOGGER.info("------------------------------");
+                        LOGGER.info(contents.toString());
                     }
-                    LOGGER.info("------------------------------");
-                    LOGGER.info(contents.toString());
                 });
     }
 
