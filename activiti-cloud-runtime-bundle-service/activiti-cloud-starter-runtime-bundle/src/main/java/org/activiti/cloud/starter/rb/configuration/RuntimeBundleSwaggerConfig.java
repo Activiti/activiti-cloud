@@ -48,6 +48,7 @@ import org.springframework.http.HttpStatus;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeBundleSwaggerConfig.class.getName());
 
     @Bean
