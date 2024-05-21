@@ -88,7 +88,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                         MediaType applicationHalValue = contents.remove(applicationHal);
                         contents.put(applicationHal, applicationHalValue);
                     }
-                    LOGGER.info("-------------------------------");
+                    LOGGER.info("------------------------------");
                     LOGGER.info(contents.toString());
                 });
     }
