@@ -34,6 +34,8 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.common.swagger.springdoc.BaseOpenApiBuilder;
 import org.activiti.cloud.common.swagger.springdoc.SwaggerDocUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.InitializingBean;
@@ -46,6 +48,7 @@ import org.springframework.http.HttpStatus;
 
 @Configuration
 public class RuntimeBundleSwaggerConfig implements InitializingBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeBundleSwaggerConfig.class.getName());
 
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
@@ -71,7 +74,9 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                 .flatMap(operation -> operation.getResponses().entrySet().stream())
                 .filter(entry -> entry.getKey().matches(String.valueOf(HttpStatus.OK.value())))
                 .forEach(entry -> {
+                    LOGGER.info("-------------------------------");
                     Content contents = entry.getValue().getContent();
+                    LOGGER.info(contents.toString());
                     String applicationHal = MediaTypes.HAL_JSON_VALUE;
                     String applicationJson = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                     if (
@@ -82,6 +87,8 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                         MediaType applicationHalValue = contents.remove(applicationHal);
                         contents.put(applicationHal, applicationHalValue);
                     }
+                    LOGGER.info("-------------------------------");
+                    LOGGER.info(contents.toString());
                 });
     }
 
