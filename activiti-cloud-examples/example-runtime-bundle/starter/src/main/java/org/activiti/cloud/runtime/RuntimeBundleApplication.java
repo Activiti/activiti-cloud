@@ -16,14 +16,19 @@
 package org.activiti.cloud.runtime;
 
 import org.activiti.cloud.starter.rb.configuration.ActivitiRuntimeBundle;
+import org.activiti.cloud.starter.rb.configuration.RuntimeBundleSwaggerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @ActivitiRuntimeBundle
 public class RuntimeBundleApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeBundleApplication.class.getName());
 
     public static void main(String[] args) {
+        LOGGER.info("Starting Runtime Bundle Application...");
         SpringApplication.run(RuntimeBundleApplication.class, args);
     }
 }

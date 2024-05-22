@@ -54,6 +54,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean(name = "runtimeBundleApi")
     public GroupedOpenApi runtimeBundleApi(@Value("${activiti.cloud.swagger.rb-base-path:}") String swaggerBasePath) {
+        LOGGER.info("GROUPED OPEN API: Runtime Bundle");
         return GroupedOpenApi
             .builder()
             .group("Runtime Bundle")
@@ -66,6 +67,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
     }
 
     public OpenApiCustomizer openApiCustomizer() {
+        LOGGER.info("OPEN API CUSTOMIZER");
         return openAPI ->
             openAPI
                 .getPaths()
@@ -97,6 +99,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        LOGGER.info("AFTER PROPERTIES SET");
         SwaggerDocUtils.replaceWithClass(StartProcessPayload.class, PayloadApiModels.StartProcessPayloadApiModel.class);
         SwaggerDocUtils.replaceWithClass(SignalPayload.class, PayloadApiModels.SignalPayloadApiModel.class);
         SwaggerDocUtils.replaceWithClass(
