@@ -75,6 +75,7 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                 .flatMap(operation -> operation.getResponses().entrySet().stream())
                 .filter(entry -> entry.getKey().matches(String.valueOf(HttpStatus.OK.value())))
                 .forEach(entry -> {
+                    LOGGER.info("--------------ENTRY-----------------");
                     LOGGER.info(entry.toString());
                     Content contents = entry.getValue().getContent();
                     String applicationHal = MediaTypes.HAL_JSON_VALUE;
@@ -84,11 +85,11 @@ public class RuntimeBundleSwaggerConfig implements InitializingBean {
                         contents.containsKey(applicationHal) &&
                         contents.containsKey(applicationJson)
                     ) {
-                        LOGGER.info("-------------------------------");
+                        LOGGER.info("-------------ContentsBefore------------------");
                         LOGGER.info(contents.toString());
                         MediaType applicationHalValue = contents.remove(applicationHal);
                         contents.put(applicationHal, applicationHalValue);
-                        LOGGER.info("------------------------------");
+                        LOGGER.info("-------------ContentsAfter-----------------");
                         LOGGER.info(contents.toString());
                     }
                 });
