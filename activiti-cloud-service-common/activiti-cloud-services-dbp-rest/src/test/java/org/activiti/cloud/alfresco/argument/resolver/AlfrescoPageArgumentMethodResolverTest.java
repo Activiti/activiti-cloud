@@ -98,7 +98,11 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
         given(pageParameterParser.parseParameters(webRequest))
             .willReturn(
-                new AlfrescoQueryParameters(new SkipCountParameter(true, 40L), new MaxItemsParameter(true, 20))
+                new AlfrescoQueryParameters(
+                    new SkipCountParameter(true, 40L),
+                    new MaxItemsParameter(true, 20),
+                    new PageParameter(true, 20)
+                )
             );
 
         //when

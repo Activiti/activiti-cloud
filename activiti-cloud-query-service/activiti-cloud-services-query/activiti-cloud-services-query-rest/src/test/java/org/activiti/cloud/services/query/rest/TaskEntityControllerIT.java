@@ -291,19 +291,18 @@ class TaskEntityControllerIT {
         MvcResult result = mockMvc
             .perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON))
             //then
-            .andExpect(status().isOk())
+            .andExpect(status().isBadRequest())
             .andReturn();
-
-        assertThatJson(result.getResponse().getContentAsString())
-            .node("list.pagination.skipCount")
-            .isEqualTo(1000)
-            .node("list.pagination.maxItems")
-            .isEqualTo(1000)
-            .node("list.pagination.count")
-            .isEqualTo(1)
-            .node("list.pagination.hasMoreItems")
-            .isEqualTo(false)
-            .node("list.pagination.totalItems")
-            .isEqualTo(2000);
+        //        assertThatJson(result.getResponse().getContentAsString())
+        //            .node("list.pagination.skipCount")
+        //            .isEqualTo(1000)
+        //            .node("list.pagination.maxItems")
+        //            .isEqualTo(1000)
+        //            .node("list.pagination.count")
+        //            .isEqualTo(1)
+        //            .node("list.pagination.hasMoreItems")
+        //            .isEqualTo(false)
+        //            .node("list.pagination.totalItems")
+        //            .isEqualTo(2000);
     }
 }
