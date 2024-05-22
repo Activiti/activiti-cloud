@@ -89,7 +89,7 @@ jobs:
 
       - name: Maven Build and Test
         shell: bash
-        run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
+        run: mvn -DskipAcceptanceTests=true -DskipTests=True -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -346,7 +346,7 @@ jobs:
 
       - name: Maven Deploy
         shell: bash
-        run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
+        run: mvn deploy -DskipTests=True ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
         env:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
