@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @ActivitiRuntimeBundle
 public class RuntimeBundleApplication {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeBundleApplication.class.getName());
 
     public static void main(String[] args) {
