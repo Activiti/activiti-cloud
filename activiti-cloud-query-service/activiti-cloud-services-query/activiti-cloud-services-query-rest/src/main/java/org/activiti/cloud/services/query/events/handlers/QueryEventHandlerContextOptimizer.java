@@ -31,7 +31,6 @@ import org.activiti.cloud.api.model.shared.impl.events.CloudVariableCreatedEvent
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableDeletedEventImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudBPMNActivityEvent;
-import org.activiti.cloud.api.process.model.events.CloudProcessCreatedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityStartedEventImpl;
@@ -73,6 +72,7 @@ public class QueryEventHandlerContextOptimizer {
     public static final String TASKS = "tasks";
     public static final String ACTIVITIES = "activities";
     public static final String SERVICE_TASKS = "serviceTasks";
+    public static final String SEQUENCE_FLOWS = "sequenceFlows";
     private static Logger LOGGER = LoggerFactory.getLogger(QueryEventHandlerContextOptimizer.class);
 
     private Map<Class<? extends CloudRuntimeEvent>, Integer> order = Map.ofEntries(
@@ -163,10 +163,6 @@ public class QueryEventHandlerContextOptimizer {
     }
 
     protected Optional<String> resolveProcessInstanceId(List<CloudRuntimeEvent<?, ?>> events) {
-        if (events.stream().anyMatch(CloudProcessCreatedEvent.class::isInstance)) {
-            return Optional.empty();
-        }
-
         return events.stream().map(CloudRuntimeEvent::getProcessInstanceId).filter(Objects::nonNull).findFirst();
     }
 

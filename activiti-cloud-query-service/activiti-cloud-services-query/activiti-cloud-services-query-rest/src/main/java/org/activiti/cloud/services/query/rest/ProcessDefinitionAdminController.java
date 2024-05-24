@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Optional;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
@@ -62,6 +63,7 @@ public class ProcessDefinitionAdminController {
         this.processDefinitionRepresentationModelAssembler = processDefinitionRepresentationModelAssembler;
     }
 
+    @Operation(summary = "Find all Process Admin")
     @GetMapping
     public PagedModel<EntityModel<CloudProcessDefinition>> findAllProcessAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(

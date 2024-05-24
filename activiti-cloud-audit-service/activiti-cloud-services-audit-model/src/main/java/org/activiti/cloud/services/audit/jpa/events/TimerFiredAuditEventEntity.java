@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerFiredEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TimerFiredAuditEventEntity.TIMER_FIRED_EVENT)
 @DiscriminatorValue(value = TimerFiredAuditEventEntity.TIMER_FIRED_EVENT)
-@DynamicInsert
 public class TimerFiredAuditEventEntity extends TimerAuditEventEntity {
 
     protected static final String TIMER_FIRED_EVENT = "TimerFiredEvent";

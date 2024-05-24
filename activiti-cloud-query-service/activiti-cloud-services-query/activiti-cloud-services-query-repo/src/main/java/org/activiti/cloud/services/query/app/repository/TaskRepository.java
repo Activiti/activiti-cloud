@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
+
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -54,8 +56,10 @@ public interface TaskRepository
         bindings.bind(root.name).first((path, value) -> path.like("%" + value.toString() + "%"));
         bindings.bind(root.description).first((path, value) -> path.like("%" + value.toString() + "%"));
 
-        bindings.excluding(root.variables);
-        bindings.excluding(root.processVariables);
-        bindings.excluding(root.standalone);
+        whitelist(root)
+            .excluding(root.variables)
+            .excluding(root.processVariables)
+            .excluding(root.standalone)
+            .apply(bindings);
     }
 }

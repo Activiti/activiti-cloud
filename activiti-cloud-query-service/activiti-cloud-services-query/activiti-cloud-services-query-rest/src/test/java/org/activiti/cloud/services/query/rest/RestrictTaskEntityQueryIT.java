@@ -37,10 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "spring.main.banner-mode=off")
+@TestPropertySource("classpath:application-test.properties")
 @EnableAutoConfiguration
-public class RestrictTaskEntityQueryIT {
+class RestrictTaskEntityQueryIT {
 
     @Autowired
     private TaskRepository taskRepository;
@@ -68,7 +70,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenCandidate() {
+    void shouldGetTasksWhenCandidate() {
         TaskEntity taskEntity = new TaskEntity();
         String taskId = UUID.randomUUID().toString();
         taskEntity.setId(taskId);
@@ -98,7 +100,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNotCandidate() {
+    void shouldNotGetTasksWhenNotCandidate() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
         taskRepository.save(taskEntity);
@@ -127,7 +129,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
+    void shouldNotGetTasksAssignedToSomeOneElseWhenCandidate() {
         //given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
@@ -156,7 +158,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksAssignedToSomeOneElseWhenOwner() {
+    void shouldGetTasksAssignedToSomeOneElseWhenOwner() {
         //given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
@@ -186,7 +188,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenAssigneeEvenIfNotCandidate() {
+    void shouldGetTasksWhenAssigneeEvenIfNotCandidate() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("2");
         taskEntity.setAssignee("fred");
@@ -214,7 +216,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenInCandidateGroup() {
+    void shouldGetTasksWhenInCandidateGroup() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
         taskRepository.save(taskEntity);
@@ -242,7 +244,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNotInCandidateGroup() {
+    void shouldNotGetTasksWhenNotInCandidateGroup() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("4");
         taskRepository.save(taskEntity);
@@ -270,7 +272,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup() {
+    void shouldNotGetTasksAssignedToSomeOneElseWhenInCandidateGroup() {
         //given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
@@ -300,7 +302,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenNoCandidatesConfiguredAndNotAssigned() {
+    void shouldGetTasksWhenNoCandidatesConfiguredAndNotAssigned() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
         taskRepository.save(taskEntity);
@@ -326,7 +328,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured() {
+    void shouldNotGetTasksAssignedToSomeOneElseWhenNoCandidatesConfigured() {
         //given
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
@@ -354,7 +356,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches() {
+    void shouldGetTasksWhenNoCandidatesConfiguredAndExistingQueryMatches() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
         taskEntity.setOwner("bob");
@@ -385,7 +387,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch() {
+    void shouldNotGetTasksWhenNoCandidatesConfiguredAndExistingQueryDoesNotMatch() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("5");
         taskEntity.setOwner("bob");
@@ -416,7 +418,7 @@ public class RestrictTaskEntityQueryIT {
     }
 
     @Test
-    public void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch() {
+    void shouldNotGetTasksWhenInCandidateGroupButExistingQueryDoesNotMatch() {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setId("3");
         taskRepository.save(taskEntity);

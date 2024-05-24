@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageReceivedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = MessageReceivedAuditEventEntity.MESSAGE_RECEIVED_EVENT)
 @DiscriminatorValue(value = MessageReceivedAuditEventEntity.MESSAGE_RECEIVED_EVENT)
-@DynamicInsert
 public class MessageReceivedAuditEventEntity extends MessageAuditEventEntity {
 
     protected static final String MESSAGE_RECEIVED_EVENT = "MessageReceivedEvent";

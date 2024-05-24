@@ -15,10 +15,16 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsHelper.whitelist;
+
 import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -35,6 +41,8 @@ public interface ProcessInstanceRepository
         CrudRepository<ProcessInstanceEntity, String> {
     @Override
     default void customize(QuerydslBindings bindings, QProcessInstanceEntity root) {
+        whitelist(root).apply(bindings);
+
         bindings.bind(String.class).first((StringPath path, String value) -> path.eq(value));
         bindings.bind(root.lastModifiedFrom).first((path, value) -> root.lastModified.after(value));
         bindings.bind(root.lastModifiedTo).first((path, value) -> root.lastModified.before(value));
@@ -48,4 +56,7 @@ public interface ProcessInstanceRepository
         bindings.bind(root.initiator).first((path, value) -> root.initiator.in(Arrays.asList(value.split(","))));
         bindings.bind(root.appVersion).first((path, value) -> root.appVersion.in(Arrays.asList(value.split(","))));
     }
+
+    @EntityGraph(value = "ProcessInstances.withVariables", type = EntityGraph.EntityGraphType.LOAD)
+    List<ProcessInstanceEntity> findByIdIsIn(Collection<String> ids, Sort sort);
 }

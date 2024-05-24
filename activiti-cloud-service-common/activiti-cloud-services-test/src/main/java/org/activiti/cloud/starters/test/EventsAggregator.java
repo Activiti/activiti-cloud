@@ -18,24 +18,59 @@ package org.activiti.cloud.starters.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ErrorMessage;
 
-public class EventsAggregator {
+public class EventsAggregator implements MessageHandler {
 
     private List<CloudRuntimeEvent<?, ?>> events = new ArrayList<>();
 
     private MyProducer producer;
 
+    private AtomicReference<Message<?>> errorMessageRef = new AtomicReference<>();
+
     public EventsAggregator(MyProducer producer) {
         this.producer = producer;
     }
 
-    public void addEvents(CloudRuntimeEvent<?, ?>... events) {
+    public EventsAggregator addEvents(CloudRuntimeEvent<?, ?>... events) {
         this.events.addAll(Arrays.asList(events));
+
+        return this;
     }
 
-    public void sendAll() {
+    public CloudRuntimeEvent<?, ?>[] sendAll() {
+        List<CloudRuntimeEvent<?, ?>> sentEvents = new ArrayList<>(events);
+
+        errorMessageRef.set(null);
         producer.send(events.toArray(new CloudRuntimeEvent<?, ?>[] {}));
         events.clear();
+
+        return sentEvents.toArray(CloudRuntimeEvent[]::new);
+    }
+
+    @Override
+    public void handleMessage(Message<?> message) throws MessagingException {
+        errorMessageRef.set(message);
+    }
+
+    public Throwable getException() {
+        return Optional
+            .ofNullable(errorMessageRef.get())
+            .map(ErrorMessage.class::cast)
+            .map(ErrorMessage::getPayload)
+            .orElse(null);
+    }
+
+    public EventsAggregator errorChannel(SubscribableChannel errorChannel) {
+        errorChannel.subscribe(this);
+
+        return this;
     }
 }

@@ -22,7 +22,9 @@ public class UserSearchParams {
     private String search;
     private Set<String> groups;
     private Set<String> roles;
+    private UserTypeSearchParam type;
     private String application;
+    private boolean filterDeactivatedUsers;
 
     public String getSearchKey() {
         return search;
@@ -48,11 +50,27 @@ public class UserSearchParams {
         this.roles = roles;
     }
 
+    public UserTypeSearchParam getType() {
+        return type;
+    }
+
+    public void setType(UserTypeSearchParam type) {
+        this.type = type;
+    }
+
     public String getApplication() {
         return application;
     }
 
     public void setApplication(String application) {
         this.application = application;
+    }
+
+    public boolean isFilterDeactivatedUsers() {
+        return filterDeactivatedUsers;
+    }
+
+    public void setFilterDeactivatedUsers(boolean filterDeactivatedUsers) {
+        this.filterDeactivatedUsers = filterDeactivatedUsers;
     }
 }

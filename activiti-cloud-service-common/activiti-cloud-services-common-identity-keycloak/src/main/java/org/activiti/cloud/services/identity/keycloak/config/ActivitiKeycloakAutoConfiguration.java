@@ -159,13 +159,12 @@ public class ActivitiKeycloakAutoConfiguration {
             clientRegistrationRepository,
             clientRegistration
         );
-        KeycloakClient keycloakClient = Feign
+        return Feign
             .builder()
             .contract(new SpringMvcContract())
             .encoder(new SpringEncoder(messageConverters))
             .decoder(new SpringDecoder(messageConverters, customizers))
             .requestInterceptor(clientCredentialsAuthRequestInterceptor)
             .target(KeycloakClient.class, url);
-        return keycloakClient;
     }
 }

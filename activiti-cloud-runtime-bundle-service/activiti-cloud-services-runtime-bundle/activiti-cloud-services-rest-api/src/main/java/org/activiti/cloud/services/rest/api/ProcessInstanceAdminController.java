@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 import org.activiti.api.process.model.payloads.StartMessagePayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
@@ -43,23 +44,39 @@ public interface ProcessInstanceAdminController {
     EntityModel<CloudProcessInstance> startProcess(@RequestBody StartProcessPayload cmd);
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    EntityModel<CloudProcessInstance> getProcessInstanceById(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> getProcessInstanceById(
+        @Parameter(
+            description = "Enter the processInstanceId to get process instance by id candidate groups"
+        ) @PathVariable String processInstanceId
+    );
 
     @RequestMapping(method = RequestMethod.POST, value = "{processInstanceId}/suspend")
-    EntityModel<CloudProcessInstance> suspend(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> suspend(
+        @Parameter(description = "Enter the processInstanceId to suspend") @PathVariable String processInstanceId
+    );
 
     @RequestMapping(method = RequestMethod.POST, value = "{processInstanceId}/resume")
-    EntityModel<CloudProcessInstance> resume(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> resume(
+        @Parameter(description = "Enter the processInstanceId to resume") @PathVariable String processInstanceId
+    );
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.DELETE)
-    EntityModel<CloudProcessInstance> deleteProcessInstance(@PathVariable String processInstanceId);
+    EntityModel<CloudProcessInstance> deleteProcessInstance(
+        @Parameter(description = "Enter the processInstanceId to delete") @PathVariable String processInstanceId
+    );
 
     @RequestMapping(value = "/{processInstanceId}/destroy", method = RequestMethod.DELETE)
-    ResponseEntity<Void> destroyProcessInstance(@PathVariable String processInstanceId);
+    ResponseEntity<Void> destroyProcessInstance(
+        @Parameter(
+            description = "Enter the processInstanceId to delete a process instance"
+        ) @PathVariable String processInstanceId
+    );
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)
     EntityModel<CloudProcessInstance> updateProcess(
-        @PathVariable("processInstanceId") String processInstanceId,
+        @Parameter(description = "Enter the processInstanceId to update process") @PathVariable(
+            "processInstanceId"
+        ) String processInstanceId,
         @RequestBody UpdateProcessPayload payload
     );
 

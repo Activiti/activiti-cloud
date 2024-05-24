@@ -18,6 +18,7 @@ package org.activiti.cloud.services.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,6 +33,7 @@ public class ProcessDefinitionMeta {
     private Set<String> groups;
 
     @JsonDeserialize(using = ProcessDefinitionVariable.class)
+    @Schema(description = "a key value map used to give a value to the variables used in a process.")
     private Set<ProcessDefinitionVariable> variables;
 
     @JsonDeserialize(using = ProcessDefinitionUserTask.class)

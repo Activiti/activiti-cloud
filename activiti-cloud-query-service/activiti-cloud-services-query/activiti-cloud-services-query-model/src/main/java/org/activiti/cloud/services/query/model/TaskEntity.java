@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
@@ -34,6 +36,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Collections;
@@ -81,12 +84,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private String description;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date createdDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date dueDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date claimedDate;
 
     private int priority;
@@ -111,50 +117,61 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private Long duration;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModified;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date createdTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date createdFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastClaimedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastClaimedFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date completedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date completedFrom;
 
     @JsonIgnore
     @Transient
     @QueryType(PropertyType.DATETIME)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date dueDateTo;
 
     @JsonIgnore
     @Transient
     @QueryType(PropertyType.DATETIME)
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date dueDateFrom;
 
     @JsonIgnore

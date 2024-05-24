@@ -15,10 +15,13 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.process.model.CloudBPMNActivity.BPMNActivityStatus;
@@ -54,12 +57,15 @@ public abstract class BaseBPMNActivityEntity extends ActivitiEntityMetadata {
     private BPMNActivityStatus status;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date startedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date completedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date cancelledDate;
 
     /** The associated process definition key of the activity as in the process file */

@@ -22,11 +22,9 @@ import jakarta.persistence.Entity;
 import org.activiti.api.process.model.BPMNError;
 import org.activiti.cloud.api.process.model.events.CloudBPMNErrorReceivedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ErrorJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @DiscriminatorValue(value = ErrorReceivedAuditEventEntity.ERROR_RECEIVED_EVENT)
-@DynamicInsert
 public class ErrorReceivedAuditEventEntity extends AuditEventEntity {
 
     protected static final String ERROR_RECEIVED_EVENT = "ErrorReceivedEvent";

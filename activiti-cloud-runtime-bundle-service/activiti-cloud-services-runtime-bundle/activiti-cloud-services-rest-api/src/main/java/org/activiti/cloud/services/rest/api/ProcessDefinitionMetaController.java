@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.cloud.services.api.model.ProcessDefinitionMeta;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
@@ -29,5 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 )
 public interface ProcessDefinitionMetaController {
     @RequestMapping(method = RequestMethod.GET)
-    EntityModel<ProcessDefinitionMeta> getProcessDefinitionMetadata(@PathVariable String id);
+    EntityModel<ProcessDefinitionMeta> getProcessDefinitionMetadata(
+        @Parameter(description = "Enter the id to get process definition metadata") @PathVariable String id
+    );
 }

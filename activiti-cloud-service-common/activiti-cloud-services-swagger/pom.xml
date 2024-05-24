@@ -5,7 +5,7 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>8.1.0-SNAPSHOT</version>
+    <version>8.6.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-swagger</artifactId>
@@ -18,6 +18,11 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

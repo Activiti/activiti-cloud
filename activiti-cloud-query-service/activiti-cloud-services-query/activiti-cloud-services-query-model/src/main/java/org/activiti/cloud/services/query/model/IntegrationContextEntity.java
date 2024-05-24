@@ -15,11 +15,32 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import java.util.*;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.api.process.model.CloudIntegrationContext;
 import org.hibernate.annotations.DynamicInsert;
@@ -50,10 +71,12 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
     @Column(columnDefinition = "text", name = "inbound_variables")
+    @Basic(fetch = FetchType.LAZY)
     private Map<String, Object> inBoundVariables = new HashMap<>();
 
     @Convert(converter = MapOfStringObjectJsonConverter.class)
     @Column(columnDefinition = "text")
+    @Basic(fetch = FetchType.LAZY)
     private Map<String, Object> outBoundVariables = new HashMap<>();
 
     private String rootProcessInstanceId;
@@ -70,12 +93,15 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
     private String connectorType;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date requestDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date resultDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date errorDate;
 
     private String errorCode;
@@ -87,6 +113,7 @@ public class IntegrationContextEntity extends ActivitiEntityMetadata implements 
 
     @Convert(converter = ListOfStackTraceElementsJsonConverter.class)
     @Column(columnDefinition = "text")
+    @Basic(fetch = FetchType.LAZY)
     private List<StackTraceElement> stackTraceElements;
 
     @JsonFormat(shape = Shape.STRING)

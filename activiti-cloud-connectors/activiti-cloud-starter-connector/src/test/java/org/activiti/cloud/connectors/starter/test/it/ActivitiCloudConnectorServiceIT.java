@@ -18,6 +18,8 @@ package org.activiti.cloud.connectors.starter.test.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.connectors.starter.ActivitiCloudConnectorApp;
+import org.activiti.cloud.connectors.starter.channels.IntegrationRequestErrorChannelListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +39,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -52,11 +57,20 @@ public class ActivitiCloudConnectorServiceIT {
     @Autowired
     private ConnectorsITStreamHandlers streamHandler;
 
+    @Autowired
+    private IntegrationRequestErrorChannelListener integrationRequestErrorChannelListener;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Value("${activiti.cloud.application.name}")
     private String appName;
 
     @Value("${spring.application.name}")
     private String serviceFullName;
+
+    @Value("${spring.cloud.stream.default.error-handler-definition}")
+    private String defaultErrorHandlerDefinition;
 
     private static final String PROCESS_INSTANCE_ID = "processInstanceId-" + UUID.randomUUID().toString();
     private static final String PROCESS_DEFINITION_ID = "myProcessDefinitionId";
@@ -260,6 +274,39 @@ public class ActivitiCloudConnectorServiceIT {
             .doesNotContain("raiseErrorCause");
 
         assertThat(integrationError.getIntegrationContext().getId()).isEqualTo(INTEGRATION_ID);
+    }
+
+    @Test
+    void defaultErrorHandlerDefinition() {
+        assertThat(defaultErrorHandlerDefinition).isEqualTo("integrationRequestErrorChannelListener");
+    }
+
+    @Test
+    void integrationRequestErrorChannelListener() throws JsonProcessingException {
+        streamHandler.isIntegrationErrorEventProduced().set(false);
+
+        //given
+        IntegrationRequest integrationRequest = mockIntegrationRequest();
+
+        var errorMessage = new ErrorMessage(
+            new MessagingException(
+                MessageBuilder
+                    .withPayload(objectMapper.writeValueAsBytes(integrationRequest))
+                    .setHeader(INTEGRATION_CONTEXT_ID, UUID.randomUUID().toString())
+                    .build(),
+                new RuntimeException("Unexpected exception")
+            )
+        );
+
+        //when
+        integrationRequestErrorChannelListener.accept(errorMessage);
+
+        //then
+        await("Should produce integration error message").untilTrue(streamHandler.isIntegrationErrorEventProduced());
+
+        var integrationError = streamHandler.getIntegrationError();
+
+        assertThat(integrationError).isNotNull();
     }
 
     private IntegrationRequest mockIntegrationRequest() {

@@ -15,13 +15,15 @@
  */
 package org.activiti.cloud.services.identity.keycloak.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import org.activiti.cloud.identity.IdentityClientRepresentation;
 
 public class KeycloakClientRepresentation implements IdentityClientRepresentation {
 
-    private String id;
+    public record ClientAttributes(@JsonProperty("access.token.lifespan") Integer accessTokenLifespan) {}
 
+    private String id;
     private String clientId;
     private String name;
     private Boolean enabled;
@@ -34,6 +36,7 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
     private Boolean publicClient;
     private Boolean implicitFlowEnabled;
     private Boolean serviceAccountsEnabled;
+    private ClientAttributes attributes;
 
     public String getClientId() {
         return clientId;
@@ -139,6 +142,14 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
         this.id = id;
     }
 
+    public ClientAttributes getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(ClientAttributes attributes) {
+        this.attributes = attributes;
+    }
+
     public static class Builder {
 
         private String clientId;
@@ -153,6 +164,7 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
         private Boolean publicClient;
         private Boolean implicitFlowEnabled;
         private Boolean serviceAccountsEnabled;
+        private Integer accessTokenLifespan;
 
         public static Builder newKeycloakClientRepresentationBuilder() {
             return new Builder();
@@ -218,6 +230,11 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
             return this;
         }
 
+        public Builder withAccessTokenLifespanInSeconds(Integer accessTokenLifespan) {
+            this.accessTokenLifespan = accessTokenLifespan;
+            return this;
+        }
+
         public KeycloakClientRepresentation build() {
             KeycloakClientRepresentation keycloakClientRepresentation = new KeycloakClientRepresentation();
             keycloakClientRepresentation.setClientId(clientId);
@@ -232,6 +249,9 @@ public class KeycloakClientRepresentation implements IdentityClientRepresentatio
             keycloakClientRepresentation.setPublicClient(publicClient);
             keycloakClientRepresentation.setImplicitFlowEnabled(implicitFlowEnabled);
             keycloakClientRepresentation.setServiceAccountsEnabled(serviceAccountsEnabled);
+            if (accessTokenLifespan != null) {
+                keycloakClientRepresentation.setAttributes(new ClientAttributes(accessTokenLifespan));
+            }
             return keycloakClientRepresentation;
         }
     }

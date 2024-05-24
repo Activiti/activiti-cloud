@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import java.io.IOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -731,13 +732,13 @@ public class ProcessVariablesIT {
         Map<String, Object> variables = new LinkedHashMap<>();
 
         ProcessVariableValue jsonValue = new ProcessVariableValue(JSON, "{}");
-        Map<String, String> stringValue = new ProcessVariableValue(STRING, "name").toMap();
-        Map<String, String> intValue = new ProcessVariableValue(INTEGER, "10").toMap();
-        Map<String, String> longValue = new ProcessVariableValue(LONG, "10").toMap();
-        Map<String, String> booleanValue = new ProcessVariableValue(BOOLEAN, "true").toMap();
-        Map<String, String> doubleValue = new ProcessVariableValue(DOUBLE, "10.00").toMap();
-        Map<String, String> dateValue = new ProcessVariableValue("date", DATE_1970_01_01T01_01_01_001Z).toMap();
-        Map<String, String> bigDecimalValue = new ProcessVariableValue("bigdecimal", "10.00").toMap();
+        Map<String, Serializable> stringValue = new ProcessVariableValue(STRING, "name").toMap();
+        Map<String, Serializable> intValue = new ProcessVariableValue(INTEGER, "10").toMap();
+        Map<String, Serializable> longValue = new ProcessVariableValue(LONG, "10").toMap();
+        Map<String, Serializable> booleanValue = new ProcessVariableValue(BOOLEAN, "true").toMap();
+        Map<String, Serializable> doubleValue = new ProcessVariableValue(DOUBLE, "10.00").toMap();
+        Map<String, Serializable> dateValue = new ProcessVariableValue("date", DATE_1970_01_01T01_01_01_001Z).toMap();
+        Map<String, Serializable> bigDecimalValue = new ProcessVariableValue("bigdecimal", "10.00").toMap();
 
         variables.put(JSON_VARIABLE, jsonValue);
         variables.put(STRING_VARIABLE, stringValue);

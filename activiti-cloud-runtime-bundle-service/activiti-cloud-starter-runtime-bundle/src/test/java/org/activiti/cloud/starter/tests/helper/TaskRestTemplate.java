@@ -92,7 +92,7 @@ public class TaskRestTemplate {
                 : new HttpEntity<>(CONTENT_TYPE_HEADER),
             TASK_RESPONSE_TYPE
         );
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
 
@@ -111,7 +111,7 @@ public class TaskRestTemplate {
             null,
             TASK_RESPONSE_TYPE
         );
-        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseEntity.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
         return responseEntity;
     }
 

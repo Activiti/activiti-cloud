@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -58,6 +59,10 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     private String variableDefinitionId;
 
+    @Schema(
+        description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
+        readOnly = true
+    )
     private String processDefinitionKey;
 
     public ProcessVariableEntity() {}

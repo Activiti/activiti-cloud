@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.process.model.payloads.RemoveProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
@@ -23,12 +24,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(
     value = "/admin/v1/process-instances/{processInstanceId}/variables",
@@ -45,7 +41,9 @@ public interface ProcessInstanceVariableAdminController {
      */
     @PutMapping
     ResponseEntity<Void> updateVariables(
-        @PathVariable String processInstanceId,
+        @Parameter(
+            description = "Enter the processInstanceId to update variables"
+        ) @PathVariable String processInstanceId,
         @RequestBody SetProcessVariablesPayload setProcessVariablesPayload
     );
 
@@ -55,7 +53,9 @@ public interface ProcessInstanceVariableAdminController {
      */
     @DeleteMapping
     ResponseEntity<Void> removeVariables(
-        @PathVariable String processInstanceId,
+        @Parameter(
+            description = "Enter the processInstanceId to remove variables"
+        ) @PathVariable String processInstanceId,
         @RequestBody RemoveProcessVariablesPayload removeProcessVariablesPayload
     );
 }

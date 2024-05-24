@@ -22,11 +22,40 @@ import io.swagger.v3.core.converter.ModelConverterContext;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IgnoredTypesModelConverter implements ModelConverter {
 
-    private static final Set<Class<?>> IGNORED_CLASSES = Set.of(JavaType.class);
+    private static final String[] IGNORED_CLASS_NAMES = {
+        "com.fasterxml.jackson.databind.JavaType",
+        "org.hibernate.engine.spi.EntityEntry",
+        "org.hibernate.engine.spi.ManagedEntity",
+        "org.hibernate.engine.spi.PersistentAttributeInterceptor",
+    };
+
+    private static final Set<Class<?>> IGNORED_CLASSES;
+
+    static {
+        IGNORED_CLASSES =
+            Stream
+                .of(IGNORED_CLASS_NAMES)
+                .map(IgnoredTypesModelConverter::forName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+    }
+
+    private static Optional<Class<?>> forName(String className) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(className, false, IgnoredTypesModelConverter.class.getClassLoader());
+        } catch (ClassNotFoundException ignored) {}
+
+        return Optional.ofNullable(clazz);
+    }
 
     // fixes NPE exception in SpringDoc SchemaPropertyDeprecatingConverter (issue #3934)
     @Override

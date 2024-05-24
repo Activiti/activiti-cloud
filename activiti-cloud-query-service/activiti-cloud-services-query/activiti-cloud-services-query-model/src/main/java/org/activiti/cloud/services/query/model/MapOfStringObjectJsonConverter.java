@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.AttributeConverter;
 import java.io.IOException;
 import java.util.Collections;
@@ -25,12 +26,10 @@ import java.util.Map;
 
 public class MapOfStringObjectJsonConverter implements AttributeConverter<Map<String, Object>, String> {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MapOfStringObjectJsonConverter() {}
-
-    public MapOfStringObjectJsonConverter(ObjectMapper objectMapper) {
-        MapOfStringObjectJsonConverter.objectMapper = objectMapper;
+    public MapOfStringObjectJsonConverter() {
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override

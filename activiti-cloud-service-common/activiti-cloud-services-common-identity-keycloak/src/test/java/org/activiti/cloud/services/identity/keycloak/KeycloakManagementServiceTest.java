@@ -15,8 +15,7 @@
  */
 package org.activiti.cloud.services.identity.keycloak;
 
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_SIZE;
-import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.PAGE_START;
+import static org.activiti.cloud.services.identity.keycloak.KeycloakManagementService.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
@@ -35,6 +34,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.activiti.cloud.identity.GroupSearchParams;
 import org.activiti.cloud.identity.UserSearchParams;
+import org.activiti.cloud.identity.UserTypeSearchParam;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidApplicationException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupException;
 import org.activiti.cloud.identity.exceptions.IdentityInvalidGroupRoleException;
@@ -109,9 +109,13 @@ class KeycloakManagementServiceTest {
         roleB.setId("b");
 
         userOne.setId("one");
+        userOne.setUsername("one");
         userTwo.setId("two");
+        userTwo.setUsername("two");
         userThree.setId("three");
+        userThree.setUsername("three");
         userFour.setId("four");
+        userFour.setUsername("four");
 
         groupOne.setId("one");
         groupOne.setName("groupOne");
@@ -297,7 +301,7 @@ class KeycloakManagementServiceTest {
 
         List<User> users = keycloakManagementService.findUsers(userSearchParams);
 
-        assertThat(users.size()).isEqualTo(0);
+        assertThat(users.size()).isZero();
     }
 
     @Test
@@ -370,7 +374,7 @@ class KeycloakManagementServiceTest {
     }
 
     @Test
-    public void should_throwInvalidApplicationException_When_AddingPermissionAndApplicationIsInvalid() {
+    void should_throwInvalidApplicationException_When_AddingPermissionAndApplicationIsInvalid() {
         String expectedMessage = "Invalid Security data: application {fakeClient} is invalid or doesn't exist";
 
         IdentityInvalidApplicationException exception = assertThrows(
@@ -407,7 +411,7 @@ class KeycloakManagementServiceTest {
     void should_throwIdentityInvalidUserException_when_addingApplicationPermissionsWithInvalidUser() {
         String expectedMessage = "Invalid Security data: user {fakeUser} is invalid or doesn't exist";
         setUpClient();
-        when(keycloakClient.searchUsers(eq("fakeUser"), eq(0), eq(50))).thenReturn(Collections.emptyList());
+        when(keycloakClient.searchUsers("fakeUser", 0, 50)).thenReturn(Collections.emptyList());
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -431,7 +435,7 @@ class KeycloakManagementServiceTest {
         String expectedMessage = "Invalid Security data: role {a} can't be assigned to user {userOne}";
         setUpClient();
         setUpUsersRealmRoles();
-        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50))).thenReturn(List.of(kUserOne));
+        when(keycloakClient.searchUsers("userOne", 0, 50)).thenReturn(List.of(kUserOne));
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -454,7 +458,7 @@ class KeycloakManagementServiceTest {
     void should_addApplicationPermissionsToUsers() {
         setUpClient();
         setUpUsersRealmRoles();
-        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50))).thenReturn(List.of(kUserOne));
+        when(keycloakClient.searchUsers("userOne", 0, 50)).thenReturn(List.of(kUserOne));
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -472,8 +476,8 @@ class KeycloakManagementServiceTest {
         String expectedMessage = "Invalid Security data: group {fakeGroup} is invalid or doesn't exist";
         setUpClient();
         setUpUsersRealmRoles();
-        when(keycloakClient.searchUsers(eq("userOne"), eq(0), eq(50))).thenReturn(List.of(kUserOne));
-        when(keycloakClient.searchGroups(eq("fakeGroup"), eq(0), eq(50))).thenReturn(Collections.emptyList());
+        when(keycloakClient.searchUsers("userOne", 0, 50)).thenReturn(List.of(kUserOne));
+        when(keycloakClient.searchGroups("fakeGroup", 0, 50)).thenReturn(Collections.emptyList());
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -500,7 +504,7 @@ class KeycloakManagementServiceTest {
     void should_throwIdentityInvalidGroupException_when_addingApplicationPermissionsWithInvalidGroup() {
         String expectedMessage = "Invalid Security data: group {fakeGroup} is invalid or doesn't exist";
         setUpClient();
-        when(keycloakClient.searchGroups(eq("fakeGroup"), eq(0), eq(50))).thenReturn(Collections.emptyList());
+        when(keycloakClient.searchGroups("fakeGroup", 0, 50)).thenReturn(Collections.emptyList());
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -525,7 +529,7 @@ class KeycloakManagementServiceTest {
         setUpClient();
         setUpGroupsRealmRoles();
 
-        when(keycloakClient.searchGroups(eq("groupOne"), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.searchGroups("groupOne", 0, 50)).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleA));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -548,7 +552,7 @@ class KeycloakManagementServiceTest {
     void should_addApplicationPermissionsToGroup() {
         setUpClient();
         setUpGroupsRealmRoles();
-        when(keycloakClient.searchGroups(eq("groupOne"), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.searchGroups("groupOne", 0, 50)).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getClientRoles(clientOne.getId())).thenReturn(List.of(keycloakRoleB));
 
         SecurityRequestBodyRepresentation securityRequestBodyRepresentation = new SecurityRequestBodyRepresentation();
@@ -618,8 +622,8 @@ class KeycloakManagementServiceTest {
 
     @Test
     void should_returnUsers_when_searchingByGroupName() {
-        when(keycloakClient.getUsersByGroupId(eq(groupOne.getId()))).thenReturn(List.of(kUserOne));
-        when(keycloakClient.searchGroups(eq(groupOne.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.getUsersByGroupId(groupOne.getId())).thenReturn(List.of(kUserOne));
+        when(keycloakClient.searchGroups(groupOne.getName(), 0, 50)).thenReturn(List.of(kGroupOne));
 
         List<User> users = keycloakManagementService.findUsersByGroupName(groupOne.getName());
 
@@ -725,6 +729,34 @@ class KeycloakManagementServiceTest {
             .hasMessage("Invalid Security data: group {groupOne} is invalid or doesn't exist");
     }
 
+    @Test
+    void should_searchByUsername_whenUserTypeSearchParamIsAll() {
+        defineSearchUsersByUsernameFromKeycloak();
+        setUpUsersRealmRoles();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setType(UserTypeSearchParam.ALL);
+        String searchKey = "o";
+        userSearchParams.setSearch(searchKey);
+
+        keycloakManagementService.findUsers(userSearchParams);
+
+        verify(keycloakClient).searchUsersByUsername(searchKey);
+    }
+
+    @Test
+    void should_searchByKeyword_whenUserTypeSearchParamIsInteractive() {
+        defineSearchUsersFromKeycloak();
+        setUpUsersRealmRoles();
+        UserSearchParams userSearchParams = new UserSearchParams();
+        userSearchParams.setType(UserTypeSearchParam.INTERACTIVE);
+        String searchKey = "o";
+        userSearchParams.setSearch(searchKey);
+
+        keycloakManagementService.findUsers(userSearchParams);
+
+        verify(keycloakClient).searchUsers(searchKey, 0, 50);
+    }
+
     private void assertThatGroupsAreEqual(List<Group> groups, Stream<Group> groupsToCompare) {
         assertTrue(
             groupsToCompare
@@ -739,20 +771,23 @@ class KeycloakManagementServiceTest {
     }
 
     private void defineSearchGroupsFromKeycloak() {
-        when(keycloakClient.searchGroups(eq("o"), eq(0), eq(50)))
+        when(keycloakClient.searchGroups("o", 0, 50))
             .thenReturn(List.of(kGroupOne, kGroupTwo, kGroupThree, kGroupFour));
     }
 
     private void defineSearchUsersFromKeycloak() {
-        when(keycloakClient.searchUsers(eq("o"), eq(0), eq(50)))
-            .thenReturn(List.of(kUserOne, kUserTwo, kUserThree, kUserFour));
+        when(keycloakClient.searchUsers("o", 0, 50)).thenReturn(List.of(kUserOne, kUserTwo, kUserThree, kUserFour));
+    }
+
+    private void defineSearchUsersByUsernameFromKeycloak() {
+        when(keycloakClient.searchUsersByUsername("o")).thenReturn(List.of(kUserOne, kUserTwo, kUserFour));
     }
 
     private void defineSearchUsersByGroupsFromKeycloak() {
-        when(keycloakClient.searchGroups(eq(groupOne.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupOne));
+        when(keycloakClient.searchGroups(groupOne.getName(), 0, 50)).thenReturn(List.of(kGroupOne));
         when(keycloakClient.getUsersByGroupId(kGroupOne.getId())).thenReturn(List.of(kUserOne, kUserTwo));
 
-        when(keycloakClient.searchGroups(eq(groupTwo.getName()), eq(0), eq(50))).thenReturn(List.of(kGroupTwo));
+        when(keycloakClient.searchGroups(groupTwo.getName(), 0, 50)).thenReturn(List.of(kGroupTwo));
         when(keycloakClient.getUsersByGroupId(kGroupTwo.getId())).thenReturn(List.of(kUserTwo, kUserThree));
     }
 

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.starter.tests;
 
+import static org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus.RUNNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
@@ -39,8 +40,12 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitizer;
+import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
+import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -65,9 +70,11 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -91,7 +98,16 @@ public class QueryProcessInstancesEntityIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @Autowired
+    private BPMNSequenceFlowRepository sequenceFlowRepository;
+
+    @Autowired
+    private BPMNActivityRepository activityRepository;
+
+    @Autowired
     private MyProducer producer;
+
+    @Autowired
+    private SubscribableChannel errorChannel;
 
     private EventsAggregator eventsAggregator;
 
@@ -103,7 +119,7 @@ public class QueryProcessInstancesEntityIT {
 
     @BeforeEach
     public void setUp() {
-        eventsAggregator = new EventsAggregator(producer);
+        eventsAggregator = new EventsAggregator(producer).errorChannel(errorChannel);
         processInstanceBuilder = new ProcessInstanceEventContainedBuilder(eventsAggregator);
         variableBuilder = new VariableEventContainedBuilder(eventsAggregator);
         taskEventBuilder = new TaskEventContainedBuilder(eventsAggregator);
@@ -112,6 +128,8 @@ public class QueryProcessInstancesEntityIT {
 
     @AfterEach
     public void tearDown() {
+        sequenceFlowRepository.deleteAll();
+        activityRepository.deleteAll();
         processInstanceRepository.deleteAll();
     }
 
@@ -147,12 +165,7 @@ public class QueryProcessInstancesEntityIT {
                             ProcessInstance.ProcessInstanceStatus.COMPLETED,
                             completedProcess.getProcessDefinitionName()
                         ),
-                        tuple(
-                            runningProcess.getId(),
-                            "second",
-                            ProcessInstance.ProcessInstanceStatus.RUNNING,
-                            runningProcess.getProcessDefinitionName()
-                        )
+                        tuple(runningProcess.getId(), "second", RUNNING, runningProcess.getProcessDefinitionName())
                     );
             });
 
@@ -200,7 +213,7 @@ public class QueryProcessInstancesEntityIT {
                 Collection<ProcessInstanceEntity> processInstanceEntities = responseEntity.getBody().getContent();
                 assertThat(processInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .contains(tuple(process.getId(), ProcessInstance.ProcessInstanceStatus.RUNNING));
+                    .contains(tuple(process.getId(), RUNNING));
             });
 
         //when
@@ -320,7 +333,7 @@ public class QueryProcessInstancesEntityIT {
 
                 assertThat(responseProcess.getProcessDefinitionVersion()).isEqualTo(10);
                 assertThat(responseProcess.getProcessDefinitionKey()).isEqualTo("process-definition-key");
-                assertThat(responseProcess.getStatus()).isEqualTo(ProcessInstanceStatus.RUNNING);
+                assertThat(responseProcess.getStatus()).isEqualTo(RUNNING);
             });
     }
 
@@ -397,7 +410,7 @@ public class QueryProcessInstancesEntityIT {
                         tuple(
                             runningProcess.getId(),
                             runningProcess.getName(),
-                            ProcessInstanceStatus.RUNNING,
+                            RUNNING,
                             runningProcess.getProcessDefinitionName()
                         )
                     );
@@ -501,7 +514,7 @@ public class QueryProcessInstancesEntityIT {
                     .getContent();
                 assertThat(filteredProcessInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), ProcessInstanceStatus.RUNNING));
+                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
             });
 
         // Filter using static date
@@ -524,7 +537,7 @@ public class QueryProcessInstancesEntityIT {
                     .getContent();
                 assertThat(filteredProcessInstanceEntities)
                     .extracting(ProcessInstanceEntity::getId, ProcessInstanceEntity::getStatus)
-                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), ProcessInstanceStatus.RUNNING));
+                    .containsExactly(tuple(processInstanceStartedNextDay.getId(), RUNNING));
             });
     }
 
@@ -1047,7 +1060,7 @@ public class QueryProcessInstancesEntityIT {
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-            ProcessInstanceStatus.RUNNING
+            RUNNING
         );
         assertThat(responseEntityFiltered.getBody().getContent())
             .flatExtracting(ProcessInstanceEntity::getVariables)
@@ -1097,7 +1110,7 @@ public class QueryProcessInstancesEntityIT {
             HttpMethod.GET,
             identityTokenProducer.entityWithAuthorizationHeader(),
             PAGED_PROCESS_INSTANCE_RESPONSE_TYPE,
-            ProcessInstanceStatus.RUNNING
+            RUNNING
         );
         assertThat(responseEntityFiltered.getBody().getContent())
             .flatExtracting(ProcessInstanceEntity::getVariables)
@@ -1105,7 +1118,7 @@ public class QueryProcessInstancesEntityIT {
         assertThat(responseEntityFiltered.getBody().getContent())
             .flatExtracting(ProcessInstanceEntity::getVariables)
             .extracting(AbstractVariableEntity::getValue)
-            .containsExactly("111", "222");
+            .containsOnly("111", "222");
     }
 
     @Test
@@ -1119,5 +1132,56 @@ public class QueryProcessInstancesEntityIT {
 
         assertThat(responseEntity.getBody().getMessage())
             .isEqualTo(ErrorAttributesMessageSanitizer.ERROR_NOT_DISCLOSED_MESSAGE);
+    }
+
+    @Test
+    @Transactional
+    void should_handleDuplicateSimpleProcessInstanceEvents() {
+        // given
+        var simpleProcessInstance = processInstanceBuilder.startSimpleProcessInstance("sampleDefinitionId");
+
+        // when
+        var sentEvents = eventsAggregator.sendAll();
+
+        // then
+        assertThat(eventsAggregator.getException()).isNull();
+        assertThat(processInstanceRepository.findById(simpleProcessInstance.getId()))
+            .isNotEmpty()
+            .get()
+            .extracting(ProcessInstanceEntity::getStatus)
+            .isEqualTo(RUNNING);
+
+        assertThat(sequenceFlowRepository.findAll())
+            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+            .extracting(
+                BPMNSequenceFlowEntity::getElementId,
+                BPMNSequenceFlowEntity::getSourceActivityElementId,
+                BPMNSequenceFlowEntity::getTargetActivityElementId
+            )
+            .containsExactly(
+                tuple(
+                    "sid-68945AF1-396F-4B8A-B836-FC318F62313F",
+                    "startEvent1",
+                    "sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94"
+                )
+            );
+
+        assertThat(activityRepository.findAll())
+            .filteredOn(it -> simpleProcessInstance.getId().equals(it.getProcessInstanceId()))
+            .extracting(
+                BPMNActivityEntity::getElementId,
+                BPMNActivityEntity::getActivityName,
+                BPMNActivityEntity::getActivityType
+            )
+            .containsExactly(
+                tuple("startEvent1", "", "startEvent"),
+                tuple("sid-CDFE7219-4627-43E9-8CA8-866CC38EBA94", "Perform Action", "userTask")
+            );
+
+        // and when duplicates are sent
+        eventsAggregator.addEvents(sentEvents).sendAll();
+
+        // and then
+        assertThat(eventsAggregator.getException()).isNull();
     }
 }

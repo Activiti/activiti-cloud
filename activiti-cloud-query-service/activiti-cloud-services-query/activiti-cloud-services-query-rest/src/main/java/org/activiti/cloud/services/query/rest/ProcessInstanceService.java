@@ -36,11 +36,11 @@ import org.activiti.core.common.spring.security.policies.ActivitiForbiddenExcept
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.SecurityPolicyAccess;
 import org.hibernate.Filter;
-import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 public class ProcessInstanceService {
@@ -97,12 +97,10 @@ public class ProcessInstanceService {
         Filter filter = session.enableFilter("variablesFilter");
         filter.setParameterList("variableKeys", variableKeys);
         Page<ProcessInstanceEntity> processInstanceEntities = findAll(predicate, pageable);
-        // Due to performance issues (e.g. https://github.com/Activiti/Activiti/issues/3139)
-        // we have to explicitly initialize the lazy loaded field to be able to work with disabled Open Session in View
-        processInstanceEntities.forEach(processInstanceEntity ->
-            Hibernate.initialize(processInstanceEntity.getVariables())
-        );
-        return processInstanceEntities;
+        var ids = processInstanceEntities.map(ProcessInstanceEntity::getId).toList();
+        var result = processInstanceRepository.findByIdIsIn(ids, pageable.getSort());
+
+        return new PageImpl<>(result, pageable, processInstanceEntities.getTotalElements());
     }
 
     public ProcessInstanceEntity findById(String processInstanceId) {

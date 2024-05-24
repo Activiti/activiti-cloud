@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.rest.api;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.activiti.cloud.api.process.model.ExtendedCloudProcessDefinition;
 import org.springframework.data.domain.Pageable;

@@ -1,2 +1,0 @@
-org.activiti.cloud.services.modeling.entity.ObjectMapperJpaConfiguration
-org.activiti.cloud.services.modeling.jpa.config.ModelingJpaAutoConfiguration

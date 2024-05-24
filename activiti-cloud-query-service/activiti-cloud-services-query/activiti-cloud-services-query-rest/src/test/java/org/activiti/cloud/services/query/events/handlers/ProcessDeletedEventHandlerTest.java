@@ -47,15 +47,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = QueryRestTestApplication.class)
+@TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
-@AutoConfigureTestDatabase
-public class ProcessDeletedEventHandlerTest {
+class ProcessDeletedEventHandlerTest {
 
     @Autowired
     private ProcessInstanceRepository processInstanceRepository;
@@ -86,7 +86,7 @@ public class ProcessDeletedEventHandlerTest {
 
     @BeforeEach
     @Transactional
-    public void setUp() {
+    void setUp() {
         handler = new ProcessDeletedEventHandler(entityManager);
 
         completedProcessId = UUID.randomUUID().toString();
@@ -145,7 +145,7 @@ public class ProcessDeletedEventHandlerTest {
     }
 
     @AfterEach
-    public void cleanUp() {
+    void cleanUp() {
         processInstanceRepository.deleteAll();
         taskRepository.deleteAll();
         serviceTaskRepository.deleteAll();
@@ -156,7 +156,7 @@ public class ProcessDeletedEventHandlerTest {
 
     @Test
     @Transactional
-    public void handleShouldDeleteCurrentProcessInstance() {
+    void handleShouldDeleteCurrentProcessInstance() {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(completedProcessId);
@@ -216,7 +216,7 @@ public class ProcessDeletedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldThrowExceptionWhenProcessInstanceIsNotCancelledOrCompleted() {
+    void handleShouldThrowExceptionWhenProcessInstanceIsNotCancelledOrCompleted() {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId(runningProcessId);
@@ -237,7 +237,7 @@ public class ProcessDeletedEventHandlerTest {
     }
 
     @Test
-    public void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
+    void handleShouldThrowExceptionWhenRelatedProcessInstanceIsNotFound() {
         //given
         ProcessInstanceImpl eventProcessInstance = new ProcessInstanceImpl();
         eventProcessInstance.setId("404");
@@ -254,7 +254,7 @@ public class ProcessDeletedEventHandlerTest {
     }
 
     @Test
-    public void getHandledEventShouldReturnProcessDeletedEvent() {
+    void getHandledEventShouldReturnProcessDeletedEvent() {
         //when
         String handledEvent = handler.getHandledEvent();
 

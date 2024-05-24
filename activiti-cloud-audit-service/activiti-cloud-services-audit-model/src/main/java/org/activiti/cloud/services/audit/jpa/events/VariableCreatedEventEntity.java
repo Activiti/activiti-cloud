@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
 @DiscriminatorValue(value = VariableCreatedEventEntity.VARIABLE_CREATED_EVENT)
-@DynamicInsert
 public class VariableCreatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_CREATED_EVENT = "VariableCreatedEvent";

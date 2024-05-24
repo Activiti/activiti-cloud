@@ -16,28 +16,32 @@
 package org.activiti.cloud.services.common.zip;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.apache.commons.io.FileUtils;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import org.junit.jupiter.api.Test;
 
 class ZipBuilderTest {
+
+    private static final String ZIPPED_FILENAME = "projectName.json";
+    private static final String FILE_CONTENT = "manifestFile";
 
     @Test
     void should_createFileContent_when_writeToFile() throws IOException {
         File tempFile = Files.createTempFile("test", ".zip").toFile();
 
         ZipBuilder zipBuilder = new ZipBuilder("projectArchive");
-        byte[] manifestFileFake = "manifestFile".getBytes();
-        zipBuilder.appendFile(manifestFileFake, "projectName.json");
-
+        byte[] manifestFileFake = FILE_CONTENT.getBytes();
+        zipBuilder.appendFile(manifestFileFake, ZIPPED_FILENAME);
         zipBuilder.writeToFile(tempFile);
 
-        byte[] tempFileContent = FileUtils.readFileToByteArray(tempFile);
+        ZipFile zipFileCreated = new ZipFile(tempFile);
+        // Verify a projectName.json file exists
+        ZipEntry zipCreatedEntry = zipFileCreated.getEntry(ZIPPED_FILENAME);
 
-        assertThat(zipBuilder.toZipBytes()).isEqualTo(tempFileContent);
+        assertThat(zipFileCreated.getInputStream(zipCreatedEntry).readAllBytes()).isEqualTo(FILE_CONTENT.getBytes());
     }
 }

@@ -17,31 +17,30 @@ package org.activiti.cloud.services.rest.api;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 public interface TaskVariableController {
     @GetMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
-    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(@PathVariable(value = "taskId") String taskId);
+    CollectionModel<EntityModel<CloudVariableInstance>> getVariables(
+        @Parameter(description = "Enter the taskId to get variables") @PathVariable(value = "taskId") String taskId
+    );
 
     @PostMapping(path = "/v1/tasks/{taskId}/variables", consumes = APPLICATION_JSON_VALUE)
     ResponseEntity<Void> createVariable(
-        @PathVariable(value = "taskId") String taskId,
+        @Parameter(description = "Enter the taskId to create variable") @PathVariable(value = "taskId") String taskId,
         @RequestBody CreateTaskVariablePayload createTaskVariablePayload
     );
 
     @PutMapping(value = "/v1/tasks/{taskId}/variables/{variableName}", consumes = APPLICATION_JSON_VALUE)
     ResponseEntity<Void> updateVariable(
-        @PathVariable(value = "taskId") String taskId,
+        @Parameter(description = "Enter the taskId to update variable") @PathVariable(value = "taskId") String taskId,
         @PathVariable(value = "variableName") String variableName,
         @RequestBody UpdateTaskVariablePayload updateTaskVariablePayload
     );

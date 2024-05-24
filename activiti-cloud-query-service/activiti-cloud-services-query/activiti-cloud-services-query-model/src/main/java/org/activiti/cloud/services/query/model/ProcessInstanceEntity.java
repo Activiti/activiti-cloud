@@ -15,10 +15,13 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import static jakarta.persistence.TemporalType.TIMESTAMP;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,8 +30,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -57,6 +65,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 )
 @DynamicInsert
 @DynamicUpdate
+@NamedEntityGraphs(
+    value = {
+        @NamedEntityGraph(
+            name = "ProcessInstances.withVariables",
+            attributeNodes = { @NamedAttributeNode(value = "variables", subgraph = "variables") },
+            subgraphs = { @NamedSubgraph(name = "variables", attributeNodes = { @NamedAttributeNode("value") }) }
+        ),
+    }
+)
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -64,12 +81,22 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     private String name;
     private String processDefinitionId;
+
+    @Schema(
+        description = "It identifies uniquely the process. In the BPMN process definition file it is the id attribute of a process and in the Modeling application it is usually called as Process ID."
+    )
     private String processDefinitionKey;
+
     private String initiator;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date startDate;
 
+    @Schema(
+        description = "The business key associated to the process instance. It could be useful to add a reference to external systems.",
+        readOnly = true
+    )
     private String businessKey;
 
     @Enumerated(EnumType.STRING)
@@ -79,30 +106,37 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     private String processDefinitionName;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date completedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date suspendedDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModified;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedTo;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @Temporal(TIMESTAMP)
     private Date lastModifiedFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @QueryType(PropertyType.DATETIME)
+    @Temporal(TIMESTAMP)
     private Date startFrom;
 
     @JsonIgnore
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @QueryType(PropertyType.DATETIME)
+    @Temporal(TIMESTAMP)
     private Date startTo;
 
     @JsonIgnore
@@ -269,6 +303,10 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
 
     public Optional<ProcessVariableEntity> getVariable(String variableName) {
         return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
+    }
+
+    public Optional<BPMNSequenceFlowEntity> getSequenceFlowByEventId(String eventId) {
+        return getSequenceFlows().stream().filter(v -> eventId.equals(v.getEventId())).findFirst();
     }
 
     @Override

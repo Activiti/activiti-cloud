@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 public class ProcessVariableValueConverter {
 
-    private static Map<String, Class<?>> typeRegistry = new HashMap<>();
+    private static final Map<String, Class<?>> typeRegistry = new HashMap<>();
 
     static {
         typeRegistry.put("string", String.class);
@@ -53,12 +53,14 @@ public class ProcessVariableValueConverter {
     @SuppressWarnings("unchecked")
     public <T> T convert(ProcessVariableValue variableValue) {
         Class<?> type = typeRegistry.getOrDefault(variableValue.getType().toLowerCase(), Object.class);
-        Object value = variableValue.getValue();
-
         try {
-            return (T) type.cast(this.conversionService.convert(value, type));
+            return (T) this.conversionService.convert(variableValue.getValue(), type);
         } catch (Exception ex) {
             throw new ActivitiException("VariableValue conversion error", ex);
         }
+    }
+
+    public boolean canConvert(String type) {
+        return typeRegistry.containsKey(type);
     }
 }

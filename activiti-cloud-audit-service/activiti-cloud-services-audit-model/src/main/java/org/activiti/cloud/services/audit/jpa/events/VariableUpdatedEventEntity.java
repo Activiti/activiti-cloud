@@ -20,11 +20,9 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = VariableUpdatedEventEntity.VARIABLE_UPDATED_EVENT)
 @DiscriminatorValue(value = VariableUpdatedEventEntity.VARIABLE_UPDATED_EVENT)
-@DynamicInsert
 public class VariableUpdatedEventEntity extends VariableAuditEventEntity {
 
     protected static final String VARIABLE_UPDATED_EVENT = "VariableUpdatedEvent";

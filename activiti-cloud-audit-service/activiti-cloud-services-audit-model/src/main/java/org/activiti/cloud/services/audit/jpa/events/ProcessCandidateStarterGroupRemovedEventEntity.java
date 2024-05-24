@@ -23,13 +23,11 @@ import org.activiti.api.process.model.ProcessCandidateStarterGroup;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupRemovedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterGroupJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCandidateStarterGroupRemovedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT)
 @DiscriminatorValue(
     value = ProcessCandidateStarterGroupRemovedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT
 )
-@DynamicInsert
 public class ProcessCandidateStarterGroupRemovedEventEntity extends AuditEventEntity {
 
     protected static final String PROCESS_CANDIDATE_STARTER_GROUP_REMOVED_EVENT =

@@ -8,13 +8,11 @@ updatebot/push-version:
 	$(eval ACTIVITI_CLOUD_VERSION=$(shell python -c "from xml.etree.ElementTree import parse; print(parse(open('activiti-cloud-dependencies/pom.xml')).find('.//{http://maven.apache.org/POM/4.0.0}activiti-cloud.version').text)"))
 	updatebot push-version --kind maven \
 		org.activiti.cloud:activiti-cloud-dependencies $(RELEASE_VERSION) \
-		org.activiti.cloud:activiti-cloud-modeling-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-audit-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-api-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-parent $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-connectors-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-messages-dependencies $(ACTIVITI_CLOUD_VERSION) \
-		org.activiti.cloud:activiti-cloud-modeling-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-notifications-graphql-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-query-dependencies $(ACTIVITI_CLOUD_VERSION) \
 		org.activiti.cloud:activiti-cloud-runtime-bundle-dependencies $(ACTIVITI_CLOUD_VERSION) \
@@ -119,16 +117,10 @@ docker-delete/%:
 		echo "::warning title=Image not found::Image not found: $(MODULE):$(RELEASE_VERSION)"; \
 		e=0; \
 	fi
-	@echo "Delete token"
-	@curl --silent --show-error --fail \
-		-X POST \
-		-H "Accept: application/json" \
-		-H "Authorization: JWT $(TOKEN)" \
-		https://hub.docker.com/v2/logout/; \
 	exit $$e
 
 docker-delete-all: docker-delete/example-runtime-bundle docker-delete/activiti-cloud-query \
-	docker-delete/example-cloud-connector docker-delete/activiti-cloud-modeling
+	docker-delete/example-cloud-connector
 
 version:
 	mvn ${MAVEN_CLI_OPTS} versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion=$(RELEASE_VERSION)

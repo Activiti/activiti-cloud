@@ -28,10 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    properties = "SPRING_MVC_REST_USE_TRAILING_SLASH_MATCH=true"
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 class TrailingSlashRedirectFilterTest {
 
@@ -61,18 +58,14 @@ class TrailingSlashRedirectFilterTest {
 
     @Test
     void testGreetingTrailingSlashWithFilter() throws Exception {
-        mvc
-            .perform(get(BASEURL + "/greeting/").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Hello, World!"));
+        mvc.perform(get(BASEURL + "/greeting/").accept(APPLICATION_JSON_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
     void testGreetingTrailingSlashAndRequestQueryParameter() throws Exception {
         mvc
             .perform(get(BASEURL + "/greeting/?query=Bar").accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Hello, Bar!"));
+            .andExpect(status().isNotFound());
     }
 
     @Test

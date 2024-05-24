@@ -16,9 +16,11 @@
 package org.activiti.cloud.security.authorization;
 
 import static java.util.function.Predicate.not;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -33,12 +35,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 
 /**
  * This class aims to define authorizations on a REST API using a configuration like below:
  * <p>
- * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/* authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
+ * authorizations.security-constraints[0].authRoles[0]=ACTIVITI_USER
+ * authorizations.security-constraints[0].securityCollections[0].patterns[0]=/v1/*
+ * authorizations.security-constraints[1].authRoles[0]=ACTIVITI_ADMIN
  * authorizations.security-constraints[1].securityCollections[0].patterns[0]=/admin/*
  * <p>
  * This configuration schema is similar to the security constraint configurations used by other systems like Keycloak.
@@ -49,6 +54,7 @@ public class AuthorizationConfigurer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationConfigurer.class);
 
     private final AuthorizationProperties authorizationProperties;
+
     private final Environment environment;
 
     @Autowired
@@ -59,7 +65,7 @@ public class AuthorizationConfigurer {
 
     @PostConstruct
     public void checkKeycloakConfig() {
-        //if there is a Keycloak security constraint defined it could be configuration issue
+        // if there is a Keycloak security constraint defined it could be configuration issue
         String securityConstraintProperty = environment.getProperty(
             "keycloak.security-constraints[0].securityCollections[0].patterns[0]"
         );
@@ -74,50 +80,81 @@ public class AuthorizationConfigurer {
         List<SecurityConstraint> orderedSecurityConstraints = getOrderedList(
             authorizationProperties.getSecurityConstraints()
         );
+        List<String> publicUrls = new ArrayList<>();
         for (SecurityConstraint securityConstraint : orderedSecurityConstraints) {
-            String[] roles = securityConstraint.getAuthRoles();
-            configureAuthorization(http, roles, securityConstraint.getSecurityCollections());
+            if (!hasRoleOrPermissionConstraint(securityConstraint)) {
+                List<String> patterns = Arrays
+                    .stream(securityConstraint.getSecurityCollections())
+                    .flatMap(s -> Arrays.stream(getPatterns(s.getPatterns())))
+                    .toList();
+                publicUrls.addAll(patterns);
+            }
+            configureAuthorization(http, securityConstraint);
         }
-        http.anonymous();
+        if (!publicUrls.isEmpty()) {
+            LOGGER.debug("Disabling CSRF protection for public URLs: {}", publicUrls);
+            http.csrf(csrf -> csrf.ignoringRequestMatchers(new CsrfIgnoreMatcher(publicUrls)));
+        }
+        http.anonymous(withDefaults());
     }
 
-    private void configureAuthorization(HttpSecurity http, String[] roles, SecurityCollection[] securityCollection)
-        throws Exception {
-        boolean rolesNotEmpty = isNotEmpty(roles);
+    private void configureAuthorization(HttpSecurity http, SecurityConstraint securityConstraint) throws Exception {
         Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> authorizedUrlConsumer;
-        if (rolesNotEmpty) {
-            authorizedUrlConsumer = a -> a.hasAnyRole(roles);
+        if (hasRoleOrPermissionConstraint(securityConstraint)) {
+            authorizedUrlConsumer =
+                a ->
+                    a.access(
+                        new CustomAuthorizationManager<RequestAuthorizationContext>(
+                            securityConstraint.getAuthRoles(),
+                            securityConstraint.getAuthPermissions()
+                        )
+                    );
         } else {
-            authorizedUrlConsumer = a -> a.permitAll();
+            authorizedUrlConsumer = AuthorizeHttpRequestsConfigurer.AuthorizedUrl::permitAll;
         }
-        buildAntMatchers(http, securityCollection, authorizedUrlConsumer);
+        buildAntMatchers(http, securityConstraint.getSecurityCollections(), authorizedUrlConsumer);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Setting access {} to {}", securityCollection, rolesNotEmpty ? roles : "anonymous");
+            LOGGER.debug(
+                "Setting access {} to {}",
+                securityConstraint.getSecurityCollections(),
+                hasRoleOrPermissionConstraint(securityConstraint)
+                    ? Stream
+                        .concat(
+                            Arrays.stream(securityConstraint.getAuthRoles()),
+                            Arrays.stream(securityConstraint.getAuthPermissions())
+                        )
+                        .collect(Collectors.joining(", "))
+                    : "anonymous"
+            );
         }
     }
 
     private void buildAntMatchers(
         HttpSecurity http,
         SecurityCollection[] securityCollections,
-        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> f
+        Consumer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl> urlConsumer
     ) throws Exception {
         for (SecurityCollection securityCollection : securityCollections) {
             String[] patterns = getPatterns(securityCollection.getPatterns());
             if (isNotEmpty(securityCollection.getOmittedMethods())) {
                 List<HttpMethod> methods = getAllowedMethods(securityCollection.getOmittedMethods());
                 for (HttpMethod method : methods) {
-                    f.accept(http.authorizeHttpRequests().requestMatchers(method, patterns));
+                    http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(method, patterns)));
                 }
             } else {
-                f.accept(http.authorizeHttpRequests().requestMatchers(patterns));
+                http.authorizeHttpRequests(spec -> urlConsumer.accept(spec.requestMatchers(patterns)));
             }
         }
     }
 
+    private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
+        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::valueOf).toList();
+        return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
+    }
+
     /**
-     * If a security constraint hasn't any roles it means that it can accessible from anyone. It must be the first one
-     * in order to avoid being overridden by other rules. The order is reversed because in order
-     * to mimic the security-constraint behaviour.
+     * If a security constraint hasn't any roles it means that it can be accessed from anyone. It must be the first one
+     * in order to avoid being overridden by other rules. The order is reversed to mimic the security-constraint behaviour.
      *
      * @param securityConstraints
      * @return
@@ -127,7 +164,7 @@ public class AuthorizationConfigurer {
         Collections.reverse(reversed);
         List<SecurityConstraint> result = new ArrayList<>();
         reversed.forEach(securityConstraint -> {
-            if (isNotEmpty(securityConstraint.getAuthRoles())) {
+            if (hasRoleOrPermissionConstraint(securityConstraint)) {
                 result.add(securityConstraint);
             } else {
                 result.add(0, securityConstraint);
@@ -143,12 +180,11 @@ public class AuthorizationConfigurer {
             .toArray(String[]::new);
     }
 
-    private List<HttpMethod> getAllowedMethods(String[] omittedMethods) {
-        List<HttpMethod> httpMethods = Stream.of(omittedMethods).map(HttpMethod::resolve).collect(Collectors.toList());
-        return Stream.of(HttpMethod.values()).filter(not(httpMethods::contains)).collect(Collectors.toList());
-    }
-
     private boolean isNotEmpty(String[] array) {
         return array != null && array.length > 0;
+    }
+
+    private boolean hasRoleOrPermissionConstraint(SecurityConstraint securityConstraint) {
+        return isNotEmpty(securityConstraint.getAuthRoles()) || isNotEmpty(securityConstraint.getAuthPermissions());
     }
 }

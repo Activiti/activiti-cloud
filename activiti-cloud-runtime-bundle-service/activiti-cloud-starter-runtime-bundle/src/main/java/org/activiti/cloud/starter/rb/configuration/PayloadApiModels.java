@@ -75,7 +75,10 @@ public class PayloadApiModels {
     @Schema(name = "CandidateGroupsPayload")
     public static class CandidateGroupsPayloadApiModel extends CandidateGroupsPayload {
 
-        @Schema(allowableValues = "CandidateGroupsPayload")
+        @Schema(
+            description = "A mandatory value that identifies the payload type for the request",
+            allowableValues = "CandidateGroupsPayload"
+        )
         public String payloadType;
     }
 

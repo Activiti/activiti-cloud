@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.rest.api;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -33,5 +34,7 @@ public interface ConnectorDefinitionController {
     CollectionModel<EntityModel<ConnectorDefinition>> getConnectorDefinitions();
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    EntityModel<ConnectorDefinition> getConnectorDefinition(@PathVariable String id);
+    EntityModel<ConnectorDefinition> getConnectorDefinition(
+        @Parameter(description = "Enter the id to get connector definition") @PathVariable String id
+    );
 }

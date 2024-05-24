@@ -18,11 +18,9 @@ package org.activiti.cloud.services.audit.jpa.events;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = TaskCreatedEventEntity.TASK_CREATED_EVENT)
 @DiscriminatorValue(value = TaskCreatedEventEntity.TASK_CREATED_EVENT)
-@DynamicInsert
 public class TaskCreatedEventEntity extends TaskAuditEventEntity {
 
     protected static final String TASK_CREATED_EVENT = "TaskCreatedEvent";

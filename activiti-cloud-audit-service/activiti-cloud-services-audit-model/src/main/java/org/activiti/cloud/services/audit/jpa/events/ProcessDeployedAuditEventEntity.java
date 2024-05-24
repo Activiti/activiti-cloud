@@ -26,7 +26,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
 @DiscriminatorValue(value = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
-@DynamicInsert
 public class ProcessDeployedAuditEventEntity extends AuditEventEntity {
 
     protected static final String PROCESS_DEPLOYED_EVENT = "ProcessDeployedEvent";

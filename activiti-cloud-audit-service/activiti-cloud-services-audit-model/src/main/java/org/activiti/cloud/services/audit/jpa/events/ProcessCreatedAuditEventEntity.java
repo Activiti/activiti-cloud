@@ -22,7 +22,6 @@ import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCreatedAuditEventEntity.PROCESS_CREATED_EVENT)
 @DiscriminatorValue(value = ProcessCreatedAuditEventEntity.PROCESS_CREATED_EVENT)
-@DynamicInsert
 public class ProcessCreatedAuditEventEntity extends ProcessAuditEventEntity {
 
     protected static final String PROCESS_CREATED_EVENT = "ProcessCreatedEvent";
