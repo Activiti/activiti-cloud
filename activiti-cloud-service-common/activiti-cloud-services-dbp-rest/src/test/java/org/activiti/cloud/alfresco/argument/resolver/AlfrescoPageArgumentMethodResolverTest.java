@@ -15,6 +15,11 @@
  */
 package org.activiti.cloud.alfresco.argument.resolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import org.activiti.test.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,15 +34,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoPageArgumentMethodResolverTest {
 
-//    @InjectMocks
+    //    @InjectMocks
     private AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
 
     @Mock
@@ -48,11 +48,13 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
     @BeforeEach
     public void setUp() {
-        alfrescoPageArgumentMethodResolver = new AlfrescoPageArgumentMethodResolver(
-            new AlfrescoPageParameterParser(1000),
-            pageableHandlerMethodArgumentResolver,
-            1000,
-            true);
+        alfrescoPageArgumentMethodResolver =
+            new AlfrescoPageArgumentMethodResolver(
+                new AlfrescoPageParameterParser(1000),
+                pageableHandlerMethodArgumentResolver,
+                1000,
+                true
+            );
     }
 
     @Test
@@ -84,5 +86,4 @@ public class AlfrescoPageArgumentMethodResolverTest {
         doReturn(parameterType).when(parameter).getParameterType();
         return parameter;
     }
-
 }
