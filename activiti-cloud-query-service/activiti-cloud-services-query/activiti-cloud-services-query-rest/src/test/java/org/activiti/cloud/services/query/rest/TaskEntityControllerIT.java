@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.servlet.ServletException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,13 +66,18 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(TaskController.class)
 @Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+        CommonExceptionHandlerQuery.class,
+    }
 )
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
 @TestPropertySource("classpath:application-test.properties")
-public class TaskEntityControllerIT {
+class TaskEntityControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -114,7 +120,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
@@ -142,7 +148,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
@@ -157,7 +163,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
@@ -174,7 +180,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnCandidates_when_invokeGetTaskById() throws Exception {
+    void should_returnCandidates_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
@@ -227,7 +233,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
+    void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
@@ -249,5 +255,67 @@ public class TaskEntityControllerIT {
             .isArray()
             .ofLength(1)
             .thatContains(TaskPermissions.VIEW);
+    }
+
+    //    @Test
+    //    void should_returnMaxItemsLimits_when_invokeWithoutPagingParameters() throws Exception {
+    //        //given
+    //        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
+    //
+    //        given(taskRepository.findAll(any(), eq(pageRequest)))
+    //            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+    //
+    //        //when
+    //        MvcResult result = mockMvc
+    //            .perform(get("/v1/tasks").accept(MediaType.APPLICATION_JSON))
+    //            //then
+    //            .andExpect(status().isOk())
+    //            .andReturn();
+    //
+    //        assertThatJson(result.getResponse().getContentAsString())
+    //            .node("list.pagination.skipCount")
+    //            .isEqualTo(0)
+    //            .node("list.pagination.maxItems")
+    //            .isEqualTo(1000)
+    //            .node("list.pagination.count")
+    //            .isEqualTo(1)
+    //            .node("list.pagination.hasMoreItems")
+    //            .isEqualTo(false)
+    //            .node("list.pagination.totalItems")
+    //            .isEqualTo(1000);
+    //    }
+
+    @Test
+    void should_returnMaxItemsLimits_when_invokeWithPagingParametersExceedingLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+
+        //when
+        try {
+            mockMvc.perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON));
+        } catch (ServletException e) {
+            assertThat(e.getCause() instanceof IllegalStateException);
+            assertThat(e.getCause().getMessage().equals("Exceeded max limit of 1000 elements"));
+        }
+    }
+
+    @Test
+    void should_returnMaxItemsLimits_when_invokeWithPageParameterExceedingLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+
+        //when
+        try {
+            mockMvc.perform(get("/v1/tasks?page=2000").accept(MediaType.APPLICATION_JSON));
+        } catch (ServletException e) {
+            assertThat(e.getCause() instanceof IllegalStateException);
+            assertThat(e.getCause().getMessage().equals("Exceeded max limit of 1000 elements"));
+        }
     }
 }

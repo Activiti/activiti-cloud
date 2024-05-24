@@ -29,12 +29,19 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
     private final AlfrescoPageParameterParser pageParameterParser;
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
+    private final int maxItemsLimit;
+    private final boolean maxItemsLimitEnabled;
+
     public AlfrescoPageArgumentMethodResolver(
         AlfrescoPageParameterParser pageParameterParser,
-        PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver
+        PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
+        int maxItemsLimit,
+        boolean maxItemsLimitEnabled
     ) {
         this.pageParameterParser = pageParameterParser;
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
+        this.maxItemsLimit = maxItemsLimit;
+        this.maxItemsLimitEnabled = maxItemsLimitEnabled;
     }
 
     @Override
@@ -58,9 +65,12 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
-        if (
+
+        if (isPaginationValueExceedinglimit(alfrescoQueryParameters, basePageable)) {
+            throw new IllegalStateException("Exceeded max limit of 1000 elements");
+        } else if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
-            alfrescoQueryParameters.getMaxItemsParameter().isSet()
+                alfrescoQueryParameters.getMaxItemsParameter().isSet()
         ) {
             return new AlfrescoPageRequest(
                 alfrescoQueryParameters.getSkipCountParameter().getValue(),
@@ -70,5 +80,43 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         } else {
             return basePageable;
         }
+    }
+
+    private boolean isPaginationValueExceedinglimit(
+        AlfrescoQueryParameters alfrescoQueryParameters,
+        Pageable basePageable
+    ) {
+        if (maxItemsLimitEnabled) {
+            if (
+                alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
+                    alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
+            ) {
+                return true;
+            }
+            if (
+                alfrescoQueryParameters.getPageParameter().isSet() &&
+                    alfrescoQueryParameters.getPageParameter().getValue() > maxItemsLimit
+            ) {
+                return true;
+            } else if (
+                alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
+                    alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
+            ) {
+                return false;
+            } else if (basePageable.getPageSize() < maxItemsLimit) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+        // Se ho impostato maxItems e questo supera il limite devo ritornare true
+        // Se non ho impostato maxItems ma ho impostato il base pageable ed è superiore al limite torno true
+        //        return (
+        //            maxItemsLimitEnabled &&
+        //            (
+        //                !alfrescoQueryParameters.getMaxItemsParameter().isSet() ||
+        //                alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
+        //            )
+        //        );
     }
 }
