@@ -70,7 +70,7 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
             throw new IllegalStateException("Exceeded max limit of 1000 elements");
         } else if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
-                alfrescoQueryParameters.getMaxItemsParameter().isSet()
+            alfrescoQueryParameters.getMaxItemsParameter().isSet()
         ) {
             return new AlfrescoPageRequest(
                 alfrescoQueryParameters.getSkipCountParameter().getValue(),
@@ -89,18 +89,18 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         if (maxItemsLimitEnabled) {
             if (
                 alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
-                    alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
+                alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
             ) {
                 return true;
             }
             if (
                 alfrescoQueryParameters.getPageParameter().isSet() &&
-                    alfrescoQueryParameters.getPageParameter().getValue() > maxItemsLimit
+                alfrescoQueryParameters.getPageParameter().getValue() > maxItemsLimit
             ) {
                 return true;
             } else if (
                 alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
-                    alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
+                alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
             ) {
                 return false;
             } else if (basePageable.getPageSize() < maxItemsLimit) {
