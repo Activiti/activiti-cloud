@@ -70,7 +70,7 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
             throw new IllegalStateException("Exceeded max limit of 1000 elements");
         } else if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
-            alfrescoQueryParameters.getMaxItemsParameter().isSet()
+                alfrescoQueryParameters.getMaxItemsParameter().isSet()
         ) {
             return new AlfrescoPageRequest(
                 alfrescoQueryParameters.getSkipCountParameter().getValue(),
@@ -89,18 +89,18 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         if (maxItemsLimitEnabled) {
             if (
                 alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
-                alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
+                    alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
             ) {
                 return true;
             }
             if (
                 alfrescoQueryParameters.getPageParameter().isSet() &&
-                alfrescoQueryParameters.getPageParameter().getValue() > maxItemsLimit
+                    alfrescoQueryParameters.getPageParameter().getValue() > maxItemsLimit
             ) {
                 return true;
             } else if (
                 alfrescoQueryParameters.getMaxItemsParameter().isSet() &&
-                alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
+                    alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
             ) {
                 return false;
             } else if (basePageable.getPageSize() < maxItemsLimit) {
@@ -109,14 +109,5 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
             return true;
         }
         return false;
-        // Se ho impostato maxItems e questo supera il limite devo ritornare true
-        // Se non ho impostato maxItems ma ho impostato il base pageable ed è superiore al limite torno true
-        //        return (
-        //            maxItemsLimitEnabled &&
-        //            (
-        //                !alfrescoQueryParameters.getMaxItemsParameter().isSet() ||
-        //                alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit
-        //            )
-        //        );
     }
 }

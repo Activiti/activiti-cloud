@@ -50,8 +50,8 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
     private final int defaultPageSize;
-    private int maxItemsLimit;
-    private boolean maxItemsLimitEnabled;
+    private final int maxItemsLimit;
+    private final boolean maxItemsLimitEnabled;
 
     public AlfrescoWebAutoConfiguration(
         @Lazy PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,

@@ -257,34 +257,6 @@ class TaskEntityControllerIT {
             .thatContains(TaskPermissions.VIEW);
     }
 
-    //    @Test
-    //    void should_returnMaxItemsLimits_when_invokeWithoutPagingParameters() throws Exception {
-    //        //given
-    //        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
-    //
-    //        given(taskRepository.findAll(any(), eq(pageRequest)))
-    //            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
-    //
-    //        //when
-    //        MvcResult result = mockMvc
-    //            .perform(get("/v1/tasks").accept(MediaType.APPLICATION_JSON))
-    //            //then
-    //            .andExpect(status().isOk())
-    //            .andReturn();
-    //
-    //        assertThatJson(result.getResponse().getContentAsString())
-    //            .node("list.pagination.skipCount")
-    //            .isEqualTo(0)
-    //            .node("list.pagination.maxItems")
-    //            .isEqualTo(1000)
-    //            .node("list.pagination.count")
-    //            .isEqualTo(1)
-    //            .node("list.pagination.hasMoreItems")
-    //            .isEqualTo(false)
-    //            .node("list.pagination.totalItems")
-    //            .isEqualTo(1000);
-    //    }
-
     @Test
     void should_returnMaxItemsLimits_when_invokeWithPagingParametersExceedingLimits() throws Exception {
         //given
