@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(ProcessDefinitionEntity.class)
 @RequestMapping(
     value = "/v1/process-definitions",
-    produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE }
+    produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }
 )
 public class ProcessDefinitionController {
 
