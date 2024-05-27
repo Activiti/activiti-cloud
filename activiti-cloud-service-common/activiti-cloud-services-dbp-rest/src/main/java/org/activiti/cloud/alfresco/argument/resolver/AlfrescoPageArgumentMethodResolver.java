@@ -103,10 +103,9 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
                 alfrescoQueryParameters.getMaxItemsParameter().getValue() < maxItemsLimit
             ) {
                 return false;
-            } else if (basePageable.getPageSize() < maxItemsLimit) {
-                return false;
+            } else {
+                return basePageable.getPageSize() >= maxItemsLimit;
             }
-            return true;
         }
         return false;
     }

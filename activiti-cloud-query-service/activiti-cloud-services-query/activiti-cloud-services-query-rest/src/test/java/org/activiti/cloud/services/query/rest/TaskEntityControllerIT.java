@@ -266,12 +266,9 @@ class TaskEntityControllerIT {
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
-        try {
-            mockMvc.perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON));
-        } catch (ServletException e) {
-            assertThat(e.getCause() instanceof IllegalStateException);
-            assertThat(e.getCause().getMessage().equals("Exceeded max limit of 1000 elements"));
-        }
+        mockMvc
+            .perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -283,11 +280,8 @@ class TaskEntityControllerIT {
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
-        try {
-            mockMvc.perform(get("/v1/tasks?page=2000").accept(MediaType.APPLICATION_JSON));
-        } catch (ServletException e) {
-            assertThat(e.getCause() instanceof IllegalStateException);
-            assertThat(e.getCause().getMessage().equals("Exceeded max limit of 1000 elements"));
-        }
+        mockMvc
+            .perform(get("/v1/tasks?page=2000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 }
