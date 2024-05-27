@@ -64,7 +64,7 @@ public class ActivitiGraphQLSchemaAutoConfiguration {
                                         .filter(VariableValue.class::isInstance)
                                         .map(VariableValue.class::cast)
                                         .map(it -> Optional.ofNullable(it.getValue()).orElse(Optional.empty()))
-                                        .orElse(input);
+                                        .orElseGet(() -> super.serialize(input));
                                 }
                             }
                         )
