@@ -1435,14 +1435,16 @@ public class ActivitiGraphQLStarterIT {
                         name: by(field: name)
                         count
                       }
-                      groupByTaskStatus: task {
-                        status: by(field: status)
-                        count
-                      }
-                      # Count by associated tasks
-                      groupByTaskAssignee: task {
-                        assignee: by(field: assignee)
-                        count
+                      by {
+                        groupByTaskStatus: task {
+                          status: by(field: status)
+                          count
+                        }
+                        # Count by associated tasks
+                        groupByTaskAssignee: task {
+                          assignee: by(field: assignee)
+                          count
+                        }
                       }
                     }
                   }
@@ -1464,7 +1466,7 @@ public class ActivitiGraphQLStarterIT {
         assertThat(result.getErrors()).isNull();
 
         var expected =
-            "{TaskVariables={aggregate={variables=3, groupByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}], groupByTaskStatus=[{status=COMPLETED, count=2}, {status=CREATED, count=1}], groupByTaskAssignee=[{assignee=assignee, count=3}]}}}";
+            "{TaskVariables={aggregate={variables=3, groupByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}], by={groupByTaskStatus=[{status=COMPLETED, count=2}, {status=CREATED, count=1}], groupByTaskAssignee=[{assignee=assignee, count=3}]}}}}";
 
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
@@ -1487,14 +1489,16 @@ public class ActivitiGraphQLStarterIT {
                         name: by(field: name)
                         count(of: processVariables)
                       }
-                      countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
-                        name: by(field: name)
-                        value: by(field: value)
-                        count
-                      }
-                      countTaskVariablesGroupedByVariableName: variables {
-                        name: by(field: name)
-                        count
+                      by {
+                        countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
+                          name: by(field: name)
+                          value: by(field: value)
+                          count
+                        }
+                        countTaskVariablesGroupedByVariableName: variables {
+                          name: by(field: name)
+                          count
+                        }
                       }
                     }
                   }
@@ -1516,7 +1520,7 @@ public class ActivitiGraphQLStarterIT {
         assertThat(result.getErrors()).isNull();
 
         var expected =
-            "{Tasks={aggregate={countTasks=6, countProcessVariables=2, countTaskVariables=6, countTasksGroupedByStatus=[{status=ASSIGNED, count=1}, {status=COMPLETED, count=2}, {status=CREATED, count=3}], countProcessVariablesGroupedByTaskName=[{name=task4, count=1}, {name=task5, count=1}], countTaskProcessVariablesGroupedByVariableNameAndValue=[{name=initiator, value={key=[1, 2, 3, 4, 5]}, count=2}], countTaskVariablesGroupedByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}, {name=variable4, count=1}, {name=variable5, count=1}, {name=variable6, count=1}]}}}";
+            "{Tasks={aggregate={countTasks=6, countProcessVariables=2, countTaskVariables=6, countTasksGroupedByStatus=[{status=ASSIGNED, count=1}, {status=COMPLETED, count=2}, {status=CREATED, count=3}], countProcessVariablesGroupedByTaskName=[{name=task4, count=1}, {name=task5, count=1}], by={countTaskProcessVariablesGroupedByVariableNameAndValue=[{name=initiator, value={key=[1, 2, 3, 4, 5]}, count=2}], countTaskVariablesGroupedByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}, {name=variable4, count=1}, {name=variable5, count=1}, {name=variable6, count=1}]}}}}";
 
         assertThat(result.getData().toString()).isEqualTo(expected);
     }
