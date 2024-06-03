@@ -29,7 +29,7 @@ public class AlfrescoPageParameterParser {
         return new AlfrescoQueryParameters(
             parseSkipCount(webRequest),
             parseMaxItems(webRequest),
-            parsePageParameter(webRequest)
+            parsePageSizeParameter(webRequest)
         );
     }
 
@@ -55,15 +55,15 @@ public class AlfrescoPageParameterParser {
         return new SkipCountParameter(isSet, skipCount);
     }
 
-    protected PageParameter parsePageParameter(NativeWebRequest webRequest) {
+    protected PageSizeParameter parsePageSizeParameter(NativeWebRequest webRequest) {
         int maxItems = defaultPageSize;
 
-        String maxItemsString = webRequest.getParameter("page");
+        String maxItemsString = webRequest.getParameter("size");
         boolean isSet = maxItemsString != null;
         if (isSet) {
             maxItems = Integer.parseInt(maxItemsString);
         }
 
-        return new PageParameter(isSet, maxItems);
+        return new PageSizeParameter(isSet, maxItems);
     }
 }

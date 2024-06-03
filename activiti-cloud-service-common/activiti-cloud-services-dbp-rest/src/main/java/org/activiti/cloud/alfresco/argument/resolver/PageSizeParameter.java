@@ -15,9 +15,9 @@
  */
 package org.activiti.cloud.alfresco.argument.resolver;
 
-public class PageParameter extends AlfrescoParameter<Integer> {
+public class PageSizeParameter extends AlfrescoParameter<Integer> {
 
-    public PageParameter(boolean set, Integer value) {
+    public PageSizeParameter(boolean set, Integer value) {
         super(set, value);
     }
 }

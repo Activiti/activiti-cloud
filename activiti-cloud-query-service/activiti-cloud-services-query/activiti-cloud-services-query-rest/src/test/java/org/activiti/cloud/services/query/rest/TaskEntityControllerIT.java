@@ -280,7 +280,7 @@ class TaskEntityControllerIT {
 
         //when
         mockMvc
-            .perform(get("/v1/tasks?page=2000").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/tasks?page=0&size=2000").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }
 }
