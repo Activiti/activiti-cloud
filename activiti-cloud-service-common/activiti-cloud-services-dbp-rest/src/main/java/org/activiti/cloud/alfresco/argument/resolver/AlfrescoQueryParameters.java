@@ -21,16 +21,9 @@ public class AlfrescoQueryParameters {
 
     private MaxItemsParameter maxItemsParameter;
 
-    private PageSizeParameter pageSizeParameter;
-
-    public AlfrescoQueryParameters(
-        SkipCountParameter skipCountParameter,
-        MaxItemsParameter maxItemsParameter,
-        PageSizeParameter pageSizeParameter
-    ) {
+    public AlfrescoQueryParameters(SkipCountParameter skipCountParameter, MaxItemsParameter maxItemsParameter) {
         this.skipCountParameter = skipCountParameter;
         this.maxItemsParameter = maxItemsParameter;
-        this.pageSizeParameter = pageSizeParameter;
     }
 
     public SkipCountParameter getSkipCountParameter() {
@@ -39,9 +32,5 @@ public class AlfrescoQueryParameters {
 
     public MaxItemsParameter getMaxItemsParameter() {
         return maxItemsParameter;
-    }
-
-    public PageSizeParameter getPageSizeParameter() {
-        return pageSizeParameter;
     }
 }

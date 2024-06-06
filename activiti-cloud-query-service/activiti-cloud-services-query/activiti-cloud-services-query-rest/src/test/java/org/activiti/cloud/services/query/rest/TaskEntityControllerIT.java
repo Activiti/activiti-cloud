@@ -23,7 +23,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -257,7 +259,7 @@ class TaskEntityControllerIT {
     }
 
     @Test
-    void should_returnMaxItemsLimits_when_invokeWithPagingParametersExceedingLimits() throws Exception {
+    void should_returnBadRequest_when_invokeWithPagingParametersExceedingLimits() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
@@ -267,11 +269,12 @@ class TaskEntityControllerIT {
         //when
         mockMvc
             .perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
     }
 
     @Test
-    void should_returnMaxItemsLimits_when_invokeWithPageParameterExceedingLimits() throws Exception {
+    void should_returnBadRequest_when_invokeWithPageParameterExceedingLimits() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
@@ -281,6 +284,7 @@ class TaskEntityControllerIT {
         //when
         mockMvc
             .perform(get("/v1/tasks?page=0&size=2000").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
     }
 }
