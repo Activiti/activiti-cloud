@@ -29,8 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -63,6 +65,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(TaskController.class)
 @Import(
@@ -267,7 +270,7 @@ class TaskEntityControllerIT {
 
         //when
         mockMvc
-            .perform(get("/v1/tasks?skipCount=1000&maxItems=2000").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/tasks?skipCount=1000&maxItems=1001").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
     }
@@ -282,8 +285,36 @@ class TaskEntityControllerIT {
 
         //when
         mockMvc
-            .perform(get("/v1/tasks?page=0&size=2000").accept(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/tasks?page=0&size=1001").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
+    }
+
+    @Test
+    void should_returnOK_when_invokeWithPagingParametersExceedingLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?skipCount=0&maxItems=1000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_returnOK_when_invokeWithPageParameterWithinLimits() throws Exception {
+        //given
+        PageRequest pageRequest = PageRequest.of(0, 1000);
+
+        given(taskRepository.findAll(any(), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?page=0&size=1000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }
