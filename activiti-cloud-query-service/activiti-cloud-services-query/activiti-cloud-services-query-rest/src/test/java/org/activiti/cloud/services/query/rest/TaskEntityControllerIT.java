@@ -288,7 +288,7 @@ class TaskEntityControllerIT {
     }
 
     @Test
-    void should_returnOK_when_invokeWithPagingParametersExceedingLimits() throws Exception {
+    void should_returnOK_when_invokeWithPagingParametersWithinLimits() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
 
