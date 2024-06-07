@@ -29,10 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -65,7 +63,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 
 @WebMvcTest(TaskController.class)
 @Import(
