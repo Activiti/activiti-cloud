@@ -76,7 +76,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
-@TestPropertySource("classpath:application-test.properties")
+@TestPropertySource(locations={"classpath:application-test.properties"}, properties = "activiti.cloud.rest.max-items.enabled=true")
 class TaskEntityControllerIT {
 
     @Autowired
