@@ -45,7 +45,7 @@ public class AlfrescoWebAutoConfigurationTest {
 
     @BeforeEach
     public void setUp() {
-        configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100);
+        configurer = new AlfrescoWebAutoConfiguration(pageableHandlerMethodArgumentResolver, 100, 1000, true);
     }
 
     @Test
