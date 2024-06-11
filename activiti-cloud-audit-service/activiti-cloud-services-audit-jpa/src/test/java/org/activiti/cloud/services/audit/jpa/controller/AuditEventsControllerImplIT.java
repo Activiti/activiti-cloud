@@ -45,6 +45,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
+import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.ActivityStartedAuditEventEntity;
@@ -79,6 +80,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 @Import(
     {
+        EventRepresentationModelAssemblerConfiguration.class,
         AuditAPIAutoConfiguration.class,
         AuditJPAAutoConfiguration.class,
         AuditJPASecurityAutoConfiguration.class,

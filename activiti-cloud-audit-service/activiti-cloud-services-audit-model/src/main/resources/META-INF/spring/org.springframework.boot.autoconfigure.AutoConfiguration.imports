@@ -1,0 +1,2 @@
+org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration
+org.activiti.cloud.services.audit.jpa.repository.config.AuditJPARepositoryAutoConfiguration

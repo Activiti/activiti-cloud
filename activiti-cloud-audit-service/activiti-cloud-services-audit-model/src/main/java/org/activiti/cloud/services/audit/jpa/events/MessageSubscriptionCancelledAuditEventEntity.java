@@ -22,7 +22,6 @@ import jakarta.persistence.Entity;
 import org.activiti.api.process.model.MessageSubscription;
 import org.activiti.cloud.api.process.model.events.CloudMessageSubscriptionCancelledEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.MessageSubscriptionJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity
 @DiscriminatorValue(value = MessageSubscriptionCancelledAuditEventEntity.MESSAGE_SUBSCRIPTION_CANCELLED_EVENT)

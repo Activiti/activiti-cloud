@@ -13,22 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.jpa.controllers.config;
+package org.activiti.cloud.services.audit.api.config;
 
-import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
-import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
-@Import(
-    {
-        EventRepresentationModelAssemblerConfiguration.class,
-        AuditEventsAdminControllerImpl.class,
-        AuditEventsControllerImpl.class,
-        AuditEventsDeleteController.class,
-    }
-)
-public class AuditJPAControllersAutoConfiguration {}
+@Import(AuditConsumerChannelsConfiguration.class)
+public class AuditConsumerChannelsAutoConfiguration {}

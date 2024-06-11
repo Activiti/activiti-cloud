@@ -37,6 +37,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
+import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -62,7 +63,14 @@ import org.springframework.test.web.servlet.MvcResult;
 @WebMvcTest(AuditEventsAdminControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({ AuditAPIAutoConfiguration.class, AuditJPAAutoConfiguration.class, AlfrescoWebAutoConfiguration.class })
+@Import(
+    {
+        EventRepresentationModelAssemblerConfiguration.class,
+        AuditAPIAutoConfiguration.class,
+        AuditJPAAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 class EventsEngineEventsAdminControllerIT {
 
     private static final String HEADER_ATTACHMENT_FILENAME = "attachment;filename=";

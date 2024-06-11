@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.audit.api.config;
+package org.activiti.cloud.services.audit.jpa.assembler.config;
 
-import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.activiti.cloud.services.audit.jpa.assembler.EventRepresentationModelAssembler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@AutoConfiguration
-public class AuditAPIAutoConfiguration {
+@Configuration
+public class EventRepresentationModelAssemblerConfiguration {
 
+    @ConditionalOnMissingBean
     @Bean
-    public EventsLinkRelationProvider eventsRelProvider() {
-        return new EventsLinkRelationProvider();
+    public EventRepresentationModelAssembler eventRepresentationModelAssembler() {
+        return new EventRepresentationModelAssembler();
     }
 }

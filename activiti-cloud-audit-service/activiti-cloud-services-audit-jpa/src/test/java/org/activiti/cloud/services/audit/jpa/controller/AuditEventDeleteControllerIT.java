@@ -31,6 +31,7 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
 import org.activiti.cloud.services.audit.api.resources.EventsLinkRelationProvider;
+import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
@@ -52,7 +53,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(AuditEventsDeleteController.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({ AuditAPIAutoConfiguration.class, AuditJPAAutoConfiguration.class, AlfrescoWebAutoConfiguration.class })
+@Import(
+    {
+        EventRepresentationModelAssemblerConfiguration.class,
+        AuditAPIAutoConfiguration.class,
+        AuditJPAAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+    }
+)
 public class AuditEventDeleteControllerIT {
 
     private static final String DOCUMENTATION_ALFRESCO_IDENTIFIER = "events-alfresco";
