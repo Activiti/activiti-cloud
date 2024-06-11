@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -59,10 +60,11 @@ import org.springframework.test.context.TestPropertySource;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "logging.level.org.hibernate.collection.spi=warn",
+        "logging.level.org.hibernate.SQL=DEBUG",
+        "logging.level.org.hibernate.type=TRACE",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
-@EnableAutoConfiguration
 public class TaskControllerHelperIT {
 
     @Autowired
@@ -94,6 +96,48 @@ public class TaskControllerHelperIT {
         variableRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskCandidateUserRepository.deleteAll();
+    }
+
+    @Test
+    public void should_returnTasks_withFilteringByProcessVariableExactQuery() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+        List<String> processVariableKeys = IntStream
+            .range(0, variables.size())
+            .filter(i -> i % 2 == 0)
+            .mapToObj(i -> processInstanceEntity.getProcessDefinitionKey() + "/name" + i)
+            .toList();
+
+        List<String> processVariableKeysFilters = List.of(processInstanceEntity.getProcessDefinitionKey() + "/name1");
+        List<String> processVariableKeysValues = List.of("id1");
+
+        Map<String, Object> processVariableFilters = Map.of(
+            processInstanceEntity.getProcessDefinitionKey() + "/name1",
+            "id1"
+        );
+
+        int pageSize = 30;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableKeys,
+            processVariableFilters
+        );
+
+        assertThat(response.getContent().size()).isEqualTo(1);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .extracting(task -> task.getProcessVariables().iterator().next().getValue())
+            .containsExactly("id1");
     }
 
     @Test
@@ -468,7 +512,7 @@ public class TaskControllerHelperIT {
         for (int i = 0; i < 8; i++) {
             ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
             processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
+            processVariableEntity.setValue("id" + i);
             processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
             processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
             processVariableEntity.setProcessInstance(processInstanceEntity);

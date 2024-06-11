@@ -15,20 +15,27 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Operator;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
+import org.hibernate.sql.ast.tree.predicate.LikePredicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.Querydsl;
@@ -119,6 +126,55 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
             .concat("/")
             .concat(processVariableEntity.name)
             .in(variableKeys);
+
+        JPQLQuery<TaskEntity> tasksQuery = queryFactory
+            .query()
+            .select(taskEntity)
+            .from(taskEntity)
+            .where(taskEntity.id.in(taskIds))
+            .leftJoin(taskEntity.processVariables, processVariableEntity)
+            .where(processVariableEntity.isNull().or(processVariableFilter))
+            .fetchJoin()
+            .leftJoin(taskEntity.taskCandidateGroups)
+            .fetchJoin()
+            .leftJoin(taskEntity.taskCandidateUsers)
+            .fetchJoin();
+
+        return PageableExecutionUtils.getPage(
+            querydsl.applySorting(pageable.getSort(), tasksQuery).fetch(),
+            pageable,
+            () -> totalElements
+        );
+    }
+
+    @Override
+    public Page<TaskEntity> searchByProcessVariableValue(
+        Predicate predicate,
+        List<String> processVariableKeys,
+        Map<String, Object> processVariableFilters,
+        Pageable pageable
+    ) {
+        Assert.notNull(processVariableKeys, "processVariableKeys must not be null!");
+        Assert.notNull(predicate, "Predicate must not be null!");
+        Assert.notNull(pageable, "Pageable must not be null!");
+
+        EntityManager entityManager = getEntityManager();
+        Querydsl querydsl = getQuerydsl();
+        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
+
+        JPAQuery<String> taskIdsQuery = queryFactory.query().select(taskEntity.id).from(taskEntity).where(predicate);
+
+        long totalElements = taskIdsQuery.fetchCount();
+
+        List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
+
+        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
+            .concat("/")
+            .concat(processVariableEntity.name)
+            .in(processVariableKeys);
 
         JPQLQuery<TaskEntity> tasksQuery = queryFactory
             .query()

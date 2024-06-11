@@ -20,6 +20,7 @@ import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Map;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -189,5 +190,23 @@ public class TaskControllerHelper {
         } else {
             return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
         }
+    }
+
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters,
+        List<String> processVariableKeys,
+        Map<String, Object> processVariableFilters
+    ) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+        Page<TaskEntity> tasks = taskRepository.searchByProcessVariableValue(
+            extendedPredicate,
+            processVariableKeys,
+            processVariableFilters,
+            pageable
+        );
+        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 }
