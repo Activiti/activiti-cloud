@@ -59,7 +59,7 @@ public class ActivitiMessagingDestinationTransformer implements Function<String,
             .filter(StringUtils::hasText)
             .orElse(source);
 
-        log.warn(
+        log.debug(
             "Processing source destination '{}' with prefix '{}' and separator '{} to target name '{}' with scope '{}'",
             source,
             prefix,
