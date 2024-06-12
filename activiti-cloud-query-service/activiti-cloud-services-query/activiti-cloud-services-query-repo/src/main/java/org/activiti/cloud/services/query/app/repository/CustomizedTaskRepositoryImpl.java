@@ -159,30 +159,29 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
 
-        Map.Entry<String, Object> firstEntry = processVariableFilters
+        BooleanExpression condition = processVariableFilters
             .entrySet()
             .stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("processVariableFilters must not be empty!"));
-        String varKey = firstEntry.getKey();
-        String varValue = firstEntry.getValue().toString();
-
-        BooleanExpression combinedCondition = processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .eq(varKey)
-            .and(
-                Expressions
-                    .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
-                    .eq(varValue)
-            );
+            .map(entry ->
+                processVariableEntity.processDefinitionKey
+                    .concat("/")
+                    .concat(processVariableEntity.name)
+                    .eq(entry.getKey())
+                    .and(
+                        Expressions
+                            .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
+                            .eq(Expressions.constant(entry.getValue()))
+                    )
+            )
+            .reduce(BooleanExpression::and)
+            .orElse(null);
 
         JPAQuery<String> taskIdsQuery = queryFactory
             .query()
             .from(processVariableEntity)
             .select(taskEntity.id)
-            .join(processVariableEntity.tasks, taskEntity)
-            .where(combinedCondition);
+            .where(condition)
+            .rightJoin(processVariableEntity.tasks, taskEntity);
 
         long totalElements = taskIdsQuery.fetchCount();
 
