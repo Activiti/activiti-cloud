@@ -15,14 +15,9 @@
  */
 package org.activiti.cloud.services.query.app.repository;
 
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.Operator;
-import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,7 +30,6 @@ import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
-import org.hibernate.sql.ast.tree.predicate.LikePredicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.Querydsl;
@@ -165,7 +159,30 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
 
-        JPAQuery<String> taskIdsQuery = queryFactory.query().select(taskEntity.id).from(taskEntity).where(predicate);
+        Map.Entry<String, Object> firstEntry = processVariableFilters
+            .entrySet()
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("processVariableFilters must not be empty!"));
+        String varKey = firstEntry.getKey();
+        String varValue = firstEntry.getValue().toString();
+
+        BooleanExpression combinedCondition = processVariableEntity.processDefinitionKey
+            .concat("/")
+            .concat(processVariableEntity.name)
+            .eq(varKey)
+            .and(
+                Expressions
+                    .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
+                    .eq(varValue)
+            );
+
+        JPAQuery<String> taskIdsQuery = queryFactory
+            .query()
+            .from(processVariableEntity)
+            .select(taskEntity.id)
+            .join(processVariableEntity.tasks, taskEntity)
+            .where(combinedCondition);
 
         long totalElements = taskIdsQuery.fetchCount();
 

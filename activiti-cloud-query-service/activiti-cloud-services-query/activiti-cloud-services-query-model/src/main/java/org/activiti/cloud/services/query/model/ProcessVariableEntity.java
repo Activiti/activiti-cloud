@@ -21,10 +21,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
@@ -64,6 +66,9 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         readOnly = true
     )
     private String processDefinitionKey;
+
+    @ManyToMany(mappedBy = "processVariables")
+    private Set<TaskEntity> tasks;
 
     public ProcessVariableEntity() {}
 
@@ -126,6 +131,14 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+    public Set<TaskEntity> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(Set<TaskEntity> tasks) {
+        this.tasks = tasks;
     }
 
     @Override

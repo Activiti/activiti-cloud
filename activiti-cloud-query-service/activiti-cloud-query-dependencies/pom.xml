@@ -12,7 +12,6 @@
   <name>Activiti Cloud :: Query Dependencies BOM (Bill Of Materials)</name>
   <properties>
     <querydsl.version>5.0.0</querydsl.version>
-    <hypersistence.version>3.7.5</hypersistence.version>
   </properties>
   <dependencyManagement>
     <dependencies>

@@ -18,11 +18,9 @@ package org.activiti.cloud.services.query.model;
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
-import jakarta.persistence.Convert;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -31,7 +29,8 @@ import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @MappedSuperclass
@@ -51,7 +50,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     private String executionId;
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "`value`", columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private VariableValue<?> value;

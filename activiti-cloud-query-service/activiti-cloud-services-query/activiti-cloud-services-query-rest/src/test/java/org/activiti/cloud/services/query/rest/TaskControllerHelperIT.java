@@ -48,12 +48,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
@@ -64,8 +68,14 @@ import org.springframework.test.context.TestPropertySource;
         "logging.level.org.hibernate.type=TRACE",
     }
 )
+@Testcontainers
+@EnableAutoConfiguration
 @TestPropertySource("classpath:application-test.properties")
 public class TaskControllerHelperIT {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Autowired
     TaskControllerHelper taskControllerHelper;
@@ -113,9 +123,6 @@ public class TaskControllerHelperIT {
             .filter(i -> i % 2 == 0)
             .mapToObj(i -> processInstanceEntity.getProcessDefinitionKey() + "/name" + i)
             .toList();
-
-        List<String> processVariableKeysFilters = List.of(processInstanceEntity.getProcessDefinitionKey() + "/name1");
-        List<String> processVariableKeysValues = List.of("id1");
 
         Map<String, Object> processVariableFilters = Map.of(
             processInstanceEntity.getProcessDefinitionKey() + "/name1",
