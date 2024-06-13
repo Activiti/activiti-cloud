@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -288,13 +286,9 @@ public class TaskControllerHelperIT {
         variableRepository.save(processVar2);
 
         TaskEntity taskFromProcess1 = tasks1.getLast();
-        taskFromProcess1.setProcessVariables(
-            Stream.of(variables1, Set.of(processVar1)).flatMap(Set::stream).collect(Collectors.toSet())
-        );
+        taskFromProcess1.setProcessVariables(Set.of(processVar1));
         TaskEntity taskFromProcess2 = tasks2.getLast();
-        taskFromProcess2.setProcessVariables(
-            Stream.of(variables2, Set.of(processVar2)).flatMap(Set::stream).collect(Collectors.toSet())
-        );
+        taskFromProcess2.setProcessVariables(Set.of(processVar2));
         taskRepository.save(taskFromProcess1);
         taskRepository.save(taskFromProcess2);
 
@@ -302,11 +296,7 @@ public class TaskControllerHelperIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<String> processVariableKeys = Stream
-            .of(variables1, variables2)
-            .flatMap(Set::stream)
-            .map(v -> v.getProcessDefinitionKey() + "/" + v.getName())
-            .collect(Collectors.toList());
+        List<String> processVariableKeys = Collections.emptyList();
 
         Map<String, Object> processVariableFilters = Map.of(
             process1.getProcessDefinitionKey() + "/" + var1name,
@@ -331,12 +321,16 @@ public class TaskControllerHelperIT {
         List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks).containsExactlyInAnyOrder(taskFromProcess1, taskFromProcess2);
         assertThat(retrievedTasks)
-            .allSatisfy(task -> {
-                assertThat(task.getProcessVariables())
-                    .extracting("name")
-                    .containsAnyOf(processVariableKeys.stream().map(k -> k.split("/")[1]).toArray(String[]::new));
-                assertThat(task.getProcessVariables()).extracting("name").doesNotContain(var1name, var2name);
-            });
+            .satisfiesExactlyInAnyOrder(
+                task -> {
+                    assertThat(task.getProcessVariables()).extracting("name").anyMatch("var-to-search"::equals);
+                    assertThat(task.getProcessVariables()).extracting("value").anyMatch("value-to-search"::equals);
+                },
+                task -> {
+                    assertThat(task.getProcessVariables()).extracting("name").anyMatch("var-to-search-2"::equals);
+                    assertThat(task.getProcessVariables()).extracting("value").anyMatch("value-to-search-2"::equals);
+                }
+            );
     }
 
     @Test

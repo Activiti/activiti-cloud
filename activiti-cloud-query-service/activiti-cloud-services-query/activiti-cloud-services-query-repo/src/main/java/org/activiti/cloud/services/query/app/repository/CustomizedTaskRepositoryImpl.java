@@ -22,8 +22,12 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -187,23 +191,27 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
 
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
 
-        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
+        Set<String> extendedKeySet = Stream
+            .of(processVariableKeys, processVariableFilters.keySet())
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+        BooleanExpression variableFetchFilter = processVariableEntity.processDefinitionKey
             .concat("/")
             .concat(processVariableEntity.name)
-            .in(processVariableKeys);
+            .in(extendedKeySet);
 
         JPQLQuery<TaskEntity> tasksQuery = queryFactory
             .query()
             .select(taskEntity)
             .from(taskEntity)
-            .where(taskEntity.id.in(taskIds))
             .leftJoin(taskEntity.processVariables, processVariableEntity)
-            .where(processVariableEntity.isNull().or(processVariableFilter))
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateGroups)
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateUsers)
-            .fetchJoin();
+            .fetchJoin()
+            .where(taskEntity.id.in(taskIds))
+            .where(processVariableEntity.isNull().or(variableFetchFilter));
 
         return PageableExecutionUtils.getPage(
             querydsl.applySorting(pageable.getSort(), tasksQuery).fetch(),
