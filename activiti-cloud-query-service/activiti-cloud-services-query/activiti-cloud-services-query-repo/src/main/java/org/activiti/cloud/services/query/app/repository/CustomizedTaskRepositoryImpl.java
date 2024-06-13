@@ -173,7 +173,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
                             .eq(Expressions.constant(entry.getValue()))
                     )
             )
-            .reduce(BooleanExpression::and)
+            .reduce(BooleanExpression::or)
             .orElse(null);
 
         JPAQuery<String> taskIdsQuery = queryFactory
