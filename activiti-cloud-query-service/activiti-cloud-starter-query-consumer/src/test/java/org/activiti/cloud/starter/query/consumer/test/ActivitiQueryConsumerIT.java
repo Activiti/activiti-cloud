@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.query.configuration;
 
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+package org.activiti.cloud.starter.query.consumer.test;
 
-@AutoConfiguration
-@Import(QuerySwaggerConfig.class)
-public class ActivitiQueryAutoConfiguration {}
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+@SpringBootApplication
+public class ActivitiQueryConsumerIT {
+
+    @Test
+    void contextLoads() {
+
+    }
+}

@@ -46,6 +46,9 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
@@ -92,5 +95,15 @@ public class QueryRestControllersAutoConfiguration {
         ProcessDiagramGenerator processDiagramGenerator
     ) {
         return new ProcessDiagramGeneratorWrapper(processDiagramGenerator);
+    }
+
+    @Bean
+    RepositoryRestConfigurer dataRestRepositoryRestConfigurer() {
+        return new RepositoryRestConfigurer() {
+            @Override
+            public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
+                config.disableDefaultExposure();
+            }
+        };
     }
 }

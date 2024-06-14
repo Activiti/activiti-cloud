@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.starter.query.configuration;
+package org.activiti.cloud.starter.query.consumer.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
-@Import(QuerySwaggerConfig.class)
-public class ActivitiQueryAutoConfiguration {}
+@PropertySource("classpath:query-messaging.properties")
+public class ActivitiQueryConsumerAutoConfiguration {}
