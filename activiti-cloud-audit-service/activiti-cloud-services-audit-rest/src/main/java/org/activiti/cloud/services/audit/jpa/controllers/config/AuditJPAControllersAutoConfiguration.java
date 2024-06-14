@@ -20,7 +20,12 @@ import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControl
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @AutoConfiguration
 @Import(
@@ -31,4 +36,16 @@ import org.springframework.context.annotation.Import;
         AuditEventsDeleteController.class,
     }
 )
-public class AuditJPAControllersAutoConfiguration {}
+public class AuditJPAControllersAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean
+    RepositoryRestConfigurer dataRestRepositoryRestConfigurer() {
+        return new RepositoryRestConfigurer() {
+            @Override
+            public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
+                config.disableDefaultExposure();
+            }
+        };
+    }
+}

@@ -16,9 +16,10 @@
     <module>activiti-cloud-services-audit-api</module>
     <module>activiti-cloud-services-audit-consumer</module>
     <module>activiti-cloud-services-audit-model</module>
-    <module>activiti-cloud-services-audit-jpa</module>
+    <module>activiti-cloud-services-audit-rest</module>
     <module>activiti-cloud-services-audit-liquibase</module>
     <module>activiti-cloud-starter-audit</module>
+    <module>activiti-cloud-starter-audit-consumer</module>
   </modules>
   <dependencyManagement>
     <dependencies>

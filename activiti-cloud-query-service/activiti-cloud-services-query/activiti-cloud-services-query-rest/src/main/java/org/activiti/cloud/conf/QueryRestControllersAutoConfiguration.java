@@ -98,6 +98,7 @@ public class QueryRestControllersAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     RepositoryRestConfigurer dataRestRepositoryRestConfigurer() {
         return new RepositoryRestConfigurer() {
             @Override
