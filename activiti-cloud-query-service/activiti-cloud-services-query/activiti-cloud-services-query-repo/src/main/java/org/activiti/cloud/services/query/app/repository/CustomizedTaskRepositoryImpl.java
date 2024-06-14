@@ -22,14 +22,21 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
+import org.hibernate.Filter;
+import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.Querydsl;
@@ -96,11 +103,12 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     @Override
     public Page<TaskEntity> findWithProcessVariables(
         List<String> variableKeys,
-        Predicate predicate,
+        Predicate taskPredicate,
+        Predicate processVariablePredicate,
         Pageable pageable
     ) {
         Assert.notNull(variableKeys, "keys must not be null!");
-        Assert.notNull(predicate, "Predicate must not be null!");
+        Assert.notNull(taskPredicate, "Predicate must not be null!");
         Assert.notNull(pageable, "Pageable must not be null!");
 
         EntityManager entityManager = getEntityManager();
@@ -110,16 +118,15 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
 
-        JPAQuery<String> taskIdsQuery = queryFactory.query().select(taskEntity.id).from(taskEntity).where(predicate);
+        JPAQuery<String> taskIdsQuery = getTaskIdsQuery(taskPredicate, processVariablePredicate);
 
         long totalElements = taskIdsQuery.fetchCount();
 
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
 
-        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .in(variableKeys);
+        Session session = entityManager.unwrap(Session.class);
+        Filter filter = session.enableFilter("variablesFilter");
+        filter.setParameterList("variableKeys", variableKeys);
 
         JPQLQuery<TaskEntity> tasksQuery = queryFactory
             .query()
@@ -127,7 +134,6 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
             .from(taskEntity)
             .where(taskEntity.id.in(taskIds))
             .leftJoin(taskEntity.processVariables, processVariableEntity)
-            .where(processVariableEntity.isNull().or(processVariableFilter))
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateGroups)
             .fetchJoin()
@@ -141,7 +147,28 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         );
     }
 
-    @Override
+    private JPAQuery<String> getTaskIdsQuery(Predicate taskPredicate, Predicate processVariablePredicate) {
+        JPAQueryFactory queryFactory = new JPAQueryFactory(getEntityManager());
+        QTaskEntity taskEntity = QTaskEntity.taskEntity;
+        if (processVariablePredicate != null) {
+            QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
+            JPAQuery<ProcessVariableEntity> subquery = queryFactory
+                .query()
+                .select(processVariableEntity)
+                .from(processVariableEntity)
+                .where(processVariablePredicate);
+            return queryFactory
+                .query()
+                .select(taskEntity.id)
+                .from(taskEntity)
+                .join(taskEntity.processVariables, processVariableEntity)
+                .where(processVariableEntity.in(subquery))
+                .groupBy(taskEntity.id);
+            //TODO having count > variaable filters size
+        }
+        return queryFactory.query().select(taskEntity.id).from(taskEntity).where(taskPredicate);
+    }
+
     public Page<TaskEntity> searchByProcessVariableValue(
         Predicate predicate,
         List<String> processVariableKeys,
@@ -159,52 +186,55 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         QTaskEntity taskEntity = QTaskEntity.taskEntity;
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
 
-        Map.Entry<String, Object> firstEntry = processVariableFilters
+        BooleanExpression condition = processVariableFilters
             .entrySet()
             .stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("processVariableFilters must not be empty!"));
-        String varKey = firstEntry.getKey();
-        String varValue = firstEntry.getValue().toString();
-
-        BooleanExpression combinedCondition = processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .eq(varKey)
-            .and(
-                Expressions
-                    .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
-                    .eq(varValue)
-            );
+            .map(entry ->
+                processVariableEntity.processDefinitionKey
+                    .concat("/")
+                    .concat(processVariableEntity.name)
+                    .eq(entry.getKey())
+                    .and(
+                        Expressions
+                            .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
+                            .eq(Expressions.constant(entry.getValue()))
+                    )
+            )
+            .reduce(BooleanExpression::or)
+            .orElse(null);
 
         JPAQuery<String> taskIdsQuery = queryFactory
             .query()
             .from(processVariableEntity)
             .select(taskEntity.id)
-            .join(processVariableEntity.tasks, taskEntity)
-            .where(combinedCondition);
+            .where(condition)
+            .rightJoin(processVariableEntity.tasks, taskEntity);
 
         long totalElements = taskIdsQuery.fetchCount();
 
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
 
-        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
+        Set<String> extendedKeySet = Stream
+            .of(processVariableKeys, processVariableFilters.keySet())
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+        BooleanExpression variableFetchFilter = processVariableEntity.processDefinitionKey
             .concat("/")
             .concat(processVariableEntity.name)
-            .in(processVariableKeys);
+            .in(extendedKeySet);
 
         JPQLQuery<TaskEntity> tasksQuery = queryFactory
             .query()
             .select(taskEntity)
             .from(taskEntity)
-            .where(taskEntity.id.in(taskIds))
             .leftJoin(taskEntity.processVariables, processVariableEntity)
-            .where(processVariableEntity.isNull().or(processVariableFilter))
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateGroups)
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateUsers)
-            .fetchJoin();
+            .fetchJoin()
+            .where(taskEntity.id.in(taskIds))
+            .where(processVariableEntity.isNull().or(variableFetchFilter));
 
         return PageableExecutionUtils.getPage(
             querydsl.applySorting(pageable.getSort(), tasksQuery).fetch(),
