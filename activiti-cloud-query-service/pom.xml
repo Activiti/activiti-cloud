@@ -12,7 +12,6 @@
   <name>Activiti Cloud Query :: Parent</name>
   <packaging>pom</packaging>
   <modules>
-
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>
