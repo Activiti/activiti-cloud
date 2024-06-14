@@ -19,8 +19,8 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -82,15 +82,17 @@ public class TaskControllerHelper {
         Predicate predicate,
         VariableSearch variableSearch,
         Pageable pageable,
-        List<QueryDslPredicateFilter> filters,
-        List<String> processVariableKeys
+        List<QueryDslPredicateFilter> taskFilters,
+        List<QueryDslPredicateFilter> processVariableFilters,
+        List<String> processVariableFetchKeys
     ) {
         Page<TaskEntity> page = findPageWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
-            filters,
-            processVariableKeys
+            taskFilters,
+            processVariableFilters,
+            processVariableFetchKeys
         );
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
@@ -111,7 +113,14 @@ public class TaskControllerHelper {
         if (processVariableKeys == null || processVariableKeys.isEmpty()) {
             return this.findAll(predicate, variableSearch, pageable, filters);
         } else {
-            return this.findAllWithProcessVariables(predicate, variableSearch, pageable, filters, processVariableKeys);
+            return this.findAllWithProcessVariables(
+                    predicate,
+                    variableSearch,
+                    pageable,
+                    filters,
+                    Collections.emptyList(),
+                    processVariableKeys
+                );
         }
     }
 
@@ -175,12 +184,16 @@ public class TaskControllerHelper {
         VariableSearch variableSearch,
         Pageable pageable,
         List<QueryDslPredicateFilter> filters,
-        List<String> processVariableKeys
+        List<QueryDslPredicateFilter> processVariableFilters,
+        List<String> processVariableFetchKeys
     ) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+        Predicate processVariablePredicate = processVariableFilters.isEmpty()
+            ? null
+            : predicateAggregator.applyFilters(null, processVariableFilters);
 
         if (variableSearch.isSet()) {
-            addProcessVariablesFilter(processVariableKeys);
+            addProcessVariablesFilter(processVariableFetchKeys);
             return taskRepository.findByVariableNameAndValue(
                 variableSearch.getName(),
                 variableSearch.getValue(),
@@ -188,25 +201,12 @@ public class TaskControllerHelper {
                 pageable
             );
         } else {
-            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
+            return taskRepository.findWithProcessVariables(
+                processVariableFetchKeys,
+                extendedPredicate,
+                processVariablePredicate,
+                pageable
+            );
         }
-    }
-
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
-        Predicate predicate,
-        VariableSearch variableSearch,
-        Pageable pageable,
-        List<QueryDslPredicateFilter> filters,
-        List<String> processVariableKeys,
-        Map<String, Object> processVariableFilters
-    ) {
-        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
-        Page<TaskEntity> tasks = taskRepository.searchByProcessVariableValue(
-            extendedPredicate,
-            processVariableKeys,
-            processVariableFilters,
-            pageable
-        );
-        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 }

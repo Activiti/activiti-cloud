@@ -27,6 +27,7 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -156,6 +157,7 @@ public class TaskController {
                 new StandAloneTaskFilter(standalone),
                 taskLookupRestrictionService
             ),
+            Collections.emptyList(),
             processVariableKeys
         );
     }

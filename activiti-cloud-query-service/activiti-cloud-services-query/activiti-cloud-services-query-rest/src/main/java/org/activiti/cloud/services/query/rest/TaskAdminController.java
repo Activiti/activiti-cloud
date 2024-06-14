@@ -27,6 +27,7 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -135,6 +136,7 @@ public class TaskAdminController {
             variableSearch,
             pageable,
             Arrays.asList(new RootTasksFilter(rootTasksOnly), new StandAloneTaskFilter(standalone)),
+            Collections.emptyList(),
             processVariableKeys
         );
     }
