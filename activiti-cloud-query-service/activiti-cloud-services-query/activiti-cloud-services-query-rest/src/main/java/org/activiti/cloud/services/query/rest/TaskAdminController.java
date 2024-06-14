@@ -35,7 +35,6 @@ import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -138,7 +137,7 @@ public class TaskAdminController {
             pageable,
             Arrays.asList(new RootTasksFilter(rootTasksOnly), new StandAloneTaskFilter(standalone)),
             Collections.emptyList(),
-            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
+            processVariableKeys
         );
     }
 
@@ -161,12 +160,7 @@ public class TaskAdminController {
                 new RootTasksFilter(queryBody.isRootTasksOnly()),
                 new StandAloneTaskFilter(queryBody.isStandalone())
             ),
-            queryBody
-                .getVariableKeys()
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .toList()
+            queryBody.getVariableKeys()
         );
 
         MappingJacksonValue result = new MappingJacksonValue(pagedModel);
