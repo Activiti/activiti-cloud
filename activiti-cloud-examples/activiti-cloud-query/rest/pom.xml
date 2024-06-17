@@ -2,24 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>activiti-cloud-query</artifactId>
-    <groupId>org.activiti.cloud</groupId>
-    <version>8.7.0-SNAPSHOT</version>
-  </parent>
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-query</artifactId>
+    <version>8.6.0-SNAPSHOT</version>
+  </parent>
 
-  <artifactId>activiti-cloud-query-starter</artifactId>
-  <name>Activiti Cloud :: Query Starter All-In-One</name>
+  <artifactId>activiti-cloud-query-starter-rest</artifactId>
+  <name>Activiti Cloud :: Query Starter Rest Api</name>
 
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-query</artifactId>
+      <artifactId>activiti-cloud-starter-query-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-audit</artifactId>
+      <artifactId>activiti-cloud-starter-audit-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
