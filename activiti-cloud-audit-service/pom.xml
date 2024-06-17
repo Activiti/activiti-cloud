@@ -20,6 +20,7 @@
     <module>activiti-cloud-services-audit-liquibase</module>
     <module>activiti-cloud-starter-audit</module>
     <module>activiti-cloud-starter-audit-consumer</module>
+    <module>activiti-cloud-starter-audit-rest</module>
   </modules>
   <dependencyManagement>
     <dependencies>

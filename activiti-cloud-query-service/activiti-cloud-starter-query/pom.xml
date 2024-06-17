@@ -10,7 +10,7 @@
     <relativePath>../activiti-cloud-query-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-query</artifactId>
-  <name>Activiti Cloud Starter :: Query</name>
+  <name>Activiti Cloud Starter :: Query All In One</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

@@ -32,7 +32,11 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-audit</artifactId>
+      <artifactId>activiti-cloud-starter-audit-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-audit-consumer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

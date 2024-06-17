@@ -6,11 +6,13 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-audit-dependencies</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.6.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
-  <artifactId>activiti-cloud-starter-audit</artifactId>
-  <name>Activiti Cloud Starter :: All In One</name>
+
+  <artifactId>activiti-cloud-starter-audit-rest</artifactId>
+  <name>Activiti Cloud Starter :: Audit Rest Api</name>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -22,11 +24,7 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-audit-rest</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-audit-consumer</artifactId>
+      <artifactId>activiti-cloud-services-audit-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -208,69 +206,5 @@
       </plugin>
     </plugins>
   </build>
-  <profiles>
-    <profile>
-      <id>generate-swagger</id>
-      <activation>
-        <property>
-          <name>!swagger.skip</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>generate-swagger</id>
-                <goals>
-                  <goal>integration-test</goal>
-                  <goal>verify</goal>
-                </goals>
-                <configuration>
-                  <includes>
-                    <!-- use a custom suffix to be able to skip integration tests and still build swagger specification-->
-                    <include>**/*ITSupport.java</include>
-                  </includes>
-                  <skipTests>false</skipTests>
-                  <skipITs>false</skipITs>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-artifacts</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>attach-artifact</goal>
-                </goals>
-                <configuration>
-                  <artifacts>
-                    <!-- these are artifacts are produced by *ITSupport test-->
-                    <!-- Alfresco format JSON-->
-                    <artifact>
-                      <file>target/swagger.json</file>
-                      <type>json</type>
-                      <classifier>api-docs</classifier>
-                    </artifact>
-                    <!-- Swagger YAML-->
-                    <artifact>
-                      <file>target/swagger.yaml</file>
-                      <type>yaml</type>
-                      <classifier>api-docs</classifier>
-                    </artifact>
-                  </artifacts>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+
 </project>
