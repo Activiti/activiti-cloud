@@ -24,7 +24,11 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-starter-query</artifactId>
+      <artifactId>activiti-cloud-starter-query-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-query-consumer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
