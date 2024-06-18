@@ -21,24 +21,6 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-audit-consumer</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-service-messaging-starter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-tracing</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-test-containers</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream-test-support</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 
