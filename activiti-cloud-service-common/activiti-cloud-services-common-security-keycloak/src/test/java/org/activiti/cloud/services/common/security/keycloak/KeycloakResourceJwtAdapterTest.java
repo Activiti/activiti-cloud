@@ -72,4 +72,28 @@ public class KeycloakResourceJwtAdapterTest {
 
         assertThat(keycloakResourceJwtAdapter.getRoles()).hasSize(2).containsExactly("roleA", "roleB");
     }
+
+    @Test
+    public void shouldReturnEmptyListWhenPermissionsIsNull() {
+        Map<String, Object> permissionsParent = JSONObjectUtils.newJSONObject();
+        permissionsParent.put("permissions", null);
+        when(jwt.hasClaim("resource_access")).thenReturn(true);
+        when(jwt.getClaim("resource_access")).thenReturn(permissionsParent);
+
+        assertThat(keycloakResourceJwtAdapter.getPermissions()).isEmpty();
+    }
+
+    @Test
+    public void shouldReturnPermissions() {
+        Map<String, Object> client = JSONObjectUtils.newJSONObject();
+        Map<String, Object> permissions = JSONObjectUtils.newJSONObject();
+        permissions.put("permissions", List.of("permissionA", "permissionB"));
+        client.put("app", permissions);
+        when(jwt.hasClaim("resource_access")).thenReturn(true);
+        when(jwt.getClaim("resource_access")).thenReturn(client);
+
+        assertThat(keycloakResourceJwtAdapter.getPermissions())
+            .hasSize(2)
+            .containsExactly("permissionA", "permissionB");
+    }
 }

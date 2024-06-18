@@ -39,6 +39,7 @@ public class AuthorizationProperties {
     public static class SecurityConstraint {
 
         private String[] authRoles = new String[] {};
+        private String[] authPermissions = new String[] {};
         private SecurityCollection[] securityCollections = new SecurityCollection[] {};
 
         public String[] getAuthRoles() {
@@ -55,6 +56,14 @@ public class AuthorizationProperties {
 
         public void setSecurityCollections(SecurityCollection[] securityCollections) {
             this.securityCollections = securityCollections;
+        }
+
+        public String[] getAuthPermissions() {
+            return authPermissions;
+        }
+
+        public void setAuthPermissions(String[] authPermissions) {
+            this.authPermissions = authPermissions;
         }
     }
 
