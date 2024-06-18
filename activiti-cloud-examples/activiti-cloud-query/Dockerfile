@@ -22,8 +22,8 @@ RUN chmod +x ./entrypoint.sh
 
 COPY liquibase/target/*.jar liquibase.jar
 COPY starter/target/*.jar app.jar
-#COPY rest/target/*.jar rest.jar
-#COPY consumer/target/*.jar consumer.jar
+COPY rest/target/*.jar rest.jar
+COPY consumer/target/*.jar consumer.jar
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["-jar", "app.jar"]
