@@ -15,6 +15,10 @@
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-query-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-query-rest</artifactId>
     </dependency>
     <dependency>

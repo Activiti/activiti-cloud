@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.query.rest.config;
+package org.activiti.cloud.query.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
@@ -25,15 +25,17 @@ import org.activiti.core.common.spring.security.policies.ProcessSecurityPolicies
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesRestrictionApplier;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-@Configuration
-public class QueryRestConfiguration {
+@AutoConfiguration
+public class QueryConfiguration {
 
     @Bean(name = "baseOpenApi")
+    @ConditionalOnMissingBean
     public OpenAPI baseOpenApi(
         BaseOpenApiBuilder baseOpenApiBuilder,
         @Value("${server.servlet.context-path:/}") String swaggerBasePath,

@@ -21,7 +21,18 @@
     <module>starter</module>
     <module>rest</module>
     <module>consumer</module>
+    <module>config</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-query-config</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>

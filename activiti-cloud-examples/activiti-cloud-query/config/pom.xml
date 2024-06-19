@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.activiti.cloud</groupId>
+    <artifactId>activiti-cloud-build-parent</artifactId>
+    <version>8.6.0-SNAPSHOT</version>
+    <relativePath>../../../activiti-cloud-build/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>activiti-cloud-query-config</artifactId>
+  <name>Activiti Cloud :: Query Config</name>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <java.release>${java.version}</java.release>
+    <java.version>21</java.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
+    <activiti-cloud.version>${project.version}</activiti-cloud.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-query-dependencies</artifactId>
+        <version>${activiti-cloud.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.activiti.cloud</groupId>
+        <artifactId>activiti-cloud-audit-dependencies</artifactId>
+        <version>${activiti-cloud.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-swagger</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-api-process-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-spring-security-policies</artifactId>
+    </dependency>
+  </dependencies>
+</project>
