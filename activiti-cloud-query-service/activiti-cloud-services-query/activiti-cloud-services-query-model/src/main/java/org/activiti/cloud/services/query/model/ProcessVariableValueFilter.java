@@ -36,7 +36,7 @@ public class ProcessVariableValueFilter {
     public BooleanExpression getExpression() {
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
         StringTemplate extractedValue = Expressions.stringTemplate(
-            "cast(jsonb_extract_path({0}, 'value') as string)",
+            "cast(jsonb_extract_path_text({0}, 'value') as string)",
             processVariableEntity.value
         );
 

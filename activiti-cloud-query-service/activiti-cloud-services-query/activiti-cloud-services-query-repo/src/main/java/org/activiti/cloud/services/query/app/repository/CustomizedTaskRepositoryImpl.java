@@ -310,7 +310,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
                 .map(order -> {
                     String variableName = order.getProperty().substring("variables.".length());
                     StringTemplate jsonValuePath = Expressions.stringTemplate(
-                        "json_extract_path_text({0}, 'value')",
+                        "jsonb_extract_path_text({0}, 'value')",
                         QProcessVariableEntity.processVariableEntity.value
                     );
                     StringExpression orderCase = new CaseBuilder()
@@ -348,7 +348,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
                     .forEach(order -> {
                         String variableName = order.getProperty().substring("variables.".length());
                         StringTemplate jsonValuePath = Expressions.stringTemplate(
-                            "json_extract_path_text({0}, 'value')",
+                            "jsonb_extract_path_text({0}, 'value')",
                             QProcessVariableEntity.processVariableEntity.value
                         );
                         StringExpression orderCase = new CaseBuilder()
