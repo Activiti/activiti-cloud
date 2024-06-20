@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.model;
 
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.BooleanTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 
@@ -35,15 +36,14 @@ public class ProcessVariableValueFilter {
     public BooleanExpression getExpression() {
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
         StringTemplate extractedValue = Expressions.stringTemplate(
-            "json_extract_path({0}, 'value')",
+            "cast(json_extract_path_text({0}, 'value') as string)",
             processVariableEntity.value
         );
+
         BooleanExpression valueExpression =
             switch (filterType) {
-                case CONTAINS -> Expressions
-                    .stringOperation(Ops.STRING_CAST, extractedValue)
-                    .containsIgnoreCase(String.valueOf(filteredValue));
-                default -> extractedValue.eq(Expressions.constant(filteredValue));
+                case CONTAINS -> extractedValue.containsIgnoreCase(Expressions.constant(filteredValue.toString()));
+                default -> extractedValue.eq(Expressions.constant(filteredValue.toString()));
             };
         return processVariableEntity.processDefinitionKey
             .concat("/")
