@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,12 @@ public interface CustomizedTaskRepository {
         Pageable pageable
     );
 
-    Page<TaskEntity> findWithProcessVariables(List<String> variableKeys, Predicate taskPredicate, Pageable pageable);
+    Page<TaskEntity> findWithProcessVariables(
+        List<String> variableKeys,
+        List<ProcessVariableValueFilter> processVariableValueFilters,
+        Predicate taskPredicate,
+        Pageable pageable
+    );
 
     Iterable<TaskEntity> findInProcessInstanceScope(Predicate predicate);
 
