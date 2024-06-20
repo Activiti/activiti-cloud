@@ -24,6 +24,7 @@ import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -83,7 +84,7 @@ public class TaskControllerHelper {
         VariableSearch variableSearch,
         Pageable pageable,
         List<QueryDslPredicateFilter> taskFilters,
-        List<QueryDslPredicateFilter> processVariableFilters,
+        List<ProcessVariableValueFilter> processVariableValueFilters,
         List<String> processVariableFetchKeys
     ) {
         Page<TaskEntity> page = findPageWithProcessVariables(
@@ -91,7 +92,7 @@ public class TaskControllerHelper {
             variableSearch,
             pageable,
             taskFilters,
-            processVariableFilters,
+            processVariableValueFilters,
             processVariableFetchKeys
         );
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
@@ -184,13 +185,10 @@ public class TaskControllerHelper {
         VariableSearch variableSearch,
         Pageable pageable,
         List<QueryDslPredicateFilter> filters,
-        List<QueryDslPredicateFilter> processVariableFilters,
+        List<ProcessVariableValueFilter> processVariableValueFilters,
         List<String> processVariableFetchKeys
     ) {
         Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
-        Predicate processVariablePredicate = processVariableFilters.isEmpty()
-            ? null
-            : predicateAggregator.applyFilters(null, processVariableFilters);
 
         if (variableSearch.isSet()) {
             addProcessVariablesFilter(processVariableFetchKeys);
@@ -200,13 +198,12 @@ public class TaskControllerHelper {
                 extendedPredicate,
                 pageable
             );
-        } else {
-            return taskRepository.findWithProcessVariables(
-                processVariableFetchKeys,
-                extendedPredicate,
-                processVariablePredicate,
-                pageable
-            );
         }
+        return taskRepository.findWithProcessVariables(
+            processVariableFetchKeys,
+            processVariableValueFilters,
+            extendedPredicate,
+            pageable
+        );
     }
 }
