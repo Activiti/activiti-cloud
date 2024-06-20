@@ -15,4 +15,4 @@
  */
 
 ALTER TABLE process_variable
-ALTER COLUMN "value" TYPE json USING "value"::json;
+ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;

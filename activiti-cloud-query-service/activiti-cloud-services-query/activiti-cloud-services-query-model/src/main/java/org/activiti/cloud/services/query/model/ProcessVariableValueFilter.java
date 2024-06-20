@@ -36,14 +36,14 @@ public class ProcessVariableValueFilter {
     public BooleanExpression getExpression() {
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
         StringTemplate extractedValue = Expressions.stringTemplate(
-            "cast(json_extract_path_text({0}, 'value') as string)",
+            "cast(jsonb_extract_path({0}, 'value') as string)",
             processVariableEntity.value
         );
 
         BooleanExpression valueExpression =
             switch (filterType) {
                 case CONTAINS -> extractedValue.containsIgnoreCase(Expressions.constant(filteredValue.toString()));
-                default -> extractedValue.eq(Expressions.constant(filteredValue.toString()));
+                default -> extractedValue.equalsIgnoreCase(Expressions.constant(filteredValue.toString()));
             };
         return processVariableEntity.processDefinitionKey
             .concat("/")
