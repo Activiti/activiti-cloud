@@ -15,35 +15,54 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.BooleanTemplate;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
 
 public class ProcessVariableValueFilter {
 
     private final String variableKey;
-    private final Object filteredValue;
+    private final Object exactValue;
     private final ProcessVariableFilterType filterType;
 
     public ProcessVariableValueFilter(String variableKey, Object filteredValue, ProcessVariableFilterType filterType) {
         this.variableKey = variableKey;
-        this.filteredValue = filteredValue;
+        this.exactValue = filteredValue;
         this.filterType = filterType;
     }
 
     public BooleanExpression getExpression() {
         QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
-        StringTemplate extractedValue = Expressions.stringTemplate(
-            "cast(jsonb_extract_path_text({0}, 'value') as string)",
-            processVariableEntity.value
-        );
 
         BooleanExpression valueExpression =
             switch (filterType) {
-                case CONTAINS -> extractedValue.containsIgnoreCase(Expressions.constant(filteredValue.toString()));
-                default -> extractedValue.equalsIgnoreCase(Expressions.constant(filteredValue.toString()));
+                case CONTAINS -> Expressions
+                    .stringTemplate(
+                        "cast(jsonb_extract_path_text({0}, 'value') as string)",
+                        processVariableEntity.value
+                    )
+                    .containsIgnoreCase(Expressions.constant(String.valueOf(exactValue)));
+                case EQUALS -> {
+                    if (exactValue instanceof Integer) {
+                        yield Expressions
+                            .stringTemplate(
+                                "CAST(jsonb_extract_path({0}, 'value') as INTEGER)",
+                                processVariableEntity.value
+                            )
+                            .eq(Expressions.constant(exactValue));
+                    }
+                    yield Expressions
+                        .stringTemplate(
+                            "CAST(jsonb_extract_path_text({0}, 'value') as STRING)",
+                            processVariableEntity.value
+                        )
+                        .equalsIgnoreCase(Expressions.constant(String.valueOf(exactValue)));
+                }
+                default -> Expressions
+                    .stringTemplate(
+                        "CAST(jsonb_extract_path_text({0}, 'value') as STRING)",
+                        processVariableEntity.value
+                    )
+                    .equalsIgnoreCase(Expressions.constant(String.valueOf(exactValue)));
             };
         return processVariableEntity.processDefinitionKey
             .concat("/")
@@ -56,7 +75,7 @@ public class ProcessVariableValueFilter {
         return variableKey;
     }
 
-    public Object getFilteredValue() {
-        return filteredValue;
+    public Object getExactValue() {
+        return exactValue;
     }
 }

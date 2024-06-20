@@ -192,7 +192,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
                     .and(
                         Expressions
                             .stringTemplate("json_extract_path_text({0}, 'value')", processVariableEntity.value)
-                            .eq(Expressions.constant(entry.getFilteredValue()))
+                            .eq(Expressions.constant(entry.getExactValue()))
                     )
             )
             .reduce(BooleanExpression::or)

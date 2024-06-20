@@ -861,6 +861,78 @@ public class TaskControllerHelperIT {
             );
     }
 
+    @Test
+    public void should_returnTasks_filteredByNumberProcessVariableExactQuery() {
+        ProcessInstanceEntity process1 = createProcessInstance();
+        ProcessInstanceEntity process2 = createProcessInstance();
+        Set<ProcessVariableEntity> variables1 = createProcessVariables(process1);
+        Set<ProcessVariableEntity> variables2 = createProcessVariables(process2);
+        List<TaskEntity> tasks1 = createTasks(variables1, process1);
+        List<TaskEntity> tasks2 = createTasks(variables2, process2);
+
+        final String varName = "var-to-search";
+        final Integer varValue = 42;
+        ProcessVariableEntity processVar1 = new ProcessVariableEntity();
+        processVar1.setName(varName);
+        processVar1.setValue(varValue);
+        processVar1.setProcessInstanceId(process1.getId());
+        processVar1.setProcessDefinitionKey(process1.getProcessDefinitionKey());
+        processVar1.setProcessInstance(process1);
+        variableRepository.save(processVar1);
+
+        ProcessVariableEntity processVar2 = new ProcessVariableEntity();
+        processVar2.setName(varName);
+        processVar2.setValue(varValue);
+        processVar2.setProcessInstanceId(process2.getId());
+        processVar2.setProcessDefinitionKey(process2.getProcessDefinitionKey());
+        processVar2.setProcessInstance(process2);
+        variableRepository.save(processVar2);
+
+        TaskEntity taskFromProcess1 = tasks1.getLast();
+        taskFromProcess1.setProcessVariables(Set.of(processVar1));
+        TaskEntity taskFromProcess2 = tasks2.getLast();
+        taskFromProcess2.setProcessVariables(Set.of(processVar2));
+        taskRepository.save(taskFromProcess1);
+        taskRepository.save(taskFromProcess2);
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+            new ProcessVariableValueFilter(
+                process1.getProcessDefinitionKey() + "/" + varName,
+                varValue,
+                ProcessVariableFilterType.EQUALS
+            )
+        );
+
+        int pageSize = 10000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableValueFilters,
+            Stream
+                .of(variables1, variables2, Set.of(processVar1, processVar2))
+                .flatMap(Set::stream)
+                .map(v -> process1.getProcessDefinitionKey() + "/" + v.getName())
+                .toList()
+        );
+
+        assertThat(response.getContent().size()).isEqualTo(2);
+        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(taskFromProcess1, taskFromProcess2);
+        assertThat(retrievedTasks)
+            .allSatisfy(task -> {
+                assertThat(task.getProcessVariables()).extracting("name").anyMatch("var-to-search"::equals);
+                assertThat(task.getProcessVariables()).extracting("value").anyMatch(v -> ((int) v) == 42);
+            });
+    }
+
     //TODO should return empty list when process variable value filter has no matches
 
     @NotNull
