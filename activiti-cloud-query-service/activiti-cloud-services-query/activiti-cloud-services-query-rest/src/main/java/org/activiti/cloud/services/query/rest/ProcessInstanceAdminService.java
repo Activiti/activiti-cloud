@@ -17,14 +17,20 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
@@ -98,5 +104,20 @@ public class ProcessInstanceAdminService {
             processInstanceId,
             "Unable to find task for the given id:'" + processInstanceId + "'"
         );
+    }
+
+    public Set<String> findAllAppVersions(Predicate predicate) {
+        Predicate transformedPredicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
+        JPAQuery<?> query = new JPAQueryFactory(entityManager).query();
+
+        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
+        List<String> appVersions = query
+            .select(process.appVersion)
+            .distinct()
+            .from(process)
+            .where(transformedPredicate)
+            .fetch();
+
+        return appVersions.stream().filter(Objects::nonNull).collect(Collectors.toSet());
     }
 }

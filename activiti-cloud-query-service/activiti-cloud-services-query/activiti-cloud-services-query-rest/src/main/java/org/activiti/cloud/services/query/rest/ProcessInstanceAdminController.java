@@ -15,7 +15,10 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static org.activiti.cloud.services.query.rest.RestDocConstants.*;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.PREDICATE_EXAMPLE;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_DESC;
+import static org.activiti.cloud.services.query.rest.RestDocConstants.VARIABLE_KEYS_EXAMPLE;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
@@ -24,6 +27,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -38,7 +42,12 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
@@ -138,5 +147,15 @@ public class ProcessInstanceAdminController {
         return processInstanceRepresentationModelAssembler.toModel(
             processInstanceAdminService.findById(processInstanceId)
         );
+    }
+
+    @Operation(summary = "Find application versions for process instances")
+    @RequestMapping(value = "/appVersions", method = RequestMethod.GET)
+    public Set<String> findProcessAppVersions(
+        @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
+            root = ProcessInstanceEntity.class
+        ) Predicate predicate
+    ) {
+        return processInstanceAdminService.findAllAppVersions(predicate);
     }
 }
