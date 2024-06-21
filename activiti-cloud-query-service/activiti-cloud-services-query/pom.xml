@@ -17,5 +17,6 @@
     <module>activiti-cloud-services-query-rest</module>
     <module>activiti-cloud-services-query-liquibase</module>
     <module>activiti-cloud-services-query-consumer</module>
+    <module>activiti-cloud-services-query-events</module>
   </modules>
 </project>

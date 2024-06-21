@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query;
+package org.activiti.cloud.services.query.events.handlers;
 
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.verify;
@@ -25,8 +25,6 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContext;
-import org.activiti.cloud.services.query.events.handlers.QueryEventHandlerContextOptimizer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

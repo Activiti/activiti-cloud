@@ -15,8 +15,6 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +27,7 @@ import org.activiti.cloud.api.process.model.CloudIntegrationContext.IntegrationC
 import org.activiti.cloud.api.process.model.events.CloudIntegrationErrorReceivedEvent;
 import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.ObjectUtils;
 
 public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHandler implements QueryEventHandler {
 
@@ -62,7 +60,6 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         });
     }
 
-    @NotNull
     private List<StackTraceElement> addFullErrorMessageAsFirstStackTraceElement(
         CloudIntegrationErrorReceivedEvent integrationEvent
     ) {
@@ -72,9 +69,8 @@ public class IntegrationErrorReceivedEventHandler extends BaseIntegrationEventHa
         return stackTraceElements;
     }
 
-    @NotNull
     private StackTraceElement getNewTopStackTraceElement(CloudIntegrationErrorReceivedEvent integrationEvent) {
-        if (isNotEmpty(integrationEvent.getStackTraceElements())) {
+        if (ObjectUtils.isNotEmpty(integrationEvent.getStackTraceElements())) {
             StackTraceElement firstElement = integrationEvent.getStackTraceElements().get(0);
             return new StackTraceElement(
                 integrationEvent.getErrorMessage(),

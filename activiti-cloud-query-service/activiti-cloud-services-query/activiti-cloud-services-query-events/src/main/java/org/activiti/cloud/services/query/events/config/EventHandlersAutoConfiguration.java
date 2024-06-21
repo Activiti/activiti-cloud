@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.conf;
+package org.activiti.cloud.services.query.events.config;
 
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.activiti.cloud.services.query.app.QueryConsumerChannelHandler;
-import org.activiti.cloud.services.query.app.QueryConsumerChannels;
 import org.activiti.cloud.services.query.app.repository.ApplicationRepository;
 import org.activiti.cloud.services.query.events.handlers.ApplicationDeployedEventHandler;
 import org.activiti.cloud.services.query.events.handlers.BPMNActivityCancelledEventHandler;
@@ -74,10 +69,8 @@ import org.activiti.cloud.services.query.events.handlers.VariableUpdatedEventHan
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
-@Import(QueryConsumerChannelsConfiguration.class)
 public class EventHandlersAutoConfiguration {
 
     @Bean
@@ -357,13 +350,5 @@ public class EventHandlersAutoConfiguration {
         EntityManager entityManager
     ) {
         return new ProcessCandidateStarterGroupRemovedEventHandler(entityManager);
-    }
-
-    @FunctionBinding(input = QueryConsumerChannels.QUERY_CONSUMER)
-    @Bean
-    public Consumer<List<CloudRuntimeEvent<?, ?>>> queryConsumerFunction(
-        QueryConsumerChannelHandler queryConsumerChannelHandler
-    ) {
-        return queryConsumerChannelHandler::receive;
     }
 }
