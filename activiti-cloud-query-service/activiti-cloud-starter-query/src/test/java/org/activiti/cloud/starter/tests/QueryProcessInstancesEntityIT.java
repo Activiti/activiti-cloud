@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessInstance;
@@ -59,6 +60,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -414,6 +416,59 @@ public class QueryProcessInstancesEntityIT {
                             runningProcess.getProcessDefinitionName()
                         )
                     );
+            });
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "status=COMPLETED, 1",
+            "status=RUNNING, 2",
+            "status=COMPLETED&status=RUNNING, 1;2",
+            "status=CREATED&status=RUNNING, 2",
+        }
+    )
+    public void shouldGetProcessInstancesAppVersionsAsAdmin(String queryParameters, String expectedResult) {
+        //given
+        processInstanceBuilder.aCompletedProcessInstanceWithAppVersion("Process for filter", "1");
+        processInstanceBuilder.aRunningProcessInstanceWithAppVersion("Process", "2");
+
+        eventsAggregator.sendAll();
+
+        identityTokenProducer.withTestUser("hradmin");
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/appVersions?" + queryParameters,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).containsExactly(expectedResult.split(";"));
+            });
+    }
+
+    @Test
+    public void shouldGetProcessInstancesEmptyAppVersionsAsAdmin() {
+        //given
+        processInstanceBuilder.aCompletedProcessInstanceWithAppVersion("Process for filter", "1");
+
+        eventsAggregator.sendAll();
+
+        identityTokenProducer.withTestUser("hradmin");
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/appVersions?status=CREATED",
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).isEmpty();
             });
     }
 
