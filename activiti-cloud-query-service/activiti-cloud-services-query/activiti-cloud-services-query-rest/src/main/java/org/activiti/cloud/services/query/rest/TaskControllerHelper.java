@@ -23,7 +23,10 @@ import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepositorySpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskSearchCriteria;
+import org.activiti.cloud.services.query.model.TaskSpecifications;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
@@ -41,6 +44,8 @@ public class TaskControllerHelper {
 
     private final TaskRepository taskRepository;
 
+    private final TaskRepositorySpecification taskRepositorySpecification;
+
     private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
 
     private final QueryDslPredicateAggregator predicateAggregator;
@@ -54,12 +59,14 @@ public class TaskControllerHelper {
 
     public TaskControllerHelper(
         TaskRepository taskRepository,
+        TaskRepositorySpecification taskRepositorySpecification,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService
     ) {
         this.taskRepository = taskRepository;
+        this.taskRepositorySpecification = taskRepositorySpecification;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.predicateAggregator = predicateAggregator;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
@@ -123,6 +130,18 @@ public class TaskControllerHelper {
         addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
         initializeProcessVariables(page);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedModel<EntityModel<QueryCloudTask>> findTaskByProcessVariables(
+        TaskSearchCriteria taskSearchCriteria,
+        Pageable pageable
+    ) {
+        Page<TaskEntity> page = taskRepositorySpecification.findAll(
+            TaskSpecifications.withDynamicConditions(taskSearchCriteria),
+            pageable
+        );
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
