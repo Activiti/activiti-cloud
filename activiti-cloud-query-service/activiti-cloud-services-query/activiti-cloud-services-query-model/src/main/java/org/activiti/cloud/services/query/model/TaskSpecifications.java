@@ -25,7 +25,7 @@ public class TaskSpecifications {
 
     public static Specification<TaskEntity> withDynamicConditions(TaskSearchCriteria criteria) {
         return (root, query, criteriaBuilder) -> {
-            Join<TaskEntity, ProcessVariableEntity> pvJoin = root.joinSet("processVariables");
+            Join<TaskEntity, ProcessVariableEntity> pvJoin = root.joinSet(TaskEntity_.PROCESS_VARIABLES);
 
             Predicate predicate = criteriaBuilder.disjunction();
 
