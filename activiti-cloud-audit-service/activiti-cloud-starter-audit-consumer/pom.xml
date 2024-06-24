@@ -24,6 +24,10 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-audit-liquibase</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
     </dependency>
     <dependency>
