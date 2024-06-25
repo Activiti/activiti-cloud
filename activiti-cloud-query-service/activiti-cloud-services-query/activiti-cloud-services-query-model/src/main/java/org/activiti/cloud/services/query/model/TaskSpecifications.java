@@ -17,8 +17,10 @@ package org.activiti.cloud.services.query.model;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {
@@ -35,7 +37,9 @@ public class TaskSpecifications {
                         predicate,
                         criteriaBuilder.and(
                             criteriaBuilder.equal(pvJoin.get(ProcessVariableEntity_.name), pair.getName()),
-                            criteriaBuilder.like(pvJoin.get("value"), "%" + pair.getValue() + "%")
+                            criteriaBuilder.like(
+                                criteriaBuilder.function("jsonb_extract_path_text", String.class, pvJoin.get(ProcessVariableEntity_.jsonValue), criteriaBuilder.literal("value")),
+                                "%" + pair.getValue() + "%")
                         )
                     );
             }
@@ -47,7 +51,8 @@ public class TaskSpecifications {
             for (ProcessVariableNameValuePair pair : criteria.conditions()) {
                 Predicate conditionPredicate = criteriaBuilder.and(
                     criteriaBuilder.equal(pvJoin.get(ProcessVariableEntity_.name), pair.getName()),
-                    criteriaBuilder.like(pvJoin.get("value"), "%" + pair.getValue() + "%")
+                    criteriaBuilder.like(criteriaBuilder.function("jsonb_extract_path_text", String.class, pvJoin.get(ProcessVariableEntity_.jsonValue), criteriaBuilder.literal("value")),
+                        "%" + pair.getValue() + "%")
                 );
 
                 Predicate havingPredicate = criteriaBuilder.gt(

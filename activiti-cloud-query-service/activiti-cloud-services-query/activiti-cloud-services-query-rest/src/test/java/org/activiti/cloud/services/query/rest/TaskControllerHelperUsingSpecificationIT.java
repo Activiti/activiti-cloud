@@ -181,7 +181,7 @@ public class TaskControllerHelperUsingSpecificationIT {
         ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
         processVariableEntity.setName(name);
         processVariableEntity.setType(type);
-        processVariableEntity.setValue(value);
+        processVariableEntity.setJsonValue(value);
         processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
         processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
         processVariableEntity.setProcessInstance(processInstanceEntity);

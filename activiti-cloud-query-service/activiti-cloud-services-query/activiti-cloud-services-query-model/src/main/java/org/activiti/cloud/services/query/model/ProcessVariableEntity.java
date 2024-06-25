@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,7 +29,9 @@ import java.util.Objects;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ParamDef;
+import org.hibernate.type.SqlTypes;
 
 @FilterDef(
     name = "variablesFilter",
@@ -64,6 +67,10 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         readOnly = true
     )
     private String processDefinitionKey;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private String jsonValue;
 
     public ProcessVariableEntity() {}
 
@@ -126,6 +133,15 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
+    }
+
+
+    public String getJsonValue() {
+        return jsonValue;
+    }
+
+    public void setJsonValue(String jsonValue) {
+        this.jsonValue = jsonValue;
     }
 
     @Override
