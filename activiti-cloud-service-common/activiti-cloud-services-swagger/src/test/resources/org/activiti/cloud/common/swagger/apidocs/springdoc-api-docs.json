@@ -863,7 +863,7 @@
         "type": "oauth2",
         "description": "Authorizing with SSO",
         "flows": {
-          "implicit": {
+          "authorizationCode": {
             "authorizationUrl": "http://dummy/token/url",
             "scopes": {
             }
