@@ -218,12 +218,16 @@ public class TaskControllerHelper {
                     .map(k -> k.getProcessDefinitionKey() + "/" + k.getVariableName())
                     .collect(Collectors.toList())
             );
-            return taskRepository.findByVariableNameAndValue(
+            Page<TaskEntity> page = taskRepository.findByVariableNameAndValue(
                 variableSearch.getName(),
                 variableSearch.getValue(),
                 extendedPredicate,
                 pageable
             );
+            initializeProcessVariables(page);
+            return page;
+        } else {
+            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
         }
 
         if (!processVariableValueFilters.isEmpty()) {
