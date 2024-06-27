@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-query-dependencies</artifactId>
-    <version>8.3.2-SNAPSHOT</version>
+    <version>8.3.2-alpha.1</version>
     <relativePath>../activiti-cloud-query-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-query</artifactId>
