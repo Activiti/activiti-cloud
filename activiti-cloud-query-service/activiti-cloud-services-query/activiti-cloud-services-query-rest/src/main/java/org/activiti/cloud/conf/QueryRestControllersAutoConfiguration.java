@@ -46,6 +46,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
 @Import(
@@ -76,6 +77,7 @@ import org.springframework.context.annotation.Import;
         ApplicationAdminController.class,
     }
 )
+@PropertySource("classpath:query-rest.properties")
 public class QueryRestControllersAutoConfiguration {
 
     @Bean
