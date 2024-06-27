@@ -20,13 +20,10 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetu
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.activiti.QueryRestConfiguration;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -37,22 +34,16 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -69,9 +60,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     }
 )
 @TestPropertySource("classpath:application-test.properties")
-@AutoConfigureMockMvc
 @Testcontainers
-@Import(QueryRestConfiguration.class)
+//TODO Make the test work using AlfrescoJackson2HttpMessageConverter to simulate the actual response that we have in real environment
 public class TaskAdminControllerIT {
 
     @Autowired
@@ -128,7 +118,7 @@ public class TaskAdminControllerIT {
         taskVariables.add(taskVariable1);
         taskVariables.add(taskVariable2);
 
-        TaskEntity taskEntity = createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
+        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
 
         processInstanceRepository.save(processInstanceEntity);
 
@@ -149,7 +139,9 @@ public class TaskAdminControllerIT {
                 taskVariable1.getValue()
             )
             .then();
-        response.statusCode(200).body("list.entries", hasSize(1));
+
+        response.statusCode(200);
+        response.body("_embedded.tasks", hasSize(1));
     }
 
     @NotNull
