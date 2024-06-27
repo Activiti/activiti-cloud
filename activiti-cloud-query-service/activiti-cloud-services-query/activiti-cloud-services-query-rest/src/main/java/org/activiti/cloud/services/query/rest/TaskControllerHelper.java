@@ -180,12 +180,14 @@ public class TaskControllerHelper {
 
         if (variableSearch.isSet()) {
             addProcessVariablesFilter(processVariableKeys);
-            return taskRepository.findByVariableNameAndValue(
+            Page<TaskEntity> page = taskRepository.findByVariableNameAndValue(
                 variableSearch.getName(),
                 variableSearch.getValue(),
                 extendedPredicate,
                 pageable
             );
+            initializeProcessVariables(page);
+            return page;
         } else {
             return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
         }
