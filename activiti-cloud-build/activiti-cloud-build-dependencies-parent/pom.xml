@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>8.3.2-SNAPSHOT</version>
+    <version>8.3.3-SNAPSHOT</version>
   </parent>
   <artifactId>activiti-cloud-build-dependencies-parent</artifactId>
   <packaging>pom</packaging>
