@@ -17,6 +17,9 @@ package org.activiti.cloud.notifications.graphql.starter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -24,9 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.introproventures.graphql.jpa.query.web.GraphQLController.GraphQLQueryRequest;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
@@ -1529,4 +1529,3 @@ public class ActivitiGraphQLWsStarterIT {
         return new StringObjectMapBuilder();
     }
 }
-

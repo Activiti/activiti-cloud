@@ -1528,4 +1528,3 @@ public class ActivitiGraphQLStarterIT {
         return new StringObjectMapBuilder();
     }
 }
-
