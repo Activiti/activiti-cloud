@@ -18,5 +18,4 @@ package org.activiti.cloud.notifications.graphql.starter;
 /**
  * A map builder creating a map with String keys and values.
  */
-class StringObjectMapBuilder extends MapBuilder<StringObjectMapBuilder, String, Object> {
-}
+class StringObjectMapBuilder extends MapBuilder<StringObjectMapBuilder, String, Object> {}
