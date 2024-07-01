@@ -18,6 +18,7 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-annotation</artifactId>
+      <version>4.2.26</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
