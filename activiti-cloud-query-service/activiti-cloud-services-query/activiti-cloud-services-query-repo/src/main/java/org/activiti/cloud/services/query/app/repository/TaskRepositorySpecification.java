@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.model;
+package org.activiti.cloud.services.query.app.repository;
 
-public record ProcessVariableValueFilter(
-    String processDefinitionKey, String variableName, Object value, ProcessVariableFilterType filterType
-) {}
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+@RepositoryRestResource(exported = false)
+public interface TaskRepositorySpecification
+    extends JpaRepository<TaskEntity, Long>, JpaSpecificationExecutor<TaskEntity> {}
