@@ -15,48 +15,6 @@
  */
 package org.activiti.cloud.services.query.model;
 
-import com.querydsl.core.types.Ops;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
-
-public class ProcessVariableValueFilter {
-
-    private final String variableKey;
-    private final Object filteredValue;
-    private final ProcessVariableFilterType filterType;
-
-    public ProcessVariableValueFilter(String variableKey, Object filteredValue, ProcessVariableFilterType filterType) {
-        this.variableKey = variableKey;
-        this.filteredValue = filteredValue;
-        this.filterType = filterType;
-    }
-
-    public BooleanExpression getExpression() {
-        QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
-        StringTemplate extractedValue = Expressions.stringTemplate(
-            "json_extract_path({0}, 'value')",
-            processVariableEntity.value
-        );
-        BooleanExpression valueExpression =
-            switch (filterType) {
-                case CONTAINS -> Expressions
-                    .stringOperation(Ops.STRING_CAST, extractedValue)
-                    .containsIgnoreCase(String.valueOf(filteredValue));
-                default -> extractedValue.eq(Expressions.constant(filteredValue));
-            };
-        return processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .eq(variableKey)
-            .and(valueExpression);
-    }
-
-    public String getVariableKey() {
-        return variableKey;
-    }
-
-    public Object getFilteredValue() {
-        return filteredValue;
-    }
-}
+public record ProcessVariableValueFilter(
+    String processDefinitionKey, String variableName, Object value, ProcessVariableFilterType filterType
+) {}

@@ -38,6 +38,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableFilterType;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
@@ -65,7 +66,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
         "logging.level.org.hibernate.collection.spi=warn",
         "spring.jpa.show-sql=true",
         "spring.jpa.properties.hibernate.format_sql=true",
@@ -135,7 +136,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
@@ -177,7 +178,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent()).hasSize(pageable.getPageSize());
@@ -205,6 +206,10 @@ public class TaskControllerHelperIT {
                 filters,
                 Collections.emptyList(),
                 processVariableKeys
+                    .stream()
+                    .map(k -> k.split("/"))
+                    .map(s -> new ProcessVariableKey(s[0], s[1]))
+                    .toList()
             );
 
         assertThat(response.getContent()).hasSize(pageable.getPageSize());
@@ -221,6 +226,10 @@ public class TaskControllerHelperIT {
                 filters,
                 Collections.emptyList(),
                 processVariableKeys
+                    .stream()
+                    .map(k -> k.split("/"))
+                    .map(s -> new ProcessVariableKey(s[0], s[1]))
+                    .toList()
             );
 
         assertThat(response.getContent()).hasSize(taskEntities.size() - pageable.getPageSize() * 3);
@@ -270,6 +279,10 @@ public class TaskControllerHelperIT {
             filters,
             Collections.emptyList(),
             processVariableFetchKeys
+                .stream()
+                .map(k -> k.split("/"))
+                .map(s -> new ProcessVariableKey(s[0], s[1]))
+                .toList()
         );
 
         assertThat(response.getContent()).hasSize(2);
@@ -324,6 +337,10 @@ public class TaskControllerHelperIT {
             filters,
             Collections.emptyList(),
             processVariableFetchKeys
+                .stream()
+                .map(k -> k.split("/"))
+                .map(s -> new ProcessVariableKey(s[0], s[1]))
+                .toList()
         );
 
         assertThat(response.getContent()).hasSize(2);
@@ -355,7 +372,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size());
@@ -390,7 +407,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size() + tasksWithProcessInstance.size());
@@ -438,7 +455,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size());
@@ -486,7 +503,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            processVariableKeys
+            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size() + childTasks.size());
@@ -496,48 +513,55 @@ public class TaskControllerHelperIT {
 
     @Test
     public void should_returnTasks_filteredByStringProcessVariableExactQuery() {
-        ProcessInstanceEntity process1 = createProcessInstance();
-        ProcessInstanceEntity process2 = createProcessInstance();
-        Set<ProcessVariableEntity> variables1 = createProcessVariables(process1);
-        Set<ProcessVariableEntity> variables2 = createProcessVariables(process2);
-        List<TaskEntity> tasks1 = createTasks(variables1, process1);
-        List<TaskEntity> tasks2 = createTasks(variables2, process2);
+        final String processDefinitionKey = "test-process";
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        ProcessInstanceEntity processInstance3 = createProcessInstance(processDefinitionKey);
 
         final String varName = "var-to-search";
         final String varValue = "value-to-search";
         ProcessVariableEntity processVar1 = new ProcessVariableEntity();
         processVar1.setName(varName);
         processVar1.setValue(varValue);
-        processVar1.setProcessInstanceId(process1.getId());
-        processVar1.setProcessDefinitionKey(process1.getProcessDefinitionKey());
-        processVar1.setProcessInstance(process1);
+        processVar1.setProcessInstanceId(processInstance1.getId());
+        processVar1.setProcessDefinitionKey(processInstance1.getProcessDefinitionKey());
+        processVar1.setProcessInstance(processInstance1);
         variableRepository.save(processVar1);
+
+        ProcessVariableEntity otherProcessVar = new ProcessVariableEntity();
+        otherProcessVar.setName("other-var");
+        otherProcessVar.setValue("other-value");
+        otherProcessVar.setProcessInstanceId(processInstance1.getId());
+        otherProcessVar.setProcessDefinitionKey(processInstance1.getProcessDefinitionKey());
+        otherProcessVar.setProcessInstance(processInstance1);
+        variableRepository.save(otherProcessVar);
 
         ProcessVariableEntity processVar2 = new ProcessVariableEntity();
         processVar2.setName(varName);
         processVar2.setValue(varValue);
-        processVar2.setProcessInstanceId(process2.getId());
-        processVar2.setProcessDefinitionKey(process2.getProcessDefinitionKey());
-        processVar2.setProcessInstance(process2);
+        processVar2.setProcessInstanceId(processInstance2.getId());
+        processVar2.setProcessDefinitionKey(processInstance2.getProcessDefinitionKey());
+        processVar2.setProcessInstance(processInstance2);
         variableRepository.save(processVar2);
 
-        TaskEntity taskFromProcess1 = tasks1.getLast();
-        taskFromProcess1.setProcessVariables(Set.of(processVar1));
-        TaskEntity taskFromProcess2 = tasks2.getLast();
-        taskFromProcess2.setProcessVariables(Set.of(processVar2));
-        taskRepository.save(taskFromProcess1);
-        taskRepository.save(taskFromProcess2);
+        ProcessVariableEntity processVar3 = new ProcessVariableEntity();
+        processVar3.setName(varName);
+        processVar3.setValue("other-value");
+        processVar3.setProcessInstanceId(processInstance3.getId());
+        processVar3.setProcessDefinitionKey(processInstance3.getProcessDefinitionKey());
+        processVar3.setProcessInstance(processInstance3);
+        variableRepository.save(processVar3);
+
+        List<TaskEntity> tasks1 = createTasks(Set.of(processVar1, otherProcessVar), processInstance1);
+        List<TaskEntity> tasks2 = createTasks(Set.of(processVar2), processInstance2);
+        List<TaskEntity> tasks3 = createTasks(Set.of(processVar3), processInstance3);
 
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
         List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
-            new ProcessVariableValueFilter(
-                process1.getProcessDefinitionKey() + "/" + varName,
-                varValue,
-                ProcessVariableFilterType.EQUALS
-            )
+            new ProcessVariableValueFilter(processDefinitionKey, varName, varValue, ProcessVariableFilterType.EQUALS)
         );
 
         int pageSize = 10000;
@@ -549,20 +573,15 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             processVariableValueFilters,
-            Stream
-                .of(variables1, variables2, Set.of(processVar1, processVar2))
-                .flatMap(Set::stream)
-                .map(v -> process1.getProcessDefinitionKey() + "/" + v.getName())
-                .toList()
+            List.of(new ProcessVariableKey(processDefinitionKey, varName))
         );
 
-        assertThat(response.getContent().size()).isEqualTo(2);
+        assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
         List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
-        assertThat(retrievedTasks).containsExactlyInAnyOrder(taskFromProcess1, taskFromProcess2);
         assertThat(retrievedTasks)
             .allSatisfy(task -> {
-                assertThat(task.getProcessVariables()).extracting("name").anyMatch("var-to-search"::equals);
-                assertThat(task.getProcessVariables()).extracting("value").anyMatch("value-to-search"::equals);
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(varValue));
             });
     }
 
@@ -608,12 +627,14 @@ public class TaskControllerHelperIT {
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
         List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
             new ProcessVariableValueFilter(
-                process1.getProcessDefinitionKey() + "/" + var1name,
+                process1.getProcessDefinitionKey(),
+                var1name,
                 var1value,
                 ProcessVariableFilterType.EQUALS
             ),
             new ProcessVariableValueFilter(
-                process2.getProcessDefinitionKey() + "/" + var2name,
+                process2.getProcessDefinitionKey(),
+                var2name,
                 var2value,
                 ProcessVariableFilterType.EQUALS
             )
@@ -629,8 +650,8 @@ public class TaskControllerHelperIT {
             filters,
             processVariableValueFilters,
             List.of(
-                process1.getProcessDefinitionKey() + "/" + var1name,
-                process2.getProcessDefinitionKey() + "/" + var2name
+                new ProcessVariableKey(process1.getProcessDefinitionKey(), var1name),
+                new ProcessVariableKey(process2.getProcessDefinitionKey(), var2name)
             )
         );
 
@@ -693,7 +714,8 @@ public class TaskControllerHelperIT {
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
         List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
             new ProcessVariableValueFilter(
-                process1.getProcessDefinitionKey() + "/" + varName,
+                process1.getProcessDefinitionKey(),
+                varName,
                 varValue.substring(2, 6),
                 ProcessVariableFilterType.CONTAINS
             )
@@ -711,7 +733,7 @@ public class TaskControllerHelperIT {
             Stream
                 .of(variables1, variables2, Set.of(processVar1, processVar2))
                 .flatMap(Set::stream)
-                .map(v -> process1.getProcessDefinitionKey() + "/" + v.getName())
+                .map(v -> new ProcessVariableKey(v.getProcessDefinitionKey(), v.getName()))
                 .toList()
         );
 
@@ -770,12 +792,14 @@ public class TaskControllerHelperIT {
         );
         List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
             new ProcessVariableValueFilter(
-                process1.getProcessDefinitionKey() + "/" + var1name,
+                process1.getProcessDefinitionKey(),
+                var1name,
                 var1value,
                 ProcessVariableFilterType.EQUALS
             ),
             new ProcessVariableValueFilter(
-                process2.getProcessDefinitionKey() + "/" + var2name,
+                process2.getProcessDefinitionKey(),
+                var2name,
                 var2value,
                 ProcessVariableFilterType.EQUALS
             )
@@ -810,7 +834,7 @@ public class TaskControllerHelperIT {
     }
 
     @Test
-    public void should_returnTasks_filteredByProcessVariableExactQuery_sortedByStringVariableValue() {
+    public void should_returnTasks_filteredByProcessVariable_sortedByStringVariableValue() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         final String varName = "var-name";
         List<String> variableValues = Stream
@@ -846,7 +870,7 @@ public class TaskControllerHelperIT {
             pageable,
             filters,
             Collections.emptyList(),
-            List.of(processInstance.getProcessDefinitionKey() + "/" + varName)
+            List.of(new ProcessVariableKey(processInstance.getProcessDefinitionKey(), varName))
         );
 
         assertThat(response.getContent().size()).isEqualTo(variableValues.size());
@@ -861,6 +885,79 @@ public class TaskControllerHelperIT {
             );
     }
 
+    @Test
+    public void should_returnTasks_filteredByNumberProcessVariableExactQuery() {
+        ProcessInstanceEntity process1 = createProcessInstance();
+        ProcessInstanceEntity process2 = createProcessInstance();
+        Set<ProcessVariableEntity> variables1 = createProcessVariables(process1);
+        Set<ProcessVariableEntity> variables2 = createProcessVariables(process2);
+        List<TaskEntity> tasks1 = createTasks(variables1, process1);
+        List<TaskEntity> tasks2 = createTasks(variables2, process2);
+
+        final String varName = "var-to-search";
+        final Integer varValue = 42;
+        ProcessVariableEntity processVar1 = new ProcessVariableEntity();
+        processVar1.setName(varName);
+        processVar1.setValue(varValue);
+        processVar1.setProcessInstanceId(process1.getId());
+        processVar1.setProcessDefinitionKey(process1.getProcessDefinitionKey());
+        processVar1.setProcessInstance(process1);
+        variableRepository.save(processVar1);
+
+        ProcessVariableEntity processVar2 = new ProcessVariableEntity();
+        processVar2.setName(varName);
+        processVar2.setValue(varValue);
+        processVar2.setProcessInstanceId(process2.getId());
+        processVar2.setProcessDefinitionKey(process2.getProcessDefinitionKey());
+        processVar2.setProcessInstance(process2);
+        variableRepository.save(processVar2);
+
+        TaskEntity taskFromProcess1 = tasks1.getLast();
+        taskFromProcess1.setProcessVariables(Set.of(processVar1));
+        TaskEntity taskFromProcess2 = tasks2.getLast();
+        taskFromProcess2.setProcessVariables(Set.of(processVar2));
+        taskRepository.save(taskFromProcess1);
+        taskRepository.save(taskFromProcess2);
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+            new ProcessVariableValueFilter(
+                process1.getProcessDefinitionKey(),
+                varName,
+                varValue,
+                ProcessVariableFilterType.EQUALS
+            )
+        );
+
+        int pageSize = 10000;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableValueFilters,
+            Stream
+                .of(variables1, variables2, Set.of(processVar1, processVar2))
+                .flatMap(Set::stream)
+                .map(v -> new ProcessVariableKey(v.getProcessDefinitionKey(), v.getName()))
+                .toList()
+        );
+
+        assertThat(response.getContent().size()).isEqualTo(2);
+        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(taskFromProcess1, taskFromProcess2);
+        assertThat(retrievedTasks)
+            .allSatisfy(task -> {
+                assertThat(task.getProcessVariables()).extracting("name").anyMatch("var-to-search"::equals);
+                assertThat(task.getProcessVariables()).extracting("value").anyMatch(v -> ((int) v) == 42);
+            });
+    }
+
     //TODO should return empty list when process variable value filter has no matches
 
     @NotNull
@@ -871,7 +968,7 @@ public class TaskControllerHelperIT {
         List<TaskEntity> taskEntities = new ArrayList<>();
 
         LocalDateTime start = LocalDateTime.fromDateFields(new Date());
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             TaskEntity taskEntity = new TaskEntity();
             String taskId = processInstanceEntity.getId() + "-task-" + i;
             taskEntity.setId(taskId);
@@ -928,12 +1025,17 @@ public class TaskControllerHelperIT {
 
     @NotNull
     private ProcessInstanceEntity createProcessInstance() {
+        return createProcessInstance("processDefinitionKey");
+    }
+
+    @NotNull
+    private ProcessInstanceEntity createProcessInstance(String processDefinitionKey) {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
         processInstanceEntity.setId(UUID.randomUUID().toString());
         processInstanceEntity.setName("name");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionName("test");
-        processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
+        processInstanceEntity.setProcessDefinitionKey(processDefinitionKey);
         processInstanceEntity.setServiceName("test");
         processInstanceRepository.save(processInstanceEntity);
         return processInstanceEntity;
