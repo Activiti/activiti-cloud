@@ -1,30 +1,25 @@
 name: CI
-
 on:
   push:
     branches:
-      - develop
+      - 8.6.x
   pull_request:
     branches:
-      - develop
+      - 8.6.x
     types:
       - opened
       - reopened
       - synchronize
       - labeled
   workflow_dispatch:
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name || github.run_id }}
   cancel-in-progress: true
-
 env:
   CLUSTER_NAME: activiti
   CLUSTER_DOMAIN: envalfresco.com
   GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
-
 jobs:
-
   pre-checks:
     runs-on: ubuntu-latest
     steps:
@@ -37,56 +32,46 @@ jobs:
           skip_checkout: true
       - name: Ensure SHA pinned actions
         uses: zgosalvez/github-actions-ensure-sha-pinned-actions@ba37328d4ea95eaf8b3bd6c6cef308f709a5f2ec # v3.0.3
-
   build:
     runs-on: ubuntu-latest
     needs: pre-checks
     # Map a step output to a job output
     outputs:
       version: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
-
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
       - name: Setup Java JDK 21
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # 4.2.1
         with:
           java-version: 21
           distribution: 'temurin'
-
       - name: Resolve override VERSION
         id: resolve-override-version
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
-
       - name: Update VERSION file
         run: |
           echo ${{ steps.update-pom-to-next-version.outputs.next-prerelease }} > VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Enable testcontainers reuse option
         run: |
           echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
           echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
       - name: Maven Build and Test
         shell: bash
         run: mvn -DskipAcceptanceTests=true -DunitTests.parallel=true -T 1C install ${{ env.MAVEN_CLI_OPTS}}
@@ -94,34 +79,25 @@ jobs:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
       - name: Remove running docker containers
         run: docker rm -f $(docker ps -a -q)
         continue-on-error: true
-
       - name: Echo Longest Tests run
         shell: bash
         run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
-
       - name: Login to DockerHub
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
       - name: Build Example Runtime Bundle
         run: make docker/example-runtime-bundle
-
       - name: Build Activiti Cloud Query
         run: make docker/activiti-cloud-query
-
       - name: Build Example Cloud Connector
         run: make docker/example-cloud-connector
-
       - name: Build Activiti Cloud Identity Adapter
         run: make docker/activiti-cloud-identity-adapter
-
-
   acceptance-tests:
     runs-on: ubuntu-latest
     needs: build
@@ -130,9 +106,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        messaging-broker: [ rabbitmq, kafka ]
-        messaging-partitioned: [ partitioned, non-partitioned ]
-        messaging-destinations: [ default-destinations ]
+        messaging-broker: [rabbitmq, kafka]
+        messaging-partitioned: [partitioned, non-partitioned]
+        messaging-destinations: [default-destinations]
         include:
           - messaging-broker: kafka
             messaging-partitioned: partitioned
@@ -140,30 +116,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
-
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
       - name: Setup Java JDK 21
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # 4.2.1
         with:
           java-version: 21
           distribution: 'temurin'
-
       - name: Set up kubectl
         uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3
         with:
           version: v1.19.6
-
       - name: Set up Helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3
         with:
           version: v3.5.2
-
       - name: Set up rancher
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
         with:
@@ -171,19 +142,16 @@ jobs:
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: ${{ env.CLUSTER_NAME }}
-
       - uses: ./.github/actions/setup-env-for-broker
         with:
           messaging-broker: ${{ matrix.messaging-broker }}
           messaging-partitioning-option: ${{ matrix.messaging-partitioned }}
           messaging-destinations-option: ${{ matrix.messaging-destinations }}
           version: ${{ needs.build.outputs.version }}
-
       - name: Delete preview for ${{ matrix.messaging-broker }}
         if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
           kubectl delete ns $PREVIEW_NAME || true
-
       - name: Install release for ${{ matrix.messaging-broker }}
         run: |
           ### Variables ###
@@ -197,7 +165,6 @@ jobs:
 
           echo "Installing release with make install"
           make install
-
       - name: (kafka,partitioned) Checks that consumers can be a different number from partitions
         if: ${{ matrix.messaging-broker == 'kafka' && matrix.messaging-partitioned == 'partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
@@ -252,29 +219,23 @@ jobs:
           echo "It checks the deployment has 4 query topic patitions"
           count_query_topic_partitions
           check_result_is 4
-
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/identity-adapter-service/actuator/health
-
       - name: Run Identity Adapter Acceptance Tests
         # identity adapter acceptance tests does not depend on messaging, so they can be run only once
         if: ${{ matrix.messaging-broker == 'rabbitmq' && matrix.messaging-partitioned == 'non-partitioned' && matrix.messaging-destinations == 'default-destinations' }}
         run: |
           make test/identity-adapter-acceptance-tests
-
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/rb/actuator/health
-
       - uses: ./.github/actions/check-service-health
         with:
           health-url: ${{ env.GATEWAY_PROTOCOL }}://${{ env.GATEWAY_HOST }}/query/actuator/health
-
       - name: Run Acceptance Tests for ${{ matrix.messaging-broker }}
         run: |
           make test/runtime-acceptance-tests
-
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
         env:
@@ -287,7 +248,6 @@ jobs:
               echo "Delete Helm release"
               make delete
           fi
-
   delete-test-images:
     runs-on: ubuntu-latest
     needs:
@@ -312,7 +272,6 @@ jobs:
               echo "Delete Docker images"
               make docker-delete-all
           fi
-
   publish:
     runs-on: ubuntu-latest
     needs:
@@ -321,29 +280,24 @@ jobs:
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     env:
       VERSION: ${{ needs.build.outputs.version }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
       - name: Setup Java JDK 21
         uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
         with:
           java-version: 21
           distribution: 'temurin'
-
       - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
       - name: Update pom files to the new version
         run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
-
       - name: Maven Deploy
         shell: bash
         run: mvn deploy -DskipTests ${{ env.MAVEN_CLI_OPTS}} ${{env.MAVEN_CLI_CONNECTION_OPTS}}
@@ -352,19 +306,16 @@ jobs:
           MAVEN_CLI_CONNECTION_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
           commit-message: "Release $VERSION"
-
       - name: Create release tag
         if: github.event_name == 'push'
         run: |
           git tag -fa $VERSION -m "Release version $VERSION"
           git push origin $VERSION
-
   propagate-maven:
     runs-on: ubuntu-latest
     needs:
@@ -385,7 +336,6 @@ jobs:
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
           git-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           git-author-name: ${{ secrets.BOT_GITHUB_USERNAME }}
-
   propagate-helm:
     runs-on: ubuntu-latest
     needs:
@@ -412,19 +362,16 @@ jobs:
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
-
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
           repository-directory: ${{ env.FULL_CHART_DIR}}
           commit-message: "Update docker image tags to $VERSION"
-
       - name: Create propagation PR
         working-directory: ${{ env.FULL_CHART_DIR}}
         env:
@@ -432,7 +379,6 @@ jobs:
         run: |
           git push origin $FULL_CHART_PR_BRANCH
           gh pr create --fill --base $FULL_CHART_BASE_BRANCH --label updatebot
-
   notify:
     runs-on: ubuntu-latest
     needs:
