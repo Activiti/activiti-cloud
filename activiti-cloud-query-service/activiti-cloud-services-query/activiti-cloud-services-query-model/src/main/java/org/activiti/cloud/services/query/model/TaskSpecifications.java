@@ -4,7 +4,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.util.Arrays;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {
@@ -17,72 +19,156 @@ public class TaskSpecifications {
                 pvRoot.get("processInstanceId")
             );
 
-            Expression<String> extractedValue = criteriaBuilder.function(
-                "jsonb_extract_path_text",
-                String.class,
-                pvRoot.get("value"),
-                criteriaBuilder.literal("value")
-            );
-
             Predicate[] variableValueFilters = criteria
                 .conditions()
                 .stream()
                 .map(filter ->
                     criteriaBuilder.and(
-                        criteriaBuilder.equal(pvRoot.get("processDefinitionKey"), filter.processDefinitionKey()),
-                        criteriaBuilder.equal(pvRoot.get("name"), filter.variableName()),
-                        getValueCriteria(criteriaBuilder, extractedValue, filter)
+                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
+                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
+                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
                     )
                 )
                 .toArray(Predicate[]::new);
 
-            Predicate[] fetchFilters = criteria
-                .processVariableFetchKeys()
+            Predicate[] havingClause = criteria
+                .conditions()
                 .stream()
-                .map(key ->
-                    criteriaBuilder.and(
-                        criteriaBuilder.equal(pvRoot.get("processDefinitionKey"), key.getProcessDefinitionKey()),
-                        criteriaBuilder.equal(pvRoot.get("name"), key.getVariableName())
+                .map(filter ->
+                    criteriaBuilder.gt(
+                        criteriaBuilder.count(
+                            criteriaBuilder
+                                .selectCase()
+                                .when(
+                                    criteriaBuilder.and(
+                                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
+                                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
+                                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
+                                    ),
+                                    criteriaBuilder.literal(1)
+                                )
+                                .otherwise(criteriaBuilder.literal(0))
+                        ),
+                        criteriaBuilder.literal(0)
                     )
                 )
                 .toArray(Predicate[]::new);
-
-            Predicate havingClause = criteriaBuilder.and(
-                Arrays
-                    .stream(variableValueFilters)
-                    .map(variableFilterPredicate ->
-                        criteriaBuilder.gt(
-                            criteriaBuilder.countDistinct(
-                                criteriaBuilder
-                                    .selectCase()
-                                    .when(variableFilterPredicate, pvRoot.get("id"))
-                                    .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                            ),
-                            0L
-                        )
-                    )
-                    .toArray(Predicate[]::new)
-            );
 
             query.groupBy(root.get("id"));
             query.having(havingClause);
 
-            return criteriaBuilder.and(joinCondition, criteriaBuilder.or(fetchFilters));
+            return criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters));
         };
     }
 
-    private static Predicate getValueCriteria(
+    private static Predicate getVariableNameCondition(
+        ProcessVariableValueFilter filter,
         CriteriaBuilder criteriaBuilder,
-        Expression<String> valueExpression,
-        ProcessVariableValueFilter filter
+        Root<ProcessVariableEntity> pvRoot
+    ) {
+        return criteriaBuilder.equal(pvRoot.get("name"), filter.name());
+    }
+
+    private static Predicate getProcessDefinitionCondition(
+        ProcessVariableValueFilter filter,
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> pvRoot
+    ) {
+        return criteriaBuilder.equal(pvRoot.get("processDefinitionKey"), filter.processDefinitionKey());
+    }
+
+    private static Predicate getVariableValueCondition(
+        ProcessVariableValueFilter filter,
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
     ) {
         return switch (filter.filterType()) {
-            case EQUALS -> criteriaBuilder.equal(valueExpression, filter.value());
-            case CONTAINS -> criteriaBuilder.like(valueExpression, "%" + filter.value() + "%");
-            case RANGE -> {
-                String[] range = filter.value().toString().split(",");
-                yield criteriaBuilder.between(valueExpression, range[0], range[1]);
-            }
+            case EQUALS -> criteriaBuilder.equal(
+                extractValueAsString(criteriaBuilder, root),
+                criteriaBuilder.literal(filter.value())
+            );
+            case CONTAINS -> criteriaBuilder.like(
+                extractValueAsString(criteriaBuilder, root),
+                "%" + filter.value() + "%"
+            );
+            case GREATER_THAN -> switch (filter.type()) {
+                case "integer" -> criteriaBuilder.greaterThan(
+                    extractValueAsBigInteger(criteriaBuilder, root),
+                    Long.parseLong(filter.value())
+                );
+                case "bigdecimal" -> criteriaBuilder.greaterThan(
+                    extractValueAsNumeric(criteriaBuilder, root),
+                    new BigDecimal(filter.value())
+                );
+                case "date" -> criteriaBuilder.greaterThan(
+                    extractValueAsDate(criteriaBuilder, root),
+                    criteriaBuilder.literal(filter.value()).as(LocalDate.class)
+                );
+                case "datetime" -> criteriaBuilder.greaterThan(
+                    extractValueAsDateTime(criteriaBuilder, root),
+                    LocalDateTime.parse(filter.value())
+                );
+                default -> throw new IllegalArgumentException("Unsupported type: " + filter.type());
+            };
+            case LESS_THAN -> switch (filter.type()) {
+                case "integer" -> criteriaBuilder.lessThan(
+                    extractValueAsBigInteger(criteriaBuilder, root),
+                    Long.parseLong(filter.value())
+                );
+                case "bigdecimal" -> criteriaBuilder.lessThan(
+                    extractValueAsNumeric(criteriaBuilder, root),
+                    new BigDecimal(filter.value())
+                );
+                case "date" -> criteriaBuilder.lessThan(
+                    extractValueAsDate(criteriaBuilder, root),
+                    LocalDate.parse(filter.value())
+                );
+                case "datetime" -> criteriaBuilder.lessThan(
+                    extractValueAsDateTime(criteriaBuilder, root),
+                    LocalDateTime.parse(filter.value())
+                );
+                default -> throw new IllegalArgumentException("Unsupported type: " + filter.type());
+            };
         };
+    }
+
+    private static Expression<String> extractValueAsString(
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
+    ) {
+        return criteriaBuilder.function(
+            "jsonb_extract_path_text",
+            String.class,
+            root.get("value"),
+            criteriaBuilder.literal("value")
+        );
+    }
+
+    private static Expression<Long> extractValueAsBigInteger(
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
+    ) {
+        return extractValueAsString(criteriaBuilder, root).as(Long.class);
+    }
+
+    private static Expression<LocalDate> extractValueAsDate(
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
+    ) {
+        return extractValueAsString(criteriaBuilder, root).as(LocalDate.class);
+    }
+
+    private static Expression<LocalDateTime> extractValueAsDateTime(
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
+    ) {
+        return extractValueAsString(criteriaBuilder, root).as(LocalDateTime.class);
+    }
+
+    private static Expression<BigDecimal> extractValueAsNumeric(
+        CriteriaBuilder criteriaBuilder,
+        Root<ProcessVariableEntity> root
+    ) {
+        return extractValueAsString(criteriaBuilder, root).as(BigDecimal.class);
     }
 }

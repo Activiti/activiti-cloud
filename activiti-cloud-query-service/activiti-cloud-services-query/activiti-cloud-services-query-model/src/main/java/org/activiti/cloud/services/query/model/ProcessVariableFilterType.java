@@ -18,5 +18,6 @@ package org.activiti.cloud.services.query.model;
 public enum ProcessVariableFilterType {
     EQUALS,
     CONTAINS,
-    RANGE,
+    GREATER_THAN,
+    LESS_THAN,
 }

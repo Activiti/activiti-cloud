@@ -16,5 +16,5 @@
 package org.activiti.cloud.services.query.model;
 
 public record ProcessVariableValueFilter(
-    String processDefinitionKey, String variableName, Object value, ProcessVariableFilterType filterType
+    String processDefinitionKey, String name, String type, String value, ProcessVariableFilterType filterType
 ) {}
