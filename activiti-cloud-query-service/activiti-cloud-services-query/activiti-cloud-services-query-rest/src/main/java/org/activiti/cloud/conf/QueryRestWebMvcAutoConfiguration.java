@@ -21,7 +21,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepositorySpecification;
-import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
@@ -35,6 +35,7 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableR
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;
@@ -201,9 +202,10 @@ public class QueryRestWebMvcAutoConfiguration {
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
         TaskRepositorySpecification taskRepositorySpecification,
-        AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
+        AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-        TaskLookupRestrictionService taskLookupRestrictionService
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        VariableRepository variableRepository
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -211,7 +213,8 @@ public class QueryRestWebMvcAutoConfiguration {
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
-            taskLookupRestrictionService
+            taskLookupRestrictionService,
+            variableRepository
         );
     }
 

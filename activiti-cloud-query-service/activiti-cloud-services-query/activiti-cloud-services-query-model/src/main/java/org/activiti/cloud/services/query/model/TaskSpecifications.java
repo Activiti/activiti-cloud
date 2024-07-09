@@ -7,11 +7,14 @@ import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {
 
-    public static Specification<TaskEntity> withDynamicConditions(TaskSearchCriteria criteria) {
+    public static Specification<TaskEntity> withDynamicConditions(
+        Set<ProcessVariableValueFilter> processVariableValueFilters
+    ) {
         return (root, query, criteriaBuilder) -> {
             Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
             Predicate joinCondition = criteriaBuilder.equal(
@@ -19,8 +22,7 @@ public class TaskSpecifications {
                 pvRoot.get("processInstanceId")
             );
 
-            Predicate[] variableValueFilters = criteria
-                .conditions()
+            Predicate[] variableValueFilters = processVariableValueFilters
                 .stream()
                 .map(filter ->
                     criteriaBuilder.and(
@@ -31,8 +33,7 @@ public class TaskSpecifications {
                 )
                 .toArray(Predicate[]::new);
 
-            Predicate[] havingClause = criteria
-                .conditions()
+            Predicate[] havingClause = processVariableValueFilters
                 .stream()
                 .map(filter ->
                     criteriaBuilder.gt(

@@ -15,8 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 import com.querydsl.core.types.Predicate;
 import java.math.BigDecimal;
@@ -30,7 +30,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -45,6 +44,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
@@ -107,7 +107,7 @@ public class TaskControllerIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @BeforeEach
     public void setUp() {
@@ -161,7 +161,7 @@ public class TaskControllerIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -174,22 +174,19 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Set.of(new ProcessVariableKey(processDefinitionKey, varName))
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
-            .allSatisfy(task ->
-                assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(varValue))
-            );
+            .allSatisfy(task -> assertThat(task.getProcessVariables()).containsEntry(varName, varValue));
     }
 
     @Test
@@ -243,7 +240,7 @@ public class TaskControllerIT {
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
 
         String searchParam = varValue.substring(2, 6);
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -256,21 +253,21 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && ((String) pv.getValue()).contains(searchParam))
+                    .hasEntrySatisfying(varName, value -> assertThat((String) value).contains(searchParam))
             );
     }
 
@@ -315,7 +312,7 @@ public class TaskControllerIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -328,22 +325,19 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
-            .allSatisfy(task ->
-                assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(varValue))
-            );
+            .allSatisfy(task -> assertThat(task.getProcessVariables()).containsEntry(varName, varValue));
     }
 
     @Test
@@ -389,7 +383,7 @@ public class TaskControllerIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -402,21 +396,21 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && (Integer) pv.getValue() > 40)
+                    .hasEntrySatisfying(varName, value -> assertThat((Integer) value).isGreaterThan(40))
             );
     }
 
@@ -463,7 +457,7 @@ public class TaskControllerIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -476,21 +470,21 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(varValue))
+                    .hasEntrySatisfying(varName, value -> assertThat((String) value).isEqualTo(varValue))
             );
     }
 
@@ -539,7 +533,7 @@ public class TaskControllerIT {
         VariableSearch variableSearch = new VariableSearch(null, null, null);
 
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -552,21 +546,21 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(varValue))
+                    .hasEntrySatisfying(varName, value -> assertThat((String) value).isEqualTo(varValue))
             );
     }
 
@@ -617,7 +611,7 @@ public class TaskControllerIT {
         List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
 
         LocalDate yesterday = today.minusDays(5);
-        List<ProcessVariableValueFilter> processVariableValueFilters = List.of(
+        Set<ProcessVariableValueFilter> processVariableValueFilters = Set.of(
             new ProcessVariableValueFilter(
                 processDefinitionKey,
                 varName,
@@ -630,31 +624,32 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize);
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableValueFilters,
-            Collections.emptyList()
+            Collections.emptySet()
         );
 
         assertThat(response.getContent().size()).isEqualTo(tasks1.size() + tasks2.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .anyMatch(pv -> pv.getName().equals(varName) && LocalDate.parse(pv.getValue()).isAfter(yesterday))
+                    .hasEntrySatisfying(varName, value -> assertThat((String) value).isEqualTo(todayValue))
             );
     }
 
     @Test
     public void should_returnTasks_filteredByProcessVariable_sortedByStringVariableValue() {
-        ProcessInstanceEntity processInstance = createProcessInstance("test-process");
+        String processDefinitionKey = "test-process";
         final String varName = "var-name";
         List<String> variableValues = Stream
             .of("beta", "alpha", "gamma", "epsilon", "delta")
             .map(value -> {
+                ProcessInstanceEntity processInstance = createProcessInstance(processDefinitionKey);
                 ProcessVariableEntity processVar = new ProcessVariableEntity();
                 processVar.setName(varName);
                 processVar.setValue(value);
@@ -664,6 +659,7 @@ public class TaskControllerIT {
                 variableRepository.save(processVar);
                 TaskEntity task = new TaskEntity();
                 task.setId(UUID.randomUUID().toString());
+                task.setProcessInstanceId(processInstance.getId());
                 task.setProcessInstance(processInstance);
                 task.setProcessVariables(Set.of(processVar));
                 taskRepository.save(task);
@@ -679,24 +675,24 @@ public class TaskControllerIT {
         int pageSize = 10000;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("variables." + varName).descending());
 
-        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
-            Collections.emptyList(),
-            List.of(new ProcessVariableKey(processInstance.getProcessDefinitionKey(), varName))
+            Collections.emptySet(),
+            Set.of(new ProcessVariableKey(processDefinitionKey, varName))
         );
 
         assertThat(response.getContent().size()).isEqualTo(variableValues.size());
-        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         assertThat(retrievedTasks)
             .satisfiesExactly(
-                task -> assertThat(task.getProcessVariables()).extracting("value").containsExactly("gamma"),
-                task -> assertThat(task.getProcessVariables()).extracting("value").containsExactly("epsilon"),
-                task -> assertThat(task.getProcessVariables()).extracting("value").containsExactly("delta"),
-                task -> assertThat(task.getProcessVariables()).extracting("value").containsExactly("beta"),
-                task -> assertThat(task.getProcessVariables()).extracting("value").containsExactly("alpha")
+                task -> assertThat(task.getProcessVariables()).containsEntry(varName, "gamma"),
+                task -> assertThat(task.getProcessVariables()).containsEntry(varName, "epsilon"),
+                task -> assertThat(task.getProcessVariables()).containsEntry(varName, "delta"),
+                task -> assertThat(task.getProcessVariables()).containsEntry(varName, "beta"),
+                task -> assertThat(task.getProcessVariables()).containsEntry(varName, "alpha")
             );
     }
 

@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
@@ -105,7 +104,6 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
     @Override
     public Page<TaskEntity> findWithProcessVariables(
         List<String> variableFetchKeys,
-        List<ProcessVariableValueFilter> processVariableValueFilters,
         Predicate taskPredicate,
         Pageable pageable
     ) {

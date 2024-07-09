@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -42,6 +41,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -101,7 +101,7 @@ public class TaskController {
     @Operation(summary = "Find tasks", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAllTasks(
+    public PagedModel<EntityModel<TaskDto>> findAllTasks(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -131,7 +131,7 @@ public class TaskController {
     @Operation(summary = "Find tasks")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariables(
+    public PagedModel<EntityModel<TaskDto>> findAllWithProcessVariables(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -158,14 +158,18 @@ public class TaskController {
                 new StandAloneTaskFilter(standalone),
                 taskLookupRestrictionService
             ),
-            Collections.emptyList(),
-            processVariableKeys.stream().map(k -> k.split("/")).map(s -> new ProcessVariableKey(s[0], s[1])).toList()
+            Collections.emptySet(),
+            processVariableKeys
+                .stream()
+                .map(k -> k.split("/"))
+                .map(s -> new ProcessVariableKey(s[0], s[1]))
+                .collect(Collectors.toSet())
         );
     }
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<QueryCloudTask> findByIdTask(@PathVariable String taskId) {
+    public EntityModel<TaskDto> findByIdTask(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,
@@ -181,7 +185,7 @@ public class TaskController {
             );
             throw new ActivitiForbiddenException("Operation not permitted for " + taskId);
         }
-        return taskRepresentationModelAssembler.toModel(taskEntity);
+        return taskRepresentationModelAssembler.toModel(new TaskDto(taskEntity));
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
