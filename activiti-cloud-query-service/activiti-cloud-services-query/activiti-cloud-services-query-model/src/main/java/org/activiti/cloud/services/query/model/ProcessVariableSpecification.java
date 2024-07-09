@@ -13,7 +13,7 @@ public class ProcessVariableSpecification {
         Set<ProcessVariableKey> processVariableKeys
     ) {
         return (root, query, criteriaBuilder) -> {
-            Optional<Predicate> keyFilter = processVariableKeys
+            Predicate keyAndNameFilter = processVariableKeys
                 .stream()
                 .map(processVariableKey -> {
                     Expression<String> processVariableKeyExpression = root.get("processDefinitionKey");
@@ -23,11 +23,10 @@ public class ProcessVariableSpecification {
                         criteriaBuilder.equal(processVariableValueExpression, processVariableKey.variableName())
                     );
                 })
-                .reduce(criteriaBuilder::or);
+                .reduce(criteriaBuilder::or)
+                .orElse(criteriaBuilder.disjunction());
 
-            return keyFilter.isPresent()
-                ? criteriaBuilder.and(root.get("processInstanceId").in(processInstanceIds), keyFilter.get())
-                : root.get("processInstanceId").in(processInstanceIds);
+            return criteriaBuilder.and(root.get("processInstanceId").in(processInstanceIds), keyAndNameFilter);
         };
     }
 }

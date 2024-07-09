@@ -261,6 +261,9 @@ public class TaskControllerHelper {
         Collection<TaskDto> tasks,
         Set<ProcessVariableKey> processVariableFetchKeys
     ) {
+        if (processVariableFetchKeys.isEmpty()) {
+            return Collections.emptyList();
+        }
         Set<String> processInstanceIds = tasks.stream().map(TaskDto::getProcessInstanceId).collect(Collectors.toSet());
         return processVariableRepository.findAll(
             ProcessVariableSpecification.withDynamicConditions(processInstanceIds, processVariableFetchKeys)
