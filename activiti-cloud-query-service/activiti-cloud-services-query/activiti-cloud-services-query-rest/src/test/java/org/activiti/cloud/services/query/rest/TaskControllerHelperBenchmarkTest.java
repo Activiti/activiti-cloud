@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,6 +55,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.StopWatch;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -69,7 +72,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-//TODO Make the test work using AlfrescoJackson2HttpMessageConverter to simulate the actual response that we have in real environment
 public class TaskControllerHelperBenchmarkTest {
 
     @Autowired
@@ -93,6 +95,8 @@ public class TaskControllerHelperBenchmarkTest {
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
+    private static final Map<String, Object> results = new HashMap<>();
+
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -105,6 +109,11 @@ public class TaskControllerHelperBenchmarkTest {
         variableRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskCandidateUserRepository.deleteAll();
+    }
+
+    @AfterAll
+    public static void printResults() {
+        results.forEach((key, value) -> System.out.println(key + " | " + value));
     }
 
     private static Stream<Arguments> getTestParameters() {
@@ -233,15 +242,37 @@ public class TaskControllerHelperBenchmarkTest {
             .map(name -> new ProcessVariableKey(processDefinitionKey, name))
             .collect(Collectors.toSet());
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
-            null,
-            new VariableSearch(null, null, null),
-            PageRequest.of(0, 10000),
-            Collections.emptyList(),
-            processVariableValueFilters,
-            processVariableKeys
-        );
+        //first invocation to assert that result are correct
+        PagedModel<EntityModel<TaskDto>> response = findTasks(processVariableValueFilters, processVariableKeys);
+        doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
 
+        StopWatch stopWatch = new StopWatch();
+
+        for (int i = 0; i < 100; i++) {
+            stopWatch.start();
+            findTasks(processVariableValueFilters, processVariableKeys);
+            stopWatch.stop();
+        }
+
+        double averageTime = (double) stopWatch.getTotalTimeMillis() / stopWatch.getTaskCount();
+
+        results.put(
+            String.format(
+                "number of process variable filters: %d | number of process variables to return: %d",
+                numOfProcessVarFilters,
+                numOfProcessVarsToFetch
+            ),
+            "avg response time(ms): " + averageTime
+        );
+    }
+
+    private static void doAssert(
+        PagedModel<EntityModel<TaskDto>> response,
+        Set<ProcessVariableValueFilter> processVariableValueFilters,
+        List<TaskEntity> tasks,
+        List<String> expectedTasks,
+        Set<ProcessVariableKey> processVariableKeys
+    ) {
         List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         if (processVariableValueFilters.isEmpty()) {
             assertThat(retrievedTasks).hasSameSizeAs(tasks);
@@ -266,5 +297,19 @@ public class TaskControllerHelperBenchmarkTest {
                         })
                 );
         }
+    }
+
+    private PagedModel<EntityModel<TaskDto>> findTasks(
+        Set<ProcessVariableValueFilter> processVariableValueFilters,
+        Set<ProcessVariableKey> processVariableKeys
+    ) {
+        return taskControllerHelper.findAllWithProcessVariables(
+            null,
+            new VariableSearch(null, null, null),
+            PageRequest.of(0, 10000),
+            Collections.emptyList(),
+            processVariableValueFilters,
+            processVariableKeys
+        );
     }
 }
