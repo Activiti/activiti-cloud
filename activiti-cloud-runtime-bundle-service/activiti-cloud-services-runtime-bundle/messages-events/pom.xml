@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-services-runtime-bundle</artifactId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.7.0-alpha.1</version>
   </parent>
   <artifactId>activiti-cloud-services-messages-events</artifactId>
   <dependencies>
