@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class TaskControllerHelperBenchmarkTest {
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    private static final Map<String, Object> results = new HashMap<>();
+    private static final Map<String, Object> results = new LinkedHashMap<>();
 
     @Container
     @ServiceConnection
