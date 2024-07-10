@@ -492,4 +492,14 @@
               stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter25-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/25-alter.pg.schema.8.6.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
 </databaseChangeLog>

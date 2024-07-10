@@ -17,11 +17,7 @@ package org.activiti.cloud.conf;
 
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.services.query.app.repository.EntityFinder;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepositorySpecification;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.app.repository.*;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
@@ -205,7 +201,8 @@ public class QueryRestWebMvcAutoConfiguration {
         AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        VariableRepository variableRepository
+        VariableRepository variableRepository,
+        ProcessVariablesPivotRepository processVariablesPivotRepository
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -214,7 +211,8 @@ public class QueryRestWebMvcAutoConfiguration {
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
             taskLookupRestrictionService,
-            variableRepository
+            variableRepository,
+            processVariablesPivotRepository
         );
     }
 

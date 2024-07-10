@@ -16,7 +16,7 @@ public class TaskSpecifications {
         Set<ProcessVariableValueFilter> processVariableValueFilters
     ) {
         return (root, query, criteriaBuilder) -> {
-            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
+            Root<ProcessVariablesPivotEntity> pvRoot = query.from(ProcessVariablesPivotEntity.class);
             Predicate joinCondition = criteriaBuilder.equal(
                 root.get("processInstanceId"),
                 pvRoot.get("processInstanceId")
@@ -24,39 +24,16 @@ public class TaskSpecifications {
 
             Predicate[] variableValueFilters = processVariableValueFilters
                 .stream()
-                .map(filter ->
-                    criteriaBuilder.and(
-                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
-                    )
-                )
+                .map(filter -> {
+                    Expression<String> function = criteriaBuilder.function(
+                        "jsonb_extract_path_text",
+                        String.class,
+                        pvRoot.get("values"),
+                        criteriaBuilder.literal(filter.processDefinitionKey() + "/" + filter.name())
+                    );
+                    return criteriaBuilder.equal(function, filter.value());
+                })
                 .toArray(Predicate[]::new);
-
-            Predicate[] havingClause = processVariableValueFilters
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.gt(
-                        criteriaBuilder.count(
-                            criteriaBuilder
-                                .selectCase()
-                                .when(
-                                    criteriaBuilder.and(
-                                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
-                                    ),
-                                    criteriaBuilder.literal(1)
-                                )
-                                .otherwise(criteriaBuilder.literal(0))
-                        ),
-                        criteriaBuilder.literal(0)
-                    )
-                )
-                .toArray(Predicate[]::new);
-
-            query.groupBy(root.get("id"));
-            query.having(havingClause);
 
             return criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters));
         };

@@ -19,22 +19,17 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.services.query.app.repository.ProcessVariablesPivotRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepositorySpecification;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.model.ProcessVariableSpecification;
-import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
-import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.TaskSpecifications;
+import org.activiti.cloud.services.query.model.*;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
@@ -43,8 +38,10 @@ import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.hibernate.Filter;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +62,8 @@ public class TaskControllerHelper {
 
     private final VariableRepository processVariableRepository;
 
+    private final ProcessVariablesPivotRepository processVariablesPivotRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -75,7 +74,8 @@ public class TaskControllerHelper {
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        VariableRepository processVariableRepository
+        VariableRepository processVariableRepository,
+        ProcessVariablesPivotRepository processVariablesPivotRepository
     ) {
         this.taskRepository = taskRepository;
         this.taskRepositorySpecification = taskRepositorySpecification;
@@ -84,6 +84,7 @@ public class TaskControllerHelper {
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
         this.processVariableRepository = processVariableRepository;
+        this.processVariablesPivotRepository = processVariablesPivotRepository;
     }
 
     public PagedModel<EntityModel<TaskDto>> findAll(
@@ -143,13 +144,13 @@ public class TaskControllerHelper {
             return this.findAll(predicate, variableSearch, pageable, filters);
         } else {
             return this.findAllWithProcessVariables(
-                    predicate,
-                    variableSearch,
-                    pageable,
-                    filters,
-                    Collections.emptySet(),
-                    processVariableKeys
-                );
+                predicate,
+                variableSearch,
+                pageable,
+                filters,
+                Collections.emptySet(),
+                processVariableKeys
+            );
         }
     }
 
@@ -262,9 +263,21 @@ public class TaskControllerHelper {
         Set<ProcessVariableKey> processVariableFetchKeys
     ) {
         Set<String> processInstanceIds = tasks.stream().map(TaskDto::getProcessInstanceId).collect(Collectors.toSet());
-        return processVariableRepository.findAll(
-            ProcessVariableSpecification.withDynamicConditions(processInstanceIds, processVariableFetchKeys)
-        );
+        Iterable<ProcessVariablesPivotEntity> pivot = processVariablesPivotRepository.findAllById(processInstanceIds);
+        Set<String> keys = processVariableFetchKeys.stream().map(p -> p.processDefinitionKey() + "/" + p.variableName()).collect(Collectors.toSet());
+        List<ProcessVariableEntity> result = new ArrayList<>();
+        pivot.forEach(p -> p
+            .getValues()
+            .forEach((key, value) -> {
+                if (keys.contains(key)) {
+                    ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
+                    processVariableEntity.setProcessInstanceId(p.getProcessInstanceId());
+                    processVariableEntity.setName(key.split("/")[1]);
+                    processVariableEntity.setValue(value);
+                    result.add(processVariableEntity);
+                }
+            }));
+        return result;
     }
 
     private void populateProcessVariables(
