@@ -46,9 +46,9 @@ public class TaskSpecifications {
                                         getVariableNameCondition(filter, criteriaBuilder, pvRoot),
                                         getVariableValueCondition(filter, criteriaBuilder, pvRoot)
                                     ),
-                                    criteriaBuilder.literal(1)
+                                    pvRoot.get("id")
                                 )
-                                .otherwise(criteriaBuilder.literal(0))
+                                .otherwise(criteriaBuilder.nullLiteral(Long.class))
                         ),
                         criteriaBuilder.literal(0)
                     )

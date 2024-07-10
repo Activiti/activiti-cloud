@@ -17,11 +17,8 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.querydsl.core.types.Predicate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,10 +42,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
-import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
-import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -57,8 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
@@ -204,35 +195,42 @@ public class TaskControllerHelperBenchmarkTest {
 
         //change process variable values only for some processes and expect to retrieve tasks from that processes when filtering
         Collections.shuffle(processInstances);
-        Iterator<ProcessInstanceEntity> processInstancesIterator = processInstances.iterator();
-        List<String> expectedTasks = new ArrayList<>();
+        List<ProcessInstanceEntity> processesWithDifferentProcessVariables = processInstances.subList(0, 100);
+
         Set<ProcessVariableValueFilter> processVariableValueFilters = processVariableNamesAndValues
             .entrySet()
             .stream()
             .limit(numOfProcessVarFilters)
             .map(entry -> {
                 String valueToSearch = UUID.randomUUID().toString();
-                ProcessInstanceEntity processInstance = processInstancesIterator.next();
-                ProcessVariableEntity processVariable = processInstance.getVariable(entry.getKey()).get();
-                processVariable.setValue(valueToSearch);
-                variableRepository.save(processVariable);
-                ProcessVariableValueFilter filter = new ProcessVariableValueFilter(
+                processesWithDifferentProcessVariables.forEach(processInstance -> {
+                    ProcessVariableEntity processVariable = processInstance.getVariable(entry.getKey()).get();
+                    processVariable.setValue(valueToSearch);
+                    variableRepository.save(processVariable);
+                });
+                return new ProcessVariableValueFilter(
                     processDefinitionKey,
                     entry.getKey(),
                     "string",
                     valueToSearch,
                     ProcessVariableFilterType.EQUALS
                 );
-                expectedTasks.addAll(processInstance.getTasks().stream().map(TaskEntity::getId).toList());
-                return filter;
             })
             .collect(Collectors.toSet());
 
-        Set<ProcessVariableKey> processVariableKeys = processVariableNamesAndValues
-            .entrySet()
+        List<String> expectedTasks = processesWithDifferentProcessVariables
             .stream()
+            .flatMap(processInstance -> processInstance.getTasks().stream().map(TaskEntity::getId))
+            .toList();
+
+        Set<ProcessVariableKey> processVariableKeys = Stream
+            .concat(
+                processVariableValueFilters.stream().map(ProcessVariableValueFilter::name),
+                processVariableNamesAndValues.keySet().stream()
+            )
+            .distinct()
             .limit(numOfProcessVarsToFetch)
-            .map(entry -> new ProcessVariableKey(processDefinitionKey, entry.getKey()))
+            .map(name -> new ProcessVariableKey(processDefinitionKey, name))
             .collect(Collectors.toSet());
 
         PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
@@ -258,16 +256,14 @@ public class TaskControllerHelperBenchmarkTest {
             assertThat(retrievedTasks)
                 .allSatisfy(task ->
                     assertThat(task.getProcessVariables())
-                        .containsAllEntriesOf(
+                        .allSatisfy((key, value) -> {
                             processVariableValueFilters
                                 .stream()
-                                .collect(
-                                    Collectors.toMap(
-                                        ProcessVariableValueFilter::name,
-                                        ProcessVariableValueFilter::value
-                                    )
-                                )
-                        )
+                                .filter(filter -> filter.name().equals(key))
+                                .findAny()
+                                .ifPresent(filter -> assertThat(value).isEqualTo(filter.value()));
+                            assertThat(processVariableKeys).extracting(ProcessVariableKey::variableName).contains(key);
+                        })
                 );
         }
     }
