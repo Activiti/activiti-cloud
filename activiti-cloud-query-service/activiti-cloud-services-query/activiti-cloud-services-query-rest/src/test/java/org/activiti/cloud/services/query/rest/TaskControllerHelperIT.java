@@ -15,8 +15,13 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.mxgraph.canvas.mxGraphicsCanvas2D;
 import com.querydsl.core.types.Predicate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.activiti.cloud.services.query.app.repository.*;
 import org.activiti.cloud.services.query.model.*;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
@@ -39,12 +44,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
     properties = {
@@ -142,11 +141,7 @@ public class TaskControllerHelperIT {
                     .containsExactlyInAnyOrderEntriesOf(
                         variables
                             .stream()
-                            .filter(v ->
-                                processVariableKeys.contains(
-                                    uniqueVarName(v, processInstanceEntity)
-                                )
-                            )
+                            .filter(v -> processVariableKeys.contains(uniqueVarName(v, processInstanceEntity)))
                             .collect(Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue))
                     )
             );
@@ -175,7 +170,13 @@ public class TaskControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        ProcessVariableValueFilter filter = new ProcessVariableValueFilter(processInstanceEntity.getProcessDefinitionKey(), "name6", "string", "value6", ProcessVariableFilterType.EQUALS);
+        ProcessVariableValueFilter filter = new ProcessVariableValueFilter(
+            processInstanceEntity.getProcessDefinitionKey(),
+            "name6",
+            "string",
+            "value6",
+            ProcessVariableFilterType.EQUALS
+        );
         PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
@@ -201,17 +202,11 @@ public class TaskControllerHelperIT {
                     .containsExactlyInAnyOrderEntriesOf(
                         variables
                             .stream()
-                            .filter(v ->
-                                processVariableKeys.contains(
-                                    uniqueVarName(v, processInstanceEntity)
-                                )
-                            )
+                            .filter(v -> processVariableKeys.contains(uniqueVarName(v, processInstanceEntity)))
                             .collect(Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue))
                     )
             );
     }
-
-
 
     @Test
     public void should_return_PaginatedTasks_WithProcessVariables() {
