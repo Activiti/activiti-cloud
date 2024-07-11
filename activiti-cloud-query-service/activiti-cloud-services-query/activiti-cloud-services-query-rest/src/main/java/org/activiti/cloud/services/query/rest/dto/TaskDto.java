@@ -1,7 +1,6 @@
 package org.activiti.cloud.services.query.rest.dto;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
@@ -27,10 +26,10 @@ public class TaskDto {
     private final Integer processDefinitionVersion;
     private final String businessKey;
     private final String taskDefinitionKey;
-    private final List<String> candidateUsers;
-    private final List<String> candidateGroups;
+    //private final List<String> candidateUsers;
+    //private final List<String> candidateGroups;
     private final String processDefinitionName;
-    private final List<String> permissions;
+    //private final List<String> permissions;
     private final Date lastModified;
     private Map<String, Object> processVariables;
 
@@ -55,11 +54,10 @@ public class TaskDto {
         this.processDefinitionVersion = entity.getProcessDefinitionVersion();
         this.businessKey = entity.getBusinessKey();
         this.taskDefinitionKey = entity.getTaskDefinitionKey();
-        this.candidateUsers = entity.getCandidateUsers();
-        this.candidateGroups = entity.getCandidateGroups();
+        //this.candidateUsers = entity.getCandidateUsers();
+        //this.candidateGroups = entity.getCandidateGroups();
         this.processDefinitionName = entity.getProcessDefinitionName();
-        this.permissions =
-            entity.getPermissions() == null ? null : entity.getPermissions().stream().map(Enum::name).toList();
+        //this.permissions =entity.getPermissions() == null ? null : entity.getPermissions().stream().map(Enum::name).toList();
         this.lastModified = entity.getLastModified();
     }
 
@@ -143,20 +141,8 @@ public class TaskDto {
         return taskDefinitionKey;
     }
 
-    public List<String> getCandidateUsers() {
-        return candidateUsers;
-    }
-
-    public List<String> getCandidateGroups() {
-        return candidateGroups;
-    }
-
     public String getProcessDefinitionName() {
         return processDefinitionName;
-    }
-
-    public List<String> getPermissions() {
-        return permissions;
     }
 
     public void setProcessVariables(Map<String, Object> processVariables) {

@@ -163,10 +163,11 @@ public class TaskControllerHelperBenchmarkTest {
                 processInstanceEntity.setProcessDefinitionName("test");
                 processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
                 processInstanceEntity.setServiceName("test");
-                processInstanceRepository.save(processInstanceEntity);
                 return processInstanceEntity;
             })
             .collect(Collectors.toList());
+
+        processInstanceRepository.saveAll(processInstances);
 
         Map<String, String> processVariableNamesAndValues = IntStream
             .range(0, 16)
@@ -184,12 +185,11 @@ public class TaskControllerHelperBenchmarkTest {
                     processVar.setProcessInstanceId(processInstance.getId());
                     processVar.setProcessDefinitionKey(processDefinitionKey);
                     processVar.setProcessInstance(processInstance);
-                    variableRepository.save(processVar);
                     return processVar;
                 })
                 .collect(Collectors.toSet());
+            variableRepository.saveAll(processVariables);
             processInstance.setVariables(processVariables);
-            processInstanceRepository.save(processInstance);
         });
 
         List<TaskEntity> tasks = processInstances
