@@ -255,7 +255,7 @@ public class TaskControllerHelperBenchmarkTest {
 
         StopWatch stopWatch = new StopWatch();
 
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 1000; i++) {
             entityManager.clear();
             stopWatch.start();
             findTasks(processVariableValueFilters, processVariableKeys);
