@@ -19,3 +19,5 @@ CREATE TABLE IF NOT EXISTS process_variable_pivot
     process_instance_id varchar(255) not null,
     process_variables       jsonb
 );
+
+CREATE INDEX process_instance_id_idx ON process_variable_pivot(process_instance_id);
