@@ -25,13 +25,15 @@ function tryRefreshOauth2Token() {
 
   const {schema, clientId} = auth;
   const errors = [];
-  switch (true) {
-    case schema == null:
-      errors.push('Invalid auth: missing schema');
-    case schema?.tokenUrl == null:
-      errors.push('Invalid auth schema: missing tokenUrl');
-    case clientId == null:
-      errors.push('Invalid auth: missing clientId');
+
+  if (schema == null) {
+    errors.push('Invalid auth: missing schema');
+  }
+  if (schema?.tokenUrl == null) {
+    errors.push('Invalid auth schema: missing tokenUrl');
+  }
+  if (clientId == null) {
+    errors.push('Invalid auth: missing clientId');
   }
   if (errors.length) {
     console.log("Can't refresh token due to the following issues:");
@@ -100,8 +102,8 @@ function tryRefreshOauth2Token() {
       const token = data;
 
       const ui = window.ui;
-      if (ui && ui.authActions && ui.authActions.authorizeOauth2WithPersistOption && token) {
-          ui.authActions.authorizeOauth2WithPersistOption({auth, token})
+      if (ui?.authActions?.authorizeOauth2WithPersistOption && token) {
+        ui.authActions.authorizeOauth2WithPersistOption({auth, token})
       } else {
         console.error('Swagger UI authActions not available.');
       }
@@ -119,10 +121,10 @@ function findTokenAndScope() {
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
 
-    if (key && key.includes('refresh_token')) {
+    if (key?.includes('refresh_token')) {
       refreshTokenKey = key;
       refreshTokenValue = localStorage.getItem(key);
-    } else if (key && key.includes('granted_scopes')) {
+    } else if (key?.includes('granted_scopes')) {
       scopeKey = key;
       scopeValue = localStorage.getItem(key);
     }
@@ -196,7 +198,7 @@ function patchRefreshHook() {
       window.tokenExpiryTime = Date.now() + payload.token.expires_in * 1000;
 
       // Start the clock
-      startClock(tokenRefreshTimeout / 1000, tokenExpiryTimeout);
+      startClock();
     }
 
     return origAuthorizeOauth2(payload);
