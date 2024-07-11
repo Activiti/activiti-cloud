@@ -67,9 +67,6 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
     )
     private String processDefinitionKey;
 
-    @ManyToMany(mappedBy = "processVariables")
-    private Set<TaskEntity> tasks;
-
     public ProcessVariableEntity() {}
 
     public ProcessVariableEntity(
@@ -131,14 +128,6 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
-    }
-
-    public Set<TaskEntity> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(Set<TaskEntity> tasks) {
-        this.tasks = tasks;
     }
 
     @Override
