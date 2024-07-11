@@ -313,7 +313,7 @@ public class TaskControllerHelperBenchmarkTest {
         return taskControllerHelper.findAllWithProcessVariables(
             null,
             new VariableSearch(null, null, null),
-            PageRequest.of(0, 10000),
+            PageRequest.of(0, 1000),
             Collections.emptyList(),
             processVariableValueFilters,
             processVariableKeys

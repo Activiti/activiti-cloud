@@ -30,7 +30,7 @@ public interface CustomizedTaskRepository {
         Pageable pageable
     );
 
-    Page<TaskEntity> findWithProcessVariables(List<String> variableKeys, Predicate taskPredicate, Pageable pageable);
+    Page<TaskEntity> findWithProcessVariables(List<String> variableKeys, Predicate predicate, Pageable pageable);
 
     Iterable<TaskEntity> findInProcessInstanceScope(Predicate predicate);
 

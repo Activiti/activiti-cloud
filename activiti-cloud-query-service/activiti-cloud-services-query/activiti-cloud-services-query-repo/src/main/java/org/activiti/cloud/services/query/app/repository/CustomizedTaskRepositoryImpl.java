@@ -115,10 +115,12 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
 
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
 
-        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .in(variableKeys);
+        BooleanExpression processVariableFilter = variableKeys.isEmpty()
+            ? Expressions.TRUE
+            : processVariableEntity.processDefinitionKey
+                .concat("/")
+                .concat(processVariableEntity.name)
+                .in(variableKeys);
 
         JPQLQuery<TaskEntity> tasksQuery = queryFactory
             .query()
