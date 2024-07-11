@@ -157,10 +157,11 @@ public class TaskControllerHelperBenchmarkTest {
                 processInstanceEntity.setProcessDefinitionName("test");
                 processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
                 processInstanceEntity.setServiceName("test");
-                processInstanceRepository.save(processInstanceEntity);
                 return processInstanceEntity;
             })
             .collect(Collectors.toList());
+
+        processInstanceRepository.saveAll(processInstances);
 
         Map<String, String> processVariableNamesAndValues = IntStream
             .range(0, 16)
@@ -178,12 +179,11 @@ public class TaskControllerHelperBenchmarkTest {
                     processVar.setProcessInstanceId(processInstance.getId());
                     processVar.setProcessDefinitionKey(processDefinitionKey);
                     processVar.setProcessInstance(processInstance);
-                    variableRepository.save(processVar);
                     return processVar;
                 })
                 .collect(Collectors.toSet());
+            variableRepository.saveAll(processVariables);
             processInstance.setVariables(processVariables);
-            processInstanceRepository.save(processInstance);
         });
 
         List<TaskEntity> tasks = processInstances
@@ -204,7 +204,6 @@ public class TaskControllerHelperBenchmarkTest {
                 taskCandidateUserRepository.save(usrCand);
                 taskRepository.save(taskEntity);
                 processInstance.setTasks(Set.of(taskEntity));
-                processInstanceRepository.save(processInstance);
                 return taskEntity;
             })
             .collect(Collectors.toList());
@@ -255,7 +254,7 @@ public class TaskControllerHelperBenchmarkTest {
 
         StopWatch stopWatch = new StopWatch();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 200; i++) {
             entityManager.clear();
             stopWatch.start();
             findTasks(processVariableValueFilters, processVariableKeys);
