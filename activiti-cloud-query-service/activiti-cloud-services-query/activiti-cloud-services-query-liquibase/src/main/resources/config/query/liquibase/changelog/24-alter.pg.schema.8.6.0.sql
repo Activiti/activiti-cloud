@@ -17,4 +17,4 @@
 ALTER TABLE process_variable
 ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
 
-CREATE INDEX process_definition_key_name_value_idx ON public.process_variable (process_definition_key,name,jsonb_extract_path_text("value", 'value'));
+CREATE INDEX process_definition_key_name_value_idx ON process_variable (process_definition_key,name,jsonb_extract_path_text("value", 'value'));
