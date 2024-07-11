@@ -31,6 +31,9 @@ public class TaskSpecifications {
         Set<ProcessVariableValueFilter> processVariableValueFilters
     ) {
         return (root, query, criteriaBuilder) -> {
+            if (processVariableValueFilters.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
             Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
             Predicate joinCondition = criteriaBuilder.equal(
                 root.get("processInstanceId"),
