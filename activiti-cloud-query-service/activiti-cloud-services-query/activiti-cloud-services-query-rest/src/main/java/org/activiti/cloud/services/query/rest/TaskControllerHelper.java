@@ -245,20 +245,8 @@ public class TaskControllerHelper {
             return page;
         }
 
-        if (!processVariableValueFilters.isEmpty()) {
-            return taskRepositorySpecification.findAll(
-                TaskSpecifications.withDynamicConditions(processVariableValueFilters),
-                pageable
-            );
-        }
-        return taskRepository.findWithProcessVariables(
-            (
-                processVariableFetchKeys
-                    .stream()
-                    .map(k -> k.processDefinitionKey() + "/" + k.variableName())
-                    .collect(Collectors.toList())
-            ),
-            extendedPredicate,
+        return taskRepositorySpecification.findAll(
+            TaskSpecifications.withDynamicConditions(processVariableValueFilters),
             pageable
         );
     }
