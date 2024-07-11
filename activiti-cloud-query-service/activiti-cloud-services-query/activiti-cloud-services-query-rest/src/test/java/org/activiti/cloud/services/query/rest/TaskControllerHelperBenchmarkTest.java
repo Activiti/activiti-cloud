@@ -17,10 +17,9 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessVariablesPivotRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -41,6 +41,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableFilterType;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
+import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -70,8 +71,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "logging.level.org.hibernate.collection.spi=warn",
         "spring.jpa.show-sql=false",
         "spring.jpa.properties.hibernate.format_sql=true",
-        "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
-        "spring.jpa.properties.hibernate.cache.use_query_cache=false",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -99,8 +98,8 @@ public class TaskControllerHelperBenchmarkTest {
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private ProcessVariablesPivotRepository processVariablesPivotRepository;
 
     private static final Map<String, Object> results = new LinkedHashMap<>();
 
@@ -205,6 +204,23 @@ public class TaskControllerHelperBenchmarkTest {
                 taskRepository.save(taskEntity);
                 processInstance.setTasks(Set.of(taskEntity));
                 processInstanceRepository.save(processInstance);
+
+                ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
+                    .findById(processInstance.getId())
+                    .orElseGet(() -> {
+                        ProcessVariablesPivotEntity p = new ProcessVariablesPivotEntity();
+                        p.setProcessInstanceId(processInstance.getId());
+                        p.setValues(new HashMap<>());
+                        return p;
+                    });
+
+                Map<String, Object> processInstanceIdVariables = processInstance
+                    .getVariables()
+                    .stream()
+                    .map(pv -> Map.entry(pv.getProcessDefinitionKey() + "/" + pv.getName(), pv.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                pivot.setValues(processInstanceIdVariables);
+                processVariablesPivotRepository.save(pivot);
                 return taskEntity;
             })
             .collect(Collectors.toList());
@@ -223,6 +239,11 @@ public class TaskControllerHelperBenchmarkTest {
                     ProcessVariableEntity processVariable = processInstance.getVariable(entry.getKey()).get();
                     processVariable.setValue(valueToSearch);
                     variableRepository.save(processVariable);
+                    ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
+                        .findById(processInstance.getId())
+                        .get();
+                    pivot.getValues().put(processDefinitionKey + "/" + processVariable.getName(), valueToSearch);
+                    processVariablesPivotRepository.save(pivot);
                 });
                 return new ProcessVariableValueFilter(
                     processDefinitionKey,
@@ -249,14 +270,13 @@ public class TaskControllerHelperBenchmarkTest {
             .map(name -> new ProcessVariableKey(processDefinitionKey, name))
             .collect(Collectors.toSet());
 
-        //first invocation to assert that results are correct
+        //first invocation to assert that result are correct
         PagedModel<EntityModel<TaskDto>> response = findTasks(processVariableValueFilters, processVariableKeys);
         doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
 
         StopWatch stopWatch = new StopWatch();
 
-        for (int i = 0; i < 200; i++) {
-            entityManager.clear();
+        for (int i = 0; i < 100; i++) {
             stopWatch.start();
             findTasks(processVariableValueFilters, processVariableKeys);
             stopWatch.stop();
@@ -266,7 +286,7 @@ public class TaskControllerHelperBenchmarkTest {
 
         results.put(
             String.format(
-                "# of process variable filters: %d | # of process variables to return: %d",
+                "number of process variable filters: %d | number of process variables to return: %d",
                 numOfProcessVarFilters,
                 numOfProcessVarsToFetch
             ),
