@@ -74,6 +74,16 @@ public class TaskDto {
         this.processDefinitionName = entity.getProcessDefinitionName();
         //this.permissions =entity.getPermissions() == null ? null : entity.getPermissions().stream().map(Enum::name).toList();
         this.lastModified = entity.getLastModified();
+
+        //TODO remove, just for testing original approach
+        if (entity.getProcessVariables() != null) {
+            this.processVariables =
+                entity
+                    .getProcessVariables()
+                    .stream()
+                    .map(pv -> new ProcessVariableDto(pv.getProcessDefinitionKey(), pv.getName(), pv.getValue()))
+                    .toList();
+        }
     }
 
     public String getId() {

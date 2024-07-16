@@ -136,8 +136,8 @@ public class TaskControllerHelperBenchmarkTest {
     private static void printResults(String title, List<Integer[]> results) {
         System.out.print("\n\n");
         String[] header = { "#filters", "#fetchVars", "avg time (ms)", "std dev (ms)" };
-        String format = "%-13s%-13s%-13s%-13s%n";
-        String separator = "--------------------------------------------------------------";
+        String format = "%-12%-12%-15%-15%n";
+        String separator = "--------------------------------------------------------";
         System.out.println(title);
         System.out.println(separator);
         System.out.format(format, (Object[]) header);
@@ -149,18 +149,43 @@ public class TaskControllerHelperBenchmarkTest {
         System.out.print("\n\n");
     }
 
+    private static void printCSV() {
+        System.out.println("ORIGINAL APPROACH");
+        System.out.println("#filters,#fetchVars,avg time (ms),std dev (ms)");
+        originalApproachResults.forEach(r -> System.out.println(r[0] + "," + r[1] + "," + r[2] + "," + r[3]));
+        System.out.println("APPROACH 1");
+        System.out.println("#filters,#fetchVars,avg time (ms),std dev (ms)");
+        approach1Results.forEach(r -> System.out.println(r[0] + "," + r[1] + "," + r[2] + "," + r[3]));
+        System.out.println("APPROACH 2");
+        System.out.println("#filters,#fetchVars,avg time (ms),std dev (ms)");
+        approach2Results.forEach(r -> System.out.println(r[0] + "," + r[1] + "," + r[2] + "," + r[3]));
+    }
+
     private static Stream<Arguments> getTestParameters() {
         return Stream.of(
             Arguments.of(0, 0),
+            Arguments.of(0, 1),
+            Arguments.of(0, 2),
+            Arguments.of(0, 5),
+            Arguments.of(0, 10),
+            Arguments.of(0, 15),
+            Arguments.of(1, 0),
+            Arguments.of(2, 0),
+            Arguments.of(5, 0),
+            Arguments.of(10, 0),
+            Arguments.of(15, 0),
             Arguments.of(1, 1),
             Arguments.of(2, 1),
             Arguments.of(5, 1),
+            Arguments.of(10, 1),
             Arguments.of(15, 1),
             Arguments.of(1, 2),
             Arguments.of(1, 5),
+            Arguments.of(1, 10),
             Arguments.of(1, 15),
             Arguments.of(2, 2),
             Arguments.of(5, 5),
+            Arguments.of(10, 10),
             Arguments.of(15, 15)
         );
     }

@@ -110,15 +110,23 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        Page<TaskDto> page = findPageWithProcessVariables(
+        Page<TaskEntity> page = findPageWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableKeys
-        )
-            .map(TaskDto::new);
-        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
+        );
+        //TODO remove, just for testing original approach
+        if (processVariableKeys.isEmpty()) {
+            page.forEach(t -> t.setProcessVariables(Collections.emptySet()));
+        }
+
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            page.map(TaskDto::new),
+            taskRepresentationModelAssembler
+        );
     }
 
     public PagedModel<EntityModel<TaskDto>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {
