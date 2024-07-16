@@ -13,71 +13,87 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.model;
+package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
+import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
 
-public class TaskSpecifications {
+public class TaskSpecification1 implements Specification<TaskEntity> {
 
-    public static Specification<TaskEntity> withDynamicConditions(
-        Set<ProcessVariableValueFilter> processVariableValueFilters
+    private final TaskSearchRequest taskSearchRequest;
+
+    public TaskSpecification1(TaskSearchRequest taskSearchRequest) {
+        this.taskSearchRequest = taskSearchRequest;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.and(applyProcessVariableValueFilters(root, query, criteriaBuilder));
+    }
+
+    private Predicate applyProcessVariableValueFilters(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
     ) {
-        return (root, query, criteriaBuilder) -> {
-            if (processVariableValueFilters.isEmpty()) {
-                return criteriaBuilder.conjunction();
-            }
-            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
-            Predicate joinCondition = criteriaBuilder.equal(
-                root.get("processInstanceId"),
-                pvRoot.get("processInstanceId")
-            );
+        if (CollectionUtils.isEmpty(taskSearchRequest.processVariableValueFilters())) {
+            return criteriaBuilder.conjunction();
+        }
 
-            Predicate[] variableValueFilters = processVariableValueFilters
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.and(
-                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
-                    )
+        Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
+        Predicate joinCondition = criteriaBuilder.equal(root.get("processInstanceId"), pvRoot.get("processInstanceId"));
+
+        Predicate[] variableValueFilters = taskSearchRequest
+            .processVariableValueFilters()
+            .stream()
+            .map(filter ->
+                criteriaBuilder.and(
+                    getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
+                    getVariableNameCondition(filter, criteriaBuilder, pvRoot),
+                    getVariableValueCondition(filter, criteriaBuilder, pvRoot)
                 )
-                .toArray(Predicate[]::new);
+            )
+            .toArray(Predicate[]::new);
 
-            Predicate[] havingClause = processVariableValueFilters
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.gt(
-                        criteriaBuilder.count(
-                            criteriaBuilder
-                                .selectCase()
-                                .when(
-                                    criteriaBuilder.and(
-                                        getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                                        getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                                        getVariableValueCondition(filter, criteriaBuilder, pvRoot)
-                                    ),
-                                    pvRoot.get("id")
-                                )
-                                .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                        ),
-                        criteriaBuilder.literal(0)
-                    )
+        Predicate[] havingClause = taskSearchRequest
+            .processVariableValueFilters()
+            .stream()
+            .map(filter ->
+                criteriaBuilder.gt(
+                    criteriaBuilder.count(
+                        criteriaBuilder
+                            .selectCase()
+                            .when(
+                                criteriaBuilder.and(
+                                    getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
+                                    getVariableNameCondition(filter, criteriaBuilder, pvRoot),
+                                    getVariableValueCondition(filter, criteriaBuilder, pvRoot)
+                                ),
+                                pvRoot.get("id")
+                            )
+                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
+                    ),
+                    criteriaBuilder.literal(0)
                 )
-                .toArray(Predicate[]::new);
+            )
+            .toArray(Predicate[]::new);
 
-            query.groupBy(root.get("id"));
-            query.having(havingClause);
+        query.groupBy(root.get("id"));
+        query.having(havingClause);
 
-            return criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters));
-        };
+        return criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters));
     }
 
     private static Predicate getVariableNameCondition(
@@ -102,9 +118,12 @@ public class TaskSpecifications {
         Root<ProcessVariableEntity> root
     ) {
         return switch (filter.filterType()) {
-            case EQUALS -> criteriaBuilder.equal(
-                extractValueAsString(criteriaBuilder, root),
-                criteriaBuilder.literal(filter.value())
+            case EQUALS -> criteriaBuilder.isTrue(
+                criteriaBuilder.function(
+                    "sql",
+                    Boolean.class,
+                    criteriaBuilder.literal("value @@ '$.value == \"" + filter.value() + "\"'")
+                )
             );
             case CONTAINS -> criteriaBuilder.like(
                 extractValueAsString(criteriaBuilder, root),

@@ -19,9 +19,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
@@ -102,7 +105,12 @@ public class TaskControllerHelperBenchmarkTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static final Map<String, Object> results = new LinkedHashMap<>();
+    private static final List<Integer[]> originalApproachResults = new ArrayList<>();
+    private static final List<Integer[]> approach1Results = new ArrayList<>();
+    private static final List<Integer[]> approach2Results = new ArrayList<>();
+
+    private static final int NUMBER_OF_ITERATIONS = 100;
+    private static final int NUMBER_OF_PROCESS_INSTANCES = 100;
 
     @Container
     @ServiceConnection
@@ -120,7 +128,25 @@ public class TaskControllerHelperBenchmarkTest {
 
     @AfterAll
     public static void printResults() {
-        results.forEach((key, value) -> System.out.println(key + " | " + value));
+        printResults("ORIGINAL APPROACH", originalApproachResults);
+        printResults("APPROACH 1", approach1Results);
+        printResults("APPROACH 2", approach2Results);
+    }
+
+    private static void printResults(String title, List<Integer[]> results) {
+        System.out.print("\n\n");
+        String[] header = { "#filters", "#fetchVars", "avg time (ms)", "std dev (ms)" };
+        String format = "%-13s%-13s%-13s%-13s%n";
+        String separator = "--------------------------------------------------------------";
+        System.out.println(title);
+        System.out.println(separator);
+        System.out.format(format, (Object[]) header);
+        System.out.println(separator);
+        results.forEach(r -> {
+            System.out.format(format, (Object[]) r);
+            System.out.println(separator);
+        });
+        System.out.print("\n\n");
     }
 
     private static Stream<Arguments> getTestParameters() {
@@ -148,7 +174,7 @@ public class TaskControllerHelperBenchmarkTest {
         String processDefinitionKey = "processDefinitionKey";
 
         List<ProcessInstanceEntity> processInstances = IntStream
-            .range(0, 1000)
+            .range(0, NUMBER_OF_PROCESS_INSTANCES)
             .mapToObj(i -> {
                 ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
                 processInstanceEntity.setId(UUID.randomUUID().toString());
@@ -248,28 +274,171 @@ public class TaskControllerHelperBenchmarkTest {
             .map(name -> new ProcessVariableKey(processDefinitionKey, name))
             .collect(Collectors.toSet());
 
-        //first invocation to assert that results are correct
-        PagedModel<EntityModel<TaskDto>> response = findTasks(processVariableValueFilters, processVariableKeys);
+        testOriginalApproach(
+            numOfProcessVarFilters,
+            numOfProcessVarsToFetch,
+            processVariableKeys,
+            tasks,
+            expectedTasks
+        );
+        testApproach1(
+            numOfProcessVarFilters,
+            numOfProcessVarsToFetch,
+            processVariableValueFilters,
+            processVariableKeys,
+            tasks,
+            expectedTasks
+        );
+        testApproach2(
+            numOfProcessVarFilters,
+            numOfProcessVarsToFetch,
+            processVariableValueFilters,
+            processVariableKeys,
+            tasks,
+            expectedTasks
+        );
+    }
+
+    private void testApproach1(
+        int numOfProcessVarFilters,
+        int numOfProcessVarsToFetch,
+        Set<ProcessVariableValueFilter> processVariableValueFilters,
+        Set<ProcessVariableKey> processVariableKeys,
+        List<TaskEntity> tasks,
+        List<String> expectedTasks
+    ) {
+        Pageable pageable = PageRequest.of(0, 1000);
+        PagedModel<EntityModel<TaskDto>> response = findTasksApproach1(
+            processVariableValueFilters,
+            processVariableKeys,
+            pageable
+        );
         doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
 
         StopWatch stopWatch = new StopWatch();
 
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < NUMBER_OF_ITERATIONS; i++) {
             entityManager.clear();
             stopWatch.start();
-            findTasks(processVariableValueFilters, processVariableKeys);
+            findTasksApproach1(processVariableValueFilters, processVariableKeys, pageable);
             stopWatch.stop();
         }
 
-        double averageTime = (double) stopWatch.getTotalTimeMillis() / stopWatch.getTaskCount();
+        List<Long> list = Arrays.stream(stopWatch.getTaskInfo()).map(StopWatch.TaskInfo::getTimeMillis).toList();
 
-        results.put(
-            String.format(
-                "# of process variable filters: %d | # of process variables to return: %d",
+        double averageTime = list.stream().mapToDouble(Long::doubleValue).average().orElse(0.0);
+
+        double standardDeviation = Math.sqrt(
+            list
+                .stream()
+                .mapToDouble(Long::doubleValue)
+                .map(value -> Math.pow(value - averageTime, 2))
+                .average()
+                .orElse(0.0)
+        );
+
+        approach1Results.add(
+            new Integer[] {
                 numOfProcessVarFilters,
-                numOfProcessVarsToFetch
-            ),
-            "avg response time(ms): " + averageTime
+                numOfProcessVarsToFetch,
+                (int) averageTime,
+                (int) standardDeviation,
+            }
+        );
+    }
+
+    private void testApproach2(
+        int numOfProcessVarFilters,
+        int numOfProcessVarsToFetch,
+        Set<ProcessVariableValueFilter> processVariableValueFilters,
+        Set<ProcessVariableKey> processVariableKeys,
+        List<TaskEntity> tasks,
+        List<String> expectedTasks
+    ) {
+        Pageable pageable = PageRequest.of(0, 1000);
+        PagedModel<EntityModel<TaskDto>> response = findTasksApproach2(
+            processVariableValueFilters,
+            processVariableKeys,
+            pageable
+        );
+        doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
+
+        StopWatch stopWatch = new StopWatch();
+
+        for (int i = 0; i < NUMBER_OF_ITERATIONS; i++) {
+            entityManager.clear();
+            stopWatch.start();
+            findTasksApproach2(processVariableValueFilters, processVariableKeys, pageable);
+            stopWatch.stop();
+        }
+
+        List<Long> list = Arrays.stream(stopWatch.getTaskInfo()).map(StopWatch.TaskInfo::getTimeMillis).toList();
+
+        double averageTime = list.stream().mapToDouble(Long::doubleValue).average().orElse(0.0);
+
+        double standardDeviation = Math.sqrt(
+            list
+                .stream()
+                .mapToDouble(Long::doubleValue)
+                .map(value -> Math.pow(value - averageTime, 2))
+                .average()
+                .orElse(0.0)
+        );
+
+        approach2Results.add(
+            new Integer[] {
+                numOfProcessVarFilters,
+                numOfProcessVarsToFetch,
+                (int) averageTime,
+                (int) standardDeviation,
+            }
+        );
+    }
+
+    private void testOriginalApproach(
+        int numOfProcessVarFilters,
+        int numOfProcessVarsToFetch,
+        Set<ProcessVariableKey> processVariableKeys,
+        List<TaskEntity> tasks,
+        List<String> expectedTasks
+    ) {
+        if (numOfProcessVarFilters != 0) {
+            return;
+        }
+
+        Pageable pageable = PageRequest.of(0, 1000);
+        PagedModel<EntityModel<TaskDto>> response = findTasksOriginal(processVariableKeys, pageable);
+        doAssert(response, Collections.emptySet(), tasks, expectedTasks, processVariableKeys);
+
+        StopWatch stopWatch = new StopWatch();
+
+        for (int i = 0; i < NUMBER_OF_ITERATIONS; i++) {
+            entityManager.clear();
+            stopWatch.start();
+            findTasksOriginal(processVariableKeys, pageable);
+            stopWatch.stop();
+        }
+
+        List<Long> list = Arrays.stream(stopWatch.getTaskInfo()).map(StopWatch.TaskInfo::getTimeMillis).toList();
+
+        double averageTime = list.stream().mapToDouble(Long::doubleValue).average().orElse(0.0);
+
+        double standardDeviation = Math.sqrt(
+            list
+                .stream()
+                .mapToDouble(Long::doubleValue)
+                .map(value -> Math.pow(value - averageTime, 2))
+                .average()
+                .orElse(0.0)
+        );
+
+        originalApproachResults.add(
+            new Integer[] {
+                numOfProcessVarFilters,
+                numOfProcessVarsToFetch,
+                (int) averageTime,
+                (int) standardDeviation,
+            }
         );
     }
 
@@ -294,29 +463,88 @@ public class TaskControllerHelperBenchmarkTest {
             assertThat(retrievedTasks)
                 .allSatisfy(task ->
                     assertThat(task.getProcessVariables())
-                        .allSatisfy((key, value) -> {
+                        .allSatisfy(pv -> {
                             processVariableValueFilters
                                 .stream()
-                                .filter(filter -> filter.name().equals(key))
+                                .filter(filter -> filter.name().equals(pv.name()))
                                 .findAny()
-                                .ifPresent(filter -> assertThat(value).isEqualTo(filter.value()));
-                            assertThat(processVariableKeys).extracting(ProcessVariableKey::variableName).contains(key);
+                                .ifPresent(filter -> assertThat(pv.value()).isEqualTo(filter.value()));
+                            assertThat(processVariableKeys)
+                                .extracting(ProcessVariableKey::variableName)
+                                .contains(pv.name());
                         })
                 );
         }
     }
 
-    private PagedModel<EntityModel<TaskDto>> findTasks(
+    private PagedModel<EntityModel<TaskDto>> findTasksApproach1(
         Set<ProcessVariableValueFilter> processVariableValueFilters,
-        Set<ProcessVariableKey> processVariableKeys
+        Set<ProcessVariableKey> processVariableKeys,
+        Pageable pageable
+    ) {
+        return taskControllerHelper.searchTaskApproach1(
+            new TaskSearchRequest(
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                processVariableValueFilters,
+                processVariableKeys
+            ),
+            pageable
+        );
+    }
+
+    private PagedModel<EntityModel<TaskDto>> findTasksApproach2(
+        Set<ProcessVariableValueFilter> processVariableValueFilters,
+        Set<ProcessVariableKey> processVariableKeys,
+        Pageable pageable
+    ) {
+        return taskControllerHelper.searchTaskApproach2(
+            new TaskSearchRequest(
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                processVariableValueFilters,
+                processVariableKeys
+            ),
+            pageable
+        );
+    }
+
+    private PagedModel<EntityModel<TaskDto>> findTasksOriginal(
+        Set<ProcessVariableKey> processVariableKeys,
+        Pageable pageable
     ) {
         return taskControllerHelper.findAllWithProcessVariables(
             null,
             new VariableSearch(null, null, null),
-            PageRequest.of(0, 1000),
+            pageable,
             Collections.emptyList(),
-            processVariableValueFilters,
-            processVariableKeys
+            processVariableKeys.stream().map(pv -> pv.processDefinitionKey() + "/" + pv.variableName()).toList()
         );
     }
 }

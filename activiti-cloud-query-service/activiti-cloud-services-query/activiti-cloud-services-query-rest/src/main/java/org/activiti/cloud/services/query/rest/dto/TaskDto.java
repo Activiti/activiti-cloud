@@ -16,7 +16,7 @@
 package org.activiti.cloud.services.query.rest.dto;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class TaskDto {
@@ -46,7 +46,7 @@ public class TaskDto {
     private final String processDefinitionName;
     //private final List<String> permissions;
     private final Date lastModified;
-    private Map<String, Object> processVariables;
+    private List<ProcessVariableDto> processVariables;
 
     public TaskDto(TaskEntity entity) {
         this.id = entity.getId();
@@ -160,11 +160,11 @@ public class TaskDto {
         return processDefinitionName;
     }
 
-    public void setProcessVariables(Map<String, Object> processVariables) {
+    public void setProcessVariables(List<ProcessVariableDto> processVariables) {
         this.processVariables = processVariables;
     }
 
-    public Map<String, Object> getProcessVariables() {
+    public List<ProcessVariableDto> getProcessVariables() {
         return processVariables;
     }
 

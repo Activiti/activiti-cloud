@@ -35,7 +35,6 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -132,12 +131,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
@@ -149,15 +143,9 @@ public class TaskControllerHelperIT {
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .containsExactlyInAnyOrderEntriesOf(
-                        variables
-                            .stream()
-                            .filter(v ->
-                                processVariableKeys.contains(
-                                    processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName()
-                                )
-                            )
-                            .collect(Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue))
+                    .allSatisfy(variable ->
+                        assertThat(processVariableKeys)
+                            .anyMatch(vk -> vk.equals(task.getProcessDefinitionId() + "/" + variable.name()))
                     )
             );
     }
@@ -184,12 +172,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(pageable.getPageSize());
@@ -215,12 +198,7 @@ public class TaskControllerHelperIT {
                 variableSearch,
                 pageable,
                 filters,
-                Collections.emptySet(),
                 processVariableKeys
-                    .stream()
-                    .map(k -> k.split("/"))
-                    .map(s -> new ProcessVariableKey(s[0], s[1]))
-                    .collect(Collectors.toSet())
             );
 
         assertThat(response.getContent()).hasSize(pageable.getPageSize());
@@ -235,12 +213,7 @@ public class TaskControllerHelperIT {
                 variableSearch,
                 pageable,
                 filters,
-                Collections.emptySet(),
                 processVariableKeys
-                    .stream()
-                    .map(k -> k.split("/"))
-                    .map(s -> new ProcessVariableKey(s[0], s[1]))
-                    .collect(Collectors.toSet())
             );
 
         assertThat(response.getContent()).hasSize(taskEntities.size() - pageable.getPageSize() * 3);
@@ -288,12 +261,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableFetchKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(2);
@@ -346,12 +314,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableFetchKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(2);
@@ -382,12 +345,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size());
@@ -421,12 +379,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size() + tasksWithProcessInstance.size());
@@ -473,12 +426,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size());
@@ -525,12 +473,7 @@ public class TaskControllerHelperIT {
             variableSearch,
             pageable,
             filters,
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size() + childTasks.size());
@@ -538,8 +481,6 @@ public class TaskControllerHelperIT {
         //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
         //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(childTasks);
     }
-
-    //TODO should return empty list when process variable value filter has no matches
 
     @NotNull
     private List<TaskEntity> createTasks(

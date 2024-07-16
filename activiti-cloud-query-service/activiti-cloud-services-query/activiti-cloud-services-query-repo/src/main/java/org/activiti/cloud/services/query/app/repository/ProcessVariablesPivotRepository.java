@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.activiti.cloud.services.query.app.repository;
 
-ALTER TABLE process_variable
-ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
+import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-CREATE INDEX index1 on process_variable using GIN ((value -> 'value') jsonb_path_ops);
-CREATE INDEX process_definition_key_name_value_idx ON process_variable (process_definition_key,name);
-
-CREATE TABLE IF NOT EXISTS process_variable_pivot
-(
-  process_instance_id varchar(255) not null,
-  process_variables       jsonb
-  );
-
-CREATE INDEX process_instance_id_idx ON process_variable_pivot(process_instance_id);
+@RepositoryRestResource(exported = false)
+public interface ProcessVariablesPivotRepository extends CrudRepository<ProcessVariablesPivotEntity, String> {}

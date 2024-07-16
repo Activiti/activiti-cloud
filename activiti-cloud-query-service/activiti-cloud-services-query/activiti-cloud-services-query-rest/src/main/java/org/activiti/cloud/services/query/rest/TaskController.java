@@ -27,7 +27,6 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -35,7 +34,6 @@ import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
@@ -158,12 +156,7 @@ public class TaskController {
                 new StandAloneTaskFilter(standalone),
                 taskLookupRestrictionService
             ),
-            Collections.emptySet(),
             processVariableKeys
-                .stream()
-                .map(k -> k.split("/"))
-                .map(s -> new ProcessVariableKey(s[0], s[1]))
-                .collect(Collectors.toSet())
         );
     }
 
