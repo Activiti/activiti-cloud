@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,8 +33,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessVariablesPivotRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -42,8 +42,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableFilterType;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
-import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
-import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
+import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
@@ -97,10 +96,7 @@ public class TaskControllerHelperBenchmarkTest {
     private VariableRepository variableRepository;
 
     @Autowired
-    private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
+    private ProcessVariablesPivotRepository processVariablesPivotRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -109,8 +105,8 @@ public class TaskControllerHelperBenchmarkTest {
     private static final List<Integer[]> approach1Results = new ArrayList<>();
     private static final List<Integer[]> approach2Results = new ArrayList<>();
 
-    private static final int NUMBER_OF_ITERATIONS = 100;
-    private static final int NUMBER_OF_PROCESS_INSTANCES = 100;
+    private static final int NUMBER_OF_ITERATIONS = 500;
+    private static final int NUMBER_OF_PROCESS_INSTANCES = 10000;
 
     @Container
     @ServiceConnection
@@ -122,8 +118,6 @@ public class TaskControllerHelperBenchmarkTest {
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
-        taskCandidateGroupRepository.deleteAll();
-        taskCandidateUserRepository.deleteAll();
     }
 
     @AfterAll
@@ -131,12 +125,13 @@ public class TaskControllerHelperBenchmarkTest {
         printResults("ORIGINAL APPROACH", originalApproachResults);
         printResults("APPROACH 1", approach1Results);
         printResults("APPROACH 2", approach2Results);
+        printCSV();
     }
 
     private static void printResults(String title, List<Integer[]> results) {
         System.out.print("\n\n");
         String[] header = { "#filters", "#fetchVars", "avg time (ms)", "std dev (ms)" };
-        String format = "%-12%-12%-15%-15%n";
+        String format = "%-12s%-12s%-15s%-15s%n";
         String separator = "--------------------------------------------------------";
         System.out.println(title);
         System.out.println(separator);
@@ -198,8 +193,14 @@ public class TaskControllerHelperBenchmarkTest {
     ) {
         String processDefinitionKey = "processDefinitionKey";
 
+        Map<String, String> processVariableNamesAndValues = IntStream
+            .range(0, 16)
+            .mapToObj(i -> Map.entry("var" + i, "value" + i))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         List<ProcessInstanceEntity> processInstances = IntStream
             .range(0, NUMBER_OF_PROCESS_INSTANCES)
+            .parallel()
             .mapToObj(i -> {
                 ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
                 processInstanceEntity.setId(UUID.randomUUID().toString());
@@ -208,54 +209,51 @@ public class TaskControllerHelperBenchmarkTest {
                 processInstanceEntity.setProcessDefinitionName("test");
                 processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
                 processInstanceEntity.setServiceName("test");
-                return processInstanceEntity;
-            })
-            .collect(Collectors.toList());
 
-        processInstanceRepository.saveAll(processInstances);
+                processInstanceRepository.save(processInstanceEntity);
 
-        Map<String, String> processVariableNamesAndValues = IntStream
-            .range(0, 16)
-            .mapToObj(i -> Map.entry("var" + i, "value" + i))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                Set<ProcessVariableEntity> processVariables = processVariableNamesAndValues
+                    .entrySet()
+                    .stream()
+                    .map(entry -> {
+                        ProcessVariableEntity processVar = new ProcessVariableEntity();
+                        processVar.setName(entry.getKey());
+                        processVar.setValue(entry.getValue());
+                        processVar.setProcessDefinitionKey(processDefinitionKey);
+                        processVar.setProcessInstanceId(processInstanceEntity.getId());
+                        return processVar;
+                    })
+                    .collect(Collectors.toSet());
+                variableRepository.saveAll(processVariables);
+                processInstanceEntity.setVariables(processVariables);
 
-        processInstances.forEach(processInstance -> {
-            Set<ProcessVariableEntity> processVariables = processVariableNamesAndValues
-                .entrySet()
-                .stream()
-                .map(entry -> {
-                    ProcessVariableEntity processVar = new ProcessVariableEntity();
-                    processVar.setName(entry.getKey());
-                    processVar.setValue(entry.getValue());
-                    processVar.setProcessInstanceId(processInstance.getId());
-                    processVar.setProcessDefinitionKey(processDefinitionKey);
-                    processVar.setProcessInstance(processInstance);
-                    return processVar;
-                })
-                .collect(Collectors.toSet());
-            variableRepository.saveAll(processVariables);
-            processInstance.setVariables(processVariables);
-        });
-
-        List<TaskEntity> tasks = processInstances
-            .stream()
-            .map(processInstance -> {
                 TaskEntity taskEntity = new TaskEntity();
                 String taskId = UUID.randomUUID().toString();
                 taskEntity.setId(taskId);
                 taskEntity.setCreatedDate(new Date());
-                TaskCandidateGroupEntity groupCand = new TaskCandidateGroupEntity(taskId, "group" + processInstance);
-                taskEntity.setTaskCandidateGroups(Set.of(groupCand));
-                TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity(taskId, "user" + processInstance);
-                taskEntity.setTaskCandidateUsers(Set.of(usrCand));
-                taskEntity.setProcessVariables(processInstance.getVariables());
-                taskEntity.setProcessInstance(processInstance);
-                taskEntity.setProcessInstanceId(processInstance.getId());
-                taskCandidateGroupRepository.save(groupCand);
-                taskCandidateUserRepository.save(usrCand);
+                taskEntity.setProcessVariables(processInstanceEntity.getVariables());
+                taskEntity.setProcessInstanceId(processInstanceEntity.getId());
                 taskRepository.save(taskEntity);
-                processInstance.setTasks(Set.of(taskEntity));
-                return taskEntity;
+                processInstanceEntity.setTasks(Set.of(taskEntity));
+
+                ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
+                    .findById(processInstanceEntity.getId())
+                    .orElseGet(() -> {
+                        ProcessVariablesPivotEntity p = new ProcessVariablesPivotEntity();
+                        p.setProcessInstanceId(processInstanceEntity.getId());
+                        p.setValues(new HashMap<>());
+                        return p;
+                    });
+
+                Map<String, Object> processInstanceIdVariables = processInstanceEntity
+                    .getVariables()
+                    .stream()
+                    .map(pv -> Map.entry(pv.getProcessDefinitionKey() + "/" + pv.getName(), pv.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                pivot.setValues(processInstanceIdVariables);
+                processVariablesPivotRepository.save(pivot);
+
+                return processInstanceEntity;
             })
             .collect(Collectors.toList());
 
@@ -273,6 +271,11 @@ public class TaskControllerHelperBenchmarkTest {
                     ProcessVariableEntity processVariable = processInstance.getVariable(entry.getKey()).get();
                     processVariable.setValue(valueToSearch);
                     variableRepository.save(processVariable);
+                    ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
+                        .findById(processInstance.getId())
+                        .get();
+                    pivot.getValues().put(processDefinitionKey + "/" + processVariable.getName(), valueToSearch);
+                    processVariablesPivotRepository.save(pivot);
                 });
                 return new ProcessVariableValueFilter(
                     processDefinitionKey,
@@ -299,28 +302,30 @@ public class TaskControllerHelperBenchmarkTest {
             .map(name -> new ProcessVariableKey(processDefinitionKey, name))
             .collect(Collectors.toSet());
 
+        Pageable pageable = PageRequest.of(0, 1000);
+
         testOriginalApproach(
             numOfProcessVarFilters,
             numOfProcessVarsToFetch,
             processVariableKeys,
-            tasks,
-            expectedTasks
+            expectedTasks,
+            pageable
         );
         testApproach1(
             numOfProcessVarFilters,
             numOfProcessVarsToFetch,
             processVariableValueFilters,
             processVariableKeys,
-            tasks,
-            expectedTasks
+            expectedTasks,
+            pageable
         );
         testApproach2(
             numOfProcessVarFilters,
             numOfProcessVarsToFetch,
             processVariableValueFilters,
             processVariableKeys,
-            tasks,
-            expectedTasks
+            expectedTasks,
+            pageable
         );
     }
 
@@ -329,16 +334,15 @@ public class TaskControllerHelperBenchmarkTest {
         int numOfProcessVarsToFetch,
         Set<ProcessVariableValueFilter> processVariableValueFilters,
         Set<ProcessVariableKey> processVariableKeys,
-        List<TaskEntity> tasks,
-        List<String> expectedTasks
+        List<String> expectedTasks,
+        Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(0, 1000);
         PagedModel<EntityModel<TaskDto>> response = findTasksApproach1(
             processVariableValueFilters,
             processVariableKeys,
             pageable
         );
-        doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
+        doAssert(response, processVariableValueFilters, expectedTasks, processVariableKeys, pageable);
 
         StopWatch stopWatch = new StopWatch();
 
@@ -377,16 +381,15 @@ public class TaskControllerHelperBenchmarkTest {
         int numOfProcessVarsToFetch,
         Set<ProcessVariableValueFilter> processVariableValueFilters,
         Set<ProcessVariableKey> processVariableKeys,
-        List<TaskEntity> tasks,
-        List<String> expectedTasks
+        List<String> expectedTasks,
+        Pageable pageable
     ) {
-        Pageable pageable = PageRequest.of(0, 1000);
         PagedModel<EntityModel<TaskDto>> response = findTasksApproach2(
             processVariableValueFilters,
             processVariableKeys,
             pageable
         );
-        doAssert(response, processVariableValueFilters, tasks, expectedTasks, processVariableKeys);
+        doAssert(response, processVariableValueFilters, expectedTasks, processVariableKeys, pageable);
 
         StopWatch stopWatch = new StopWatch();
 
@@ -424,16 +427,15 @@ public class TaskControllerHelperBenchmarkTest {
         int numOfProcessVarFilters,
         int numOfProcessVarsToFetch,
         Set<ProcessVariableKey> processVariableKeys,
-        List<TaskEntity> tasks,
-        List<String> expectedTasks
+        List<String> expectedTasks,
+        Pageable pageable
     ) {
         if (numOfProcessVarFilters != 0) {
             return;
         }
 
-        Pageable pageable = PageRequest.of(0, 1000);
         PagedModel<EntityModel<TaskDto>> response = findTasksOriginal(processVariableKeys, pageable);
-        doAssert(response, Collections.emptySet(), tasks, expectedTasks, processVariableKeys);
+        doAssert(response, Collections.emptySet(), expectedTasks, processVariableKeys, pageable);
 
         StopWatch stopWatch = new StopWatch();
 
@@ -470,15 +472,15 @@ public class TaskControllerHelperBenchmarkTest {
     private static void doAssert(
         PagedModel<EntityModel<TaskDto>> response,
         Set<ProcessVariableValueFilter> processVariableValueFilters,
-        List<TaskEntity> tasks,
         List<String> expectedTasks,
-        Set<ProcessVariableKey> processVariableKeys
+        Set<ProcessVariableKey> processVariableKeys,
+        Pageable pageable
     ) {
         List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
         if (processVariableValueFilters.isEmpty()) {
-            assertThat(retrievedTasks).hasSameSizeAs(tasks);
+            assertThat(retrievedTasks).hasSize(Math.min(NUMBER_OF_PROCESS_INSTANCES, pageable.getPageSize()));
         } else {
-            assertThat(retrievedTasks).hasSameSizeAs(expectedTasks);
+            assertThat(retrievedTasks).hasSize(Math.min(expectedTasks.size(), pageable.getPageSize()));
             assertThat(expectedTasks)
                 .containsExactlyInAnyOrderElementsOf(retrievedTasks.stream().map(TaskDto::getId).toList());
         }

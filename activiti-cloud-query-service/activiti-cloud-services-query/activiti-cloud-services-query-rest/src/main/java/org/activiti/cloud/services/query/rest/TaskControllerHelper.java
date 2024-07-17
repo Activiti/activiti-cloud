@@ -117,16 +117,14 @@ public class TaskControllerHelper {
             filters,
             processVariableKeys
         );
+        Page<TaskDto> dtos;
         //TODO remove, just for testing original approach
-        if (processVariableKeys.isEmpty()) {
-            page.forEach(t -> t.setProcessVariables(Collections.emptySet()));
+        if (!processVariableKeys.isEmpty()) {
+            dtos = page.map(TaskDto::withProcessVariables);
+        } else {
+            dtos = page.map(TaskDto::new);
         }
-
-        return pagedCollectionModelAssembler.toModel(
-            pageable,
-            page.map(TaskDto::new),
-            taskRepresentationModelAssembler
-        );
+        return pagedCollectionModelAssembler.toModel(pageable, dtos, taskRepresentationModelAssembler);
     }
 
     public PagedModel<EntityModel<TaskDto>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {

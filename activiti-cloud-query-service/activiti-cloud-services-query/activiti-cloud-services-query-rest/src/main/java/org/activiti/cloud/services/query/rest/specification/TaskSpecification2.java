@@ -30,7 +30,7 @@ public class TaskSpecification2 implements Specification<TaskEntity> {
         CriteriaBuilder criteriaBuilder
     ) {
         {
-            if (CollectionUtils.isEmpty(taskSearchRequest.taskVariableValueFilters())) {
+            if (CollectionUtils.isEmpty(taskSearchRequest.processVariableValueFilters())) {
                 return criteriaBuilder.conjunction();
             }
             Root<ProcessVariablesPivotEntity> pvRoot = query.from(ProcessVariablesPivotEntity.class);
@@ -43,13 +43,20 @@ public class TaskSpecification2 implements Specification<TaskEntity> {
                 .processVariableValueFilters()
                 .stream()
                 .map(filter -> {
-                    Expression<String> function = criteriaBuilder.function(
-                        "jsonb_extract_path_text",
-                        String.class,
-                        pvRoot.get("values"),
-                        criteriaBuilder.literal(filter.processDefinitionKey() + "/" + filter.name())
+                    Expression<Boolean> function = criteriaBuilder.function(
+                        "sql",
+                        Boolean.class,
+                        criteriaBuilder.literal(
+                            "process_variables @> '{\"" +
+                            filter.processDefinitionKey() +
+                            "/" +
+                            filter.name() +
+                            "\": \"" +
+                            filter.value() +
+                            "\"}'"
+                        )
                     );
-                    return criteriaBuilder.equal(function, filter.value());
+                    return criteriaBuilder.isTrue(function);
                 })
                 .toArray(Predicate[]::new);
 
