@@ -35,12 +35,14 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -98,7 +100,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private int priority;
     private String processDefinitionId;
 
-    @Column(nullable = true, insertable = true, updatable = false)
+    @Column(name = "process_instance_id", nullable = true, insertable = true, updatable = false)
     private String processInstanceId;
 
     private Integer processDefinitionVersion;
@@ -185,7 +187,7 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "processInstanceId",
+        name = "process_instance_id",
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
@@ -228,15 +230,15 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     )
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 
-    @JsonView(JsonViews.ProcessVariables.class)
-    @Filter(name = "variablesFilter")
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
-    @JoinTable(
-        name = "task_process_variable",
-        joinColumns = { @JoinColumn(name = "task_id") },
-        inverseJoinColumns = { @JoinColumn(name = "process_variable_id") }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "process_instance_id",
+        referencedColumnName = "process_instance_id",
+        insertable = false,
+        updatable = false,
+        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
     )
-    private Set<ProcessVariableEntity> processVariables = new LinkedHashSet<>();
+    private ProcessVariablesPivotEntity processVariablesPivot;
 
     public TaskEntity() {}
 
@@ -637,13 +639,32 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     @Override
-    public Set<ProcessVariableEntity> getProcessVariables() {
-        return processVariables;
+    public Set<ProcessVariableInstance> getProcessVariables() {
+        return this.processVariablesPivot != null
+            ? this.processVariablesPivot.getValues()
+                .values()
+                .stream()
+                .map(v -> (ProcessVariableInstance) v)
+                .collect(Collectors.toSet())
+            : Collections.emptySet();
     }
 
-    public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {
-        this.processVariables = new LinkedHashSet<>();
-        this.processVariables.addAll(processVariables);
+    public void setProcessVariables(Set<ProcessVariableInstance> processVariables) {
+        if (this.processVariablesPivot == null) {
+            this.processVariablesPivot = new ProcessVariablesPivotEntity();
+            this.processVariablesPivot.setProcessInstanceId(this.processInstanceId);
+        }
+        this.processVariablesPivot.setValues(
+                processVariables.stream().collect(Collectors.toMap(ProcessVariableInstance::getName, v -> v))
+            );
+    }
+
+    public ProcessVariablesPivotEntity getProcessVariablesPivot() {
+        return processVariablesPivot;
+    }
+
+    public void setProcessVariablesPivot(ProcessVariablesPivotEntity processVariablesPivot) {
+        this.processVariablesPivot = processVariablesPivot;
     }
 
     @Override

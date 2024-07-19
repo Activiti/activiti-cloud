@@ -23,7 +23,7 @@ import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.Optional;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,16 +45,19 @@ public class VariableEntityUpdaterTest {
     @Test
     public void updateShouldUpdateVariableRetrievedByPredicate() {
         //given
-        ProcessVariableEntity currentVariableEntity = new ProcessVariableEntity();
-        currentVariableEntity.setName("var");
-
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.getVariables().add(currentVariableEntity);
+        processInstanceEntity.setProcessDefinitionKey("procDefKey");
+
+        ProcessVariableInstance currentVariableEntity = new ProcessVariableInstance();
+        currentVariableEntity.setName("var");
+        currentVariableEntity.setProcessDefinitionKey("procDefKey");
+
+        processInstanceEntity.getVariables().put(currentVariableEntity.getName(), currentVariableEntity);
 
         given(entityManagerFinder.findProcessInstanceWithVariables("procInstId"))
             .willReturn(Optional.of(processInstanceEntity));
         Date now = new Date();
-        ProcessVariableEntity updatedVariableEntity = new ProcessVariableEntity();
+        ProcessVariableInstance updatedVariableEntity = new ProcessVariableInstance();
         updatedVariableEntity.setName("var");
         updatedVariableEntity.setType("string");
         updatedVariableEntity.setValue("content");

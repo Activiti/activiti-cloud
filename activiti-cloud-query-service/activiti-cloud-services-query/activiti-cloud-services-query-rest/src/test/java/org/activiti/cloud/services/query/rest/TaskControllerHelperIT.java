@@ -17,13 +17,34 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.mxgraph.canvas.mxGraphicsCanvas2D;
 import com.querydsl.core.types.Predicate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.activiti.cloud.services.query.app.repository.*;
-import org.activiti.cloud.services.query.model.*;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessVariablesPivotRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableFilterType;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
+import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
+import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
@@ -100,7 +121,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnTasks_withProcessVariablesByKeys() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
 
         Predicate predicate = null;
@@ -142,7 +163,9 @@ public class TaskControllerHelperIT {
                         variables
                             .stream()
                             .filter(v -> processVariableKeys.contains(uniqueVarName(v, processInstanceEntity)))
-                            .collect(Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue))
+                            .collect(
+                                Collectors.toMap(ProcessVariableInstance::getName, ProcessVariableInstance::getValue)
+                            )
                     )
             );
     }
@@ -150,11 +173,11 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnTasks_withProcessVariablesByKeysAndFilters() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
 
         ProcessInstanceEntity processInstanceEntity1 = createProcessInstance();
-        Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1, "test");
+        Set<ProcessVariableInstance> variables1 = createProcessVariables(processInstanceEntity1, "test");
         List<TaskEntity> taskEntities1 = createTasks(variables1, processInstanceEntity1);
 
         Predicate predicate = null;
@@ -203,7 +226,9 @@ public class TaskControllerHelperIT {
                         variables
                             .stream()
                             .filter(v -> processVariableKeys.contains(uniqueVarName(v, processInstanceEntity)))
-                            .collect(Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue))
+                            .collect(
+                                Collectors.toMap(ProcessVariableInstance::getName, ProcessVariableInstance::getValue)
+                            )
                     )
             );
     }
@@ -211,7 +236,7 @@ public class TaskControllerHelperIT {
     @Test
     public void should_return_PaginatedTasks_WithProcessVariables() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
 
         Predicate predicate = null;
@@ -297,7 +322,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnTask_whenItHashNoMatchingProcessVariablesFetchKeys() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
 
         TaskEntity taskWithoutVariables = new TaskEntity();
         String taskId = "task_id";
@@ -352,9 +377,9 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnBothTasks_whenOneTaskHasNoMatchingProcessVariablesFetchKeys() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
 
-        Set<ProcessVariableEntity> otherVariables = variables.stream().skip(4).collect(Collectors.toSet());
+        Set<ProcessVariableInstance> otherVariables = variables.stream().skip(4).collect(Collectors.toSet());
         variables.removeAll(otherVariables);
 
         TaskEntity taskWithoutVariables = new TaskEntity();
@@ -406,7 +431,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnOnlyStandaloneTasks_whenStandAloneFilterIsTrue() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> tasksWithProcessInstance = createTasks(variables, processInstanceEntity);
         List<TaskEntity> standaloneTasks = createStandaloneTasks();
 
@@ -445,7 +470,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnAllTasks_whenStandAloneFilterIsFalse() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> tasksWithProcessInstance = createTasks(variables, processInstanceEntity);
         List<TaskEntity> standaloneTasks = createStandaloneTasks();
 
@@ -484,7 +509,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnOnlyRootTasks_whenRootTaskFilterIsTrue() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> rootTasks = createTasks(variables, processInstanceEntity);
 
         List<TaskEntity> childTasks = new ArrayList<>();
@@ -536,7 +561,7 @@ public class TaskControllerHelperIT {
     @Test
     void should_returnRootTasksAndChildTasks_whenRootTaskFilterIsFalse() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        Set<ProcessVariableInstance> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> rootTasks = createTasks(variables, processInstanceEntity);
 
         List<TaskEntity> childTasks = new ArrayList<>();
@@ -589,7 +614,7 @@ public class TaskControllerHelperIT {
 
     @NotNull
     private List<TaskEntity> createTasks(
-        Set<ProcessVariableEntity> variables,
+        Set<ProcessVariableInstance> variables,
         ProcessInstanceEntity processInstanceEntity
     ) {
         List<TaskEntity> taskEntities = new ArrayList<>();
@@ -631,31 +656,33 @@ public class TaskControllerHelperIT {
         return taskEntities;
     }
 
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
+    private Set<ProcessVariableInstance> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
         return createProcessVariables(processInstanceEntity, "");
     }
 
     @NotNull
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity, String var) {
-        Set<ProcessVariableEntity> variables = new HashSet<>();
+    private Set<ProcessVariableInstance> createProcessVariables(
+        ProcessInstanceEntity processInstanceEntity,
+        String var
+    ) {
+        Set<ProcessVariableInstance> variables = new HashSet<>();
         Map<String, Object> map = new HashMap<>();
 
         for (int i = 0; i < 8; i++) {
-            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-            processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("value" + i + var);
-            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-            processVariableEntity.setProcessInstance(processInstanceEntity);
-            variables.add(processVariableEntity);
-            map.put(uniqueVarName(processVariableEntity, processInstanceEntity), processVariableEntity.getValue());
+            ProcessVariableInstance ProcessVariableInstance = new ProcessVariableInstance();
+            ProcessVariableInstance.setName("name" + i);
+            ProcessVariableInstance.setValue("value" + i + var);
+            ProcessVariableInstance.setProcessInstanceId(processInstanceEntity.getId());
+            ProcessVariableInstance.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
+            variables.add(ProcessVariableInstance);
+            map.put(uniqueVarName(ProcessVariableInstance, processInstanceEntity), ProcessVariableInstance.getValue());
         }
-        variableRepository.saveAll(variables);
+        //variableRepository.saveAll(variables);
         processInstanceEntity.setVariables(variables);
         processInstanceRepository.save(processInstanceEntity);
 
         ProcessVariablesPivotEntity pivot = new ProcessVariablesPivotEntity();
-        pivot.setValues(map);
+        //pivot.setValues(map);
         pivot.setProcessInstanceId(processInstanceEntity.getId());
 
         processVariablesPivotRepository.save(pivot);
@@ -679,7 +706,7 @@ public class TaskControllerHelperIT {
         return processInstanceEntity;
     }
 
-    private static String uniqueVarName(ProcessVariableEntity v, ProcessInstanceEntity processInstanceEntity) {
+    private static String uniqueVarName(ProcessVariableInstance v, ProcessInstanceEntity processInstanceEntity) {
         return processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName();
     }
 }

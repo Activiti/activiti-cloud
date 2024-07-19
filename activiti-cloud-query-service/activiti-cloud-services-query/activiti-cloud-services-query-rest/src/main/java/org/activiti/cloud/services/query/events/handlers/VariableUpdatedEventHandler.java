@@ -19,7 +19,7 @@ import java.util.Date;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudVariableUpdatedEvent;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +64,11 @@ public class VariableUpdatedEventHandler implements QueryEventHandler {
                 variableEntity.setValue(variableUpdatedEvent.getEntity().getValue());
                 taskVariableUpdatedEventHandler.handle(variableEntity);
             } else {
-                ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-                    null,
+                ProcessVariableInstance variableEntity = new ProcessVariableInstance(
+                    variableUpdatedEvent.getEntity().getProcessInstanceId(),
                     variableUpdatedEvent.getEntity().getType(),
                     variableUpdatedEvent.getEntity().getName(),
-                    variableUpdatedEvent.getEntity().getProcessInstanceId(),
+                    "", //TODO missing process definition key
                     variableUpdatedEvent.getServiceName(),
                     variableUpdatedEvent.getServiceFullName(),
                     variableUpdatedEvent.getServiceVersion(),

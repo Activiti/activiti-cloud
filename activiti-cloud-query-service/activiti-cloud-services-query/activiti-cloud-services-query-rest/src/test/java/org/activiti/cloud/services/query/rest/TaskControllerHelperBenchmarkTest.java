@@ -21,7 +21,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +38,8 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableFilterType;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
@@ -48,6 +47,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.dto.TaskDto;
+import org.apache.commons.compress.utils.Lists;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,7 +71,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
         "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=false",
+        "spring.jpa.show-sql=true",
         "spring.jpa.properties.hibernate.format_sql=true",
         "spring.jpa.properties.hibernate.cache.use_second_level_cache=false",
         "spring.jpa.properties.hibernate.cache.use_query_cache=false",
@@ -112,7 +112,7 @@ public class TaskControllerHelperBenchmarkTest {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(true);
 
     @BeforeEach
     public void setUp() {
@@ -175,21 +175,26 @@ public class TaskControllerHelperBenchmarkTest {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         processInstances.forEach(processInstance -> {
-            Set<ProcessVariableEntity> processVariables = processVariableNamesAndValues
+            Set<ProcessVariableInstance> processVariables = processVariableNamesAndValues
                 .entrySet()
                 .stream()
                 .map(entry -> {
-                    ProcessVariableEntity processVar = new ProcessVariableEntity();
+                    ProcessVariableInstance processVar = new ProcessVariableInstance();
                     processVar.setName(entry.getKey());
                     processVar.setValue(entry.getValue());
                     processVar.setProcessInstanceId(processInstance.getId());
                     processVar.setProcessDefinitionKey(processDefinitionKey);
-                    processVar.setProcessInstance(processInstance);
                     return processVar;
                 })
                 .collect(Collectors.toSet());
-            variableRepository.saveAll(processVariables);
-            processInstance.setVariables(processVariables);
+            ProcessVariablesPivotEntity processVariablesPivotEntity = new ProcessVariablesPivotEntity();
+            processVariablesPivotEntity.setProcessInstanceId(processInstance.getId());
+            processVariablesPivotEntity.setProcessInstance(processInstance);
+            processVariablesPivotEntity.setProcessDefinitionKey(processDefinitionKey);
+            processVariablesPivotEntity.setValues(
+                processVariables.stream().collect(Collectors.toMap(ProcessVariableInstance::getName, pv -> pv))
+            );
+            processVariablesPivotRepository.save(processVariablesPivotEntity);
         });
 
         List<TaskEntity> tasks = processInstances
@@ -203,7 +208,6 @@ public class TaskControllerHelperBenchmarkTest {
                 taskEntity.setTaskCandidateGroups(Set.of(groupCand));
                 TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity(taskId, "user" + processInstance);
                 taskEntity.setTaskCandidateUsers(Set.of(usrCand));
-                taskEntity.setProcessVariables(processInstance.getVariables());
                 taskEntity.setProcessInstance(processInstance);
                 taskEntity.setProcessInstanceId(processInstance.getId());
                 taskCandidateGroupRepository.save(groupCand);
@@ -212,25 +216,12 @@ public class TaskControllerHelperBenchmarkTest {
                 processInstance.setTasks(Set.of(taskEntity));
                 processInstanceRepository.save(processInstance);
 
-                ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
-                    .findById(processInstance.getId())
-                    .orElseGet(() -> {
-                        ProcessVariablesPivotEntity p = new ProcessVariablesPivotEntity();
-                        p.setProcessInstanceId(processInstance.getId());
-                        p.setValues(new HashMap<>());
-                        return p;
-                    });
-
-                Map<String, Object> processInstanceIdVariables = processInstance
-                    .getVariables()
-                    .stream()
-                    .map(pv -> Map.entry(pv.getProcessDefinitionKey() + "/" + pv.getName(), pv.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                pivot.setValues(processInstanceIdVariables);
-                processVariablesPivotRepository.save(pivot);
                 return taskEntity;
             })
             .collect(Collectors.toList());
+
+        //refresh process instances
+        processInstances = Lists.newArrayList(processInstanceRepository.findAll().iterator());
 
         //change process variable values only for some processes and expect to retrieve tasks from that processes when filtering
         Collections.shuffle(processInstances);
@@ -243,13 +234,12 @@ public class TaskControllerHelperBenchmarkTest {
             .map(entry -> {
                 String valueToSearch = UUID.randomUUID().toString();
                 processesWithDifferentProcessVariables.forEach(processInstance -> {
-                    ProcessVariableEntity processVariable = processInstance.getVariable(entry.getKey()).get();
+                    ProcessVariableInstance processVariable = processInstance.getVariable(entry.getKey()).get();
                     processVariable.setValue(valueToSearch);
-                    variableRepository.save(processVariable);
                     ProcessVariablesPivotEntity pivot = processVariablesPivotRepository
                         .findById(processInstance.getId())
                         .get();
-                    pivot.getValues().put(processDefinitionKey + "/" + processVariable.getName(), valueToSearch);
+                    pivot.getValues().put(processVariable.getName(), processVariable);
                     processVariablesPivotRepository.save(pivot);
                 });
                 return new ProcessVariableValueFilter(

@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.events.handlers;
 
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 
 public class ProcessVariableUpdateEventHandler {
 
@@ -25,7 +25,7 @@ public class ProcessVariableUpdateEventHandler {
         this.variableUpdater = variableUpdater;
     }
 
-    public void handle(ProcessVariableEntity updatedVariableEntity) {
+    public void handle(ProcessVariableInstance updatedVariableEntity) {
         String variableName = updatedVariableEntity.getName();
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
 

@@ -17,7 +17,8 @@ package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
+import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 
 public class ProcessVariableUpdater {
@@ -30,24 +31,23 @@ public class ProcessVariableUpdater {
         this.entityManagerFinder = entityManagerFinder;
     }
 
-    public void update(ProcessVariableEntity updatedVariableEntity, String notFoundMessage) {
+    public void update(ProcessVariableInstance updatedVariableEntity, String notFoundMessage) {
         String processInstanceId = updatedVariableEntity.getProcessInstanceId();
         ProcessInstanceEntity processInstanceEntity = entityManagerFinder
             .findProcessInstanceWithVariables(processInstanceId)
             .orElseThrow(() -> new QueryException("Process instance id " + processInstanceId + " not found!"));
-        processInstanceEntity
-            .getVariable(updatedVariableEntity.getName())
-            .ifPresentOrElse(
-                variableEntity -> {
-                    variableEntity.setLastUpdatedTime(updatedVariableEntity.getLastUpdatedTime());
-                    variableEntity.setType(updatedVariableEntity.getType());
-                    variableEntity.setValue(updatedVariableEntity.getValue());
-
-                    entityManager.persist(variableEntity);
-                },
-                () -> {
-                    throw new QueryException(notFoundMessage);
+        ProcessVariablesPivotEntity processVariablesPivot = processInstanceEntity.getProcessVariablesPivot();
+        processVariablesPivot
+            .getValues()
+            .compute(
+                updatedVariableEntity.getName(),
+                (k, v) -> {
+                    if (v == null) {
+                        throw new QueryException(notFoundMessage);
+                    }
+                    return updatedVariableEntity;
                 }
             );
+        entityManager.persist(processVariablesPivot);
     }
 }

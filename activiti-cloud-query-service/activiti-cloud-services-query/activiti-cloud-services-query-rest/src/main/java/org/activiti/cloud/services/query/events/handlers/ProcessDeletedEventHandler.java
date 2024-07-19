@@ -58,7 +58,7 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
             processInstanceEntity.getTasks().stream().forEach(entityManager::remove);
-            processInstanceEntity.getVariables().stream().forEach(entityManager::remove);
+            entityManager.remove(processInstanceEntity.getProcessVariablesPivot());
             processInstanceEntity.getServiceTasks().stream().forEach(entityManager::remove);
             processInstanceEntity.getActivities().stream().forEach(entityManager::remove);
             processInstanceEntity.getSequenceFlows().stream().forEach(entityManager::remove);

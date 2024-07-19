@@ -16,8 +16,9 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 @RepositoryRestResource(exported = false)
-public interface ProcessVariablesPivotRepository extends CrudRepository<ProcessVariablesPivotEntity, String> {}
+public interface ProcessVariablesPivotRepository extends JpaRepository<ProcessVariablesPivotEntity, String> {}

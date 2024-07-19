@@ -19,7 +19,6 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,8 +29,7 @@ import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.ProcessVariablesPivotRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepositorySpecification;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableValueFilter;
 import org.activiti.cloud.services.query.model.ProcessVariablesPivotEntity;
@@ -65,8 +63,6 @@ public class TaskControllerHelper {
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
-    private final VariableRepository processVariableRepository;
-
     private final ProcessVariablesPivotRepository processVariablesPivotRepository;
 
     @PersistenceContext
@@ -79,7 +75,6 @@ public class TaskControllerHelper {
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService,
-        VariableRepository processVariableRepository,
         ProcessVariablesPivotRepository processVariablesPivotRepository
     ) {
         this.taskRepository = taskRepository;
@@ -88,7 +83,6 @@ public class TaskControllerHelper {
         this.predicateAggregator = predicateAggregator;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
-        this.processVariableRepository = processVariableRepository;
         this.processVariablesPivotRepository = processVariablesPivotRepository;
     }
 
@@ -124,7 +118,7 @@ public class TaskControllerHelper {
             processVariableFetchKeys
         )
             .map(TaskDto::new);
-        List<ProcessVariableEntity> processVariables = fetchProcessVariables(
+        List<ProcessVariableInstance> processVariables = fetchProcessVariables(
             filteredTasks.getContent(),
             processVariableFetchKeys
         );
@@ -251,43 +245,29 @@ public class TaskControllerHelper {
         );
     }
 
-    private List<ProcessVariableEntity> fetchProcessVariables(
+    private List<ProcessVariableInstance> fetchProcessVariables(
         Collection<TaskDto> tasks,
         Set<ProcessVariableKey> processVariableFetchKeys
     ) {
         Set<String> processInstanceIds = tasks.stream().map(TaskDto::getProcessInstanceId).collect(Collectors.toSet());
-        Iterable<ProcessVariablesPivotEntity> pivot = processVariablesPivotRepository.findAllById(processInstanceIds);
-        Set<String> keys = processVariableFetchKeys
+        List<ProcessVariablesPivotEntity> pivot = processVariablesPivotRepository.findAllById(processInstanceIds);
+        return pivot
             .stream()
-            .map(p -> p.processDefinitionKey() + "/" + p.variableName())
-            .collect(Collectors.toSet());
-        List<ProcessVariableEntity> result = new ArrayList<>();
-        pivot.forEach(p ->
-            p
-                .getValues()
-                .forEach((key, value) -> {
-                    if (keys.contains(key)) {
-                        ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-                        processVariableEntity.setProcessInstanceId(p.getProcessInstanceId());
-                        processVariableEntity.setName(key.split("/")[1]);
-                        processVariableEntity.setValue(value);
-                        result.add(processVariableEntity);
-                    }
-                })
-        );
-        return result;
+            .flatMap(p -> p.getValues().values().stream())
+            .filter(pv -> processVariableFetchKeys.contains(pv.getProcessVariableKey()))
+            .collect(Collectors.toList());
     }
 
     private void populateProcessVariables(
         Collection<TaskDto> tasks,
-        Collection<ProcessVariableEntity> processVariables
+        Collection<ProcessVariableInstance> processVariables
     ) {
         Map<String, Map<String, Object>> processVariablesMap = processVariables
             .stream()
             .collect(
                 Collectors.groupingBy(
-                    ProcessVariableEntity::getProcessInstanceId,
-                    Collectors.toMap(ProcessVariableEntity::getName, ProcessVariableEntity::getValue)
+                    ProcessVariableInstance::getProcessInstanceId,
+                    Collectors.toMap(ProcessVariableInstance::getName, ProcessVariableInstance::getValue)
                 )
             );
         tasks.forEach(task -> task.setProcessVariables(processVariablesMap.get(task.getProcessInstanceId())));

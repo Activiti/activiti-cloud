@@ -53,7 +53,7 @@ public class ProcessInstanceDeleteController {
 
     private final TaskRepository taskRepository;
 
-    private final VariableRepository variableRepository;
+    private final ProcessVariablesPivotRepository processVariablesPivotRepository;
 
     private final ServiceTaskRepository serviceTaskRepository;
 
@@ -67,7 +67,7 @@ public class ProcessInstanceDeleteController {
     public ProcessInstanceDeleteController(
         ProcessInstanceRepository processInstanceRepository,
         TaskRepository taskRepository,
-        VariableRepository variableRepository,
+        ProcessVariablesPivotRepository processVariablesPivotRepository,
         ServiceTaskRepository serviceTaskRepository,
         BPMNActivityRepository bpmnActivityRepository,
         BPMNSequenceFlowRepository bpmnSequenceFlowRepository,
@@ -75,7 +75,7 @@ public class ProcessInstanceDeleteController {
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
-        this.variableRepository = variableRepository;
+        this.processVariablesPivotRepository = processVariablesPivotRepository;
         this.serviceTaskRepository = serviceTaskRepository;
         this.bpmnActivityRepository = bpmnActivityRepository;
         this.bpmnSequenceFlowRepository = bpmnSequenceFlowRepository;
@@ -95,7 +95,7 @@ public class ProcessInstanceDeleteController {
 
         for (ProcessInstanceEntity entity : iterable) {
             Optional.ofNullable(entity.getTasks()).ifPresent(taskRepository::deleteAll);
-            Optional.ofNullable(entity.getVariables()).ifPresent(variableRepository::deleteAll);
+            Optional.ofNullable(entity.getProcessVariablesPivot()).ifPresent(processVariablesPivotRepository::delete);
             Optional.ofNullable(entity.getServiceTasks()).ifPresent(serviceTaskRepository::deleteAll);
             Optional.ofNullable(entity.getActivities()).ifPresent(bpmnActivityRepository::deleteAll);
             Optional.ofNullable(entity.getSequenceFlows()).ifPresent(bpmnSequenceFlowRepository::deleteAll);

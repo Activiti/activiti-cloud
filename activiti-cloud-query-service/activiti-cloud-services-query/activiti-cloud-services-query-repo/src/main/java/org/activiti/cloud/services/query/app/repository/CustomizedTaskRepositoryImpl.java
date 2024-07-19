@@ -125,7 +125,7 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
             .select(taskEntity)
             .from(taskEntity)
             .where(taskEntity.id.in(taskIds))
-            .leftJoin(taskEntity.processVariables, processVariableEntity)
+            //.leftJoin(taskEntity.processVariables, processVariableEntity)
             .where(processVariableEntity.isNull().or(processVariableFilter))
             .fetchJoin()
             .leftJoin(taskEntity.taskCandidateGroups)

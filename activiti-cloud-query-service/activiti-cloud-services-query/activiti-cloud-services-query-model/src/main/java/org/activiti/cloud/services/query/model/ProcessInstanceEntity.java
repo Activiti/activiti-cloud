@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.model;
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,11 +29,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.NamedEntityGraphs;
-import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
@@ -42,13 +38,14 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Filter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "ProcessInstance")
@@ -65,15 +62,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 )
 @DynamicInsert
 @DynamicUpdate
-@NamedEntityGraphs(
-    value = {
-        @NamedEntityGraph(
-            name = "ProcessInstances.withVariables",
-            attributeNodes = { @NamedAttributeNode(value = "variables", subgraph = "variables") },
-            subgraphs = { @NamedSubgraph(name = "variables", attributeNodes = { @NamedAttributeNode("value") }) }
-        ),
-    }
-)
 public class ProcessInstanceEntity extends ActivitiEntityMetadata implements CloudProcessInstance {
 
     @Id
@@ -166,7 +154,7 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "processInstanceId",
+        name = "process_instance_id",
         referencedColumnName = "id",
         insertable = false,
         updatable = false,
@@ -174,17 +162,8 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
     )
     private Set<TaskEntity> tasks = new LinkedHashSet<>();
 
-    @JsonView(JsonViews.ProcessVariables.class)
-    @Filter(name = "variablesFilter")
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "processInstanceId",
-        referencedColumnName = "id",
-        insertable = false,
-        updatable = false,
-        foreignKey = @jakarta.persistence.ForeignKey(value = ConstraintMode.NO_CONSTRAINT, name = "none")
-    )
-    private Set<ProcessVariableEntity> variables = new LinkedHashSet<>();
+    @OneToOne(mappedBy = "processInstance", fetch = FetchType.LAZY)
+    private ProcessVariablesPivotEntity processVariablesPivot;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY)
@@ -293,16 +272,30 @@ public class ProcessInstanceEntity extends ActivitiEntityMetadata implements Clo
         this.tasks = tasks;
     }
 
-    public Set<ProcessVariableEntity> getVariables() {
-        return variables;
+    public ProcessVariablesPivotEntity getProcessVariablesPivot() {
+        return processVariablesPivot;
     }
 
-    public void setVariables(Set<ProcessVariableEntity> variable) {
-        this.variables = variable;
+    public void setProcessVariablesPivot(ProcessVariablesPivotEntity processVariablesPivot) {
+        this.processVariablesPivot = processVariablesPivot;
     }
 
-    public Optional<ProcessVariableEntity> getVariable(String variableName) {
-        return getVariables().stream().filter(v -> v.getName().equals(variableName)).findFirst();
+    public Map<String, ProcessVariableInstance> getVariables() {
+        return this.processVariablesPivot.getValues();
+    }
+
+    public void setVariables(Set<ProcessVariableInstance> variable) {
+        if (this.processVariablesPivot == null) {
+            this.processVariablesPivot = new ProcessVariablesPivotEntity();
+            this.processVariablesPivot.setProcessInstanceId(this.id);
+        }
+        this.processVariablesPivot.setValues(
+                variable.stream().collect(Collectors.toMap(ProcessVariableInstance::getName, v -> v))
+            );
+    }
+
+    public Optional<ProcessVariableInstance> getVariable(String variableName) {
+        return Optional.ofNullable(this.processVariablesPivot.getValues().get(variableName));
     }
 
     public Optional<BPMNSequenceFlowEntity> getSequenceFlowByEventId(String eventId) {

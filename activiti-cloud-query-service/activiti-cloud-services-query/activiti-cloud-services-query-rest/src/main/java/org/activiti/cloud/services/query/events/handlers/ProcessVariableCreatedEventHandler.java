@@ -16,11 +16,10 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
-import java.util.Date;
 import java.util.Set;
 import org.activiti.cloud.api.model.shared.events.CloudVariableCreatedEvent;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,23 +51,25 @@ public class ProcessVariableCreatedEventHandler {
                             );
                         },
                         () -> {
-                            ProcessVariableEntity variableEntity = createProcessVariableEntity(
+                            ProcessVariableInstance variableEntity = createProcessVariableInstance(
                                 variableCreatedEvent,
                                 processInstanceEntity
                             );
-                            processInstanceEntity.getVariables().add(variableEntity);
+                            //TODO fix
+                            //processInstanceEntity.getVariables().add(variableEntity);
                             assignToTasks(processInstanceId, variableName, variableEntity);
                         }
                     );
             });
     }
 
-    private ProcessVariableEntity createProcessVariableEntity(
+    private ProcessVariableInstance createProcessVariableInstance(
         CloudVariableCreatedEvent variableCreatedEvent,
         ProcessInstanceEntity processInstanceEntity
     ) {
-        ProcessVariableEntity variableEntity = new ProcessVariableEntity(
-            null,
+        //TODO fix test
+        ProcessVariableInstance variableEntity = new ProcessVariableInstance(
+            /*   null,
             variableCreatedEvent.getEntity().getType(),
             variableCreatedEvent.getEntity().getName(),
             variableCreatedEvent.getEntity().getProcessInstanceId(),
@@ -79,24 +80,24 @@ public class ProcessVariableCreatedEventHandler {
             variableCreatedEvent.getAppVersion(),
             new Date(variableCreatedEvent.getTimestamp()),
             new Date(variableCreatedEvent.getTimestamp()),
-            null
+            null */
         );
         variableEntity.setValue(variableCreatedEvent.getEntity().getValue());
-        variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
+        //variableEntity.setVariableDefinitionId(variableCreatedEvent.getVariableDefinitionId());
         variableEntity.setProcessDefinitionKey(variableCreatedEvent.getProcessDefinitionKey());
-        variableEntity.setProcessInstance(processInstanceEntity);
+        //variableEntity.setProcessInstance(processInstanceEntity);
 
         entityManager.persist(variableEntity);
 
         return variableEntity;
     }
 
-    private void assignToTasks(String processInstanceId, String variableName, ProcessVariableEntity variableEntity) {
+    private void assignToTasks(String processInstanceId, String variableName, ProcessVariableInstance variableEntity) {
         entityManagerFinder
             .findTasksWithProcessVariables(processInstanceId)
             .forEach(taskEntity -> {
-                Set<ProcessVariableEntity> processVariables = taskEntity.getProcessVariables();
-                if (processVariables.stream().map(ProcessVariableEntity::getName).anyMatch(variableName::equals)) {
+                Set<ProcessVariableInstance> processVariables = taskEntity.getProcessVariables();
+                if (processVariables.stream().map(ProcessVariableInstance::getName).anyMatch(variableName::equals)) {
                     LOGGER.warn(
                         "Process variable " + variableName + " already exists in the task " + taskEntity.getId() + "!"
                     );

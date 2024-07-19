@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017-2020 Alfresco Software, Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.cloud.services.query.model;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -28,13 +43,18 @@ public class TaskSpecifications {
             Predicate[] variableValueFilters = processVariableValueFilters
                 .stream()
                 .map(filter -> {
-                    Expression<String> function = criteriaBuilder.function(
-                        "jsonb_extract_path_text",
-                        String.class,
-                        pvRoot.get("values"),
-                        criteriaBuilder.literal(filter.processDefinitionKey() + "/" + filter.name())
+                    Predicate procDefKeyPredicate = criteriaBuilder.equal(
+                        pvRoot.get("processDefinitionKey"),
+                        filter.processDefinitionKey()
                     );
-                    return criteriaBuilder.equal(function, filter.value());
+                    Expression<Boolean> valueExpression = criteriaBuilder.function(
+                        "sql",
+                        Boolean.class,
+                        criteriaBuilder.literal(
+                            "process_variables @@ '$." + filter.name() + ".value == \"" + filter.value() + "\"'"
+                        )
+                    );
+                    return criteriaBuilder.and(procDefKeyPredicate, valueExpression);
                 })
                 .toArray(Predicate[]::new);
 
@@ -45,7 +65,7 @@ public class TaskSpecifications {
     private static Predicate getVariableNameCondition(
         ProcessVariableValueFilter filter,
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> pvRoot
+        Root<ProcessVariableInstance> pvRoot
     ) {
         return criteriaBuilder.equal(pvRoot.get("name"), filter.name());
     }
@@ -53,7 +73,7 @@ public class TaskSpecifications {
     private static Predicate getProcessDefinitionCondition(
         ProcessVariableValueFilter filter,
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> pvRoot
+        Root<ProcessVariableInstance> pvRoot
     ) {
         return criteriaBuilder.equal(pvRoot.get("processDefinitionKey"), filter.processDefinitionKey());
     }
@@ -61,7 +81,7 @@ public class TaskSpecifications {
     private static Predicate getVariableValueCondition(
         ProcessVariableValueFilter filter,
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return switch (filter.filterType()) {
             case EQUALS -> criteriaBuilder.equal(
@@ -115,7 +135,7 @@ public class TaskSpecifications {
 
     private static Expression<String> extractValueAsString(
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return criteriaBuilder.function(
             "jsonb_extract_path_text",
@@ -127,28 +147,28 @@ public class TaskSpecifications {
 
     private static Expression<Long> extractValueAsBigInteger(
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return extractValueAsString(criteriaBuilder, root).as(Long.class);
     }
 
     private static Expression<LocalDate> extractValueAsDate(
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return extractValueAsString(criteriaBuilder, root).as(LocalDate.class);
     }
 
     private static Expression<LocalDateTime> extractValueAsDateTime(
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return extractValueAsString(criteriaBuilder, root).as(LocalDateTime.class);
     }
 
     private static Expression<BigDecimal> extractValueAsNumeric(
         CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
+        Root<ProcessVariableInstance> root
     ) {
         return extractValueAsString(criteriaBuilder, root).as(BigDecimal.class);
     }

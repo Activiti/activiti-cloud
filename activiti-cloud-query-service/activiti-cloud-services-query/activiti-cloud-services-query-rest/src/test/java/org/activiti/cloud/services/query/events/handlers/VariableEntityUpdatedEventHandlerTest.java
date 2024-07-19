@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import org.activiti.api.model.shared.event.VariableEvent;
 import org.activiti.api.runtime.model.impl.VariableInstanceImpl;
 import org.activiti.cloud.api.model.shared.impl.events.CloudVariableUpdatedEventImpl;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableInstance;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.test.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,10 +53,10 @@ public class VariableEntityUpdatedEventHandlerTest {
         handler.handle(event);
 
         //then
-        ArgumentCaptor<ProcessVariableEntity> captor = ArgumentCaptor.forClass(ProcessVariableEntity.class);
+        ArgumentCaptor<ProcessVariableInstance> captor = ArgumentCaptor.forClass(ProcessVariableInstance.class);
         verify(processVariableUpdateEventHandler).handle(captor.capture());
 
-        ProcessVariableEntity variableEntity = captor.getValue();
+        ProcessVariableInstance variableEntity = captor.getValue();
         Assertions
             .assertThat(variableEntity)
             .hasProcessInstanceId(event.getEntity().getProcessInstanceId())
