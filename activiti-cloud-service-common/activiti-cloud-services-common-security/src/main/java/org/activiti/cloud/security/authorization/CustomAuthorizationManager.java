@@ -29,6 +29,7 @@ public class CustomAuthorizationManager<RequestAuthorizationContext>
 
     public static final String ROLE_PREFIX = "ROLE_";
     public static final String PERMISSION_PREFIX = "PERMISSION_";
+    public static final String SCOPE_PREFIX = "SCOPE_";
 
     private final Set<String> authoritiesWithAccess;
 
