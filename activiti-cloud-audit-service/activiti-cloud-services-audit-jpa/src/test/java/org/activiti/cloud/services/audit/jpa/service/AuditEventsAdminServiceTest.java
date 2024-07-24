@@ -15,17 +15,16 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
+
+import java.time.LocalDate;
+import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class AuditEventsAdminServiceTest {
 
@@ -42,7 +41,10 @@ public class AuditEventsAdminServiceTest {
         LocalDate toDate = LocalDate.of(2019, 1, 1);
 
         // when
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate));
+        IllegalArgumentException thrown = assertThrows(
+            IllegalArgumentException.class,
+            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
+        );
 
         // then
         assertEquals("From date cannot be after to date", thrown.getMessage());
@@ -55,7 +57,10 @@ public class AuditEventsAdminServiceTest {
         LocalDate toDate = LocalDate.of(2020, 2, 1);
 
         // when
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate));
+        IllegalArgumentException thrown = assertThrows(
+            IllegalArgumentException.class,
+            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
+        );
 
         // then
         assertEquals("Difference between dates cannot be more than 31 days or negative", thrown.getMessage());
@@ -68,7 +73,10 @@ public class AuditEventsAdminServiceTest {
         LocalDate toDate = LocalDate.of(2019, 12, 1);
 
         // when
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate));
+        IllegalArgumentException thrown = assertThrows(
+            IllegalArgumentException.class,
+            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
+        );
 
         // then
         assertEquals("Difference between dates cannot be more than 31 days or negative", thrown.getMessage());

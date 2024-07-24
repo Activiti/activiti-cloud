@@ -109,12 +109,14 @@ class EventsEngineEventsAdminControllerIT {
         List<AuditEventEntity> events = buildEventsData(1);
         events.add(buildVariableAuditEventEntity(2));
 
-        given(eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(),anyLong())).willReturn(events);
+        given(eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(anyLong(), anyLong())).willReturn(events);
 
         MvcResult response = mockMvc
-            .perform(get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
-                .param("from","2024-07-22")
-                .param("to","2024-07-24"))
+            .perform(
+                get("/admin/{version}/events/export/" + CSV_FILENAME, "v1")
+                    .param("from", "2024-07-22")
+                    .param("to", "2024-07-24")
+            )
             .andExpect(status().isOk())
             .andReturn();
 
