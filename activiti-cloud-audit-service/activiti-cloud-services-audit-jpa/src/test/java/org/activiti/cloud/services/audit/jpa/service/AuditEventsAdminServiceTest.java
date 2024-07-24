@@ -23,15 +23,19 @@ import static org.mockito.Mockito.verify;
 import java.time.LocalDate;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@ExtendWith(MockitoExtension.class)
 public class AuditEventsAdminServiceTest {
 
     @Mock
     private EventsRepository eventsRepository;
 
-    @Autowired
+    @InjectMocks
     private AuditEventsAdminService auditEventsAdminService;
 
     @Test
