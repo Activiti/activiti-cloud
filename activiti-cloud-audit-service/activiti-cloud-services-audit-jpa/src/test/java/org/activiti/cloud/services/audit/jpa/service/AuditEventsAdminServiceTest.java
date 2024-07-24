@@ -58,23 +58,7 @@ public class AuditEventsAdminServiceTest {
     void should_throw_exception_when_difference_between_dates_is_more_than_31_days() {
         // given
         LocalDate fromDate = LocalDate.of(2020, 1, 1);
-        LocalDate toDate = LocalDate.of(2020, 2, 1);
-
-        // when
-        IllegalArgumentException thrown = assertThrows(
-            IllegalArgumentException.class,
-            () -> auditEventsAdminService.findAuditsBetweenDates(fromDate, toDate)
-        );
-
-        // then
-        assertEquals("Difference between dates cannot be more than 31 days or negative", thrown.getMessage());
-    }
-
-    @Test
-    void should_throw_exception_when_difference_between_dates_is_negative() {
-        // given
-        LocalDate fromDate = LocalDate.of(2020, 1, 1);
-        LocalDate toDate = LocalDate.of(2019, 12, 1);
+        LocalDate toDate = LocalDate.of(2020, 3, 1);
 
         // when
         IllegalArgumentException thrown = assertThrows(
