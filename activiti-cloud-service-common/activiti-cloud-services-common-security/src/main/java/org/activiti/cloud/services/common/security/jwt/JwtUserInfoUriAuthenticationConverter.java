@@ -72,8 +72,11 @@ public class JwtUserInfoUriAuthenticationConverter implements Converter<Jwt, Abs
                 expiresAt
             );
             OAuth2UserRequest userRequest = new OAuth2UserRequest(clientRegistration, accessToken);
-            OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, getCacheKey(jwt));
-            username = oAuth2User.getName();
+            String cacheKey = getCacheKey(jwt);
+            if (cacheKey != null) {
+                OAuth2User oAuth2User = this.oAuth2UserServiceCacheable.loadUser(userRequest, cacheKey);
+                username = oAuth2User.getName();
+            }
         }
         return username;
     }
