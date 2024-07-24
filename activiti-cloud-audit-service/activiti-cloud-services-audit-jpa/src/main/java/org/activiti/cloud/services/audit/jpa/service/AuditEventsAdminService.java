@@ -15,16 +15,15 @@
  */
 package org.activiti.cloud.services.audit.jpa.service;
 
-import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Objects;
+import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
+import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
 
 public class AuditEventsAdminService {
+
     private final EventsRepository eventsRepository;
 
     public AuditEventsAdminService(EventsRepository eventsRepository) {
@@ -32,13 +31,13 @@ public class AuditEventsAdminService {
     }
 
     public Collection<AuditEventEntity> findAuditsBetweenDates(LocalDate fromDate, LocalDate toDate) {
-        if(fromDate.isAfter(toDate)) {
+        if (fromDate.isAfter(toDate)) {
             throw new IllegalArgumentException("From date cannot be after to date");
         }
 
         long daysBetween = ChronoUnit.DAYS.between(fromDate, toDate);
 
-        if(daysBetween > 31 || daysBetween < 0) {
+        if (daysBetween > 31 || daysBetween < 0) {
             throw new IllegalArgumentException("Difference between dates cannot be more than 31 days or negative");
         }
 
