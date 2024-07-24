@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.services.audit.api.controllers.AuditEventsAdminController;
