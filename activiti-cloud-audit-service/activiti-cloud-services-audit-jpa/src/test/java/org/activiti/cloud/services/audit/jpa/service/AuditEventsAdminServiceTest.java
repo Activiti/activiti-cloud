@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
-public class AuditEventsAdminServiceTest {
+class AuditEventsAdminServiceTest {
 
     @Mock
     private EventsRepository eventsRepository;
