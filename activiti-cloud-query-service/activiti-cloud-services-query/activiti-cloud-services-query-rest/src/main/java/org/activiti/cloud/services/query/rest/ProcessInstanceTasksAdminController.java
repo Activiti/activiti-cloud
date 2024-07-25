@@ -17,12 +17,12 @@ package org.activiti.cloud.services.query.rest;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,7 +44,7 @@ public class ProcessInstanceTasksAdminController {
 
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
-    private AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
+    private AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler;
 
     private final TaskRepository taskRepository;
 
@@ -52,7 +52,7 @@ public class ProcessInstanceTasksAdminController {
     public ProcessInstanceTasksAdminController(
         TaskRepository taskRepository,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-        AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler
+        AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler
     ) {
         this.taskRepository = taskRepository;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
@@ -61,14 +61,15 @@ public class ProcessInstanceTasksAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/tasks", method = RequestMethod.GET)
-    public PagedModel<EntityModel<QueryCloudTask>> getTasksAdmin(
-        @PathVariable String processInstanceId,
-        Pageable pageable
-    ) {
+    public PagedModel<EntityModel<TaskDto>> getTasksAdmin(@PathVariable String processInstanceId, Pageable pageable) {
         Page<TaskEntity> page = taskRepository.findAll(
             QTaskEntity.taskEntity.processInstanceId.eq(processInstanceId),
             pageable
         );
-        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            page.map(TaskDto::new),
+            taskRepresentationModelAssembler
+        );
     }
 }

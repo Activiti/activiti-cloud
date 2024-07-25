@@ -23,6 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Date;
@@ -125,7 +126,7 @@ public class VariableEntityAdminControllerIT {
         );
         variableEntity.setValue("John");
 
-        given(variableRepository.findAll(any(), eq(pageRequest)))
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
 
         //when

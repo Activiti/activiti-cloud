@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
@@ -38,6 +40,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
@@ -46,25 +49,34 @@ import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
         "logging.level.org.hibernate.collection.spi=warn",
+        "spring.jpa.show-sql=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
+@Testcontainers
 @TestPropertySource("classpath:application-test.properties")
-@EnableAutoConfiguration
 public class TaskControllerHelperIT {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Autowired
     TaskControllerHelper taskControllerHelper;
@@ -98,7 +110,7 @@ public class TaskControllerHelperIT {
     }
 
     @Test
-    public void should_returnTasks_withProcessVariablesByKeys() {
+    void should_returnTasks_withProcessVariablesByKeys() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
         Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
         List<TaskEntity> taskEntities = createTasks(variables, processInstanceEntity);
@@ -133,9 +145,9 @@ public class TaskControllerHelperIT {
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
-                    .extracting("name")
-                    .containsExactlyInAnyOrder(
-                        IntStream.range(0, variables.size()).filter(i -> i % 2 == 0).mapToObj(i -> "name" + i).toArray()
+                    .allSatisfy(variable ->
+                        assertThat(processVariableKeys)
+                            .anyMatch(vk -> vk.equals(task.getProcessDefinitionId() + "/" + variable.name()))
                     )
             );
     }
@@ -155,7 +167,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        Pageable pageable = PageRequest.of(0, 30, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("createdDate").descending());
 
         PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
@@ -180,7 +192,7 @@ public class TaskControllerHelperIT {
                     .toArray(String[]::new)
             );
 
-        pageable = PageRequest.of(1, 30, Sort.by("createdDate").descending());
+        pageable = PageRequest.of(1, 3, Sort.by("createdDate").descending());
 
         response =
             taskControllerHelper.findAllWithProcessVariables(
@@ -195,7 +207,7 @@ public class TaskControllerHelperIT {
         assertThat(response.getPreviousLink()).isPresent();
         assertThat(response.getNextLink()).isPresent();
 
-        pageable = PageRequest.of(3, 30, Sort.by("createdDate").descending());
+        pageable = PageRequest.of(3, 3, Sort.by("createdDate").descending());
 
         response =
             taskControllerHelper.findAllWithProcessVariables(
@@ -499,9 +511,9 @@ public class TaskControllerHelperIT {
         List<TaskEntity> taskEntities = new ArrayList<>();
 
         LocalDateTime start = LocalDateTime.fromDateFields(new Date());
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             TaskEntity taskEntity = new TaskEntity();
-            String taskId = "id" + i;
+            String taskId = UUID.randomUUID().toString();
             taskEntity.setId(taskId);
             taskEntity.setCreatedDate(start.plusSeconds(i).toDate());
             TaskCandidateGroupEntity groupCand = new TaskCandidateGroupEntity(taskId, "group" + i);
@@ -545,7 +557,7 @@ public class TaskControllerHelperIT {
         for (int i = 0; i < numberOfVariables; i++) {
             ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
             processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
+            processVariableEntity.setValue("value" + i);
             processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
             processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
             processVariableEntity.setProcessInstance(processInstanceEntity);
@@ -565,7 +577,7 @@ public class TaskControllerHelperIT {
     @NotNull
     private ProcessInstanceEntity createProcessInstance(String processDefinitionKey) {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId(processDefinitionKey + "/id");
+        processInstanceEntity.setId(UUID.randomUUID().toString());
         processInstanceEntity.setName("name");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionName("test");

@@ -109,7 +109,7 @@ create table process_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    value               CLOB,
+    value               json,
     primary key (id)
 );
 create table task
@@ -178,7 +178,7 @@ create table task_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    value               CLOB,
+    value               json,
     task_id             varchar(255),
     primary key (id)
 );

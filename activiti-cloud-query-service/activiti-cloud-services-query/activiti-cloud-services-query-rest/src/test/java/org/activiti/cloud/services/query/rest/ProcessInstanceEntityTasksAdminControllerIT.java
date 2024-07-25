@@ -23,6 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -101,7 +102,7 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
         //given
         TaskEntity taskEntity = buildDefaultTask();
 
-        given(taskRepository.findAll(any(), any(Pageable.class)))
+        given(taskRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
                 new PageImpl<>(
                     Collections.singletonList(taskEntity),

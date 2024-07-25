@@ -16,7 +16,10 @@
 package org.activiti.cloud.services.query.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -52,6 +55,11 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     private Long id;
 
     private String taskId;
+
+    @Convert(converter = VariableValueJsonConverter.class)
+    @Column(name = "`value`", columnDefinition = "text")
+    @Basic(fetch = FetchType.LAZY)
+    private VariableValue<?> value;
 
     @JsonIgnore
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -124,6 +132,15 @@ public class TaskVariableEntity extends AbstractVariableEntity {
     @Override
     public boolean isTaskVariable() {
         return true;
+    }
+
+    public <T> void setValue(T value) {
+        this.value = new VariableValue<>(value);
+    }
+
+    @Override
+    public <T> T getValue() {
+        return (T) value.getValue();
     }
 
     @Override
