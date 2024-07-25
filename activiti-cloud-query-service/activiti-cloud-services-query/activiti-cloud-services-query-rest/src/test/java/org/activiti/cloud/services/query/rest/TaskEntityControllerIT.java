@@ -131,7 +131,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
@@ -159,7 +159,7 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when
@@ -269,7 +269,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
@@ -284,7 +284,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
@@ -299,7 +299,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
 
         //when
@@ -313,7 +313,7 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(0, 1000);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
 
         //when

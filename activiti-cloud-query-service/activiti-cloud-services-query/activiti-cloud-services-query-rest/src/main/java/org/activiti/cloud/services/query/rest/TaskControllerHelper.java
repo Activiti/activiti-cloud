@@ -19,21 +19,30 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
+import org.activiti.cloud.services.query.model.ProcessVariableSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.ProcessVariableDto;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.specification.ProcessVariableSpecification;
+import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +56,7 @@ public class TaskControllerHelper {
 
     private final VariableRepository processVariableRepository;
 
-    private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler;
 
     private final QueryDslPredicateAggregator predicateAggregator;
 
@@ -91,7 +100,23 @@ public class TaskControllerHelper {
     ) {
         Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
         fetchProcessVariables(page.getContent(), processVariableKeys);
-        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            page.map(TaskDto::new),
+            taskRepresentationModelAssembler
+        );
+    }
+
+    public PagedModel<EntityModel<TaskDto>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
+        Page<TaskDto> tasks = taskRepository
+            .findAll(new TaskSpecification(taskSearchRequest), pageable)
+            .map(TaskDto::new);
+        List<ProcessVariableEntity> processVariables = fetchProcessVariables(
+            tasks.getContent(),
+            taskSearchRequest.processVariableKeys()
+        );
+        populateProcessVariables(tasks.getContent(), processVariables);
+        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {

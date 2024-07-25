@@ -68,6 +68,9 @@ public class ProcessModelControllerIT {
     private ProcessModelRepository processModelRepository;
 
     @MockBean
+    private VariableRepository variableRepository;
+
+    @MockBean
     private SecurityPoliciesManager securityPoliciesManager;
 
     @MockBean
