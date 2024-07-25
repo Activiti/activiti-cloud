@@ -67,7 +67,7 @@ public class AuditEventsAdminServiceTest {
         );
 
         // then
-        assertEquals("Difference between dates cannot be more than 31 days or negative", thrown.getMessage());
+        assertEquals("Difference between dates cannot be more than 31 days", thrown.getMessage());
     }
 
     @Test

@@ -37,8 +37,8 @@ public class AuditEventsAdminService {
 
         long daysBetween = ChronoUnit.DAYS.between(fromDate, toDate);
 
-        if (daysBetween > 31 || daysBetween < 0) {
-            throw new IllegalArgumentException("Difference between dates cannot be more than 31 days or negative");
+        if (daysBetween > 31) {
+            throw new IllegalArgumentException("Difference between dates cannot be more than 31 days");
         }
 
         Long startDateTime = fromDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
