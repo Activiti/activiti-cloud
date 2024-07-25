@@ -37,6 +37,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -73,6 +74,9 @@ public class TaskEntityAdminControllerIT {
 
     @MockBean
     private ProcessInstanceAdminService processInstanceAdminService;
+
+    @MockBean
+    private VariableRepository variableRepository;
 
     @MockBean
     private TaskRepository taskRepository;
@@ -116,7 +120,7 @@ public class TaskEntityAdminControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
@@ -144,7 +148,7 @@ public class TaskEntityAdminControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when

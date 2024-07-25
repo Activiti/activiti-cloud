@@ -23,6 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
 import org.activiti.api.runtime.conf.impl.CommonModelAutoConfiguration;
@@ -31,6 +32,7 @@ import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -68,6 +70,9 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
     private TaskRepository taskRepository;
 
     @MockBean
+    private VariableRepository variableRepository;
+
+    @MockBean
     private SecurityManager securityManager;
 
     @MockBean
@@ -97,7 +102,7 @@ public class ProcessInstanceEntityTasksAdminControllerIT {
         //given
         TaskEntity taskEntity = buildDefaultTask();
 
-        given(taskRepository.findAll(any(), any(Pageable.class)))
+        given(taskRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
                 new PageImpl<>(
                     Collections.singletonList(taskEntity),

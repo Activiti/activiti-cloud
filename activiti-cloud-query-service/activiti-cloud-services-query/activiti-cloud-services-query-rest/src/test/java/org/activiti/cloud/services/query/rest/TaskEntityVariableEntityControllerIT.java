@@ -23,6 +23,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Date;
@@ -35,6 +36,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -69,6 +71,9 @@ public class TaskEntityVariableEntityControllerIT {
 
     @MockBean
     private TaskVariableRepository variableRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private SecurityManager securityManager;
@@ -110,7 +115,7 @@ public class TaskEntityVariableEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
         TaskVariableEntity variableEntity = buildVariable();
-        given(variableRepository.findAll(any(), eq(pageRequest)))
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 12));
 
         //when
@@ -141,7 +146,7 @@ public class TaskEntityVariableEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
         TaskVariableEntity variableEntity = buildVariable();
-        given(variableRepository.findAll(any(), eq(pageRequest)))
+        given(variableRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(variableEntity), pageRequest, 11));
 
         //when

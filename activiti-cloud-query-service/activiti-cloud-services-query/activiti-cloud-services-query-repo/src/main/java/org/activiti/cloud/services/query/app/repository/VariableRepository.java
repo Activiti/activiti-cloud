@@ -20,6 +20,7 @@ import static org.activiti.cloud.services.query.app.repository.QuerydslBindingsH
 import com.querydsl.core.types.dsl.StringPath;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -31,6 +32,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 public interface VariableRepository
     extends
         PagingAndSortingRepository<ProcessVariableEntity, Long>,
+        JpaSpecificationExecutor<ProcessVariableEntity>,
         QuerydslPredicateExecutor<ProcessVariableEntity>,
         QuerydslBinderCustomizer<QProcessVariableEntity>,
         CrudRepository<ProcessVariableEntity, Long> {
