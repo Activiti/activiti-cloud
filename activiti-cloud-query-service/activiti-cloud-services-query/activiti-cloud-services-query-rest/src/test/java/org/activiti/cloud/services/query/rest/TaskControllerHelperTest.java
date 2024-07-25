@@ -24,11 +24,11 @@ import com.querydsl.core.types.Predicate;
 import java.util.Collections;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.VariableValue;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class TaskControllerHelperTest {
     private TaskRepository taskRepository;
 
     @Mock
-    private AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
+    private AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler;
 
     @Mock
     private QueryDslPredicateAggregator predicateAggregator;
@@ -60,7 +60,7 @@ public class TaskControllerHelperTest {
     private TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     @Mock
-    private PagedModel<EntityModel<QueryCloudTask>> cloudTaskPagedModel;
+    private PagedModel<EntityModel<TaskDto>> cloudTaskPagedModel;
 
     @Test
     public void findAll_should_useFindByVariableNameAndValue_when_variableSearchIsSet() {
@@ -83,11 +83,17 @@ public class TaskControllerHelperTest {
         )
             .willReturn(pageResult);
 
-        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler))
+        given(
+            pagedCollectionModelAssembler.toModel(
+                pageable,
+                pageResult.map(TaskDto::new),
+                taskRepresentationModelAssembler
+            )
+        )
             .willReturn(cloudTaskPagedModel);
 
         //when
-        PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
+        PagedModel<EntityModel<TaskDto>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
             variableSearch,
             pageable,
@@ -111,11 +117,17 @@ public class TaskControllerHelperTest {
         PageImpl<TaskEntity> pageResult = new PageImpl<>(Collections.singletonList(new TaskEntity()));
         given(taskRepository.findAll(extendedPredicate, pageable)).willReturn(pageResult);
 
-        given(pagedCollectionModelAssembler.toModel(pageable, pageResult, taskRepresentationModelAssembler))
+        given(
+            pagedCollectionModelAssembler.toModel(
+                pageable,
+                pageResult.map(TaskDto::new),
+                taskRepresentationModelAssembler
+            )
+        )
             .willReturn(cloudTaskPagedModel);
 
         //when
-        PagedModel<EntityModel<QueryCloudTask>> resultPagedModel = taskControllerHelper.findAll(
+        PagedModel<EntityModel<TaskDto>> resultPagedModel = taskControllerHelper.findAll(
             initialPredicate,
             variableSearch,
             pageable,
