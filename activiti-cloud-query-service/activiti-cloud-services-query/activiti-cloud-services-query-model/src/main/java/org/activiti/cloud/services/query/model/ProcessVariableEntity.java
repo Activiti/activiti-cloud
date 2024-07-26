@@ -16,10 +16,7 @@
 package org.activiti.cloud.services.query.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,9 +28,7 @@ import java.util.Objects;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ParamDef;
-import org.hibernate.type.SqlTypes;
 
 @FilterDef(
     name = "variablesFilter",
@@ -69,11 +64,6 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
         readOnly = true
     )
     private String processDefinitionKey;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "`value`", columnDefinition = "jsonb")
-    @Basic(fetch = FetchType.LAZY)
-    private VariableValue<?> value;
 
     public ProcessVariableEntity() {}
 
@@ -136,15 +126,6 @@ public class ProcessVariableEntity extends AbstractVariableEntity {
 
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
-    }
-
-    public <T> void setValue(T value) {
-        this.value = new VariableValue<>(value);
-    }
-
-    @Override
-    public <T> T getValue() {
-        return (T) value.getValue();
     }
 
     @Override

@@ -18,7 +18,9 @@ package org.activiti.cloud.services.query.rest.dto;
 import java.util.Date;
 import java.util.List;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.springframework.hateoas.server.core.Relation;
 
+@Relation(collectionRelation = "tasks")
 public class TaskDto {
 
     private final String id;
@@ -75,6 +77,12 @@ public class TaskDto {
         this.permissions =
             entity.getPermissions() == null ? null : entity.getPermissions().stream().map(Enum::name).toList();
         this.lastModified = entity.getLastModified();
+    }
+
+    public static TaskDto withProcessVariables(TaskEntity entity) {
+        TaskDto taskDto = new TaskDto(entity);
+        taskDto.setProcessVariables(entity.getProcessVariables().stream().map(ProcessVariableDto::new).toList());
+        return taskDto;
     }
 
     public String getId() {
@@ -171,5 +179,17 @@ public class TaskDto {
 
     public Date getLastModified() {
         return lastModified;
+    }
+
+    public List<String> getCandidateUsers() {
+        return candidateUsers;
+    }
+
+    public List<String> getCandidateGroups() {
+        return candidateGroups;
+    }
+
+    public List<String> getPermissions() {
+        return permissions;
     }
 }
