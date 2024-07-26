@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
+import java.util.stream.Stream;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -142,14 +143,15 @@ public class TaskControllerHelperIT {
                 taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
             );
 
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .allSatisfy(task ->
+        assertThat(retrievedTasks)
+            .allSatisfy(task -> {
+                assertThat(task.getProcessVariables()).hasSizeLessThanOrEqualTo(processVariableKeys.size());
                 assertThat(task.getProcessVariables())
                     .allSatisfy(variable ->
                         assertThat(processVariableKeys)
-                            .anyMatch(vk -> vk.equals(task.getProcessDefinitionId() + "/" + variable.name()))
-                    )
-            );
+                            .anyMatch(vk -> vk.equals(variable.processDefinitionKey() + "/" + variable.name()))
+                    );
+            });
     }
 
     @Test
@@ -231,21 +233,13 @@ public class TaskControllerHelperIT {
         ProcessInstanceEntity processInstanceEntity2 = createProcessInstance("processDefinitionKey2");
         Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2, 7);
 
-        TaskEntity process1Task = new TaskEntity();
-        String taskId = "task_id_1";
-        process1Task.setId(taskId);
-        process1Task.setCreatedDate(new Date());
-        process1Task.setProcessVariables(variables1);
-        process1Task.setProcessInstanceId(processInstanceEntity1.getId());
-        taskRepository.save(process1Task);
-
-        TaskEntity process2Task = new TaskEntity();
-        String taskId2 = "task_id_2";
-        process2Task.setId(taskId2);
-        process2Task.setCreatedDate(new Date());
-        process2Task.setProcessVariables(variables2);
-        process2Task.setProcessInstanceId(processInstanceEntity2.getId());
-        taskRepository.save(process2Task);
+        TaskEntity taskWithVariables = new TaskEntity();
+        taskWithVariables.setId("task_id_2");
+        taskWithVariables.setCreatedDate(new Date());
+        taskWithVariables.setProcessVariables(variables);
+        taskWithVariables.setProcessInstance(processInstanceEntity);
+        taskWithVariables.setProcessInstanceId(processInstanceEntity.getId());
+        taskRepository.save(taskWithVariables);
 
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);

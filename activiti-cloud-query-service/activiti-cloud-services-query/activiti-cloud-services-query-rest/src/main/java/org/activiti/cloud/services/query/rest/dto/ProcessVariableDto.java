@@ -15,4 +15,11 @@
  */
 package org.activiti.cloud.services.query.rest.dto;
 
-public record ProcessVariableDto(String processDefinitionKey, String name, Object value) {}
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+
+public record ProcessVariableDto(String processDefinitionKey, String name, Object value) {
+    public ProcessVariableDto(ProcessVariableEntity entity) {
+        this(entity.getProcessDefinitionKey(), entity.getName(), entity.getValue());
+    }
+}
