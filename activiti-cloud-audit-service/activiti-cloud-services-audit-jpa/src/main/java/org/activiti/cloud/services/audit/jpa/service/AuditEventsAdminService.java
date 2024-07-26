@@ -41,8 +41,8 @@ public class AuditEventsAdminService {
             throw new IllegalArgumentException("Difference between dates cannot be more than 31 days");
         }
 
-        Long startDateTime = fromDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-        Long endDateTime = toDate.atStartOfDay().plusDays(1).toEpochSecond(ZoneOffset.UTC);
+        Long startDateTime = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        Long endDateTime = toDate.atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli();
 
         return eventsRepository.findAllByTimestampBetweenOrderByTimestampDesc(startDateTime, endDateTime);
     }
