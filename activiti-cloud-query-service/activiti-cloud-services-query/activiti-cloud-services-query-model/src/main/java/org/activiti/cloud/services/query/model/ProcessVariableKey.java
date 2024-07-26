@@ -15,4 +15,16 @@
  */
 package org.activiti.cloud.services.query.model;
 
-public record ProcessVariableKey(String processDefinitionKey, String variableName) {}
+public record ProcessVariableKey(String processDefinitionKey, String variableName) {
+    public static ProcessVariableKey fromString(String processVariableKey) {
+        String[] parts = processVariableKey.split("/");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid process variable key: " + processVariableKey);
+        }
+        return new ProcessVariableKey(parts[0], parts[1]);
+    }
+
+    public static String toString(ProcessVariableKey processVariableKey) {
+        return processVariableKey.processDefinitionKey() + "/" + processVariableKey.variableName();
+    }
+}

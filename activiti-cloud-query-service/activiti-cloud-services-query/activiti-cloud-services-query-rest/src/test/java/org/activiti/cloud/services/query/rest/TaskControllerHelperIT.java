@@ -23,10 +23,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -134,20 +136,23 @@ public class TaskControllerHelperIT {
             processVariableKeys
         );
 
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+
+        assertThat(retrievedTasks)
             .extracting(TaskDto::getId)
             .containsExactly(
                 taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
             );
 
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .allSatisfy(task ->
+        assertThat(retrievedTasks)
+            .allSatisfy(task -> {
+                assertThat(task.getProcessVariables()).hasSizeLessThanOrEqualTo(processVariableKeys.size());
                 assertThat(task.getProcessVariables())
                     .allSatisfy(variable ->
                         assertThat(processVariableKeys)
-                            .anyMatch(vk -> vk.equals(task.getProcessDefinitionId() + "/" + variable.name()))
-                    )
-            );
+                            .anyMatch(vk -> vk.equals(variable.processDefinitionKey() + "/" + variable.name()))
+                    );
+            });
     }
 
     @Test
@@ -223,25 +228,27 @@ public class TaskControllerHelperIT {
 
     @Test
     void should_returnTask_whenItHashNoMatchingProcessVariablesFetchKeys() {
-        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+        ProcessInstanceEntity processInstanceEntity1 = createProcessInstance("processDefinitionKey1");
+        Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1);
 
-        TaskEntity taskWithoutVariables = new TaskEntity();
-        String taskId = "task_id";
-        taskWithoutVariables.setId(taskId);
-        taskWithoutVariables.setCreatedDate(new Date());
-        taskWithoutVariables.setProcessVariables(Collections.emptySet());
-        taskWithoutVariables.setProcessInstance(processInstanceEntity);
-        taskWithoutVariables.setProcessInstanceId(processInstanceEntity.getId());
-        taskRepository.save(taskWithoutVariables);
+        ProcessInstanceEntity processInstanceEntity2 = createProcessInstance("processDefinitionKey2");
+        Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2);
 
-        TaskEntity taskWithVariables = new TaskEntity();
-        taskWithVariables.setId("task_id_2");
-        taskWithVariables.setCreatedDate(new Date());
-        taskWithVariables.setProcessVariables(variables);
-        taskWithVariables.setProcessInstance(processInstanceEntity);
-        taskWithVariables.setProcessInstanceId(processInstanceEntity.getId());
-        taskRepository.save(taskWithVariables);
+        TaskEntity process1Task = new TaskEntity();
+        String taskId = "task_id_1";
+        process1Task.setId(taskId);
+        process1Task.setCreatedDate(new Date());
+        process1Task.setProcessVariables(variables1);
+        process1Task.setProcessInstanceId(processInstanceEntity1.getId());
+        taskRepository.save(process1Task);
+
+        TaskEntity process2Task = new TaskEntity();
+        String taskId2 = "task_id_2";
+        process2Task.setId(taskId2);
+        process2Task.setCreatedDate(new Date());
+        process2Task.setProcessVariables(variables2);
+        process2Task.setProcessInstanceId(processInstanceEntity2.getId());
+        taskRepository.save(process2Task);
 
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
@@ -251,9 +258,9 @@ public class TaskControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").ascending());
 
-        List<String> processVariableFetchKeys = variables
+        List<String> processVariableFetchKeys = variables1
             .stream()
-            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+            .map(v -> processInstanceEntity1.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
         PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
@@ -265,10 +272,29 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(2);
-
-        assertThat(response.getContent().stream().toList().getFirst().getContent().getProcessVariables()).isEmpty();
-        assertThat(response.getContent().stream().toList().get(1).getContent().getProcessVariables())
-            .hasSize(processVariableFetchKeys.size());
+        Optional<TaskDto> task1 = response
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .filter(t -> t.getId().equals(taskId))
+            .findFirst();
+        assertThat(task1)
+            .isPresent()
+            .get()
+            .extracting(TaskDto::getProcessVariables)
+            .asList()
+            .hasSize(variables1.size());
+        Optional<TaskDto> task2 = response
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .filter(t -> t.getId().equals(taskId2))
+            .findFirst();
+        assertThat(task2)
+            .isPresent()
+            .get()
+            .extracting(TaskDto::getProcessVariables)
+            .satisfies(pv -> assertThat(pv).isNullOrEmpty());
     }
 
     @Test
@@ -349,9 +375,12 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size());
-        //TODO fix test
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).doesNotContainAnyElementsOf(tasksWithProcessInstance);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .allSatisfy(task -> assertThat(standaloneTasks).extracting(TaskEntity::getId).contains(task.getId()));
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .noneSatisfy(task ->
+                assertThat(tasksWithProcessInstance).extracting(TaskEntity::getId).contains(task.getId())
+            );
     }
 
     @Test
@@ -383,7 +412,6 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(standaloneTasks.size() + tasksWithProcessInstance.size());
-        //TODO fix test
         //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(standaloneTasks);
         //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(tasksWithProcessInstance);
     }
@@ -430,9 +458,10 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size());
-        //TODO fix test
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).doesNotContainAnyElementsOf(childTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .allSatisfy(task -> assertThat(rootTasks).extracting(TaskEntity::getId).contains(task.getId()));
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .noneSatisfy(task -> assertThat(childTasks).extracting(TaskEntity::getId).contains(task.getId()));
     }
 
     @Test
@@ -477,9 +506,12 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(rootTasks.size() + childTasks.size());
-        //TODO fix test
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(rootTasks);
-        //assertThat(response.getContent().stream().map(EntityModel::getContent).toList()).containsAll(childTasks);
+        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+            .allSatisfy(task ->
+                assertThat(Stream.of(childTasks, rootTasks).flatMap(List::stream))
+                    .extracting(TaskEntity::getId)
+                    .contains(task.getId())
+            );
     }
 
     @NotNull

@@ -17,14 +17,10 @@
 ALTER TABLE process_variable
 ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
 
-CREATE INDEX index1 on process_variable using GIN ((value -> 'value') jsonb_path_ops);
+ALTER TABLE task_variable
+ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
+
+CREATE INDEX process_variable_value_idx on process_variable using GIN ((value -> 'value') jsonb_path_ops);
 CREATE INDEX process_definition_key_name_value_idx ON process_variable (process_definition_key,name);
 
-CREATE TABLE IF NOT EXISTS process_variable_pivot
-(
-  process_instance_id varchar(255) not null,
-  process_variables       jsonb
-  );
-
-CREATE INDEX process_instance_id_idx ON process_variable_pivot(process_instance_id);
-CREATE INDEX process_variables_idx ON process_variable_pivot USING GIN (process_variables jsonb_path_ops);
+CREATE INDEX task_variable_value_idx on task_variable using GIN ((value -> 'value') jsonb_path_ops);

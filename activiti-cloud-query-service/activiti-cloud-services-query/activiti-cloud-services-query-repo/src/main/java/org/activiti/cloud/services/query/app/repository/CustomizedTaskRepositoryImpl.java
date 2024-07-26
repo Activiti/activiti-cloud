@@ -25,6 +25,8 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessVariableEntity;
+import org.activiti.cloud.services.query.model.QTaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.QTaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -159,7 +161,6 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
         final long totalElements = taskIdsQuery.fetchCount();
         List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
         JPQLQuery<TaskEntity> tasks = buildLeftJoin(taskEntity).select(taskEntity).where(taskEntity.id.in(taskIds));
-
         return PageableExecutionUtils.getPage(
             querydsl.applySorting(pageable.getSort(), tasks).fetch(),
             pageable,

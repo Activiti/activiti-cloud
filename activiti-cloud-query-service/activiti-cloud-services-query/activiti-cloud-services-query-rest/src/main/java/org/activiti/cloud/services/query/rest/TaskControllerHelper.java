@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.activiti.bpmn.model.Task;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -104,18 +105,20 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        Page<TaskEntity> page = findPageWithProcessVariables(
+        Page<TaskDto> page = findPageWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
             filters,
             processVariableKeys
+        )
+            .map(TaskDto::new);
+        List<ProcessVariableEntity> processVariables = fetchProcessVariables(
+            page.getContent(),
+            processVariableKeys.stream().map(ProcessVariableKey::fromString).collect(Collectors.toSet())
         );
-        return pagedCollectionModelAssembler.toModel(
-            pageable,
-            page.map(TaskDto::new),
-            taskRepresentationModelAssembler
-        );
+        populateProcessVariables(page.getContent(), processVariables);
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
     public PagedModel<EntityModel<TaskDto>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
@@ -233,7 +236,7 @@ public class TaskControllerHelper {
             initializeProcessVariables(page);
             return page;
         } else {
-            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
+            return taskRepository.findAll(extendedPredicate, pageable);
         }
     }
 
