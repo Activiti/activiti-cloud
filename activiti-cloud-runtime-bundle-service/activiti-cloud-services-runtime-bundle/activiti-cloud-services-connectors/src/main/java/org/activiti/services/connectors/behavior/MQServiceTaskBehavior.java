@@ -72,7 +72,7 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
 
             aggregateCloudIntegrationRequestedEvent(integrationContext);
         }
-        return DelegateExecutionOutcome.DO_NOTHING;
+        return DelegateExecutionOutcome.WAIT_FOR_TRIGGER;
     }
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
