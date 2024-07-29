@@ -19,7 +19,6 @@ import static org.activiti.services.test.DelegateExecutionBuilder.anExecution;
 import static org.activiti.test.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -120,10 +119,10 @@ public class MQServiceTaskBehaviorTest {
         given(defaultServiceTaskBehavior.hasConnectorBean(execution)).willReturn(true);
 
         //when
-        behavior.execute(execution);
+        behavior.apply(execution);
 
         //then
-        verify(defaultServiceTaskBehavior).execute(execution);
+        verify(defaultServiceTaskBehavior).apply(execution);
     }
 
     @Test
@@ -147,7 +146,7 @@ public class MQServiceTaskBehaviorTest {
         when(runtimeBundleProperties.getEventsProperties().isIntegrationAuditEventsEnabled()).thenReturn(true);
 
         //when
-        behavior.execute(execution);
+        behavior.apply(execution);
 
         //then
         ((ExecutionEntity) execution).getProcessInstance();
@@ -164,18 +163,5 @@ public class MQServiceTaskBehaviorTest {
         verify(runtimeBundleInfoAppender).appendRuntimeBundleInfoTo(integrationRequest);
 
         verify(processEngineEventsAggregator).add(any(CloudIntegrationRequestedEvent.class));
-    }
-
-    @Test
-    public void triggerShouldCallLeave() {
-        //given
-        DelegateExecution execution = mock(DelegateExecution.class);
-        doNothing().when(behavior).leave(execution);
-
-        //when
-        behavior.trigger(execution, null, null);
-
-        //then
-        verify(behavior).leave(execution);
     }
 }
