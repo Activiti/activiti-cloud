@@ -64,14 +64,15 @@ public class MQServiceTaskBehavior implements DelegateExecutionFunction {
         if (defaultServiceTaskBehavior.hasConnectorBean(execution)) {
             // use de default implementation -> directly call a bean
             return defaultServiceTaskBehavior.apply(execution);
-        } else {
-            IntegrationContextEntity integrationContextEntity = storeIntegrationContext(execution);
-
-            IntegrationContext integrationContext = integrationContextBuilder.from(integrationContextEntity, execution);
-            sendIntegrationRequest(integrationContext);
-
-            aggregateCloudIntegrationRequestedEvent(integrationContext);
         }
+
+        IntegrationContext integrationContext = integrationContextBuilder.from(
+            storeIntegrationContext(execution),
+            execution
+        );
+        sendIntegrationRequest(integrationContext);
+        aggregateCloudIntegrationRequestedEvent(integrationContext);
+
         return DelegateExecutionOutcome.WAIT_FOR_TRIGGER;
     }
 
