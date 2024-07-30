@@ -19,12 +19,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
@@ -59,6 +60,8 @@ import org.springframework.test.context.TestPropertySource;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "logging.level.org.hibernate.collection.spi=warn",
+        "spring.jpa.show-sql=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -211,9 +214,83 @@ public class TaskControllerHelperIT {
     }
 
     @Test
-    void should_returnTask_evenIfItHashNoMatchingProcessVariables() {
-        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> variables = createProcessVariables(processInstanceEntity);
+    void should_returnBothTasks_whenOneTaskHasNoMatchingProcessVariablesFetchKeys() {
+        ProcessInstanceEntity processInstanceEntity1 = createProcessInstance("processDefinitionKey1");
+        Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1, 5);
+
+        ProcessInstanceEntity processInstanceEntity2 = createProcessInstance("processDefinitionKey2");
+        Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2, 7);
+
+        TaskEntity process1Task = new TaskEntity();
+        String taskId = "task_id_1";
+        process1Task.setId(taskId);
+        process1Task.setCreatedDate(new Date());
+        process1Task.setProcessVariables(variables1);
+        process1Task.setProcessInstanceId(processInstanceEntity1.getId());
+        taskRepository.save(process1Task);
+
+        TaskEntity process2Task = new TaskEntity();
+        String taskId2 = "task_id_2";
+        process2Task.setId(taskId2);
+        process2Task.setCreatedDate(new Date());
+        process2Task.setProcessVariables(variables2);
+        process2Task.setProcessInstanceId(processInstanceEntity2.getId());
+        taskRepository.save(process2Task);
+
+        Predicate predicate = null;
+        VariableSearch variableSearch = new VariableSearch(null, null, null);
+
+        List<QueryDslPredicateFilter> filters = List.of(new RootTasksFilter(false), new StandAloneTaskFilter(false));
+
+        int pageSize = 30;
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").ascending());
+
+        List<String> processVariableFetchKeys = variables1
+            .stream()
+            .limit(3)
+            .map(v -> processInstanceEntity1.getProcessDefinitionKey() + "/" + v.getName())
+            .toList();
+
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
+            predicate,
+            variableSearch,
+            pageable,
+            filters,
+            processVariableFetchKeys
+        );
+
+        assertThat(response.getContent()).hasSize(2);
+        Optional<QueryCloudTask> task1 = response
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .filter(t -> t.getId().equals(taskId))
+            .findFirst();
+        assertThat(task1)
+            .isPresent()
+            .get()
+            .extracting(QueryCloudTask::getProcessVariables)
+            .satisfies(pv -> assertThat(pv).hasSameSizeAs(processVariableFetchKeys));
+        Optional<QueryCloudTask> task2 = response
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .filter(t -> t.getId().equals(taskId2))
+            .findFirst();
+        assertThat(task2)
+            .isPresent()
+            .get()
+            .extracting(QueryCloudTask::getProcessVariables)
+            .satisfies(pv -> assertThat(pv).isNullOrEmpty());
+    }
+
+    @Test
+    void should_returnTask_whenItHashNoMatchingProcessVariablesFetchKeys() {
+        String processDefinitionKey = "processDefinitionKey";
+        ProcessInstanceEntity processInstanceEntity1 = createProcessInstance(processDefinitionKey);
+        ProcessInstanceEntity processInstanceEntity2 = createProcessInstance(processDefinitionKey);
+        Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1, 2);
+        Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2, 2);
 
         TaskEntity taskEntity = new TaskEntity();
         String taskId = "task_id";
@@ -223,9 +300,9 @@ public class TaskControllerHelperIT {
         taskEntity.setTaskCandidateGroups(Set.of(groupCand));
         TaskCandidateUserEntity usrCand = new TaskCandidateUserEntity(taskId, "user");
         taskEntity.setTaskCandidateUsers(Set.of(usrCand));
-        taskEntity.setProcessVariables(Collections.emptySet());
-        taskEntity.setProcessInstance(processInstanceEntity);
-        taskEntity.setProcessInstanceId(processInstanceEntity.getId());
+        taskEntity.setProcessVariables(variables1);
+        taskEntity.setProcessInstance(processInstanceEntity1);
+        taskEntity.setProcessInstanceId(processInstanceEntity1.getId());
         taskCandidateGroupRepository.save(groupCand);
         taskCandidateUserRepository.save(usrCand);
         taskRepository.save(taskEntity);
@@ -238,9 +315,9 @@ public class TaskControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        List<String> processVariableKeys = variables
-            .stream()
-            .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
+        List<String> processVariableKeys = Stream
+            .of("other-variable", "another-variable")
+            .map(v -> processInstanceEntity1.getProcessDefinitionKey() + "/" + v)
             .toList();
 
         PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
@@ -252,7 +329,6 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(1);
-
         assertThat(response.getContent().stream().toList().getFirst().getContent().getProcessVariables()).isEmpty();
     }
 
@@ -462,10 +538,13 @@ public class TaskControllerHelperIT {
     }
 
     @NotNull
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
+    private Set<ProcessVariableEntity> createProcessVariables(
+        ProcessInstanceEntity processInstanceEntity,
+        int numberOfVariables
+    ) {
         Set<ProcessVariableEntity> variables = new HashSet<>();
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < numberOfVariables; i++) {
             ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
             processVariableEntity.setName("name" + i);
             processVariableEntity.setValue("id");
@@ -481,15 +560,25 @@ public class TaskControllerHelperIT {
     }
 
     @NotNull
-    private ProcessInstanceEntity createProcessInstance() {
+    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
+        return createProcessVariables(processInstanceEntity, 8);
+    }
+
+    @NotNull
+    private ProcessInstanceEntity createProcessInstance(String processDefinitionKey) {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId("processInstanceId");
+        processInstanceEntity.setId(processDefinitionKey + "/id");
         processInstanceEntity.setName("name");
         processInstanceEntity.setInitiator("initiator");
         processInstanceEntity.setProcessDefinitionName("test");
-        processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
+        processInstanceEntity.setProcessDefinitionKey(processDefinitionKey);
         processInstanceEntity.setServiceName("test");
         processInstanceRepository.save(processInstanceEntity);
         return processInstanceEntity;
+    }
+
+    @NotNull
+    private ProcessInstanceEntity createProcessInstance() {
+        return createProcessInstance("processDefinitionKey");
     }
 }
