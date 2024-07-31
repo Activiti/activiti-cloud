@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.model;
+package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -21,6 +21,9 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.Set;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ProcessVariableSpecification implements Specification<ProcessVariableEntity> {
