@@ -17,8 +17,6 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,9 +35,6 @@ import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelA
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.hibernate.Filter;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -59,9 +54,6 @@ public class TaskControllerHelper {
     private final TaskRepresentationModelAssembler taskRepresentationModelAssembler;
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public TaskControllerHelper(
         TaskRepository taskRepository,
@@ -128,20 +120,9 @@ public class TaskControllerHelper {
         List<String> processVariableKeys,
         Pageable pageable
     ) {
-        addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
-        initializeProcessVariables(page);
+        fetchProcessVariables(page.getContent(), processVariableKeys);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
-    }
-
-    private void initializeProcessVariables(Page<TaskEntity> page) {
-        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
-    }
-
-    private void addProcessVariablesFilter(List<String> processVariableKeys) {
-        Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter("variablesFilter");
-        filter.setParameterList("variableKeys", processVariableKeys);
     }
 
     private Page<TaskEntity> findAllByInvolvedUser(Predicate predicate, Pageable pageable) {
