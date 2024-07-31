@@ -18,17 +18,19 @@ package org.activiti.cloud.services.query.rest.assembler;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import org.activiti.cloud.api.task.model.QueryCloudTask;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.TaskController;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
-public class TaskRepresentationModelAssembler implements RepresentationModelAssembler<TaskDto, EntityModel<TaskDto>> {
+public class TaskRepresentationModelAssembler
+    implements RepresentationModelAssembler<TaskEntity, EntityModel<QueryCloudTask>> {
 
     @Override
-    public EntityModel<TaskDto> toModel(TaskDto task) {
-        Link selfRel = linkTo(methodOn(TaskController.class).findByIdTask(task.getId())).withSelfRel();
-        return EntityModel.of(task, selfRel);
+    public EntityModel<QueryCloudTask> toModel(TaskEntity entity) {
+        Link selfRel = linkTo(methodOn(TaskController.class).findByIdTask(entity.getId())).withSelfRel();
+        return EntityModel.of(entity, selfRel);
     }
 }

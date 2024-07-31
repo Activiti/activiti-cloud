@@ -24,23 +24,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(
@@ -73,7 +69,7 @@ public class ProcessInstanceTasksController {
     @Operation(summary = "Find tasks for process instance")
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/tasks", method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<TaskDto>> getTasks(@PathVariable String processInstanceId, Pageable pageable) {
+    public PagedModel<EntityModel<QueryCloudTask>> getTasks(@PathVariable String processInstanceId, Pageable pageable) {
         Predicate restrictedQuery = restrictQuery(processInstanceId);
 
         return taskControllerHelper.findAllByInvolvedUserQuery(restrictedQuery, pageable);
@@ -82,7 +78,7 @@ public class ProcessInstanceTasksController {
     @Operation(summary = "Find tasks for process instance")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(value = "/tasks", method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<TaskDto>> getTasksWithProcessVariables(
+    public PagedModel<EntityModel<QueryCloudTask>> getTasksWithProcessVariables(
         @PathVariable String processInstanceId,
         @Parameter(description = VARIABLE_KEYS_DESC, example = VARIABLE_KEYS_EXAMPLE) @RequestParam(
             value = "variableKeys",
