@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -40,7 +40,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
@@ -128,7 +127,7 @@ public class TaskControllerHelperIT {
         int pageSize = 30;
         Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -136,10 +135,10 @@ public class TaskControllerHelperIT {
             processVariableKeys
         );
 
-        List<TaskDto> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
 
         assertThat(retrievedTasks)
-            .extracting(TaskDto::getId)
+            .extracting(QueryCloudTask::getId)
             .containsExactly(
                 taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
             );
@@ -150,7 +149,9 @@ public class TaskControllerHelperIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(variable ->
                         assertThat(processVariableKeys)
-                            .anyMatch(vk -> vk.equals(variable.processDefinitionKey() + "/" + variable.name()))
+                            .anyMatch(vk ->
+                                vk.equals(processInstanceEntity.getProcessDefinitionKey() + "/" + variable.getName())
+                            )
                     );
             });
     }
@@ -172,7 +173,7 @@ public class TaskControllerHelperIT {
 
         Pageable pageable = PageRequest.of(0, 3, Sort.by("createdDate").descending());
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -185,7 +186,7 @@ public class TaskControllerHelperIT {
         assertThat(response.getNextLink()).isPresent();
 
         assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
-            .extracting(TaskDto::getId)
+            .extracting(QueryCloudTask::getId)
             .containsExactly(
                 taskEntities
                     .reversed()
@@ -263,7 +264,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity1.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -272,7 +273,7 @@ public class TaskControllerHelperIT {
         );
 
         assertThat(response.getContent()).hasSize(2);
-        Optional<TaskDto> task1 = response
+        Optional<QueryCloudTask> task1 = response
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -281,10 +282,9 @@ public class TaskControllerHelperIT {
         assertThat(task1)
             .isPresent()
             .get()
-            .extracting(TaskDto::getProcessVariables)
-            .asList()
-            .hasSize(variables1.size());
-        Optional<TaskDto> task2 = response
+            .extracting(QueryCloudTask::getProcessVariables)
+            .satisfies(pv -> assertThat(pv).hasSize(variables1.size()));
+        Optional<QueryCloudTask> task2 = response
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -293,7 +293,7 @@ public class TaskControllerHelperIT {
         assertThat(task2)
             .isPresent()
             .get()
-            .extracting(TaskDto::getProcessVariables)
+            .extracting(QueryCloudTask::getProcessVariables)
             .satisfies(pv -> assertThat(pv).isNullOrEmpty());
     }
 
@@ -335,7 +335,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -366,7 +366,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -403,7 +403,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -449,7 +449,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,
@@ -497,7 +497,7 @@ public class TaskControllerHelperIT {
             .map(v -> processInstanceEntity.getProcessDefinitionKey() + "/" + v.getName())
             .toList();
 
-        PagedModel<EntityModel<TaskDto>> response = taskControllerHelper.findAllWithProcessVariables(
+        PagedModel<EntityModel<QueryCloudTask>> response = taskControllerHelper.findAllWithProcessVariables(
             predicate,
             variableSearch,
             pageable,

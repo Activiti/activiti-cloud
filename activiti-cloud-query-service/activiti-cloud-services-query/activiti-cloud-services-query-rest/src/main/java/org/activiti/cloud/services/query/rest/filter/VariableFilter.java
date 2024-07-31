@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.rest.dto;
+package org.activiti.cloud.services.query.rest.filter;
 
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import jakarta.annotation.Nullable;
 
-public record ProcessVariableDto(String processDefinitionKey, String name, Object value) {
-    public ProcessVariableDto(ProcessVariableEntity entity) {
-        this(entity.getProcessDefinitionKey(), entity.getName(), entity.getValue());
-    }
-}
+public record VariableFilter(
+    @Nullable String processDefinitionKey, String name, VariableType type, String value, FilterOperator operator
+) {}

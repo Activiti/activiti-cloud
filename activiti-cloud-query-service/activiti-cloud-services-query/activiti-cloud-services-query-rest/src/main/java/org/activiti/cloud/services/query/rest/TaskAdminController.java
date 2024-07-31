@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
@@ -37,7 +38,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.TasksQueryBody;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
@@ -85,7 +85,7 @@ public class TaskAdminController {
     @Operation(summary = "Find tasks Admin", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<TaskDto>> findAllServiceTaskAdmin(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllServiceTaskAdmin(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -111,7 +111,7 @@ public class TaskAdminController {
     @Operation(summary = "Find tasks with Process Variables Admin")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<TaskDto>> findAllWithProcessVariablesAdmin(
+    public PagedModel<EntityModel<QueryCloudTask>> findAllWithProcessVariablesAdmin(
         @Parameter(description = ROOT_TASKS_DESC) @RequestParam(
             name = "rootTasksOnly",
             defaultValue = "false"
@@ -143,7 +143,7 @@ public class TaskAdminController {
     @Operation(summary = "Search tasks", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.POST, value = "/search")
-    public PagedModel<EntityModel<TaskDto>> searchTasks(
+    public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         @RequestBody TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
@@ -161,7 +161,7 @@ public class TaskAdminController {
     ) {
         TasksQueryBody queryBody = Optional.ofNullable(payload).orElse(new TasksQueryBody());
 
-        PagedModel<EntityModel<TaskDto>> pagedModel = taskControllerHelper.findAllFromBody(
+        PagedModel<EntityModel<QueryCloudTask>> pagedModel = taskControllerHelper.findAllFromBody(
             predicate,
             variableSearch,
             pageable,
@@ -184,14 +184,14 @@ public class TaskAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{taskId}", method = RequestMethod.GET)
-    public EntityModel<TaskDto> findByIdTaskAdmin(@PathVariable String taskId) {
+    public EntityModel<QueryCloudTask> findByIdTaskAdmin(@PathVariable String taskId) {
         TaskEntity taskEntity = entityFinder.findById(
             taskRepository,
             taskId,
             "Unable to find taskEntity for the given id:'" + taskId + "'"
         );
 
-        return taskRepresentationModelAssembler.toModel(new TaskDto(taskEntity));
+        return taskRepresentationModelAssembler.toModel(taskEntity);
     }
 
     @RequestMapping(value = "/{taskId}/candidate-users", method = RequestMethod.GET)
