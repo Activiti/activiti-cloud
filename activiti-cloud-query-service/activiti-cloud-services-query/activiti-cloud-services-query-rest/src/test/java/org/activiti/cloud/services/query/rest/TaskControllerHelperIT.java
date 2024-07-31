@@ -288,7 +288,7 @@ public class TaskControllerHelperIT {
         ProcessInstanceEntity processInstanceEntity1 = createProcessInstance(processDefinitionKey);
         ProcessInstanceEntity processInstanceEntity2 = createProcessInstance(processDefinitionKey);
         Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1, 2);
-        Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2, 2);
+        createProcessVariables(processInstanceEntity2, 2);
 
         TaskEntity taskEntity = new TaskEntity();
         String taskId = "task_id";
