@@ -23,11 +23,11 @@ import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -59,16 +59,16 @@ public class TaskDeleteController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.DELETE)
-    public CollectionModel<EntityModel<TaskDto>> deleteTasks(
+    public CollectionModel<EntityModel<QueryCloudTask>> deleteTasks(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = TaskEntity.class
         ) Predicate predicate
     ) {
-        Collection<EntityModel<TaskDto>> result = new ArrayList<>();
+        Collection<EntityModel<QueryCloudTask>> result = new ArrayList<>();
         Iterable<TaskEntity> iterable = taskRepository.findAll(predicate);
 
         for (TaskEntity entity : iterable) {
-            result.add(taskRepresentationModelAssembler.toModel(new TaskDto(entity)));
+            result.add(taskRepresentationModelAssembler.toModel(entity));
         }
 
         taskRepository.deleteAll(iterable);

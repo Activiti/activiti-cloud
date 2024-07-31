@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import java.util.stream.Stream;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
@@ -41,7 +42,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
@@ -137,7 +137,9 @@ public class TaskControllerHelperIT {
             processVariableKeys
         );
 
-        assertThat(response.getContent().stream().map(EntityModel::getContent).toList())
+        List<QueryCloudTask> retrievedTasks = response.getContent().stream().map(EntityModel::getContent).toList();
+
+        assertThat(retrievedTasks)
             .extracting(QueryCloudTask::getId)
             .containsExactly(
                 taskEntities.reversed().stream().limit(pageSize).map(TaskEntity::getId).toArray(String[]::new)
@@ -149,7 +151,9 @@ public class TaskControllerHelperIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(variable ->
                         assertThat(processVariableKeys)
-                            .anyMatch(vk -> vk.equals(variable.processDefinitionKey() + "/" + variable.name()))
+                            .anyMatch(vk ->
+                                vk.equals(processInstanceEntity.getProcessDefinitionKey() + "/" + variable.getName())
+                            )
                     );
             });
     }

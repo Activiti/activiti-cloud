@@ -22,6 +22,7 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
@@ -35,7 +36,6 @@ import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceVariableR
 import org.activiti.cloud.services.query.rest.assembler.ServiceTaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.TaskVariableRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.security.ProcessDefinitionFilter;
 import org.activiti.cloud.services.security.ProcessDefinitionKeyBasedRestrictionBuilder;

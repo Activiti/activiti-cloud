@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
+import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -36,8 +37,6 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
-import org.activiti.cloud.services.query.rest.dto.ProcessVariableDto;
-import org.activiti.cloud.services.query.rest.dto.TaskDto;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
@@ -56,7 +55,7 @@ public class TaskControllerHelper {
 
     private final VariableRepository processVariableRepository;
 
-    private final AlfrescoPagedModelAssembler<TaskDto> pagedCollectionModelAssembler;
+    private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
 
     private final QueryDslPredicateAggregator predicateAggregator;
 
@@ -98,24 +97,17 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
-        fetchProcessVariables(page.getContent(), processVariableKeys);
-        return pagedCollectionModelAssembler.toModel(
-            pageable,
-            page.map(TaskDto::new),
-            taskRepresentationModelAssembler
+        Page<TaskEntity> page = findPageWithProcessVariables(predicate, variableSearch, pageable, filters);
+        fetchProcessVariables(
+            page.getContent(),
+            processVariableKeys.stream().map(ProcessVariableKey::fromString).collect(Collectors.toSet())
         );
+        return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<TaskDto>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
-        Page<TaskDto> tasks = taskRepository
-            .findAll(new TaskSpecification(taskSearchRequest), pageable)
-            .map(TaskDto::new);
-        List<ProcessVariableEntity> processVariables = fetchProcessVariables(
-            tasks.getContent(),
-            taskSearchRequest.processVariableKeys()
-        );
-        populateProcessVariables(tasks.getContent(), processVariables);
+    public PagedModel<EntityModel<QueryCloudTask>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
+        Page<TaskEntity> tasks = taskRepository.findAll(new TaskSpecification(taskSearchRequest), pageable);
+        fetchProcessVariables(tasks.getContent(), taskSearchRequest.processVariableKeys());
         return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 
@@ -183,21 +175,34 @@ public class TaskControllerHelper {
         return page;
     }
 
-    private void fetchProcessVariables(Collection<TaskEntity> tasks, List<String> processVariableKeys) {
-        if (processVariableKeys.isEmpty()) {
-            tasks.forEach(task -> task.setProcessVariables(Collections.emptySet()));
+    private Page<TaskEntity> findPageWithProcessVariables(
+        Predicate predicate,
+        VariableSearch variableSearch,
+        Pageable pageable,
+        List<QueryDslPredicateFilter> filters
+    ) {
+        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
+        if (variableSearch.isSet()) {
+            return taskRepository.findByVariableNameAndValue(
+                variableSearch.getName(),
+                variableSearch.getValue(),
+                extendedPredicate,
+                pageable
+            );
         } else {
+            return taskRepository.findAll(extendedPredicate, pageable);
+        }
+    }
+
+    private void fetchProcessVariables(Collection<TaskEntity> tasks, Set<ProcessVariableKey> processVariableFetchKeys) {
+        if (!processVariableFetchKeys.isEmpty()) {
             Set<String> processInstanceIds = tasks
                 .stream()
-                .map(TaskEntity::getProcessInstanceId)
+                .map(QueryCloudTask::getProcessInstanceId)
                 .collect(Collectors.toSet());
-            var processVariables = processVariableRepository.findAll(
-                new ProcessVariableSpecification(
-                    processInstanceIds,
-                    processVariableKeys.stream().map(ProcessVariableKey::fromString).collect(Collectors.toSet())
-                )
+            List<ProcessVariableEntity> processVariables = processVariableRepository.findAll(
+                new ProcessVariableSpecification(processInstanceIds, processVariableFetchKeys)
             );
-
             Map<String, Set<ProcessVariableEntity>> processVariablesMap = processVariables
                 .stream()
                 .collect(
