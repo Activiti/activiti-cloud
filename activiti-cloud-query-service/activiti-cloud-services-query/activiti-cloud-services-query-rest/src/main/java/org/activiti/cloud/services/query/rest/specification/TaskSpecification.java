@@ -19,6 +19,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,8 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -176,6 +179,9 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 );
             }
         }
+        if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
+            applyTaskVariableFilters(root, query, criteriaBuilder);
+        }
         if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
             applyProcessVariableFilters(root, query, criteriaBuilder);
         }
@@ -225,9 +231,12 @@ public class TaskSpecification implements Specification<TaskEntity> {
             .stream()
             .map(filter ->
                 criteriaBuilder.and(
-                    getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                    getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                    getVariableValueCondition(filter, criteriaBuilder, pvRoot)
+                    criteriaBuilder.equal(
+                        pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                        filter.processDefinitionKey()
+                    ),
+                    criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
+                    getVariableValueCondition(filter, criteriaBuilder)
                 )
             )
             .toArray(Predicate[]::new);
@@ -242,9 +251,12 @@ public class TaskSpecification implements Specification<TaskEntity> {
                             .selectCase()
                             .when(
                                 criteriaBuilder.and(
-                                    getProcessDefinitionCondition(filter, criteriaBuilder, pvRoot),
-                                    getVariableNameCondition(filter, criteriaBuilder, pvRoot),
-                                    getVariableValueCondition(filter, criteriaBuilder, pvRoot)
+                                    criteriaBuilder.equal(
+                                        pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                        filter.processDefinitionKey()
+                                    ),
+                                    criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
+                                    getVariableValueCondition(filter, criteriaBuilder)
                                 ),
                                 pvRoot.get(ProcessVariableEntity_.id)
                             )
@@ -260,34 +272,64 @@ public class TaskSpecification implements Specification<TaskEntity> {
         predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
     }
 
-    private static Predicate getVariableNameCondition(
-        VariableFilter filter,
-        CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> pvRoot
+    private void applyTaskVariableFilters(
+        Root<TaskEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
     ) {
-        return criteriaBuilder.equal(pvRoot.get("name"), filter.name());
+        SetJoin<TaskEntity, TaskVariableEntity> join = root.join(TaskEntity_.variables);
+        Predicate[] variableValueFilters = taskSearchRequest
+            .taskVariableFilters()
+            .stream()
+            .map(filter ->
+                criteriaBuilder.and(
+                    criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
+                    getVariableValueCondition(filter, criteriaBuilder)
+                )
+            )
+            .toArray(Predicate[]::new);
+
+        Predicate[] havingClause = taskSearchRequest
+            .taskVariableFilters()
+            .stream()
+            .map(filter ->
+                criteriaBuilder.gt(
+                    criteriaBuilder.count(
+                        criteriaBuilder
+                            .selectCase()
+                            .when(
+                                criteriaBuilder.and(
+                                    criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
+                                    getVariableValueCondition(filter, criteriaBuilder)
+                                ),
+                                join.get(TaskVariableEntity_.id)
+                            )
+                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
+                    ),
+                    criteriaBuilder.literal(0)
+                )
+            )
+            .toArray(Predicate[]::new);
+
+        query.groupBy(root.get(TaskEntity_.id));
+        query.having(havingClause);
+        predicates.add(criteriaBuilder.or(variableValueFilters));
     }
 
-    private static Predicate getProcessDefinitionCondition(
-        VariableFilter filter,
-        CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> pvRoot
-    ) {
-        return criteriaBuilder.equal(pvRoot.get("processDefinitionKey"), filter.processDefinitionKey());
-    }
-
-    private static Predicate getVariableValueCondition(
-        VariableFilter filter,
-        CriteriaBuilder criteriaBuilder,
-        Root<ProcessVariableEntity> root
-    ) {
+    private static Predicate getVariableValueCondition(VariableFilter filter, CriteriaBuilder criteriaBuilder) {
         return switch (filter.operator()) {
             case EQUALS -> {
                 String condition =
                     switch (filter.type()) {
-                        case INTEGER, BOOLEAN -> "value @@ '$.value == " + filter.value() + "'";
-                        case STRING, BIGDECIMAL, DATETIME -> "value @@ '$.value == \"" + filter.value() + "\"'";
-                        case DATE -> "value @@ '$.value::DATE == \"" + filter.value() + "\"'";
+                        case INTEGER, BOOLEAN -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value == " +
+                        filter.value() +
+                        "'";
+                        case STRING, BIGDECIMAL, DATETIME -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value == \"" +
+                        filter.value() +
+                        "\"'";
+                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE == \"" + filter.value() + "\"'";
                     };
                 yield criteriaBuilder.isTrue(
                     criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
@@ -297,17 +339,25 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 criteriaBuilder.function(
                     "sql",
                     Boolean.class,
-                    criteriaBuilder.literal("value @@ '$.value LIKE \"%" + filter.value() + "%\"'")
+                    criteriaBuilder.literal(
+                        ProcessVariableEntity_.VALUE + " @@ '$.value LIKE \"%" + filter.value() + "%\"'"
+                    )
                 )
             );
             case GREATER_THAN -> {
                 String condition =
                     switch (filter.type()) {
-                        case INTEGER -> "value @@ '$.value > " + filter.value() + "'";
-                        case BIGDECIMAL -> "value @@ '$.value::NUMERIC > " + filter.value() + "'";
-                        case STRING -> "value @@ '$.value > \"" + filter.value() + "\"'";
-                        case DATETIME -> "value @@ '$.value::TIMESTAMPTZ > \"" + filter.value() + "\"'";
-                        case DATE -> "value @@ '$.value::DATE > \"" + filter.value() + "\"'";
+                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value > " + filter.value() + "'";
+                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::NUMERIC > " +
+                        filter.value() +
+                        "'";
+                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value > \"" + filter.value() + "\"'";
+                        case DATETIME -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::TIMESTAMPTZ > \"" +
+                        filter.value() +
+                        "\"'";
+                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE > \"" + filter.value() + "\"'";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -319,11 +369,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
             case GREATER_THAN_OR_EQUALS -> {
                 String condition =
                     switch (filter.type()) {
-                        case INTEGER -> "value @@ '$.value >= " + filter.value() + "'";
-                        case BIGDECIMAL -> "value @@ '$.value::NUMERIC >= " + filter.value() + "'";
-                        case STRING -> "value @@ '$.value >= \"" + filter.value() + "\"'";
-                        case DATETIME -> "value @@ '$.value::TIMESTAMPTZ >= \"" + filter.value() + "\"'";
-                        case DATE -> "value @@ '$.value::DATE >= \"" + filter.value() + "\"'";
+                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value >= " + filter.value() + "'";
+                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::NUMERIC >= " +
+                        filter.value() +
+                        "'";
+                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value >= \"" + filter.value() + "\"'";
+                        case DATETIME -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::TIMESTAMPTZ >= \"" +
+                        filter.value() +
+                        "\"'";
+                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE >= \"" + filter.value() + "\"'";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -335,11 +391,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
             case LESS_THAN -> {
                 String condition =
                     switch (filter.type()) {
-                        case INTEGER -> "value @@ '$.value < " + filter.value() + "'";
-                        case BIGDECIMAL -> "value @@ '$.value::NUMERIC < " + filter.value() + "'";
-                        case STRING -> "value @@ '$.value < \"" + filter.value() + "\"'";
-                        case DATETIME -> "value @@ '$.value::TIMESTAMPTZ < \"" + filter.value() + "\"'";
-                        case DATE -> "value @@ '$.value::DATE < \"" + filter.value() + "\"'";
+                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value < " + filter.value() + "'";
+                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::NUMERIC < " +
+                        filter.value() +
+                        "'";
+                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value < \"" + filter.value() + "\"'";
+                        case DATETIME -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::TIMESTAMPTZ < \"" +
+                        filter.value() +
+                        "\"'";
+                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE < \"" + filter.value() + "\"'";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -351,11 +413,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
             case LESS_THAN_OR_EQUALS -> {
                 String condition =
                     switch (filter.type()) {
-                        case INTEGER -> "value @@ '$.value <= " + filter.value() + "'";
-                        case BIGDECIMAL -> "value @@ '$.value::NUMERIC <= " + filter.value() + "'";
-                        case STRING -> "value @@ '$.value <= \"" + filter.value() + "\"'";
-                        case DATETIME -> "value @@ '$.value::TIMESTAMPTZ <= \"" + filter.value() + "\"'";
-                        case DATE -> "value @@ '$.value::DATE <= \"" + filter.value() + "\"'";
+                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value <= " + filter.value() + "'";
+                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::NUMERIC <= " +
+                        filter.value() +
+                        "'";
+                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value <= \"" + filter.value() + "\"'";
+                        case DATETIME -> ProcessVariableEntity_.VALUE +
+                        " @@ '$.value::TIMESTAMPTZ <= \"" +
+                        filter.value() +
+                        "\"'";
+                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE <= \"" + filter.value() + "\"'";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
