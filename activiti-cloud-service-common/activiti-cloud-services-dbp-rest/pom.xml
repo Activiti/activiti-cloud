@@ -5,7 +5,7 @@
   <parent>
     <artifactId>activiti-cloud-service-common-dependencies</artifactId>
     <groupId>org.activiti.cloud</groupId>
-    <version>8.7.0-SNAPSHOT</version>
+    <version>8.7.0-alpha.8</version>
     <relativePath>../activiti-cloud-service-common-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-services-dbp-rest</artifactId>
