@@ -52,6 +52,9 @@ public class ProcessVariableSpecification implements Specification<ProcessVariab
             .reduce(criteriaBuilder::or)
             .orElse(criteriaBuilder.disjunction());
 
-        return criteriaBuilder.and(root.get(ProcessVariableEntity_.processInstanceId).in(processInstanceIds), keyAndNameFilter);
+        return criteriaBuilder.and(
+            root.get(ProcessVariableEntity_.processInstanceId).in(processInstanceIds),
+            keyAndNameFilter
+        );
     }
 }
