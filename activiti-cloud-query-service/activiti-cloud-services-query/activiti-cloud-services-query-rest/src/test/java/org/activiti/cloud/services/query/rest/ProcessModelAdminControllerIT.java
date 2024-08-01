@@ -33,6 +33,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessModelRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.query.model.ProcessModelEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -81,6 +82,9 @@ public class ProcessModelAdminControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private ProcessInstanceAdminService processInstanceAdminService;
