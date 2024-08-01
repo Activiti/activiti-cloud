@@ -21,11 +21,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -36,23 +32,11 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.util.DateUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
 public class TaskSpecification implements Specification<TaskEntity> {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
-        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        .optionalStart()
-        .appendOffset("+HH:MM", "+00:00")
-        .optionalEnd()
-        .optionalStart()
-        .appendOffset("+HHMM", "+0000")
-        .optionalEnd()
-        .optionalStart()
-        .appendOffset("+HH", "Z")
-        .optionalEnd()
-        .toFormatter();
 
     List<Predicate> predicates = new ArrayList<>();
 
@@ -102,20 +86,23 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.createdDate),
-                    parseDate(taskSearchRequest.createdFrom())
+                    DateUtils.parseDate(taskSearchRequest.createdFrom())
                 )
             );
         }
         if (taskSearchRequest.createdTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), parseDate(taskSearchRequest.createdTo()))
+                criteriaBuilder.lessThan(
+                    root.get(TaskEntity_.createdDate),
+                    DateUtils.parseDate(taskSearchRequest.createdTo())
+                )
             );
         }
         if (taskSearchRequest.lastModifiedFrom() != null) {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.lastModified),
-                    parseDate(taskSearchRequest.lastModifiedFrom())
+                    DateUtils.parseDate(taskSearchRequest.lastModifiedFrom())
                 )
             );
         }
@@ -123,7 +110,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.lastModified),
-                    parseDate(taskSearchRequest.lastModifiedTo())
+                    DateUtils.parseDate(taskSearchRequest.lastModifiedTo())
                 )
             );
         }
@@ -131,7 +118,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.claimedDate),
-                    parseDate(taskSearchRequest.lastClaimedFrom())
+                    DateUtils.parseDate(taskSearchRequest.lastClaimedFrom())
                 )
             );
         }
@@ -139,7 +126,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.claimedDate),
-                    parseDate(taskSearchRequest.lastClaimedTo())
+                    DateUtils.parseDate(taskSearchRequest.lastClaimedTo())
                 )
             );
         }
@@ -147,7 +134,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.completedDate),
-                    parseDate(taskSearchRequest.completedFrom())
+                    DateUtils.parseDate(taskSearchRequest.completedFrom())
                 )
             );
         }
@@ -155,18 +142,24 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.completedDate),
-                    parseDate(taskSearchRequest.completedTo())
+                    DateUtils.parseDate(taskSearchRequest.completedTo())
                 )
             );
         }
         if (taskSearchRequest.dueDateFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), parseDate(taskSearchRequest.dueDateFrom()))
+                criteriaBuilder.greaterThan(
+                    root.get(TaskEntity_.dueDate),
+                    DateUtils.parseDate(taskSearchRequest.dueDateFrom())
+                )
             );
         }
         if (taskSearchRequest.dueDateTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), parseDate(taskSearchRequest.dueDateTo()))
+                criteriaBuilder.lessThan(
+                    root.get(TaskEntity_.dueDate),
+                    DateUtils.parseDate(taskSearchRequest.dueDateTo())
+                )
             );
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.candidateGroupId())) {
@@ -189,10 +182,6 @@ public class TaskSpecification implements Specification<TaskEntity> {
             return criteriaBuilder.conjunction();
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
-    }
-
-    private Date parseDate(String stringDate) {
-        return Date.from(Instant.from(DATE_TIME_FORMATTER.parse(stringDate)));
     }
 
     private void applyLikeFilters(
