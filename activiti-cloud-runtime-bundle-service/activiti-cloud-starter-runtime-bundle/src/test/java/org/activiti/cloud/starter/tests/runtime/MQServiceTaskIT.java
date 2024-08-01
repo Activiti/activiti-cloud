@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import org.activiti.api.process.model.IntegrationContext;
 import org.activiti.cloud.services.rest.api.ReplayServiceTaskRequest;
+import org.activiti.cloud.starter.tests.services.audit.AuditProducerIT;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 public class MQServiceTaskIT extends AbstractMQServiceTaskIT {
