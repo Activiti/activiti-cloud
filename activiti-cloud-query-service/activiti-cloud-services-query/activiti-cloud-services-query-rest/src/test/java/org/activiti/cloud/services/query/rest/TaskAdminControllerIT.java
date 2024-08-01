@@ -27,8 +27,6 @@ import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
@@ -82,12 +80,6 @@ public class TaskAdminControllerIT {
     @Autowired
     private VariableRepository variableRepository;
 
-    @Autowired
-    private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
-
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -99,8 +91,6 @@ public class TaskAdminControllerIT {
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
-        taskCandidateGroupRepository.deleteAll();
-        taskCandidateUserRepository.deleteAll();
     }
 
     @Test
