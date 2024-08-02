@@ -337,10 +337,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value > " + filter.value() + "'";
-                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::NUMERIC > " +
-                        filter.value() +
-                        "'";
+                        case BIGDECIMAL -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::NUMERIC > " +
+                        filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value > \"" + filter.value() + "\"'";
                         case DATETIME -> ProcessVariableEntity_.VALUE +
                         " @@ '$.value::TIMESTAMPTZ > \"" +
@@ -359,10 +359,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value >= " + filter.value() + "'";
-                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::NUMERIC >= " +
-                        filter.value() +
-                        "'";
+                        case BIGDECIMAL -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::NUMERIC >= " +
+                        filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value >= \"" + filter.value() + "\"'";
                         case DATETIME -> ProcessVariableEntity_.VALUE +
                         " @@ '$.value::TIMESTAMPTZ >= \"" +
@@ -381,10 +381,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value < " + filter.value() + "'";
-                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::NUMERIC < " +
-                        filter.value() +
-                        "'";
+                        case BIGDECIMAL -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::NUMERIC < " +
+                        filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value < \"" + filter.value() + "\"'";
                         case DATETIME -> ProcessVariableEntity_.VALUE +
                         " @@ '$.value::TIMESTAMPTZ < \"" +
@@ -403,10 +403,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value <= " + filter.value() + "'";
-                        case BIGDECIMAL -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::NUMERIC <= " +
-                        filter.value() +
-                        "'";
+                        case BIGDECIMAL -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::NUMERIC <= " +
+                        filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value <= \"" + filter.value() + "\"'";
                         case DATETIME -> ProcessVariableEntity_.VALUE +
                         " @@ '$.value::TIMESTAMPTZ <= \"" +
