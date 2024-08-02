@@ -25,10 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import org.activiti.cloud.api.task.model.QueryCloudTask;
 import java.util.stream.Stream;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -242,13 +239,21 @@ public class TaskControllerHelperIT {
         ProcessInstanceEntity processInstanceEntity2 = createProcessInstance("processDefinitionKey2");
         Set<ProcessVariableEntity> variables2 = createProcessVariables(processInstanceEntity2, 7);
 
-        TaskEntity taskWithVariables = new TaskEntity();
-        taskWithVariables.setId("task_id_2");
-        taskWithVariables.setCreatedDate(new Date());
-        taskWithVariables.setProcessVariables(variables);
-        taskWithVariables.setProcessInstance(processInstanceEntity);
-        taskWithVariables.setProcessInstanceId(processInstanceEntity.getId());
-        taskRepository.save(taskWithVariables);
+        TaskEntity process1Task = new TaskEntity();
+        String taskId = "task_id_1";
+        process1Task.setId(taskId);
+        process1Task.setCreatedDate(new Date());
+        process1Task.setProcessVariables(variables1);
+        process1Task.setProcessInstanceId(processInstanceEntity1.getId());
+        taskRepository.save(process1Task);
+
+        TaskEntity process2Task = new TaskEntity();
+        String taskId2 = "task_id_2";
+        process2Task.setId(taskId2);
+        process2Task.setCreatedDate(new Date());
+        process2Task.setProcessVariables(variables2);
+        process2Task.setProcessInstanceId(processInstanceEntity2.getId());
+        taskRepository.save(process2Task);
 
         Predicate predicate = null;
         VariableSearch variableSearch = new VariableSearch(null, null, null);
@@ -675,8 +680,6 @@ public class TaskControllerHelperIT {
     @NotNull
     private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
         return createProcessVariables(processInstanceEntity, 8);
-    private ProcessInstanceEntity createProcessInstance() {
-        return createProcessInstance(UUID.randomUUID().toString());
     }
 
     @NotNull
@@ -695,24 +698,5 @@ public class TaskControllerHelperIT {
     @NotNull
     private ProcessInstanceEntity createProcessInstance() {
         return createProcessInstance("processDefinitionKey");
-    }
-
-    @NotNull
-    private List<ProcessInstanceEntity> createProcessInstancesAndVariablesAndTasks(String processDefinitionKey) {
-        List<ProcessInstanceEntity> processInstanceEntities = new ArrayList<>();
-        for (Map.Entry<String, Pair<VariableType, Object>> entry : processVariables.entrySet()) {
-            ProcessInstanceEntity processInstanceEntity = createProcessInstance(processDefinitionKey);
-            processInstanceEntities.add(processInstanceEntity);
-            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-            processVariableEntity.setName(entry.getKey());
-            processVariableEntity.setValue(entry.getValue().getSecond().toString());
-            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-            variableRepository.save(processVariableEntity);
-            processInstanceEntity.setVariables(Set.of(processVariableEntity));
-            processInstanceRepository.save(processInstanceEntity);
-            createTasks(processInstanceEntity, 2);
-        }
-        return processInstanceEntities;
     }
 }
