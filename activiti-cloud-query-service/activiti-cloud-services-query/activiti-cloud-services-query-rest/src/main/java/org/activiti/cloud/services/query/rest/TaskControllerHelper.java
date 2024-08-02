@@ -19,8 +19,6 @@ package org.activiti.cloud.services.query.rest;
 import com.querydsl.core.types.Predicate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,16 +30,12 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
-import org.activiti.cloud.services.query.rest.specification.ProcessVariableSpecification;
 import org.activiti.cloud.services.query.rest.specification.TaskSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.springframework.data.domain.Page;
@@ -193,6 +187,13 @@ public class TaskControllerHelper {
         } else {
             return taskRepository.findAll(extendedPredicate, pageable);
         }
+    }
+
+    private void fetchProcessVariables(Collection<TaskEntity> tasks, Collection<String> processVariableFetchKeys) {
+        fetchProcessVariables(
+            tasks,
+            processVariableFetchKeys.stream().map(ProcessVariableKey::fromString).collect(Collectors.toSet())
+        );
     }
 
     private void fetchProcessVariables(Collection<TaskEntity> tasks, Set<ProcessVariableKey> processVariableFetchKeys) {
