@@ -355,7 +355,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                     criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
                 );
             }
-            case GREATER_THAN_OR_EQUALS -> {
+            case GREATER_THAN_OR_EQUAL -> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value >= " + filter.value() + "'";
@@ -399,7 +399,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                     criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
                 );
             }
-            case LESS_THAN_OR_EQUALS -> {
+            case LESS_THAN_OR_EQUAL -> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value <= " + filter.value() + "'";

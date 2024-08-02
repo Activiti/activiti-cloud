@@ -544,7 +544,7 @@ public class TaskControllerHelperIT {
             .toList();
 
         assertThat(retrievedTasks)
-            .hasSize(1)
+            .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task -> {
                 assertThat(task.getProcessInstanceId()).isEqualTo(processInstance1.getId());
                 assertThat(task.getProcessVariables())
@@ -557,8 +557,7 @@ public class TaskControllerHelperIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "task-var";
         String valueToSearch = "task-value";
-        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.STRING, valueToSearch);
-        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.STRING, valueToSearch);
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.STRING, valueToSearch);
         createTaskWithVariable(processInstance, varName, VariableType.STRING, "different-value");
 
         VariableFilter variableFilter = new VariableFilter(
@@ -578,7 +577,7 @@ public class TaskControllerHelperIT {
             .map(EntityModel::getContent)
             .toList();
 
-        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrder(task1, task2);
+        assertThat(retrievedTasks).containsExactly(task);
     }
 
     @Test
@@ -656,6 +655,363 @@ public class TaskControllerHelperIT {
             .toList();
 
         assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_match() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+        String varName = "int-var";
+        int valueToSearch = 42;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, valueToSearch);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, valueToSearch + 1);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.INTEGER, valueToSearch);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(valueToSearch),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .hasSize(1)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(valueToSearch))
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_match() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int valueToSearch = 42;
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, valueToSearch);
+        createTaskWithVariable(processInstance, varName, VariableType.INTEGER, valueToSearch + 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(valueToSearch),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_greaterThan() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "int-var";
+        int lowerBound = 42;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, lowerBound + 1);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, lowerBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.INTEGER, lowerBound + 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .hasSize(1)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() > lowerBound)
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_greaterThan() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int lowerBound = 42;
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, lowerBound + 1);
+        createTaskWithVariable(processInstance, varName, VariableType.INTEGER, lowerBound);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_greaterThanOrEqual() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "int-var";
+        int lowerBound = 42;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, lowerBound + 1);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, lowerBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.INTEGER, lowerBound + 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(
+            processInstance1.getTasks().iterator().next(),
+            processInstance2.getTasks().iterator().next()
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactlyInAnyOrderElementsOf(expectedTasks)
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() >= lowerBound)
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_greaterThanOrEqual() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int lowerBound = 42;
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, lowerBound + 1);
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, lowerBound);
+        createTaskWithVariable(processInstance, varName, VariableType.INTEGER, lowerBound - 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(task1, task2);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_lessThan() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "int-var";
+        int upperBound = 42;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, upperBound - 1);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, upperBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.INTEGER, upperBound - 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() < upperBound)
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_lessThan() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int upperBound = 42;
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, upperBound - 1);
+        createTaskWithVariable(processInstance, varName, VariableType.INTEGER, upperBound);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_lessThanOrEqual() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "int-var";
+        int upperBound = 42;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, upperBound - 1);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, upperBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.INTEGER, upperBound - 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(
+            processInstance1.getTasks().iterator().next(),
+            processInstance2.getTasks().iterator().next()
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactlyInAnyOrderElementsOf(expectedTasks)
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() <= upperBound)
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_lessThanOrEqual() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int upperBound = 42;
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, upperBound - 1);
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.INTEGER, upperBound);
+        createTaskWithVariable(processInstance, varName, VariableType.INTEGER, upperBound + 1);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(task1, task2);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrderElementsOf(expectedTasks);
     }
 
     private void createProcessVariableAndTask(
