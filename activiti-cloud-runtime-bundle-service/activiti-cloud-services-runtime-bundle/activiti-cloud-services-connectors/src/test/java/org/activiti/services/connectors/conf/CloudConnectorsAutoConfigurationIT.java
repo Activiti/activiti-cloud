@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import org.activiti.api.runtime.shared.identity.UserGroupManager;
 import org.activiti.api.runtime.shared.security.SecurityManager;
+import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer;
@@ -43,8 +45,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+    properties = {
+        "activiti.cloud.services.oauth2.iam-name=apa",
+    })
 public class CloudConnectorsAutoConfigurationIT {
 
     @Autowired
@@ -79,6 +86,18 @@ public class CloudConnectorsAutoConfigurationIT {
 
     @MockBean
     private BuildProperties buildProperties;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
+    @MockBean
+    private IdentityService identityService;
 
     @BeforeEach
     public void beforeEach() {
