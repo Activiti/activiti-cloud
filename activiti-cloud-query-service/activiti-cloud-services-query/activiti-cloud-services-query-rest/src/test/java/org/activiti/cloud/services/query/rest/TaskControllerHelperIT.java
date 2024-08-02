@@ -553,8 +553,49 @@ public class TaskControllerHelperIT {
 
     @Test
     void should_returnTasks_filteredByStringProcessVariable_contains() {
-        String varName = "string-var-1";
-        String queryParam = "ring";
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+        String varName = "string-var";
+        String valueToSearch = "jaeger";
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.STRING, "Eren Jaeger");
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.STRING, "Frank Jaeger");
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.STRING, valueToSearch);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.STRING,
+            valueToSearch,
+            FilterOperator.CONTAINS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequest(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(
+            processInstance1.getTasks().iterator().next(),
+            processInstance2.getTasks().iterator().next()
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactlyInAnyOrderElementsOf(expectedTasks)
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) &&
+                        ((String) pv.getValue()).toLowerCase().contains(valueToSearch.toLowerCase())
+                    )
+            );
     }
 
     private void createProcessVariableAndTask(
