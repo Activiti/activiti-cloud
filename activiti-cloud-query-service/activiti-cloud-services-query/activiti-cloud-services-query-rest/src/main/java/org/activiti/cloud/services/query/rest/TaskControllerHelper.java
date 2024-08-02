@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -215,7 +216,11 @@ public class TaskControllerHelper {
                         Collectors.mapping(pv -> pv, Collectors.toSet())
                     )
                 );
-            tasks.forEach(task -> task.setProcessVariables(processVariablesMap.get(task.getProcessInstanceId())));
+            tasks.forEach(task ->
+                task.setProcessVariables(
+                    processVariablesMap.getOrDefault(task.getProcessInstanceId(), Collections.emptySet())
+                )
+            );
         }
     }
 }
