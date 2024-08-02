@@ -19,6 +19,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.converter.ProcessAuditServiceInfoAppender;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
@@ -98,12 +99,14 @@ public class CloudEventsAutoConfiguration {
     public ProcessStartedActorProviderEventListener processStartedActorProviderEventListener(
         RuntimeService runtimeService,
         SecurityContextPrincipalProvider securityContextPrincipalProvider,
-        PrincipalIdentityProvider principalIdentityProvider
+        PrincipalIdentityProvider principalIdentityProvider,
+        IdentityService identityService
     ) {
         return new ProcessStartedActorProviderEventListener(
             runtimeService,
             securityContextPrincipalProvider,
-            principalIdentityProvider
+            principalIdentityProvider,
+            identityService
         );
     }
 
