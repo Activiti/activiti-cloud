@@ -48,10 +48,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    properties = {
-        "activiti.cloud.services.oauth2.iam-name=apa",
-    })
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+    properties = { "activiti.cloud.services.oauth2.iam-name=keycloak" }
+)
 public class CloudConnectorsAutoConfigurationIT {
 
     @Autowired
