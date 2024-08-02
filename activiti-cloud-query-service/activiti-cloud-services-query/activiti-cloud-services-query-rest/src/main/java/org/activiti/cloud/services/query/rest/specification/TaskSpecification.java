@@ -21,6 +21,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -86,7 +87,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.createdDate),
-                    DateUtils.parseDate(taskSearchRequest.createdFrom())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.createdFrom()).toInstant())
                 )
             );
         }
@@ -94,7 +95,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.createdDate),
-                    DateUtils.parseDate(taskSearchRequest.createdTo())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.createdTo()).toInstant())
                 )
             );
         }
@@ -102,7 +103,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.lastModified),
-                    DateUtils.parseDate(taskSearchRequest.lastModifiedFrom())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastModifiedFrom()).toInstant())
                 )
             );
         }
@@ -110,7 +111,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.lastModified),
-                    DateUtils.parseDate(taskSearchRequest.lastModifiedTo())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastModifiedTo()).toInstant())
                 )
             );
         }
@@ -118,7 +119,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.claimedDate),
-                    DateUtils.parseDate(taskSearchRequest.lastClaimedFrom())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastClaimedFrom()).toInstant())
                 )
             );
         }
@@ -126,7 +127,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.claimedDate),
-                    DateUtils.parseDate(taskSearchRequest.lastClaimedTo())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastClaimedTo()).toInstant())
                 )
             );
         }
@@ -134,7 +135,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.completedDate),
-                    DateUtils.parseDate(taskSearchRequest.completedFrom())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.completedFrom()).toInstant())
                 )
             );
         }
@@ -142,7 +143,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.completedDate),
-                    DateUtils.parseDate(taskSearchRequest.completedTo())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.completedTo()).toInstant())
                 )
             );
         }
@@ -150,7 +151,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.greaterThan(
                     root.get(TaskEntity_.dueDate),
-                    DateUtils.parseDate(taskSearchRequest.dueDateFrom())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.dueDateFrom()).toInstant())
                 )
             );
         }
@@ -158,7 +159,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
             predicates.add(
                 criteriaBuilder.lessThan(
                     root.get(TaskEntity_.dueDate),
-                    DateUtils.parseDate(taskSearchRequest.dueDateTo())
+                    Date.from(DateUtils.parseDateTime(taskSearchRequest.dueDateTo()).toInstant())
                 )
             );
         }
@@ -314,11 +315,20 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         " @@ '$.value == " +
                         filter.value() +
                         "'";
-                        case STRING, BIGDECIMAL, DATETIME -> ProcessVariableEntity_.VALUE +
+                        case STRING, BIGDECIMAL -> ProcessVariableEntity_.VALUE +
                         " @@ '$.value == \"" +
                         filter.value() +
                         "\"'";
-                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE == \"" + filter.value() + "\"'";
+                        case DATETIME -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::TIMESTAMPTZ = '" +
+                        filter.value() +
+                        "'::TIMESTAMPTZ";
+                        case DATE -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::DATE = '" +
+                        filter.value() +
+                        "'::DATE";
                     };
                 yield criteriaBuilder.isTrue(
                     criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
@@ -342,11 +352,16 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         "->>'value')::NUMERIC > " +
                         filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value > \"" + filter.value() + "\"'";
-                        case DATETIME -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::TIMESTAMPTZ > \"" +
+                        case DATETIME -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::TIMESTAMPTZ > '" +
                         filter.value() +
-                        "\"'";
-                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE > \"" + filter.value() + "\"'";
+                        "'::TIMESTAMPTZ";
+                        case DATE -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::DATE > '" +
+                        filter.value() +
+                        "'::DATE";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -364,11 +379,16 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         "->>'value')::NUMERIC >= " +
                         filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value >= \"" + filter.value() + "\"'";
-                        case DATETIME -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::TIMESTAMPTZ >= \"" +
+                        case DATETIME -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::TIMESTAMPTZ >= '" +
                         filter.value() +
-                        "\"'";
-                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE >= \"" + filter.value() + "\"'";
+                        "'::TIMESTAMPTZ";
+                        case DATE -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::DATE >= '" +
+                        filter.value() +
+                        "'::DATE";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -386,11 +406,16 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         "->>'value')::NUMERIC < " +
                         filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value < \"" + filter.value() + "\"'";
-                        case DATETIME -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::TIMESTAMPTZ < \"" +
+                        case DATETIME -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::TIMESTAMPTZ < '" +
                         filter.value() +
-                        "\"'";
-                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE < \"" + filter.value() + "\"'";
+                        "'::TIMESTAMPTZ";
+                        case DATE -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::DATE < '" +
+                        filter.value() +
+                        "'::DATE";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );
@@ -408,11 +433,16 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         "->>'value')::NUMERIC <= " +
                         filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value <= \"" + filter.value() + "\"'";
-                        case DATETIME -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value::TIMESTAMPTZ <= \"" +
+                        case DATETIME -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::TIMESTAMPTZ <= '" +
                         filter.value() +
-                        "\"'";
-                        case DATE -> ProcessVariableEntity_.VALUE + " @@ '$.value::DATE <= \"" + filter.value() + "\"'";
+                        "'::TIMESTAMPTZ";
+                        case DATE -> "(" +
+                        ProcessVariableEntity_.VALUE +
+                        "->>'value')::DATE <= '" +
+                        filter.value() +
+                        "'::DATE";
                         default -> throw new IllegalArgumentException(
                             "Unsupported type: " + filter.type() + " for operator: " + filter.operator()
                         );

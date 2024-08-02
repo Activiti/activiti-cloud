@@ -15,15 +15,18 @@
  */
 package org.activiti.cloud.util;
 
-import java.time.Instant;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Date;
 
 public abstract class DateUtils {
 
     public static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
-        .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        .append(ISO_LOCAL_DATE_TIME)
         .optionalStart()
         .appendOffset("+HH:MM", "+00:00")
         .optionalEnd()
@@ -35,7 +38,11 @@ public abstract class DateUtils {
         .optionalEnd()
         .toFormatter();
 
-    public static Date parseDate(String stringDate) {
-        return Date.from(Instant.from(DateUtils.ISO_DATE_TIME_FORMATTER.parse(stringDate)));
+    public static OffsetDateTime parseDateTime(String stringDate) {
+        return OffsetDateTime.parse(stringDate, ISO_DATE_TIME_FORMATTER);
+    }
+
+    public static LocalDate parseDate(String stringDate) {
+        return LocalDate.parse(stringDate, ISO_LOCAL_DATE);
     }
 }
