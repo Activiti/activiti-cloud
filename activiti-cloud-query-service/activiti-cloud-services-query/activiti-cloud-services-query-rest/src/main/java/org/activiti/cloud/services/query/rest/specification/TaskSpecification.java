@@ -329,7 +329,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                     "sql",
                     Boolean.class,
                     criteriaBuilder.literal(
-                        ProcessVariableEntity_.VALUE + " @@ '$.value LIKE \"%" + filter.value() + "%\"'"
+                        ProcessVariableEntity_.VALUE + " @@ '$.value like_regex \"(?i).*" + filter.value() + ".*\"'"
                     )
                 )
             );
