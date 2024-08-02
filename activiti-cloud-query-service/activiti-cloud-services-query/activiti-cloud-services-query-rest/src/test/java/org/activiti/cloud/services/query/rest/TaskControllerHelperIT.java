@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.querydsl.core.types.Predicate;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -658,7 +659,7 @@ public class TaskControllerHelperIT {
     }
 
     @Test
-    void should_returnTasks_filteredByIntegerProcessVariable_match() {
+    void should_returnTasks_filteredByIntegerProcessVariable_equals() {
         String processDefinitionKey = "process-definition-key";
         String differentProcessDefinitionKey = "different-process-definition-key";
         String varName = "int-var";
@@ -698,7 +699,7 @@ public class TaskControllerHelperIT {
     }
 
     @Test
-    void should_returnTasks_filteredByIntegerTaskVariable_match() {
+    void should_returnTasks_filteredByIntegerTaskVariable_equals() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "int-var";
         int valueToSearch = 42;
@@ -1014,6 +1015,414 @@ public class TaskControllerHelperIT {
         assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrderElementsOf(expectedTasks);
     }
 
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_equals() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+        String varName = "bigdecimal-var";
+        BigDecimal valueToSearch = new BigDecimal("42.42");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, valueToSearch);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, new BigDecimal("42.43"));
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.BIGDECIMAL, valueToSearch);
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(valueToSearch),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) && new BigDecimal(pv.getValue().toString()).equals(valueToSearch)
+                    )
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_equals() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal valueToSearch = new BigDecimal("42.42");
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, valueToSearch);
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, new BigDecimal("42.43"));
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(valueToSearch),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_greaterThan() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42.42");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, new BigDecimal("42.43"));
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, lowerBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(
+            processWithDifferentKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.43")
+        );
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .allSatisfy(pv -> {
+                        assertThat(pv.getName()).isEqualTo(varName);
+                        assertThat(new BigDecimal(pv.getValue().toString())).isGreaterThan(lowerBound);
+                    })
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_greaterThan() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42.42");
+        QueryCloudTask task = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.43")
+        );
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, lowerBound);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_greaterThanOrEqual() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42.42");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, new BigDecimal("42.43"));
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, lowerBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(
+            processWithDifferentKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.43")
+        );
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(
+            processInstance1.getTasks().iterator().next(),
+            processInstance2.getTasks().iterator().next()
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactlyInAnyOrderElementsOf(expectedTasks)
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .allSatisfy(pv -> {
+                        assertThat(pv.getName()).isEqualTo(varName);
+                        assertThat(new BigDecimal(pv.getValue().toString())).isGreaterThanOrEqualTo(lowerBound);
+                    })
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_greaterThanOrEqual() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42.42");
+        QueryCloudTask task1 = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.43")
+        );
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, lowerBound);
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, new BigDecimal("42.41"));
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(task1, task2);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_lessThan() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "bigdecimal-var";
+        BigDecimal upperBound = new BigDecimal("42.42");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, new BigDecimal("42.41"));
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, upperBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(
+            processWithDifferentKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.41")
+        );
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .allSatisfy(pv -> {
+                        assertThat(pv.getName()).isEqualTo(varName);
+                        assertThat(new BigDecimal(pv.getValue().toString())).isLessThan(upperBound);
+                    })
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_lessThan() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal upperBound = new BigDecimal("42.42");
+        QueryCloudTask task = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.41")
+        );
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, upperBound);
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_lessThanOrEqual() {
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+
+        String varName = "bigdecimal-var";
+        BigDecimal upperBound = new BigDecimal("42.42");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, new BigDecimal("42.41"));
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, upperBound);
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(
+            processWithDifferentKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.41")
+        );
+
+        VariableFilter variableFilter = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(
+            processInstance1.getTasks().iterator().next(),
+            processInstance2.getTasks().iterator().next()
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactlyInAnyOrderElementsOf(expectedTasks)
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .allSatisfy(pv -> {
+                        assertThat(pv.getName()).isEqualTo(varName);
+                        assertThat(new BigDecimal(pv.getValue().toString())).isLessThanOrEqualTo(upperBound);
+                    })
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_lessThanOrEqual() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal upperBound = new BigDecimal("42.42");
+        QueryCloudTask task1 = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("42.41")
+        );
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, upperBound);
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, new BigDecimal("42.43"));
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(task1, task2);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
     private void createProcessVariableAndTask(
         ProcessInstanceEntity processInstance,
         String name,
@@ -1024,7 +1433,7 @@ public class TaskControllerHelperIT {
         processVariableEntity.setName(name);
         processVariableEntity.setType(variableType.name().toLowerCase());
         switch (variableType) {
-            case STRING, BIGDECIMAL, DATE, DATETIME -> processVariableEntity.setValue((String) value);
+            case STRING, BIGDECIMAL, DATE, DATETIME -> processVariableEntity.setValue(String.valueOf(value));
             case INTEGER -> processVariableEntity.setValue((Integer) value);
             case BOOLEAN -> processVariableEntity.setValue((Boolean) value);
         }
@@ -1202,7 +1611,7 @@ public class TaskControllerHelperIT {
         taskVariableEntity.setName(varName);
         taskVariableEntity.setType(variableType.name().toLowerCase());
         switch (variableType) {
-            case STRING, BIGDECIMAL, DATE, DATETIME -> taskVariableEntity.setValue((String) value);
+            case STRING, BIGDECIMAL, DATE, DATETIME -> taskVariableEntity.setValue(String.valueOf(value));
             case INTEGER -> taskVariableEntity.setValue((Integer) value);
             case BOOLEAN -> taskVariableEntity.setValue((Boolean) value);
         }
