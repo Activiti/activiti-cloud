@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.core.utils.TestProcessEngine;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
 
@@ -48,6 +50,9 @@ class ProcessDiagramGeneratorWrapperIT {
 
     @Autowired
     private TestProcessEngine processEngine;
+
+    @MockBean
+    private IdentityService identityService;
 
     /**
      * Test for generating a valid process diagram
