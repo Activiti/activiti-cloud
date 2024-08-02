@@ -30,6 +30,7 @@ import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.ProcessVariableSpecification;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -213,8 +214,10 @@ public class TaskControllerHelper {
                 .stream()
                 .map(QueryCloudTask::getProcessInstanceId)
                 .collect(Collectors.toSet());
-            List<ProcessVariableEntity> processVariables = processVariableRepository.findAll(
-                new ProcessVariableSpecification(processInstanceIds, processVariableFetchKeys)
+
+            List<ProcessVariableEntity> processVariables = processVariableRepository.findBy(
+                new ProcessVariableSpecification(processInstanceIds, processVariableFetchKeys),
+                q -> q.project(ProcessVariableEntity_.VALUE).all()
             );
             Map<String, Set<ProcessVariableEntity>> processVariablesMap = processVariables
                 .stream()
