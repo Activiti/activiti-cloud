@@ -27,12 +27,14 @@ import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.SaveTaskPayload;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
@@ -46,6 +48,9 @@ class ProcessVariablesPayloadConverterTest {
 
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
+
+    @MockBean
+    private IdentityService identityService;
 
     private static Map<String, Object> variablesToConvert;
 
