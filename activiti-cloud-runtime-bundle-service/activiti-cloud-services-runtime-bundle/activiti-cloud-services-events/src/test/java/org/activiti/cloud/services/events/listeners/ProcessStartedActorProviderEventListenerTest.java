@@ -66,7 +66,6 @@ class ProcessStartedActorProviderEventListenerTest {
     void beforeEach() {
         User user = new User();
         user.setId(USER_ID);
-        when(this.principalIdentityProvider.getUserId(this.principal)).thenReturn(USER_ID);
         when(this.identityService.findUserByName(anyString())).thenReturn(user);
         when(this.securityContextPrincipalProvider.getCurrentPrincipal()).thenReturn(Optional.of(this.principal));
         this.processStartedActorProviderEventListener =
