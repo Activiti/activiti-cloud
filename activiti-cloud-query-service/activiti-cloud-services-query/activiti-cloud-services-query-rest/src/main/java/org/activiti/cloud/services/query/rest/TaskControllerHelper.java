@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +42,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 public class TaskControllerHelper {
 
@@ -197,7 +197,7 @@ public class TaskControllerHelper {
     }
 
     private void fetchProcessVariables(Collection<TaskEntity> tasks, Set<ProcessVariableKey> processVariableFetchKeys) {
-        if (!processVariableFetchKeys.isEmpty()) {
+        if (!CollectionUtils.isEmpty(processVariableFetchKeys)) {
             Set<String> processInstanceIds = tasks
                 .stream()
                 .map(QueryCloudTask::getProcessInstanceId)
@@ -215,11 +215,7 @@ public class TaskControllerHelper {
                         Collectors.mapping(pv -> pv, Collectors.toSet())
                     )
                 );
-            tasks.forEach(task ->
-                task.setProcessVariables(
-                    processVariablesMap.getOrDefault(task.getProcessInstanceId(), Collections.emptySet())
-                )
-            );
+            tasks.forEach(task -> task.setProcessVariables(processVariablesMap.get(task.getProcessInstanceId())));
         }
     }
 }

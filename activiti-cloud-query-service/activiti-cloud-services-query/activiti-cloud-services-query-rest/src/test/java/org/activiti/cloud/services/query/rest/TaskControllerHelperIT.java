@@ -40,6 +40,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
@@ -533,7 +534,7 @@ public class TaskControllerHelperIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = buildTaskSearchRequest(variableFilter);
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -549,6 +550,35 @@ public class TaskControllerHelperIT {
                 assertThat(task.getProcessVariables())
                     .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(valueToSearch));
             });
+    }
+
+    @Test
+    void should_returnTasks_filteredByTaskProcessVariable_exactMatch() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "task-var";
+        String valueToSearch = "task-value";
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.STRING, valueToSearch);
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.STRING, valueToSearch);
+        createTaskWithVariable(processInstance, varName, VariableType.STRING, "different-value");
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.STRING,
+            valueToSearch,
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).hasSize(2).containsExactlyInAnyOrder(task1, task2);
     }
 
     @Test
@@ -573,7 +603,7 @@ public class TaskControllerHelperIT {
             FilterOperator.CONTAINS
         );
 
-        TaskSearchRequest taskSearchRequest = buildTaskSearchRequest(variableFilter);
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -596,6 +626,36 @@ public class TaskControllerHelperIT {
                         ((String) pv.getValue()).toLowerCase().contains(valueToSearch.toLowerCase())
                     )
             );
+    }
+
+    @Test
+    void should_returnTasks_filteredByTaskProcessVariable_contains() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "task-var";
+        String valueToSearch = "fox";
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.STRING, "Gray Fox");
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.STRING, "Fox Hound");
+
+        VariableFilter variableFilter = new VariableFilter(
+            null,
+            varName,
+            VariableType.STRING,
+            valueToSearch,
+            FilterOperator.CONTAINS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+
+        List<QueryCloudTask> expectedTasks = List.of(task1, task2);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
     }
 
     private void createProcessVariableAndTask(
@@ -621,7 +681,7 @@ public class TaskControllerHelperIT {
     }
 
     @NotNull
-    private static TaskSearchRequest buildTaskSearchRequest(VariableFilter variableFilter) {
+    private static TaskSearchRequest buildTaskSearchRequestWithProcessVariableFilter(VariableFilter variableFilter) {
         Set<VariableFilter> filters = Set.of(variableFilter);
         Set<ProcessVariableKey> processVariableKeys = Set.of(
             new ProcessVariableKey(variableFilter.processDefinitionKey(), variableFilter.name())
@@ -650,6 +710,35 @@ public class TaskControllerHelperIT {
             null,
             filters,
             processVariableKeys
+        );
+    }
+
+    @NotNull
+    private static TaskSearchRequest buildTaskSearchRequestWithTaskVariableFilter(VariableFilter variableFilter) {
+        return new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            Set.of(variableFilter),
+            null,
+            null
         );
     }
 
@@ -739,5 +828,33 @@ public class TaskControllerHelperIT {
     @NotNull
     private ProcessInstanceEntity createProcessInstance() {
         return createProcessInstance("processDefinitionKey");
+    }
+
+    private TaskEntity createTaskWithVariable(
+        ProcessInstanceEntity processInstance,
+        String varName,
+        VariableType variableType,
+        Object value
+    ) {
+        TaskEntity taskEntity = new TaskEntity();
+        String taskId = UUID.randomUUID().toString();
+        taskEntity.setId(taskId);
+        taskEntity.setCreatedDate(new Date());
+        taskEntity.setProcessInstanceId(processInstance.getId());
+
+        TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
+        taskVariableEntity.setName(varName);
+        taskVariableEntity.setType(variableType.name().toLowerCase());
+        switch (variableType) {
+            case STRING, BIGDECIMAL, DATE, DATETIME -> taskVariableEntity.setValue((String) value);
+            case INTEGER -> taskVariableEntity.setValue((Integer) value);
+            case BOOLEAN -> taskVariableEntity.setValue((Boolean) value);
+        }
+        taskVariableEntity.setTaskId(taskId);
+        taskVariableRepository.save(taskVariableEntity);
+        taskEntity.setVariables(Set.of(taskVariableEntity));
+        taskRepository.save(taskEntity);
+
+        return taskEntity;
     }
 }
