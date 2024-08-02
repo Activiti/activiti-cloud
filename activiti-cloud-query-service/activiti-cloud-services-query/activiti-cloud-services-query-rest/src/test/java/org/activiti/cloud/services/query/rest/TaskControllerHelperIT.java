@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -61,7 +60,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.util.Pair;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
@@ -510,58 +508,70 @@ public class TaskControllerHelperIT {
 
     @Test
     void should_returnTasks_filteredByStringProcessVariable_exactMatch() {
-        String processDefinitionKey = "processDefinitionKey";
-        String anotherProcessDefinitionKey = "anotherProcessDefinitionKey";
-        List<ProcessInstanceEntity> processInstances1 = createProcessInstancesAndVariablesAndTasks(
-            processDefinitionKey
-        );
-        List<ProcessInstanceEntity> processInstances2 = createProcessInstancesAndVariablesAndTasks(
-            processDefinitionKey
-        );
-        List<ProcessInstanceEntity> processInstances3 = createProcessInstancesAndVariablesAndTasks(
-            anotherProcessDefinitionKey
-        );
+        String processDefinitionKey = "process-definition-key";
+        String differentProcessDefinitionKey = "different-process-definition-key";
+        String varName = "string-var";
+        String valueToSearch = "string-value";
 
-        Map.Entry<String, Pair<VariableType, Object>> variableToFilter = processVariables
-            .entrySet()
-            .stream()
-            .filter(e -> e.getValue().getFirst() == VariableType.STRING)
-            .findAny()
-            .get();
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.STRING, valueToSearch);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.STRING, "different-string-value");
+        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.STRING, valueToSearch);
+
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
-            variableToFilter.getKey(),
+            varName,
             VariableType.STRING,
-            (String) variableToFilter.getValue().getSecond(),
+            valueToSearch,
             FilterOperator.EQUALS
         );
+
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequest(variableFilter);
 
-        Set<TaskEntity> expectedTasks = Stream
-            .of(processInstances1, processInstances2, processInstances3)
-            .flatMap(List::stream)
-            .map(ProcessInstanceEntity::getTasks)
-            .flatMap(Set::stream)
-            .filter(t ->
-                t
-                    .getProcessVariables()
-                    .stream()
-                    .anyMatch(v ->
-                        v.getProcessDefinitionKey().equals(processDefinitionKey) &&
-                        v.getName().equals(variableToFilter.getKey()) &&
-                        v.getValue().equals(variableToFilter.getValue().getSecond())
-                    )
-            )
-            .collect(Collectors.toSet());
-
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 10000))
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
             .toList();
 
-        assertThat(retrievedTasks).hasSize(expectedTasks.size());
+        assertThat(retrievedTasks)
+            .hasSize(1)
+            .allSatisfy(task -> {
+                assertThat(task.getProcessInstanceId()).isEqualTo(processInstance1.getId());
+                assertThat(task.getProcessVariables())
+                    .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(valueToSearch));
+            });
+    }
+
+    @Test
+    void should_returnTasks_filteredByStringProcessVariable_contains() {
+        String varName = "string-var-1";
+        String queryParam = "ring";
+    }
+
+    private void createProcessVariableAndTask(
+        ProcessInstanceEntity processInstance,
+        String name,
+        VariableType variableType,
+        Object value
+    ) {
+        ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
+        processVariableEntity.setName(name);
+        processVariableEntity.setType(variableType.name().toLowerCase());
+        switch (variableType) {
+            case STRING, BIGDECIMAL, DATE, DATETIME -> processVariableEntity.setValue((String) value);
+            case INTEGER -> processVariableEntity.setValue((Integer) value);
+            case BOOLEAN -> processVariableEntity.setValue((Boolean) value);
+        }
+        processVariableEntity.setProcessInstanceId(processInstance.getId());
+        processVariableEntity.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        variableRepository.save(processVariableEntity);
+        processInstance.setVariables(Set.of(processVariableEntity));
+        processInstanceRepository.save(processInstance);
+        createTasks(processInstance, 1);
     }
 
     @NotNull
