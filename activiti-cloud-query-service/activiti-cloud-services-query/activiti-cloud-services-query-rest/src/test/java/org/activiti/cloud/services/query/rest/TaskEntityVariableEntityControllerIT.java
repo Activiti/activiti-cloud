@@ -35,6 +35,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -69,6 +70,9 @@ public class TaskEntityVariableEntityControllerIT {
 
     @MockBean
     private TaskVariableRepository variableRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private SecurityManager securityManager;
