@@ -1974,6 +1974,155 @@ public class TaskSearchIT {
         assertThat(retrievedTasks).containsExactly(task2);
     }
 
+    @Test
+    void should_returnStandaloneTasksOnly() {
+        TaskEntity standalone = new TaskEntity();
+        String taskId = "standalone";
+        standalone.setId(taskId);
+        taskRepository.save(standalone);
+
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        createTask(processInstance);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            true,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(standalone);
+    }
+
+    @Test
+    void should_returnRootTasksOnly() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        TaskEntity rootTask = createTask(processInstance);
+        TaskEntity subTask = new TaskEntity();
+        String subTaskId = "subTask";
+        subTask.setId(subTaskId);
+        subTask.setProcessInstanceId(processInstance.getId());
+        subTask.setParentTaskId(rootTask.getId());
+        taskRepository.save(subTask);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            true,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(rootTask);
+    }
+
+    @Test
+    void should_returnTasksFilteredByNameContains() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setName("Darth Vader");
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setName("Frodo Baggins");
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setName("Duke Leto");
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            List.of("darth", "baggins"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
     private void createProcessVariableAndTask(
         ProcessInstanceEntity processInstance,
         String name,
@@ -2031,6 +2180,7 @@ public class TaskSearchIT {
             null,
             null,
             null,
+            null,
             filters,
             processVariableKeys
         );
@@ -2041,6 +2191,7 @@ public class TaskSearchIT {
         return new TaskSearchRequest(
             false,
             false,
+            null,
             null,
             null,
             null,
