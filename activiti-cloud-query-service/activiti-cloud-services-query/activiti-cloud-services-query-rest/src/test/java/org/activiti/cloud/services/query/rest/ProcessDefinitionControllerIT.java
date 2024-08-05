@@ -74,9 +74,6 @@ public class ProcessDefinitionControllerIT {
     private MockMvc mockMvc;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private ProcessDefinitionRepository processDefinitionRepository;
 
     @MockBean

@@ -71,9 +71,6 @@ public class ProcessInstanceEntityAdminControllerIT {
     private ProcessInstanceRepository processInstanceRepository;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private SecurityManager securityManager;
 
     @MockBean

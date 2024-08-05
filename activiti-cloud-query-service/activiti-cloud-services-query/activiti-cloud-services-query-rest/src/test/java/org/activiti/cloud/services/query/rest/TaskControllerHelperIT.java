@@ -48,16 +48,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     properties = {
@@ -67,7 +63,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     }
 )
 @TestPropertySource("classpath:application-test.properties")
-@Testcontainers
 @EnableAutoConfiguration
 public class TaskControllerHelperIT {
 
@@ -91,10 +86,6 @@ public class TaskControllerHelperIT {
 
     @Autowired
     private TaskCandidateUserRepository taskCandidateUserRepository;
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @BeforeEach
     public void setUp() {

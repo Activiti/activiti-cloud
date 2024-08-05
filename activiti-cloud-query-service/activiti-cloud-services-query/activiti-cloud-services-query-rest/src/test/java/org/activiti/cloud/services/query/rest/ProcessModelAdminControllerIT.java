@@ -66,9 +66,6 @@ public class ProcessModelAdminControllerIT {
     private ProcessModelRepository processModelRepository;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private UserGroupManager userGroupManager;
 
     @MockBean
