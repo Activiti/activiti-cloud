@@ -34,6 +34,7 @@ import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -89,6 +90,9 @@ public class ProcessInstanceEntityAdminControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private EntityManagerFactory entityManagerFactory;
