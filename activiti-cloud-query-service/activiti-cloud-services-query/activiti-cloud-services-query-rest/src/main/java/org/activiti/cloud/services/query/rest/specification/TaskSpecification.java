@@ -49,10 +49,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
 
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.rootTasksOnly()) {
+        if (taskSearchRequest.onlyRoot()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.parentTaskId)));
         }
-        if (taskSearchRequest.standAlone()) {
+        if (taskSearchRequest.onlyStandalone()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.processInstanceId)));
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.name())) {
@@ -191,18 +191,21 @@ public class TaskSpecification implements Specification<TaskEntity> {
         Root<TaskEntity> root,
         SingularAttribute<TaskEntity, String> attribute
     ) {
-        if (valuesToFilter.size() > 1) {
-            predicates.add(
-                criteriaBuilder.or(
-                    valuesToFilter
-                        .stream()
-                        .map(value -> criteriaBuilder.like(root.get(attribute), "%" + value + "%"))
-                        .toArray(Predicate[]::new)
+        predicates.add(
+            valuesToFilter
+                .stream()
+                .map(value ->
+                    criteriaBuilder.isTrue(
+                        criteriaBuilder.function(
+                            "sql",
+                            Boolean.class,
+                            criteriaBuilder.literal(attribute.getName() + " ilike '%" + value + "%'")
+                        )
+                    )
                 )
-            );
-        } else {
-            predicates.add(criteriaBuilder.like(root.get(attribute), "%" + valuesToFilter.getFirst() + "%"));
-        }
+                .reduce(criteriaBuilder::or)
+                .orElse(criteriaBuilder.conjunction())
+        );
     }
 
     private void applyProcessVariableFilters(
