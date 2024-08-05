@@ -67,9 +67,6 @@ public class ApplicationAdminControllerIT {
     private ApplicationRepository applicationRepository;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private SecurityManager securityManager;
 
     @MockBean

@@ -67,9 +67,6 @@ public class ProcessDefinitionAdminControllerIT {
     private ProcessDefinitionRepository processDefinitionRepository;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private SecurityManager securityManager;
 
     @MockBean

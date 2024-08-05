@@ -76,9 +76,6 @@ public class TaskEntityAdminControllerIT {
     private ProcessInstanceAdminService processInstanceAdminService;
 
     @MockBean
-    private VariableRepository variableRepository;
-
-    @MockBean
     private TaskRepository taskRepository;
 
     @MockBean
