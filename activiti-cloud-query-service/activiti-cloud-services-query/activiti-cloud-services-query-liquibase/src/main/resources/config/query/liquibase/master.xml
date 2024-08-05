@@ -483,10 +483,20 @@
   </changeSet>
 
   <changeSet author="activiti-query" runInTransaction="false"
+             id="alter24-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/24-alter.oracle.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
              id="alter24-schema" dbms="postgresql">
     <sqlFile dbms="postgresql"
               encoding="utf8"
-              path="changelog/24-alter.pg.schema.8.6.0.sql"
+              path="changelog/24-alter.pg.schema.8.7.0.sql"
               relativeToChangelogFile="true"
               splitStatements="true"
               stripComments="true"/>
