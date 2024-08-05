@@ -178,7 +178,7 @@ create table task_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    value               text,
+    value               json,
     task_id             varchar(255),
     primary key (id)
 );
