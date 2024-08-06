@@ -18,26 +18,32 @@ package org.activiti.cloud.services.query.rest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.activiti.cloud.util.DateUtils;
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +87,12 @@ public class TaskSearchIT {
 
     @Autowired
     private VariableRepository variableRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
 
     @BeforeEach
     public void setUp() {
@@ -1009,16 +1021,11 @@ public class TaskSearchIT {
         String valueToSearch = "2024-08-02";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-02");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-03T00:12:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-03");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(
-            processWithDifferentKey,
-            varName,
-            VariableType.DATE,
-            "2024-08-02T00:13:00.000+0000"
-        );
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.DATE, "2024-08-02");
 
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
@@ -1043,8 +1050,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()).toLocalDate())
-                            .isEqualTo(DateUtils.parseDate(valueToSearch));
+                        assertThat(LocalDate.parse(pv.getValue())).isEqualTo(LocalDate.parse(valueToSearch));
                     })
             );
     }
@@ -1054,13 +1060,8 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "date-var";
         String valueToSearch = "2024-08-02";
-        QueryCloudTask task = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-02T00:11:00.000+0000"
-        );
-        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03T00:12:00.000+0000");
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1091,16 +1092,11 @@ public class TaskSearchIT {
         String lowerBound = "2024-08-02";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-03T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-03");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(
-            processWithDifferentKey,
-            varName,
-            VariableType.DATE,
-            "2024-08-03T00:12:00.000+0000"
-        );
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.DATE, "2024-08-03");
 
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
@@ -1125,8 +1121,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()).toLocalDate())
-                            .isAfter(DateUtils.parseDate(lowerBound));
+                        assertThat(LocalDate.parse(pv.getValue())).isGreaterThan(LocalDate.parse(lowerBound));
                     })
             );
     }
@@ -1136,13 +1131,8 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "date-var";
         String lowerBound = "2024-08-02";
-        QueryCloudTask task = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-03T00:11:00.000+0000"
-        );
-        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1173,16 +1163,11 @@ public class TaskSearchIT {
         String lowerBound = "2024-08-02";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-03T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-03");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(
-            processWithDifferentKey,
-            varName,
-            VariableType.DATE,
-            "2024-08-03T00:12:00.000+0000"
-        );
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.DATE, "2024-08-03");
 
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
@@ -1212,8 +1197,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()).toLocalDate())
-                            .isAfterOrEqualTo(DateUtils.parseDate(lowerBound));
+                        assertThat(LocalDate.parse(pv.getValue())).isGreaterThanOrEqualTo(LocalDate.parse(lowerBound));
                     })
             );
     }
@@ -1223,19 +1207,9 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "date-var";
         String lowerBound = "2024-08-02";
-        QueryCloudTask task1 = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-03T00:11:00.000+0000"
-        );
-        QueryCloudTask task2 = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-02T00:11:00.000+0000"
-        );
-        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-01T00:11:00.000+0000");
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03");
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-01");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1268,16 +1242,11 @@ public class TaskSearchIT {
         String upperBound = "2024-08-02";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-01T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-01");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(
-            processWithDifferentKey,
-            varName,
-            VariableType.DATE,
-            "2024-08-01T00:11:00.000+0000"
-        );
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.DATE, "2024-08-01");
 
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
@@ -1302,8 +1271,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()).toLocalDate())
-                            .isBefore(DateUtils.parseDate(upperBound));
+                        assertThat(LocalDate.parse(pv.getValue())).isLessThan(LocalDate.parse(upperBound));
                     })
             );
     }
@@ -1313,13 +1281,8 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "date-var";
         String upperBound = "2024-08-02";
-        QueryCloudTask task = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-01T00:11:00.000+0000"
-        );
-        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-01");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1350,16 +1313,11 @@ public class TaskSearchIT {
         String upperBound = "2024-08-02";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-01T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-01");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-02");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(
-            processWithDifferentKey,
-            varName,
-            VariableType.DATE,
-            "2024-08-01T00:11:00.000+0000"
-        );
+        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.DATE, "2024-08-01");
 
         VariableFilter variableFilter = new VariableFilter(
             processDefinitionKey,
@@ -1389,8 +1347,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()).toLocalDate())
-                            .isBeforeOrEqualTo(DateUtils.parseDate(upperBound));
+                        assertThat(LocalDate.parse(pv.getValue())).isLessThanOrEqualTo(LocalDate.parse(upperBound));
                     })
             );
     }
@@ -1400,19 +1357,9 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "date-var";
         String upperBound = "2024-08-02";
-        QueryCloudTask task1 = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-01T00:11:00.000+0000"
-        );
-        QueryCloudTask task2 = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATE,
-            "2024-08-02T00:11:00.000+0000"
-        );
-        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03T00:11:00.000+0000");
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-01");
+        QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-03");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1442,18 +1389,18 @@ public class TaskSearchIT {
         String differentProcessDefinitionKey = "different-process-definition-key";
 
         String varName = "datetime-var";
-        String valueToSearch = "2024-08-02T00:11:00.000+0000";
+        String valueToSearch = "2024-08-02T00:11:00.000+00:00";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:11:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:11:00.000+00:00");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+0000");
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00");
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
         createProcessVariableAndTask(
             processWithDifferentKey,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:11:00.000+0000"
+            "2024-08-02T00:11:00.000+00:00"
         );
 
         VariableFilter variableFilter = new VariableFilter(
@@ -1479,8 +1426,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()))
-                            .isEqualTo(DateUtils.parseDateTime(valueToSearch));
+                        assertThat(OffsetDateTime.parse(pv.getValue())).isEqualTo(OffsetDateTime.parse(valueToSearch));
                     })
             );
     }
@@ -1490,9 +1436,9 @@ public class TaskSearchIT {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "datetime-var";
 
-        String valueToSearch = "2024-08-02T00:11:00.000+0000";
+        String valueToSearch = "2024-08-02T00:11:00.000+00:00";
         QueryCloudTask task = createTaskWithVariable(processInstance, varName, VariableType.DATETIME, valueToSearch);
-        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+0000");
+        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1520,10 +1466,10 @@ public class TaskSearchIT {
         String differentProcessDefinitionKey = "different-process-definition-key";
 
         String varName = "datetime-var";
-        String lowerBound = "2024-08-02T00:11:00.000+0000";
+        String lowerBound = "2024-08-02T00:11:00.000+00:00";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
         createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, lowerBound);
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
@@ -1531,7 +1477,7 @@ public class TaskSearchIT {
             processWithDifferentKey,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:12:00.000+0000"
+            "2024-08-02T00:12:00.000+00:00"
         );
 
         VariableFilter variableFilter = new VariableFilter(
@@ -1557,7 +1503,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue())).isAfter(DateUtils.parseDateTime(lowerBound));
+                        assertThat(OffsetDateTime.parse(pv.getValue())).isAfter(OffsetDateTime.parse(lowerBound));
                     })
             );
     }
@@ -1566,12 +1512,12 @@ public class TaskSearchIT {
     void should_returnTasksFilteredByDateTimeTaskVariable_greaterThan() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "datetime-var";
-        String lowerBound = "2024-08-02T00:11:00.000+0000";
+        String lowerBound = "2024-08-02T00:11:00.000+00:00";
         QueryCloudTask task = createTaskWithVariable(
             processInstance,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:12:00.000+0000"
+            "2024-08-02T00:12:00.000+00:00"
         );
         createTaskWithVariable(processInstance, varName, VariableType.DATETIME, lowerBound);
 
@@ -1601,10 +1547,10 @@ public class TaskSearchIT {
         String differentProcessDefinitionKey = "different-process-definition-key";
 
         String varName = "datetime-var";
-        String lowerBound = "2024-08-02T00:11:00.000+0000";
+        String lowerBound = "2024-08-02T00:11:00.000+00:00";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
         createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, lowerBound);
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
@@ -1612,7 +1558,7 @@ public class TaskSearchIT {
             processWithDifferentKey,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:12:00.000+0000"
+            "2024-08-02T00:12:00.000+00:00"
         );
 
         VariableFilter variableFilter = new VariableFilter(
@@ -1643,8 +1589,8 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()))
-                            .isAfterOrEqualTo(DateUtils.parseDateTime(lowerBound));
+                        assertThat(OffsetDateTime.parse(pv.getValue()))
+                            .isAfterOrEqualTo(OffsetDateTime.parse(lowerBound));
                     })
             );
     }
@@ -1653,15 +1599,15 @@ public class TaskSearchIT {
     void should_returnTasksFilteredByDateTimeTaskVariable_greaterThanOrEqual() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "datetime-var";
-        String lowerBound = "2024-08-02T00:11:00.000+0000";
+        String lowerBound = "2024-08-02T00:11:00.000+00:00";
         QueryCloudTask task1 = createTaskWithVariable(
             processInstance,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:12:00.000+0000"
+            "2024-08-02T00:12:00.000+00:00"
         );
         QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.DATETIME, lowerBound);
-        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+0000");
+        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+00:00");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -1691,10 +1637,10 @@ public class TaskSearchIT {
         String differentProcessDefinitionKey = "different-process-definition-key";
 
         String varName = "datetime-var";
-        String upperBound = "2024-08-02T00:11:00.000+0000";
+        String upperBound = "2024-08-02T00:11:00.000+00:00";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+00:00");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
         createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, upperBound);
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
@@ -1702,7 +1648,7 @@ public class TaskSearchIT {
             processWithDifferentKey,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:10:00.000+0000"
+            "2024-08-02T00:10:00.000+00:00"
         );
 
         VariableFilter variableFilter = new VariableFilter(
@@ -1728,8 +1674,7 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()))
-                            .isBefore(DateUtils.parseDateTime(upperBound));
+                        assertThat(OffsetDateTime.parse(pv.getValue())).isBefore(OffsetDateTime.parse(upperBound));
                     })
             );
     }
@@ -1738,13 +1683,13 @@ public class TaskSearchIT {
     void should_returnTasksFilteredByDateTimeTaskVariable_lessThan() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "datetime-var";
-        String upperBound = "2024-08-02T00:11:00.000+0000";
+        String upperBound = "2024-08-02T00:11:00.000+00:00";
 
         QueryCloudTask task = createTaskWithVariable(
             processInstance,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:10:00.000+0000"
+            "2024-08-02T00:10:00.000+00:00"
         );
         createTaskWithVariable(processInstance, varName, VariableType.DATETIME, upperBound);
 
@@ -1774,10 +1719,10 @@ public class TaskSearchIT {
         String differentProcessDefinitionKey = "different-process-definition-key";
 
         String varName = "datetime-var";
-        String upperBound = "2024-08-02T00:11:00.000+0000";
+        String upperBound = "2024-08-02T00:11:00.000+00:00";
 
         ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+0000");
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:10:00.000+00:00");
         ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
         createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, upperBound);
         ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
@@ -1785,7 +1730,7 @@ public class TaskSearchIT {
             processWithDifferentKey,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:10:00.000+0000"
+            "2024-08-02T00:10:00.000+00:00"
         );
 
         VariableFilter variableFilter = new VariableFilter(
@@ -1816,8 +1761,8 @@ public class TaskSearchIT {
                 assertThat(task.getProcessVariables())
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
-                        assertThat(DateUtils.parseDateTime(pv.getValue()))
-                            .isBeforeOrEqualTo(DateUtils.parseDateTime(upperBound));
+                        assertThat(OffsetDateTime.parse(pv.getValue()))
+                            .isBeforeOrEqualTo(OffsetDateTime.parse(upperBound));
                     })
             );
     }
@@ -1826,16 +1771,16 @@ public class TaskSearchIT {
     void should_returnTasksFilteredByDateTimeTaskVariable_lessThanOrEqual() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "datetime-var";
-        String upperBound = "2024-08-02T00:11:00.000+0000";
+        String upperBound = "2024-08-02T00:11:00.000+00:00";
 
         QueryCloudTask task1 = createTaskWithVariable(
             processInstance,
             varName,
             VariableType.DATETIME,
-            "2024-08-02T00:10:00.000+0000"
+            "2024-08-02T00:10:00.000+00:00"
         );
         QueryCloudTask task2 = createTaskWithVariable(processInstance, varName, VariableType.DATETIME, upperBound);
-        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+0000");
+        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:12:00.000+00:00");
 
         VariableFilter variableFilter = new VariableFilter(
             null,
@@ -2007,7 +1952,6 @@ public class TaskSearchIT {
             null,
             null,
             null,
-            null,
             null
         );
 
@@ -2035,7 +1979,6 @@ public class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
             false,
             true,
-            null,
             null,
             null,
             null,
@@ -2109,6 +2052,936 @@ public class TaskSearchIT {
             null,
             null,
             null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByDescriptionContains() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setDescription("Darth Vader");
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setDescription("Frodo Baggins");
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setDescription("Duke Leto");
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            List.of("darth", "baggins"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByPriority() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setPriority(1);
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setPriority(2);
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setPriority(3);
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            List.of(1, 2),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByStatus() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setStatus(Task.TaskStatus.CREATED);
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setStatus(Task.TaskStatus.ASSIGNED);
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setStatus(Task.TaskStatus.COMPLETED);
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            List.of(Task.TaskStatus.CREATED, Task.TaskStatus.ASSIGNED),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCompletedBy() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setCompletedBy("Jimmy Page");
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setCompletedBy("Robert Plant");
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setCompletedBy("John Bonham");
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            List.of("Jimmy Page", "Robert Plant"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByAssignee() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setAssignee("Kimi Raikkonen");
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setAssignee("Lewis Hamilton");
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setAssignee("Max Verstappen");
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            List.of("Kimi Raikkonen", "Lewis Hamilton"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCreatedFrom() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setCreatedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setCreatedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setCreatedDate(new Date(500));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(900),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCreatedTo() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setCreatedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setCreatedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setCreatedDate(new Date(3000));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(2500),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByLastModifiedFrom() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setLastModified(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setLastModified(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setLastModified(new Date(500));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(900),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByLastModifiedTo() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setLastModified(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setLastModified(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setLastModified(new Date(3000));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(2500),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByLastClaimedFrom() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setClaimedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setClaimedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setClaimedDate(new Date(500));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(900),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByLastClaimedTo() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setClaimedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setClaimedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setClaimedDate(new Date(3000));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(2500),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByDueDateFrom() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setDueDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setDueDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setDueDate(new Date(500));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(900),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByDueDateTo() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setDueDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setDueDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setDueDate(new Date(3000));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(2500),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCompletedFrom() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setCompletedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setCompletedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setCompletedDate(new Date(500));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(900),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCompletedTo() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        task1.setCompletedDate(new Date(1000));
+        taskRepository.save(task1);
+
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        task2.setCompletedDate(new Date(2000));
+        taskRepository.save(task2);
+
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        task3.setCompletedDate(new Date(3000));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            new Date(2500),
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCandidateUserId() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        taskRepository.save(task1);
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        taskRepository.save(task2);
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        taskRepository.save(task3);
+
+        TaskCandidateUserEntity candidate1 = new TaskCandidateUserEntity();
+        candidate1.setUserId("user1");
+        candidate1.setTaskId(task1.getId());
+        taskCandidateUserRepository.save(candidate1);
+        TaskCandidateUserEntity candidate2 = new TaskCandidateUserEntity();
+        candidate2.setUserId("user2");
+        candidate2.setTaskId(task2.getId());
+        taskCandidateUserRepository.save(candidate2);
+        TaskCandidateUserEntity candidate3 = new TaskCandidateUserEntity();
+        candidate3.setUserId("user3");
+        candidate3.setTaskId(task3.getId());
+        taskCandidateUserRepository.save(candidate3);
+
+        task1.setTaskCandidateUsers(Set.of(candidate1));
+        taskRepository.save(task1);
+        task2.setTaskCandidateUsers(Set.of(candidate2));
+        taskRepository.save(task2);
+        task3.setTaskCandidateUsers(Set.of(candidate3));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            List.of("user1", "user2"),
+            null,
+            null,
+            null,
+            null
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByCandidateGroupId() {
+        TaskEntity task1 = new TaskEntity();
+        task1.setId("task1");
+        taskRepository.save(task1);
+        TaskEntity task2 = new TaskEntity();
+        task2.setId("task2");
+        taskRepository.save(task2);
+        TaskEntity task3 = new TaskEntity();
+        task3.setId("task3");
+        taskRepository.save(task3);
+
+        TaskCandidateGroupEntity candidate1 = new TaskCandidateGroupEntity();
+        candidate1.setGroupId("group1");
+        candidate1.setTaskId(task1.getId());
+        taskCandidateGroupRepository.save(candidate1);
+        TaskCandidateGroupEntity candidate2 = new TaskCandidateGroupEntity();
+        candidate2.setGroupId("group2");
+        candidate2.setTaskId(task2.getId());
+        taskCandidateGroupRepository.save(candidate2);
+        TaskCandidateGroupEntity candidate3 = new TaskCandidateGroupEntity();
+        candidate3.setGroupId("group3");
+        candidate3.setTaskId(task3.getId());
+        taskCandidateGroupRepository.save(candidate3);
+
+        task1.setTaskCandidateGroups(Set.of(candidate1));
+        taskRepository.save(task1);
+        task2.setTaskCandidateGroups(Set.of(candidate2));
+        taskRepository.save(task2);
+        task3.setTaskCandidateGroups(Set.of(candidate3));
+        taskRepository.save(task3);
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            List.of("group1", "group2"),
+            null,
             null,
             null
         );
@@ -2180,7 +3053,6 @@ public class TaskSearchIT {
             null,
             null,
             null,
-            null,
             filters,
             processVariableKeys
         );
@@ -2191,7 +3063,6 @@ public class TaskSearchIT {
         return new TaskSearchRequest(
             false,
             false,
-            null,
             null,
             null,
             null,
