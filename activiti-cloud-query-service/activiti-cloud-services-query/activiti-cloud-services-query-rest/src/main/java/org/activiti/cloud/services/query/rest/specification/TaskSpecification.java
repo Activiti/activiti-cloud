@@ -31,7 +31,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
-import org.activiti.cloud.services.query.rest.IllegalFilterException;
+import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,6 +41,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
 
     private static final String DATETIME_DB_TYPE = "TIMESTAMPTZ";
     private static final String DATE_DB_TYPE = "DATE";
+    private static final String EXTRACT_VALUE_EXPRESSION = "(" + ProcessVariableEntity_.VALUE + "->>'value')";
     List<Predicate> predicates = new ArrayList<>();
 
     private final TaskSearchRequest taskSearchRequest;
@@ -181,7 +182,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
 
     private void applyNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(taskSearchRequest.description())) {
-            applyLikeFilters(taskSearchRequest.description(), criteriaBuilder, root, TaskEntity_.description);
+            applyLikeFilters(taskSearchRequest.description(), criteriaBuilder, TaskEntity_.description);
         }
     }
 
@@ -192,7 +193,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
         SingularAttribute<TaskEntity, String> name
     ) {
         if (!CollectionUtils.isEmpty(taskSearchRequest)) {
-            applyLikeFilters(taskSearchRequest, criteriaBuilder, root, name);
+            applyLikeFilters(taskSearchRequest, criteriaBuilder, name);
         }
     }
 
@@ -211,7 +212,6 @@ public class TaskSpecification implements Specification<TaskEntity> {
     private void applyLikeFilters(
         List<String> valuesToFilter,
         CriteriaBuilder criteriaBuilder,
-        Root<TaskEntity> root,
         SingularAttribute<TaskEntity, String> attribute
     ) {
         predicates.add(
@@ -349,17 +349,15 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         " @@ '$.value == \"" +
                         filter.value() +
                         "\"'";
-                        case DATETIME -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATETIME_DB_TYPE +
                         " = '" +
                         filter.value() +
                         "'::" +
                         DATETIME_DB_TYPE;
-                        case DATE -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATE -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATE_DB_TYPE +
                         " = '" +
                         filter.value() +
@@ -383,22 +381,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value > " + filter.value() + "'";
-                        case BIGDECIMAL -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::NUMERIC > " +
-                        filter.value();
+                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC > " + filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value > \"" + filter.value() + "\"'";
-                        case DATETIME -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATETIME_DB_TYPE +
                         " > '" +
                         filter.value() +
                         "'::" +
                         DATETIME_DB_TYPE;
-                        case DATE -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATE -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATE_DB_TYPE +
                         " > '" +
                         filter.value() +
@@ -414,22 +407,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value >= " + filter.value() + "'";
-                        case BIGDECIMAL -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::NUMERIC >= " +
-                        filter.value();
+                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC >= " + filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value >= \"" + filter.value() + "\"'";
-                        case DATETIME -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATETIME_DB_TYPE +
                         " >= '" +
                         filter.value() +
                         "'::" +
                         DATETIME_DB_TYPE;
-                        case DATE -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATE -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATE_DB_TYPE +
                         " >= '" +
                         filter.value() +
@@ -445,22 +433,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value < " + filter.value() + "'";
-                        case BIGDECIMAL -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::NUMERIC < " +
-                        filter.value();
+                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC < " + filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value < \"" + filter.value() + "\"'";
-                        case DATETIME -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATETIME_DB_TYPE +
                         " < '" +
                         filter.value() +
                         "'::" +
                         DATETIME_DB_TYPE;
-                        case DATE -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATE -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATE_DB_TYPE +
                         " < '" +
                         filter.value() +
@@ -476,22 +459,17 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 String condition =
                     switch (filter.type()) {
                         case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value <= " + filter.value() + "'";
-                        case BIGDECIMAL -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::NUMERIC <= " +
-                        filter.value();
+                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC <= " + filter.value();
                         case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value <= \"" + filter.value() + "\"'";
-                        case DATETIME -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATETIME_DB_TYPE +
                         " <= '" +
                         filter.value() +
                         "'::" +
                         DATETIME_DB_TYPE;
-                        case DATE -> "(" +
-                        ProcessVariableEntity_.VALUE +
-                        "->>'value')::" +
+                        case DATE -> EXTRACT_VALUE_EXPRESSION +
+                        "::" +
                         DATE_DB_TYPE +
                         " <= '" +
                         filter.value() +
