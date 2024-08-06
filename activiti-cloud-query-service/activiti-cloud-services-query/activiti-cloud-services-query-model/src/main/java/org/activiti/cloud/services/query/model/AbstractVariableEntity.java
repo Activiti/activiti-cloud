@@ -30,6 +30,8 @@ import jakarta.persistence.Temporal;
 import java.util.Date;
 import java.util.Objects;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @MappedSuperclass
@@ -50,6 +52,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
     private String executionId;
 
     @Convert(converter = VariableValueJsonConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "`value`", columnDefinition = "text")
     @Basic(fetch = FetchType.LAZY)
     private VariableValue<?> value;
