@@ -55,7 +55,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
         applyNameFilter(taskSearchRequest.name(), criteriaBuilder, root, TaskEntity_.name);
-        applyNameFilter(root, criteriaBuilder);
+        applyNameFilter(criteriaBuilder);
         applyPriorityFilter(root);
         applyStatusFilter(root);
         applyCompletedByFilter(root);
@@ -180,7 +180,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
         }
     }
 
-    private void applyNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+    private void applyNameFilter(CriteriaBuilder criteriaBuilder) {
         if (!CollectionUtils.isEmpty(taskSearchRequest.description())) {
             applyLikeFilters(taskSearchRequest.description(), criteriaBuilder, TaskEntity_.description);
         }
