@@ -15,6 +15,6 @@
  */
 
 ALTER TABLE process_variable ADD (temp_value JSON);
-UPDATE process_variable SET temp_value = value;
+UPDATE process_variable SET temp_value = value WHERE true;
 ALTER TABLE process_variable DROP COLUMN value;
 ALTER TABLE process_variable RENAME COLUMN temp_value TO value;

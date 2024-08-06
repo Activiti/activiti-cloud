@@ -65,7 +65,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @Testcontainers
 @TestPropertySource("classpath:application-test.properties")
-public class TaskSearchIT {
+class TaskSearchIT {
 
     @Container
     @ServiceConnection
@@ -136,6 +136,7 @@ public class TaskSearchIT {
             .allSatisfy(task -> {
                 assertThat(task.getProcessInstanceId()).isEqualTo(processInstance1.getId());
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(valueToSearch));
             });
     }
@@ -208,6 +209,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv ->
                         pv.getName().equals(varName) &&
                         ((String) pv.getValue()).toLowerCase().contains(valueToSearch.toLowerCase())
@@ -281,6 +283,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && pv.getValue().equals(valueToSearch))
             );
     }
@@ -350,6 +353,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() > lowerBound)
             );
     }
@@ -423,6 +427,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() >= lowerBound)
             );
     }
@@ -494,6 +499,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() < upperBound)
             );
     }
@@ -567,6 +573,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv -> pv.getName().equals(varName) && (int) pv.getValue() <= upperBound)
             );
     }
@@ -637,6 +644,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .anyMatch(pv ->
                         pv.getName().equals(varName) && new BigDecimal(pv.getValue().toString()).equals(valueToSearch)
                     )
@@ -711,6 +719,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(new BigDecimal(pv.getValue().toString())).isGreaterThan(lowerBound);
@@ -797,6 +806,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(new BigDecimal(pv.getValue().toString())).isGreaterThanOrEqualTo(lowerBound);
@@ -881,6 +891,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(new BigDecimal(pv.getValue().toString())).isLessThan(upperBound);
@@ -967,6 +978,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(new BigDecimal(pv.getValue().toString())).isLessThanOrEqualTo(upperBound);
@@ -1046,6 +1058,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(LocalDate.parse(pv.getValue())).isEqualTo(LocalDate.parse(valueToSearch));
@@ -1117,6 +1130,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(LocalDate.parse(pv.getValue())).isGreaterThan(LocalDate.parse(lowerBound));
@@ -1193,6 +1207,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(LocalDate.parse(pv.getValue())).isGreaterThanOrEqualTo(LocalDate.parse(lowerBound));
@@ -1267,6 +1282,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(LocalDate.parse(pv.getValue())).isLessThan(LocalDate.parse(upperBound));
@@ -1343,6 +1359,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(LocalDate.parse(pv.getValue())).isLessThanOrEqualTo(LocalDate.parse(upperBound));
@@ -1422,6 +1439,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(OffsetDateTime.parse(pv.getValue())).isEqualTo(OffsetDateTime.parse(valueToSearch));
@@ -1499,6 +1517,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(OffsetDateTime.parse(pv.getValue())).isAfter(OffsetDateTime.parse(lowerBound));
@@ -1585,6 +1604,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(OffsetDateTime.parse(pv.getValue()))
@@ -1670,6 +1690,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(OffsetDateTime.parse(pv.getValue())).isBefore(OffsetDateTime.parse(upperBound));
@@ -1757,6 +1778,7 @@ public class TaskSearchIT {
             .containsExactlyInAnyOrderElementsOf(expectedTasks)
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat(OffsetDateTime.parse(pv.getValue()))
@@ -1838,6 +1860,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance1.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat((boolean) pv.getValue()).isTrue();
@@ -1867,6 +1890,7 @@ public class TaskSearchIT {
             .containsExactly(processInstance2.getTasks().iterator().next())
             .allSatisfy(task ->
                 assertThat(task.getProcessVariables())
+                    .isNotEmpty()
                     .allSatisfy(pv -> {
                         assertThat(pv.getName()).isEqualTo(varName);
                         assertThat((boolean) pv.getValue()).isFalse();
