@@ -54,6 +54,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -130,7 +131,7 @@ public class TaskController {
 
     @Operation(summary = "Search tasks", hidden = true)
     @JsonView(JsonViews.General.class)
-    @RequestMapping(method = RequestMethod.POST, value = "/search")
+    @PostMapping("/search")
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         @RequestBody TaskSearchRequest taskSearchRequest,
         Pageable pageable
