@@ -21,19 +21,18 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity_;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.activiti.cloud.util.DateUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
@@ -61,21 +60,11 @@ public class TaskSpecification implements Specification<TaskEntity> {
         if (!CollectionUtils.isEmpty(taskSearchRequest.description())) {
             applyLikeFilters(taskSearchRequest.description(), criteriaBuilder, root, TaskEntity_.description);
         }
-        if (!CollectionUtils.isEmpty(taskSearchRequest.processDefinitionName())) {
-            applyLikeFilters(
-                taskSearchRequest.processDefinitionName(),
-                criteriaBuilder,
-                root,
-                TaskEntity_.processDefinitionName
-            );
-        }
         if (!CollectionUtils.isEmpty(taskSearchRequest.priority())) {
             predicates.add(root.get(TaskEntity_.priority).in(taskSearchRequest.priority()));
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.status())) {
-            predicates.add(
-                root.get(TaskEntity_.status).in(taskSearchRequest.status().stream().map(String::toUpperCase))
-            );
+            predicates.add(root.get(TaskEntity_.status).in(taskSearchRequest.status()));
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.completedBy())) {
             predicates.add(root.get(TaskEntity_.completedBy).in(taskSearchRequest.completedBy()));
@@ -85,93 +74,63 @@ public class TaskSpecification implements Specification<TaskEntity> {
         }
         if (taskSearchRequest.createdFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(
-                    root.get(TaskEntity_.createdDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.createdFrom()).toInstant())
-                )
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdFrom())
             );
         }
         if (taskSearchRequest.createdTo() != null) {
-            predicates.add(
-                criteriaBuilder.lessThan(
-                    root.get(TaskEntity_.createdDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.createdTo()).toInstant())
-                )
-            );
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdTo()));
         }
         if (taskSearchRequest.lastModifiedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(
-                    root.get(TaskEntity_.lastModified),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastModifiedFrom()).toInstant())
-                )
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedFrom())
             );
         }
         if (taskSearchRequest.lastModifiedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(
-                    root.get(TaskEntity_.lastModified),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastModifiedTo()).toInstant())
-                )
+                criteriaBuilder.lessThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedTo())
             );
         }
         if (taskSearchRequest.lastClaimedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(
-                    root.get(TaskEntity_.claimedDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastClaimedFrom()).toInstant())
-                )
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedFrom())
             );
         }
         if (taskSearchRequest.lastClaimedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(
-                    root.get(TaskEntity_.claimedDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.lastClaimedTo()).toInstant())
-                )
+                criteriaBuilder.lessThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedTo())
             );
         }
         if (taskSearchRequest.completedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(
-                    root.get(TaskEntity_.completedDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.completedFrom()).toInstant())
-                )
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedFrom())
             );
         }
         if (taskSearchRequest.completedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(
-                    root.get(TaskEntity_.completedDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.completedTo()).toInstant())
-                )
+                criteriaBuilder.lessThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedTo())
             );
         }
         if (taskSearchRequest.dueDateFrom() != null) {
-            predicates.add(
-                criteriaBuilder.greaterThan(
-                    root.get(TaskEntity_.dueDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.dueDateFrom()).toInstant())
-                )
-            );
+            predicates.add(criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateFrom()));
         }
         if (taskSearchRequest.dueDateTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateTo()));
+        }
+        if (!CollectionUtils.isEmpty(taskSearchRequest.candidateUserId())) {
             predicates.add(
-                criteriaBuilder.lessThan(
-                    root.get(TaskEntity_.dueDate),
-                    Date.from(DateUtils.parseDateTime(taskSearchRequest.dueDateTo()).toInstant())
-                )
+                root
+                    .join(TaskEntity_.taskCandidateUsers)
+                    .get(TaskCandidateUserEntity_.userId)
+                    .in(taskSearchRequest.candidateUserId())
             );
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.candidateGroupId())) {
-            if (taskSearchRequest.candidateGroupId().size() > 1) {
-                predicates.add(
-                    root
-                        .join(TaskEntity_.taskCandidateGroups)
-                        .get(TaskCandidateGroupEntity_.groupId)
-                        .in(taskSearchRequest.candidateGroupId())
-                );
-            }
+            predicates.add(
+                root
+                    .join(TaskEntity_.taskCandidateGroups)
+                    .get(TaskCandidateGroupEntity_.groupId)
+                    .in(taskSearchRequest.candidateGroupId())
+            );
         }
         if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
             applyTaskVariableFilters(root, query, criteriaBuilder);
