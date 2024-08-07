@@ -640,7 +640,8 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     }
 
     public void setProcessVariables(Set<ProcessVariableEntity> processVariables) {
-        this.processVariables = processVariables;
+        this.processVariables = new LinkedHashSet<>();
+        this.processVariables.addAll(processVariables);
     }
 
     @Override
