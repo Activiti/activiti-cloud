@@ -53,7 +53,7 @@ public abstract class AbstractVariableEntity extends ActivitiEntityMetadata impl
 
     @Convert(converter = VariableValueJsonConverter.class)
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "`value`", columnDefinition = "text")
+    @Column(name = "`value`", columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private VariableValue<?> value;
 
