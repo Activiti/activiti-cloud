@@ -188,7 +188,7 @@ class TaskSearchIT {
             varName,
             VariableType.STRING,
             valueToSearch,
-            FilterOperator.CONTAINS
+            FilterOperator.LIKE
         );
 
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
@@ -230,7 +230,7 @@ class TaskSearchIT {
             varName,
             VariableType.STRING,
             valueToSearch,
-            FilterOperator.CONTAINS
+            FilterOperator.LIKE
         );
 
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);

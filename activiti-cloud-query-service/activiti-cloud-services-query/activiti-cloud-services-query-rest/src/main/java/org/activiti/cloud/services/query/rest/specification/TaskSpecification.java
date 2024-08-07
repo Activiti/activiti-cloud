@@ -367,7 +367,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                     criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
                 );
             }
-            case CONTAINS -> criteriaBuilder.isTrue(
+            case LIKE -> criteriaBuilder.isTrue(
                 criteriaBuilder.function(
                     "sql",
                     Boolean.class,
