@@ -3028,9 +3028,9 @@ class TaskSearchIT {
         processVariableEntity.setName(name);
         processVariableEntity.setType(variableType.name().toLowerCase());
         switch (variableType) {
-            case STRING, BIGDECIMAL, DATE, DATETIME -> processVariableEntity.setValue(String.valueOf(value));
             case INTEGER -> processVariableEntity.setValue((Integer) value);
             case BOOLEAN -> processVariableEntity.setValue((Boolean) value);
+            default -> processVariableEntity.setValue(String.valueOf(value));
         }
         processVariableEntity.setProcessInstanceId(processInstance.getId());
         processVariableEntity.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());

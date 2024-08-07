@@ -54,7 +54,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
-        applyNameFilter(taskSearchRequest.name(), criteriaBuilder, root, TaskEntity_.name);
+        applyNameFilter(taskSearchRequest.name(), criteriaBuilder, TaskEntity_.name);
         applyNameFilter(criteriaBuilder);
         applyPriorityFilter(root);
         applyStatusFilter(root);
@@ -189,7 +189,6 @@ public class TaskSpecification implements Specification<TaskEntity> {
     private void applyNameFilter(
         List<String> taskSearchRequest,
         CriteriaBuilder criteriaBuilder,
-        Root<TaskEntity> root,
         SingularAttribute<TaskEntity, String> name
     ) {
         if (!CollectionUtils.isEmpty(taskSearchRequest)) {
