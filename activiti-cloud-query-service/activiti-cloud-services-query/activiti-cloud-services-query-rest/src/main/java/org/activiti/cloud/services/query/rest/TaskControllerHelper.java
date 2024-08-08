@@ -17,20 +17,24 @@
 package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
+import org.activiti.cloud.services.query.rest.specification.ProcessVariableSpecification;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
-import org.hibernate.Filter;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
@@ -41,6 +45,8 @@ public class TaskControllerHelper {
 
     private final TaskRepository taskRepository;
 
+    private final VariableRepository processVariableRepository;
+
     private final AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler;
 
     private final QueryDslPredicateAggregator predicateAggregator;
@@ -49,17 +55,16 @@ public class TaskControllerHelper {
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     public TaskControllerHelper(
         TaskRepository taskRepository,
+        VariableRepository processVariableRepository,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService
     ) {
         this.taskRepository = taskRepository;
+        this.processVariableRepository = processVariableRepository;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
         this.predicateAggregator = predicateAggregator;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
@@ -84,13 +89,8 @@ public class TaskControllerHelper {
         List<QueryDslPredicateFilter> filters,
         List<String> processVariableKeys
     ) {
-        Page<TaskEntity> page = findPageWithProcessVariables(
-            predicate,
-            variableSearch,
-            pageable,
-            filters,
-            processVariableKeys
-        );
+        Page<TaskEntity> page = findPage(predicate, variableSearch, pageable, filters);
+        fetchProcessVariables(page.getContent(), processVariableKeys);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
@@ -120,20 +120,9 @@ public class TaskControllerHelper {
         List<String> processVariableKeys,
         Pageable pageable
     ) {
-        addProcessVariablesFilter(processVariableKeys);
         Page<TaskEntity> page = findAllByInvolvedUser(predicate, pageable);
-        initializeProcessVariables(page);
+        fetchProcessVariables(page.getContent(), processVariableKeys);
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
-    }
-
-    private void initializeProcessVariables(Page<TaskEntity> page) {
-        page.forEach(taskEntity -> Hibernate.initialize(taskEntity.getProcessVariables()));
-    }
-
-    private void addProcessVariablesFilter(List<String> processVariableKeys) {
-        Session session = entityManager.unwrap(Session.class);
-        Filter filter = session.enableFilter("variablesFilter");
-        filter.setParameterList("variableKeys", processVariableKeys);
     }
 
     private Page<TaskEntity> findAllByInvolvedUser(Predicate predicate, Pageable pageable) {
@@ -169,27 +158,34 @@ public class TaskControllerHelper {
         return page;
     }
 
-    private Page<TaskEntity> findPageWithProcessVariables(
-        Predicate predicate,
-        VariableSearch variableSearch,
-        Pageable pageable,
-        List<QueryDslPredicateFilter> filters,
-        List<String> processVariableKeys
-    ) {
-        Predicate extendedPredicate = predicateAggregator.applyFilters(predicate, filters);
-
-        if (variableSearch.isSet()) {
-            addProcessVariablesFilter(processVariableKeys);
-            Page<TaskEntity> page = taskRepository.findByVariableNameAndValue(
-                variableSearch.getName(),
-                variableSearch.getValue(),
-                extendedPredicate,
-                pageable
-            );
-            initializeProcessVariables(page);
-            return page;
+    private void fetchProcessVariables(Collection<TaskEntity> tasks, List<String> processVariableKeys) {
+        if (processVariableKeys.isEmpty()) {
+            tasks.forEach(task -> task.setProcessVariables(Collections.emptySet()));
         } else {
-            return taskRepository.findWithProcessVariables(processVariableKeys, extendedPredicate, pageable);
+            Set<String> processInstanceIds = tasks
+                .stream()
+                .map(TaskEntity::getProcessInstanceId)
+                .collect(Collectors.toSet());
+            var processVariables = processVariableRepository.findAll(
+                new ProcessVariableSpecification(
+                    processInstanceIds,
+                    processVariableKeys.stream().map(ProcessVariableKey::fromString).collect(Collectors.toSet())
+                )
+            );
+
+            Map<String, Set<ProcessVariableEntity>> processVariablesMap = processVariables
+                .stream()
+                .collect(
+                    Collectors.groupingBy(
+                        ProcessVariableEntity::getProcessInstanceId,
+                        Collectors.mapping(pv -> pv, Collectors.toSet())
+                    )
+                );
+            tasks.forEach(task ->
+                task.setProcessVariables(
+                    processVariablesMap.getOrDefault(task.getProcessInstanceId(), Collections.emptySet())
+                )
+            );
         }
     }
 }

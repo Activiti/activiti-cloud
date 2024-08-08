@@ -36,6 +36,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.QProcessDefinitionEntity;
 import org.activiti.cloud.services.security.ProcessDefinitionRestrictionService;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -92,6 +93,9 @@ public class ProcessDefinitionControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private ProcessInstanceAdminService processInstanceAdminService;

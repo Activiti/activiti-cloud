@@ -35,6 +35,7 @@ import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
@@ -67,6 +68,9 @@ public class VariableEntityAdminControllerIT {
 
     @MockBean
     private TaskVariableRepository variableRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private UserGroupManager userGroupManager;
