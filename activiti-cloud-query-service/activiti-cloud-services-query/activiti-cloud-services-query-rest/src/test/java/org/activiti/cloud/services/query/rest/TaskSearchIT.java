@@ -3158,9 +3158,9 @@ class TaskSearchIT {
         taskVariableEntity.setName(varName);
         taskVariableEntity.setType(variableType.name().toLowerCase());
         switch (variableType) {
-            case STRING, BIGDECIMAL, DATE, DATETIME -> taskVariableEntity.setValue(String.valueOf(value));
             case INTEGER -> taskVariableEntity.setValue((Integer) value);
             case BOOLEAN -> taskVariableEntity.setValue((Boolean) value);
+            default -> taskVariableEntity.setValue(String.valueOf(value));
         }
         taskVariableEntity.setTaskId(taskId);
         taskVariableRepository.save(taskVariableEntity);
