@@ -19,11 +19,13 @@ import static graphql.schema.GraphQLScalarType.newScalar;
 import static graphql.schema.idl.TypeRuntimeWiring.newTypeWiring;
 
 import com.introproventures.graphql.jpa.query.schema.JavaScalars;
+import com.introproventures.graphql.jpa.query.schema.JavaScalars.GraphQLObjectCoercing;
 import com.introproventures.graphql.jpa.query.schema.JavaScalarsWiringPostProcessor;
 import graphql.scalars.ExtendedScalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.RuntimeWiring.Builder;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -70,6 +72,7 @@ public class GraphQLSubscriptionSchemaBuilder {
 
     private GraphQLSchema buildSchema() {
         return new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build());
+
     }
 
     public TypeRuntimeWiring.Builder withTypeWiring(String typeName) {
