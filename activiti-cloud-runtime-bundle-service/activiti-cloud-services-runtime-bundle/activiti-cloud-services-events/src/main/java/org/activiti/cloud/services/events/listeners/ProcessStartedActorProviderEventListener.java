@@ -55,7 +55,7 @@ public class ProcessStartedActorProviderEventListener implements ProcessEventLis
                     .ifPresent(details ->
                         runtimeService.addUserIdentityLink(
                             event.getEntity().getId(),
-                            identityService.findUserByName(principal.getName()).getId(),
+                            identityService.findUserByName(event.getEntity().getInitiator()).getId(),
                             ActorConstants.ACTOR_TYPE,
                             details
                         )
