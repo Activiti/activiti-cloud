@@ -221,7 +221,7 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-    <hibernate.version>6.5.2.Final</hibernate.version>
+    <hibernate.version>6.4.10.Final</hibernate.version>
 
 
     <!-- Tests Config -->
