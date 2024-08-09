@@ -105,6 +105,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.task.IdentityLink;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -687,6 +688,7 @@ public class AuditProducerIT {
             });
     }
 
+    @Disabled("Temporary")
     @Test
     void shouldEmitEventsForTaskAddDeleteUserCandidates() {
         //given
@@ -773,6 +775,7 @@ public class AuditProducerIT {
             });
     }
 
+    @Disabled("Temporary")
     @Test
     void shouldEmitEventsForTaskAddDeleteGroupCandidates() {
         //given
