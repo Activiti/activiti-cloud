@@ -25,18 +25,26 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
+import org.activiti.cloud.api.process.model.events.CloudIntegrationResultReceivedEvent;
+import org.activiti.cloud.api.process.model.events.CloudProcessCompletedEvent;
 import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.containers.RabbitMQContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
 import org.activiti.cloud.starter.tests.helper.TaskRestTemplate;
+import org.activiti.cloud.starter.tests.services.audit.AuditConsumerStreamHandler;
+import org.activiti.cloud.starter.tests.services.audit.AuditProducerIT;
+import org.activiti.cloud.starter.tests.services.audit.ServicesAuditITConfiguration;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -44,6 +52,8 @@ import org.activiti.engine.task.Task;
 import org.activiti.services.connectors.conf.ConnectorImplementationsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
@@ -51,16 +61,20 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+@ActiveProfiles(AuditProducerIT.AUDIT_PRODUCER_IT)
 @TestPropertySource("classpath:application-test.properties")
 @DirtiesContext
 @ContextConfiguration(
-    classes = RuntimeITConfiguration.class,
+    classes = { RuntimeITConfiguration.class, ServicesAuditITConfiguration.class },
     initializers = { RabbitMQContainerApplicationInitializer.class, KeycloakContainerApplicationInitializer.class }
 )
 public abstract class AbstractMQServiceTaskIT {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMQServiceTaskIT.class);
 
     @Autowired
     protected RuntimeService runtimeService;
@@ -82,6 +96,12 @@ public abstract class AbstractMQServiceTaskIT {
 
     @Autowired
     protected BindingServiceProperties bindingServiceProperties;
+
+    @Autowired
+    private AuditConsumerStreamHandler auditConsumer;
+
+    @Autowired
+    private ServiceTaskConsumerHandler serviceTaskConsumerHandler;
 
     @Value("${activiti.identity.test-user:hruser}")
     protected String keycloakTestUser;
@@ -439,5 +459,73 @@ public abstract class AbstractMQServiceTaskIT {
                         )
                     );
             });
+    }
+
+    @Test
+    void should_beAbleToExecuteMultiInstanceServiceTasksAndNotMultiInstantiatedServiceTasksWithoutRaceConditions()
+        throws Exception {
+        //given
+        CompletableFuture<ProcessInstance> singleInstanceCompletableFuture = CompletableFuture.supplyAsync(() ->
+            runtimeService.startProcessInstanceByKey(
+                "serviceTaskSingleInstanceRaceConditionWithOtherProcessWithMultiInstance"
+            )
+        );
+
+        CompletableFuture<ProcessInstance> multiInstanceCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            waitForSingleInstanceToStart();
+            ProcessInstance processWithMultiInstance = runtimeService.startProcessInstanceByKey(
+                "miSequentialServiceTaskRaceCondition"
+            );
+            waitForFirstMultiInstanceToComplete(processWithMultiInstance);
+
+            //when
+            resumeExecutionOfSingleInstance();
+            return processWithMultiInstance;
+        });
+
+        //then
+        ProcessInstance singleProcessInstance = singleInstanceCompletableFuture.get(10, TimeUnit.SECONDS);
+        ProcessInstance multiInstanceProcess = multiInstanceCompletableFuture.get(10, TimeUnit.SECONDS);
+        await()
+            .untilAsserted(() ->
+                assertThat(auditConsumer.getAllReceivedEvents(CloudProcessCompletedEvent.class))
+                    .extracting(CloudRuntimeEvent::getProcessInstanceId, CloudRuntimeEvent::getProcessDefinitionKey)
+                    .contains(
+                        tuple(singleProcessInstance.getId(), singleProcessInstance.getProcessDefinitionKey()),
+                        tuple(multiInstanceProcess.getId(), multiInstanceProcess.getProcessDefinitionKey())
+                    )
+            );
+    }
+
+    private void resumeExecutionOfSingleInstance() {
+        serviceTaskConsumerHandler.getMultiInstanceLatch().countDown();
+        LOGGER.info("Multi-instance latch counted down . Thread: {}", Thread.currentThread().threadId());
+    }
+
+    private void waitForFirstMultiInstanceToComplete(ProcessInstance processWithMultiInstance) {
+        LOGGER.info(
+            "Waiting for the first integration result for multi instance before counting down multi-instance latch... Thread: {}",
+            Thread.currentThread().threadId()
+        );
+        await()
+            .untilAsserted(() ->
+                assertThat(auditConsumer.getAllReceivedEvents(CloudIntegrationResultReceivedEvent.class))
+                    .extracting(CloudIntegrationResultReceivedEvent::getProcessInstanceId)
+                    .contains(processWithMultiInstance.getId())
+            );
+    }
+
+    private void waitForSingleInstanceToStart() {
+        try {
+            LOGGER.info(
+                "Waiting for single instance latch to be counted down... Thread: {}",
+                Thread.currentThread().threadId()
+            );
+            boolean conditionReached = serviceTaskConsumerHandler.getSingleInstanceLatch().await(5, TimeUnit.SECONDS);
+            assertThat(conditionReached).isTrue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 }

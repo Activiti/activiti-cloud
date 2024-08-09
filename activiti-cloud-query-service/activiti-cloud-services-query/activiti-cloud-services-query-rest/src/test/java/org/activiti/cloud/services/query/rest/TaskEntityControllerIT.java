@@ -41,6 +41,7 @@ import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -87,6 +88,9 @@ class TaskEntityControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private EntityFinder entityFinder;

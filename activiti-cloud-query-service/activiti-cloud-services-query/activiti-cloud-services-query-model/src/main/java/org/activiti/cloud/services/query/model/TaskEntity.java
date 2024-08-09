@@ -55,7 +55,6 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Filter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity(name = "Task")
@@ -229,7 +228,6 @@ public class TaskEntity extends ActivitiEntityMetadata implements QueryCloudTask
     private Set<TaskVariableEntity> variables = new LinkedHashSet<>();
 
     @JsonView(JsonViews.ProcessVariables.class)
-    @Filter(name = "variablesFilter")
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "task_process_variable",
