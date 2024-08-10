@@ -97,8 +97,6 @@ import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEv
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -320,6 +318,9 @@ public class CloudProcessModelAutoConfiguration {
     @Primary
     public JacksonMapper jacksonMapper(@Autowired(required = false) final ObjectMapper objectMapper) {
         //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
+        if(objectMapper == null) {
+            return new JacksonMapper(new ObjectMapper());
+        }
         return new JacksonMapper(objectMapper);
     }
 }
