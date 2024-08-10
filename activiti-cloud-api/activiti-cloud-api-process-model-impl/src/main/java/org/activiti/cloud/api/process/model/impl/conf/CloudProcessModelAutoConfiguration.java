@@ -318,7 +318,6 @@ public class CloudProcessModelAutoConfiguration {
 
     @Bean
     @Primary
-    @ConditionalOnBean(JacksonMapper.class)
     public JacksonMapper jacksonMapper(@Autowired(required = false) final ObjectMapper objectMapper) {
         //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
         return new JacksonMapper(objectMapper);
