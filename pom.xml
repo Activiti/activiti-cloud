@@ -195,7 +195,7 @@
     <project.scm.repository>activiti-cloud</project.scm.repository>
     <project.year>2020</project.year>
 
-    <spring-boot.version>3.3.2</spring-boot.version>
+    <spring-boot.version>3.3.1</spring-boot.version>
 
     <!-- configuration properties for tests-->
     <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
@@ -221,8 +221,7 @@
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
     <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-    <!-- downgrade due to https://hibernate.atlassian.net/browse/HHH-18378 -->
-    <hibernate.version>6.4.10.Final</hibernate.version>
+    <hibernate.version>6.5.0.Final</hibernate.version>
 
 
     <!-- Tests Config -->
