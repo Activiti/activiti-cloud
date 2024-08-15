@@ -29,4 +29,6 @@ public interface EventsRepository<T extends AuditEventEntity>
     Optional<T> findByEventId(String eventId);
 
     Collection<T> findAllByOrderByTimestampDesc();
+
+    Collection<AuditEventEntity> findAllByTimestampBetweenOrderByTimestampDesc(Long startDateTime, Long endDateTime);
 }

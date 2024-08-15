@@ -28,11 +28,11 @@ jobs:
   pre-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Check dependabot build
-        uses: Activiti/Activiti/.github/actions/check-ext-build@4db084fcbb13a288f3b66ac08fc50a5ab7f144ed # 8.0.0-alpha.10
+        uses: Activiti/Activiti/.github/actions/check-ext-build@7700f0283a9ff5181581a350d2520e55c61c1c60 # 8.6.0
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -48,11 +48,11 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
-      - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -72,7 +72,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -128,7 +128,9 @@ jobs:
     env:
       MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml
     strategy:
-      fail-fast: false
+      # avoid overloading test cluster
+      max-parallel: 2
+      fail-fast: true
       matrix:
         messaging-broker: [ rabbitmq, kafka ]
         messaging-partitioned: [ partitioned, non-partitioned ]
@@ -139,9 +141,9 @@ jobs:
             messaging-destinations: override-destinations
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -165,7 +167,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -296,7 +298,7 @@ jobs:
       - build
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Delete Docker images
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -324,7 +326,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
@@ -334,7 +336,7 @@ jobs:
           java-version: 21
           distribution: 'temurin'
 
-      - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -353,7 +355,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -375,8 +377,8 @@ jobs:
       VERSION: ${{ needs.build.outputs.version }}
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -398,7 +400,7 @@ jobs:
       FULL_CHART_BASE_BRANCH: develop
       FULL_CHART_PR_BRANCH: update-docker-images-${{ needs.build.outputs.version }}
     steps:
-      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           path: ${{ env.FULL_CHART_DIR }}
           repository: Activiti/activiti-cloud-full-chart
@@ -413,12 +415,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -441,7 +443,7 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@9558268b491821a4cfce1f11d4c8f6e56adc8496 # v5.30.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
           channel-id: 'eng-hxp-studio-activiti-gh-notifs'
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
