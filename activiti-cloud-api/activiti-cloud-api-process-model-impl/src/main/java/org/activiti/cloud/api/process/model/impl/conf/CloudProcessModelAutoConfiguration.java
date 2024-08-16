@@ -94,11 +94,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 @AutoConfiguration
 public class CloudProcessModelAutoConfiguration {

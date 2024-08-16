@@ -34,7 +34,4 @@ import org.springframework.context.annotation.Import;
     }
 )
 public class RuntimeITConfiguration {
-
-    @MockBean
-    private BuildProperties buildProperties;
 }
