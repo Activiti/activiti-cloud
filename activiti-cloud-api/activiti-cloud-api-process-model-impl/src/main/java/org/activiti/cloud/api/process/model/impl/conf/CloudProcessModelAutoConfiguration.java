@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -312,15 +311,5 @@ public class CloudProcessModelAutoConfiguration {
         module.setAbstractTypes(resolver);
 
         return module;
-    }
-
-    @Bean
-    @Primary
-    public JacksonMapper jacksonMapper(@Autowired(required = false) final ObjectMapper objectMapper) {
-        //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
-        if (objectMapper == null) {
-            return new JacksonMapper(new ObjectMapper());
-        }
-        return new JacksonMapper(objectMapper);
     }
 }
