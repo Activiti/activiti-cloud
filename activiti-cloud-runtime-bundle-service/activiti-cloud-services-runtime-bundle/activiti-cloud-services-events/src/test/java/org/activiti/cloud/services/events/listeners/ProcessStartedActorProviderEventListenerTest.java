@@ -97,6 +97,7 @@ class ProcessStartedActorProviderEventListenerTest {
     private CloudProcessCreatedEventImpl buildCloudProcessCreatedEvent() {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
+        process.setInitiator("initiator");
         CloudProcessCreatedEventImpl cloudProcessCreatedEvent = new CloudProcessCreatedEventImpl(process);
         return cloudProcessCreatedEvent;
     }
