@@ -40,10 +40,13 @@ import org.activiti.cloud.services.audit.api.config.AuditAPIAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentationModelAssemblerConfiguration;
 import org.activiti.cloud.services.audit.jpa.conf.AuditJPAAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
+import org.activiti.cloud.services.audit.jpa.controllers.config.AuditJPAControllersAutoConfiguration;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessStartedAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.VariableCreatedEventEntity;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.security.config.AuditJPASecurityAutoConfiguration;
+import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +72,8 @@ import org.springframework.test.web.servlet.MvcResult;
         AuditAPIAutoConfiguration.class,
         AuditJPAAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
+        AuditJPAControllersAutoConfiguration.class,
+        AuditJPASecurityAutoConfiguration.class,
     }
 )
 class EventsEngineEventsAdminControllerIT {
@@ -94,6 +99,9 @@ class EventsEngineEventsAdminControllerIT {
 
     @MockBean
     private UserGroupManager userGroupManager;
+
+    @MockBean
+    private SecurityPoliciesProperties securityPoliciesProperties;
 
     @BeforeEach
     void setUp() throws Exception {
