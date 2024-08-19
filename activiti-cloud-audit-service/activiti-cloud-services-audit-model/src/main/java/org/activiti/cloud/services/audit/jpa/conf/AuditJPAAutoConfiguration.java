@@ -67,7 +67,6 @@ import org.activiti.cloud.services.audit.jpa.converters.VariableCreatedEventConv
 import org.activiti.cloud.services.audit.jpa.converters.VariableDeletedEventConverter;
 import org.activiti.cloud.services.audit.jpa.converters.VariableUpdatedEventConverter;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -440,10 +439,5 @@ public class AuditJPAAutoConfiguration {
         EventContextInfoAppender eventContextInfoAppender
     ) {
         return new ApplicationRollbackEventConverter(eventContextInfoAppender);
-    }
-
-    @Bean
-    public AuditEventsAdminService auditEventsAdminService(EventsRepository eventsRepository) {
-        return new AuditEventsAdminService(eventsRepository);
     }
 }

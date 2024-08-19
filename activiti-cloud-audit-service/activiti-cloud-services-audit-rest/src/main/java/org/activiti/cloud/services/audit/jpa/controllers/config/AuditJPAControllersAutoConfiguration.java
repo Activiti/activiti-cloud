@@ -19,6 +19,8 @@ import org.activiti.cloud.services.audit.jpa.assembler.config.EventRepresentatio
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsAdminControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsControllerImpl;
 import org.activiti.cloud.services.audit.jpa.controllers.AuditEventsDeleteController;
+import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
+import org.activiti.cloud.services.audit.jpa.service.AuditEventsAdminService;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -47,5 +49,10 @@ public class AuditJPAControllersAutoConfiguration {
                 config.disableDefaultExposure();
             }
         };
+    }
+
+    @Bean
+    public AuditEventsAdminService auditEventsAdminService(EventsRepository eventsRepository) {
+        return new AuditEventsAdminService(eventsRepository);
     }
 }
