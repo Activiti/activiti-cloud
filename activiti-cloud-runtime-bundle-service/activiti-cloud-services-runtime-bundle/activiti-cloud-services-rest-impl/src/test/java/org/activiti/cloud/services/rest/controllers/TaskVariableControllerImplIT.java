@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -36,6 +37,11 @@ import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.identity.config.IdentitySearchCacheConfiguration;
+import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
+import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -60,6 +66,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskVariableControllerImpl.class)
@@ -76,6 +84,8 @@ import org.springframework.test.web.servlet.MockMvc;
         ProcessExtensionsAutoConfiguration.class,
         ServicesRestWebMvcAutoConfiguration.class,
         StreamConfig.class,
+        CommonSecurityAutoConfiguration.class,
+        ClientCredentialsAuthConfiguration.class,
     }
 )
 class TaskVariableControllerImplIT {
@@ -115,6 +125,15 @@ class TaskVariableControllerImplIT {
 
     @MockBean
     private IdentityService identityService;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
@@ -160,6 +179,7 @@ class TaskVariableControllerImplIT {
     void createVariable() throws Exception {
         this.mockMvc.perform(
                 post("/v1/tasks/{taskId}/variables", TASK_ID)
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         mapper.writeValueAsString(
@@ -182,6 +202,7 @@ class TaskVariableControllerImplIT {
         this.mockMvc.perform(
                 put("/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .with(csrf())
                     .content(
                         mapper.writeValueAsString(
                             TaskPayloadBuilder

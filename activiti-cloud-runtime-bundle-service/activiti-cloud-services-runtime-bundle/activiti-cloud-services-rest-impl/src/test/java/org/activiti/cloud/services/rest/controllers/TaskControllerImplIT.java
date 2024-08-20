@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,6 +56,8 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -81,6 +84,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskControllerImpl.class)
@@ -99,6 +104,7 @@ import org.springframework.test.web.servlet.MockMvc;
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
         ServicesCoreAutoConfiguration.class,
+        CommonSecurityAutoConfiguration.class,
     }
 )
 class TaskControllerImplIT {
@@ -151,6 +157,15 @@ class TaskControllerImplIT {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
     @BeforeEach
     void setUp() {
         assertThat(springPageConverter).isNotNull();
@@ -190,20 +205,20 @@ class TaskControllerImplIT {
         when(securityManager.getAuthenticatedUserId()).thenReturn("assignee");
         given(taskRuntime.claim(any())).willReturn(buildDefaultAssignedTask());
 
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/claim", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/claim", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
     void releaseTask() throws Exception {
         given(taskRuntime.release(any())).willReturn(buildTask("my task", CREATED));
 
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/release", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/release", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
     void completeTask() throws Exception {
         given(taskRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(post("/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(post("/v1/tasks/{taskId}/complete", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
@@ -214,6 +229,7 @@ class TaskControllerImplIT {
                 post("/v1/tasks/{taskId}/save", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(saveTask))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -221,7 +237,7 @@ class TaskControllerImplIT {
     @Test
     void deleteTask() throws Exception {
         given(taskRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(delete("/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/v1/tasks/{taskId}", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
@@ -246,6 +262,7 @@ class TaskControllerImplIT {
                 post("/v1/tasks", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTask))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -266,6 +283,7 @@ class TaskControllerImplIT {
                 post("/v1/tasks", parentTaskId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(createTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -297,6 +315,7 @@ class TaskControllerImplIT {
                 put("/v1/tasks/{taskId}", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(updateTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -310,6 +329,7 @@ class TaskControllerImplIT {
                 post("/v1/tasks/{taskId}/assign", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }

@@ -49,6 +49,8 @@ import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -84,6 +86,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -101,6 +105,7 @@ import org.springframework.test.web.servlet.MvcResult;
         ServicesCoreAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CommonSecurityAutoConfiguration.class,
     }
 )
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
@@ -147,6 +152,15 @@ class ProcessDefinitionControllerImplIT {
 
     @MockBean
     private IdentityService identityService;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     private final ObjectMapper om = new ObjectMapper();
 

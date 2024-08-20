@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,6 +62,8 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -86,6 +89,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessInstanceControllerImpl.class)
@@ -102,6 +107,7 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesCoreAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CommonSecurityAutoConfiguration.class,
     }
 )
 class ProcessInstanceControllerImplIT {
@@ -148,6 +154,15 @@ class ProcessInstanceControllerImplIT {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
     @Test
     void getProcessInstances() throws Exception {
         //given
@@ -181,7 +196,10 @@ class ProcessInstanceControllerImplIT {
 
         mockMvc
             .perform(
-                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
+                post("/v1/process-instances")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -194,6 +212,7 @@ class ProcessInstanceControllerImplIT {
         mockMvc
             .perform(
                 post("/v1/process-instances/create")
+                    .with(csrf())
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
             )
@@ -209,6 +228,7 @@ class ProcessInstanceControllerImplIT {
         mockMvc
             .perform(
                 post("/v1/process-instances/{processInstanceId}/start", 1)
+                    .with(csrf())
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(payload))
             )
@@ -225,7 +245,10 @@ class ProcessInstanceControllerImplIT {
 
         mockMvc
             .perform(
-                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
+                post("/v1/process-instances")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("entry.code", is(403)))
@@ -243,7 +266,10 @@ class ProcessInstanceControllerImplIT {
 
         mockMvc
             .perform(
-                post("/v1/process-instances").contentType(APPLICATION_JSON).content(mapper.writeValueAsString(cmd))
+                post("/v1/process-instances")
+                    .contentType(APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("entry.code", is(422)))
@@ -337,6 +363,7 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/signal")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -347,7 +374,9 @@ class ProcessInstanceControllerImplIT {
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.suspend(any())).thenReturn(defaultProcessInstance());
         mockMvc
-            .perform(post("/v1/process-instances/{processInstanceId}/suspend", 1).contentType(APPLICATION_JSON))
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/suspend", 1).with(csrf()).contentType(APPLICATION_JSON)
+            )
             .andExpect(status().isOk());
     }
 
@@ -357,7 +386,9 @@ class ProcessInstanceControllerImplIT {
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.resume(any())).thenReturn(defaultProcessInstance());
         mockMvc
-            .perform(post("/v1/process-instances/{processInstanceId}/resume", 1).contentType(APPLICATION_JSON))
+            .perform(
+                post("/v1/process-instances/{processInstanceId}/resume", 1).with(csrf()).contentType(APPLICATION_JSON)
+            )
             .andExpect(status().isOk());
     }
 
@@ -366,7 +397,7 @@ class ProcessInstanceControllerImplIT {
         ProcessInstance processInstance = mock(ProcessInstance.class);
         when(processRuntime.processInstance("1")).thenReturn(processInstance);
         when(processRuntime.delete(any())).thenReturn(defaultProcessInstance());
-        mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1)).andExpect(status().isOk());
+        mockMvc.perform(delete("/v1/process-instances/{processInstanceId}", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
@@ -385,6 +416,7 @@ class ProcessInstanceControllerImplIT {
         mockMvc
             .perform(
                 put("/v1/process-instances/{processInstanceId}", 1)
+                    .with(csrf())
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
             )
@@ -415,6 +447,7 @@ class ProcessInstanceControllerImplIT {
                 put("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -434,6 +467,7 @@ class ProcessInstanceControllerImplIT {
                 post("/v1/process-instances/message")
                     .contentType(APPLICATION_JSON)
                     .content(mapper.writeValueAsString(cmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }

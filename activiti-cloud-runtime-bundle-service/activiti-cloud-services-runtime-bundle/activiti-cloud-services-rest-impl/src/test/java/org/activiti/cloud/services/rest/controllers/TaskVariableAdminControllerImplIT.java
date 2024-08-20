@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -37,6 +38,8 @@ import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
 import org.activiti.cloud.services.events.configuration.ProcessEngineChannelsConfiguration;
@@ -61,6 +64,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskVariableAdminControllerImpl.class)
@@ -78,6 +84,7 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CommonSecurityAutoConfiguration.class,
     }
 )
 class TaskVariableAdminControllerImplIT {
@@ -121,6 +128,15 @@ class TaskVariableAdminControllerImplIT {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
     private static final String TASK_ID = UUID.randomUUID().toString();
     private static final String PROCESS_INSTANCE_ID = UUID.randomUUID().toString();
 
@@ -161,6 +177,7 @@ class TaskVariableAdminControllerImplIT {
     void createVariable() throws Exception {
         this.mockMvc.perform(
                 post("/admin/v1/tasks/{taskId}/variables", TASK_ID)
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         mapper.writeValueAsString(
@@ -182,6 +199,7 @@ class TaskVariableAdminControllerImplIT {
         //WHEN
         this.mockMvc.perform(
                 put("/admin/v1/tasks/{taskId}/variables/{variableName}", TASK_ID, "name")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         mapper.writeValueAsString(

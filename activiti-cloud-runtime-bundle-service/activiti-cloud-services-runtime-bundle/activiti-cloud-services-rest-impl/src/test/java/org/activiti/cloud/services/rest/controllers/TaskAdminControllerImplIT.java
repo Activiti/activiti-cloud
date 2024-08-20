@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,6 +41,8 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.core.pageable.SpringPageConverter;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -64,6 +67,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TaskAdminControllerImpl.class)
@@ -80,6 +85,7 @@ import org.springframework.test.web.servlet.MockMvc;
         ServicesRestWebMvcAutoConfiguration.class,
         AlfrescoWebAutoConfiguration.class,
         StreamConfig.class,
+        CommonSecurityAutoConfiguration.class,
     }
 )
 class TaskAdminControllerImplIT {
@@ -117,6 +123,15 @@ class TaskAdminControllerImplIT {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
     @BeforeEach
     void setUp() {
         assertThat(pageConverter).isNotNull();
@@ -147,7 +162,7 @@ class TaskAdminControllerImplIT {
     @Test
     void deleteTask() throws Exception {
         given(taskAdminRuntime.delete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(delete("/admin/v1/tasks/{taskId}", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
@@ -164,6 +179,7 @@ class TaskAdminControllerImplIT {
                 put("/admin/v1/tasks/{taskId}", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(updateTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -171,7 +187,7 @@ class TaskAdminControllerImplIT {
     @Test
     void completeTask() throws Exception {
         given(taskAdminRuntime.complete(any())).willReturn(buildDefaultAssignedTask());
-        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1)).andExpect(status().isOk());
+        this.mockMvc.perform(post("/admin/v1/tasks/{taskId}/complete", 1).with(csrf())).andExpect(status().isOk());
     }
 
     @Test
@@ -183,6 +199,7 @@ class TaskAdminControllerImplIT {
                 post("/admin/v1/tasks/{taskId}/assign", 1)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTaskCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
@@ -200,6 +217,7 @@ class TaskAdminControllerImplIT {
                 post("/admin/v1/tasks/assign")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(mapper.writeValueAsString(assignTasksCmd))
+                    .with(csrf())
             )
             .andExpect(status().isOk());
     }
