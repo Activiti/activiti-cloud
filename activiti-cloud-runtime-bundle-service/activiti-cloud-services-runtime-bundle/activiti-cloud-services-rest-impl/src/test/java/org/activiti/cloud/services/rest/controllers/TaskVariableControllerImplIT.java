@@ -37,8 +37,6 @@ import org.activiti.api.task.conf.impl.TaskModelAutoConfiguration;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.cloud.identity.IdentityService;
-import org.activiti.cloud.identity.config.IdentitySearchCacheConfiguration;
-import org.activiti.cloud.security.feign.ClientCredentialsAuthRequestInterceptor;
 import org.activiti.cloud.security.feign.configuration.ClientCredentialsAuthConfiguration;
 import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
