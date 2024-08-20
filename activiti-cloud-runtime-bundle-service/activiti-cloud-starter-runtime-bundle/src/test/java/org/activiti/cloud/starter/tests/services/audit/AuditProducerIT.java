@@ -482,7 +482,7 @@ public class AuditProducerIT {
             .filteredOn(it -> ActorConstants.ACTOR_TYPE.equals(it.getType()))
             .isNotEmpty()
             .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
-            .containsOnly(tuple("hruser", expectedActor.getBytes()));
+            .containsOnly(tuple("c67e205b-0818-4dc1-ba36-4c6d4a602117", expectedActor.getBytes()));
 
         //and given
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
