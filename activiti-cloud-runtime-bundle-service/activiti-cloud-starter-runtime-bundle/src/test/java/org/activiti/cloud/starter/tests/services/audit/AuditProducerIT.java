@@ -97,6 +97,7 @@ import org.activiti.cloud.api.task.model.CloudTask;
 import org.activiti.cloud.api.task.model.events.CloudTaskCancelledEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCandidateUserRemovedEvent;
 import org.activiti.cloud.api.task.model.events.CloudTaskCreatedEvent;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -188,6 +189,9 @@ public class AuditProducerIT {
 
     @Autowired
     private AuditConsumerStreamHandler streamHandler;
+
+    @Autowired
+    private IdentityService identityService;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
     private Map<String, Integer> processDefinitionVersions = new HashMap<>();
@@ -464,11 +468,11 @@ public class AuditProducerIT {
                 .withBusinessKey("my business key")
                 .build()
         );
-
         //then
         List<IdentityLink> identityLinksForProcessInstance = runtimeService.getIdentityLinksForProcessInstance(
             startProcessEntity.getBody().getId()
         );
+        String id = identityService.findUserByName("hruser").getId();
         String expectedActor = new String(
             identityLinksForProcessInstance
                 .stream()
@@ -482,7 +486,7 @@ public class AuditProducerIT {
             .filteredOn(it -> ActorConstants.ACTOR_TYPE.equals(it.getType()))
             .isNotEmpty()
             .extracting(IdentityLink::getUserId, IdentityLink::getDetails)
-            .containsOnly(tuple("c67e205b-0818-4dc1-ba36-4c6d4a602117", expectedActor.getBytes()));
+            .containsOnly(tuple(id, expectedActor.getBytes()));
 
         //and given
         ResponseEntity<PagedModel<CloudTask>> tasks = processInstanceRestTemplate.getTasks(startProcessEntity);
