@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -94,8 +95,11 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEve
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudSequenceFlowTakenEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudStartMessageDeployedEventImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.cloud.function.json.JacksonMapper;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 @AutoConfiguration
 public class CloudProcessModelAutoConfiguration {
@@ -308,5 +312,15 @@ public class CloudProcessModelAutoConfiguration {
         module.setAbstractTypes(resolver);
 
         return module;
+    }
+
+    @Bean
+    @Primary
+    public JacksonMapper jacksonMapper(@Autowired(required = false) final ObjectMapper objectMapper) {
+        //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
+        if (objectMapper == null) {
+            return new JacksonMapper(new ObjectMapper());
+        }
+        return new JacksonMapper(objectMapper);
     }
 }
