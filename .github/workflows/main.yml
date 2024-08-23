@@ -279,16 +279,9 @@ jobs:
 
       - name: Delete Helm chart for ${{ matrix.messaging-broker }}
         if: always()
-        env:
-          IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview') }}
         run: |
-          if [ $IS_PREVIEW = true ]
-          then
-              echo "Skipping delete Helm release for preview"
-          else
-              echo "Delete Helm release"
-              make delete
-          fi
+          echo "Delete Helm release"
+          make delete
 
   delete-test-images:
     runs-on: ubuntu-latest
