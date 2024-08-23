@@ -6,7 +6,7 @@
   <artifactId>activiti-cloud-mono-aggregator</artifactId>
   <packaging>pom</packaging>
   <name>Activiti Cloud Mono :: Parent</name>
-  <version>8.1.2-SNAPSHOT</version>
+  <version>8.1.3-SNAPSHOT</version>
   <description>Activiti Cloud Mono :: Aggregator</description>
   <url>http://activiti.org</url>
   <inceptionYear>2017</inceptionYear>
