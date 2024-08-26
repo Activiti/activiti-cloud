@@ -18,11 +18,9 @@ package org.activiti.cloud.starter.audit.consumer.test;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.stream.binder.test.EnableTestBinder;
 
 @SpringBootTest
 @SpringBootApplication
-@EnableTestBinder
 public class ActivitiAuditConsumerAutoConfigurationTest {
 
     @Test
