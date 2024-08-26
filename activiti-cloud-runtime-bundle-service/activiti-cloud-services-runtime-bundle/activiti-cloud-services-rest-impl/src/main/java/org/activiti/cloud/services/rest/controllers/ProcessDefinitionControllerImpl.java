@@ -61,6 +61,7 @@ import org.activiti.engine.impl.util.IoUtil;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.Mapping.SourceMappingType;
+import org.activiti.spring.process.model.ProcessConstantsMapping;
 import org.activiti.spring.process.model.ProcessVariablesMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -178,9 +179,56 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
 
     @Override
     public Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(String id) {
+        Map<String, Object> result = new HashMap<>();
+        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
+        if (
+            extensionsStartEventId != null &&
+            extensionsStartEventId.extensions() != null &&
+            extensionsStartEventId.id() != null
+        ) {
+            ProcessVariablesMapping startEventMappings = extensionsStartEventId
+                .extensions()
+                .getMappings()
+                .get(extensionsStartEventId.id());
+
+            if (startEventMappings != null) {
+                startEventMappings
+                    .getInputs()
+                    .forEach((input, mapping) -> {
+                        if (SourceMappingType.VALUE.equals(mapping.getType())) {
+                            result.put(input, mapping.getValue());
+                        }
+                    });
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getProcessModelConstantValuesForStartEvent(String id) {
+        Map<String, Object> result = new HashMap<>();
+        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
+        if (
+            extensionsStartEventId != null &&
+            extensionsStartEventId.extensions() != null &&
+            extensionsStartEventId.id() != null
+        ) {
+            ProcessConstantsMapping startEventConstants = extensionsStartEventId
+                .extensions()
+                .getConstantForFlowElement(extensionsStartEventId.id());
+
+            if (startEventConstants != null) {
+                startEventConstants.keySet().forEach(key -> result.put(key, startEventConstants.get(key).getValue()));
+            }
+        }
+
+        return result;
+    }
+
+    private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id) {
         checkUserCanReadProcessDefinition(id);
 
-        Map<String, Object> result = new HashMap<>();
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
         Process process = bpmnModel.getMainProcess();
 
@@ -192,23 +240,15 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
                 .findFirst();
 
             if (startEvent.isPresent()) {
-                Extension extensions = cachingProcessExtensionService.getExtensionsForId(id);
-                if (extensions != null) {
-                    ProcessVariablesMapping startEventMappings = extensions.getMappings().get(startEvent.get().getId());
-
-                    if (startEventMappings != null) {
-                        startEventMappings
-                            .getInputs()
-                            .forEach((input, mapping) -> {
-                                if (SourceMappingType.VALUE.equals(mapping.getType())) {
-                                    result.put(input, mapping.getValue());
-                                }
-                            });
-                    }
-                }
+                return new ExtensionsStartEventId(
+                    startEvent.get().getId(),
+                    cachingProcessExtensionService.getExtensionsForId(id)
+                );
             }
         }
 
-        return result;
+        return null;
     }
+
+    private record ExtensionsStartEventId(String id, Extension extensions) {}
 }
