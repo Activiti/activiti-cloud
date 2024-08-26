@@ -18,7 +18,6 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-api-model-shared</artifactId>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
