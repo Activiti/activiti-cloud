@@ -102,4 +102,41 @@ public class ProcessDefinitionIT {
 
         assertThat(staticValues.getBody()).isEqualTo(Map.of());
     }
+
+    @Test
+    public void shouldReturnStartEventConstantsOnlyWhenProcessHasStartEventFormAndMappings() {
+        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+            processDefinitionIds.get("StartEventStaticMapping")
+        );
+
+        assertThat(staticValues.getBody())
+            .isEqualTo(Map.of("startEnabled", "true", "startLabel", "Start the process", "cancelEnabled", "false"));
+    }
+
+    @Test
+    public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoStartEventForm() {
+        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+            processDefinitionIds.get("shouldDeliverMessagesViaRestApi")
+        );
+
+        assertThat(staticValues.getBody()).isEqualTo(Map.of());
+    }
+
+    @Test
+    public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoConstantsForStartEvent() {
+        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+            processDefinitionIds.get("SimpleProcess")
+        );
+
+        assertThat(staticValues.getBody()).isEqualTo(Map.of());
+    }
+
+    @Test
+    public void shouldReturnEmptyMapWhenGettingStartEventConstantsAndHasNoExtensions() {
+        ResponseEntity<Map<String, String>> staticValues = processDefinitionRestTemplate.getProcessModelConstantValuesForStartEvent(
+            processDefinitionIds.get("ProcessWithVariables")
+        );
+
+        assertThat(staticValues.getBody()).isEqualTo(Map.of());
+    }
 }
