@@ -75,7 +75,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+@RequestMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
 public class ProcessDefinitionControllerImpl implements ProcessDefinitionController {
 
     private final RepositoryService repositoryService;
@@ -181,9 +181,11 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     public Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(String id) {
         Map<String, Object> result = new HashMap<>();
         ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
-        if (extensionsStartEventId != null
-            && extensionsStartEventId.extensions() != null
-            && extensionsStartEventId.id() != null) {
+        if (
+            extensionsStartEventId != null &&
+            extensionsStartEventId.extensions() != null &&
+            extensionsStartEventId.id() != null
+        ) {
             ProcessVariablesMapping startEventMappings = extensionsStartEventId
                 .extensions()
                 .getMappings()
@@ -207,9 +209,11 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     public Map<String, Object> getProcessModelConstantValuesForStartEvent(String id) {
         Map<String, Object> result = new HashMap<>();
         ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
-        if (extensionsStartEventId != null
-            && extensionsStartEventId.extensions() != null
-            && extensionsStartEventId.id() != null) {
+        if (
+            extensionsStartEventId != null &&
+            extensionsStartEventId.extensions() != null &&
+            extensionsStartEventId.id() != null
+        ) {
             ProcessConstantsMapping startEventConstants = extensionsStartEventId
                 .extensions()
                 .getConstantForFlowElement(extensionsStartEventId.id());
@@ -246,7 +250,5 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         return null;
     }
 
-    private record ExtensionsStartEventId(String id, Extension extensions) {
-
-    }
+    private record ExtensionsStartEventId(String id, Extension extensions) {}
 }
