@@ -10,25 +10,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>activiti-cloud-query-starter</artifactId>
+  <name>Activiti Cloud :: Query Starter All-In-One</name>
 
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-service-messaging-starter</artifactId>
+      <artifactId>activiti-cloud-query-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-tracing</artifactId>
+      <artifactId>activiti-cloud-starter-query</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-test-containers</artifactId>
-      <scope>test</scope>
+      <artifactId>activiti-cloud-starter-audit</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-stream-test-support</artifactId>
-      <scope>test</scope>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
     </dependency>
   </dependencies>
 

@@ -12,10 +12,11 @@
   <name>Activiti Cloud Query :: Parent</name>
   <packaging>pom</packaging>
   <modules>
-
     <module>activiti-cloud-query-dependencies</module>
     <module>activiti-cloud-services-query</module>
     <module>activiti-cloud-starter-query</module>
+    <module>activiti-cloud-starter-query-consumer</module>
+    <module>activiti-cloud-starter-query-rest</module>
   </modules>
   <properties>
     <activiti.version>8.7.0-alpha.19</activiti.version>
