@@ -70,4 +70,12 @@ public interface ProcessDefinitionController {
             description = "Enter the id to get process model static values mapping for start event"
         ) @PathVariable(value = "id") String id
     );
+
+    @GetMapping(value = "/v1/process-definitions/{id}/constant-values", produces = "application/json")
+    @ResponseBody
+    Map<String, Object> getProcessModelConstantValuesForStartEvent(
+        @Parameter(description = "Enter the id to get process model constant values for start event") @PathVariable(
+            value = "id"
+        ) String id
+    );
 }
