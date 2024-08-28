@@ -118,7 +118,7 @@ create table process_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    "value"             text,
+    "value"             json,
     variable_definition_id varchar(64),
     process_definition_key varchar(255),
     primary key (id)
@@ -191,7 +191,7 @@ create table task_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    "value"             text,
+    "value"             json,
     task_id             varchar(255),
     primary key (id)
 );

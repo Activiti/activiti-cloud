@@ -40,6 +40,7 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.assembler.TaskRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.RootTasksFilter;
 import org.activiti.cloud.services.query.rest.predicate.StandAloneTaskFilter;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
@@ -53,6 +54,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -124,6 +127,16 @@ public class TaskController {
                 taskLookupRestrictionService
             )
         );
+    }
+
+    @Operation(summary = "Search tasks", hidden = true)
+    @JsonView(JsonViews.General.class)
+    @PostMapping("/search")
+    public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
+        @RequestBody TaskSearchRequest taskSearchRequest,
+        Pageable pageable
+    ) {
+        return taskControllerHelper.searchTasks(taskSearchRequest, pageable);
     }
 
     @Operation(summary = "Find tasks")

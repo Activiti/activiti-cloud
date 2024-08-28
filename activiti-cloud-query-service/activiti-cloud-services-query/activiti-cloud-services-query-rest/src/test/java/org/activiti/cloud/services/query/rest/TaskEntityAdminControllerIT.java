@@ -120,7 +120,7 @@ public class TaskEntityAdminControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
@@ -148,7 +148,7 @@ public class TaskEntityAdminControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(any(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when
