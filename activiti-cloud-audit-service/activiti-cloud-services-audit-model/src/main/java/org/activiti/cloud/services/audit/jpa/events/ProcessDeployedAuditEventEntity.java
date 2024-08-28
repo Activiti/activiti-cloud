@@ -22,7 +22,6 @@ import jakarta.persistence.Entity;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeployedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessDefinitionJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)
 @DiscriminatorValue(value = ProcessDeployedAuditEventEntity.PROCESS_DEPLOYED_EVENT)

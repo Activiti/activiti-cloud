@@ -3,7 +3,19 @@
   "name": "myProcess.bpmn",
   "extensions": {
     "StartEventStaticMapping": {
-      "constants": {},
+      "constants": {
+        "Event_1": {
+          "startEnabled": {
+            "value": "true"
+          },
+          "startLabel": {
+            "value": "Start the process"
+          },
+          "cancelEnabled": {
+            "value": "false"
+          }
+        }
+      },
       "mappings": {
         "Task_03vo218": {
           "inputs": {
