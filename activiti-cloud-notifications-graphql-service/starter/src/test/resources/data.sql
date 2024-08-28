@@ -1,3 +1,6 @@
+/* Using "JSONB" data type for value column in PROCESS_VARIABLE and TASK_VARIABLE tables,
+the automatic creation of tables is not working anymore with H2 database which only supports "JSON".
+So, these two tables have to be created manually */
 CREATE TABLE IF NOT EXISTS PROCESS_VARIABLE (
   marked_as_deleted BOOLEAN,
   create_time TIMESTAMP(6),

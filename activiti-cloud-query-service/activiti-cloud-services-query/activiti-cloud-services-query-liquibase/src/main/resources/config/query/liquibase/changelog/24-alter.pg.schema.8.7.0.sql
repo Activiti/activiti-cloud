@@ -20,7 +20,7 @@ ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
 ALTER TABLE task_variable
 ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
 
-CREATE INDEX process_variable_value_idx on process_variable using GIN ((value -> 'value') jsonb_path_ops);
+CREATE INDEX process_variable_value_idx ON process_variable USING GIN ((value -> 'value') jsonb_path_ops);
 CREATE INDEX process_definition_key_name_value_idx ON process_variable (process_definition_key,name);
 
-CREATE INDEX task_variable_value_idx on task_variable using GIN ((value -> 'value') jsonb_path_ops);
+CREATE INDEX task_variable_value_idx ON task_variable USING GIN ((value -> 'value') jsonb_path_ops);
