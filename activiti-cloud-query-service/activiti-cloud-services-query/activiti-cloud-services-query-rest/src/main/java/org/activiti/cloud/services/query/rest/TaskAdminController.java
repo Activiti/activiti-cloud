@@ -141,7 +141,7 @@ public class TaskAdminController {
         );
     }
 
-    @Operation(summary = "Search tasks", hidden = true)
+    @Operation(summary = "Search tasks")
     @JsonView(JsonViews.General.class)
     @PostMapping("/search")
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(

@@ -15,7 +15,11 @@
  */
 package org.activiti.cloud.services.query.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 public record ProcessVariableKey(String processDefinitionKey, String variableName) {
+    @JsonSetter
     public static ProcessVariableKey fromString(String processVariableKey) {
         String[] parts = processVariableKey.split("/");
         if (parts.length != 2) {
@@ -24,6 +28,7 @@ public record ProcessVariableKey(String processDefinitionKey, String variableNam
         return new ProcessVariableKey(parts[0], parts[1]);
     }
 
+    @JsonGetter
     public static String toString(ProcessVariableKey processVariableKey) {
         return processVariableKey.processDefinitionKey() + "/" + processVariableKey.variableName();
     }
