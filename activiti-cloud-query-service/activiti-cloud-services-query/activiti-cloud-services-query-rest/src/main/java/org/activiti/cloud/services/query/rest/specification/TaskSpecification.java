@@ -179,7 +179,6 @@ public class TaskSpecification implements Specification<TaskEntity> {
     }
 
     private void applyPriorityFilter(Root<TaskEntity> root) {
-
         if (!CollectionUtils.isEmpty(taskSearchRequest.getPriority())) {
             predicates.add(root.get(TaskEntity_.priority).in(taskSearchRequest.getPriority()));
         }

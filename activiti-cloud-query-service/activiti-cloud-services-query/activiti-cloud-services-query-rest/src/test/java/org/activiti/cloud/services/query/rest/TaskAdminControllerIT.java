@@ -36,13 +36,8 @@ import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.rest.filter.FilterOperator;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
-import org.activiti.cloud.services.query.rest.filter.VariableType;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -153,7 +148,7 @@ public class TaskAdminControllerIT {
 
     @Test
     @WithMockUser(username = "testadmin")
-    void should_parseTaskSearchRequest() {
+    void should_parseTaskSearchRequest_withTaskVariableFilters() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
         Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
 
@@ -175,7 +170,41 @@ public class TaskAdminControllerIT {
             .all()
             .webAppContextSetup(context)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(getTaskSearchBody())
+            .body(getTaskSearchRequestBodyWithTaskVariableFilters())
+            .when()
+            .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
+            .then()
+            .log()
+            .all();
+
+        response.statusCode(200);
+    }
+
+    @Test
+    @WithMockUser(username = "testadmin")
+    void should_parseTaskSearchRequest_withProcessVariableFilters() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
+
+        TaskVariableEntity taskVariable1 = createTaskVariable();
+        TaskVariableEntity taskVariable2 = createTaskVariable();
+        taskVariableRepository.save(taskVariable1);
+        taskVariableRepository.save(taskVariable2);
+
+        Set<TaskVariableEntity> taskVariables = new HashSet<>();
+        taskVariables.add(taskVariable1);
+        taskVariables.add(taskVariable2);
+
+        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
+
+        processInstanceRepository.save(processInstanceEntity);
+
+        ValidatableMockMvcResponse response = given()
+            .log()
+            .all()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(getTaskSearchRequestBodyWithProcessVariableFilters())
             .when()
             .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
             .then()
@@ -250,7 +279,7 @@ public class TaskAdminControllerIT {
         return processInstanceEntity;
     }
 
-    private String getTaskSearchBody() {
+    private String getTaskSearchRequestBodyWithTaskVariableFilters() {
         return """
             {
                 "completedFrom": "2021-01-01T00:00:00Z",
@@ -258,6 +287,34 @@ public class TaskAdminControllerIT {
                 "candidateUserId": ["candidateUserId"],
                 "candidateGroupId": ["candidateGroupId"],
                 "taskVariableFilters": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
+                "processVariableKeys": ["processDef/varName"],
+                "onlyStandalone": true,
+                "onlyRoot": true,
+                "assignee": ["assignee"],
+                "name": ["name"],
+                "description": ["description"],
+                "priority": [1],
+                "status": ["CREATED"],
+                "completedBy": ["completedBy"]
+            }
+            """;
+    }
+
+    private String getTaskSearchRequestBodyWithProcessVariableFilters() {
+        return """
+            {
+                "completedFrom": "2021-01-01T00:00:00Z",
+                "completedTo": "2021-01-01T00:00:00Z",
+                "candidateUserId": ["candidateUserId"],
+                "candidateGroupId": ["candidateGroupId"],
+                "processVariableFilters": [
                     {
                         "processDefinitionKey": "processDefinitionKey",
                         "name": "name",
@@ -273,7 +330,7 @@ public class TaskAdminControllerIT {
                 "name": ["name"],
                 "description": ["description"],
                 "priority": [1],
-                "status": ["CREATED"],
+                "status": ["ASSIGNED"],
                 "completedBy": ["completedBy"]
             }
             """;
