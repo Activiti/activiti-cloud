@@ -29,4 +29,5 @@ public enum VariableType {
     public String getValue() {
         return name().toLowerCase();
     }
+
 }
