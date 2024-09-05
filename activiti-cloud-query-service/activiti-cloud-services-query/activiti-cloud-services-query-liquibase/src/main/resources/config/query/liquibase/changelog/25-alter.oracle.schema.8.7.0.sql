@@ -17,4 +17,3 @@
 create index if not exists idx_task_assignee on task(assignee);
 create index if not exists idx_task_owner on task(owner);
 create index if not exists idx_process_instance_initiator on process_instance(initiator);
-
