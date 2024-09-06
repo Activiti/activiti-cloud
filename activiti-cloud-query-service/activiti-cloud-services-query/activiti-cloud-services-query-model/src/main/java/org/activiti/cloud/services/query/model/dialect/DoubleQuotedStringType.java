@@ -5,9 +5,9 @@ import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.descriptor.java.StringJavaType;
 import org.hibernate.type.descriptor.jdbc.JdbcLiteralFormatter;
 import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
-import org.hibernate.type.internal.BasicTypeImpl;
+import org.hibernate.type.internal.NamedBasicTypeImpl;
 
-public class DoubleQuotedStringType extends BasicTypeImpl<String> {
+public class DoubleQuotedStringType extends NamedBasicTypeImpl<String> {
 
     private final RelationalFormType relationalFormType;
 
@@ -16,7 +16,7 @@ public class DoubleQuotedStringType extends BasicTypeImpl<String> {
     }
 
     public DoubleQuotedStringType(RelationalFormType relationalFormType) {
-        super(StringJavaType.INSTANCE, VarcharJdbcType.INSTANCE);
+        super(StringJavaType.INSTANCE, VarcharJdbcType.INSTANCE, "doublequotedstring");
         this.relationalFormType = relationalFormType;
     }
 
