@@ -342,9 +342,9 @@ public class TaskSpecification implements Specification<TaskEntity> {
         VariableFilter filter,
         CriteriaBuilder criteriaBuilder
     ) {
-        return criteriaBuilder.isTrue(
-            switch (filter.operator()) {
-                case EQUALS -> switch (filter.type()) {
+        return switch (filter.operator()) {
+            case EQUALS -> criteriaBuilder.isTrue(
+                switch (filter.type()) {
                     case BOOLEAN -> criteriaBuilder.function(
                         JsonValueFunctions.VALUE_EQUALS,
                         Boolean.class,
@@ -375,14 +375,18 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         valueColumnPath,
                         criteriaBuilder.literal(filter.value())
                     );
-                };
-                case LIKE -> criteriaBuilder.function(
+                }
+            );
+            case LIKE -> criteriaBuilder.isTrue(
+                criteriaBuilder.function(
                     JsonValueFunctions.LIKE_CASE_INSENSITIVE,
                     Boolean.class,
                     valueColumnPath,
                     criteriaBuilder.literal(filter.value())
-                );
-                case GREATER_THAN -> switch (filter.type()) {
+                )
+            );
+            case GREATER_THAN -> criteriaBuilder.isTrue(
+                switch (filter.type()) {
                     case INTEGER -> criteriaBuilder.function(
                         JsonValueFunctions.NUMERIC_GREATER_THAN,
                         Boolean.class,
@@ -414,8 +418,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         criteriaBuilder.literal(filter.value())
                     );
                     default -> throw new IllegalFilterException(filter);
-                };
-                case GREATER_THAN_OR_EQUAL -> switch (filter.type()) {
+                }
+            );
+            case GREATER_THAN_OR_EQUAL -> criteriaBuilder.isTrue(
+                switch (filter.type()) {
                     case INTEGER -> criteriaBuilder.function(
                         JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
                         Boolean.class,
@@ -447,8 +453,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         criteriaBuilder.literal(filter.value())
                     );
                     default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN -> switch (filter.type()) {
+                }
+            );
+            case LESS_THAN -> criteriaBuilder.isTrue(
+                switch (filter.type()) {
                     case INTEGER -> criteriaBuilder.function(
                         JsonValueFunctions.NUMERIC_LESS_THAN,
                         Boolean.class,
@@ -480,8 +488,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         criteriaBuilder.literal(filter.value())
                     );
                     default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN_OR_EQUAL -> switch (filter.type()) {
+                }
+            );
+            case LESS_THAN_OR_EQUAL -> criteriaBuilder.isTrue(
+                switch (filter.type()) {
                     case INTEGER -> criteriaBuilder.function(
                         JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
                         Boolean.class,
@@ -513,8 +523,8 @@ public class TaskSpecification implements Specification<TaskEntity> {
                         criteriaBuilder.literal(filter.value())
                     );
                     default -> throw new IllegalFilterException(filter);
-                };
-            }
-        );
+                }
+            );
+        };
     }
 }
