@@ -18,10 +18,10 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,11 +54,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = { QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class },
-    properties = {
-        "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
-        "logging.level.org.hibernate.collection.spi=warn",
-    }
+    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
@@ -113,8 +109,6 @@ public class TaskAdminControllerIT {
 
         TaskVariableEntity taskVariable1 = createTaskVariable();
         TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
 
         Set<TaskVariableEntity> taskVariables = new HashSet<>();
         taskVariables.add(taskVariable1);
@@ -126,7 +120,7 @@ public class TaskAdminControllerIT {
 
         ProcessVariableEntity variableToFetch = processVariables.stream().findFirst().get();
 
-        ValidatableMockMvcResponse response = given()
+        given()
             .webAppContextSetup(context)
             .accept("application/hal+json;charset=UTF-8")
             .when()
@@ -140,152 +134,30 @@ public class TaskAdminControllerIT {
                 "&variables.value=" +
                 taskVariable1.getValue()
             )
-            .then();
-
-        response.statusCode(200);
-        response.body("_embedded.tasks", hasSize(1));
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(1));
     }
 
     @Test
     @WithMockUser(username = "testadmin")
-    void should_parseTaskSearchRequest_withTaskVariableFilters() {
-        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
-
-        TaskVariableEntity taskVariable1 = createTaskVariable();
-        TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
-
-        Set<TaskVariableEntity> taskVariables = new HashSet<>();
-        taskVariables.add(taskVariable1);
-        taskVariables.add(taskVariable2);
-
-        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
-
-        processInstanceRepository.save(processInstanceEntity);
-
-        ValidatableMockMvcResponse response = given()
-            .log()
-            .all()
-            .webAppContextSetup(context)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(getTaskSearchRequestBodyWithTaskVariableFilters())
-            .when()
-            .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
-            .then()
-            .log()
-            .all();
-
-        response.statusCode(200);
-    }
-
-    @Test
-    @WithMockUser(username = "testadmin")
-    void should_parseTaskSearchRequest_withProcessVariableFilters() {
-        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
-
-        TaskVariableEntity taskVariable1 = createTaskVariable();
-        TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
-
-        Set<TaskVariableEntity> taskVariables = new HashSet<>();
-        taskVariables.add(taskVariable1);
-        taskVariables.add(taskVariable2);
-
-        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
-
-        processInstanceRepository.save(processInstanceEntity);
-
-        ValidatableMockMvcResponse response = given()
-            .log()
-            .all()
-            .webAppContextSetup(context)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(getTaskSearchRequestBodyWithProcessVariableFilters())
-            .when()
-            .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
-            .then()
-            .log()
-            .all();
-
-        response.statusCode(200);
-    }
-
-    @NotNull
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
-        Set<ProcessVariableEntity> variables = new HashSet<>();
-
-        for (int i = 0; i < 8; i++) {
-            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-            processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id" + i);
-            processVariableEntity.setType("string");
-            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-            processVariableEntity.setProcessInstance(processInstanceEntity);
-            variables.add(processVariableEntity);
-        }
-        variableRepository.saveAll(variables);
-        processInstanceEntity.setVariables(variables);
-        processInstanceRepository.save(processInstanceEntity);
-        return variables;
-    }
-
-    @NotNull
-    private TaskVariableEntity createTaskVariable() {
-        TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
-        taskVariableEntity.setName("name" + UUID.randomUUID());
-        taskVariableEntity.setType("string");
-        taskVariableEntity.setValue("var-value");
-        return taskVariableEntity;
-    }
-
-    @NotNull
-    private TaskEntity createTaskWithVariables(
-        ProcessInstanceEntity processInstanceEntity,
-        Set<TaskVariableEntity> taskVariables,
-        Set<ProcessVariableEntity> processVariables
-    ) {
-        TaskEntity taskEntity = new TaskEntity();
-        String taskId = UUID.randomUUID().toString();
-        taskEntity.setId(taskId);
-        taskEntity.setCreatedDate(new Date());
-        taskEntity.setProcessInstance(processInstanceEntity);
-        taskEntity.setProcessInstanceId(processInstanceEntity.getId());
-        taskEntity.setVariables(taskVariables);
-        taskEntity.setProcessVariables(processVariables);
-        taskRepository.save(taskEntity);
-        taskVariables.forEach(taskVariableEntity -> {
-            taskVariableEntity.setTaskId(taskId);
-            taskVariableEntity.setTask(taskEntity);
-            taskVariableRepository.save(taskVariableEntity);
-        });
-        return taskEntity;
-    }
-
-    @NotNull
-    private ProcessInstanceEntity createProcessInstance() {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId("processInstanceId");
-        processInstanceEntity.setName("name");
-        processInstanceEntity.setInitiator("initiator");
-        processInstanceEntity.setProcessDefinitionName("test");
-        processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
-        processInstanceEntity.setServiceName("test");
-        processInstanceRepository.save(processInstanceEntity);
-        return processInstanceEntity;
-    }
-
-    private String getTaskSearchRequestBodyWithTaskVariableFilters() {
-        return """
+    void should_parseTaskSearchRequest() {
+        String taskSearchRequest =
+            """
             {
                 "completedFrom": "2021-01-01T00:00:00Z",
                 "completedTo": "2021-01-01T00:00:00Z",
                 "candidateUserId": ["candidateUserId"],
                 "candidateGroupId": ["candidateGroupId"],
+                 "processVariableFilters": [
+                    {
+                        "processDefinitionKey": "processDefinitionKey",
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
                 "taskVariableFilters": [
                     {
                         "name": "name",
@@ -305,34 +177,140 @@ public class TaskAdminControllerIT {
                 "completedBy": ["completedBy"]
             }
             """;
+
+        given()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequest)
+            .when()
+            .post("/admin/v1/tasks/search")
+            .then()
+            .statusCode(200);
     }
 
-    private String getTaskSearchRequestBodyWithProcessVariableFilters() {
-        return """
+    @Test
+    @WithMockUser(username = "testadmin")
+    void should_filterByProcessVariablesAndTaskVariables() {
+        ProcessInstanceEntity process1 = createProcessInstance();
+        ProcessInstanceEntity process2 = createProcessInstance();
+        Set<ProcessVariableEntity> processVars1 = createProcessVariables(process1);
+        Set<ProcessVariableEntity> processVars2 = createProcessVariables(process2);
+
+        TaskVariableEntity taskVariable1 = createTaskVariable();
+        TaskVariableEntity taskVariable2 = createTaskVariable();
+        taskVariableRepository.save(taskVariable1);
+        taskVariableRepository.save(taskVariable2);
+
+        createTaskWithVariables(process1, Set.of(taskVariable1), processVars1);
+        createTaskWithVariables(process2, Set.of(taskVariable2), processVars2);
+
+        processInstanceRepository.save(process1);
+        processInstanceRepository.save(process2);
+
+        String taskSearchRequest = String.format(
+            """
             {
-                "completedFrom": "2021-01-01T00:00:00Z",
-                "completedTo": "2021-01-01T00:00:00Z",
-                "candidateUserId": ["candidateUserId"],
-                "candidateGroupId": ["candidateGroupId"],
                 "processVariableFilters": [
                     {
-                        "processDefinitionKey": "processDefinitionKey",
-                        "name": "name",
+                        "processDefinitionKey": "%s",
+                        "name": "%s",
                         "type": "string",
-                        "value": "value",
+                        "value": "%s",
                         "operator": "eq"
                     }
                 ],
-                "processVariableKeys": ["processDef/varName"],
-                "onlyStandalone": true,
-                "onlyRoot": true,
-                "assignee": ["assignee"],
-                "name": ["name"],
-                "description": ["description"],
-                "priority": [1],
-                "status": ["ASSIGNED"],
-                "completedBy": ["completedBy"]
+                "taskVariableFilters": [
+                    {
+                        "name": "%s",
+                        "type": "string",
+                        "value": "%s",
+                        "operator": "eq"
+                    }
+                ]
             }
-            """;
+            """,
+            taskVariable1.getProcessInstance().getProcessDefinitionKey(),
+            processVars1.stream().findFirst().get().getName(),
+            processVars1.stream().findFirst().get().getValue(),
+            taskVariable1.getName(),
+            taskVariable1.getValue()
+        );
+
+        given()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequest)
+            .when()
+            .post("/admin/v1/tasks/search")
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(1))
+            .body("_embedded.tasks[0].id", equalTo(taskVariable1.getTask().getId()));
+    }
+
+    @NotNull
+    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
+        Set<ProcessVariableEntity> variables = new HashSet<>();
+
+        for (int i = 0; i < 2; i++) {
+            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
+            processVariableEntity.setName("name" + i);
+            processVariableEntity.setValue(UUID.randomUUID().toString());
+            processVariableEntity.setType("string");
+            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
+            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
+            processVariableEntity.setProcessInstance(processInstanceEntity);
+            variables.add(processVariableEntity);
+        }
+        variableRepository.saveAll(variables);
+        processInstanceEntity.setVariables(variables);
+        processInstanceRepository.save(processInstanceEntity);
+        return variables;
+    }
+
+    @NotNull
+    private TaskVariableEntity createTaskVariable() {
+        TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
+        taskVariableEntity.setName("name" + UUID.randomUUID());
+        taskVariableEntity.setType("string");
+        taskVariableEntity.setValue(UUID.randomUUID().toString());
+        taskVariableRepository.save(taskVariableEntity);
+        return taskVariableEntity;
+    }
+
+    private void createTaskWithVariables(
+        ProcessInstanceEntity processInstanceEntity,
+        Set<TaskVariableEntity> taskVariables,
+        Set<ProcessVariableEntity> processVariables
+    ) {
+        TaskEntity taskEntity = new TaskEntity();
+        String taskId = UUID.randomUUID().toString();
+        taskEntity.setId(taskId);
+        taskEntity.setCreatedDate(new Date());
+        taskEntity.setProcessInstance(processInstanceEntity);
+        taskEntity.setProcessInstanceId(processInstanceEntity.getId());
+        taskEntity.setVariables(taskVariables);
+        taskEntity.setProcessVariables(processVariables);
+        taskRepository.save(taskEntity);
+        taskVariables.forEach(taskVariableEntity -> {
+            taskVariableEntity.setTaskId(taskId);
+            taskVariableEntity.setTask(taskEntity);
+            taskVariableEntity.setProcessInstance(processInstanceEntity);
+            taskVariableRepository.save(taskVariableEntity);
+        });
+    }
+
+    @NotNull
+    private ProcessInstanceEntity createProcessInstance() {
+        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
+        String process = UUID.randomUUID().toString();
+        processInstanceEntity.setId(process);
+        processInstanceEntity.setName(process);
+        processInstanceEntity.setInitiator("initiator");
+        processInstanceEntity.setProcessDefinitionName(process);
+        processInstanceEntity.setProcessDefinitionKey(process);
+        processInstanceEntity.setServiceName("test");
+        processInstanceRepository.save(processInstanceEntity);
+        return processInstanceEntity;
     }
 }
