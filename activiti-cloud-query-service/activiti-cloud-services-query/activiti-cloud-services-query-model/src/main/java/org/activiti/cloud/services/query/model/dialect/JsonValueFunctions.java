@@ -15,7 +15,7 @@
  */
 package org.activiti.cloud.services.query.model.dialect;
 
-public class JsonValueFunctions {
+public abstract class JsonValueFunctions {
 
     public static final String VALUE_EQUALS = "jsonb_value_eq";
     public static final String NUMERIC_EQUALS = "jsonb_numeric_eq";
