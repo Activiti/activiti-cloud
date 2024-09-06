@@ -103,7 +103,7 @@ public class TaskControllerHelper {
 
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
         Page<TaskEntity> tasks = taskRepository.findAll(new TaskSpecification(taskSearchRequest), pageable);
-        fetchProcessVariables(tasks.getContent(), taskSearchRequest.processVariableKeys());
+        fetchProcessVariables(tasks.getContent(), taskSearchRequest.getProcessVariableKeys());
         return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 

@@ -16,8 +16,10 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
 import java.util.Date;
@@ -42,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.context.WebApplicationContext;
@@ -55,8 +58,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -95,6 +96,7 @@ public class TaskAdminControllerIT {
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
+        postProcessors(csrf().asHeader());
         taskRepository.deleteAll();
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
@@ -104,7 +106,7 @@ public class TaskAdminControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "testadmin", roles = "ACTIVITI_ADMIN")
+    @WithMockUser(username = "testadmin")
     void should_returnTasks_withOnlyRequestedProcessVariables_whenSearchingByTaskVariableNameAndValue() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
         Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
@@ -144,6 +146,74 @@ public class TaskAdminControllerIT {
         response.body("_embedded.tasks", hasSize(1));
     }
 
+    @Test
+    @WithMockUser(username = "testadmin")
+    void should_parseTaskSearchRequest_withTaskVariableFilters() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
+
+        TaskVariableEntity taskVariable1 = createTaskVariable();
+        TaskVariableEntity taskVariable2 = createTaskVariable();
+        taskVariableRepository.save(taskVariable1);
+        taskVariableRepository.save(taskVariable2);
+
+        Set<TaskVariableEntity> taskVariables = new HashSet<>();
+        taskVariables.add(taskVariable1);
+        taskVariables.add(taskVariable2);
+
+        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
+
+        processInstanceRepository.save(processInstanceEntity);
+
+        ValidatableMockMvcResponse response = given()
+            .log()
+            .all()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(getTaskSearchRequestBodyWithTaskVariableFilters())
+            .when()
+            .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
+            .then()
+            .log()
+            .all();
+
+        response.statusCode(200);
+    }
+
+    @Test
+    @WithMockUser(username = "testadmin")
+    void should_parseTaskSearchRequest_withProcessVariableFilters() {
+        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
+        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
+
+        TaskVariableEntity taskVariable1 = createTaskVariable();
+        TaskVariableEntity taskVariable2 = createTaskVariable();
+        taskVariableRepository.save(taskVariable1);
+        taskVariableRepository.save(taskVariable2);
+
+        Set<TaskVariableEntity> taskVariables = new HashSet<>();
+        taskVariables.add(taskVariable1);
+        taskVariables.add(taskVariable2);
+
+        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
+
+        processInstanceRepository.save(processInstanceEntity);
+
+        ValidatableMockMvcResponse response = given()
+            .log()
+            .all()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(getTaskSearchRequestBodyWithProcessVariableFilters())
+            .when()
+            .post("/admin/v1/tasks/search?maxItems=500&skipCount=0&sort=createdDate,desc")
+            .then()
+            .log()
+            .all();
+
+        response.statusCode(200);
+    }
+
     @NotNull
     private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
         Set<ProcessVariableEntity> variables = new HashSet<>();
@@ -151,7 +221,8 @@ public class TaskAdminControllerIT {
         for (int i = 0; i < 8; i++) {
             ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
             processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
+            processVariableEntity.setValue("id" + i);
+            processVariableEntity.setType("string");
             processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
             processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
             processVariableEntity.setProcessInstance(processInstanceEntity);
@@ -167,6 +238,7 @@ public class TaskAdminControllerIT {
     private TaskVariableEntity createTaskVariable() {
         TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
         taskVariableEntity.setName("name" + UUID.randomUUID());
+        taskVariableEntity.setType("string");
         taskVariableEntity.setValue("var-value");
         return taskVariableEntity;
     }
@@ -205,5 +277,62 @@ public class TaskAdminControllerIT {
         processInstanceEntity.setServiceName("test");
         processInstanceRepository.save(processInstanceEntity);
         return processInstanceEntity;
+    }
+
+    private String getTaskSearchRequestBodyWithTaskVariableFilters() {
+        return """
+            {
+                "completedFrom": "2021-01-01T00:00:00Z",
+                "completedTo": "2021-01-01T00:00:00Z",
+                "candidateUserId": ["candidateUserId"],
+                "candidateGroupId": ["candidateGroupId"],
+                "taskVariableFilters": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
+                "processVariableKeys": ["processDef/varName"],
+                "onlyStandalone": true,
+                "onlyRoot": true,
+                "assignee": ["assignee"],
+                "name": ["name"],
+                "description": ["description"],
+                "priority": [1],
+                "status": ["CREATED"],
+                "completedBy": ["completedBy"]
+            }
+            """;
+    }
+
+    private String getTaskSearchRequestBodyWithProcessVariableFilters() {
+        return """
+            {
+                "completedFrom": "2021-01-01T00:00:00Z",
+                "completedTo": "2021-01-01T00:00:00Z",
+                "candidateUserId": ["candidateUserId"],
+                "candidateGroupId": ["candidateGroupId"],
+                "processVariableFilters": [
+                    {
+                        "processDefinitionKey": "processDefinitionKey",
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
+                "processVariableKeys": ["processDef/varName"],
+                "onlyStandalone": true,
+                "onlyRoot": true,
+                "assignee": ["assignee"],
+                "name": ["name"],
+                "description": ["description"],
+                "priority": [1],
+                "status": ["ASSIGNED"],
+                "completedBy": ["completedBy"]
+            }
+            """;
     }
 }

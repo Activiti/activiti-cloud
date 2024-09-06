@@ -15,11 +15,18 @@
  */
 package org.activiti.cloud.services.query.rest.filter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum VariableType {
     STRING,
     INTEGER,
     BIGDECIMAL,
     BOOLEAN,
     DATE,
-    DATETIME,
+    DATETIME;
+
+    @JsonValue
+    public String getValue() {
+        return name().toLowerCase();
+    }
 }
