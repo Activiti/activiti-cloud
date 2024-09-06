@@ -309,3 +309,6 @@ alter table task_process_variable
   add constraint fk_process_variable_id foreign key (process_variable_id) references process_variable;
 alter table task_process_variable
   add constraint uk_task_process_var unique (task_id, process_variable_id);
+create index idx_task_assignee on task(assignee);
+create index idx_task_owner on task(owner);
+create index idx_process_instance_initiator on process_instance(initiator);
