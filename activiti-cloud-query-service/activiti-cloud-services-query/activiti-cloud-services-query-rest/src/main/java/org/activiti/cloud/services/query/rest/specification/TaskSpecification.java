@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
@@ -31,6 +32,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
+import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
@@ -39,9 +41,6 @@ import org.springframework.util.CollectionUtils;
 
 public class TaskSpecification implements Specification<TaskEntity> {
 
-    private static final String DATETIME_DB_TYPE = "TIMESTAMPTZ";
-    private static final String DATE_DB_TYPE = "DATE";
-    private static final String EXTRACT_VALUE_EXPRESSION = "(" + ProcessVariableEntity_.VALUE + "->>'value')";
     List<Predicate> predicates = new ArrayList<>();
 
     private final TaskSearchRequest taskSearchRequest;
@@ -247,7 +246,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                             filter.processDefinitionKey()
                         ),
                         criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
-                        getVariableValueCondition(filter, criteriaBuilder)
+                        getVariableValueCondition(pvRoot.get(ProcessVariableEntity_.value), filter, criteriaBuilder)
                     )
                 )
                 .toArray(Predicate[]::new);
@@ -267,7 +266,11 @@ public class TaskSpecification implements Specification<TaskEntity> {
                                             filter.processDefinitionKey()
                                         ),
                                         criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
-                                        getVariableValueCondition(filter, criteriaBuilder)
+                                        getVariableValueCondition(
+                                            pvRoot.get(ProcessVariableEntity_.value),
+                                            filter,
+                                            criteriaBuilder
+                                        )
                                     ),
                                     pvRoot.get(ProcessVariableEntity_.id)
                                 )
@@ -297,7 +300,7 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 .map(filter ->
                     criteriaBuilder.and(
                         criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
-                        getVariableValueCondition(filter, criteriaBuilder)
+                        getVariableValueCondition(join.get(TaskVariableEntity_.value), filter, criteriaBuilder)
                     )
                 )
                 .toArray(Predicate[]::new);
@@ -313,7 +316,11 @@ public class TaskSpecification implements Specification<TaskEntity> {
                                 .when(
                                     criteriaBuilder.and(
                                         criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
-                                        getVariableValueCondition(filter, criteriaBuilder)
+                                        getVariableValueCondition(
+                                            join.get(TaskVariableEntity_.value),
+                                            filter,
+                                            criteriaBuilder
+                                        )
                                     ),
                                     join.get(TaskVariableEntity_.id)
                                 )
@@ -330,151 +337,184 @@ public class TaskSpecification implements Specification<TaskEntity> {
         }
     }
 
-    private Predicate getVariableValueCondition(VariableFilter filter, CriteriaBuilder criteriaBuilder) {
-        return switch (filter.operator()) {
-            case EQUALS -> {
-                String condition =
-                    switch (filter.type()) {
-                        case INTEGER, BOOLEAN -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value == " +
-                        filter.value() +
-                        "'";
-                        case STRING, BIGDECIMAL -> ProcessVariableEntity_.VALUE +
-                        " @@ '$.value == \"" +
-                        filter.value() +
-                        "\"'";
-                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATETIME_DB_TYPE +
-                        " = '" +
-                        filter.value() +
-                        "'::" +
-                        DATETIME_DB_TYPE;
-                        case DATE -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATE_DB_TYPE +
-                        " = '" +
-                        filter.value() +
-                        "'::" +
-                        DATE_DB_TYPE;
-                    };
-                yield criteriaBuilder.isTrue(
-                    criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
-                );
-            }
-            case LIKE -> criteriaBuilder.isTrue(
-                criteriaBuilder.function(
-                    "sql",
+    private Predicate getVariableValueCondition(
+        Path<?> valueColumnPath,
+        VariableFilter filter,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        return criteriaBuilder.isTrue(
+            switch (filter.operator()) {
+                case EQUALS -> switch (filter.type()) {
+                    case BOOLEAN -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Boolean.valueOf(filter.value()))
+                    );
+                    case INTEGER -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
+                    );
+                    case STRING, BIGDECIMAL -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATETIME -> criteriaBuilder.function(
+                        JsonValueFunctions.DATETIME_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATE -> criteriaBuilder.function(
+                        JsonValueFunctions.DATE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                };
+                case LIKE -> criteriaBuilder.function(
+                    JsonValueFunctions.LIKE_CASE_INSENSITIVE,
                     Boolean.class,
-                    criteriaBuilder.literal(
-                        ProcessVariableEntity_.VALUE + " @@ '$.value like_regex \"(?i).*" + filter.value() + ".*\"'"
-                    )
-                )
-            );
-            case GREATER_THAN -> {
-                String condition =
-                    switch (filter.type()) {
-                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value > " + filter.value() + "'";
-                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC > " + filter.value();
-                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value > \"" + filter.value() + "\"'";
-                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATETIME_DB_TYPE +
-                        " > '" +
-                        filter.value() +
-                        "'::" +
-                        DATETIME_DB_TYPE;
-                        case DATE -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATE_DB_TYPE +
-                        " > '" +
-                        filter.value() +
-                        "'::" +
-                        DATE_DB_TYPE;
-                        default -> throw new IllegalFilterException(filter);
-                    };
-                yield criteriaBuilder.isTrue(
-                    criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
+                    valueColumnPath,
+                    criteriaBuilder.literal(filter.value())
                 );
+                case GREATER_THAN -> switch (filter.type()) {
+                    case INTEGER -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_GREATER_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
+                    );
+                    case BIGDECIMAL -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_GREATER_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case STRING -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATETIME -> criteriaBuilder.function(
+                        JsonValueFunctions.DATETIME_GREATER_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATE -> criteriaBuilder.function(
+                        JsonValueFunctions.DATE_GREATER_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    default -> throw new IllegalFilterException(filter);
+                };
+                case GREATER_THAN_OR_EQUAL -> switch (filter.type()) {
+                    case INTEGER -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
+                    );
+                    case BIGDECIMAL -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case STRING -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATETIME -> criteriaBuilder.function(
+                        JsonValueFunctions.DATETIME_GREATER_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATE -> criteriaBuilder.function(
+                        JsonValueFunctions.DATE_GREATER_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    default -> throw new IllegalFilterException(filter);
+                };
+                case LESS_THAN -> switch (filter.type()) {
+                    case INTEGER -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_LESS_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
+                    );
+                    case BIGDECIMAL -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_LESS_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case STRING -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATETIME -> criteriaBuilder.function(
+                        JsonValueFunctions.DATETIME_LESS_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATE -> criteriaBuilder.function(
+                        JsonValueFunctions.DATE_LESS_THAN,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    default -> throw new IllegalFilterException(filter);
+                };
+                case LESS_THAN_OR_EQUAL -> switch (filter.type()) {
+                    case INTEGER -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
+                    );
+                    case BIGDECIMAL -> criteriaBuilder.function(
+                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case STRING -> criteriaBuilder.function(
+                        JsonValueFunctions.VALUE_EQUALS,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATETIME -> criteriaBuilder.function(
+                        JsonValueFunctions.DATETIME_LESS_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    case DATE -> criteriaBuilder.function(
+                        JsonValueFunctions.DATE_LESS_THAN_EQUAL,
+                        Boolean.class,
+                        valueColumnPath,
+                        criteriaBuilder.literal(filter.value())
+                    );
+                    default -> throw new IllegalFilterException(filter);
+                };
             }
-            case GREATER_THAN_OR_EQUAL -> {
-                String condition =
-                    switch (filter.type()) {
-                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value >= " + filter.value() + "'";
-                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC >= " + filter.value();
-                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value >= \"" + filter.value() + "\"'";
-                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATETIME_DB_TYPE +
-                        " >= '" +
-                        filter.value() +
-                        "'::" +
-                        DATETIME_DB_TYPE;
-                        case DATE -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATE_DB_TYPE +
-                        " >= '" +
-                        filter.value() +
-                        "'::" +
-                        DATE_DB_TYPE;
-                        default -> throw new IllegalFilterException(filter);
-                    };
-                yield criteriaBuilder.isTrue(
-                    criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
-                );
-            }
-            case LESS_THAN -> {
-                String condition =
-                    switch (filter.type()) {
-                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value < " + filter.value() + "'";
-                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC < " + filter.value();
-                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value < \"" + filter.value() + "\"'";
-                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATETIME_DB_TYPE +
-                        " < '" +
-                        filter.value() +
-                        "'::" +
-                        DATETIME_DB_TYPE;
-                        case DATE -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATE_DB_TYPE +
-                        " < '" +
-                        filter.value() +
-                        "'::" +
-                        DATE_DB_TYPE;
-                        default -> throw new IllegalFilterException(filter);
-                    };
-                yield criteriaBuilder.isTrue(
-                    criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
-                );
-            }
-            case LESS_THAN_OR_EQUAL -> {
-                String condition =
-                    switch (filter.type()) {
-                        case INTEGER -> ProcessVariableEntity_.VALUE + " @@ '$.value <= " + filter.value() + "'";
-                        case BIGDECIMAL -> EXTRACT_VALUE_EXPRESSION + "::NUMERIC <= " + filter.value();
-                        case STRING -> ProcessVariableEntity_.VALUE + " @@ '$.value <= \"" + filter.value() + "\"'";
-                        case DATETIME -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATETIME_DB_TYPE +
-                        " <= '" +
-                        filter.value() +
-                        "'::" +
-                        DATETIME_DB_TYPE;
-                        case DATE -> EXTRACT_VALUE_EXPRESSION +
-                        "::" +
-                        DATE_DB_TYPE +
-                        " <= '" +
-                        filter.value() +
-                        "'::" +
-                        DATE_DB_TYPE;
-                        default -> throw new IllegalFilterException(filter);
-                    };
-                yield criteriaBuilder.isTrue(
-                    criteriaBuilder.function("sql", Boolean.class, criteriaBuilder.literal(condition))
-                );
-            }
-        };
+        );
     }
 }

@@ -57,11 +57,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    properties = {
-        "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
-        "logging.level.org.hibernate.collection.spi=warn",
-    }
+    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
 )
 @Testcontainers
 @TestPropertySource("classpath:application-test.properties")
