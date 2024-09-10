@@ -21,7 +21,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -31,6 +30,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.security.ProcessInstanceRestrictionService;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public class ProcessInstanceService {
 
@@ -50,6 +51,8 @@ public class ProcessInstanceService {
     private final ProcessInstanceRepository processInstanceRepository;
 
     private final TaskRepository taskRepository;
+
+    private final ProcessInstanceSearchService processInstanceSearchService;
 
     private final ProcessInstanceRestrictionService processInstanceRestrictionService;
 
@@ -65,6 +68,7 @@ public class ProcessInstanceService {
     public ProcessInstanceService(
         ProcessInstanceRepository processInstanceRepository,
         TaskRepository taskRepository,
+        ProcessInstanceSearchService processInstanceSearchService,
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
@@ -72,6 +76,7 @@ public class ProcessInstanceService {
     ) {
         this.processInstanceRepository = processInstanceRepository;
         this.taskRepository = taskRepository;
+        this.processInstanceSearchService = processInstanceSearchService;
         this.processInstanceRestrictionService = processInstanceRestrictionService;
         this.securityPoliciesApplicationService = securityPoliciesApplicationService;
         this.securityManager = securityManager;
@@ -159,6 +164,11 @@ public class ProcessInstanceService {
         Predicate extendedPredicate = expression.and(transformedPredicate);
 
         return processInstanceRepository.findAll(extendedPredicate, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> search(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
+        return processInstanceSearchService.searchRestricted(searchRequest, pageable);
     }
 
     private boolean canRead(ProcessInstanceEntity processInstanceEntity) {

@@ -24,13 +24,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.types.Predicate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -39,6 +39,8 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -101,6 +103,20 @@ public class ProcessInstanceController {
         return pagedCollectionModelAssembler.toModel(
             pageable,
             processInstanceService.findAllWithVariables(predicate, variableKeys, pageable),
+            processInstanceRepresentationModelAssembler
+        );
+    }
+
+    @Operation(summary = "Search process instances")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/search")
+    public PagedModel<EntityModel<CloudProcessInstance>> searchProcessInstances(
+        @RequestBody ProcessInstanceSearchRequest searchRequest,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceService.search(searchRequest, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
