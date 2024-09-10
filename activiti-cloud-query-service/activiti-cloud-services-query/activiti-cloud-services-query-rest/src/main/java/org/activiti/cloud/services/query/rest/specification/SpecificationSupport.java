@@ -24,8 +24,6 @@ import java.util.Collection;
 import java.util.Set;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
-import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -74,179 +72,46 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
         VariableFilter filter,
         CriteriaBuilder criteriaBuilder
     ) {
-        return criteriaBuilder.isTrue(
-            switch (filter.operator()) {
-                case EQUALS -> switch (filter.type()) {
-                    case BOOLEAN -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Boolean.valueOf(filter.value()))
-                    );
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case STRING, BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                };
-                case LIKE -> criteriaBuilder.function(
-                    JsonValueFunctions.LIKE_CASE_INSENSITIVE,
-                    Boolean.class,
+        VariableValueCondition valueConditionStrategy =
+            switch (filter.type()) {
+                case STRING -> new StringVariableValueCondition(
                     valueColumnPath,
-                    criteriaBuilder.literal(filter.value())
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
                 );
-                case GREATER_THAN -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case GREATER_THAN_OR_EQUAL -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN_OR_EQUAL -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-            }
-        );
+                case INTEGER -> new IntegerVariableValueCondition(
+                    valueColumnPath,
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
+                );
+                case BIGDECIMAL -> new BigDecimalVariableValueCondition(
+                    valueColumnPath,
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
+                );
+                case DATE -> new DateVariableValueCondition(
+                    valueColumnPath,
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
+                );
+                case DATETIME -> new DatetimeVariableValueCondition(
+                    valueColumnPath,
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
+                );
+                case BOOLEAN -> new BooleanVariableValueCondition(
+                    valueColumnPath,
+                    filter.operator(),
+                    filter.value(),
+                    criteriaBuilder
+                );
+            };
+
+        return valueConditionStrategy.toPredicate();
     }
 }

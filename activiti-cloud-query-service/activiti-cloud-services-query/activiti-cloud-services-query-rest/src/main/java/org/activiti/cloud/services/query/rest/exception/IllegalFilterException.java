@@ -15,11 +15,17 @@
  */
 package org.activiti.cloud.services.query.rest.exception;
 
+import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
 
 public class IllegalFilterException extends IllegalArgumentException {
 
+    public IllegalFilterException(VariableType type, FilterOperator operator) {
+        super("Unsupported type: " + type + " for operator: " + operator);
+    }
+
     public IllegalFilterException(VariableFilter filter) {
-        super("Unsupported type: " + filter.type() + " for operator: " + filter.operator());
+        this(filter.type(), filter.operator());
     }
 }

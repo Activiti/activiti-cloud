@@ -27,17 +27,93 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
     @Override
     public void initializeFunctionRegistry(FunctionContributions functionContributions) {
         super.initializeFunctionRegistry(functionContributions);
-        registerJsonValueEquals(functionContributions);
+        registerJsonValueFunctions(functionContributions);
         registerJsonValueLikeFunctions(functionContributions);
         registerJsonValueNumericFunctions(functionContributions);
         registerJsonValueDateFunctions(functionContributions);
         registerJsonValueDatetimeFunctions(functionContributions);
     }
 
-    private void registerJsonValueEquals(FunctionContributions functionContributions) {
+    private void registerJsonValueFunctions(FunctionContributions functionContributions) {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
         functionRegistry
             .patternDescriptorBuilder(JsonValueFunctions.VALUE_EQUALS, "?1 @@ '$.value == ?2'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, ANY value")
+            .setArgumentTypeResolver((function, argIndex, converter) -> {
+                if (argIndex == 1 && function.getArguments().get(1).getNodeJavaType().equals(StringJavaType.INSTANCE)) {
+                    return new DoubleQuotedStringType();
+                }
+                return StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE.resolveFunctionArgumentType(
+                    function,
+                    argIndex,
+                    converter
+                );
+            })
+            .register();
+
+        functionRegistry
+            .patternDescriptorBuilder(JsonValueFunctions.VALUE_GREATER_THAN, "?1 @@ '$.value > ?2'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, ANY value")
+            .setArgumentTypeResolver((function, argIndex, converter) -> {
+                if (argIndex == 1 && function.getArguments().get(1).getNodeJavaType().equals(StringJavaType.INSTANCE)) {
+                    return new DoubleQuotedStringType();
+                }
+                return StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE.resolveFunctionArgumentType(
+                    function,
+                    argIndex,
+                    converter
+                );
+            })
+            .register();
+
+        functionRegistry
+            .patternDescriptorBuilder(JsonValueFunctions.VALUE_GREATER_THAN_EQUAL, "?1 @@ '$.value >= ?2'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, ANY value")
+            .setArgumentTypeResolver((function, argIndex, converter) -> {
+                if (argIndex == 1 && function.getArguments().get(1).getNodeJavaType().equals(StringJavaType.INSTANCE)) {
+                    return new DoubleQuotedStringType();
+                }
+                return StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE.resolveFunctionArgumentType(
+                    function,
+                    argIndex,
+                    converter
+                );
+            })
+            .register();
+
+        functionRegistry
+            .patternDescriptorBuilder(JsonValueFunctions.VALUE_LESS_THAN, "?1 @@ '$.value < ?2'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(2)
+            .setArgumentListSignature("JSONB jsonb, ANY value")
+            .setArgumentTypeResolver((function, argIndex, converter) -> {
+                if (argIndex == 1 && function.getArguments().get(1).getNodeJavaType().equals(StringJavaType.INSTANCE)) {
+                    return new DoubleQuotedStringType();
+                }
+                return StandardFunctionArgumentTypeResolvers.IMPLIED_RESULT_TYPE.resolveFunctionArgumentType(
+                    function,
+                    argIndex,
+                    converter
+                );
+            })
+            .register();
+
+        functionRegistry
+            .patternDescriptorBuilder(JsonValueFunctions.VALUE_LESS_THAN_EQUAL, "?1 @@ '$.value <= ?2'")
             .setInvariantType(
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
             )

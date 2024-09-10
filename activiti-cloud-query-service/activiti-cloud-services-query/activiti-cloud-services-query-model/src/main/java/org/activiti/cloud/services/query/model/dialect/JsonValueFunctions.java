@@ -18,6 +18,10 @@ package org.activiti.cloud.services.query.model.dialect;
 public abstract class JsonValueFunctions {
 
     public static final String VALUE_EQUALS = "jsonb_value_eq";
+    public static final String VALUE_GREATER_THAN = "jsonb_value_gt";
+    public static final String VALUE_GREATER_THAN_EQUAL = "jsonb_value_gte";
+    public static final String VALUE_LESS_THAN = "jsonb_value_lt";
+    public static final String VALUE_LESS_THAN_EQUAL = "jsonb_value_lte";
     public static final String NUMERIC_EQUALS = "jsonb_numeric_eq";
     public static final String NUMERIC_GREATER_THAN = "jsonb_numeric_gt";
     public static final String NUMERIC_GREATER_THAN_EQUAL = "jsonb_numeric_gte";
