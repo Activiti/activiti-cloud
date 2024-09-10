@@ -65,9 +65,11 @@ import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.activiti.spring.process.CachingProcessExtensionService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
+import org.activiti.spring.process.model.ConstantDefinition;
 import org.activiti.spring.process.model.Extension;
 import org.activiti.spring.process.model.Mapping;
 import org.activiti.spring.process.model.Mapping.SourceMappingType;
+import org.activiti.spring.process.model.ProcessConstantsMapping;
 import org.activiti.spring.process.model.ProcessVariablesMapping;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.junit.jupiter.api.Test;
@@ -640,6 +642,322 @@ class ProcessDefinitionControllerImplIT {
 
         MvcResult result = mockMvc
             .perform(get("/v1/process-definitions/{id}/static-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    @Test
+    void should_getProcessModelConstantsForStartEvent_when_hasStartEventFormAndConstants() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setName("startEvent");
+        startEvent.setId("startEvent");
+        startEvent.setFormKey("start-event-form");
+        process.setInitialFlowElement(startEvent);
+        process.addFlowElement(startEvent);
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        ProcessConstantsMapping givenConstantsDefinition = new ProcessConstantsMapping();
+        ConstantDefinition constantDefinition1 = new ConstantDefinition();
+        constantDefinition1.setValue("Variable no 1");
+        givenConstantsDefinition.put("variableRef", constantDefinition1);
+
+        Extension extension = new Extension();
+        extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of("variableRef", "Variable no 1"));
+    }
+
+    @Test
+    void should_getProcessModelConstantsForStartEvent_when_hasNoStartEventFormAndConstants() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setName("startEvent");
+        startEvent.setId("startEvent");
+        process.setInitialFlowElement(startEvent);
+        process.addFlowElement(startEvent);
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        ProcessConstantsMapping givenConstantsDefinition = new ProcessConstantsMapping();
+        ConstantDefinition constantDefinition1 = new ConstantDefinition();
+        constantDefinition1.setValue("Variable no 1");
+        givenConstantsDefinition.put("variableRef", constantDefinition1);
+
+        Extension extension = new Extension();
+        extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of("variableRef", "Variable no 1"));
+    }
+
+    @Test
+    void should_getEmptyMapForProcessModelConstantsForStartEvent_when_startEventHasNoFormAndNoConstants()
+        throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setName("startEvent");
+        startEvent.setId("startEvent");
+        process.setInitialFlowElement(startEvent);
+        process.addFlowElement(startEvent);
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        Extension extension = new Extension();
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    @Test
+    void should_getEmptyMapForProcessModelConstantsMappingForStartEvent_when_hasFormAndNoConstantsForStartEvent()
+        throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setName("startEvent");
+        startEvent.setId("startEvent");
+        startEvent.setFormKey("start-event-form");
+        process.setInitialFlowElement(startEvent);
+        process.addFlowElement(startEvent);
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        Extension extension = new Extension();
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    @Test
+    void should_getEmptyMapForProcessModelConstantsMappingForStartEvent_when_hasNoStartEvent() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        ProcessConstantsMapping givenConstantsDefinition = new ProcessConstantsMapping();
+        ConstantDefinition constantDefinition1 = new ConstantDefinition();
+        constantDefinition1.setValue("Variable no 1");
+        givenConstantsDefinition.put("variableRef", constantDefinition1);
+
+        Extension extension = new Extension();
+        extension.setConstants(Map.of("startEvent", givenConstantsDefinition));
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(extension);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Map<String, Object> resultMap = om.readValue(result.getResponse().getContentAsString(), Map.class);
+
+        assertThat(resultMap).isEqualTo(Map.of());
+    }
+
+    @Test
+    void should_getEmptyMapForProcessModelConstantsMappingForStartEvent_when_hasNoExtensions() throws Exception {
+        String procId = "procId";
+        String my_process = "my process";
+        String this_is_my_process = "this is my process";
+        int version = 1;
+        ProcessDefinition processDefinition = buildProcessDefinition(procId, my_process, this_is_my_process, version);
+        List<ProcessDefinition> processDefinitionList = new ArrayList<>();
+        processDefinitionList.add(processDefinition);
+        Page<ProcessDefinition> processDefinitionPage = new PageImpl<>(
+            processDefinitionList,
+            processDefinitionList.size()
+        );
+        when(processRuntime.processDefinitions(any())).thenReturn(processDefinitionPage);
+
+        BpmnModel bpmnModel = new BpmnModel();
+        Process process = new Process();
+        process.setId(procId);
+        process.setName("Main Process");
+        StartEvent startEvent = new StartEvent();
+        startEvent.setName("startEvent");
+        startEvent.setId("startEvent");
+        startEvent.setFormKey("start-event-form");
+        process.setInitialFlowElement(startEvent);
+        process.addFlowElement(startEvent);
+        bpmnModel.getProcesses().add(process);
+        when(repositoryService.getBpmnModel(procId)).thenReturn(bpmnModel);
+
+        ProcessVariablesMapping startEventMapping = new ProcessVariablesMapping();
+        Mapping valueMapping = new Mapping();
+        valueMapping.setValue("static value");
+        valueMapping.setType(SourceMappingType.VALUE);
+        Mapping variableMapping = new Mapping();
+        variableMapping.setValue("variableRef");
+        variableMapping.setType(SourceMappingType.VARIABLE);
+        startEventMapping.setInputs(Map.of("value", valueMapping, "variable", variableMapping));
+
+        when(cachingProcessExtensionService.getExtensionsForId("procId")).thenReturn(null);
+
+        MvcResult result = mockMvc
+            .perform(get("/v1/process-definitions/{id}/constant-values", procId).accept(APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
 
