@@ -43,7 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @Testcontainers
 @TestPropertySource("classpath:application-test.properties")
-public class ProcessVariableServiceIT {
+class ProcessVariableServiceIT {
 
     @Container
     @ServiceConnection

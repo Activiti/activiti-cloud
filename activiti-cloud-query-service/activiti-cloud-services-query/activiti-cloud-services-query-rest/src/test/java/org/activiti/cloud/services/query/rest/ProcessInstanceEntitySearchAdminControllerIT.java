@@ -53,7 +53,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-public class ProcessInstanceEntitySearchAdminControllerIT {
+class ProcessInstanceEntitySearchAdminControllerIT {
 
     @Autowired
     private WebApplicationContext context;
@@ -72,7 +72,7 @@ public class ProcessInstanceEntitySearchAdminControllerIT {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         webAppContextSetup(context);
         postProcessors(csrf().asHeader());
         taskRepository.deleteAll();
