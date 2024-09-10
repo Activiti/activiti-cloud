@@ -21,7 +21,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomi
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class HibernateConfiguration implements HibernatePropertiesCustomizer {
+public class CustomHibernateConfiguration implements HibernatePropertiesCustomizer {
 
     @Override
     public void customize(Map<String, Object> hibernateProperties) {

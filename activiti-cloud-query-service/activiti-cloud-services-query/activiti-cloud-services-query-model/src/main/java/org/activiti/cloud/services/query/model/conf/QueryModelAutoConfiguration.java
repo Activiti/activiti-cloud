@@ -19,8 +19,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.cloud.services.query.model.VariableValueJsonConverter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
+@Import(CustomHibernateConfiguration.class)
 public class QueryModelAutoConfiguration {
 
     @Bean
