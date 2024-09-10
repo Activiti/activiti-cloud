@@ -27,7 +27,7 @@ public abstract class VariableValueCondition {
     protected final String value;
     protected final CriteriaBuilder criteriaBuilder;
 
-    public VariableValueCondition(
+    protected VariableValueCondition(
         Path<?> path,
         FilterOperator operator,
         String value,
