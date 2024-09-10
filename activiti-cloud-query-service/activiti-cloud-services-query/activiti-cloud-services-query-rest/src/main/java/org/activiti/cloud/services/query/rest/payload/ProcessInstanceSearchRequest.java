@@ -17,10 +17,9 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import java.util.Date;
 import java.util.Set;
-import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
-public record TaskSearchRequest(
-    boolean onlyStandalone, boolean onlyRoot, Set<String> name, Set<String> description, Set<Integer> priority, Set<Task.TaskStatus> status, Set<String> completedBy, Set<String> assignee, Date createdFrom, Date createdTo, Date lastModifiedFrom, Date lastModifiedTo, Date lastClaimedFrom, Date lastClaimedTo, Date dueDateFrom, Date dueDateTo, Date completedFrom, Date completedTo, Set<String> candidateUserId, Set<String> candidateGroupId, Set<VariableFilter> taskVariableFilters, Set<VariableFilter> processVariableFilters, Set<ProcessVariableKey> processVariableKeys
+public record ProcessInstanceSearchRequest(
+    Set<String> name, Set<String> initiator, Set<String> appVersion, Date lastModifiedFrom, Date lastModifiedTo, Date startFrom, Date startTo, Date completedFrom, Date completedTo, Date suspendedFrom, Date suspendedTo, Set<VariableFilter> processVariableFilters, Set<ProcessVariableKey> processVariableKeys
 ) {}

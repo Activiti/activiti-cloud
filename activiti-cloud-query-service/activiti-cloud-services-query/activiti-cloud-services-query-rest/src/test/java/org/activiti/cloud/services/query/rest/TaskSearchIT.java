@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
@@ -57,7 +58,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.show-sql=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
+    }
 )
 @Testcontainers
 @TestPropertySource("classpath:application-test.properties")
@@ -94,6 +100,242 @@ class TaskSearchIT {
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
         variableRepository.deleteAll();
+    }
+
+    @Test
+    void should_returnTask_filteredByProcessVariable_whenAllFiltersMatch() {
+        ProcessInstanceEntity processInstance = new ProcessInstanceEntity();
+        processInstance.setId(UUID.randomUUID().toString());
+        processInstance.setProcessDefinitionKey(UUID.randomUUID().toString());
+        processInstance = processInstanceRepository.save(processInstance);
+
+        ProcessVariableEntity processVariableEntity1 = new ProcessVariableEntity();
+        processVariableEntity1.setProcessInstanceId(processInstance.getId());
+        processVariableEntity1.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        processVariableEntity1.setName("var1");
+        processVariableEntity1.setValue("value1");
+        variableRepository.save(processVariableEntity1);
+
+        ProcessVariableEntity processVariableEntity2 = new ProcessVariableEntity();
+        processVariableEntity2.setProcessInstanceId(processInstance.getId());
+        processVariableEntity2.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        processVariableEntity2.setName("var2");
+        processVariableEntity2.setValue("value2");
+        variableRepository.save(processVariableEntity2);
+
+        TaskEntity task = new TaskEntity();
+        task.setId(UUID.randomUUID().toString());
+        task.setProcessInstanceId(processInstance.getId());
+        task.setProcessVariables(Set.of(processVariableEntity1, processVariableEntity2));
+        task = taskRepository.save(task);
+
+        processInstance.setTasks(Set.of(task));
+        processInstance.setVariables(Set.of(processVariableEntity1, processVariableEntity2));
+
+        VariableFilter matchingFilter1 = new VariableFilter(
+            processInstance.getProcessDefinitionKey(),
+            processVariableEntity1.getName(),
+            VariableType.STRING,
+            processVariableEntity1.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        VariableFilter matchingFilter2 = new VariableFilter(
+            processInstance.getProcessDefinitionKey(),
+            processVariableEntity2.getName(),
+            VariableType.STRING,
+            processVariableEntity2.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilters(
+            Set.of(matchingFilter1, matchingFilter2)
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_not_returnTask_filteredByProcessVariable_when_OneFilterDoesNotMatch() {
+        ProcessInstanceEntity processInstance = new ProcessInstanceEntity();
+        processInstance.setId(UUID.randomUUID().toString());
+        processInstance.setProcessDefinitionKey(UUID.randomUUID().toString());
+        processInstance = processInstanceRepository.save(processInstance);
+
+        ProcessVariableEntity processVariableEntity1 = new ProcessVariableEntity();
+        processVariableEntity1.setProcessInstanceId(processInstance.getId());
+        processVariableEntity1.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        processVariableEntity1.setName("var1");
+        processVariableEntity1.setValue("value1");
+        variableRepository.save(processVariableEntity1);
+
+        ProcessVariableEntity processVariableEntity2 = new ProcessVariableEntity();
+        processVariableEntity2.setProcessInstanceId(processInstance.getId());
+        processVariableEntity2.setProcessDefinitionKey(processInstance.getProcessDefinitionKey());
+        processVariableEntity2.setName("var2");
+        processVariableEntity2.setValue("value2");
+        variableRepository.save(processVariableEntity2);
+
+        TaskEntity task = new TaskEntity();
+        task.setId(UUID.randomUUID().toString());
+        task.setProcessInstanceId(processInstance.getId());
+        task.setProcessVariables(Set.of(processVariableEntity1, processVariableEntity2));
+        task = taskRepository.save(task);
+
+        processInstance.setTasks(Set.of(task));
+        processInstance.setVariables(Set.of(processVariableEntity1, processVariableEntity2));
+
+        VariableFilter matchingFilter = new VariableFilter(
+            processInstance.getProcessDefinitionKey(),
+            processVariableEntity1.getName(),
+            VariableType.STRING,
+            processVariableEntity1.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        VariableFilter notMatchingFilter = new VariableFilter(
+            processInstance.getProcessDefinitionKey(),
+            processVariableEntity2.getName(),
+            VariableType.STRING,
+            "not-matching-value",
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilters(
+            Set.of(matchingFilter, notMatchingFilter)
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).isEmpty();
+    }
+
+    @Test
+    void should_returnTask_filteredByTaskVariable_whenAllFiltersMatch() {
+        ProcessInstanceEntity processInstance = new ProcessInstanceEntity();
+        processInstance.setId(UUID.randomUUID().toString());
+        processInstance.setProcessDefinitionKey(UUID.randomUUID().toString());
+        processInstance = processInstanceRepository.save(processInstance);
+
+        TaskEntity task = new TaskEntity();
+        task.setId(UUID.randomUUID().toString());
+        task.setProcessInstanceId(processInstance.getId());
+        task = taskRepository.save(task);
+
+        TaskVariableEntity taskVariable1 = new TaskVariableEntity();
+        taskVariable1.setTaskId(task.getId());
+        taskVariable1.setName("var1");
+        taskVariable1.setValue("value1");
+        taskVariableRepository.save(taskVariable1);
+
+        TaskVariableEntity taskVariable2 = new TaskVariableEntity();
+        taskVariable2.setTaskId(task.getId());
+        taskVariable2.setName("var2");
+        taskVariable2.setValue("value2");
+        taskVariableRepository.save(taskVariable2);
+
+        task.setVariables(Set.of(taskVariable1, taskVariable2));
+        taskRepository.save(task);
+
+        VariableFilter matchingFilter1 = new VariableFilter(
+            null,
+            taskVariable1.getName(),
+            VariableType.STRING,
+            taskVariable1.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        VariableFilter matchingFilter2 = new VariableFilter(
+            null,
+            taskVariable2.getName(),
+            VariableType.STRING,
+            taskVariable2.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            matchingFilter1,
+            matchingFilter2
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactly(task);
+    }
+
+    @Test
+    void should_not_returnTask_filteredByTaskVariable_when_OneFilterDoesNotMatch() {
+        ProcessInstanceEntity processInstance = new ProcessInstanceEntity();
+        processInstance.setId(UUID.randomUUID().toString());
+        processInstance.setProcessDefinitionKey(UUID.randomUUID().toString());
+        processInstance = processInstanceRepository.save(processInstance);
+
+        TaskEntity task = new TaskEntity();
+        task.setId(UUID.randomUUID().toString());
+        task.setProcessInstanceId(processInstance.getId());
+        task = taskRepository.save(task);
+
+        TaskVariableEntity taskVariable1 = new TaskVariableEntity();
+        taskVariable1.setTaskId(task.getId());
+        taskVariable1.setName("var1");
+        taskVariable1.setValue("value1");
+        taskVariableRepository.save(taskVariable1);
+
+        TaskVariableEntity taskVariable2 = new TaskVariableEntity();
+        taskVariable2.setTaskId(task.getId());
+        taskVariable2.setName("var2");
+        taskVariable2.setValue("value2");
+        taskVariableRepository.save(taskVariable2);
+
+        task.setVariables(Set.of(taskVariable1, taskVariable2));
+        taskRepository.save(task);
+
+        VariableFilter matchingFilter1 = new VariableFilter(
+            null,
+            taskVariable1.getName(),
+            VariableType.STRING,
+            taskVariable1.getValue(),
+            FilterOperator.EQUALS
+        );
+
+        VariableFilter notMatchingFilter = new VariableFilter(
+            null,
+            taskVariable2.getName(),
+            VariableType.STRING,
+            "not-matching-value",
+            FilterOperator.EQUALS
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            matchingFilter1,
+            notMatchingFilter
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).isEmpty();
     }
 
     @Test
@@ -138,7 +380,7 @@ class TaskSearchIT {
     }
 
     @Test
-    void should_returnTasks_filteredByTaskProcessVariable_exactMatch() {
+    void should_returnTasks_filteredByStringTaskProcessVariable_exactMatch() {
         ProcessInstanceEntity processInstance = createProcessInstance();
         String varName = "task-var";
         String valueToSearch = "task-value";
@@ -2050,7 +2292,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
             false,
             false,
-            List.of("darth", "baggins"),
+            Set.of("darth", "baggins"),
             null,
             null,
             null,
@@ -2104,7 +2346,7 @@ class TaskSearchIT {
             false,
             false,
             null,
-            List.of("darth", "baggins"),
+            Set.of("darth", "baggins"),
             null,
             null,
             null,
@@ -2158,7 +2400,7 @@ class TaskSearchIT {
             false,
             null,
             null,
-            List.of(1, 2),
+            Set.of(1, 2),
             null,
             null,
             null,
@@ -2212,7 +2454,7 @@ class TaskSearchIT {
             null,
             null,
             null,
-            List.of(Task.TaskStatus.CREATED, Task.TaskStatus.ASSIGNED),
+            Set.of(Task.TaskStatus.CREATED, Task.TaskStatus.ASSIGNED),
             null,
             null,
             null,
@@ -2266,7 +2508,7 @@ class TaskSearchIT {
             null,
             null,
             null,
-            List.of("Jimmy Page", "Robert Plant"),
+            Set.of("Jimmy Page", "Robert Plant"),
             null,
             null,
             null,
@@ -2320,7 +2562,7 @@ class TaskSearchIT {
             null,
             null,
             null,
-            List.of("Kimi Raikkonen", "Lewis Hamilton"),
+            Set.of("Kimi Raikkonen", "Lewis Hamilton"),
             null,
             null,
             null,
@@ -2929,7 +3171,7 @@ class TaskSearchIT {
             null,
             null,
             null,
-            List.of("user1", "user2"),
+            Set.of("user1", "user2"),
             null,
             null,
             null,
@@ -2998,7 +3240,7 @@ class TaskSearchIT {
             null,
             null,
             null,
-            List.of("group1", "group2"),
+            Set.of("group1", "group2"),
             null,
             null,
             null
@@ -3045,10 +3287,17 @@ class TaskSearchIT {
 
     @NotNull
     private static TaskSearchRequest buildTaskSearchRequestWithProcessVariableFilter(VariableFilter variableFilter) {
-        Set<VariableFilter> filters = Set.of(variableFilter);
-        Set<ProcessVariableKey> processVariableKeys = Set.of(
-            new ProcessVariableKey(variableFilter.processDefinitionKey(), variableFilter.name())
-        );
+        return buildTaskSearchRequestWithProcessVariableFilters(Set.of(variableFilter));
+    }
+
+    @NotNull
+    private static TaskSearchRequest buildTaskSearchRequestWithProcessVariableFilters(
+        Set<VariableFilter> variableFilters
+    ) {
+        Set<ProcessVariableKey> processVariableKeys = variableFilters
+            .stream()
+            .map(variableFilter -> new ProcessVariableKey(variableFilter.processDefinitionKey(), variableFilter.name()))
+            .collect(Collectors.toSet());
         return new TaskSearchRequest(
             false,
             false,
@@ -3071,13 +3320,13 @@ class TaskSearchIT {
             null,
             null,
             null,
-            filters,
+            variableFilters,
             processVariableKeys
         );
     }
 
     @NotNull
-    private static TaskSearchRequest buildTaskSearchRequestWithTaskVariableFilter(VariableFilter variableFilter) {
+    private static TaskSearchRequest buildTaskSearchRequestWithTaskVariableFilter(VariableFilter... variableFilter) {
         return new TaskSearchRequest(
             false,
             false,

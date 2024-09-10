@@ -17,11 +17,9 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
-import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -32,14 +30,10 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
-import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
-import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
-public class TaskSpecification implements Specification<TaskEntity> {
+public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     List<Predicate> predicates = new ArrayList<>();
 
@@ -75,153 +69,132 @@ public class TaskSpecification implements Specification<TaskEntity> {
     }
 
     private void applyCandidateGroupFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getCandidateGroupId())) {
+        if (!CollectionUtils.isEmpty(taskSearchRequest.candidateGroupId())) {
             predicates.add(
                 root
                     .join(TaskEntity_.taskCandidateGroups)
                     .get(TaskCandidateGroupEntity_.groupId)
-                    .in(taskSearchRequest.getCandidateGroupId())
+                    .in(taskSearchRequest.candidateGroupId())
             );
         }
     }
 
     private void applyCandidateUserFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getCandidateUserId())) {
+        if (!CollectionUtils.isEmpty(taskSearchRequest.candidateUserId())) {
             predicates.add(
                 root
                     .join(TaskEntity_.taskCandidateUsers)
                     .get(TaskCandidateUserEntity_.userId)
-                    .in(taskSearchRequest.getCandidateUserId())
+                    .in(taskSearchRequest.candidateUserId())
             );
         }
     }
 
     private void applyDueDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.getDueDateFrom() != null) {
-            predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), taskSearchRequest.getDueDateFrom())
-            );
+        if (taskSearchRequest.dueDateFrom() != null) {
+            predicates.add(criteriaBuilder.greaterThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateFrom()));
         }
-        if (taskSearchRequest.getDueDateTo() != null) {
-            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), taskSearchRequest.getDueDateTo()));
+        if (taskSearchRequest.dueDateTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.dueDate), taskSearchRequest.dueDateTo()));
         }
     }
 
     private void applyCompletedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.getCompletedFrom() != null) {
+        if (taskSearchRequest.completedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.completedDate), taskSearchRequest.getCompletedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedFrom())
             );
         }
-        if (taskSearchRequest.getCompletedTo() != null) {
+        if (taskSearchRequest.completedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.completedDate), taskSearchRequest.getCompletedTo())
+                criteriaBuilder.lessThan(root.get(TaskEntity_.completedDate), taskSearchRequest.completedTo())
             );
         }
     }
 
     private void applyLastClaimedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.getLastClaimedFrom() != null) {
+        if (taskSearchRequest.lastClaimedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.getLastClaimedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedFrom())
             );
         }
-        if (taskSearchRequest.getLastClaimedTo() != null) {
+        if (taskSearchRequest.lastClaimedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.getLastClaimedTo())
+                criteriaBuilder.lessThan(root.get(TaskEntity_.claimedDate), taskSearchRequest.lastClaimedTo())
             );
         }
     }
 
     private void applyLastModifiedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.getLastModifiedFrom() != null) {
+        if (taskSearchRequest.lastModifiedFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.lastModified), taskSearchRequest.getLastModifiedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedFrom())
             );
         }
-        if (taskSearchRequest.getLastModifiedTo() != null) {
+        if (taskSearchRequest.lastModifiedTo() != null) {
             predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.lastModified), taskSearchRequest.getLastModifiedTo())
+                criteriaBuilder.lessThan(root.get(TaskEntity_.lastModified), taskSearchRequest.lastModifiedTo())
             );
         }
     }
 
     private void applyCreatedDateFilters(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.getCreatedFrom() != null) {
+        if (taskSearchRequest.createdFrom() != null) {
             predicates.add(
-                criteriaBuilder.greaterThan(root.get(TaskEntity_.createdDate), taskSearchRequest.getCreatedFrom())
+                criteriaBuilder.greaterThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdFrom())
             );
         }
-        if (taskSearchRequest.getCreatedTo() != null) {
-            predicates.add(
-                criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), taskSearchRequest.getCreatedTo())
-            );
+        if (taskSearchRequest.createdTo() != null) {
+            predicates.add(criteriaBuilder.lessThan(root.get(TaskEntity_.createdDate), taskSearchRequest.createdTo()));
         }
     }
 
     private void applyAssigneeFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getAssignee())) {
-            predicates.add(root.get(TaskEntity_.assignee).in(taskSearchRequest.getAssignee()));
+        if (!CollectionUtils.isEmpty(taskSearchRequest.assignee())) {
+            predicates.add(root.get(TaskEntity_.assignee).in(taskSearchRequest.assignee()));
         }
     }
 
     private void applyCompletedByFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getCompletedBy())) {
-            predicates.add(root.get(TaskEntity_.completedBy).in(taskSearchRequest.getCompletedBy()));
+        if (!CollectionUtils.isEmpty(taskSearchRequest.completedBy())) {
+            predicates.add(root.get(TaskEntity_.completedBy).in(taskSearchRequest.completedBy()));
         }
     }
 
     private void applyStatusFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getStatus())) {
-            predicates.add(root.get(TaskEntity_.status).in(taskSearchRequest.getStatus()));
+        if (!CollectionUtils.isEmpty(taskSearchRequest.status())) {
+            predicates.add(root.get(TaskEntity_.status).in(taskSearchRequest.status()));
         }
     }
 
     private void applyPriorityFilter(Root<TaskEntity> root) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getPriority())) {
-            predicates.add(root.get(TaskEntity_.priority).in(taskSearchRequest.getPriority()));
+        if (!CollectionUtils.isEmpty(taskSearchRequest.priority())) {
+            predicates.add(root.get(TaskEntity_.priority).in(taskSearchRequest.priority()));
         }
     }
 
     private void applyDescriptionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getDescription())) {
-            applyLikeFilters(taskSearchRequest.getDescription(), root, criteriaBuilder, TaskEntity_.description);
+        if (!CollectionUtils.isEmpty(taskSearchRequest.description())) {
+            addLikeFilters(predicates, taskSearchRequest.description(), root, criteriaBuilder, TaskEntity_.description);
         }
     }
 
     private void applyNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getName())) {
-            applyLikeFilters(taskSearchRequest.getName(), root, criteriaBuilder, TaskEntity_.name);
+        if (!CollectionUtils.isEmpty(taskSearchRequest.name())) {
+            addLikeFilters(predicates, taskSearchRequest.name(), root, criteriaBuilder, TaskEntity_.name);
         }
     }
 
     private void applyStandaloneFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.isOnlyStandalone()) {
+        if (taskSearchRequest.onlyStandalone()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.processInstanceId)));
         }
     }
 
     private void applyRootTasksFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
-        if (taskSearchRequest.isOnlyRoot()) {
+        if (taskSearchRequest.onlyRoot()) {
             predicates.add(criteriaBuilder.isNull(root.get(TaskEntity_.parentTaskId)));
         }
-    }
-
-    private void applyLikeFilters(
-        List<String> valuesToFilter,
-        Root<TaskEntity> root,
-        CriteriaBuilder criteriaBuilder,
-        SingularAttribute<TaskEntity, String> attribute
-    ) {
-        predicates.add(
-            valuesToFilter
-                .stream()
-                .map(value ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get(attribute)), "%" + value.toLowerCase() + "%")
-                )
-                .reduce(criteriaBuilder::or)
-                .orElse(criteriaBuilder.conjunction())
-        );
     }
 
     private void applyProcessVariableFilters(
@@ -229,61 +202,32 @@ public class TaskSpecification implements Specification<TaskEntity> {
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getProcessVariableFilters())) {
+        if (!CollectionUtils.isEmpty(taskSearchRequest.processVariableFilters())) {
             Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
             Predicate joinCondition = criteriaBuilder.equal(
                 root.get(TaskEntity_.processInstanceId),
                 pvRoot.get(ProcessVariableEntity_.processInstanceId)
             );
 
-            Predicate[] variableValueFilters = taskSearchRequest
-                .getProcessVariableFilters()
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.and(
-                        criteriaBuilder.equal(
-                            pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                            filter.processDefinitionKey()
-                        ),
-                        criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
-                        getVariableValueCondition(pvRoot.get(ProcessVariableEntity_.value), filter, criteriaBuilder)
-                    )
-                )
-                .toArray(Predicate[]::new);
-
-            Predicate[] havingClause = taskSearchRequest
-                .getProcessVariableFilters()
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.gt(
-                        criteriaBuilder.count(
-                            criteriaBuilder
-                                .selectCase()
-                                .when(
-                                    criteriaBuilder.and(
-                                        criteriaBuilder.equal(
-                                            pvRoot.get(ProcessVariableEntity_.processDefinitionKey),
-                                            filter.processDefinitionKey()
-                                        ),
-                                        criteriaBuilder.equal(pvRoot.get(ProcessVariableEntity_.name), filter.name()),
-                                        getVariableValueCondition(
-                                            pvRoot.get(ProcessVariableEntity_.value),
-                                            filter,
-                                            criteriaBuilder
-                                        )
-                                    ),
-                                    pvRoot.get(ProcessVariableEntity_.id)
-                                )
-                                .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                        ),
-                        criteriaBuilder.literal(0)
-                    )
-                )
-                .toArray(Predicate[]::new);
-
             query.groupBy(root.get(TaskEntity_.id));
-            query.having(havingClause);
-            predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
+            query.having(
+                criteriaBuilder.equal(
+                    criteriaBuilder.countDistinct(pvRoot.get(ProcessVariableEntity_.name)),
+                    criteriaBuilder.literal(taskSearchRequest.processVariableFilters().size())
+                )
+            );
+            predicates.add(
+                criteriaBuilder.and(
+                    joinCondition,
+                    criteriaBuilder.or(
+                        getProcessVariableValueFilters(
+                            pvRoot,
+                            taskSearchRequest.processVariableFilters(),
+                            criteriaBuilder
+                        )
+                    )
+                )
+            );
         }
     }
 
@@ -292,10 +236,10 @@ public class TaskSpecification implements Specification<TaskEntity> {
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
-        if (!CollectionUtils.isEmpty(taskSearchRequest.getTaskVariableFilters())) {
+        if (!CollectionUtils.isEmpty(taskSearchRequest.taskVariableFilters())) {
             SetJoin<TaskEntity, TaskVariableEntity> join = root.join(TaskEntity_.variables);
             Predicate[] variableValueFilters = taskSearchRequest
-                .getTaskVariableFilters()
+                .taskVariableFilters()
                 .stream()
                 .map(filter ->
                     criteriaBuilder.and(
@@ -305,216 +249,14 @@ public class TaskSpecification implements Specification<TaskEntity> {
                 )
                 .toArray(Predicate[]::new);
 
-            Predicate[] havingClause = taskSearchRequest
-                .getTaskVariableFilters()
-                .stream()
-                .map(filter ->
-                    criteriaBuilder.gt(
-                        criteriaBuilder.count(
-                            criteriaBuilder
-                                .selectCase()
-                                .when(
-                                    criteriaBuilder.and(
-                                        criteriaBuilder.equal(join.get(TaskVariableEntity_.name), filter.name()),
-                                        getVariableValueCondition(
-                                            join.get(TaskVariableEntity_.value),
-                                            filter,
-                                            criteriaBuilder
-                                        )
-                                    ),
-                                    join.get(TaskVariableEntity_.id)
-                                )
-                                .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                        ),
-                        criteriaBuilder.literal(0)
-                    )
-                )
-                .toArray(Predicate[]::new);
-
             query.groupBy(root.get(TaskEntity_.id));
-            query.having(havingClause);
+            query.having(
+                criteriaBuilder.equal(
+                    criteriaBuilder.countDistinct(join.get(ProcessVariableEntity_.name)),
+                    criteriaBuilder.literal(taskSearchRequest.taskVariableFilters().size())
+                )
+            );
             predicates.add(criteriaBuilder.or(variableValueFilters));
         }
-    }
-
-    private Predicate getVariableValueCondition(
-        Path<?> valueColumnPath,
-        VariableFilter filter,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        return criteriaBuilder.isTrue(
-            switch (filter.operator()) {
-                case EQUALS -> switch (filter.type()) {
-                    case BOOLEAN -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Boolean.valueOf(filter.value()))
-                    );
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case STRING, BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                };
-                case LIKE -> criteriaBuilder.function(
-                    JsonValueFunctions.LIKE_CASE_INSENSITIVE,
-                    Boolean.class,
-                    valueColumnPath,
-                    criteriaBuilder.literal(filter.value())
-                );
-                case GREATER_THAN -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_GREATER_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case GREATER_THAN_OR_EQUAL -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_GREATER_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_LESS_THAN,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-                case LESS_THAN_OR_EQUAL -> switch (filter.type()) {
-                    case INTEGER -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(Integer.parseInt(filter.value()))
-                    );
-                    case BIGDECIMAL -> criteriaBuilder.function(
-                        JsonValueFunctions.NUMERIC_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case STRING -> criteriaBuilder.function(
-                        JsonValueFunctions.VALUE_EQUALS,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATETIME -> criteriaBuilder.function(
-                        JsonValueFunctions.DATETIME_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    case DATE -> criteriaBuilder.function(
-                        JsonValueFunctions.DATE_LESS_THAN_EQUAL,
-                        Boolean.class,
-                        valueColumnPath,
-                        criteriaBuilder.literal(filter.value())
-                    );
-                    default -> throw new IllegalFilterException(filter);
-                };
-            }
-        );
     }
 }
