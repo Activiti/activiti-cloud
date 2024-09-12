@@ -54,7 +54,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     classes = { QueryRestTestApplication.class, AlfrescoWebAutoConfiguration.class },
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+    }
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers

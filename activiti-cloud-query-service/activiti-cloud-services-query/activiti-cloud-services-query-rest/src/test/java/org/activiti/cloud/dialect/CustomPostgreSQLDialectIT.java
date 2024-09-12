@@ -26,6 +26,7 @@ import java.util.List;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +52,11 @@ class CustomPostgreSQLDialectIT {
 
     @Autowired
     private EntityManager entityManager;
+
+    @AfterEach
+    void clean() {
+        variableRepository.deleteAll();
+    }
 
     @Test
     void should_findEntity_usingJsonValueEquals_whenVariableIsStringType() {
@@ -113,7 +119,7 @@ class CustomPostgreSQLDialectIT {
         );
         query.where(condition);
         List<Object> resultList = entityManager.createQuery(query).getResultList();
-        assertThat(resultList).containsExactlyInAnyOrder(variables.get(0), variables.get(1), variables.get(2));
+        assertThat(resultList).containsExactlyInAnyOrder(variables.get(0), variables.get(1));
     }
 
     @Test
@@ -161,7 +167,7 @@ class CustomPostgreSQLDialectIT {
         );
         query.where(condition);
         List<Object> resultList = entityManager.createQuery(query).getResultList();
-        assertThat(resultList).containsExactly(variables.get(0), variables.get(1), variables.get(2));
+        assertThat(resultList).containsExactly(variables.get(0), variables.get(1));
     }
 
     @Test
@@ -193,7 +199,7 @@ class CustomPostgreSQLDialectIT {
         );
         query.where(condition);
         List<Object> resultList = entityManager.createQuery(query).getResultList();
-        assertThat(resultList).containsExactly(variables.get(0), variables.get(1), variables.get(2));
+        assertThat(resultList).containsExactly(variables.get(0), variables.get(1));
     }
 
     @Test
