@@ -222,10 +222,10 @@ class SpecificationSupportIT {
             return values
                 .stream()
                 .map(value -> {
-                    ProcessVariableEntity var = new ProcessVariableEntity();
-                    var.setValue(value);
-                    variableRepository.save(var);
-                    return var;
+                    ProcessVariableEntity variable = new ProcessVariableEntity();
+                    variable.setValue(value);
+                    variableRepository.save(variable);
+                    return variable;
                 })
                 .toList();
         }
