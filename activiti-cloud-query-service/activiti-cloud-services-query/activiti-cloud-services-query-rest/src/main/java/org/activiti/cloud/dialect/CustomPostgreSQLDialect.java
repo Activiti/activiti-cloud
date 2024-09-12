@@ -22,25 +22,120 @@ import org.hibernate.query.sqm.produce.function.StandardFunctionArgumentTypeReso
 import org.hibernate.type.StandardBasicTypes;
 import org.hibernate.type.descriptor.java.StringJavaType;
 
+/**
+ * Custom PostgreSQL dialect to add custom JSONB functions that abstract the PostgreSQL JSON path operators:
+ * All functions accept exactly two arguments:
+ * 1. A JSONB column field or a SQL path to a JSONB field.
+ * 2. A value to compare with the extracted field "value" from the JSONB field.
+ */
 public class CustomPostgreSQLDialect extends PostgreSQLDialect {
 
+    /**
+     * Extracts the "value" field from a JSONB column and compares it with the given value, returning true if they are equal.
+     * It works with strings and booleans.
+     */
     public static final String JSON_VALUE_EQUALS = "jsonb_value_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if they are equal.
+     */
     public static final String JSON_VALUE_NUMERIC_EQUALS = "jsonb_numeric_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if the extracted value is greater than the given value.
+     */
     public static final String JSON_VALUE_NUMERIC_GREATER_THAN = "jsonb_numeric_gt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if the extracted value is greater than or equal to the given value.
+     */
     public static final String JSON_VALUE_NUMERIC_GREATER_THAN_EQUAL = "jsonb_numeric_gte";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if the extracted value is less than the given value.
+     */
     public static final String JSON_VALUE_NUMERIC_LESS_THAN = "jsonb_numeric_lt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to NUMERIC and compares it with the given value cast to NUMERIC,
+     * returning true if the extracted value is less than or equal to the given value.
+     */
     public static final String JSON_VALUE_NUMERIC_LESS_THAN_EQUAL = "jsonb_numeric_lte";
+
+    /**
+     * Extracts the "value" field from a JSONB column and compares it with the given value using a case-sensitive regex pattern,
+     * returning true if the extracted value matches the pattern. The "value" field must contain a string.
+     */
     public static final String JSON_VALUE_LIKE_CASE_SENSITIVE = "jsonb_value_like_cs";
+
+    /**
+     * Extracts the "value" field from a JSONB column and compares it with the given value using a case-insensitive regex pattern,
+     * returning true if the extracted value matches the pattern. The "value" field must contain a string.
+     */
     public static final String JSON_VALUE_LIKE_CASE_INSENSITIVE = "jsonb_value_like_ci";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if they are equal.
+     */
     public static final String JSON_VALUE_DATE_EQUALS = "jsonb_date_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if the extracted value is greater than the given value.
+     */
     public static final String JSON_VALUE_DATE_GREATER_THAN = "jsonb_date_gt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if the extracted value is greater than or equal to the given value.
+     */
     public static final String JSON_VALUE_DATE_GREATER_THAN_EQUAL = "jsonb_date_gte";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if the extracted value is less than the given value.
+     */
     public static final String JSON_VALUE_DATE_LESS_THAN = "jsonb_date_lt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to DATE and compares it with the given value cast to DATE,
+     * returning true if the extracted value is less than or equal to the given value.
+     */
     public static final String JSON_VALUE_DATE_LESS_THAN_EQUAL = "jsonb_date_lte";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if they are equal.
+     */
     public static final String JSON_VALUE_DATETIME_EQUALS = "jsonb_datetime_eq";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if the extracted value is greater than the given value.
+     */
     public static final String JSON_VALUE_DATETIME_GREATER_THAN = "jsonb_datetime_gt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if the extracted value is greater than or equal to the given value.
+     */
     public static final String JSON_VALUE_DATETIME_GREATER_THAN_EQUAL = "jsonb_datetime_gte";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if the extracted value is less than the given value.
+     */
     public static final String JSON_VALUE_DATETIME_LESS_THAN = "jsonb_datetime_lt";
+
+    /**
+     * Extracts the "value" field from a JSONB column, casts it to TIMESTAMPTZ and compares it with the given value cast to TIMESTAMPTZ,
+     * returning true if the extracted value is less than or equal to the given value.
+     */
     public static final String JSON_VALUE_DATETIME_LESS_THAN_EQUAL = "jsonb_datetime_lte";
 
     @Override
