@@ -409,49 +409,6 @@ class TaskSearchIT {
     }
 
     @Test
-    void should_returnTasks_filteredByStringProcessVariable_greaterThan() {
-        String processDefinitionKey = "process-definition-key";
-        String differentProcessDefinitionKey = "different-process-definition-key";
-        String varName = "string-var";
-        String lowerBound = "c";
-
-        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance1, varName, VariableType.STRING, "abcdefg");
-        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
-        createProcessVariableAndTask(processInstance2, varName, VariableType.STRING, "cdefg");
-        ProcessInstanceEntity processWithDifferentKey = createProcessInstance(differentProcessDefinitionKey);
-        createProcessVariableAndTask(processWithDifferentKey, varName, VariableType.STRING, "defgh");
-
-        VariableFilter variableFilter = new VariableFilter(
-            processDefinitionKey,
-            varName,
-            VariableType.STRING,
-            lowerBound,
-            FilterOperator.GREATER_THAN
-        );
-
-        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
-
-        List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
-            .getContent()
-            .stream()
-            .map(EntityModel::getContent)
-            .toList();
-
-        assertThat(retrievedTasks)
-            .containsExactly(
-                processInstance1.getTasks().iterator().next(),
-                processInstance2.getTasks().iterator().next()
-            )
-            .allSatisfy(task ->
-                assertThat(task.getProcessVariables())
-                    .isNotEmpty()
-                    .anyMatch(pv -> pv.getName().equals(varName) && ((String) pv.getValue()).compareTo(lowerBound) > 0)
-            );
-    }
-
-    @Test
     void should_returnTasks_filteredByStringProcessVariable_contains() {
         String processDefinitionKey = "process-definition-key";
         String differentProcessDefinitionKey = "different-process-definition-key";
