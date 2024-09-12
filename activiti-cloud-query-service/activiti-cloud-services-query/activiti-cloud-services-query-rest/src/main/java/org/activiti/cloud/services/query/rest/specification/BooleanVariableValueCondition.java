@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
-import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
@@ -36,7 +36,7 @@ public class BooleanVariableValueCondition extends VariableValueCondition {
     @Override
     protected String getFunctionName() {
         if (operator == FilterOperator.EQUALS) {
-            return JsonValueFunctions.VALUE_EQUALS;
+            return CustomPostgreSQLDialect.JSON_VALUE_EQUALS;
         }
         throw new IllegalFilterException(VariableType.BOOLEAN, operator);
     }

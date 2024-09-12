@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.activiti.cloud.services.query.model.conf;
+package org.activiti.cloud.services.query.rest.config;
 
 import java.util.Map;
-import org.activiti.cloud.services.query.model.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class CustomHibernateConfiguration implements HibernatePropertiesCustomizer {
+@AutoConfiguration(after = DataSourceAutoConfiguration.class)
+@ConditionalOnExpression(
+    "'${spring.jpa.database-platform}'.toLowerCase().contains('postgres') or '${spring.datasource.url}'.toLowerCase().contains('postgres')"
+)
+public class CustomHibernateAutoConfiguration implements HibernatePropertiesCustomizer {
 
     @Override
     public void customize(Map<String, Object> hibernateProperties) {

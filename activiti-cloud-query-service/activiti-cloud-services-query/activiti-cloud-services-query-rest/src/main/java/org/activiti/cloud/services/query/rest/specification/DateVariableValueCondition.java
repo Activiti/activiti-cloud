@@ -17,7 +17,7 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
-import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
@@ -36,11 +36,11 @@ public class DateVariableValueCondition extends VariableValueCondition {
     @Override
     protected String getFunctionName() {
         return switch (operator) {
-            case EQUALS -> JsonValueFunctions.DATE_EQUALS;
-            case GREATER_THAN -> JsonValueFunctions.DATE_GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> JsonValueFunctions.DATE_GREATER_THAN_EQUAL;
-            case LESS_THAN -> JsonValueFunctions.DATE_LESS_THAN;
-            case LESS_THAN_OR_EQUAL -> JsonValueFunctions.DATE_LESS_THAN_EQUAL;
+            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_DATE_EQUALS;
+            case GREATER_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATE_GREATER_THAN;
+            case GREATER_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATE_GREATER_THAN_EQUAL;
+            case LESS_THAN -> CustomPostgreSQLDialect.JSON_VALUE_DATE_LESS_THAN;
+            case LESS_THAN_OR_EQUAL -> CustomPostgreSQLDialect.JSON_VALUE_DATE_LESS_THAN_EQUAL;
             default -> throw new IllegalFilterException(VariableType.DATE, operator);
         };
     }

@@ -17,8 +17,10 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Path;
-import org.activiti.cloud.services.query.model.dialect.JsonValueFunctions;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
+import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
 
 public class StringVariableValueCondition extends VariableValueCondition {
 
@@ -34,12 +36,9 @@ public class StringVariableValueCondition extends VariableValueCondition {
     @Override
     protected String getFunctionName() {
         return switch (operator) {
-            case EQUALS -> JsonValueFunctions.VALUE_EQUALS;
-            case LIKE -> JsonValueFunctions.LIKE_CASE_INSENSITIVE;
-            case GREATER_THAN -> JsonValueFunctions.VALUE_GREATER_THAN;
-            case GREATER_THAN_OR_EQUAL -> JsonValueFunctions.VALUE_GREATER_THAN_EQUAL;
-            case LESS_THAN -> JsonValueFunctions.VALUE_LESS_THAN;
-            case LESS_THAN_OR_EQUAL -> JsonValueFunctions.VALUE_LESS_THAN_EQUAL;
+            case EQUALS -> CustomPostgreSQLDialect.JSON_VALUE_EQUALS;
+            case LIKE -> CustomPostgreSQLDialect.JSON_VALUE_LIKE_CASE_INSENSITIVE;
+            default -> throw new IllegalFilterException(VariableType.STRING, operator);
         };
     }
 
