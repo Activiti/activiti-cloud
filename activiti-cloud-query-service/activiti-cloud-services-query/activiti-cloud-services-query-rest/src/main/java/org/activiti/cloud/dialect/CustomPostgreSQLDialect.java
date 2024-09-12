@@ -141,14 +141,14 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
     @Override
     public void initializeFunctionRegistry(FunctionContributions functionContributions) {
         super.initializeFunctionRegistry(functionContributions);
-        registerJsonValueFunctions(functionContributions);
+        registerJsonValueEquals(functionContributions);
         registerJsonValueLikeFunctions(functionContributions);
         registerJsonValueNumericFunctions(functionContributions);
         registerJsonValueDateFunctions(functionContributions);
         registerJsonValueDatetimeFunctions(functionContributions);
     }
 
-    private void registerJsonValueFunctions(FunctionContributions functionContributions) {
+    private void registerJsonValueEquals(FunctionContributions functionContributions) {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
         functionRegistry
             .patternDescriptorBuilder(JSON_VALUE_EQUALS, "?1 @@ '$.value == ?2'")
