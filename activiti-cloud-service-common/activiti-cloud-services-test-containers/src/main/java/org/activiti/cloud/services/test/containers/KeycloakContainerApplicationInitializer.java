@@ -20,16 +20,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.testcontainers.containers.wait.strategy.Wait;
 
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:18.0.0")
+    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:25.0")
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
-        .waitingFor(Wait.defaultWaitStrategy())
         .withReuse(true);
 
     @Override
