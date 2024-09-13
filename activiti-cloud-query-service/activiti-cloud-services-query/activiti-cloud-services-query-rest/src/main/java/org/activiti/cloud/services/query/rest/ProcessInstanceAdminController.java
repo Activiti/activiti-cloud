@@ -34,6 +34,7 @@ import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
@@ -43,6 +44,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -139,6 +141,20 @@ public class ProcessInstanceAdminController {
         }
 
         return result;
+    }
+
+    @Operation(summary = "Search process instances")
+    @JsonView(JsonViews.ProcessVariables.class)
+    @PostMapping("/search")
+    public PagedModel<EntityModel<CloudProcessInstance>> searchProcessInstances(
+        @RequestBody ProcessInstanceSearchRequest searchRequest,
+        Pageable pageable
+    ) {
+        return pagedCollectionModelAssembler.toModel(
+            pageable,
+            processInstanceAdminService.search(searchRequest, pageable),
+            processInstanceRepresentationModelAssembler
+        );
     }
 
     @JsonView(JsonViews.General.class)

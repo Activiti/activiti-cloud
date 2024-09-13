@@ -23,6 +23,7 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
+import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
@@ -239,9 +240,20 @@ public class QueryRestWebMvcAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public ProcessInstanceSearchService processInstanceSearchService(
+        ProcessInstanceRepository processInstanceRepository,
+        ProcessVariableService processVariableService,
+        SecurityManager securityManager
+    ) {
+        return new ProcessInstanceSearchService(processInstanceRepository, processVariableService, securityManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public ProcessInstanceService processInstanceService(
         ProcessInstanceRepository processInstanceRepository,
         TaskRepository taskRepository,
+        ProcessInstanceSearchService processInstanceSearchService,
         ProcessInstanceRestrictionService processInstanceRestrictionService,
         SecurityPoliciesManager securityPoliciesApplicationService,
         SecurityManager securityManager,
@@ -250,6 +262,7 @@ public class QueryRestWebMvcAutoConfiguration {
         return new ProcessInstanceService(
             processInstanceRepository,
             taskRepository,
+            processInstanceSearchService,
             processInstanceRestrictionService,
             securityPoliciesApplicationService,
             securityManager,
@@ -261,10 +274,12 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public ProcessInstanceAdminService processInstanceAdminService(
         ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceSearchService processInstanceSearchService,
         EntityFinder entityFinder
     ) {
         return new ProcessInstanceAdminService(
             processInstanceRepository,
+            processInstanceSearchService,
             entityFinder,
             new QueryDslPredicateAggregator()
         );
