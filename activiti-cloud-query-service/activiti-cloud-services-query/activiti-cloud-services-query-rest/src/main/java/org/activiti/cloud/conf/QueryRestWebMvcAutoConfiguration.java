@@ -24,6 +24,7 @@ import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
+import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
@@ -200,14 +201,14 @@ public class QueryRestWebMvcAutoConfiguration {
     @ConditionalOnMissingBean
     public TaskControllerHelper taskControllerHelper(
         TaskRepository taskRepository,
-        VariableRepository variableRepository,
+        ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
         TaskLookupRestrictionService taskLookupRestrictionService
     ) {
         return new TaskControllerHelper(
             taskRepository,
-            variableRepository,
+            processVariableService,
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
@@ -228,6 +229,12 @@ public class QueryRestWebMvcAutoConfiguration {
         TaskControllerHelper taskControllerHelper
     ) {
         return new TaskPermissionsHelper(securityManager, taskControllerHelper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessVariableService processVariableService(VariableRepository variableRepository) {
+        return new ProcessVariableService(variableRepository);
     }
 
     @Bean
