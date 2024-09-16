@@ -312,5 +312,6 @@ alter table task_process_variable
 create index idx_task_assignee on task(assignee);
 create index idx_task_owner on task(owner);
 create index idx_process_instance_initiator on process_instance(initiator);
+CREATE INDEX idx_task_id_name_status ON task(id, name, status);
 CREATE INDEX idx_task_process_var_taskId_processVarId ON task_process_variable (task_id, process_variable_id);
 CREATE INDEX idx_task_createdDate ON task (created_date);
