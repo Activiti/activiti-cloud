@@ -312,3 +312,4 @@ alter table task_process_variable
 create index idx_task_assignee on task(assignee);
 create index idx_task_owner on task(owner);
 create index idx_process_instance_initiator on process_instance(initiator);
+CREATE INDEX idx_task_id_name_status ON task(id, name, status);
