@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+DROP INDEX IF EXISTS proc_var_name_value_idx;
 
 ALTER TABLE process_variable
 ALTER COLUMN "value" TYPE jsonb USING "value"::jsonb;
