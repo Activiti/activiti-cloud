@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
@@ -94,6 +95,9 @@ class CandidateUserAdminControllerIT {
 
     @MockBean
     private RuntimeService runtimeService;
+
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
