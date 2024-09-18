@@ -493,7 +493,7 @@
   </changeSet>
 
   <changeSet author="activiti-query" id="drop-index-proc-var-value" dbms="postgresql">
-    <preConditions>
+    <preConditions onFail="MARK_RAN">
       <indexExists tableName="process_variable" indexName="proc_var_name_value_idx"/>
     </preConditions>
     <dropIndex tableName="process_variable" indexName="proc_var_name_value_idx"/>
