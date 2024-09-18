@@ -17,6 +17,7 @@ package org.activiti.cloud.services.events.configuration;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -595,12 +596,14 @@ public class CloudEventsAutoConfiguration {
     public CloudProcessDeletedService cloudProcessDeletedProducer(
         ProcessEngineChannels processEngineChannels,
         RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        RuntimeBundleInfoAppender runtimeBundleInfoAppender,
+        ProcessAdminRuntime processAdminRuntime
     ) {
         return new CloudProcessDeletedService(
             processEngineChannels,
             runtimeBundleMessageBuilderFactory,
-            runtimeBundleInfoAppender
+            runtimeBundleInfoAppender,
+            processAdminRuntime
         );
     }
 }
