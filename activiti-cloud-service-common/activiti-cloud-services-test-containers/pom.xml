@@ -11,7 +11,7 @@
   <artifactId>activiti-cloud-services-test-containers</artifactId>
   <name>Activiti Cloud Services :: Test Containers</name>
   <properties>
-    <testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
+    <testcontainers-keycloak.version>3.3.1</testcontainers-keycloak.version>
   </properties>
   <dependencies>
     <dependency>
