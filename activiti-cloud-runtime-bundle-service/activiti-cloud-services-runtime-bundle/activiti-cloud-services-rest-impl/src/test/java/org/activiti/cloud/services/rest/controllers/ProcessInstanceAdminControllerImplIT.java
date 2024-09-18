@@ -19,6 +19,7 @@ import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSample
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -193,6 +194,8 @@ class ProcessInstanceAdminControllerImplIT {
     void destroyProcessInstance() throws Exception {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
             .andExpect(status().isOk());
+
+        verify(cloudProcessDeletedService).sendDeleteEvent("1");
     }
 
     @Test
