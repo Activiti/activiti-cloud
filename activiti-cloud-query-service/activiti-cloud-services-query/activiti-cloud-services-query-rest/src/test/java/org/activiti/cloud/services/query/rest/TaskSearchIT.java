@@ -39,7 +39,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.activiti.cloud.services.query.rest.config.CustomHibernateAutoConfiguration;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
@@ -49,7 +48,6 @@ import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
@@ -2432,12 +2430,7 @@ class TaskSearchIT {
             VariableType.DATETIME,
             "2024-08-02T00:11:00.000+00:00"
         );
-        QueryCloudTask task2 = createTaskWithVariable(
-            processInstance,
-            varName,
-            VariableType.DATETIME,
-            "2024-08-02T00:13:00.000+00:00"
-        );
+        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:13:00.000+00:00");
 
         VariableFilter variableFilterGt = new VariableFilter(
             null,
