@@ -152,7 +152,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -212,7 +212,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -270,7 +270,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -328,7 +328,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -362,7 +362,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -397,7 +397,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -436,7 +436,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -475,7 +475,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -509,7 +509,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -544,7 +544,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -579,7 +579,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -614,7 +614,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -654,7 +654,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -691,7 +691,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -726,7 +726,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -760,7 +760,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -800,7 +800,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -837,7 +837,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -973,7 +973,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1009,7 +1009,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1048,7 +1048,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1090,7 +1090,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1135,7 +1135,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1180,7 +1180,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1220,7 +1220,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1262,7 +1262,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1307,7 +1307,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1352,7 +1352,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1490,7 +1490,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1527,7 +1527,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1562,7 +1562,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1599,7 +1599,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1639,7 +1639,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1679,7 +1679,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1714,7 +1714,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1751,7 +1751,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1791,7 +1791,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1831,7 +1831,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -1968,7 +1968,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2006,7 +2006,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2046,7 +2046,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2088,7 +2088,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2133,7 +2133,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2179,7 +2179,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2219,7 +2219,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2262,7 +2262,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2307,7 +2307,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2354,7 +2354,7 @@ class TaskSearchIT {
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2491,7 +2491,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2521,7 +2521,7 @@ class TaskSearchIT {
 
         retrievedTasks =
             taskControllerHelper
-                .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+                .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
                 .getContent()
                 .stream()
                 .map(EntityModel::getContent)
@@ -2558,7 +2558,7 @@ class TaskSearchIT {
         TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2573,7 +2573,7 @@ class TaskSearchIT {
 
         retrievedTasks =
             taskControllerHelper
-                .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+                .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
                 .getContent()
                 .stream()
                 .map(EntityModel::getContent)
@@ -2619,7 +2619,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2666,7 +2666,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2719,7 +2719,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2772,7 +2772,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2825,7 +2825,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2878,7 +2878,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2931,7 +2931,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2984,7 +2984,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3037,7 +3037,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3090,7 +3090,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3143,7 +3143,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3196,7 +3196,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3249,7 +3249,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3302,7 +3302,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3355,7 +3355,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3408,7 +3408,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3461,7 +3461,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3514,7 +3514,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3582,7 +3582,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3650,7 +3650,7 @@ class TaskSearchIT {
         );
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)

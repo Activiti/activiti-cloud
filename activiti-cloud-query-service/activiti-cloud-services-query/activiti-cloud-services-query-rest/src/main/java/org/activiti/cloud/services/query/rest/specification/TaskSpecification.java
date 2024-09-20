@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
@@ -31,7 +32,6 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
-import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.springframework.util.CollectionUtils;
 
@@ -41,12 +41,44 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     private final TaskSearchRequest taskSearchRequest;
 
-    public TaskSpecification(TaskSearchRequest taskSearchRequest) {
+    private final String userId;
+    private final Collection<String> userGroups;
+
+    private TaskSpecification(TaskSearchRequest taskSearchRequest, String userId, Collection<String> userGroups) {
         this.taskSearchRequest = taskSearchRequest;
+        this.userId = userId;
+        this.userGroups = userGroups;
+    }
+
+    public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest) {
+        return new TaskSpecification(taskSearchRequest, null, null);
+    }
+
+    /**
+     * Creates a specification that applies the filters and restricts the retrieved tasks based on the authenticated user.
+     * In addition to the filters, tasks are retrieved if they match one of the following conditions:
+     * - user is assignee
+     * - user is owner
+     * - user is candidate task is not assigned
+     * - user belongs to candidate group and task is not assigned
+     * - there are no candidate users and groups set and task is not assigned
+     *
+     * @param taskSearchRequest the request containing all the filters
+     * @param userId authenticated user id
+     * @param userGroups authenticated user groups
+     * @return a specification that applies the filters and restricts the retrieved tasks based on the authenticated user
+     */
+    public static TaskSpecification restricted(
+        TaskSearchRequest taskSearchRequest,
+        String userId,
+        Collection<String> userGroups
+    ) {
+        return new TaskSpecification(taskSearchRequest, userId, userGroups);
     }
 
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
@@ -211,6 +243,13 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 pvRoot.get(ProcessVariableEntity_.processInstanceId)
             );
 
+            query.groupBy(root.get(TaskEntity_.id));
+            query.having(
+                criteriaBuilder.equal(
+                    criteriaBuilder.countDistinct(pvRoot.get(ProcessVariableEntity_.name)),
+                    criteriaBuilder.literal(taskSearchRequest.processVariableFilters().size())
+                )
+            );
             predicates.add(
                 criteriaBuilder.and(
                     joinCondition,
@@ -223,9 +262,6 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                     )
                 )
             );
-
-            query.groupBy(root.get(TaskEntity_.id));
-            query.having(getHavingClause(pvRoot, taskSearchRequest.processVariableFilters(), criteriaBuilder));
         }
     }
 
@@ -247,41 +283,44 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
                 .toArray(Predicate[]::new);
 
-            predicates.add(criteriaBuilder.or(variableValueFilters));
             query.groupBy(root.get(TaskEntity_.id));
-            query.having(getHavingClause(join, taskSearchRequest.taskVariableFilters(), criteriaBuilder));
+            query.having(
+                criteriaBuilder.equal(
+                    criteriaBuilder.countDistinct(join.get(ProcessVariableEntity_.name)),
+                    criteriaBuilder.literal(taskSearchRequest.taskVariableFilters().size())
+                )
+            );
+            predicates.add(criteriaBuilder.or(variableValueFilters));
         }
     }
 
-    private Predicate getHavingClause(
-        SetJoin<TaskEntity, TaskVariableEntity> root,
-        Collection<VariableFilter> filters,
-        CriteriaBuilder criteriaBuilder
-    ) {
-        return filters
-            .stream()
-            .map(filter ->
-                criteriaBuilder.greaterThan(
-                    criteriaBuilder.count(
-                        criteriaBuilder
-                            .selectCase()
-                            .when(
-                                criteriaBuilder.and(
-                                    criteriaBuilder.equal(root.get(TaskVariableEntity_.name), filter.name()),
-                                    getVariableValueCondition(
-                                        root.get(TaskVariableEntity_.value),
-                                        filter,
-                                        criteriaBuilder
-                                    )
-                                ),
-                                criteriaBuilder.literal(1)
+    private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (userId != null) {
+            predicates.add(
+                criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
+                    criteriaBuilder.equal(root.get(TaskEntity_.owner), userId),
+                    criteriaBuilder.and(
+                        criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+                        criteriaBuilder.or(
+                            criteriaBuilder.equal(
+                                root
+                                    .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
+                                    .get(TaskCandidateUserEntity_.userId),
+                                userId
+                            ),
+                            root
+                                .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
+                                .get(TaskCandidateGroupEntity_.groupId)
+                                .in(userGroups),
+                            criteriaBuilder.and(
+                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
+                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
                             )
-                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
-                    ),
-                    0L
+                        )
+                    )
                 )
-            )
-            .reduce(criteriaBuilder::and)
-            .orElse(criteriaBuilder.disjunction());
+            );
+        }
     }
 }
