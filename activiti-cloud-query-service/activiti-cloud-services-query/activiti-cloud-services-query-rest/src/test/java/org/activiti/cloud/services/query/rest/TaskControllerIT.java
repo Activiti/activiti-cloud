@@ -63,8 +63,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-//TODO Make the test work using AlfrescoJackson2HttpMessageConverter to simulate the actual response that we have in real environment
-public class TaskControllerIT {
+class TaskControllerIT {
 
     @Autowired
     private WebApplicationContext context;

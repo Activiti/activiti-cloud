@@ -97,8 +97,7 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        Page<TaskEntity> tasks = searchTasks(taskSearchRequest, pageable, true);
-        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
+        return searchTasks(taskSearchRequest, pageable, true);
     }
 
     @Transactional(readOnly = true)
@@ -106,11 +105,14 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        Page<TaskEntity> tasks = searchTasks(taskSearchRequest, pageable, false);
-        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
+        return searchTasks(taskSearchRequest, pageable, false);
     }
 
-    private Page<TaskEntity> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable, boolean restricted) {
+    private PagedModel<EntityModel<QueryCloudTask>> searchTasks(
+        TaskSearchRequest taskSearchRequest,
+        Pageable pageable,
+        boolean restricted
+    ) {
         TaskSpecification taskSpecification = restricted
             ? TaskSpecification.restricted(
                 taskSearchRequest,
@@ -123,7 +125,7 @@ public class TaskControllerHelper {
             tasks.getContent(),
             taskSearchRequest.processVariableKeys()
         );
-        return tasks;
+        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {
