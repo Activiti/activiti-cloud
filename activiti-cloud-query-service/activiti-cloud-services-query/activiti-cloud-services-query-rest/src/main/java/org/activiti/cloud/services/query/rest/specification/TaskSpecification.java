@@ -50,6 +50,11 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         this.userGroups = userGroups;
     }
 
+    /**
+     * Creates a specification that retrieve tasks that match filters in the request without restrictions related to authenticated user.
+     * @param taskSearchRequest the request containing all the filters
+     * @return a specification that applies the filters in the request
+     */
     public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest) {
         return new TaskSpecification(taskSearchRequest, null, null);
     }
@@ -59,7 +64,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
      * In addition to the filters, tasks are retrieved if they match one of the following conditions:
      * - user is assignee
      * - user is owner
-     * - user is candidate task is not assigned
+     * - user is candidate and task is not assigned
      * - user belongs to candidate group and task is not assigned
      * - there are no candidate users and groups set and task is not assigned
      *
