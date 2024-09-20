@@ -30,8 +30,6 @@ import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepositor
 import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
 import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
@@ -69,19 +67,10 @@ class TaskControllerIT {
     private WebApplicationContext context;
 
     @Autowired
-    TaskControllerHelper taskControllerHelper;
-
-    @Autowired
     TaskRepository taskRepository;
 
     @Autowired
-    TaskVariableRepository taskVariableRepository;
-
-    @Autowired
     private ProcessInstanceRepository processInstanceRepository;
-
-    @Autowired
-    private VariableRepository variableRepository;
 
     @Autowired
     private TaskCandidateGroupRepository taskCandidateGroupRepository;
@@ -103,9 +92,7 @@ class TaskControllerIT {
         webAppContextSetup(context);
         postProcessors(csrf().asHeader());
         taskRepository.deleteAll();
-        taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
-        variableRepository.deleteAll();
         taskCandidateGroupRepository.deleteAll();
         taskCandidateUserRepository.deleteAll();
     }
