@@ -25,5 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 class KeycloakContainerApplicationInitializerIT {
 
     @Test
-    void contextLoads() {}
+    void contextLoads() {
+        // application context loads successfully
+    }
 }
