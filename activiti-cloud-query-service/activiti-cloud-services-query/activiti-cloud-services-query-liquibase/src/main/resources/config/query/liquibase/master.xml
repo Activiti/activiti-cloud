@@ -492,6 +492,13 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" id="drop-index-proc-var-value" dbms="postgresql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="process_variable" indexName="proc_var_name_value_idx"/>
+    </preConditions>
+    <dropIndex tableName="process_variable" indexName="proc_var_name_value_idx"/>
+  </changeSet>
+
   <changeSet author="activiti-query" runInTransaction="false"
              id="alter24-schema" dbms="postgresql">
     <sqlFile dbms="postgresql"
