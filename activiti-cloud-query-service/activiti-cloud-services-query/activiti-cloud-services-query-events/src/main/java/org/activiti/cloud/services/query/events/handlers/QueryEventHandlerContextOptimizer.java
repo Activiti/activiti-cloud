@@ -19,14 +19,15 @@ import jakarta.persistence.AttributeNode;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
@@ -130,47 +131,7 @@ public class QueryEventHandlerContextOptimizer {
         resolveProcessInstanceId(events)
             .ifPresent(processInstanceId -> {
                 LOGGER.debug("Building entity fetch graph for root process instance: {}", processInstanceId);
-                EntityGraph<ProcessInstanceEntity> entityGraph = entityManager.createEntityGraph(
-                    ProcessInstanceEntity.class
-                );
-
-                findRuntimeEvent(events, CloudVariableEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(VARIABLES));
-                findRuntimeEvent(events, CloudTaskRuntimeEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(TASKS));
-                findRuntimeEvent(events, CloudBPMNActivityEvent.class)
-                    .ifPresent(e -> entityGraph.addAttributeNodes(ACTIVITIES));
-                findRuntimeEvents(
-                    events,
-                    CloudBPMNActivityEvent.class,
-                    entity -> SERVICE_TASKS.equals(entity.getActivityType())
-                )
-                    .findAny()
-                    .ifPresent(e -> entityGraph.addAttributeNodes(SERVICE_TASKS));
-
-                var variableNames = findRuntimeEvents(events, CloudVariableEvent.class, entity -> true)
-                    .map(VariableInstance::getName)
-                    .distinct()
-                    .toList();
-
-                var taskIds = findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true)
-                    .map(Task::getId)
-                    .distinct()
-                    .toList();
-
-                var activityIds = findRuntimeEvents(events, CloudBPMNActivityEvent.class, entity -> true)
-                    .map(BPMNActivityEntity.IdBuilderHelper::from)
-                    .distinct()
-                    .toList();
-
-                var serviceTaskIds = findRuntimeEvents(
-                    events,
-                    CloudBPMNActivityEvent.class,
-                    entity -> SERVICE_TASKS.equals(entity.getActivityType())
-                )
-                    .map(BPMNActivityEntity.IdBuilderHelper::from)
-                    .distinct()
-                    .toList();
+                var entityGraph = entityManager.createEntityGraph(ProcessInstanceEntity.class);
 
                 var criteriaBuilder = entityManager.getCriteriaBuilder();
                 var criteriaQuery = criteriaBuilder.createQuery(ProcessInstanceEntity.class);
@@ -179,25 +140,35 @@ public class QueryEventHandlerContextOptimizer {
 
                 criteriaQuery.select(fromProcessInstance).where(whereProcessInstance);
 
-                if (!variableNames.isEmpty()) {
-                    var join = (Join<?, ?>) fromProcessInstance.fetch(VARIABLES);
-                    join.on(join.get("name").in(variableNames));
-                }
+                findRuntimeEvents(events, CloudVariableEvent.class, entity -> true, VariableInstance::getName)
+                    .ifPresent(variableNames -> {
+                        fetch(fromProcessInstance, entityGraph, VARIABLES, "name", variableNames);
+                    });
 
-                if (!taskIds.isEmpty()) {
-                    var join = (Join<?, ?>) fromProcessInstance.fetch(TASKS);
-                    join.on(join.get("id").in(taskIds));
-                }
+                findRuntimeEvents(events, CloudTaskRuntimeEvent.class, entity -> true, Task::getId)
+                    .ifPresent(taskIds -> {
+                        fetch(fromProcessInstance, entityGraph, TASKS, "id", taskIds);
+                    });
 
-                if (!activityIds.isEmpty()) {
-                    var join = (Join<?, ?>) fromProcessInstance.fetch(ACTIVITIES);
-                    join.on(join.get("id").in(activityIds));
-                }
+                findRuntimeEvents(
+                    events,
+                    CloudBPMNActivityEvent.class,
+                    entity -> true,
+                    BPMNActivityEntity.IdBuilderHelper::from
+                )
+                    .ifPresent(activityIds -> {
+                        fetch(fromProcessInstance, entityGraph, ACTIVITIES, "id", activityIds);
+                    });
 
-                if (!serviceTaskIds.isEmpty()) {
-                    var join = (Join<?, ?>) fromProcessInstance.fetch(SERVICE_TASKS);
-                    join.on(join.get("id").in(serviceTaskIds));
-                }
+                findRuntimeEvents(
+                    events,
+                    CloudBPMNActivityEvent.class,
+                    entity -> SERVICE_TASKS.equals(entity.getActivityType()),
+                    BPMNActivityEntity.IdBuilderHelper::from
+                )
+                    .ifPresent(serviceTaskIds -> {
+                        fetch(fromProcessInstance, entityGraph, SERVICE_TASKS, "id", serviceTaskIds);
+                    });
 
                 entityManager
                     .createQuery(criteriaQuery)
@@ -234,16 +205,36 @@ public class QueryEventHandlerContextOptimizer {
         return events.stream().filter(runtimeEventClass::isInstance).findFirst();
     }
 
-    protected <T> Stream<T> findRuntimeEvents(
+    protected <T, R> Optional<List<R>> findRuntimeEvents(
         List<CloudRuntimeEvent<?, ?>> events,
         Class<? extends CloudRuntimeEvent<T, ?>> runtimeEventClass,
-        Predicate<T> predicate
+        Predicate<T> predicate,
+        Function<T, R> mapper
     ) {
-        return events
-            .stream()
-            .filter(runtimeEventClass::isInstance)
-            .map(runtimeEventClass::cast)
-            .map(CloudRuntimeEvent::getEntity)
-            .filter(predicate);
+        return Optional
+            .of(
+                events
+                    .stream()
+                    .filter(runtimeEventClass::isInstance)
+                    .map(runtimeEventClass::cast)
+                    .map(CloudRuntimeEvent::getEntity)
+                    .filter(predicate)
+                    .map(mapper)
+                    .distinct()
+                    .toList()
+            )
+            .filter(Predicate.not(List::isEmpty));
+    }
+
+    protected <T, R> void fetch(
+        Root<T> from,
+        EntityGraph<T> entityGraph,
+        String association,
+        String attribute,
+        List<R> ids
+    ) {
+        entityGraph.addAttributeNodes(association);
+        var join = (Join<?, ?>) from.fetch(association);
+        join.on(join.get(attribute).in(ids));
     }
 }
