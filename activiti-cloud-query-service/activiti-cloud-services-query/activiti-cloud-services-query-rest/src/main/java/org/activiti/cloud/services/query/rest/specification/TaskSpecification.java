@@ -51,7 +51,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
     }
 
     /**
-     * Creates a specification that retrieve tasks that match filters in the request without restrictions related to authenticated user.
+     * Creates a specification that retrieve tasks that match filters in the request without restrictions related to any user.
      * @param taskSearchRequest the request containing all the filters
      * @return a specification that applies the filters in the request
      */
@@ -60,18 +60,18 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
     }
 
     /**
-     * Creates a specification that applies the filters and restricts the retrieved tasks based on the authenticated user.
+     * Creates a specification that applies the filters and restricts the retrieved tasks based on the given user and groups.
      * In addition to the filters, tasks are retrieved if they match one of the following conditions:
      * - user is assignee
      * - user is owner
      * - user is candidate and task is not assigned
-     * - user belongs to candidate group and task is not assigned
+     * - any of the user groups is candidate group and task is not assigned
      * - there are no candidate users and groups set and task is not assigned
      *
      * @param taskSearchRequest the request containing all the filters
-     * @param userId authenticated user id
-     * @param userGroups authenticated user groups
-     * @return a specification that applies the filters and restricts the retrieved tasks based on the authenticated user
+     * @param userId user id to be applied for restriction
+     * @param userGroups groups to be applied for restriction
+     * @return a specification that applies the filters and restricts the retrieved tasks based on the given user and groups
      */
     public static TaskSpecification restricted(
         TaskSearchRequest taskSearchRequest,
