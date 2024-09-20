@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.types.Predicate;
 import java.util.List;
+import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
@@ -48,13 +49,16 @@ public class TaskControllerHelper {
 
     private final TaskLookupRestrictionService taskLookupRestrictionService;
 
+    private final SecurityManager securityManager;
+
     public TaskControllerHelper(
         TaskRepository taskRepository,
         ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         QueryDslPredicateAggregator predicateAggregator,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-        TaskLookupRestrictionService taskLookupRestrictionService
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        SecurityManager securityManager
     ) {
         this.taskRepository = taskRepository;
         this.processVariableService = processVariableService;
@@ -62,6 +66,7 @@ public class TaskControllerHelper {
         this.predicateAggregator = predicateAggregator;
         this.taskRepresentationModelAssembler = taskRepresentationModelAssembler;
         this.taskLookupRestrictionService = taskLookupRestrictionService;
+        this.securityManager = securityManager;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAll(
@@ -87,13 +92,38 @@ public class TaskControllerHelper {
         return pagedCollectionModelAssembler.toModel(pageable, page, taskRepresentationModelAssembler);
     }
 
-    public PagedModel<EntityModel<QueryCloudTask>> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable) {
-        Page<TaskEntity> tasks = taskRepository.findAll(new TaskSpecification(taskSearchRequest), pageable);
+    @Transactional(readOnly = true)
+    public PagedModel<EntityModel<QueryCloudTask>> searchTasksRestricted(
+        TaskSearchRequest taskSearchRequest,
+        Pageable pageable
+    ) {
+        Page<TaskEntity> tasks = searchTasks(taskSearchRequest, pageable, true);
+        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedModel<EntityModel<QueryCloudTask>> searchTasksUnrestricted(
+        TaskSearchRequest taskSearchRequest,
+        Pageable pageable
+    ) {
+        Page<TaskEntity> tasks = searchTasks(taskSearchRequest, pageable, false);
+        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
+    }
+
+    private Page<TaskEntity> searchTasks(TaskSearchRequest taskSearchRequest, Pageable pageable, boolean restricted) {
+        TaskSpecification taskSpecification = restricted
+            ? TaskSpecification.restricted(
+                taskSearchRequest,
+                securityManager.getAuthenticatedUserId(),
+                securityManager.getAuthenticatedUserGroups()
+            )
+            : TaskSpecification.unrestricted(taskSearchRequest);
+        Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
         processVariableService.fetchProcessVariablesForTasks(
             tasks.getContent(),
             taskSearchRequest.processVariableKeys()
         );
-        return pagedCollectionModelAssembler.toModel(pageable, tasks, taskRepresentationModelAssembler);
+        return tasks;
     }
 
     public PagedModel<EntityModel<QueryCloudTask>> findAllByInvolvedUserQuery(Predicate predicate, Pageable pageable) {

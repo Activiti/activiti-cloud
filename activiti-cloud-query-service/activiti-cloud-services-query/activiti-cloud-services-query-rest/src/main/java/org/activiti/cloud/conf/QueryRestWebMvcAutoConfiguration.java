@@ -204,7 +204,8 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessVariableService processVariableService,
         AlfrescoPagedModelAssembler<TaskEntity> pagedCollectionModelAssembler,
         TaskRepresentationModelAssembler taskRepresentationModelAssembler,
-        TaskLookupRestrictionService taskLookupRestrictionService
+        TaskLookupRestrictionService taskLookupRestrictionService,
+        SecurityManager securityManager
     ) {
         return new TaskControllerHelper(
             taskRepository,
@@ -212,7 +213,8 @@ public class QueryRestWebMvcAutoConfiguration {
             pagedCollectionModelAssembler,
             new QueryDslPredicateAggregator(),
             taskRepresentationModelAssembler,
-            taskLookupRestrictionService
+            taskLookupRestrictionService,
+            securityManager
         );
     }
 
