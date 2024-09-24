@@ -17,11 +17,13 @@ package org.activiti.cloud.common.messaging.config;
 
 import static org.springframework.integration.handler.LoggingHandler.Level.DEBUG;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -205,6 +207,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         ObjectMapper copiedMapper;
         try {
             copiedMapper = objectMapper.copy();
+            //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
+            copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
         } catch (Exception e) {
             copiedMapper = new ObjectMapper();
             copiedMapper.registerModule(new JavaTimeModule());
