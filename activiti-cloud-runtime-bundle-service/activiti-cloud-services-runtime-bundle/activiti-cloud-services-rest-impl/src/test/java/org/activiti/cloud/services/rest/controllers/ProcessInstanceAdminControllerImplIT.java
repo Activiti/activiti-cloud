@@ -19,6 +19,7 @@ import static org.activiti.cloud.services.rest.controllers.ProcessInstanceSample
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -54,6 +55,7 @@ import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.query.impl.PageImpl;
@@ -132,6 +134,9 @@ class ProcessInstanceAdminControllerImplIT {
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
 
+    @MockBean
+    private ManagementService managementService;
+
     @BeforeEach
     void setUp() {
         assertThat(processEngineChannels).isNotNull();
@@ -195,7 +200,34 @@ class ProcessInstanceAdminControllerImplIT {
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
             .andExpect(status().isOk());
 
+        verify(cloudProcessDeletedService, never()).delete(any());
         verify(cloudProcessDeletedService).sendDeleteEvent("1");
+    }
+
+    @Test
+    void destroyCancelledProcessInstance() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.CANCELLED);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
+            .andExpect(status().isOk());
+
+        verify(cloudProcessDeletedService, never()).delete(any());
+        verify(cloudProcessDeletedService).sendDeleteEvent("1");
+    }
+
+    @Test
+    void destroyRunningProcessInstanceWithForce() throws Exception {
+        ProcessInstance processInstance = mock(ProcessInstance.class);
+        when(processInstance.getStatus()).thenReturn(ProcessInstanceStatus.RUNNING);
+        when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
+
+        this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy?force=true", 1))
+            .andExpect(status().isAccepted());
+
+        verify(cloudProcessDeletedService).delete("1");
+        verify(cloudProcessDeletedService, never()).sendDeleteEvent("1");
     }
 
     @Test
@@ -207,6 +239,9 @@ class ProcessInstanceAdminControllerImplIT {
 
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy", 1))
             .andExpect(status().isBadRequest());
+
+        verify(cloudProcessDeletedService, never()).delete(any());
+        verify(cloudProcessDeletedService, never()).sendDeleteEvent(any());
     }
 
     @Test

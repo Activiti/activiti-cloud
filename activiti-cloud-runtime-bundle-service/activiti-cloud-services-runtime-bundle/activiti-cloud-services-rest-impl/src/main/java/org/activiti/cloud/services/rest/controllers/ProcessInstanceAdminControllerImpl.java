@@ -148,11 +148,16 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
     }
 
     @Override
-    public ResponseEntity<Void> destroyProcessInstance(@PathVariable String processInstanceId) {
+    public ResponseEntity<Void> destroyProcessInstance(@PathVariable String processInstanceId, boolean force) {
         try {
             ProcessInstance processInstance = processAdminRuntime.processInstance(processInstanceId);
             if (processInstance != null && !deleteStatuses.contains(processInstance.getStatus())) {
-                throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
+                if (force) {
+                    cloudProcessDeletedService.delete(processInstanceId);
+                    return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+                } else {
+                    throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
+                }
             }
         } catch (NotFoundException e) {
             LOGGER.debug("Process Instance " + processInstanceId + " not found. Sending PROCESS_DELETE event.");

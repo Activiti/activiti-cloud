@@ -16,21 +16,20 @@
 package org.activiti.cloud.services.events.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import org.activiti.api.process.model.payloads.DeleteProcessPayload;
 import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.activiti.engine.ManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +55,12 @@ public class CloudProcessDeletedServiceTest {
     @Mock
     private ProcessAdminRuntime processAdminRuntime;
 
+    @Mock
+    private ManagementService managementService;
+
+    @Mock
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
+
     @BeforeEach
     public void setUp() {
         RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
@@ -67,7 +72,8 @@ public class CloudProcessDeletedServiceTest {
                 producer,
                 runtimeBundleMessageBuilderFactory,
                 runtimeBundleInfoAppender,
-                processAdminRuntime
+                managementService,
+                processEngineEventsAggregator
             );
     }
 
@@ -85,33 +91,35 @@ public class CloudProcessDeletedServiceTest {
         //given
         setProperties();
 
-        var processInstance = new ProcessInstanceImpl();
-        processInstance.setId("1");
-
-        when(processAdminRuntime.delete(any())).thenReturn(processInstance);
-
         //when
         cloudProcessDeletedService.sendDeleteEvent("1");
 
-        ArgumentCaptor<DeleteProcessPayload> deleteProcessPayloadArgument = ArgumentCaptor.forClass(
-            DeleteProcessPayload.class
-        );
-
         //then
-        verify(processAdminRuntime).delete(deleteProcessPayloadArgument.capture());
-
-        assertThat(deleteProcessPayloadArgument.getValue())
-            .extracting(DeleteProcessPayload::getProcessInstanceId)
-            .isEqualTo("1");
-
         verify(auditProducer)
             .send(
                 argThat(arg ->
                     ((List<CloudRuntimeEvent>) arg.getPayload()).stream()
                         .filter(CloudProcessDeletedEventImpl.class::isInstance)
                         .map(CloudProcessDeletedEventImpl.class::cast)
-                        .anyMatch(it -> it.getEntity().equals(processInstance))
+                        .anyMatch(it -> it.getEntity().getId().equals("1"))
                 )
             );
+    }
+
+    @Test
+    public void should_deleteProcessInstance() {
+        //given
+
+        //when
+        cloudProcessDeletedService.delete("1");
+
+        ArgumentCaptor<DeleteCloudProcessInstanceCmd> deleteProcessPayloadArgument = ArgumentCaptor.forClass(
+            DeleteCloudProcessInstanceCmd.class
+        );
+
+        //then
+        verify(managementService).executeCommand(deleteProcessPayloadArgument.capture());
+
+        assertThat(deleteProcessPayloadArgument.getValue()).isNotNull();
     }
 }
