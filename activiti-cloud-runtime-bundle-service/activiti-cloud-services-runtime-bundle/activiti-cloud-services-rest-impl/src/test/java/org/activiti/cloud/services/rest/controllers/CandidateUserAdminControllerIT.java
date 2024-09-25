@@ -37,6 +37,7 @@ import org.activiti.cloud.services.events.listeners.CloudProcessDeployedProducer
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.conf.ProcessExtensionsAutoConfiguration;
@@ -101,6 +102,9 @@ class CandidateUserAdminControllerIT {
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
+
+    @MockBean
+    private ManagementService managementService;
 
     @BeforeEach
     void setUp() {
