@@ -43,6 +43,21 @@ public class TaskBuilder {
         this.task.setName(UUID.randomUUID().toString());
     }
 
+    public TaskBuilder withName(String name) {
+        task.setName(name);
+        return this;
+    }
+
+    public TaskBuilder withDescription(String description) {
+        task.setDescription(description);
+        return this;
+    }
+
+    public TaskBuilder withParentTask(TaskEntity parentTask) {
+        task.setParentTaskId(parentTask.getId());
+        return this;
+    }
+
     public TaskBuilder withPriority(Integer priority) {
         task.setPriority(priority);
         return this;
@@ -91,6 +106,11 @@ public class TaskBuilder {
         return this;
     }
 
+    public TaskBuilder withCompletedBy(String completedBy) {
+        task.setCompletedBy(completedBy);
+        return this;
+    }
+
     public TaskBuilder withCompletedDate(Date completedDate) {
         task.setCompletedDate(completedDate);
         return this;
@@ -103,6 +123,16 @@ public class TaskBuilder {
 
     public TaskBuilder withDueDate(Date dueDate) {
         task.setDueDate(dueDate);
+        return this;
+    }
+
+    public TaskBuilder withClaimedDate(Date claimedDate) {
+        task.setClaimedDate(claimedDate);
+        return this;
+    }
+
+    public TaskBuilder withLastModifiedDate(Date modifiedDate) {
+        task.setLastModified(modifiedDate);
         return this;
     }
 
