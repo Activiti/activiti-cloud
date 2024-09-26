@@ -16,14 +16,19 @@
 package org.activiti.cloud.services.query.events.handlers;
 
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import java.util.Set;
-import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
+import org.activiti.cloud.services.query.model.BPMNActivityEntity;
+import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QueryException;
+import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskEntity;
 
 public class ProcessDeletedEventHandler implements QueryEventHandler {
 
@@ -37,33 +42,30 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
     );
 
     private final EntityManager entityManager;
-    private final EntityManagerFinder entityManagerFinder;
 
     public ProcessDeletedEventHandler(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.entityManagerFinder = new EntityManagerFinder(entityManager);
     }
 
     @Override
     public void handle(CloudRuntimeEvent<?, ?> event) {
         CloudProcessDeletedEvent deletedEvent = (CloudProcessDeletedEvent) event;
 
-        ProcessInstance eventProcessInstance = deletedEvent.getEntity();
+        var eventProcessInstanceId = deletedEvent.getEntity().getId();
 
-        ProcessInstanceEntity processInstanceEntity = entityManagerFinder
-            .findProcessInstanceWithRelatedEntities(eventProcessInstance.getId())
+        ProcessInstanceEntity processInstanceEntity = Optional
+            .ofNullable(entityManager.find(ProcessInstanceEntity.class, eventProcessInstanceId))
             .orElseThrow(() ->
-                new QueryException("Unable to find process instance with the given id: " + eventProcessInstance.getId())
+                new QueryException("Unable to find process instance with the given id: " + eventProcessInstanceId)
             );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
-            processInstanceEntity.getTasks().stream().forEach(entityManager::remove);
-            processInstanceEntity.getVariables().stream().forEach(entityManager::remove);
-            processInstanceEntity.getServiceTasks().stream().forEach(entityManager::remove);
-            processInstanceEntity.getActivities().stream().forEach(entityManager::remove);
-            processInstanceEntity.getSequenceFlows().stream().forEach(entityManager::remove);
-
-            entityManager.remove(processInstanceEntity);
+            remove(TaskEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(ProcessVariableEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(ServiceTaskEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(BPMNActivityEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(BPMNSequenceFlowEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(ProcessInstanceEntity.class, "id", eventProcessInstanceId);
         } else {
             throw new IllegalStateException(
                 String.format(
@@ -73,6 +75,17 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
                 )
             );
         }
+    }
+
+    <T> void remove(Class<T> entityClass, String attributeName, Object attributeValue) {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        var delete = criteriaBuilder.createCriteriaDelete(entityClass);
+        var from = delete.from(entityClass);
+
+        delete.where(criteriaBuilder.equal(from.get(attributeName), attributeValue));
+
+        entityManager.createQuery(delete).executeUpdate();
     }
 
     @Override
