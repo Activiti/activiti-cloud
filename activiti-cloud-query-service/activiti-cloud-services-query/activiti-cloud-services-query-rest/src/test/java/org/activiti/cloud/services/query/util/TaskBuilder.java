@@ -20,8 +20,8 @@ import org.activiti.cloud.services.query.model.TaskVariableEntity;
 public class TaskBuilder {
 
     private final TaskEntity task;
-    private final Set<String> candidateUsers = new HashSet<>();
-    private final Set<String> candidateGroups = new HashSet<>();
+    private final Set<String> candidateUserIds = new HashSet<>();
+    private final Set<String> candidateGroupsIds = new HashSet<>();
 
     private final TaskRepository taskRepository;
     private final TaskVariableRepository taskVariableRepository;
@@ -97,12 +97,12 @@ public class TaskBuilder {
     }
 
     public TaskBuilder withTaskCandidateUsers(String... users) {
-        candidateUsers.addAll(Arrays.asList(users));
+        candidateUserIds.addAll(Arrays.asList(users));
         return this;
     }
 
     public TaskBuilder withTaskCandidateGroups(String... groups) {
-        candidateGroups.addAll(Arrays.asList(groups));
+        candidateGroupsIds.addAll(Arrays.asList(groups));
         return this;
     }
 
@@ -138,13 +138,13 @@ public class TaskBuilder {
 
     public TaskEntity buildAndSave() {
         Set<TaskCandidateUserEntity> candidateUsers =
-            this.candidateUsers.stream()
+            this.candidateUserIds.stream()
                 .map(user -> new TaskCandidateUserEntity(task.getId(), user))
                 .collect(Collectors.toSet());
         taskCandidateUserRepository.saveAll(candidateUsers);
         task.setTaskCandidateUsers(candidateUsers);
         Set<TaskCandidateGroupEntity> candidateGroups =
-            this.candidateGroups.stream()
+            this.candidateGroupsIds.stream()
                 .map(group -> new TaskCandidateGroupEntity(task.getId(), group))
                 .collect(Collectors.toSet());
         taskCandidateGroupRepository.saveAll(candidateGroups);
