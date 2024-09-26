@@ -179,6 +179,7 @@ public class ProcessQuerySteps {
     @Step
     public void checkProcessInstanceNotFound(String processInstanceId) {
         await()
+            .pollInSameThread()
             .untilAsserted(() ->
                 assertThatRestNotFoundErrorIsThrownBy(() -> processQueryService.getProcessInstance(processInstanceId))
             );

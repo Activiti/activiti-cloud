@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Optional;
 import net.thucydides.core.steps.StepEventBus;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 
@@ -39,9 +38,7 @@ public class RestErrorAssert {
         Throwable throwable = catchThrowable(throwingCallable);
         assertThat(throwable).isInstanceOf(FeignException.class);
 
-        Optional
-            .ofNullable(StepEventBus.getEventBus().getBaseStepListener())
-            .ifPresent(baseStepListener -> baseStepListener.exceptionExpected(FeignException.class));
+        StepEventBus.getEventBus().getBaseStepListener().exceptionExpected(FeignException.class);
 
         return new RestErrorAssert((FeignException) throwable);
     }
