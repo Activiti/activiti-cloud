@@ -50,6 +50,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateSta
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessUpdatedEventImpl;
@@ -114,7 +115,8 @@ public class QueryEventHandlerContextOptimizer {
         Map.entry(CloudProcessCandidateStarterUserAddedEventImpl.class, 17),
         Map.entry(CloudProcessCandidateStarterGroupAddedEventImpl.class, 17),
         Map.entry(CloudProcessCandidateStarterUserRemovedEventImpl.class, 18),
-        Map.entry(CloudProcessCandidateStarterGroupRemovedEventImpl.class, 18)
+        Map.entry(CloudProcessCandidateStarterGroupRemovedEventImpl.class, 18),
+        Map.entry(CloudProcessDeletedEventImpl.class, 19)
     );
 
     private Comparator<CloudRuntimeEvent<?, ?>> byTimestamp = Comparator.comparingLong(CloudRuntimeEvent::getTimestamp);

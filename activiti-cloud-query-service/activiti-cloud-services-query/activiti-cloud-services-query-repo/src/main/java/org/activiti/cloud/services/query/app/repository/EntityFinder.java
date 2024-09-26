@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.Predicate;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -28,7 +29,7 @@ public class EntityFinder {
     }
 
     private <T> T getEntity(Optional<T> result, String notFoundMessage) {
-        return result.orElseThrow(() -> new IllegalStateException(notFoundMessage));
+        return result.orElseThrow(() -> new EntityNotFoundException(notFoundMessage));
     }
 
     public <T> T findOne(QuerydslPredicateExecutor<T> predicateExecutor, Predicate predicate, String notFoundMessage) {

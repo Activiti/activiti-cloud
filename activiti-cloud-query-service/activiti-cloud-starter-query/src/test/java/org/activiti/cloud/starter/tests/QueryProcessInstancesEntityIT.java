@@ -35,7 +35,9 @@ import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -258,6 +260,52 @@ public class QueryProcessInstancesEntityIT {
 
                 ProcessInstance responseProcess = responseEntity.getBody();
                 assertThat(responseProcess.getId()).isEqualTo(process.getId());
+            });
+    }
+
+    @Test
+    public void shouldDeleteProcessInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                identityTokenProducer.withTestUser("hradmin");
+
+                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/" + process.getId(),
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getId()).isNotNull();
+
+                ProcessInstance responseProcess = responseEntity.getBody();
+                assertThat(responseProcess.getId()).isEqualTo(process.getId());
+
+                eventsAggregator.addEvents(new CloudProcessCancelledEventImpl(responseProcess));
+                eventsAggregator.addEvents(new CloudProcessDeletedEventImpl(responseProcess));
+            });
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                identityTokenProducer.withTestUser("hradmin");
+
+                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/" + process.getId(),
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             });
     }
 
