@@ -24,14 +24,13 @@ import java.util.List;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.api.task.model.QueryCloudTask;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequestBuilder;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.joda.time.LocalDate;
@@ -68,12 +67,6 @@ class TaskSearchIT {
     TaskControllerHelper taskControllerHelper;
 
     @Autowired
-    TaskRepository taskRepository;
-
-    @Autowired
-    TaskVariableRepository taskVariableRepository;
-
-    @Autowired
     private QueryTestUtils queryTestUtils;
 
     @AfterEach
@@ -108,9 +101,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilters(
-            Set.of(matchingFilter1, matchingFilter2)
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(matchingFilter1, matchingFilter2))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -149,9 +142,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilters(
-            Set.of(matchingFilter, notMatchingFilter)
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(matchingFilter, notMatchingFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -189,10 +182,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            matchingFilter1,
-            matchingFilter2
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { matchingFilter1, matchingFilter2 }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -230,10 +222,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            matchingFilter1,
-            notMatchingFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { matchingFilter1, notMatchingFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -276,9 +267,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -325,9 +316,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -380,9 +371,9 @@ class TaskSearchIT {
             FilterOperator.LIKE
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -432,9 +423,9 @@ class TaskSearchIT {
             FilterOperator.LIKE
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -478,9 +469,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -520,9 +511,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -566,9 +557,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -607,9 +598,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -653,9 +644,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -707,9 +698,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -755,9 +746,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -799,9 +790,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -845,9 +836,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -899,9 +890,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -947,9 +938,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -993,9 +984,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1039,9 +1030,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1086,9 +1077,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1132,9 +1123,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -1189,9 +1180,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -1237,9 +1228,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1284,9 +1275,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1330,9 +1321,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -1387,9 +1378,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -1435,9 +1426,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1482,9 +1473,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1528,9 +1519,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1575,9 +1566,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1621,9 +1612,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -1678,9 +1669,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -1726,9 +1717,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1773,9 +1764,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1819,9 +1810,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -1876,9 +1867,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -1930,9 +1921,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -1980,9 +1971,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2030,9 +2021,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2079,9 +2070,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2129,9 +2120,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -2191,9 +2182,9 @@ class TaskSearchIT {
             FilterOperator.GREATER_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -2243,9 +2234,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2293,9 +2284,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2343,9 +2334,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(
             processInstance1.getTasks().iterator().next(),
@@ -2406,9 +2397,9 @@ class TaskSearchIT {
             FilterOperator.LESS_THAN_OR_EQUAL
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
 
@@ -2453,9 +2444,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessVariableFilters(Set.of(variableFilter))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2484,7 +2475,7 @@ class TaskSearchIT {
                 FilterOperator.EQUALS
             );
 
-        taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithProcessVariableFilter(variableFilter);
+        taskSearchRequest = new TaskSearchRequestBuilder().withProcessVariableFilters(Set.of(variableFilter)).build();
 
         retrievedTasks =
             taskControllerHelper
@@ -2530,9 +2521,9 @@ class TaskSearchIT {
             FilterOperator.EQUALS
         );
 
-        TaskSearchRequest taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(
-            variableFilter
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2546,7 +2537,10 @@ class TaskSearchIT {
         variableFilter =
             new VariableFilter(null, varName, VariableType.BOOLEAN, String.valueOf(false), FilterOperator.EQUALS);
 
-        taskSearchRequest = QueryTestUtils.buildTaskSearchRequestWithTaskVariableFilter(variableFilter);
+        taskSearchRequest =
+            new TaskSearchRequestBuilder()
+                .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+                .build();
 
         retrievedTasks =
             taskControllerHelper
@@ -2561,39 +2555,12 @@ class TaskSearchIT {
 
     @Test
     void should_returnStandaloneTasksOnly() {
-        TaskEntity standalone = new TaskEntity();
-        String taskId = "standalone";
-        standalone.setId(taskId);
-        taskRepository.save(standalone);
+        TaskEntity standalone = queryTestUtils.buildTask().buildAndSave();
 
         ProcessInstanceEntity processInstance = queryTestUtils.buildProcessInstance().buildAndSave();
         queryTestUtils.buildTask().withParentProcess(processInstance).buildAndSave();
 
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            true,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().onlyStandalone().build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2609,38 +2576,9 @@ class TaskSearchIT {
     void should_returnRootTasksOnly() {
         ProcessInstanceEntity processInstance = queryTestUtils.buildProcessInstance().buildAndSave();
         TaskEntity rootTask = queryTestUtils.buildTask().withParentProcess(processInstance).buildAndSave();
-        TaskEntity subTask = new TaskEntity();
-        String subTaskId = "subTask";
-        subTask.setId(subTaskId);
-        subTask.setProcessInstanceId(processInstance.getId());
-        subTask.setParentTaskId(rootTask.getId());
-        taskRepository.save(subTask);
+        queryTestUtils.buildTask().withParentTask(rootTask).buildAndSave();
 
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            true,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().onlyRoot().build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2654,46 +2592,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByNameContains() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setName("Darth Vader");
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withName("Darth Vader").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withName("Frodo Baggins").buildAndSave();
+        queryTestUtils.buildTask().withName("Duke Leto").buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setName("Frodo Baggins");
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setName("Duke Leto");
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            Set.of("darth", "baggins"),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withName("darth", "baggins").build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2707,46 +2610,13 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByDescriptionContains() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setDescription("Darth Vader");
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withDescription("Darth Vader").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withDescription("Frodo Baggins").buildAndSave();
+        queryTestUtils.buildTask().withDescription("Duke Leto").buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setDescription("Frodo Baggins");
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setDescription("Duke Leto");
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            Set.of("darth", "baggins"),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withDescription("darth", "baggins")
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2760,46 +2630,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByPriority() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setPriority(1);
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withPriority(1).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withPriority(2).buildAndSave();
+        queryTestUtils.buildTask().withPriority(3).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setPriority(2);
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setPriority(3);
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            Set.of(1, 2),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withPriority(1, 2).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2813,46 +2648,13 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByStatus() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setStatus(Task.TaskStatus.CREATED);
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withStatus(Task.TaskStatus.CREATED).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withStatus(Task.TaskStatus.ASSIGNED).buildAndSave();
+        queryTestUtils.buildTask().withStatus(Task.TaskStatus.COMPLETED).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setStatus(Task.TaskStatus.ASSIGNED);
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setStatus(Task.TaskStatus.COMPLETED);
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            Set.of(Task.TaskStatus.CREATED, Task.TaskStatus.ASSIGNED),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withStatus(Task.TaskStatus.CREATED, Task.TaskStatus.ASSIGNED)
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2866,46 +2668,13 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByCompletedBy() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setCompletedBy("Jimmy Page");
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withCompletedBy("Jimmy Page").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withCompletedBy("Robert Plant").buildAndSave();
+        queryTestUtils.buildTask().withCompletedBy("John Bonham").buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setCompletedBy("Robert Plant");
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setCompletedBy("John Bonham");
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            Set.of("Jimmy Page", "Robert Plant"),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withCompletedBy("Jimmy Page", "Robert Plant")
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2919,46 +2688,13 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByAssignee() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setAssignee("Kimi Raikkonen");
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withAssignee("Kimi Raikkonen").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withAssignee("Lewis Hamilton").buildAndSave();
+        queryTestUtils.buildTask().withAssignee("Sebastian Vettel").buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setAssignee("Lewis Hamilton");
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setAssignee("Max Verstappen");
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            Set.of("Kimi Raikkonen", "Lewis Hamilton"),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withAssignees("Kimi Raikkonen", "Lewis Hamilton")
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -2972,46 +2708,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByCreatedFrom() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setCreatedDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withCreatedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withCreatedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withCreatedDate(new Date(500)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setCreatedDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setCreatedDate(new Date(500));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(900),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withCreatedFrom(new Date(900)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3025,46 +2726,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByCreatedTo() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setCreatedDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withCreatedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withCreatedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withCreatedDate(new Date(3000)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setCreatedDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setCreatedDate(new Date(3000));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(2500),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withCreatedTo(new Date(2500)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3078,46 +2744,13 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByLastModifiedFrom() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setLastModified(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withLastModifiedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withLastModifiedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withLastModifiedDate(new Date(500)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setLastModified(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setLastModified(new Date(500));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(900),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withLastModifiedFrom(new Date(900))
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3131,46 +2764,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByLastModifiedTo() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setLastModified(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withLastModifiedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withLastModifiedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withLastModifiedDate(new Date(3000)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setLastModified(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setLastModified(new Date(3000));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(2500),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withLastModifiedTo(new Date(2500)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3184,46 +2782,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByLastClaimedFrom() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setClaimedDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withClaimedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withClaimedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withClaimedDate(new Date(500)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setClaimedDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setClaimedDate(new Date(500));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(900),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withLastClaimedFrom(new Date(900)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3237,46 +2800,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByLastClaimedTo() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setClaimedDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withClaimedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withClaimedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withClaimedDate(new Date(3000)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setClaimedDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setClaimedDate(new Date(3000));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(2500),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withLastClaimedTo(new Date(2500)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3290,46 +2818,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByDueDateFrom() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setDueDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withDueDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withDueDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withDueDate(new Date(500)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setDueDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setDueDate(new Date(500));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(900),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withDueDateFrom(new Date(900)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3343,46 +2836,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByDueDateTo() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setDueDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withDueDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withDueDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withDueDate(new Date(3000)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setDueDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setDueDate(new Date(3000));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(2500),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withDueDateTo(new Date(2500)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3400,31 +2858,7 @@ class TaskSearchIT {
         TaskEntity task2 = queryTestUtils.buildTask().withCompletedDate(new Date(2000)).buildAndSave();
         queryTestUtils.buildTask().withCompletedDate(new Date(500)).buildAndSave();
 
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(900),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withCompletedFrom(new Date(900)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3438,46 +2872,11 @@ class TaskSearchIT {
 
     @Test
     void should_returnTasksFilteredByCompletedTo() {
-        TaskEntity task1 = new TaskEntity();
-        task1.setId("task1");
-        task1.setCompletedDate(new Date(1000));
-        taskRepository.save(task1);
+        TaskEntity task1 = queryTestUtils.buildTask().withCompletedDate(new Date(1000)).buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withCompletedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildTask().withCompletedDate(new Date(3000)).buildAndSave();
 
-        TaskEntity task2 = new TaskEntity();
-        task2.setId("task2");
-        task2.setCompletedDate(new Date(2000));
-        taskRepository.save(task2);
-
-        TaskEntity task3 = new TaskEntity();
-        task3.setId("task3");
-        task3.setCompletedDate(new Date(3000));
-        taskRepository.save(task3);
-
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new Date(2500),
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder().withCompletedTo(new Date(2500)).build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3495,31 +2894,9 @@ class TaskSearchIT {
         TaskEntity task2 = queryTestUtils.buildTask().withTaskCandidateUsers("user2").buildAndSave();
         queryTestUtils.buildTask().withTaskCandidateUsers("user3").buildAndSave();
 
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            Set.of("user1", "user2"),
-            null,
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withCandidateUserId("user1", "user2")
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
@@ -3537,31 +2914,9 @@ class TaskSearchIT {
         TaskEntity task2 = queryTestUtils.buildTask().withTaskCandidateGroups("group2").buildAndSave();
         queryTestUtils.buildTask().withTaskCandidateGroups("group3").buildAndSave();
 
-        TaskSearchRequest taskSearchRequest = new TaskSearchRequest(
-            false,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            Set.of("group1", "group2"),
-            null,
-            null,
-            null
-        );
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withCandidateGroupId("group1", "group2")
+            .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
