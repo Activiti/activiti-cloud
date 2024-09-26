@@ -1,4 +1,4 @@
-package org.activiti.cloud.services.query.rest.payload;
+package org.activiti.cloud.services.query.util;
 
 import java.util.Date;
 import java.util.Set;
@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 
 public class TaskSearchRequestBuilder {
 

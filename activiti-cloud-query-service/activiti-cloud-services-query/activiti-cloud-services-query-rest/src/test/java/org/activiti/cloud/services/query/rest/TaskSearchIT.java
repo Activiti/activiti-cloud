@@ -30,8 +30,8 @@ import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
-import org.activiti.cloud.services.query.rest.payload.TaskSearchRequestBuilder;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
+import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.joda.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
@@ -725,7 +725,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.INTEGER, upperBound - 1))
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(processInstance1.getProcessDefinitionKey())
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.INTEGER, upperBound))
@@ -917,7 +917,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, valueToSearch))
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(processInstance1.getProcessDefinitionKey())
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, new BigDecimal("42.43")))
@@ -1009,7 +1009,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, new BigDecimal("42.43")))
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(processInstance1.getProcessDefinitionKey())
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, lowerBound))
@@ -1207,7 +1207,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, new BigDecimal("42.41")))
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(processInstance1.getProcessDefinitionKey())
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.BIGDECIMAL, upperBound))
@@ -2211,7 +2211,7 @@ class TaskSearchIT {
             )
             .withTasks(queryTestUtils.buildTask())
             .buildAndSave();
-        ProcessInstanceEntity processInstance2 = queryTestUtils
+        queryTestUtils
             .buildProcessInstance()
             .withProcessDefinitionKey(processInstance1.getProcessDefinitionKey())
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.DATETIME, upperBound))
