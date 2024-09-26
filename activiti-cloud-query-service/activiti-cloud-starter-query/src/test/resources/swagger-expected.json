@@ -97,8 +97,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -613,8 +620,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1004,8 +1018,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1339,8 +1360,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1437,8 +1465,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1748,8 +1783,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2052,8 +2094,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2318,8 +2367,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2834,8 +2890,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2945,8 +3008,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3012,8 +3082,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3085,8 +3162,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3158,8 +3242,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3469,8 +3560,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3536,8 +3634,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3654,8 +3759,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3764,8 +3876,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4072,8 +4191,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4134,8 +4260,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4286,8 +4419,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4348,8 +4488,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4457,8 +4604,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4568,8 +4722,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4635,8 +4796,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4708,8 +4876,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4781,8 +4956,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4869,8 +5051,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4936,8 +5125,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5003,8 +5199,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5070,8 +5273,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5188,8 +5398,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5284,8 +5501,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5380,8 +5604,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5442,8 +5673,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5718,8 +5956,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5870,8 +6115,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -5932,8 +6184,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -6041,8 +6300,15 @@
           "401": {
             "description": "Unauthorized"
           },
-          "404": {
-            "description": "Not Found"
+          "404":{
+            "description":"Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
