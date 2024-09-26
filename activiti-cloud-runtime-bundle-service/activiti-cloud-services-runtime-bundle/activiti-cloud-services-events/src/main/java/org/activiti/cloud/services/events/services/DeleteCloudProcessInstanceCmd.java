@@ -15,31 +15,28 @@
  */
 package org.activiti.cloud.services.events.services;
 
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
+import java.util.ArrayList;
+import java.util.List;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.impl.cmd.DeleteProcessInstanceCmd;
+import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.interceptor.CommandContext;
 
-public class DeleteCloudProcessInstanceCmd extends DeleteProcessInstanceCmd {
+class DeleteCloudProcessInstanceCmd implements Command<Void> {
 
-    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
-    private final ProcessInstance processInstance;
+    private final List<Command<Void>> commands = new ArrayList<>();
 
     public DeleteCloudProcessInstanceCmd(
-        ProcessInstance processInstance,
+        String processInstanceId,
         ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
-        super(processInstance.getId(), null);
-        this.processInstance = processInstance;
-        this.processEngineEventsAggregator = processEngineEventsAggregator;
+        commands.add(new DeleteProcessInstanceCmd(processInstanceId, null));
+        commands.add(new SendDeleteCloudProcessInstanceEventCmd(processInstanceId, processEngineEventsAggregator));
     }
 
     @Override
     public Void execute(CommandContext commandContext) {
-        super.execute(commandContext);
-
-        processEngineEventsAggregator.add(new CloudProcessDeletedEventImpl(processInstance));
+        commands.forEach(command -> command.execute(commandContext));
 
         return null;
     }

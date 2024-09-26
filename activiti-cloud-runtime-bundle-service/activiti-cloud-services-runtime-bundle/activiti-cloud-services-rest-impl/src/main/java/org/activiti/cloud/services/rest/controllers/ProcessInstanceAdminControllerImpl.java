@@ -154,7 +154,7 @@ public class ProcessInstanceAdminControllerImpl implements ProcessInstanceAdminC
             if (processInstance != null && !deleteStatuses.contains(processInstance.getStatus())) {
                 if (force) {
                     cloudProcessDeletedService.delete(processInstanceId);
-                    return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+                    return ResponseEntity.status(HttpStatus.OK).build();
                 } else {
                     throw new IllegalStateException(String.format(DELETE_PROCESS_NOT_ALLOWED, processInstanceId));
                 }

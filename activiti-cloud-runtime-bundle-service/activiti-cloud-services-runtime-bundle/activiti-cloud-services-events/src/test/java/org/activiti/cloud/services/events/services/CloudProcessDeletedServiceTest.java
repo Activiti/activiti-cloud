@@ -15,45 +15,21 @@
  */
 package org.activiti.cloud.services.events.services;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.List;
-import org.activiti.api.process.runtime.ProcessAdminRuntime;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
-import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.engine.ManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageChannel;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudProcessDeletedServiceTest {
 
     private CloudProcessDeletedService cloudProcessDeletedService;
-
-    @Mock
-    private RuntimeBundleProperties properties;
-
-    @Mock
-    private ProcessEngineChannels producer;
-
-    @Mock
-    private MessageChannel auditProducer;
-
-    @Mock
-    private ProcessAdminRuntime processAdminRuntime;
 
     @Mock
     private ManagementService managementService;
@@ -63,47 +39,18 @@ public class CloudProcessDeletedServiceTest {
 
     @BeforeEach
     public void setUp() {
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
-        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory = new RuntimeBundleMessageBuilderFactory(
-            properties
-        );
-        cloudProcessDeletedService =
-            new CloudProcessDeletedService(
-                producer,
-                runtimeBundleMessageBuilderFactory,
-                runtimeBundleInfoAppender,
-                managementService,
-                processEngineEventsAggregator
-            );
-    }
-
-    private void setProperties() {
-        when(producer.auditProducer()).thenReturn(auditProducer);
-        when(properties.getAppName()).thenReturn("an");
-        when(properties.getServiceName()).thenReturn("sn");
-        when(properties.getServiceFullName()).thenReturn("sfn");
-        when(properties.getServiceType()).thenReturn("st");
-        when(properties.getServiceVersion()).thenReturn("sv");
+        cloudProcessDeletedService = new CloudProcessDeletedService(managementService, processEngineEventsAggregator);
     }
 
     @Test
     public void should_sendDeleteEvent() {
         //given
-        setProperties();
 
         //when
         cloudProcessDeletedService.sendDeleteEvent("1");
 
         //then
-        verify(auditProducer)
-            .send(
-                argThat(arg ->
-                    ((List<CloudRuntimeEvent>) arg.getPayload()).stream()
-                        .filter(CloudProcessDeletedEventImpl.class::isInstance)
-                        .map(CloudProcessDeletedEventImpl.class::cast)
-                        .anyMatch(it -> it.getEntity().getId().equals("1"))
-                )
-            );
+        verify(managementService).executeCommand(any(SendDeleteCloudProcessInstanceEventCmd.class));
     }
 
     @Test
@@ -113,13 +60,7 @@ public class CloudProcessDeletedServiceTest {
         //when
         cloudProcessDeletedService.delete("1");
 
-        ArgumentCaptor<DeleteCloudProcessInstanceCmd> deleteProcessPayloadArgument = ArgumentCaptor.forClass(
-            DeleteCloudProcessInstanceCmd.class
-        );
-
         //then
-        verify(managementService).executeCommand(deleteProcessPayloadArgument.capture());
-
-        assertThat(deleteProcessPayloadArgument.getValue()).isNotNull();
+        verify(managementService).executeCommand(any(DeleteCloudProcessInstanceCmd.class));
     }
 }

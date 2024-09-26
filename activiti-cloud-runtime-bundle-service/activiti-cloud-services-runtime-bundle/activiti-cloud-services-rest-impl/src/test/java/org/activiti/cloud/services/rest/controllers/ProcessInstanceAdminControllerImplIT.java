@@ -224,7 +224,7 @@ class ProcessInstanceAdminControllerImplIT {
         when(processAdminRuntime.processInstance("1")).thenReturn(processInstance);
 
         this.mockMvc.perform(delete("/admin/v1/process-instances/{processInstanceId}/destroy?force=true", 1))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
 
         verify(cloudProcessDeletedService).delete("1");
         verify(cloudProcessDeletedService, never()).sendDeleteEvent("1");
