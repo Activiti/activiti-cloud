@@ -32,6 +32,7 @@ import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.model.TaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskVariableEntity_;
+import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.springframework.util.CollectionUtils;
 
@@ -248,13 +249,6 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 pvRoot.get(ProcessVariableEntity_.processInstanceId)
             );
 
-            query.groupBy(root.get(TaskEntity_.id));
-            query.having(
-                criteriaBuilder.equal(
-                    criteriaBuilder.countDistinct(pvRoot.get(ProcessVariableEntity_.name)),
-                    criteriaBuilder.literal(taskSearchRequest.processVariableFilters().size())
-                )
-            );
             predicates.add(
                 criteriaBuilder.and(
                     joinCondition,
@@ -267,6 +261,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                     )
                 )
             );
+
+            query.groupBy(root.get(TaskEntity_.id));
+            query.having(getHavingClause(pvRoot, taskSearchRequest.processVariableFilters(), criteriaBuilder));
         }
     }
 
@@ -288,14 +285,9 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
                 .toArray(Predicate[]::new);
 
-            query.groupBy(root.get(TaskEntity_.id));
-            query.having(
-                criteriaBuilder.equal(
-                    criteriaBuilder.countDistinct(join.get(ProcessVariableEntity_.name)),
-                    criteriaBuilder.literal(taskSearchRequest.taskVariableFilters().size())
-                )
-            );
             predicates.add(criteriaBuilder.or(variableValueFilters));
+            query.groupBy(root.get(TaskEntity_.id));
+            query.having(getHavingClause(join, taskSearchRequest.taskVariableFilters(), criteriaBuilder));
         }
     }
 
@@ -327,5 +319,37 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
             );
         }
+    }
+
+    private Predicate getHavingClause(
+        SetJoin<TaskEntity, TaskVariableEntity> root,
+        Collection<VariableFilter> filters,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        return filters
+            .stream()
+            .map(filter ->
+                criteriaBuilder.greaterThan(
+                    criteriaBuilder.count(
+                        criteriaBuilder
+                            .selectCase()
+                            .when(
+                                criteriaBuilder.and(
+                                    criteriaBuilder.equal(root.get(TaskVariableEntity_.name), filter.name()),
+                                    getVariableValueCondition(
+                                        root.get(TaskVariableEntity_.value),
+                                        filter,
+                                        criteriaBuilder
+                                    )
+                                ),
+                                criteriaBuilder.literal(1)
+                            )
+                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
+                    ),
+                    0L
+                )
+            )
+            .reduce(criteriaBuilder::and)
+            .orElse(criteriaBuilder.disjunction());
     }
 }

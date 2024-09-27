@@ -847,6 +847,108 @@ class TaskSearchIT {
     }
 
     @Test
+    void should_returnTasks_filteredByIntegerProcessVariable_range() {
+        String processDefinitionKey = "process-definition-key";
+
+        String varName = "int-var";
+        int lowerBound = 42;
+        int upperBound = 84;
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.INTEGER, (lowerBound + upperBound) / 2);
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.INTEGER, lowerBound + upperBound);
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .hasSize(1)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .isNotEmpty()
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) &&
+                        (int) pv.getValue() > lowerBound &&
+                        (int) pv.getValue() < upperBound
+                    )
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByIntegerTaskVariable_range() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "int-var";
+        int lowerBound = 42;
+        int upperBound = 84;
+
+        QueryCloudTask task1 = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.INTEGER,
+            (lowerBound + upperBound) / 2
+        );
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            null,
+            varName,
+            VariableType.INTEGER,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> expectedTasks = List.of(task1);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
     void should_returnTasks_filteredByBigDecimalProcessVariable_equals() {
         String processDefinitionKey = "process-definition-key";
         String differentProcessDefinitionKey = "different-process-definition-key";
@@ -1260,6 +1362,109 @@ class TaskSearchIT {
     }
 
     @Test
+    void should_returnTasks_filteredByBigDecimalProcessVariable_range() {
+        String processDefinitionKey = "process-definition-key";
+
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42");
+        BigDecimal upperBound = new BigDecimal("84");
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.BIGDECIMAL, new BigDecimal("60"));
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.BIGDECIMAL, new BigDecimal("10"));
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .hasSize(1)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .isNotEmpty()
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) &&
+                        new BigDecimal(pv.getValue().toString()).compareTo(lowerBound) > 0 &&
+                        new BigDecimal(pv.getValue().toString()).compareTo(upperBound) < 0
+                    )
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByBigDecimalTaskVariable_range() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "bigdecimal-var";
+        BigDecimal lowerBound = new BigDecimal("42");
+        BigDecimal upperBound = new BigDecimal("84");
+
+        QueryCloudTask task1 = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.BIGDECIMAL,
+            new BigDecimal("60")
+        );
+        createTaskWithVariable(processInstance, varName, VariableType.BIGDECIMAL, new BigDecimal("10"));
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(lowerBound),
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            null,
+            varName,
+            VariableType.BIGDECIMAL,
+            String.valueOf(upperBound),
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> expectedTasks = List.of(task1);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
     void should_returnTasks_filteredByDateProcessVariable_equals() {
         String processDefinitionKey = "process-definition-key";
         String differentProcessDefinitionKey = "different-process-definition-key";
@@ -1627,6 +1832,103 @@ class TaskSearchIT {
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateProcessVariable_range() {
+        String processDefinitionKey = "process-definition-key";
+
+        String varName = "date-var";
+        String lowerBound = "2024-08-01";
+        String upperBound = "2024-08-03";
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATE, "2024-08-02");
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATE, "2024-08-04");
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.DATE,
+            lowerBound,
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.DATE,
+            upperBound,
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .isNotEmpty()
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) &&
+                        LocalDate.parse(pv.getValue()).isAfter(LocalDate.parse(lowerBound)) &&
+                        LocalDate.parse(pv.getValue()).isBefore(LocalDate.parse(upperBound))
+                    )
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTaskVariable_range() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "date-var";
+        String lowerBound = "2024-08-01";
+        String upperBound = "2024-08-03";
+
+        QueryCloudTask task1 = createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-02");
+        createTaskWithVariable(processInstance, varName, VariableType.DATE, "2024-08-04");
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            null,
+            varName,
+            VariableType.DATE,
+            lowerBound,
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            null,
+            varName,
+            VariableType.DATE,
+            upperBound,
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> expectedTasks = List.of(task1);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -2053,6 +2355,108 @@ class TaskSearchIT {
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
             .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrderElementsOf(expectedTasks);
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTimeProcessVariable_range() {
+        String processDefinitionKey = "process-definition-key";
+
+        String varName = "datetime-var";
+        String lowerBound = "2024-08-02T00:10:00.000+00:00";
+        String upperBound = "2024-08-02T00:12:00.000+00:00";
+
+        ProcessInstanceEntity processInstance1 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance1, varName, VariableType.DATETIME, "2024-08-02T00:11:00.000+00:00");
+        ProcessInstanceEntity processInstance2 = createProcessInstance(processDefinitionKey);
+        createProcessVariableAndTask(processInstance2, varName, VariableType.DATETIME, "2024-08-02T00:13:00.000+00:00");
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.DATETIME,
+            lowerBound,
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            processDefinitionKey,
+            varName,
+            VariableType.DATETIME,
+            upperBound,
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithProcessVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks)
+            .containsExactly(processInstance1.getTasks().iterator().next())
+            .allSatisfy(task ->
+                assertThat(task.getProcessVariables())
+                    .isNotEmpty()
+                    .anyMatch(pv ->
+                        pv.getName().equals(varName) &&
+                        OffsetDateTime.parse(pv.getValue()).isAfter(OffsetDateTime.parse(lowerBound)) &&
+                        OffsetDateTime.parse(pv.getValue()).isBefore(OffsetDateTime.parse(upperBound))
+                    )
+            );
+    }
+
+    @Test
+    void should_returnTasks_filteredByDateTimeTaskVariable_range() {
+        ProcessInstanceEntity processInstance = createProcessInstance();
+        String varName = "datetime-var";
+        String lowerBound = "2024-08-02T00:10:00.000+00:00";
+        String upperBound = "2024-08-02T00:12:00.000+00:00";
+
+        QueryCloudTask task1 = createTaskWithVariable(
+            processInstance,
+            varName,
+            VariableType.DATETIME,
+            "2024-08-02T00:11:00.000+00:00"
+        );
+        createTaskWithVariable(processInstance, varName, VariableType.DATETIME, "2024-08-02T00:13:00.000+00:00");
+
+        VariableFilter variableFilterGt = new VariableFilter(
+            null,
+            varName,
+            VariableType.DATETIME,
+            lowerBound,
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter variableFilterLt = new VariableFilter(
+            null,
+            varName,
+            VariableType.DATETIME,
+            upperBound,
+            FilterOperator.LESS_THAN
+        );
+
+        TaskSearchRequest taskSearchRequest = buildTaskSearchRequestWithTaskVariableFilter(
+            variableFilterGt,
+            variableFilterLt
+        );
+
+        List<QueryCloudTask> expectedTasks = List.of(task1);
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
@@ -3285,8 +3689,10 @@ class TaskSearchIT {
     }
 
     @NotNull
-    private static TaskSearchRequest buildTaskSearchRequestWithProcessVariableFilter(VariableFilter variableFilter) {
-        return buildTaskSearchRequestWithProcessVariableFilters(Set.of(variableFilter));
+    private static TaskSearchRequest buildTaskSearchRequestWithProcessVariableFilter(
+        VariableFilter... variableFilters
+    ) {
+        return buildTaskSearchRequestWithProcessVariableFilters(Set.of(variableFilters));
     }
 
     @NotNull
