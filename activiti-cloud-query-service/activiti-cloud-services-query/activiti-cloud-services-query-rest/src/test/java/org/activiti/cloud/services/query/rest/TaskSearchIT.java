@@ -32,7 +32,6 @@ import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.joda.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -49,10 +48,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @Testcontainers
@@ -296,16 +293,11 @@ class TaskSearchIT {
             VariableType.STRING,
             "string-value"
         );
+
+        TaskEntity task1 = queryTestUtils.buildTask().withVariables(varToSearch).buildAndSave();
         queryTestUtils
-            .buildProcessInstance()
-            .withTasks(
-                queryTestUtils.buildTask().withVariables(varToSearch),
-                queryTestUtils
-                    .buildTask()
-                    .withVariables(
-                        new QueryTestUtils.VariableInput(varToSearch.name(), VariableType.STRING, "other-value")
-                    )
-            )
+            .buildTask()
+            .withVariables(new QueryTestUtils.VariableInput(varToSearch.name(), VariableType.STRING, "other-value"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
@@ -327,15 +319,7 @@ class TaskSearchIT {
             .map(EntityModel::getContent)
             .toList();
 
-        assertThat(retrievedTasks)
-            .hasSize(1)
-            .asInstanceOf(InstanceOfAssertFactories.list(TaskEntity.class))
-            .satisfiesExactly(task ->
-                assertThat(task.getVariable(varToSearch.name()))
-                    .hasValueSatisfying(variable ->
-                        assertThat((String) variable.getValue()).isEqualTo(varToSearch.value())
-                    )
-            );
+        assertThat(retrievedTasks).containsExactly(task1);
     }
 
     @Test
@@ -2616,6 +2600,26 @@ class TaskSearchIT {
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
             .withDescription("darth", "baggins")
+            .build();
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByProcessDefinitionName() {
+        TaskEntity task1 = queryTestUtils.buildTask().withProcessDefinitionName("name1").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withProcessDefinitionName("name2").buildAndSave();
+        queryTestUtils.buildTask().withProcessDefinitionName("name3").buildAndSave();
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessDefinitionName("name1", "name2")
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper

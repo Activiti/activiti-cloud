@@ -107,6 +107,8 @@ public class TaskBuilder {
     public TaskBuilder withParentProcess(ProcessInstanceEntity process) {
         process.getTasks().add(task);
         task.setProcessInstanceId(process.getId());
+        task.setProcessDefinitionId(process.getProcessDefinitionId());
+        task.setProcessDefinitionName(process.getProcessDefinitionName());
         task.setProcessVariables(process.getVariables());
         return this;
     }
@@ -172,5 +174,10 @@ public class TaskBuilder {
             });
         taskVariableRepository.saveAll(task.getVariables());
         return taskRepository.save(task);
+    }
+
+    public TaskBuilder withProcessDefinitionName(String processDefinitionName) {
+        task.setProcessDefinitionName(processDefinitionName);
+        return this;
     }
 }
