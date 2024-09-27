@@ -266,7 +266,7 @@ public class QueryProcessInstancesEntityIT {
     @Test
     public void shouldDeleteProcessInfo() {
         //given
-        ProcessInstance process = processInstanceBuilder.aRunningProcessInstance("running");
+        ProcessInstance process = processInstanceBuilder.startSimpleProcessInstance("simple");
 
         eventsAggregator.sendAll();
 

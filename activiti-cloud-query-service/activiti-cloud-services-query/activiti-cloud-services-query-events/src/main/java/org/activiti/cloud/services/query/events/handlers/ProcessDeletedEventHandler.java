@@ -24,11 +24,15 @@ import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
+import org.activiti.cloud.services.query.model.IntegrationContextEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QueryException;
 import org.activiti.cloud.services.query.model.ServiceTaskEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
+import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.model.TaskVariableEntity;
 
 public class ProcessDeletedEventHandler implements QueryEventHandler {
 
@@ -60,8 +64,28 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
             );
 
         if (ALLOWED_STATUS.contains(processInstanceEntity.getStatus())) {
+            remove(
+                TaskCandidateUserEntity.class,
+                "taskId",
+                TaskEntity.class,
+                "id",
+                "processInstanceId",
+                eventProcessInstanceId
+            );
+
+            remove(
+                TaskCandidateGroupEntity.class,
+                "taskId",
+                TaskEntity.class,
+                "id",
+                "processInstanceId",
+                eventProcessInstanceId
+            );
+
+            remove(TaskVariableEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(TaskEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(ProcessVariableEntity.class, "processInstanceId", eventProcessInstanceId);
+            remove(IntegrationContextEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(ServiceTaskEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNActivityEntity.class, "processInstanceId", eventProcessInstanceId);
             remove(BPMNSequenceFlowEntity.class, "processInstanceId", eventProcessInstanceId);
@@ -86,6 +110,33 @@ public class ProcessDeletedEventHandler implements QueryEventHandler {
         delete.where(criteriaBuilder.equal(from.get(attributeName), attributeValue));
 
         entityManager.createQuery(delete).executeUpdate();
+    }
+
+    <P, T> void remove(
+        Class<T> entityClass,
+        String attributeName,
+        Class<P> parentClass,
+        String parentIdAttribute,
+        String parentAttributeName,
+        Object parentAttributeValue
+    ) {
+        var criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        var parentQuery = criteriaBuilder.createQuery(Object.class);
+        var parentFrom = parentQuery.from(parentClass);
+        parentQuery.select(parentFrom.get(parentIdAttribute));
+        parentQuery.where(criteriaBuilder.equal(parentFrom.get(parentAttributeName), parentAttributeValue));
+
+        var parentIds = entityManager.createQuery(parentQuery).getResultList();
+
+        if (!parentIds.isEmpty()) {
+            var delete = criteriaBuilder.createCriteriaDelete(entityClass);
+            var from = delete.from(entityClass);
+
+            delete.where(from.get(attributeName).in(parentIds));
+
+            entityManager.createQuery(delete).executeUpdate();
+        }
     }
 
     @Override
