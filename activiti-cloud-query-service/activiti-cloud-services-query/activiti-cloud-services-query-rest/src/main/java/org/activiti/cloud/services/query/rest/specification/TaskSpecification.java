@@ -17,10 +17,12 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -39,12 +41,49 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     private final TaskSearchRequest taskSearchRequest;
 
-    public TaskSpecification(TaskSearchRequest taskSearchRequest) {
+    private final String userId;
+    private final Collection<String> userGroups;
+
+    private TaskSpecification(TaskSearchRequest taskSearchRequest, String userId, Collection<String> userGroups) {
         this.taskSearchRequest = taskSearchRequest;
+        this.userId = userId;
+        this.userGroups = userGroups;
+    }
+
+    /**
+     * Creates a specification that retrieve tasks that match filters in the request without restrictions related to any user.
+     * @param taskSearchRequest the request containing all the filters
+     * @return a specification that applies the filters in the request
+     */
+    public static TaskSpecification unrestricted(TaskSearchRequest taskSearchRequest) {
+        return new TaskSpecification(taskSearchRequest, null, null);
+    }
+
+    /**
+     * Creates a specification that applies the filters and restricts the retrieved tasks based on the given user and groups.
+     * In addition to the filters, tasks are retrieved if they match one of the following conditions:
+     * - user is assignee
+     * - user is owner
+     * - user is candidate and task is not assigned
+     * - any of the user groups is candidate group and task is not assigned
+     * - there are no candidate users and groups set and task is not assigned
+     *
+     * @param taskSearchRequest the request containing all the filters
+     * @param userId user id to be applied for restriction
+     * @param userGroups groups to be applied for restriction
+     * @return a specification that applies the filters and restricts the retrieved tasks based on the given user and groups
+     */
+    public static TaskSpecification restricted(
+        TaskSearchRequest taskSearchRequest,
+        String userId,
+        Collection<String> userGroups
+    ) {
+        return new TaskSpecification(taskSearchRequest, userId, userGroups);
     }
 
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
@@ -257,6 +296,36 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
                 )
             );
             predicates.add(criteriaBuilder.or(variableValueFilters));
+        }
+    }
+
+    private void applyUserRestrictionFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (userId != null) {
+            predicates.add(
+                criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get(TaskEntity_.assignee), userId),
+                    criteriaBuilder.equal(root.get(TaskEntity_.owner), userId),
+                    criteriaBuilder.and(
+                        criteriaBuilder.isNull(root.get(TaskEntity_.assignee)),
+                        criteriaBuilder.or(
+                            criteriaBuilder.equal(
+                                root
+                                    .join(TaskEntity_.taskCandidateUsers, JoinType.LEFT)
+                                    .get(TaskCandidateUserEntity_.userId),
+                                userId
+                            ),
+                            root
+                                .join(TaskEntity_.taskCandidateGroups, JoinType.LEFT)
+                                .get(TaskCandidateGroupEntity_.groupId)
+                                .in(userGroups),
+                            criteriaBuilder.and(
+                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateUsers)),
+                                criteriaBuilder.isEmpty(root.get(TaskEntity_.taskCandidateGroups))
+                            )
+                        )
+                    )
+                )
+            );
         }
     }
 }
