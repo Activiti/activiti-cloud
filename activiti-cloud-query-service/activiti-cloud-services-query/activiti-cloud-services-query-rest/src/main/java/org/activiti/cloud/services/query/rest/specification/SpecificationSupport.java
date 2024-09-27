@@ -67,6 +67,42 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             .toArray(Predicate[]::new);
     }
 
+    protected Predicate getHavingClause(
+        Root<ProcessVariableEntity> root,
+        Collection<VariableFilter> filters,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        return filters
+            .stream()
+            .map(filter ->
+                criteriaBuilder.greaterThan(
+                    criteriaBuilder.count(
+                        criteriaBuilder
+                            .selectCase()
+                            .when(
+                                criteriaBuilder.and(
+                                    criteriaBuilder.equal(
+                                        root.get(ProcessVariableEntity_.processDefinitionKey),
+                                        filter.processDefinitionKey()
+                                    ),
+                                    criteriaBuilder.equal(root.get(ProcessVariableEntity_.name), filter.name()),
+                                    getVariableValueCondition(
+                                        root.get(ProcessVariableEntity_.value),
+                                        filter,
+                                        criteriaBuilder
+                                    )
+                                ),
+                                criteriaBuilder.literal(1)
+                            )
+                            .otherwise(criteriaBuilder.nullLiteral(Long.class))
+                    ),
+                    0L
+                )
+            )
+            .reduce(criteriaBuilder::and)
+            .orElse(criteriaBuilder.disjunction());
+    }
+
     protected Predicate getVariableValueCondition(
         Path<?> valueColumnPath,
         VariableFilter filter,
