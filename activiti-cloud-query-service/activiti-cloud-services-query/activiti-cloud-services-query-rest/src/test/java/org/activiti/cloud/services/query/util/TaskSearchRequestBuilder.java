@@ -29,6 +29,7 @@ public class TaskSearchRequestBuilder {
     private boolean onlyRoot;
     private Set<String> name;
     private Set<String> description;
+    private Set<String> processDefinitionName;
     private Set<Integer> priority;
     private Set<Task.TaskStatus> status;
     private Set<String> completedBy;
@@ -66,6 +67,11 @@ public class TaskSearchRequestBuilder {
 
     public TaskSearchRequestBuilder withDescription(String... descriptions) {
         this.description = Set.of(descriptions);
+        return this;
+    }
+
+    public TaskSearchRequestBuilder withProcessDefinitionName(String... processDefinitionNames) {
+        this.processDefinitionName = Set.of(processDefinitionNames);
         return this;
     }
 
@@ -183,6 +189,7 @@ public class TaskSearchRequestBuilder {
             onlyRoot,
             name,
             description,
+            processDefinitionName,
             priority,
             status,
             completedBy,

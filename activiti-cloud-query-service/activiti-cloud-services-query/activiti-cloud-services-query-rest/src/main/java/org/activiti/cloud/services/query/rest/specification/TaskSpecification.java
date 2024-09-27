@@ -51,6 +51,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyStandaloneFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
         applyDescriptionFilter(root, criteriaBuilder);
+        applyProcessDefinitionNameFilter(root, criteriaBuilder);
         applyPriorityFilter(root);
         applyStatusFilter(root);
         applyCompletedByFilter(root);
@@ -68,6 +69,18 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
             return criteriaBuilder.conjunction();
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+    }
+
+    private void applyProcessDefinitionNameFilter(Root<TaskEntity> root, CriteriaBuilder criteriaBuilder) {
+        if (!CollectionUtils.isEmpty(taskSearchRequest.processDefinitionName())) {
+            addLikeFilters(
+                predicates,
+                taskSearchRequest.processDefinitionName(),
+                root,
+                criteriaBuilder,
+                TaskEntity_.processDefinitionName
+            );
+        }
     }
 
     private void applyCandidateGroupFilter(Root<TaskEntity> root) {

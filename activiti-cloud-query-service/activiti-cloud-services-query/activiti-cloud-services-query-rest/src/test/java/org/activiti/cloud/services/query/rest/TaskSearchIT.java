@@ -49,10 +49,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(
     properties = {
         "spring.main.banner-mode=off",
-        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
         "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
     }
 )
 @Testcontainers
@@ -2616,6 +2614,26 @@ class TaskSearchIT {
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
             .withDescription("darth", "baggins")
+            .build();
+
+        List<QueryCloudTask> retrievedTasks = taskControllerHelper
+            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .getContent()
+            .stream()
+            .map(EntityModel::getContent)
+            .toList();
+
+        assertThat(retrievedTasks).containsExactlyInAnyOrder(task1, task2);
+    }
+
+    @Test
+    void should_returnTasksFilteredByProcessDefinitionName() {
+        TaskEntity task1 = queryTestUtils.buildTask().withProcessDefinitionName("name1").buildAndSave();
+        TaskEntity task2 = queryTestUtils.buildTask().withProcessDefinitionName("name2").buildAndSave();
+        queryTestUtils.buildTask().withProcessDefinitionName("name3").buildAndSave();
+
+        TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
+            .withProcessDefinitionName("name1", "name2")
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
