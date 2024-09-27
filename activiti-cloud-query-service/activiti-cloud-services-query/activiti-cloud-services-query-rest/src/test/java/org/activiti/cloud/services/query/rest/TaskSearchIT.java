@@ -2623,7 +2623,7 @@ class TaskSearchIT {
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
-            .searchTasks(taskSearchRequest, PageRequest.of(0, 100))
+            .searchTasksUnrestricted(taskSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .map(EntityModel::getContent)
