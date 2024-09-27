@@ -136,7 +136,7 @@ public class TaskController {
         @RequestBody TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return taskControllerHelper.searchTasks(taskSearchRequest, pageable);
+        return taskControllerHelper.searchTasksRestricted(taskSearchRequest, pageable);
     }
 
     @Operation(summary = "Find tasks")
