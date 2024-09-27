@@ -32,7 +32,6 @@ import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.activiti.cloud.services.query.util.TaskSearchRequestBuilder;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.joda.time.LocalDate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -294,16 +293,11 @@ class TaskSearchIT {
             VariableType.STRING,
             "string-value"
         );
+
+        TaskEntity task1 = queryTestUtils.buildTask().withVariables(varToSearch).buildAndSave();
         queryTestUtils
-            .buildProcessInstance()
-            .withTasks(
-                queryTestUtils.buildTask().withVariables(varToSearch),
-                queryTestUtils
-                    .buildTask()
-                    .withVariables(
-                        new QueryTestUtils.VariableInput(varToSearch.name(), VariableType.STRING, "other-value")
-                    )
-            )
+            .buildTask()
+            .withVariables(new QueryTestUtils.VariableInput(varToSearch.name(), VariableType.STRING, "other-value"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
@@ -325,15 +319,7 @@ class TaskSearchIT {
             .map(EntityModel::getContent)
             .toList();
 
-        assertThat(retrievedTasks)
-            .hasSize(1)
-            .asInstanceOf(InstanceOfAssertFactories.list(TaskEntity.class))
-            .satisfiesExactly(task ->
-                assertThat(task.getVariable(varToSearch.name()))
-                    .hasValueSatisfying(variable ->
-                        assertThat((String) variable.getValue()).isEqualTo(varToSearch.value())
-                    )
-            );
+        assertThat(retrievedTasks).containsExactly(task1);
     }
 
     @Test
