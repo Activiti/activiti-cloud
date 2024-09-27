@@ -148,7 +148,7 @@ public class TaskAdminController {
         @RequestBody TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return taskControllerHelper.searchTasks(taskSearchRequest, pageable);
+        return taskControllerHelper.searchTasksUnrestricted(taskSearchRequest, pageable);
     }
 
     @RequestMapping(method = RequestMethod.POST)
