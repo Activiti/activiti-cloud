@@ -97,7 +97,15 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return searchTasks(taskSearchRequest, pageable, true);
+        return searchTasks(
+            taskSearchRequest,
+            pageable,
+            TaskSpecification.restricted(
+                taskSearchRequest,
+                securityManager.getAuthenticatedUserId(),
+                securityManager.getAuthenticatedUserGroups()
+            )
+        );
     }
 
     @Transactional(readOnly = true)
@@ -105,21 +113,14 @@ public class TaskControllerHelper {
         TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return searchTasks(taskSearchRequest, pageable, false);
+        return searchTasks(taskSearchRequest, pageable, TaskSpecification.unrestricted(taskSearchRequest));
     }
 
     private PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         TaskSearchRequest taskSearchRequest,
         Pageable pageable,
-        boolean restricted
+        TaskSpecification taskSpecification
     ) {
-        TaskSpecification taskSpecification = restricted
-            ? TaskSpecification.restricted(
-                taskSearchRequest,
-                securityManager.getAuthenticatedUserId(),
-                securityManager.getAuthenticatedUserGroups()
-            )
-            : TaskSpecification.unrestricted(taskSearchRequest);
         Page<TaskEntity> tasks = taskRepository.findAll(taskSpecification, pageable);
         processVariableService.fetchProcessVariablesForTasks(
             tasks.getContent(),

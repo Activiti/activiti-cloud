@@ -15,25 +15,18 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
-import org.jetbrains.annotations.NotNull;
+import org.activiti.cloud.services.query.util.QueryTestUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,13 +52,7 @@ class ProcessInstanceEntitySearchControllerIT {
     private WebApplicationContext context;
 
     @Autowired
-    TaskRepository taskRepository;
-
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
-
-    @Autowired
-    private VariableRepository variableRepository;
+    private QueryTestUtils queryTestUtils;
 
     @Container
     @ServiceConnection
@@ -75,24 +62,23 @@ class ProcessInstanceEntitySearchControllerIT {
     void setUp() {
         webAppContextSetup(context);
         postProcessors(csrf().asHeader());
-        taskRepository.deleteAll();
-        processInstanceRepository.deleteAll();
-        variableRepository.deleteAll();
+    }
+
+    @AfterEach
+    void cleanUp() {
+        queryTestUtils.cleanUp();
     }
 
     @Test
     @WithMockUser(username = "testuser")
     void should_return_RestrictedProcessInstances() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance("process1", Map.of());
-        ProcessInstanceEntity processInstance2 = createProcessInstance("process2", Map.of());
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("testuser")
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator("anotheruser").buildAndSave();
 
-        processInstance1.setInitiator("testuser");
-        processInstanceRepository.save(processInstance1);
-        processInstance2.setInitiator("another-user");
-        processInstanceRepository.save(processInstance2);
-
-        RestAssuredMockMvc
-            .given()
+        given()
             .contentType(MediaType.APPLICATION_JSON)
             .body("{}")
             .when()
@@ -101,32 +87,5 @@ class ProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body("_embedded.processInstances", hasSize(1))
             .body("_embedded.processInstances[0].id", equalTo(processInstance1.getId()));
-    }
-
-    @NotNull
-    private ProcessInstanceEntity createProcessInstance(String processDefKey, Map<String, Object> variables) {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId(UUID.randomUUID().toString());
-        processInstanceEntity.setName(UUID.randomUUID().toString());
-        processInstanceEntity.setProcessDefinitionKey(processDefKey);
-        processInstanceEntity.setAppVersion(UUID.randomUUID().toString());
-        processInstanceRepository.save(processInstanceEntity);
-
-        Set<ProcessVariableEntity> processVariables = variables
-            .entrySet()
-            .stream()
-            .map(entry -> {
-                ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-                processVariableEntity.setName(entry.getKey());
-                processVariableEntity.setValue(entry.getValue());
-                processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-                processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-                variableRepository.save(processVariableEntity);
-                return processVariableEntity;
-            })
-            .collect(Collectors.toSet());
-
-        processInstanceEntity.setVariables(processVariables);
-        return processInstanceRepository.save(processInstanceEntity);
     }
 }

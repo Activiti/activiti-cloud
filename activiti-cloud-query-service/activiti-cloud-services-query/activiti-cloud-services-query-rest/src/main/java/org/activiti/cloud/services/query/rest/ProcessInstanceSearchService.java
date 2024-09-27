@@ -44,15 +44,11 @@ public class ProcessInstanceSearchService {
 
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchRestricted(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
-        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId()),
-            pageable
+        return search(
+            searchRequest,
+            pageable,
+            ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
-        processVariableService.fetchProcessVariablesForProcessInstances(
-            processInstances.getContent(),
-            searchRequest.processVariableKeys()
-        );
-        return processInstances;
     }
 
     @Transactional(readOnly = true)
@@ -60,10 +56,15 @@ public class ProcessInstanceSearchService {
         ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
-        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(
-            ProcessInstanceSpecification.unrestricted(searchRequest),
-            pageable
-        );
+        return search(searchRequest, pageable, ProcessInstanceSpecification.unrestricted(searchRequest));
+    }
+
+    private Page<ProcessInstanceEntity> search(
+        ProcessInstanceSearchRequest searchRequest,
+        Pageable pageable,
+        ProcessInstanceSpecification specification
+    ) {
+        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(specification, pageable);
         processVariableService.fetchProcessVariablesForProcessInstances(
             processInstances.getContent(),
             searchRequest.processVariableKeys()
