@@ -549,4 +549,23 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter27-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/27-alter.oracle.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter27-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/27-alter.pg.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>
