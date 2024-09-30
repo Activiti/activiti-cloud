@@ -207,15 +207,15 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         ObjectMapper copiedMapper;
         try {
             copiedMapper = objectMapper.copy();
-            //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
-            copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
         } catch (Exception e) {
             copiedMapper = new ObjectMapper();
-            copiedMapper.registerModule(new JavaTimeModule());
-            copiedMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
-            copiedMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
+        //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
+        copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
+        copiedMapper.registerModule(new JavaTimeModule());
+        copiedMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        copiedMapper.configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
+        copiedMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return new JacksonMapper(copiedMapper);
     }
 }
