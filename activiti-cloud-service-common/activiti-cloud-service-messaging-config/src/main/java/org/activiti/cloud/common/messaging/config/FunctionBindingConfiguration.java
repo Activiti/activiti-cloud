@@ -119,8 +119,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (
                     Supplier.class.isInstance(bean) ||
-                        Function.class.isInstance(bean) ||
-                        Consumer.class.isInstance(bean)
+                    Function.class.isInstance(bean) ||
+                    Consumer.class.isInstance(bean)
                 ) {
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
@@ -197,9 +197,7 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         };
     }
 
-    public interface BindingResolver extends Function<String, String> {
-
-    }
+    public interface BindingResolver extends Function<String, String> {}
 
     @Bean
     @ConditionalOnClass(JacksonMapper.class)
