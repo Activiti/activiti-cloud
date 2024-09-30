@@ -119,8 +119,8 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
             public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
                 if (
                     Supplier.class.isInstance(bean) ||
-                    Function.class.isInstance(bean) ||
-                    Consumer.class.isInstance(bean)
+                        Function.class.isInstance(bean) ||
+                        Consumer.class.isInstance(bean)
                 ) {
                     Optional
                         .ofNullable(functionAnnotationService.findAnnotationOnBean(beanName, FunctionBinding.class))
@@ -197,7 +197,9 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
         };
     }
 
-    public interface BindingResolver extends Function<String, String> {}
+    public interface BindingResolver extends Function<String, String> {
+
+    }
 
     @Bean
     @ConditionalOnClass(JacksonMapper.class)
@@ -205,10 +207,14 @@ public class FunctionBindingConfiguration extends AbstractFunctionalBindingConfi
     public JacksonMapper jacksonMapper(@Autowired(required = false) ObjectMapper objectMapper) {
         //temporary workaround for https://github.com/spring-cloud/spring-cloud-function/issues/1159
         ObjectMapper copiedMapper;
-        try {
-            copiedMapper = objectMapper.copy();
-        } catch (Exception e) {
+        if (objectMapper == null) {
             copiedMapper = new ObjectMapper();
+        } else {
+            try {
+                copiedMapper = objectMapper.copy();
+            } catch (Exception e) {
+                copiedMapper = new ObjectMapper();
+            }
         }
         //logic from AlfrescoWebAutoConfiguration.configureObjectMapperForBigDecimal
         copiedMapper.configOverride(BigDecimal.class).setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.STRING));
