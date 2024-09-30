@@ -568,5 +568,4 @@
              splitStatements="true"
              stripComments="true"/>
   </changeSet>
-
 </databaseChangeLog>

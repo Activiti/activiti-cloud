@@ -27,6 +27,7 @@ public record TaskSearchRequest(
     boolean onlyRoot,
     Set<String> name,
     Set<String> description,
+    Set<String> processDefinitionName,
     Set<Integer> priority,
     Set<Task.TaskStatus> status,
     Set<String> completedBy,

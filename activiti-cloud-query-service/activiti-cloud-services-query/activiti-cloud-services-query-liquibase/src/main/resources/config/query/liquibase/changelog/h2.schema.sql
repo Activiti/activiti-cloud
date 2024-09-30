@@ -60,7 +60,7 @@ create table process_definition
     service_name           varchar(255),
     service_type           varchar(255),
     service_version        varchar(255),
-    description            varchar(255),
+    description            varchar(4000),
     form_key               varchar(255),
     process_definition_key varchar(255),
     name                   varchar(255),

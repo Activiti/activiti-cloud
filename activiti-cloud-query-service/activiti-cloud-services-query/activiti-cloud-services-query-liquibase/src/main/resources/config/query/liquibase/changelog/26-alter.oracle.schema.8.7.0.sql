@@ -14,4 +14,5 @@
  * limitations under the License.
  */
 
-CREATE INDEX idx_task_id_name_status ON task(id, name, status);
+ALTER TABLE process_definition
+  MODIFY description varchar(4000);
