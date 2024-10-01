@@ -180,7 +180,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { matchingFilter1, matchingFilter2 }))
+            .withTaskVariableFilters(Set.of(matchingFilter1, matchingFilter2))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -220,7 +220,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { matchingFilter1, notMatchingFilter }))
+            .withTaskVariableFilters(Set.of(matchingFilter1, notMatchingFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -309,7 +309,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -408,7 +408,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -496,7 +496,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -583,7 +583,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -683,7 +683,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -775,7 +775,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -875,7 +875,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -937,7 +937,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLtEq }))
+            .withProcessVariableFilters(Set.of(variableFilterGt, variableFilterLtEq))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1002,7 +1002,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLtEq }))
+            .withTaskVariableFilters(Set.of(variableFilterGt, variableFilterLtEq))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1);
@@ -1096,7 +1096,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1189,7 +1189,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1292,7 +1292,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -1387,7 +1387,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1490,7 +1490,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -1553,7 +1553,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLtEq }))
+            .withProcessVariableFilters(Set.of(variableFilterGt, variableFilterLtEq))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1624,7 +1624,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLt }))
+            .withTaskVariableFilters(Set.of(variableFilterGt, variableFilterLt))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1);
@@ -1719,7 +1719,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1812,7 +1812,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -1915,7 +1915,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -2010,7 +2010,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2113,7 +2113,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -2176,7 +2176,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLt }))
+            .withProcessVariableFilters(Set.of(variableFilterGt, variableFilterLt))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2246,7 +2246,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLt }))
+            .withTaskVariableFilters(Set.of(variableFilterGt, variableFilterLt))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1);
@@ -2350,7 +2350,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2449,7 +2449,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2561,7 +2561,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -2663,7 +2663,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2776,7 +2776,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1, task2);
@@ -2838,7 +2838,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withProcessVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLt }))
+            .withProcessVariableFilters(Set.of(variableFilterGt, variableFilterLt))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -2910,7 +2910,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilterGt, variableFilterLt }))
+            .withTaskVariableFilters(Set.of(variableFilterGt, variableFilterLt))
             .build();
 
         List<QueryCloudTask> expectedTasks = List.of(task1);
@@ -3034,7 +3034,7 @@ class TaskSearchIT {
         );
 
         TaskSearchRequest taskSearchRequest = new TaskSearchRequestBuilder()
-            .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
+            .withTaskVariableFilters(Set.of(variableFilter))
             .build();
 
         List<QueryCloudTask> retrievedTasks = taskControllerHelper
@@ -3049,10 +3049,7 @@ class TaskSearchIT {
         variableFilter =
             new VariableFilter(null, varName, VariableType.BOOLEAN, String.valueOf(false), FilterOperator.EQUALS);
 
-        taskSearchRequest =
-            new TaskSearchRequestBuilder()
-                .withTaskVariableFilters(Set.of(new VariableFilter[] { variableFilter }))
-                .build();
+        taskSearchRequest = new TaskSearchRequestBuilder().withTaskVariableFilters(Set.of(variableFilter)).build();
 
         retrievedTasks =
             taskControllerHelper
