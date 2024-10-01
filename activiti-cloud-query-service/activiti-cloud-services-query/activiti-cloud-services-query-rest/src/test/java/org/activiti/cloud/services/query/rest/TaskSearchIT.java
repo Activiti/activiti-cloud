@@ -970,7 +970,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.INTEGER, 42))
             .buildAndSave();
 
-        QueryCloudTask task2 = queryTestUtils
+        queryTestUtils
             .buildTask()
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.INTEGER, 84))
             .buildAndSave();
@@ -2214,7 +2214,7 @@ class TaskSearchIT {
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.DATE, "2024-08-02"))
             .buildAndSave();
 
-        QueryCloudTask task2 = queryTestUtils
+        queryTestUtils
             .buildTask()
             .withVariables(new QueryTestUtils.VariableInput(varName, VariableType.DATE, "2024-08-04"))
             .buildAndSave();
