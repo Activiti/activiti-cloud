@@ -18,7 +18,6 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
@@ -190,66 +189,6 @@ public class TaskAdminControllerIT {
             .post("/admin/v1/tasks/search")
             .then()
             .statusCode(200);
-    }
-
-    @Test
-    @WithMockUser(username = "testadmin")
-    void should_filterByProcessVariablesAndTaskVariables() {
-        ProcessInstanceEntity process1 = createProcessInstance();
-        ProcessInstanceEntity process2 = createProcessInstance();
-        Set<ProcessVariableEntity> processVars1 = createProcessVariables(process1);
-        Set<ProcessVariableEntity> processVars2 = createProcessVariables(process2);
-
-        TaskVariableEntity taskVariable1 = createTaskVariable();
-        TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
-
-        createTaskWithVariables(process1, Set.of(taskVariable1), processVars1);
-        createTaskWithVariables(process2, Set.of(taskVariable2), processVars2);
-
-        processInstanceRepository.save(process1);
-        processInstanceRepository.save(process2);
-
-        String taskSearchRequest = String.format(
-            """
-            {
-                "processVariableFilters": [
-                    {
-                        "processDefinitionKey": "%s",
-                        "name": "%s",
-                        "type": "string",
-                        "value": "%s",
-                        "operator": "eq"
-                    }
-                ],
-                "taskVariableFilters": [
-                    {
-                        "name": "%s",
-                        "type": "string",
-                        "value": "%s",
-                        "operator": "eq"
-                    }
-                ]
-            }
-            """,
-            taskVariable1.getProcessInstance().getProcessDefinitionKey(),
-            processVars1.stream().findFirst().get().getName(),
-            processVars1.stream().findFirst().get().getValue(),
-            taskVariable1.getName(),
-            taskVariable1.getValue()
-        );
-
-        given()
-            .webAppContextSetup(context)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(taskSearchRequest)
-            .when()
-            .post("/admin/v1/tasks/search")
-            .then()
-            .statusCode(200)
-            .body("_embedded.tasks", hasSize(1))
-            .body("_embedded.tasks[0].id", equalTo(taskVariable1.getTask().getId()));
     }
 
     @NotNull

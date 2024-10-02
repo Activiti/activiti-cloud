@@ -73,6 +73,11 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
+    public ProcessInstanceBuilder withInitiator(String initiator) {
+        process.setInitiator(initiator);
+        return this;
+    }
+
     public ProcessInstanceEntity buildAndSave() {
         variableRepository.saveAll(process.getVariables());
         process.setTasks(
