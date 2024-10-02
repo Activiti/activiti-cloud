@@ -16,28 +16,19 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.util.QueryTestUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
@@ -46,35 +37,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-class ProcessInstanceEntitySearchControllerIT {
+@WithMockUser(username = AbstractProcessInstanceEntitySearchControllerIT.USER, roles = "ACTIVITI_USER")
+class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEntitySearchControllerIT {
 
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
-    private QueryTestUtils queryTestUtils;
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    @BeforeEach
-    void setUp() {
-        webAppContextSetup(context);
-        postProcessors(csrf().asHeader());
-    }
-
-    @AfterEach
-    void cleanUp() {
-        queryTestUtils.cleanUp();
+    @Override
+    protected String getSearchEndpoint() {
+        return "/v1/process-instances/search";
     }
 
     @Test
-    @WithMockUser(username = "testuser")
     void should_return_RestrictedProcessInstances() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
-            .withInitiator("testuser")
+            .withInitiator(USER)
             .buildAndSave();
         queryTestUtils.buildProcessInstance().withInitiator("anotheruser").buildAndSave();
 
@@ -82,10 +57,43 @@ class ProcessInstanceEntitySearchControllerIT {
             .contentType(MediaType.APPLICATION_JSON)
             .body("{}")
             .when()
-            .post("/v1/process-instances/search")
+            .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body("_embedded.processInstances", hasSize(1))
+            .body(processInstanceJsonPath, hasSize(1))
             .body("_embedded.processInstances[0].id", equalTo(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByInitiator() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user2")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user3")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withInitiators("user1", "user2");
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.build())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(2))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
     }
 }

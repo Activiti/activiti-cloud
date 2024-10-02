@@ -17,18 +17,12 @@ package org.activiti.cloud.services.query.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.jetbrains.annotations.NotNull;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -53,24 +47,26 @@ class ProcessVariableServiceIT {
     ProcessVariableService processVariableService;
 
     @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private VariableRepository variableRepository;
+    private QueryTestUtils queryTestUtils;
 
     @Test
     void should_fetchProcessVariables_forProcessInstances() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(
-            "process1",
-            Map.of("var1", "value1", "var2", "value2")
-        );
-        ProcessInstanceEntity processInstance2 = createProcessInstance(
-            "process2",
-            Map.of("var1", "value1", "var2", "value2")
-        );
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey("process1")
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+            )
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey("process2")
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+            )
+            .buildAndSave();
 
         Set<ProcessVariableKey> variableKeys = Set.of(
             new ProcessVariableKey("process1", "var1"),
@@ -101,31 +97,32 @@ class ProcessVariableServiceIT {
 
     @Test
     void should_fetchProcessVariables_forTasks() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(
-            "process1",
-            Map.of("var1", "value1", "var2", "value2")
-        );
-        ProcessInstanceEntity processInstance2 = createProcessInstance(
-            "process2",
-            Map.of("var1", "value1", "var2", "value2")
-        );
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey("process1")
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+            )
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey("process2")
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+            )
+            .withTasks(queryTestUtils.buildTask())
+            .buildAndSave();
 
         Set<ProcessVariableKey> variableKeys = Set.of(
             new ProcessVariableKey("process1", "var1"),
             new ProcessVariableKey("process2", "var2")
         );
 
-        TaskEntity task1 = new TaskEntity();
-        task1.setId(UUID.randomUUID().toString());
-        task1.setProcessInstanceId(processInstance1.getId());
-        task1.setProcessVariables(processInstance1.getVariables());
-        taskRepository.save(task1);
-
-        TaskEntity task2 = new TaskEntity();
-        task2.setId(UUID.randomUUID().toString());
-        task2.setProcessInstanceId(processInstance2.getId());
-        task2.setProcessVariables(processInstance2.getVariables());
-        taskRepository.save(task2);
+        TaskEntity task1 = processInstance1.getTasks().iterator().next();
+        TaskEntity task2 = processInstance2.getTasks().iterator().next();
 
         processVariableService.fetchProcessVariablesForTasks(Set.of(task1, task2), variableKeys);
 
@@ -144,32 +141,5 @@ class ProcessVariableServiceIT {
                 assertThat(processVariableEntity.getName()).isEqualTo("var2");
                 assertThat((String) processVariableEntity.getValue()).isEqualTo("value2");
             });
-    }
-
-    @NotNull
-    private ProcessInstanceEntity createProcessInstance(String processDefKey, Map<String, Object> variables) {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId(UUID.randomUUID().toString());
-        processInstanceEntity.setName(UUID.randomUUID().toString());
-        processInstanceEntity.setProcessDefinitionKey(processDefKey);
-        processInstanceEntity.setAppVersion(UUID.randomUUID().toString());
-        processInstanceRepository.save(processInstanceEntity);
-
-        Set<ProcessVariableEntity> processVariables = variables
-            .entrySet()
-            .stream()
-            .map(entry -> {
-                ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-                processVariableEntity.setName(entry.getKey());
-                processVariableEntity.setValue(entry.getValue());
-                processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-                processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-                variableRepository.save(processVariableEntity);
-                return processVariableEntity;
-            })
-            .collect(Collectors.toSet());
-
-        processInstanceEntity.setVariables(processVariables);
-        return processInstanceRepository.save(processInstanceEntity);
     }
 }
