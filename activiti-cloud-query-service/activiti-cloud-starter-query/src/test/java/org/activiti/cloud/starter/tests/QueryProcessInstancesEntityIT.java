@@ -46,6 +46,11 @@ import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitize
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
@@ -113,6 +118,21 @@ public class QueryProcessInstancesEntityIT {
     @Autowired
     private SubscribableChannel errorChannel;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private TaskVariableRepository taskVariableRepository;
+
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
+    private VariableRepository variableRepository;
+
     private EventsAggregator eventsAggregator;
 
     private ProcessInstanceEventContainedBuilder processInstanceBuilder;
@@ -134,7 +154,12 @@ public class QueryProcessInstancesEntityIT {
     public void tearDown() {
         sequenceFlowRepository.deleteAll();
         activityRepository.deleteAll();
+        taskVariableRepository.deleteAll();
+        taskRepository.deleteAll();
+        variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
+        taskCandidateUserRepository.deleteAll();
     }
 
     @Test
@@ -268,6 +293,13 @@ public class QueryProcessInstancesEntityIT {
         //given
         ProcessInstance process = processInstanceBuilder.startSimpleProcessInstance("simple");
 
+        var candidateUserTask = taskEventBuilder.aTaskWithUserCandidate("userCandidate", "testuser", process);
+        var candidateGroupTask = taskEventBuilder.aTaskWithGroupCandidate("groupCandidate", "testgroup", process);
+
+        variableBuilder.aCreatedVariable("foo", "bar").onProcessInstance(process);
+        variableBuilder.aCreatedVariable("baz", "qux").onTask(candidateGroupTask);
+        variableBuilder.aCreatedVariable("quux", "bax").onTask(candidateUserTask);
+
         eventsAggregator.sendAll();
 
         await()
@@ -288,6 +320,15 @@ public class QueryProcessInstancesEntityIT {
                 ProcessInstance responseProcess = responseEntity.getBody();
                 assertThat(responseProcess.getId()).isEqualTo(process.getId());
 
+                assertThat(taskRepository.findAll()).isNotEmpty();
+                assertThat(taskVariableRepository.findAll()).isNotEmpty();
+                assertThat(activityRepository.findAll()).isNotEmpty();
+                assertThat(sequenceFlowRepository.findAll()).isNotEmpty();
+                assertThat(variableRepository.findAll()).isNotEmpty();
+                assertThat(processInstanceRepository.findAll()).isNotEmpty();
+                assertThat(taskCandidateGroupRepository.findAll()).isNotEmpty();
+                assertThat(taskCandidateUserRepository.findAll()).isNotEmpty();
+
                 eventsAggregator.addEvents(new CloudProcessCancelledEventImpl(responseProcess));
                 eventsAggregator.addEvents(new CloudProcessDeletedEventImpl(responseProcess));
             });
@@ -306,6 +347,15 @@ public class QueryProcessInstancesEntityIT {
                 );
                 //then
                 assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+                assertThat(taskRepository.findAll()).isEmpty();
+                assertThat(taskVariableRepository.findAll()).isEmpty();
+                assertThat(activityRepository.findAll()).isEmpty();
+                assertThat(sequenceFlowRepository.findAll()).isEmpty();
+                assertThat(variableRepository.findAll()).isEmpty();
+                assertThat(processInstanceRepository.findAll()).isEmpty();
+                assertThat(taskCandidateGroupRepository.findAll()).isEmpty();
+                assertThat(taskCandidateUserRepository.findAll()).isEmpty();
             });
     }
 
