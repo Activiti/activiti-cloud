@@ -697,7 +697,8 @@ class ProcessInstanceIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThatExceptionOfType(AssertionError.class)
-            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity));
+            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity))
+            .withMessageContaining("404 NOT_FOUND");
 
         verify(this.processEngineEventsAggregator, atLeast(1)).add(this.cloudRuntimeEventArgumentCaptor.capture());
         assertThat(cloudRuntimeEventArgumentCaptor.getAllValues())
