@@ -203,7 +203,14 @@
             "description": "Unauthorized"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2473,7 +2480,14 @@
             "description": "Unauthorized"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
           }
         },
         "security": [
