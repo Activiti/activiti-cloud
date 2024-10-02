@@ -16,6 +16,7 @@
 
 package org.activiti.cloud.services.events.listeners;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,8 @@ import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.identity.model.User;
 import org.activiti.cloud.services.events.ActorConstants;
 import org.activiti.engine.RuntimeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,17 +57,23 @@ class ProcessStartedActorProviderEventListenerTest {
     @Mock
     private Principal principal;
 
+    @Mock
+    private IdentityService identityService;
+
     private ProcessStartedActorProviderEventListener processStartedActorProviderEventListener;
 
     @BeforeEach
     void beforeEach() {
-        when(this.principalIdentityProvider.getUserId(this.principal)).thenReturn(USER_ID);
+        User user = new User();
+        user.setId(USER_ID);
+        when(this.identityService.findUserByName(anyString())).thenReturn(user);
         when(this.securityContextPrincipalProvider.getCurrentPrincipal()).thenReturn(Optional.of(this.principal));
         this.processStartedActorProviderEventListener =
             new ProcessStartedActorProviderEventListener(
                 this.runtimeService,
                 this.securityContextPrincipalProvider,
-                this.principalIdentityProvider
+                this.principalIdentityProvider,
+                this.identityService
             );
     }
 
@@ -88,6 +97,7 @@ class ProcessStartedActorProviderEventListenerTest {
     private CloudProcessCreatedEventImpl buildCloudProcessCreatedEvent() {
         ProcessInstanceImpl process = new ProcessInstanceImpl();
         process.setId(UUID.randomUUID().toString());
+        process.setInitiator("initiator");
         CloudProcessCreatedEventImpl cloudProcessCreatedEvent = new CloudProcessCreatedEventImpl(process);
         return cloudProcessCreatedEvent;
     }

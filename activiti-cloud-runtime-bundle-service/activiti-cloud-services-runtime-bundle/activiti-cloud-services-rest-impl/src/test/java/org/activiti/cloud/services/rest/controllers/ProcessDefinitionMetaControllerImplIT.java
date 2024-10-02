@@ -21,6 +21,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.identity.IdentityService;
+import org.activiti.cloud.services.common.security.config.CommonSecurityAutoConfiguration;
+import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenProvider;
 import org.activiti.cloud.services.rest.assemblers.ProcessDefinitionMetaRepresentationModelAssembler;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.engine.RepositoryService;
@@ -37,12 +40,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ProcessDefinitionMetaControllerImpl.class)
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
-@Import({ StreamConfig.class })
+@Import({ StreamConfig.class, CommonSecurityAutoConfiguration.class })
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class })
 public class ProcessDefinitionMetaControllerImplIT {
 
@@ -54,6 +59,18 @@ public class ProcessDefinitionMetaControllerImplIT {
 
     @MockBean
     private ProcessDefinitionMetaRepresentationModelAssembler representationModelAssembler;
+
+    @MockBean
+    private IdentityService identityService;
+
+    @MockBean
+    private ClientRegistrationRepository clientRegistrationRepository;
+
+    @MockBean
+    private JwtAccessTokenProvider jwtAccessTokenProvider;
+
+    @MockBean
+    private JwtDecoder jwtDecoder;
 
     @Test
     public void getProcessDefinitionMetadata() throws Exception {

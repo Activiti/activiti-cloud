@@ -23,11 +23,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.stream.Stream;
+import org.activiti.cloud.identity.IdentityService;
 import org.activiti.cloud.services.api.model.ProcessVariableValue;
 import org.activiti.common.util.DateFormatterProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApplication.class)
@@ -41,6 +43,9 @@ class ProcessVariableValueConverterTest {
 
     @Autowired
     private DateFormatterProvider dateFormatterProvider;
+
+    @MockBean
+    private IdentityService identityService;
 
     @Test
     void testProcessVariableValueConverterNullValue() {
