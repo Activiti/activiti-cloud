@@ -16,6 +16,7 @@
 package org.activiti.cloud.services.query.util;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -45,8 +46,43 @@ public class ProcessInstanceBuilder {
         this.withProcessDefinitionKey(UUID.randomUUID().toString());
     }
 
+    public ProcessInstanceBuilder withName(String name) {
+        process.setName(name);
+        return this;
+    }
+
     public ProcessInstanceBuilder withProcessDefinitionKey(String processDefinitionKey) {
         process.setProcessDefinitionKey(processDefinitionKey);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withServiceName(String serviceName) {
+        process.setServiceName(serviceName);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withAppVersion(String appVersion) {
+        process.setAppVersion(appVersion);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withLastModified(Date lastModified) {
+        process.setLastModified(lastModified);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withStartDate(Date startDate) {
+        process.setStartDate(startDate);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withCompletedDate(Date completedDate) {
+        process.setCompletedDate(completedDate);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withSuspendedDate(Date suspendedDate) {
+        process.setSuspendedDate(suspendedDate);
         return this;
     }
 

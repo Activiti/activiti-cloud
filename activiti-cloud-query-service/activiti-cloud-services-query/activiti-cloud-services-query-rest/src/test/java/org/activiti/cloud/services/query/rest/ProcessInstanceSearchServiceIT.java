@@ -18,6 +18,7 @@ package org.activiti.cloud.services.query.rest;
 import static org.activiti.cloud.services.query.rest.ProcessInstanceSearchServiceIT.USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -35,8 +36,11 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +56,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
-    properties = { "spring.main.banner-mode=off", "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false" }
+    properties = {
+        "spring.main.banner-mode=off",
+        "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
+    }
 )
 @Testcontainers
 @TestPropertySource("classpath:application-test.properties")
@@ -85,6 +93,9 @@ class ProcessInstanceSearchServiceIT {
     @Autowired
     private SecurityManager securityManager;
 
+    @Autowired
+    private QueryTestUtils queryTestUtils;
+
     @BeforeEach
     public void setUp() {
         processInstanceRepository.deleteAll();
@@ -93,83 +104,67 @@ class ProcessInstanceSearchServiceIT {
 
     @Test
     void should_return_AllProcessInstances() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance("process1", Map.of());
-        ProcessInstanceEntity processInstance2 = createProcessInstance("process2", Map.of());
-
-        processInstance2.setInitiator("another-user");
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("another-user")
+            .buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = buildProcessInstanceSearchRequest();
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactlyInAnyOrder(processInstance1, processInstance2);
+        assertThat(retrievedInstances).containsExactlyInAnyOrder(processInstance1, processInstance2);
     }
 
     @Test
     void should_return_restrictedProcessInstances() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance("process1", Map.of());
-        ProcessInstanceEntity processInstance2 = createProcessInstance("process2", Map.of());
-        ProcessInstanceEntity processInstance3 = createProcessInstance("process3", Map.of());
-        ProcessInstanceEntity processInstance4 = createProcessInstance("process4", Map.of());
-
-        TaskEntity process2Task = new TaskEntity();
-        process2Task.setId(UUID.randomUUID().toString());
-        process2Task.setProcessInstanceId(processInstance2.getId());
-        process2Task.setAssignee(USER);
-        taskRepository.save(process2Task);
-
-        processInstance2.setInitiator("another-user");
-        processInstance2.setTasks(Set.of(process2Task));
-        processInstanceRepository.save(processInstance2);
-
-        TaskEntity process3Task = new TaskEntity();
-        process3Task.setId(UUID.randomUUID().toString());
-        process3Task.setProcessInstanceId(processInstance3.getId());
-        process3Task.setProcessInstance(processInstance3);
-        TaskCandidateUserEntity taskCandidate = new TaskCandidateUserEntity();
-        taskCandidate.setUserId(USER);
-        taskCandidate.setTaskId(process3Task.getId());
-        taskCandidate.setTask(process3Task);
-        process3Task.setTaskCandidateUsers(Set.of(taskCandidate));
-        taskCandidateUserRepository.save(taskCandidate);
-        taskRepository.save(process3Task);
-
-        processInstance3.setInitiator("another-user");
-        processInstance3.setTasks(Set.of(process3Task));
-        processInstanceRepository.save(processInstance3);
-
-        processInstance4.setInitiator("another-user");
-        processInstanceRepository.save(processInstance4);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("another-user")
+            .buildAndSave();
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("another-user")
+            .withTasks(queryTestUtils.buildTask().withTaskCandidateUsers(USER))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator("another-user").buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = buildProcessInstanceSearchRequest();
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchRestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactlyInAnyOrder(processInstance1, processInstance2, processInstance3);
+        assertThat(retrievedInstances).containsExactlyInAnyOrder(processInstance1, processInstance2, processInstance3);
     }
 
     @Test
     void should_returnProcessInstances_filteredByNameLike() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        String name1LikeFilter = processInstance1.getName().substring(1, processInstance1.getName().length() - 1);
-        String name2LikeFilter = processInstance2.getName().substring(1, processInstance2.getName().length() - 1);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withName("Beautiful process instance name")
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withName("Amazing process instance name")
+            .buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
-            Set.of(name1LikeFilter, name2LikeFilter),
+            Set.of("beautiful", "amazing"),
             null,
             null,
             null,
@@ -184,26 +179,26 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1, processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1, processInstance2);
     }
 
     @Test
     void should_returnProcessInstances_filteredByInitiator() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-        processInstance2.setInitiator("user2");
-        processInstanceRepository.save(processInstance2);
-
-        ProcessInstanceEntity processInstance3 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-        processInstance3.setInitiator("user3");
-        processInstanceRepository.save(processInstance3);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user1")
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator("user2")
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator("user3").buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -221,22 +216,26 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1, processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1, processInstance2);
     }
 
     @Test
     void should_returnProcessInstances_filteredByAppVersion() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withAppVersion("1.0.0")
+            .buildAndSave();
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withAppVersion("2.0.0")
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withAppVersion("3.0.0").buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -254,26 +253,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1, processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1, processInstance2);
     }
 
     @Test
     void should_returnProcessInstances_filteredByLastModifiedFrom() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setLastModified(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setLastModified(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withLastModified(new Date(2000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withLastModified(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -291,26 +286,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredByLastModifiedTo() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setLastModified(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setLastModified(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withLastModified(new Date(1000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withLastModified(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -328,26 +319,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredByStartFrom() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setStartDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setStartDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withStartDate(new Date(2000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withStartDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -365,26 +352,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredByStartTo() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setStartDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setStartDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withStartDate(new Date(1000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withStartDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -402,26 +385,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredByCompletedFrom() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setCompletedDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setCompletedDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withCompletedDate(new Date(2000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withCompletedDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -439,26 +418,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredByCompletedTo() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setCompletedDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setCompletedDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withCompletedDate(new Date(1000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withCompletedDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -476,26 +451,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredBySuspendedFrom() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setSuspendedDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setSuspendedDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withSuspendedDate(new Date(2000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withSuspendedDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -513,26 +484,22 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance2);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstances_filteredBySuspendedTo() {
-        ProcessInstanceEntity processInstance1 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance1.setSuspendedDate(new Date(1000));
-        processInstanceRepository.save(processInstance1);
-
-        ProcessInstanceEntity processInstance2 = createProcessInstance(PROCESS_DEFINITION_KEY, Map.of());
-
-        processInstance2.setSuspendedDate(new Date(2000));
-        processInstanceRepository.save(processInstance2);
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withSuspendedDate(new Date(1000))
+            .buildAndSave();
+        queryTestUtils.buildProcessInstance().withSuspendedDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -550,21 +517,25 @@ class ProcessInstanceSearchServiceIT {
             null
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks).containsExactly(processInstance1);
+        assertThat(retrievedInstances).containsExactly(processInstance1);
     }
 
     @Test
     void should_returnProcessInstance_withoutProcessVariables() {
-        ProcessInstanceEntity processInstance = createProcessInstance(
-            PROCESS_DEFINITION_KEY,
-            Map.of("var1", "value1", "var2", "value2")
-        );
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
+            )
+            .buildAndSave();
 
         ProcessInstanceSearchRequest processInstanceSearchRequest = new ProcessInstanceSearchRequest(
             null,
@@ -582,13 +553,13 @@ class ProcessInstanceSearchServiceIT {
             Set.of()
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks)
+        assertThat(retrievedInstances)
             .containsExactly(processInstance)
             .first()
             .extracting(ProcessInstanceEntity::getVariables)
@@ -598,10 +569,16 @@ class ProcessInstanceSearchServiceIT {
 
     @Test
     void should_returnProcessInstances_withJustRequestedProcessVariables() {
-        ProcessInstanceEntity processInstance = createProcessInstance(
-            PROCESS_DEFINITION_KEY,
-            Map.of("var1", "value1", "var2", "value2", "var3", "value3", "var4", "value4")
-        );
+        ProcessInstanceEntity processInstance = queryTestUtils
+            .buildProcessInstance()
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 1),
+                new QueryTestUtils.VariableInput("var3", VariableType.STRING, "value3"),
+                new QueryTestUtils.VariableInput("var4", VariableType.BOOLEAN, true)
+            )
+            .buildAndSave();
 
         Set<ProcessVariableKey> processVariableKeys = Set.of(
             new ProcessVariableKey(PROCESS_DEFINITION_KEY, "var1"),
@@ -624,13 +601,13 @@ class ProcessInstanceSearchServiceIT {
             processVariableKeys
         );
 
-        List<ProcessInstanceEntity> retrievedTasks = processInstanceSearchService
+        List<ProcessInstanceEntity> retrievedInstances = processInstanceSearchService
             .searchUnrestricted(processInstanceSearchRequest, PageRequest.of(0, 100))
             .getContent()
             .stream()
             .toList();
 
-        assertThat(retrievedTasks)
+        assertThat(retrievedInstances)
             .containsExactly(processInstance)
             .first()
             .satisfies(process ->
@@ -668,33 +645,5 @@ class ProcessInstanceSearchServiceIT {
             Set.of(variableFilters),
             processVariableKeys
         );
-    }
-
-    @NotNull
-    private ProcessInstanceEntity createProcessInstance(String processDefKey, Map<String, Object> variables) {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId(UUID.randomUUID().toString());
-        processInstanceEntity.setName(UUID.randomUUID().toString());
-        processInstanceEntity.setInitiator(USER);
-        processInstanceEntity.setProcessDefinitionKey(processDefKey);
-        processInstanceEntity.setAppVersion(UUID.randomUUID().toString());
-        processInstanceRepository.save(processInstanceEntity);
-
-        Set<ProcessVariableEntity> processVariables = variables
-            .entrySet()
-            .stream()
-            .map(entry -> {
-                ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-                processVariableEntity.setName(entry.getKey());
-                processVariableEntity.setValue(entry.getValue());
-                processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-                processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-                variableRepository.save(processVariableEntity);
-                return processVariableEntity;
-            })
-            .collect(Collectors.toSet());
-
-        processInstanceEntity.setVariables(processVariables);
-        return processInstanceRepository.save(processInstanceEntity);
     }
 }
