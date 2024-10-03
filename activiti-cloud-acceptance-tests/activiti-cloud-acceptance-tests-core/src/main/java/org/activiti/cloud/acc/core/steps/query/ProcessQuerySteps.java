@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.acc.core.steps.query;
 
+import static org.activiti.cloud.acc.core.assertions.RestErrorAssert.assertThatRestNotFoundErrorIsThrownBy;
 import static org.activiti.cloud.services.common.util.ImageUtils.svgToPng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -173,5 +174,14 @@ public class ProcessQuerySteps {
     @Step
     public void checkProcessInstanceNoDiagram(String diagram) {
         assertThat(diagram).isEmpty();
+    }
+
+    @Step
+    public void checkProcessInstanceNotFound(String processInstanceId) {
+        await()
+            .pollInSameThread()
+            .untilAsserted(() ->
+                assertThatRestNotFoundErrorIsThrownBy(() -> processQueryService.getProcessInstance(processInstanceId))
+            );
     }
 }

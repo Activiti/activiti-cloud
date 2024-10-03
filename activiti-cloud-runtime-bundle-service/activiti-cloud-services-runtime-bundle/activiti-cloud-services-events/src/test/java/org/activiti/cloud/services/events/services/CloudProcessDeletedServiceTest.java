@@ -16,20 +16,15 @@
 package org.activiti.cloud.services.events.services;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
-import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ManagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.MessageChannel;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudProcessDeletedServiceTest {
@@ -37,42 +32,35 @@ public class CloudProcessDeletedServiceTest {
     private CloudProcessDeletedService cloudProcessDeletedService;
 
     @Mock
-    private RuntimeBundleProperties properties;
+    private ManagementService managementService;
 
     @Mock
-    private ProcessEngineChannels producer;
-
-    @Mock
-    private MessageChannel auditProducer;
+    private ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     @BeforeEach
     public void setUp() {
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender = new RuntimeBundleInfoAppender(properties);
-        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory = new RuntimeBundleMessageBuilderFactory(
-            properties
-        );
-        cloudProcessDeletedService =
-            new CloudProcessDeletedService(producer, runtimeBundleMessageBuilderFactory, runtimeBundleInfoAppender);
-    }
-
-    private void setProperties() {
-        when(producer.auditProducer()).thenReturn(auditProducer);
-        when(properties.getAppName()).thenReturn("an");
-        when(properties.getServiceName()).thenReturn("sn");
-        when(properties.getServiceFullName()).thenReturn("sfn");
-        when(properties.getServiceType()).thenReturn("st");
-        when(properties.getServiceVersion()).thenReturn("sv");
+        cloudProcessDeletedService = new CloudProcessDeletedService(managementService, processEngineEventsAggregator);
     }
 
     @Test
     public void should_sendDeleteEvent() {
         //given
-        setProperties();
 
         //when
         cloudProcessDeletedService.sendDeleteEvent("1");
 
         //then
-        verify(auditProducer, times(1)).send(any());
+        verify(managementService).executeCommand(any(SendDeleteCloudProcessInstanceEventCmd.class));
+    }
+
+    @Test
+    public void should_deleteProcessInstance() {
+        //given
+
+        //when
+        cloudProcessDeletedService.delete("1");
+
+        //then
+        verify(managementService).executeCommand(any(DeleteCloudProcessInstanceCmd.class));
     }
 }

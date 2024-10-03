@@ -16,8 +16,6 @@
 package org.activiti.cloud.services.audit.jpa.converters;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 public class ProcessDeletedEventConverterTest {
@@ -65,10 +62,8 @@ public class ProcessDeletedEventConverterTest {
         //given
         String processDefinitionId = UUID.randomUUID().toString();
         String processInstanceId = UUID.randomUUID().toString();
-        given(eventsRepository.findAll(any(), any(Sort.class)))
-            .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
 
-        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
+        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId, processDefinitionId);
 
         //when
         ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
@@ -83,10 +78,8 @@ public class ProcessDeletedEventConverterTest {
         //given
         String processDefinitionId = UUID.randomUUID().toString();
         String processInstanceId = UUID.randomUUID().toString();
-        given(eventsRepository.findAll(any(), any(Sort.class)))
-            .willReturn(buildCompletedEntities(processDefinitionId, processInstanceId));
 
-        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId);
+        CloudRuntimeEvent<?, ?> runtimeEvent = buildEvent(processInstanceId, processDefinitionId);
 
         //when
         ProcessDeletedAuditEventEntity event = converter.createEventEntity(runtimeEvent);
@@ -97,9 +90,10 @@ public class ProcessDeletedEventConverterTest {
         assertThat(apiEvent.getProcessInstanceId()).isEqualTo(processInstanceId);
     }
 
-    private CloudRuntimeEvent<?, ?> buildEvent(String processInstanceId) {
+    private CloudRuntimeEvent<?, ?> buildEvent(String processInstanceId, String processDefinitionId) {
         ProcessInstanceImpl instance = new ProcessInstanceImpl();
         instance.setId(processInstanceId);
+        instance.setProcessDefinitionId(processDefinitionId);
 
         CloudProcessDeletedEventImpl event = new CloudProcessDeletedEventImpl(instance);
         event.setProcessInstanceId(processInstanceId);

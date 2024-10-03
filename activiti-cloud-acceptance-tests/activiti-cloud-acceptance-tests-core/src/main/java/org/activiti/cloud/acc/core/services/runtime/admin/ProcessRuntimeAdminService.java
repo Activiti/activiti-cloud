@@ -31,6 +31,9 @@ public interface ProcessRuntimeAdminService {
     @RequestLine("DELETE /admin/v1/process-instances/{id}")
     void deleteProcess(@Param("id") String id);
 
+    @RequestLine("DELETE /admin/v1/process-instances/{id}/destroy?force={force}")
+    void destroyProcess(@Param("id") String id, @Param("force") boolean force);
+
     @RequestLine("POST /admin/v1/process-instances/message")
     @Headers("Content-Type: application/json")
     CloudProcessInstance message(StartMessagePayload startProcess);

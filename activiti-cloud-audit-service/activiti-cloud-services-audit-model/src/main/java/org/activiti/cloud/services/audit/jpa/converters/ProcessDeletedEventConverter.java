@@ -15,22 +15,14 @@
  */
 package org.activiti.cloud.services.audit.jpa.converters;
 
-import java.util.List;
 import org.activiti.api.process.model.events.ProcessRuntimeEvent;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.model.shared.impl.events.CloudRuntimeEventImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessDeletedEvent;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.services.audit.jpa.events.AuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.events.ProcessAuditEventEntity;
 import org.activiti.cloud.services.audit.jpa.events.ProcessDeletedAuditEventEntity;
-import org.activiti.cloud.services.audit.jpa.repository.EventSpecificationsBuilder;
 import org.activiti.cloud.services.audit.jpa.repository.EventsRepository;
-import org.activiti.cloud.services.audit.jpa.repository.SearchOperation;
-import org.activiti.cloud.services.audit.jpa.repository.SpecSearchCriteria;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.jpa.domain.Specification;
 
 public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
@@ -57,8 +49,7 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
 
     @Override
     protected ProcessDeletedAuditEventEntity createEventEntity(CloudRuntimeEvent cloudRuntimeEvent) {
-        ProcessAuditEventEntity event = findEvent(cloudRuntimeEvent.getProcessInstanceId());
-        return new ProcessDeletedAuditEventEntity(event, (CloudProcessDeletedEvent) cloudRuntimeEvent);
+        return new ProcessDeletedAuditEventEntity((CloudProcessDeletedEvent) cloudRuntimeEvent);
     }
 
     @Override
@@ -70,17 +61,5 @@ public class ProcessDeletedEventConverter extends BaseEventToEntityConverter {
             processDeletedAuditEventEntity.getTimestamp(),
             processDeletedAuditEventEntity.getProcessInstance()
         );
-    }
-
-    protected ProcessAuditEventEntity findEvent(String processInstanceId) {
-        Specification<AuditEventEntity> specification = new EventSpecificationsBuilder()
-            .with(new SpecSearchCriteria(PROCESS_INSTANCE_ID, SearchOperation.EQUALITY, processInstanceId))
-            .build();
-        List<AuditEventEntity> events = eventsRepository.findAll(specification, Sort.by(Order.desc(TIMESTAMP)));
-        AuditEventEntity lastEvent = events
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException(String.format(MISSING_PROCESS_INSTANCE, processInstanceId)));
-        return ProcessAuditEventEntity.class.cast(lastEvent);
     }
 }

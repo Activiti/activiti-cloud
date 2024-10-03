@@ -107,7 +107,7 @@ public class ProcessInstanceAdminService {
         return entityFinder.findById(
             processInstanceRepository,
             processInstanceId,
-            "Unable to find task for the given id:'" + processInstanceId + "'"
+            "Unable to find process instance for the given id:'" + processInstanceId + "'"
         );
     }
 
