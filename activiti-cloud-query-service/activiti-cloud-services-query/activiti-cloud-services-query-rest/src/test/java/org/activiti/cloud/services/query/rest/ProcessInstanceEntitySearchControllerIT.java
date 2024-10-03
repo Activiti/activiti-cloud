@@ -87,7 +87,7 @@ class ProcessInstanceEntitySearchControllerIT extends AbstractProcessInstanceEnt
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
