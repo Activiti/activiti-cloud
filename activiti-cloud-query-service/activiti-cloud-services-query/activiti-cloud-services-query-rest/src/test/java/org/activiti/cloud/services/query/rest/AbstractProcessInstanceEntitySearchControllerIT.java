@@ -96,7 +96,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -125,7 +125,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -142,14 +142,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withLastModified(new Date(2000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withLastModified(new Date(1000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withLastModified(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withLastModifiedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -165,14 +165,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withLastModified(new Date(1000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withLastModified(new Date(2000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withLastModified(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withLastModifiedTo(new Date(2000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -188,14 +188,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withStartDate(new Date(2000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withStartDate(new Date(1000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withStartDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withStartFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -211,14 +211,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withStartDate(new Date(1000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withStartDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withStartDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withStartTo(new Date(2000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -234,14 +234,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withCompletedDate(new Date(2000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withCompletedDate(new Date(1000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withCompletedDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withCompletedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -257,14 +257,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withCompletedDate(new Date(1000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withCompletedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withCompletedDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withCompletedTo(new Date(2000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -280,14 +280,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withSuspendedDate(new Date(2000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withSuspendedDate(new Date(1000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withSuspendedDate(new Date(1000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSuspendedFrom(new Date(1000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -303,14 +303,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withSuspendedDate(new Date(1000))
             .buildAndSave();
-        queryTestUtils.buildProcessInstance().withSuspendedDate(new Date(2000)).buildAndSave();
+        queryTestUtils.buildProcessInstance().withInitiator(USER).withSuspendedDate(new Date(2000)).buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSuspendedTo(new Date(2000));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
@@ -365,7 +365,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(requestBuilder.build())
+            .body(requestBuilder.buildJson())
             .when()
             .post(getSearchEndpoint())
             .then()
