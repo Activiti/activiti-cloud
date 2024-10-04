@@ -60,7 +60,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withReuse(false);
 
     @Autowired
     protected QueryTestUtils queryTestUtils;
