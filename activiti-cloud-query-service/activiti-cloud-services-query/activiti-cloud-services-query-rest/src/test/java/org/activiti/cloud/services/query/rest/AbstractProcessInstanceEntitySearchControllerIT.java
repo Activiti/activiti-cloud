@@ -755,6 +755,89 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     @Test
+    void should_returnProcessInstances_filteredByIntegerVariable_range() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 4))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 8))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 15))
+            .buildAndSave();
+
+        VariableFilter filterGt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.INTEGER,
+            "4",
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter filterLt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.INTEGER,
+            "15",
+            FilterOperator.LESS_THAN
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(filterGt, filterLt);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(1))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+
+        VariableFilter filterGtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.INTEGER,
+            "4",
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        VariableFilter filterLtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.INTEGER,
+            "15",
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGtEq, filterLtEq);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance3.getId()));
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByBigDecimalVariable_equals() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -865,7 +948,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .then()
             .statusCode(200)
             .body(processInstanceJsonPath, hasSize(2))
-            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()));
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
     }
 
     @Test
@@ -946,6 +1030,89 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     }
 
     @Test
+    void should_returnProcessInstances_filteredBigdecimalVariable_range() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("4.8")))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("15.16")))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("23.42")))
+            .buildAndSave();
+
+        VariableFilter filterGt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.BIGDECIMAL,
+            "4.8",
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter filterLt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.BIGDECIMAL,
+            "23.42",
+            FilterOperator.LESS_THAN
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(filterGt, filterLt);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(1))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+
+        VariableFilter filterGtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.BIGDECIMAL,
+            "4.8",
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        VariableFilter filterLtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.BIGDECIMAL,
+            "23.42",
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGtEq, filterLtEq);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance3.getId()));
+    }
+
+    @Test
     void should_returnProcessInstances_filteredByDateVariable_equals() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()
@@ -1016,7 +1183,9 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .when()
             .post(getSearchEndpoint())
             .then()
-            .statusCode(200);
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(1))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()));
     }
 
     @Test
@@ -1133,6 +1302,89 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(processInstanceJsonPath, hasSize(2))
             .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
             .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByDateVariable_range() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-03"))
+            .buildAndSave();
+
+        VariableFilter filterGt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATE,
+            "2024-09-01",
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter filterLt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATE,
+            "2024-09-03",
+            FilterOperator.LESS_THAN
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(filterGt, filterLt);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(1))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+
+        VariableFilter filterGtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATE,
+            "2024-09-01",
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        VariableFilter filterLtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATE,
+            "2024-09-03",
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGtEq, filterLtEq);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance3.getId()));
     }
 
     @Test
@@ -1345,6 +1597,95 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(processInstanceJsonPath, hasSize(2))
             .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
             .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByDatetimeVariable_range() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:13:00.000+00:00")
+            )
+            .buildAndSave();
+
+        VariableFilter filterGt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATETIME,
+            "2024-09-01T00:11:00.000+00:00",
+            FilterOperator.GREATER_THAN
+        );
+
+        VariableFilter filterLt = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATETIME,
+            "2024-09-01T00:13:00.000+00:00",
+            FilterOperator.LESS_THAN
+        );
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(filterGt, filterLt);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(1))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+
+        VariableFilter filterGtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATETIME,
+            "2024-09-01T00:11:00.000+00:00",
+            FilterOperator.GREATER_THAN_OR_EQUAL
+        );
+
+        VariableFilter filterLtEq = new VariableFilter(
+            PROCESS_DEFINITION_KEY,
+            "var1",
+            VariableType.DATETIME,
+            "2024-09-01T00:13:00.000+00:00",
+            FilterOperator.LESS_THAN_OR_EQUAL
+        );
+
+        requestBuilder = new ProcessInstanceSearchRequestBuilder().withProcessVariableFilters(filterGtEq, filterLtEq);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()))
+            .body(processInstanceIdJsonPath, hasItem(processInstance3.getId()));
     }
 
     @Test

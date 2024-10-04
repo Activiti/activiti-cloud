@@ -192,12 +192,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
             );
 
             query.groupBy(root.get(ProcessInstanceEntity_.id));
-            query.having(
-                criteriaBuilder.equal(
-                    criteriaBuilder.countDistinct(pvRoot.get(ProcessVariableEntity_.name)),
-                    criteriaBuilder.literal(searchRequest.processVariableFilters().size())
-                )
-            );
+            query.having(getHavingClause(pvRoot, searchRequest.processVariableFilters(), criteriaBuilder));
             predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
         }
     }
