@@ -27,12 +27,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import java.math.BigDecimal;
 import java.util.Date;
 import org.activiti.QueryRestTestApplication;
-import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
@@ -72,24 +67,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     protected final String processInstanceJsonPath = "_embedded.processInstances";
     protected final String processInstanceIdJsonPath = "_embedded.processInstances.id";
-
-    @Autowired
-    ProcessInstanceSearchService processInstanceSearchService;
-
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
-
-    @Autowired
-    private VariableRepository variableRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
-
-    @Autowired
-    private SecurityManager securityManager;
 
     @BeforeEach
     void setUp() {
