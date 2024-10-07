@@ -36,7 +36,7 @@ jobs:
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@b88cd0aad2c36a63e42c71f81cb1958fed95ac87 # v3.0.10
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@b8f9a25a51fe633d9215ac7734854dc11cd299cb # v3.0.13
 
   build:
     runs-on: ubuntu-latest
@@ -438,5 +438,5 @@ jobs:
       - name: Slack Notification
         uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
-          channel-id: 'eng-hxp-studio-activiti-gh-notifs'
+          channel-id: 'C03PMT6APFU' # eng-hxp-studio-activiti-gh-notifs, to be renamed eng-automate-activiti-gh-notifs
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}

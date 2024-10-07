@@ -366,6 +366,24 @@ public class ProcessInstanceRestTemplate {
         return responseEntity;
     }
 
+    public ResponseEntity<CloudProcessInstance> adminDestroy(
+        ResponseEntity<CloudProcessInstance> processInstanceEntity,
+        boolean force
+    ) {
+        assertThat(processInstanceEntity.getBody()).isNotNull();
+        ResponseEntity<CloudProcessInstance> responseEntity = testRestTemplate.exchange(
+            PROCESS_INSTANCES_ADMIN_RELATIVE_URL
+                .concat("/")
+                .concat(processInstanceEntity.getBody().getId())
+                .concat("/destroy?force=" + force),
+            HttpMethod.DELETE,
+            null,
+            new ParameterizedTypeReference<CloudProcessInstance>() {}
+        );
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
+
     public ResponseEntity<Void> suspend(ResponseEntity<CloudProcessInstance> processInstanceEntity) {
         assertThat(processInstanceEntity.getBody()).isNotNull();
         return suspend(PROCESS_INSTANCES_RELATIVE_URL, processInstanceEntity.getBody().getId());

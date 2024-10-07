@@ -15,8 +15,10 @@
  */
 package org.activiti.cloud.starter.tests.runtime;
 
+import static org.activiti.api.process.model.events.ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +36,7 @@ import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.converter.util.InputStreamProvider;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.CloudProcessDefinition;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.events.CloudProcessStartedEvent;
@@ -109,6 +112,9 @@ class ProcessInstanceIT {
 
     @Captor
     private ArgumentCaptor<CloudProcessStartedEvent> processStartedEventArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<CloudRuntimeEvent<?, ?>> cloudRuntimeEventArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -664,6 +670,41 @@ class ProcessInstanceIT {
 
         assertThatExceptionOfType(AssertionError.class)
             .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity));
+    }
+
+    @Test
+    void adminShouldForceDestroyProcessInstance() {
+        //given
+        ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key"
+        );
+
+        assertThat(processEntity).isNotNull();
+        assertThat(processEntity.getBody()).isNotNull();
+        assertThat(processEntity.getBody().getId()).isNotNull();
+        assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
+
+        //when
+        identityTokenProducer.withTestUser("testadmin");
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDestroy(
+            processEntity,
+            true
+        );
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatExceptionOfType(AssertionError.class)
+            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity))
+            .withMessageContaining("404 NOT_FOUND");
+
+        verify(this.processEngineEventsAggregator, atLeast(1)).add(this.cloudRuntimeEventArgumentCaptor.capture());
+        assertThat(cloudRuntimeEventArgumentCaptor.getAllValues())
+            .isNotEmpty()
+            .extracting("eventType")
+            .contains(PROCESS_DELETED);
     }
 
     private void assertEventActorIsSet(String processInstanceId) {

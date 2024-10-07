@@ -59,6 +59,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.engine.ActivitiObjectNotFoundException;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
@@ -145,6 +146,9 @@ class ProcessDefinitionControllerImplIT {
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
+
+    @MockBean
+    private ManagementService managementService;
 
     private final ObjectMapper om = new ObjectMapper();
 

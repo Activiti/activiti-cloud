@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping(
     value = "/admin/v1/process-instances",
@@ -68,8 +69,13 @@ public interface ProcessInstanceAdminController {
     @RequestMapping(value = "/{processInstanceId}/destroy", method = RequestMethod.DELETE)
     ResponseEntity<Void> destroyProcessInstance(
         @Parameter(
-            description = "Enter the processInstanceId to delete a process instance"
-        ) @PathVariable String processInstanceId
+            description = "Enter the processInstanceId to destroy a process instance"
+        ) @PathVariable String processInstanceId,
+        @Parameter(description = "Enable force delete if the process is still running") @RequestParam(
+            value = "force",
+            required = false,
+            defaultValue = "false"
+        ) boolean force
     );
 
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.PUT)

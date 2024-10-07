@@ -71,6 +71,7 @@ import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.spring.security.policies.ActivitiForbiddenException;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.image.exception.ActivitiInterchangeInfoNotFoundException;
@@ -143,6 +144,9 @@ class ProcessInstanceControllerImplIT {
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
+
+    @MockBean
+    private ManagementService managementService;
 
     @Test
     void getProcessInstances() throws Exception {
