@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -64,6 +66,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
+        applyProcessVariableFilters(root, query, criteriaBuilder);
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
@@ -167,6 +170,30 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                     )
                 )
             );
+        }
+    }
+
+    private void applyProcessVariableFilters(
+        Root<ProcessInstanceEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (!CollectionUtils.isEmpty(searchRequest.processVariableFilters())) {
+            Root<ProcessVariableEntity> pvRoot = query.from(ProcessVariableEntity.class);
+            Predicate joinCondition = criteriaBuilder.equal(
+                root.get(ProcessInstanceEntity_.id),
+                pvRoot.get(ProcessVariableEntity_.processInstanceId)
+            );
+
+            Predicate[] variableValueFilters = getProcessVariableValueFilters(
+                pvRoot,
+                searchRequest.processVariableFilters(),
+                criteriaBuilder
+            );
+
+            query.groupBy(root.get(ProcessInstanceEntity_.id));
+            query.having(getHavingClause(pvRoot, searchRequest.processVariableFilters(), criteriaBuilder));
+            predicates.add(criteriaBuilder.and(joinCondition, criteriaBuilder.or(variableValueFilters)));
         }
     }
 }
