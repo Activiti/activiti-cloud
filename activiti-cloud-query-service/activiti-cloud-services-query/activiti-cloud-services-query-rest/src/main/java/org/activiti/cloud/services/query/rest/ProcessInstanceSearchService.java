@@ -50,11 +50,7 @@ public class ProcessInstanceSearchService {
         return search(
             searchRequest.processVariableKeys(),
             pageable,
-            ProcessInstanceSpecification.restricted(
-                searchRequest,
-                securityManager.getAuthenticatedUserId(),
-                pageable.getSort()
-            )
+            ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
     }
 
@@ -66,7 +62,7 @@ public class ProcessInstanceSearchService {
         return search(
             searchRequest.processVariableKeys(),
             pageable,
-            ProcessInstanceSpecification.unrestricted(searchRequest, pageable.getSort())
+            ProcessInstanceSpecification.unrestricted(searchRequest)
         );
     }
 

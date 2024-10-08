@@ -33,7 +33,6 @@ import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSort;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -46,24 +45,17 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
 
     private final ProcessInstanceSearchRequest searchRequest;
 
-    private final Sort sort;
-
-    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId, Sort sort) {
+    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
         this.searchRequest = searchRequest;
         this.userId = userId;
-        this.sort = sort;
     }
 
-    public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest, Sort sort) {
-        return new ProcessInstanceSpecification(searchRequest, null, sort);
+    public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest) {
+        return new ProcessInstanceSpecification(searchRequest, null);
     }
 
-    public static ProcessInstanceSpecification restricted(
-        ProcessInstanceSearchRequest searchRequest,
-        String userId,
-        Sort sort
-    ) {
-        return new ProcessInstanceSpecification(searchRequest, userId, sort);
+    public static ProcessInstanceSpecification restricted(ProcessInstanceSearchRequest searchRequest, String userId) {
+        return new ProcessInstanceSpecification(searchRequest, userId);
     }
 
     @Override
@@ -104,7 +96,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
                 );
                 Expression<?> extractedValue = criteriaBuilder.function(
                     CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
-                    sort.type().getJavaType(),
+                    Object.class,
                     joinRoot.get(ProcessVariableEntity_.value)
                 );
                 orderByClause =

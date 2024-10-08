@@ -202,6 +202,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
 
     private void registerExtractionFunctions(FunctionContributions functionContributions) {
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
+        String jsonbArgSignature = "JSONB jsonb";
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_RAW_VALUE, "?1->'value'")
             .setInvariantType(
@@ -211,7 +212,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                     .resolve(StandardBasicTypes.OBJECT_TYPE)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_STRING_VALUE, "?1->>'value'")
@@ -219,7 +220,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.STRING)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_NUMERIC_VALUE, "(?1->>'value')::NUMERIC")
@@ -230,7 +231,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                     .resolve(StandardBasicTypes.BIG_DECIMAL)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_DATE_VALUE, "(?1->>'value')::DATE")
@@ -238,7 +239,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.DATE)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_DATETIME_VALUE, "(?1->>'value')::TIMESTAMPTZ")
@@ -249,7 +250,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                     .resolve(StandardBasicTypes.ZONED_DATE_TIME)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
         functionRegistry
             .patternDescriptorBuilder(EXTRACT_JSON_BOOLEAN_VALUE, "(?1->>'value')::BOOLEAN")
@@ -257,7 +258,7 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
                 functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
             )
             .setExactArgumentCount(1)
-            .setArgumentListSignature("JSONB jsonb")
+            .setArgumentListSignature(jsonbArgSignature)
             .register();
     }
 

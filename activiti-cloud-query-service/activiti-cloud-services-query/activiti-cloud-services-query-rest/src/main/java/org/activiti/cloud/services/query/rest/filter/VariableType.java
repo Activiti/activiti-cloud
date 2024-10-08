@@ -16,26 +16,14 @@
 package org.activiti.cloud.services.query.rest.filter;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.math.BigDecimal;
-import java.util.Date;
 
 public enum VariableType {
-    STRING(String.class),
-    INTEGER(Long.class),
-    BIGDECIMAL(BigDecimal.class),
-    BOOLEAN(Boolean.class),
-    DATE(Date.class),
-    DATETIME(Date.class);
-
-    private final Class<?> javaType;
-
-    VariableType(Class<?> javaType) {
-        this.javaType = javaType;
-    }
-
-    public Class<?> getJavaType() {
-        return javaType;
-    }
+    STRING,
+    INTEGER,
+    BIGDECIMAL,
+    BOOLEAN,
+    DATE,
+    DATETIME;
 
     @JsonValue
     public String getValue() {
