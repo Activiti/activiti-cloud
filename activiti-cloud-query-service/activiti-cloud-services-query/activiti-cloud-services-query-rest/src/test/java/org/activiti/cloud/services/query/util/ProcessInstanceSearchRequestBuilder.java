@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSort;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +42,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Date suspendedTo;
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
+    private ProcessInstanceSort sort;
 
     public ProcessInstanceSearchRequestBuilder withNames(String... names) {
         this.names = Set.of(names);
@@ -107,6 +109,11 @@ public class ProcessInstanceSearchRequestBuilder {
         return this;
     }
 
+    public ProcessInstanceSearchRequestBuilder withSort(ProcessInstanceSort sort) {
+        this.sort = sort;
+        return this;
+    }
+
     public ProcessInstanceSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -134,7 +141,8 @@ public class ProcessInstanceSearchRequestBuilder {
             suspendedFrom,
             suspendedTo,
             processVariableFilters,
-            processVariableKeys
+            processVariableKeys,
+            sort
         );
     }
 

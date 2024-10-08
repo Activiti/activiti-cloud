@@ -15,6 +15,8 @@
  */
 package org.activiti.cloud.dialect;
 
+import java.util.Map;
+import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.query.sqm.function.SqmFunctionRegistry;
@@ -29,6 +31,36 @@ import org.hibernate.type.descriptor.java.StringJavaType;
  * 2. A value to compare with the extracted field "value" from the JSONB field.
  */
 public class CustomPostgreSQLDialect extends PostgreSQLDialect {
+
+    /**
+     * Extracts the "value" field from a JSONB column.
+     */
+    public static final String EXTRACT_JSON_RAW_VALUE = "jsonb_value_extract";
+
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to STRING.
+     */
+    public static final String EXTRACT_JSON_STRING_VALUE = "jsonb_string_value_extract";
+
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to NUMERIC.
+     */
+    public static final String EXTRACT_JSON_NUMERIC_VALUE = "jsonb_numeric_value_extract";
+
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to DATE.
+     */
+    public static final String EXTRACT_JSON_DATE_VALUE = "jsonb_date_value_extract";
+
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to TIMESTAMPTZ.
+     */
+    public static final String EXTRACT_JSON_DATETIME_VALUE = "jsonb_datetime_value_extract";
+
+    /**
+     * Extracts the "value" field from a JSONB column and casts it to BOOLEAN.
+     */
+    public static final String EXTRACT_JSON_BOOLEAN_VALUE = "jsonb_boolean_value_extract";
 
     /**
      * Extracts the "value" field from a JSONB column and compares it with the given value, returning true if they are equal.
@@ -138,14 +170,95 @@ public class CustomPostgreSQLDialect extends PostgreSQLDialect {
      */
     public static final String JSON_VALUE_DATETIME_LESS_THAN_EQUAL = "jsonb_datetime_lte";
 
+    private static final Map<VariableType, String> EXTRACTION_FUNCTIONS_BY_TYPE = Map.of(
+        VariableType.STRING,
+        EXTRACT_JSON_STRING_VALUE,
+        VariableType.INTEGER,
+        EXTRACT_JSON_NUMERIC_VALUE,
+        VariableType.BIGDECIMAL,
+        EXTRACT_JSON_NUMERIC_VALUE,
+        VariableType.DATE,
+        EXTRACT_JSON_DATE_VALUE,
+        VariableType.DATETIME,
+        EXTRACT_JSON_DATETIME_VALUE,
+        VariableType.BOOLEAN,
+        EXTRACT_JSON_BOOLEAN_VALUE
+    );
+
+    public static String getExtractionFunction(VariableType type) {
+        return EXTRACTION_FUNCTIONS_BY_TYPE.getOrDefault(type, EXTRACT_JSON_RAW_VALUE);
+    }
+
     @Override
     public void initializeFunctionRegistry(FunctionContributions functionContributions) {
         super.initializeFunctionRegistry(functionContributions);
+        registerExtractionFunctions(functionContributions);
         registerJsonValueEquals(functionContributions);
         registerJsonValueLikeFunctions(functionContributions);
         registerJsonValueNumericFunctions(functionContributions);
         registerJsonValueDateFunctions(functionContributions);
         registerJsonValueDatetimeFunctions(functionContributions);
+    }
+
+    private void registerExtractionFunctions(FunctionContributions functionContributions) {
+        SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_RAW_VALUE, "?1->'value'")
+            .setInvariantType(
+                functionContributions
+                    .getTypeConfiguration()
+                    .getBasicTypeRegistry()
+                    .resolve(StandardBasicTypes.OBJECT_TYPE)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_STRING_VALUE, "?1->>'value'")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.STRING)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_NUMERIC_VALUE, "(?1->>'value')::NUMERIC")
+            .setInvariantType(
+                functionContributions
+                    .getTypeConfiguration()
+                    .getBasicTypeRegistry()
+                    .resolve(StandardBasicTypes.BIG_DECIMAL)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_DATE_VALUE, "(?1->>'value')::DATE")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.DATE)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_DATETIME_VALUE, "(?1->>'value')::TIMESTAMPTZ")
+            .setInvariantType(
+                functionContributions
+                    .getTypeConfiguration()
+                    .getBasicTypeRegistry()
+                    .resolve(StandardBasicTypes.ZONED_DATE_TIME)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
+        functionRegistry
+            .patternDescriptorBuilder(EXTRACT_JSON_BOOLEAN_VALUE, "(?1->>'value')::BOOLEAN")
+            .setInvariantType(
+                functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(StandardBasicTypes.BOOLEAN)
+            )
+            .setExactArgumentCount(1)
+            .setArgumentListSignature("JSONB jsonb")
+            .register();
     }
 
     private void registerJsonValueEquals(FunctionContributions functionContributions) {

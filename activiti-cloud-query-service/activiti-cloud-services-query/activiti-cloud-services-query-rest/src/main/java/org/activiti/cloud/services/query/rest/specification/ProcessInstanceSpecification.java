@@ -17,11 +17,14 @@ package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.SetJoin;
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity_;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
@@ -29,7 +32,11 @@ import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity_;
 import org.activiti.cloud.services.query.model.TaskEntity_;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSort;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
 
@@ -39,17 +46,24 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
 
     private final ProcessInstanceSearchRequest searchRequest;
 
-    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId) {
+    private final Sort sort;
+
+    private ProcessInstanceSpecification(ProcessInstanceSearchRequest searchRequest, String userId, Sort sort) {
         this.searchRequest = searchRequest;
         this.userId = userId;
+        this.sort = sort;
     }
 
-    public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest) {
-        return new ProcessInstanceSpecification(searchRequest, null);
+    public static ProcessInstanceSpecification unrestricted(ProcessInstanceSearchRequest searchRequest, Sort sort) {
+        return new ProcessInstanceSpecification(searchRequest, null, sort);
     }
 
-    public static ProcessInstanceSpecification restricted(ProcessInstanceSearchRequest searchRequest, String userId) {
-        return new ProcessInstanceSpecification(searchRequest, userId);
+    public static ProcessInstanceSpecification restricted(
+        ProcessInstanceSearchRequest searchRequest,
+        String userId,
+        Sort sort
+    ) {
+        return new ProcessInstanceSpecification(searchRequest, userId, sort);
     }
 
     @Override
@@ -67,10 +81,73 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
+        applySorting(root, query, criteriaBuilder);
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
+    }
+
+    private void applySorting(
+        Root<ProcessInstanceEntity> root,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (searchRequest.sort() != null) {
+            validateSort(searchRequest.sort());
+            ProcessInstanceSort sort = searchRequest.sort();
+            Expression<Object> orderByClause;
+            if (sort.isProcessVariable()) {
+                SetJoin<ProcessInstanceEntity, ProcessVariableEntity> joinRoot = root.join(
+                    ProcessInstanceEntity_.variables,
+                    JoinType.LEFT
+                );
+                Expression<?> extractedValue = criteriaBuilder.function(
+                    CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
+                    sort.type().getJavaType(),
+                    joinRoot.get(ProcessVariableEntity_.value)
+                );
+                orderByClause =
+                    criteriaBuilder
+                        .selectCase()
+                        .when(
+                            criteriaBuilder.and(
+                                criteriaBuilder.equal(
+                                    joinRoot.get(ProcessVariableEntity_.processDefinitionKey),
+                                    sort.processDefinitionKey()
+                                ),
+                                criteriaBuilder.equal(joinRoot.get(ProcessVariableEntity_.name), sort.field())
+                            ),
+                            extractedValue
+                        )
+                        .otherwise(criteriaBuilder.nullLiteral(Object.class));
+            } else {
+                orderByClause = root.get(sort.field());
+            }
+            if (sort.direction().isAscending()) {
+                query.orderBy(criteriaBuilder.asc(orderByClause));
+            } else {
+                //This is a workaround to override the nulls first behavior when ordering direction is DESC
+                query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
+            }
+        }
+    }
+
+    private void validateSort(ProcessInstanceSort sort) {
+        if (sort.isProcessVariable()) {
+            if (sort.processDefinitionKey() == null) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Process definition key is required when sorting by process variable"
+                );
+            }
+            if (sort.type() == null) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Variable type is required when sorting by process variable"
+                );
+            }
+        }
     }
 
     private void applyNameFilter(Root<ProcessInstanceEntity> root, CriteriaBuilder criteriaBuilder) {
