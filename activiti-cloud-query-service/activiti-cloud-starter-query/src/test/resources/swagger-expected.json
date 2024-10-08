@@ -310,13 +310,6 @@
             }
           },
           {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "dueDate",
             "in": "query",
             "schema": {
@@ -326,13 +319,6 @@
           },
           {
             "name": "processInstance",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
             "in": "query",
             "schema": {
               "type": "string"
@@ -354,22 +340,6 @@
             }
           },
           {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
             "name": "claimedDate",
             "in": "query",
             "schema": {
@@ -386,41 +356,10 @@
             }
           },
           {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
             }
           },
           {
@@ -432,20 +371,6 @@
           },
           {
             "name": "processInstanceId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -464,13 +389,6 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -505,22 +423,6 @@
             }
           },
           {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -530,13 +432,6 @@
           },
           {
             "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -566,13 +461,6 @@
             }
           },
           {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -585,6 +473,118 @@
                 "CANCELLED",
                 "DELETED"
               ]
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "businessKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -699,13 +699,6 @@
             }
           },
           {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "dueDate",
             "in": "query",
             "schema": {
@@ -715,13 +708,6 @@
           },
           {
             "name": "processInstance",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
             "in": "query",
             "schema": {
               "type": "string"
@@ -743,22 +729,6 @@
             }
           },
           {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
             "name": "claimedDate",
             "in": "query",
             "schema": {
@@ -775,41 +745,10 @@
             }
           },
           {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
             }
           },
           {
@@ -821,20 +760,6 @@
           },
           {
             "name": "processInstanceId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -853,13 +778,6 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -894,22 +812,6 @@
             }
           },
           {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -919,13 +821,6 @@
           },
           {
             "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -955,13 +850,6 @@
             }
           },
           {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -974,6 +862,118 @@
                 "CANCELLED",
                 "DELETED"
               ]
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "businessKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1050,13 +1050,6 @@
         "operationId": "deleteTasks",
         "parameters": [
           {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "dueDate",
             "in": "query",
             "schema": {
@@ -1066,13 +1059,6 @@
           },
           {
             "name": "processInstance",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1094,22 +1080,6 @@
             }
           },
           {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
             "name": "claimedDate",
             "in": "query",
             "schema": {
@@ -1126,41 +1096,10 @@
             }
           },
           {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
             }
           },
           {
@@ -1172,20 +1111,6 @@
           },
           {
             "name": "processInstanceId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1204,13 +1129,6 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -1245,22 +1163,6 @@
             }
           },
           {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -1270,13 +1172,6 @@
           },
           {
             "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1306,13 +1201,6 @@
             }
           },
           {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -1325,6 +1213,118 @@
                 "CANCELLED",
                 "DELETED"
               ]
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "businessKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -2587,13 +2587,6 @@
             }
           },
           {
-            "name": "parentTaskId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "dueDate",
             "in": "query",
             "schema": {
@@ -2603,13 +2596,6 @@
           },
           {
             "name": "processInstance",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "description",
             "in": "query",
             "schema": {
               "type": "string"
@@ -2631,22 +2617,6 @@
             }
           },
           {
-            "name": "dueDateTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "duration",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
             "name": "claimedDate",
             "in": "query",
             "schema": {
@@ -2663,41 +2633,10 @@
             }
           },
           {
-            "name": "lastClaimedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "completedTo",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "id",
             "in": "query",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "owner",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lastModifiedFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
             }
           },
           {
@@ -2709,20 +2648,6 @@
           },
           {
             "name": "processInstanceId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "formKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "taskCandidateUsers",
             "in": "query",
             "schema": {
               "type": "string"
@@ -2741,13 +2666,6 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
-          },
-          {
-            "name": "candidateGroupId",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -2782,22 +2700,6 @@
             }
           },
           {
-            "name": "createdDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "createdFrom",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "lastClaimedFrom",
             "in": "query",
             "schema": {
@@ -2807,13 +2709,6 @@
           },
           {
             "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessKey",
             "in": "query",
             "schema": {
               "type": "string"
@@ -2843,13 +2738,6 @@
             }
           },
           {
-            "name": "completedBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -2862,6 +2750,118 @@
                 "CANCELLED",
                 "DELETED"
               ]
+            }
+          },
+          {
+            "name": "parentTaskId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueDateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "lastClaimedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "formKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskCandidateUsers",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateGroupId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "businessKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "completedBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -6582,11 +6582,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -6667,15 +6667,15 @@
               ]
             }
           },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "processVariables": {
             "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_General"
             }
+          },
+          "processDefinitionName": {
+            "type": "string"
           },
           "appName": {
             "type": "string"
@@ -6715,31 +6715,13 @@
           "standalone": {
             "type": "boolean"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "description": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "formKey": {
+          "businessKey": {
             "type": "string"
           },
           "assignee": {
             "type": "string"
           },
-          "businessKey": {
+          "formKey": {
             "type": "string"
           },
           "createdDate": {
@@ -6757,21 +6739,19 @@
           "completedBy": {
             "type": "string"
           },
-          "parentTaskId": {
+          "description": {
             "type": "string"
           },
-          "taskDefinitionKey": {
-            "type": "string"
-          },
-          "completedDate": {
+          "status": {
             "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "candidateUsers": {
             "type": "array",
@@ -6784,6 +6764,26 @@
             "items": {
               "type": "string"
             }
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -6973,15 +6973,15 @@
           "id": {
             "type": "string"
           },
-          "processDefinitionName": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
             "type": "string"
           },
-          "processDefinitionKey": {
+          "initiator": {
             "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
           },
           "parentId": {
             "type": "string"
@@ -6996,22 +6996,22 @@
               "COMPLETED"
             ]
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "businessKey": {
+          "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionId": {
+          "processDefinitionName": {
             "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7150,11 +7150,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -7210,15 +7210,15 @@
               ]
             }
           },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "processVariables": {
             "uniqueItems": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CloudVariableInstance_ProcessVariables"
             }
+          },
+          "processDefinitionName": {
+            "type": "string"
           },
           "appName": {
             "type": "string"
@@ -7258,31 +7258,13 @@
           "standalone": {
             "type": "boolean"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "description": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "formKey": {
+          "businessKey": {
             "type": "string"
           },
           "assignee": {
             "type": "string"
           },
-          "businessKey": {
+          "formKey": {
             "type": "string"
           },
           "createdDate": {
@@ -7300,21 +7282,19 @@
           "completedBy": {
             "type": "string"
           },
-          "parentTaskId": {
+          "description": {
             "type": "string"
           },
-          "taskDefinitionKey": {
-            "type": "string"
-          },
-          "completedDate": {
+          "status": {
             "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
           },
           "candidateUsers": {
             "type": "array",
@@ -7327,6 +7307,26 @@
             "items": {
               "type": "string"
             }
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7361,11 +7361,11 @@
           "type": {
             "type": "string"
           },
-          "taskId": {
-            "type": "string"
-          },
           "taskVariable": {
             "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
           },
           "processInstanceId": {
             "type": "string"
@@ -7458,15 +7458,15 @@
           "id": {
             "type": "string"
           },
-          "processDefinitionName": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
             "type": "string"
           },
-          "processDefinitionKey": {
+          "initiator": {
             "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
           },
           "parentId": {
             "type": "string"
@@ -7481,22 +7481,22 @@
               "COMPLETED"
             ]
           },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "businessKey": {
+          "processDefinitionId": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionId": {
+          "processDefinitionName": {
             "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7568,13 +7568,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "description": {
-            "type": "string"
-          },
           "formKey": {
             "type": "string"
           },
           "category": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           }
         }
@@ -7667,12 +7667,12 @@
           "id": {
             "type": "string"
           },
-          "processDefinitionKey": {
-            "type": "string"
+          "startedDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "businessKey": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7683,13 +7683,6 @@
               "ERROR"
             ]
           },
-          "startedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "businessKey": {
-            "type": "string"
-          },
           "cancelledDate": {
             "type": "string",
             "format": "date-time"
@@ -7697,6 +7690,13 @@
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           },
           "appName": {
             "type": "string"
@@ -7776,17 +7776,6 @@
           "errorMessage": {
             "type": "string"
           },
-          "errorCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INTEGRATION_REQUESTED",
-              "INTEGRATION_RESULT_RECEIVED",
-              "INTEGRATION_ERROR_RECEIVED"
-            ]
-          },
           "requestDate": {
             "type": "string",
             "format": "date-time"
@@ -7798,6 +7787,17 @@
           "errorDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INTEGRATION_REQUESTED",
+              "INTEGRATION_RESULT_RECEIVED",
+              "INTEGRATION_ERROR_RECEIVED"
+            ]
           },
           "errorClassName": {
             "type": "string"
@@ -7838,35 +7838,22 @@
           "id": {
             "type": "string"
           },
-          "rootProcessInstanceId": {
+          "clientId": {
             "type": "string"
           },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "parentProcessInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "clientType": {
+          "clientName": {
             "type": "string"
           },
           "executionId": {
             "type": "string"
           },
-          "appVersion": {
+          "clientType": {
             "type": "string"
           },
           "businessKey": {
             "type": "string"
           },
-          "clientId": {
-            "type": "string"
-          },
-          "clientName": {
+          "appVersion": {
             "type": "string"
           },
           "connectorType": {
@@ -7889,6 +7876,19 @@
           },
           "processInstanceId": {
             "type": "string"
+          },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "parentProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           },
           "appName": {
             "type": "string"
