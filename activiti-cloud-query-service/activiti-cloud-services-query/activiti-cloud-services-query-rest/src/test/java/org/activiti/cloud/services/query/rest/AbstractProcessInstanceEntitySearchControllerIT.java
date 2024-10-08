@@ -36,7 +36,7 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
-import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSort;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -1728,7 +1728,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(new ProcessInstanceSort("name", Sort.Direction.ASC, false, null, null));
+            .withSort(new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1744,7 +1744,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
-                .withSort(new ProcessInstanceSort("startDate", Sort.Direction.DESC, false, null, null));
+                .withSort(new CloudRuntimeEntitySort("startDate", Sort.Direction.DESC, false, null, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -1784,7 +1784,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.STRING
+                )
             );
 
         given()
@@ -1803,7 +1809,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -1851,7 +1857,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.INTEGER)
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.INTEGER
+                )
             );
 
         given()
@@ -1870,7 +1882,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -1918,7 +1930,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort(
+                new CloudRuntimeEntitySort(
                     "var1",
                     Sort.Direction.ASC,
                     true,
@@ -1943,7 +1955,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -1991,7 +2003,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+                new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
             );
 
         given()
@@ -2010,7 +2022,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -2064,7 +2076,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATETIME)
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.DATETIME
+                )
             );
 
         given()
@@ -2083,7 +2101,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -2131,7 +2149,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.BOOLEAN)
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.BOOLEAN
+                )
             );
 
         given()
@@ -2154,7 +2178,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var1",
                         Sort.Direction.DESC,
                         true,
@@ -2215,7 +2239,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.STRING)
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.STRING
+                )
             );
 
         given()
@@ -2232,7 +2262,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
-                    new ProcessInstanceSort(
+                    new CloudRuntimeEntitySort(
                         "var2",
                         Sort.Direction.DESC,
                         true,
@@ -2254,7 +2284,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
-                .withSort(new ProcessInstanceSort("appName", Sort.Direction.DESC, false, null, null));
+                .withSort(new CloudRuntimeEntitySort("appName", Sort.Direction.DESC, false, null, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2271,7 +2301,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Test
     void should_returnBadRequest_when_sortParameterIsInvalid() {
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(new ProcessInstanceSort("var1", Sort.Direction.ASC, true, null, VariableType.STRING));
+            .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, null, VariableType.STRING));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2283,7 +2313,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
-                .withSort(new ProcessInstanceSort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+                .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)

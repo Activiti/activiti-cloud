@@ -16,16 +16,24 @@
 package org.activiti.cloud.services.query.rest.specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Supplier;
+import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 public abstract class SpecificationSupport<T> implements Specification<T> {
 
@@ -149,5 +157,65 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             };
 
         return valueConditionStrategy.toPredicate();
+    }
+
+    protected void applySorting(
+        Root<T> root,
+        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        CloudRuntimeEntitySort sort,
+        CriteriaQuery<?> query,
+        CriteriaBuilder criteriaBuilder
+    ) {
+        if (sort != null) {
+            validateSort(sort);
+            Expression<Object> orderByClause;
+            if (sort.isProcessVariable()) {
+                SetJoin<T, ProcessVariableEntity> join = joinSupplier.get();
+                Expression<?> extractedValue = criteriaBuilder.function(
+                    CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
+                    Object.class,
+                    join.get(ProcessVariableEntity_.value)
+                );
+                orderByClause =
+                    criteriaBuilder
+                        .selectCase()
+                        .when(
+                            criteriaBuilder.and(
+                                criteriaBuilder.equal(
+                                    join.get(ProcessVariableEntity_.processDefinitionKey),
+                                    sort.processDefinitionKey()
+                                ),
+                                criteriaBuilder.equal(join.get(ProcessVariableEntity_.name), sort.field())
+                            ),
+                            extractedValue
+                        )
+                        .otherwise(criteriaBuilder.nullLiteral(Object.class));
+            } else {
+                orderByClause = root.get(sort.field());
+            }
+            if (sort.direction().isAscending()) {
+                query.orderBy(criteriaBuilder.asc(orderByClause));
+            } else {
+                //This is a workaround to override the nulls first behavior when ordering direction is DESC
+                query.orderBy(criteriaBuilder.asc(orderByClause.isNull()), criteriaBuilder.desc(orderByClause));
+            }
+        }
+    }
+
+    protected void validateSort(CloudRuntimeEntitySort sort) {
+        if (sort.isProcessVariable()) {
+            if (sort.processDefinitionKey() == null) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Process definition key is required when sorting by process variable"
+                );
+            }
+            if (sort.type() == null) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Variable type is required when sorting by process variable"
+                );
+            }
+        }
     }
 }
