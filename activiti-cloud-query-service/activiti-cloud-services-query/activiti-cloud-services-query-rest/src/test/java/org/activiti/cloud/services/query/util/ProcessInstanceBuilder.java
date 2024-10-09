@@ -51,13 +51,13 @@ public class ProcessInstanceBuilder {
         return this;
     }
 
-    public ProcessInstanceBuilder withProcessDefinitionKey(String processDefinitionKey) {
-        process.setProcessDefinitionKey(processDefinitionKey);
+    public ProcessInstanceBuilder withAppName(String appName) {
+        process.setAppName(appName);
         return this;
     }
 
-    public ProcessInstanceBuilder withServiceName(String serviceName) {
-        process.setServiceName(serviceName);
+    public ProcessInstanceBuilder withProcessDefinitionKey(String processDefinitionKey) {
+        process.setProcessDefinitionKey(processDefinitionKey);
         return this;
     }
 

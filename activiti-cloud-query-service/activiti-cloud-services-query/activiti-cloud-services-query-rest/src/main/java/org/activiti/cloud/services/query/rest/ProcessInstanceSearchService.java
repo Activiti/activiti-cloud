@@ -15,12 +15,15 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import java.util.Set;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.specification.ProcessInstanceSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +48,7 @@ public class ProcessInstanceSearchService {
     @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> searchRestricted(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
         return search(
-            searchRequest,
+            searchRequest.processVariableKeys(),
             pageable,
             ProcessInstanceSpecification.restricted(searchRequest, securityManager.getAuthenticatedUserId())
         );
@@ -56,18 +59,31 @@ public class ProcessInstanceSearchService {
         ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
-        return search(searchRequest, pageable, ProcessInstanceSpecification.unrestricted(searchRequest));
+        return search(
+            searchRequest.processVariableKeys(),
+            pageable,
+            ProcessInstanceSpecification.unrestricted(searchRequest)
+        );
     }
 
+    /**
+     * @param processVariableKeys the process variables to fetch for each process instance, each represented by process definition key and variable name
+     * @param pageable the page request. N.B. the sort contained in this pageable will be ignored and the sort from the search request will be used instead
+     * @param specification the specification to use for the search. It includes the sorting parameter.
+     * @return the page of process instances
+     */
     private Page<ProcessInstanceEntity> search(
-        ProcessInstanceSearchRequest searchRequest,
+        Set<ProcessVariableKey> processVariableKeys,
         Pageable pageable,
         ProcessInstanceSpecification specification
     ) {
-        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(specification, pageable);
+        Page<ProcessInstanceEntity> processInstances = processInstanceRepository.findAll(
+            specification,
+            PageRequest.of(pageable.getPageNumber(), pageable.getPageSize())
+        );
         processVariableService.fetchProcessVariablesForProcessInstances(
             processInstances.getContent(),
-            searchRequest.processVariableKeys()
+            processVariableKeys
         );
         return processInstances;
     }

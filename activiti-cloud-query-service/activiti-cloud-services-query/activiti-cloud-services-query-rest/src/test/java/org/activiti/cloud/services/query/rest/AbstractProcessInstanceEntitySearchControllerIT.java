@@ -18,9 +18,12 @@ package org.activiti.cloud.services.query.rest;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
@@ -33,12 +36,14 @@ import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.FilterOperator;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.util.ProcessInstanceSearchRequestBuilder;
 import org.activiti.cloud.services.query.util.QueryTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
@@ -1694,5 +1699,628 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .statusCode(200)
             .body(processInstanceJsonPath, hasSize(1))
             .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_RootFields() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withName("Nice name")
+            .withInitiator(USER)
+            .withStartDate(new Date(3000))
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withName("Good name")
+            .withInitiator(USER)
+            .withStartDate(new Date(2000))
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withName("Amazing name")
+            .withInitiator(USER)
+            .withStartDate(new Date(4000))
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(new CloudRuntimeEntitySort("name", Sort.Direction.ASC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance3.getId(), processInstance2.getId(), processInstance1.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(new CloudRuntimeEntitySort("startDate", Sort.Direction.DESC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_StringProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "cool"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "amazing"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "beautiful"))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.STRING
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.STRING
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_IntegerProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 3))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 1))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.INTEGER
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.INTEGER
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance2.getId(), processInstance1.getId(), processInstance3.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_BigdecimalProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("5.1")))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.BIGDECIMAL
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.BIGDECIMAL
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_DateProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-03"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance2.getId(), processInstance3.getId(), processInstance1.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.DATE
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance1.getId(), processInstance3.getId(), processInstance2.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_DatetimeProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:10:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(
+                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+            )
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.DATETIME
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance2.getId(), processInstance1.getId(), processInstance3.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.DATETIME
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                contains(processInstance3.getId(), processInstance1.getId(), processInstance2.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedBy_BooleanProcessVariable() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, true))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, false))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, true))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.BOOLEAN
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                containsInRelativeOrder(processInstance2.getId(), processInstance1.getId())
+            )
+            .body(
+                processInstanceIdJsonPath,
+                containsInRelativeOrder(processInstance2.getId(), processInstance3.getId())
+            );
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var1",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.BOOLEAN
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(3))
+            .body(
+                processInstanceIdJsonPath,
+                containsInRelativeOrder(processInstance1.getId(), processInstance2.getId())
+            )
+            .body(
+                processInstanceIdJsonPath,
+                containsInRelativeOrder(processInstance3.getId(), processInstance2.getId())
+            );
+    }
+
+    @Test
+    void should_returnProcessInstances_withSortedElementsFirst() {
+        ProcessInstanceEntity processInstance1 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withAppName("Nice app")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "cool"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance2 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "amazing"))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance3 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withAppName("Best app ever")
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 4))
+            .buildAndSave();
+
+        ProcessInstanceEntity processInstance4 = queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 3))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    "var1",
+                    Sort.Direction.ASC,
+                    true,
+                    PROCESS_DEFINITION_KEY,
+                    VariableType.STRING
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(4))
+            .body(processInstanceIdJsonPath + "[0]", is(processInstance2.getId()))
+            .body(processInstanceIdJsonPath + "[1]", is(processInstance1.getId()));
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        "var2",
+                        Sort.Direction.DESC,
+                        true,
+                        PROCESS_DEFINITION_KEY,
+                        VariableType.INTEGER
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(4))
+            .body(processInstanceIdJsonPath + "[0]", is(processInstance3.getId()))
+            .body(processInstanceIdJsonPath + "[1]", is(processInstance4.getId()));
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(new CloudRuntimeEntitySort("appName", Sort.Direction.DESC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(processInstanceJsonPath, hasSize(4))
+            .body(processInstanceIdJsonPath + "[0]", is(processInstance1.getId()))
+            .body(processInstanceIdJsonPath + "[1]", is(processInstance3.getId()));
+    }
+
+    @Test
+    void should_returnBadRequest_when_sortParameterIsInvalid() {
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, null, VariableType.STRING));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(400);
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(400);
     }
 }

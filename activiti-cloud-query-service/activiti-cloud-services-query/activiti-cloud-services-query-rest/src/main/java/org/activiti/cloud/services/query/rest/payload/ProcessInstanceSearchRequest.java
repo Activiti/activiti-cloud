@@ -34,5 +34,6 @@ public record ProcessInstanceSearchRequest(
     Date suspendedFrom,
     Date suspendedTo,
     Set<VariableFilter> processVariableFilters,
-    Set<ProcessVariableKey> processVariableKeys
+    Set<ProcessVariableKey> processVariableKeys,
+    CloudRuntimeEntitySort sort
 ) {}

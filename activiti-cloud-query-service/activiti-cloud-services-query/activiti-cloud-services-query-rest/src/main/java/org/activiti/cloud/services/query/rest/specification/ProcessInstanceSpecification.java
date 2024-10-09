@@ -67,6 +67,13 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
+        applySorting(
+            root,
+            () -> root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
+            searchRequest.sort(),
+            query,
+            criteriaBuilder
+        );
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
