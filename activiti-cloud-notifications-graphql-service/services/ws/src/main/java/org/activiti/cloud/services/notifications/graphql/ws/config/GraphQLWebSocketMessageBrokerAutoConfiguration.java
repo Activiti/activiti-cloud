@@ -61,6 +61,11 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
     @EnableWebSocket
     @Configuration
+    @ConditionalOnProperty(
+        value = "spring.activiti.cloud.services.notification.graphql.ws.native.enabled",
+        havingValue = "false",
+        matchIfMissing = true
+    )
     public static class DefaultGraphQLWebSocketMessageBrokerConfiguration
         extends DelegatingWebSocketMessageBrokerConfiguration {
 
