@@ -73,9 +73,9 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(processInstanceJsonPath, hasSize(2))
-            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
-            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
     }
 
     @Test
@@ -100,8 +100,8 @@ class ProcessInstanceEntitySearchAdminControllerIT extends AbstractProcessInstan
             .post(getSearchEndpoint())
             .then()
             .statusCode(200)
-            .body(processInstanceJsonPath, hasSize(2))
-            .body(processInstanceIdJsonPath, hasItem(processInstance1.getId()))
-            .body(processInstanceIdJsonPath, hasItem(processInstance2.getId()));
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
     }
 }

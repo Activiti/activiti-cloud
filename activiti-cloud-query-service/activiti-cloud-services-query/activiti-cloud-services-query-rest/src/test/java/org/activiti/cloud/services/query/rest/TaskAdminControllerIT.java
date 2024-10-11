@@ -43,7 +43,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
 @WithMockUser(username = AbstractTaskControllerIT.CURRENT_USER, roles = "ACTIVITI_ADMIN")
-public class TaskAdminControllerIT extends AbstractTaskControllerIT {
+class TaskAdminControllerIT extends AbstractTaskControllerIT {
 
     @Container
     @ServiceConnection
