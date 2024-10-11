@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
@@ -116,47 +117,51 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
         VariableFilter filter,
         CriteriaBuilder criteriaBuilder
     ) {
-        VariableValueCondition valueConditionStrategy =
-            switch (filter.type()) {
-                case STRING -> new StringVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case INTEGER -> new IntegerVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case BIGDECIMAL -> new BigDecimalVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case DATE -> new DateVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case DATETIME -> new DatetimeVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case BOOLEAN -> new BooleanVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-            };
+        try {
+            VariableValueCondition valueConditionStrategy =
+                switch (filter.type()) {
+                    case STRING -> new StringVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case INTEGER -> new IntegerVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case BIGDECIMAL -> new BigDecimalVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case DATE -> new DateVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case DATETIME -> new DatetimeVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case BOOLEAN -> new BooleanVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                };
 
-        return valueConditionStrategy.toPredicate();
+            return valueConditionStrategy.toPredicate();
+        } catch (IllegalFilterException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     protected void applySorting(
