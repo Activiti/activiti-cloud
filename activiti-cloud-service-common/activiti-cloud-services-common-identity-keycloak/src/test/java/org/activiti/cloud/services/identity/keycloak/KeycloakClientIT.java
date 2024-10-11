@@ -486,7 +486,7 @@ public class KeycloakClientIT {
     @Test
     public void should_getUsers() {
         Integer countAllUsers = keycloakClient.countAllUsers();
-        List<KeycloakUser> allUsers = keycloakClient.getAllUsers(countAllUsers);
+        List<KeycloakUser> allUsers = keycloakClient.getAllUsers(countAllUsers, true);
 
         assertThat(allUsers).hasSizeGreaterThan(0);
 
