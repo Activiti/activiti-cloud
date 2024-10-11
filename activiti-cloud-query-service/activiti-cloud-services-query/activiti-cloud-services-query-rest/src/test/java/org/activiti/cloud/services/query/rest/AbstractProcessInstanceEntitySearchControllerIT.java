@@ -63,8 +63,8 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Autowired
     protected QueryTestUtils queryTestUtils;
 
-    protected final String processInstanceJsonPath = "_embedded.processInstances";
-    protected final String processInstanceIdJsonPath = "_embedded.processInstances.id";
+    protected static final String processInstanceJsonPath = "_embedded.processInstances";
+    protected static final String processInstanceIdJsonPath = "_embedded.processInstances.id";
 
     @BeforeEach
     void setUp() {

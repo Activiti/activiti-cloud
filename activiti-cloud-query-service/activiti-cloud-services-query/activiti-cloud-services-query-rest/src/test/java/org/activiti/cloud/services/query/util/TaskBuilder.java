@@ -58,6 +58,11 @@ public class TaskBuilder {
         this.task.setName(UUID.randomUUID().toString());
     }
 
+    public TaskBuilder withId(String id) {
+        task.setId(id);
+        return this;
+    }
+
     public TaskBuilder withName(String name) {
         task.setName(name);
         return this;
@@ -150,6 +155,11 @@ public class TaskBuilder {
 
     public TaskBuilder withLastModifiedDate(Date modifiedDate) {
         task.setLastModified(modifiedDate);
+        return this;
+    }
+
+    public TaskBuilder withOwner(String owner) {
+        task.setOwner(owner);
         return this;
     }
 
