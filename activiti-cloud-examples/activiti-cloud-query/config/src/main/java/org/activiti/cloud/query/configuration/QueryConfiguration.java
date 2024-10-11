@@ -30,8 +30,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
+@PropertySource("classpath:activiti-cloud-query-config.properties")
 public class QueryConfiguration {
 
     @Bean(name = "baseOpenApi")
