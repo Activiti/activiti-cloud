@@ -25,11 +25,14 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
+import org.activiti.api.process.model.payloads.TimerPayload;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
 import org.activiti.api.runtime.model.impl.BPMNSignalImpl;
 import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNMessageEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNSignalReceivedEvent;
 import org.activiti.cloud.api.process.model.events.CloudBPMNTimerCancelledEvent;
@@ -58,12 +61,9 @@ import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
-import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessage;
-import org.activiti.cloud.services.notifications.graphql.ws.api.GraphQLMessageType;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
-import org.apache.groovy.util.Maps;
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,6 +74,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
+import org.springframework.graphql.test.tester.GraphQlTester;
+import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -81,15 +84,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.http.client.HttpClient.WebsocketSender;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.test.StepVerifier;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = { GrapqhQLApplication.class })
+@SpringBootTest(
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+    classes = { GrapqhQLApplication.class },
+    properties = {
+        "spring.activiti.cloud.services.notification.graphql.ws.native.enabled=true",
+        "spring.graphql.websocket.path=/ws/graphql",
+        "spring.graphql.websocket.keep-alive=PT1S",
+    }
+)
 @ContextConfiguration(
     classes = EngineEventsConfiguration.class,
     initializers = { KeycloakContainerApplicationInitializer.class }
@@ -97,9 +109,8 @@ import reactor.test.StepVerifier;
 @Import(TestChannelBinderConfiguration.class)
 public class ActivitiGraphQLWsStarterIT {
 
-    //TODO ATM this is a copy of ActivitiGraphQLStarterIT - we need to implement it according to the new specs
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
-    private static final String GRAPHQL_WS = "graphql-ws";
+    private static final String GRAPHQL_WS = "graphql-transport-ws";
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
     private static final String TESTADMIN = "testadmin";
@@ -129,11 +140,19 @@ public class ActivitiGraphQLWsStarterIT {
 
     private HttpHeaders authHeaders;
 
+    private GraphQlTester graphQlTester;
+
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         identityTokenProducer.withTestUser(TESTADMIN);
         authHeaders = identityTokenProducer.authorizationHeaders();
         authHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        URI url = getUrl(WS_GRAPHQL_URI);
+        this.graphQlTester =
+            WebSocketGraphQlTester
+                .builder(url, new ReactorNettyWebSocketClient())
+                .interceptor(new JwtGraphQlClientInterceptor(identityTokenProducer.withTestUser(TESTADMIN)))
+                .build();
     }
 
     protected URI getUrl(String path) throws URISyntaxException {
@@ -142,24 +161,23 @@ public class ActivitiGraphQLWsStarterIT {
 
     @Test
     public void testGraphqlWsSubprotocolConnectionInitXAuthorizationSupported() throws JsonProcessingException {
+        testConnectionInit(TESTADMIN);
+    }
+
+    @Test
+    public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JsonProcessingException {
+        testConnectionInit(HRUSER);
+    }
+
+    private void testConnectionInit(String user) throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
-        identityTokenProducer.withTestUser(TESTADMIN);
+        identityTokenProducer.withTestUser(user);
         final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put("kaInterval", 1000)
-            .put("X-Authorization", accessToken)
-            .get();
+        Map<String, Object> payload = new StringObjectMapBuilder().put("Authorization", accessToken).get();
 
-        String initMessage = objectMapper.writeValueAsString(
-            GraphQLMessage
-                .builder()
-                .type(GraphQLMessageType.CONNECTION_INIT)
-                .id("initx-authorization-supported")
-                .payload(payload)
-                .build()
-        );
+        var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
 
         HttpClient
             .create()
@@ -184,47 +202,29 @@ public class ActivitiGraphQLWsStarterIT {
             .collectList()
             .subscribe();
 
-        String ackMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ACK).id("initx-authorization-supported").build()
-        );
+        var ackMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionAck(null));
 
-        String kaMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.KA).build()
-        );
+        var kaMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.ping(null));
 
         StepVerifier.create(output).expectNext(ackMessage).expectNext(kaMessage).expectComplete().verify(TIMEOUT);
     }
 
     @Test
-    public void testGraphqlWsSubprotocolServerStartStopSubscription() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    void testGraphqlSubscription_PROCESS_CREATED_and_PROCESS_STARTED() {
         Map<String, Object> variables = mapBuilder()
             .put("appName", "default-app")
             .put("eventTypes", Arrays.array("PROCESS_CREATED", "PROCESS_STARTED"))
             .get();
 
-        Map<String, Object> payload = mapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!, $eventTypes: [EngineEventType!]) { " +
-                "  engineEvents(appName: [$appName], eventType: $eventTypes) { " +
-                "    processInstanceId  " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
+        var document =
+            """
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                eventType
+              }
+            }""";
 
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
-
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
         CloudProcessCreatedEvent event1 = new CloudProcessCreatedEventImpl() {
             {
                 setAppName("default-app");
@@ -256,60 +256,34 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
-
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .take(1)
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1, event2))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        // then
-        Map<String, Object> message = Maps.of(
-            "data",
-            Maps.of(
-                "engineEvents",
-                Arrays.array(
-                    Maps.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_CREATED"),
-                    Maps.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_STARTED")
-                )
-            )
+        var messages = List.of(
+            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_CREATED"),
+            Map.of("processInstanceId", "processInstanceId", "eventType", "PROCESS_STARTED")
         );
 
-        String dataMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.DATA).id("1").payload(message).build()
-        );
-        StepVerifier.create(data).expectNext(dataMessage).expectComplete().verify(TIMEOUT);
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1, event2))
+            .expectNext(messages)
+            .thenCancel()
+            .verify(TIMEOUT);
+    }
+
+    private Runnable sendEvents(CloudRuntimeEvent... events) {
+        return () ->
+            producerChannel
+                .output()
+                .send(
+                    MessageBuilder.withPayload(Arrays.array(events)).setHeader("routingKey", "eventProducer").build()
+                );
     }
 
     private void closeWebSocketAnCompleteDataProcessor(
@@ -320,31 +294,18 @@ public class ActivitiGraphQLWsStarterIT {
     }
 
     @Test
-    public void testGraphqlSubscriptionPROCESS_DEPLOYED() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    public void testGraphqlSubscriptionPROCESS_DEPLOYED() {
         Map<String, Object> variables = new StringObjectMapBuilder().put("appName", "default-app").get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!) { " +
-                "  engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) { " +
-                "    processDefinitionKey " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
+        var document =
+            """
+            subscription($appName: String!) {
+              engineEvents(appName: [$appName], eventType: PROCESS_DEPLOYED) {
+                processDefinitionKey
+                eventType
+              }
+            }""";
 
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
         CloudProcessDeployedEvent event1 = new CloudProcessDeployedEventImpl(
             "id",
             new Date().getTime(),
@@ -364,94 +325,40 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
 
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .take(1)
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        // then
-        Map<String, Object> message = Maps.of(
-            "data",
-            Maps.of(
-                "engineEvents",
-                Arrays.array(
-                    mapBuilder()
-                        .put("processDefinitionKey", "processDefinitionKey")
-                        .put("eventType", "PROCESS_DEPLOYED")
-                        .get()
-                )
-            )
-        );
-
-        String dataMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.DATA).id("1").payload(message).build()
-        );
-        StepVerifier.create(data).expectNext(dataMessage).expectComplete().verify(TIMEOUT);
+        var messages = List.of(Map.of("processDefinitionKey", "processDefinitionKey", "eventType", "PROCESS_DEPLOYED"));
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1))
+            .expectNext(messages)
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
-    public void testGraphqlSubscriptionSIGNAL_RECEIVED() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    public void testGraphqlSubscriptionSIGNAL_RECEIVED() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventType", "SIGNAL_RECEIVED")
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!, $eventType: EngineEventType!) { " +
-                "  engineEvents(appName: [$appName], eventType: [$eventType]) { " +
-                "    processInstanceId " +
-                "    processDefinitionId " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
+        var document =
+            """
+            subscription($appName: String!, $eventType: EngineEventType!) {
+              engineEvents(appName: [$appName], eventType: [$eventType]) {
+                processInstanceId
+                processDefinitionId
+                eventType
+              }
+            }""";
 
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
         CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
             "id",
             new Date().getTime(),
@@ -471,96 +378,49 @@ public class ActivitiGraphQLWsStarterIT {
                 setBusinessKey("businessKey");
             }
         };
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
-
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .take(1)
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        // then
-        Map<String, Object> message = Maps.of(
-            "data",
-            Maps.of(
-                "engineEvents",
-                Arrays.array(
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("eventType", "SIGNAL_RECEIVED")
-                        .get()
-                )
+        var messages = List.of(
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "eventType",
+                "SIGNAL_RECEIVED"
             )
         );
-
-        String dataMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.DATA).id("1").payload(message).build()
-        );
-        StepVerifier.create(data).expectNext(dataMessage).expectComplete().verify(TIMEOUT);
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1))
+            .expectNext(messages)
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
-    public void testGraphqlSubscriptionShouldFilterEmptyResults() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    public void testGraphqlSubscriptionShouldFilterEmptyResults() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventType", "PROCESS_STARTED")
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!, $eventType: EngineEventType!) { " +
-                "  engineEvents(appName: [$appName], eventType: [$eventType]) { " +
-                "    processInstanceId " +
-                "    processDefinitionId " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
+        var document =
+            """
+            subscription($appName: String!, $eventType: EngineEventType!) {
+              engineEvents(appName: [$appName], eventType: [$eventType]) {
+                processInstanceId
+                processDefinitionId
+                eventType
+              }
+            }""";
 
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
         CloudBPMNSignalReceivedEvent event1 = new CloudBPMNSignalReceivedEventImpl(
             "id",
             new Date().getTime(),
@@ -581,54 +441,23 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
-
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .timeout(Duration.ofSeconds(2))
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        StepVerifier.create(data).expectSubscription().expectError(TimeoutException.class).verify();
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1))
+            .expectNoEvent(Duration.ofSeconds(2))
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
-    public void testGraphqlSubscriptionCloudBPMNTimerEvents() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    public void testGraphqlSubscriptionCloudBPMNTimerEvents() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put(
@@ -644,29 +473,23 @@ public class ActivitiGraphQLWsStarterIT {
             )
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!, $eventTypes: [EngineEventType!]) { " +
-                "  engineEvents(appName: [$appName], eventType: $eventTypes) { " +
-                "    processInstanceId " +
-                "    processDefinitionId " +
-                "    entity " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
+        var document =
+            """
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                processDefinitionId
+                entity
+                eventType
+              }
+            }""";
 
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
+        var bpmnTimer = new BPMNTimerImpl("timerId");
+        bpmnTimer.setTimerPayload(new TimerPayload());
         CloudBPMNTimerScheduledEvent event1 = new CloudBPMNTimerScheduledEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -683,11 +506,10 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNTimerFiredEvent event2 = new CloudBPMNTimerFiredEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -704,11 +526,10 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNTimerExecutedEvent event3 = new CloudBPMNTimerExecutedEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -725,11 +546,10 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNTimerCancelledEvent event4 = new CloudBPMNTimerCancelledEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -746,11 +566,10 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNTimerFailedEvent event5 = new CloudBPMNTimerFailedEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -767,11 +586,10 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNTimerRetriesDecrementedEvent event6 = new CloudBPMNTimerRetriesDecrementedEventImpl(
             "id",
             new Date().getTime(),
-            new BPMNTimerImpl("timerId"),
+            bpmnTimer,
             "processDefinitionId",
             "processInstanceId"
         ) {
@@ -788,127 +606,102 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
-
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .take(1)
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1, event2, event3, event4, event5, event6))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        // then
-        Map<String, Object> message = Maps.of(
-            "data",
-            Maps.of(
-                "engineEvents",
-                Arrays.array(
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_SCHEDULED")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_FIRED")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_EXECUTED")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_CANCELLED")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_FAILED")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("timerId"))
-                        .put("eventType", "TIMER_RETRIES_DECREMENTED")
-                        .get()
-                )
+        var messages = List.of(
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_SCHEDULED"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_FIRED"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_EXECUTED"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_CANCELLED"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_FAILED"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                bpmnTimer,
+                "eventType",
+                "TIMER_RETRIES_DECREMENTED"
             )
         );
 
-        String dataMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.DATA).id("1").payload(message).build()
-        );
-        StepVerifier.create(data).expectNext(dataMessage).expectComplete().verify(TIMEOUT);
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1, event2, event3, event4, event5, event6))
+            .expectNextMatches(messageMatches(messages))
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
-    public void testGraphqlSubscriptionCloudBPMNMessageEvents() throws JsonProcessingException {
-        ReplayProcessor<String> data = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(TESTADMIN);
-        final String auth = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
+    public void testGraphqlSubscriptionCloudBPMNMessageEvents() {
         Map<String, Object> variables = new StringObjectMapBuilder()
             .put("appName", "default-app")
             .put("eventTypes", Arrays.array("MESSAGE_SENT", "MESSAGE_WAITING", "MESSAGE_RECEIVED"))
             .get();
 
-        Map<String, Object> payload = new StringObjectMapBuilder()
-            .put(
-                "query",
-                "subscription($appName: String!, $eventTypes: [EngineEventType!]) { " +
-                "  engineEvents(appName: [$appName], eventType: $eventTypes) { " +
-                "    processInstanceId " +
-                "    processDefinitionId " +
-                "    entity " +
-                "    eventType " +
-                "  } " +
-                "}"
-            )
-            .put("variables", variables)
-            .get();
-        GraphQLMessage start = GraphQLMessage.builder().type(GraphQLMessageType.START).id("1").payload(payload).build();
+        var document =
+            """
+            subscription($appName: String!, $eventTypes: [EngineEventType!]) {
+              engineEvents(appName: [$appName], eventType: $eventTypes) {
+                processInstanceId
+                processDefinitionId
+                entity
+                eventType
+              }
+            }""";
 
-        String startMessage = objectMapper.writeValueAsString(start);
-
-        // given
         CloudBPMNMessageEvent event1 = new CloudBPMNMessageSentEventImpl(
             "id",
             new Date().getTime(),
@@ -929,7 +722,6 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNMessageEvent event2 = new CloudBPMNMessageWaitingEventImpl(
             "id",
             new Date().getTime(),
@@ -950,7 +742,6 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        // given
         CloudBPMNMessageEvent event3 = new CloudBPMNMessageReceivedEventImpl(
             "id",
             new Date().getTime(),
@@ -971,147 +762,64 @@ public class ActivitiGraphQLWsStarterIT {
             }
         };
 
-        WebsocketSender client = HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .headers(h -> h.add(AUTHORIZATION, auth))
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI);
-
-        // start subscription
-        client
-            .handle((i, o) -> {
-                o.sendString(Mono.just(startMessage)).then().log("start").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .log("data")
-                    .take(1)
-                    .doOnSubscribe(s ->
-                        producerChannel
-                            .output()
-                            .send(
-                                MessageBuilder
-                                    .withPayload(Arrays.array(event1, event2, event3))
-                                    .setHeader("routingKey", "eventProducer")
-                                    .build()
-                            )
-                    )
-                    .delaySubscription(Duration.ofSeconds(1))
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(data, o);
-                    })
-                    .subscribeWith(data);
-            }) // stop subscription
-            .collectList()
-            .subscribe();
-
-        // then
-        Map<String, Object> message = Maps.of(
-            "data",
-            Maps.of(
-                "engineEvents",
-                Arrays.array(
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("messageId"))
-                        .put("eventType", "MESSAGE_SENT")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("messageId"))
-                        .put("eventType", "MESSAGE_WAITING")
-                        .get(),
-                    mapBuilder()
-                        .put("processInstanceId", "processInstanceId")
-                        .put("processDefinitionId", "processDefinitionId")
-                        .put("entity", new BPMNTimerImpl("messageId"))
-                        .put("eventType", "MESSAGE_RECEIVED")
-                        .get()
-                )
+        var messages = List.of(
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                new BPMNTimerImpl("messageId"),
+                "eventType",
+                "MESSAGE_SENT"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                new BPMNTimerImpl("messageId"),
+                "eventType",
+                "MESSAGE_WAITING"
+            ),
+            Map.of(
+                "processInstanceId",
+                "processInstanceId",
+                "processDefinitionId",
+                "processDefinitionId",
+                "entity",
+                new BPMNTimerImpl("messageId"),
+                "eventType",
+                "MESSAGE_RECEIVED"
             )
         );
 
-        String dataMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.DATA).id("1").payload(message).build()
-        );
-        StepVerifier.create(data).expectNext(dataMessage).expectComplete().verify(TIMEOUT);
-    }
-
-    @Test
-    public void testGraphqlWsSubprotocolServerWithUserRoleAuthorized() throws JsonProcessingException {
-        ReplayProcessor<String> output = ReplayProcessor.create();
-
-        identityTokenProducer.withTestUser(HRUSER);
-
-        final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
-
-        Map<String, Object> payload = mapBuilder().put("X-Authorization", accessToken).get();
-
-        String initMessage = objectMapper.writeValueAsString(
-            GraphQLMessage
-                .builder()
-                .type(GraphQLMessageType.CONNECTION_INIT)
-                .id("user-role-authorized-connection")
-                .payload(payload)
-                .build()
-        );
-        HttpClient
-            .create()
-            .baseUrl("ws://localhost:" + port)
-            .wiretap(true)
-            .websocket(graphqlWsClientSpec)
-            .uri(WS_GRAPHQL_URI)
-            .handle((i, o) -> {
-                o.sendString(Mono.just(initMessage)).then().log("client-send").subscribe();
-
-                return i
-                    .aggregateFrames()
-                    .receive()
-                    .asString()
-                    .doOnCancel(() -> {
-                        closeWebSocketAnCompleteDataProcessor(output, o);
-                    });
-            })
-            .log("client-received")
-            .take(2)
-            .subscribeWith(output)
-            .collectList()
-            .doOnError(i -> System.err.println("Failed requesting server: " + i))
-            .subscribe();
-
-        String ackMessage = objectMapper.writeValueAsString(
-            GraphQLMessage
-                .builder()
-                .type(GraphQLMessageType.CONNECTION_ACK)
-                .id("user-role-authorized-connection")
-                .build()
-        );
-
-        String kaMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.KA).build()
-        );
-
-        StepVerifier.create(output).expectNext(ackMessage).expectNext(kaMessage).expectComplete().verify(TIMEOUT);
+        Flux<List> flux =
+            this.graphQlTester.document(document)
+                .variables(variables)
+                .executeSubscription()
+                .toFlux("engineEvents", List.class);
+        StepVerifier
+            .create(flux)
+            .expectSubscription()
+            .thenAwait(Duration.ofMillis(300))
+            .then(sendEvents(event1, event2, event3))
+            .expectNextMatches(messageMatches(messages))
+            .thenCancel()
+            .verify(TIMEOUT);
     }
 
     @Test
     public void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
-        String initMessage = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_INIT).id("unauthorized-connection").build()
-        );
+        var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(null));
+
         HttpClient
             .create()
             .baseUrl("ws://localhost:" + port)
             .wiretap(true)
-            //.headers(h -> h.add(AUTHORIZATION, auth)) // Anonymous request
             .websocket(graphqlWsClientSpec)
             .uri(WS_GRAPHQL_URI)
             .handle((i, o) -> {
@@ -1129,13 +837,9 @@ public class ActivitiGraphQLWsStarterIT {
             .take(1)
             .subscribeWith(output)
             .collectList()
-            .doOnError(i -> System.err.println("Failed requesting server: " + i))
             .subscribe();
 
-        String expected = objectMapper.writeValueAsString(
-            GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ERROR).id("unauthorized-connection").build()
-        );
-        StepVerifier.create(output).expectNext(expected).verifyComplete();
+        StepVerifier.create(output).expectComplete().verify(TIMEOUT);
     }
 
     @Test
@@ -1182,22 +886,22 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlTasksQueryWithEQNullValues() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-            "query {" +
-            "  Tasks(" +
-            "    page: { start: 1, limit: 100 }" +
-            "    where: { status: { IN: [CREATED, ASSIGNED] }, dueDate: { EQ: null } }" +
-            "  ) {" +
-            "    select {" +
-            "      id" +
-            "      businessKey" +
-            "      name" +
-            "      status" +
-            "      priority(orderBy: DESC)" +
-            "      dueDate(orderBy: ASC)" +
-            "      assignee" +
-            "    }" +
-            "  }" +
-            "}");
+                "query {" +
+                "  Tasks(" +
+                "    page: { start: 1, limit: 100 }" +
+                "    where: { status: { IN: [CREATED, ASSIGNED] }, dueDate: { EQ: null } }" +
+                "  ) {" +
+                "    select {" +
+                "      id" +
+                "      businessKey" +
+                "      name" +
+                "      status" +
+                "      priority(orderBy: DESC)" +
+                "      dueDate(orderBy: ASC)" +
+                "      assignee" +
+                "    }" +
+                "  }" +
+                "}");
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1228,22 +932,22 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlTasksQueryWithNENullValues() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-            "query {" +
-                "  Tasks(" +
-                "    page: { start: 1, limit: 100 }" +
-                "    where: { status: { IN: [ASSIGNED, COMPLETED] }, businessKey: { NE: null } }" +
-                "  ) {" +
-                "    select {" +
-                "      id" +
-                "      businessKey" +
-                "      name" +
-                "      status" +
-                "      priority(orderBy: DESC)" +
-                "      dueDate(orderBy: ASC)" +
-                "      assignee" +
-                "    }" +
-                "  }" +
-                "}");
+                "query {" +
+                    "  Tasks(" +
+                    "    page: { start: 1, limit: 100 }" +
+                    "    where: { status: { IN: [ASSIGNED, COMPLETED] }, businessKey: { NE: null } }" +
+                    "  ) {" +
+                    "    select {" +
+                    "      id" +
+                    "      businessKey" +
+                    "      name" +
+                    "      status" +
+                    "      priority(orderBy: DESC)" +
+                    "      dueDate(orderBy: ASC)" +
+                    "      assignee" +
+                    "    }" +
+                    "  }" +
+                    "}");
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1272,23 +976,23 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlWhere() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-                "query {" +
-                "	  ProcessInstances(page: {start: 1, limit: 10}," +
-                "	    where: {status : {EQ: COMPLETED }}) {" +
-                "	    pages" +
-                "	    total" +
-                "	    select {" +
-                "	      id" +
-                "	      processDefinitionId" +
-                "	      processDefinitionKey" +
-                "	      status" +
-                "	      tasks {" +
-                "	        name" +
-                "	        status" +
-                "	      }" +
-                "	    }" +
-                "	  }" +
-                "	}");
+                    "query {" +
+                    "	  ProcessInstances(page: {start: 1, limit: 10}," +
+                    "	    where: {status : {EQ: COMPLETED }}) {" +
+                    "	    pages" +
+                    "	    total" +
+                    "	    select {" +
+                    "	      id" +
+                    "	      processDefinitionId" +
+                    "	      processDefinitionKey" +
+                    "	      status" +
+                    "	      tasks {" +
+                    "	        name" +
+                    "	        status" +
+                    "	      }" +
+                    "	    }" +
+                    "	  }" +
+                    "	}");
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1311,33 +1015,33 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlNesting() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-                "query {"
-                + "ProcessInstances {"
-                + "    select {"
-                + "      id"
-                + "      tasks {"
-                + "        id"
-                + "        name"
-                + "        variables {"
-                + "          name"
-                + "          value"
-                + "        }"
-                + "        taskCandidateUsers {"
-                + "           taskId"
-                + "           userId"
-                + "        }"
-                + "        taskCandidateGroups {"
-                + "           taskId"
-                + "           groupId"
-                + "        }"
-                + "      }"
-                + "      variables {"
-                + "        name"
-                + "        value"
-                + "      }"
-                + "    }"
-                + "  }"
-                + "}");
+                    "query {"
+                    + "ProcessInstances {"
+                    + "    select {"
+                    + "      id"
+                    + "      tasks {"
+                    + "        id"
+                    + "        name"
+                    + "        variables {"
+                    + "          name"
+                    + "          value"
+                    + "        }"
+                    + "        taskCandidateUsers {"
+                    + "           taskId"
+                    + "           userId"
+                    + "        }"
+                    + "        taskCandidateGroups {"
+                    + "           taskId"
+                    + "           groupId"
+                    + "        }"
+                    + "      }"
+                    + "      variables {"
+                    + "        name"
+                    + "        value"
+                    + "      }"
+                    + "    }"
+                    + "  }"
+                    + "}");
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1360,19 +1064,19 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlReverse() {
         // @formatter:off
         GraphQLQueryRequest query = new GraphQLQueryRequest(
-                " query {"
-                + " ProcessVariables {"
-                + "    select {"
-                + "      id"
-                + "      name"
-                + "      value"
-                + "      processInstance(where: {status: {EQ: RUNNING}}) {"
-                + "        id"
-                + "      }"
-                + "    }"
-                + "  }"
-                + "}"
-        );
+                    " query {"
+                    + " ProcessVariables {"
+                    + "    select {"
+                    + "      id"
+                    + "      name"
+                    + "      value"
+                    + "      processInstance(where: {status: {EQ: RUNNING}}) {"
+                    + "        id"
+                    + "      }"
+                    + "    }"
+                    + "  }"
+                    + "}"
+            );
         // @formatter:on
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1422,34 +1126,34 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlAggregateTaskVariablesQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
-                query {
-                  TaskVariables(
-                    # Apply filter criteria
-                    where: {name: {IN: ["variable1", "variable2", "variable3"]}}
-                  ) {
-                    aggregate {
-                      # count by variables
-                      variables: count
-                      # Count by associated tasks
-                      groupByVariableName: group {
-                        name: by(field: name)
-                        count
-                      }
-                      by {
-                        groupByTaskStatus: task {
-                          status: by(field: status)
-                          count
-                        }
-                        # Count by associated tasks
-                        groupByTaskAssignee: task {
-                          assignee: by(field: assignee)
-                          count
+                    query {
+                      TaskVariables(
+                        # Apply filter criteria
+                        where: {name: {IN: ["variable1", "variable2", "variable3"]}}
+                      ) {
+                        aggregate {
+                          # count by variables
+                          variables: count
+                          # Count by associated tasks
+                          groupByVariableName: group {
+                            name: by(field: name)
+                            count
+                          }
+                          by {
+                            groupByTaskStatus: task {
+                              status: by(field: status)
+                              count
+                            }
+                            # Count by associated tasks
+                            groupByTaskAssignee: task {
+                              assignee: by(field: assignee)
+                              count
+                            }
+                          }
                         }
                       }
                     }
-                  }
-                }
-            """
+                """
         );
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1475,35 +1179,35 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlAggregateTasksQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
-                query {
-                  Tasks {
-                    aggregate {
-                      countTasks: count
-                      countProcessVariables: count(of: processVariables)
-                      countTaskVariables: count(of: variables)
-                      countTasksGroupedByStatus: group {
-                        status: by(field: status)
-                        count
-                      }
-                      countProcessVariablesGroupedByTaskName: group {
-                        name: by(field: name)
-                        count(of: processVariables)
-                      }
-                      by {
-                        countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
-                          name: by(field: name)
-                          value: by(field: value)
-                          count
-                        }
-                        countTaskVariablesGroupedByVariableName: variables {
-                          name: by(field: name)
-                          count
+                    query {
+                      Tasks {
+                        aggregate {
+                          countTasks: count
+                          countProcessVariables: count(of: processVariables)
+                          countTaskVariables: count(of: variables)
+                          countTasksGroupedByStatus: group {
+                            status: by(field: status)
+                            count
+                          }
+                          countProcessVariablesGroupedByTaskName: group {
+                            name: by(field: name)
+                            count(of: processVariables)
+                          }
+                          by {
+                            countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
+                              name: by(field: name)
+                              value: by(field: value)
+                              count
+                            }
+                            countTaskVariablesGroupedByVariableName: variables {
+                              name: by(field: name)
+                              count
+                            }
+                          }
                         }
                       }
                     }
-                  }
-                }
-            """
+                """
         );
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1523,6 +1227,24 @@ public class ActivitiGraphQLWsStarterIT {
             "{Tasks={aggregate={countTasks=6, countProcessVariables=2, countTaskVariables=6, countTasksGroupedByStatus=[{status=ASSIGNED, count=1}, {status=COMPLETED, count=2}, {status=CREATED, count=3}], countProcessVariablesGroupedByTaskName=[{name=task4, count=1}, {name=task5, count=1}], by={countTaskProcessVariablesGroupedByVariableNameAndValue=[{name=initiator, value={key=[1, 2, 3, 4, 5]}, count=2}], countTaskVariablesGroupedByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}, {name=variable4, count=1}, {name=variable5, count=1}, {name=variable6, count=1}]}}}}";
 
         assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    private static Predicate<List> messageMatches(List<Map<String, Object>> messages) {
+        return m ->
+            messages
+                .stream()
+                .allMatch(message ->
+                    m
+                        .stream()
+                        .anyMatch(o -> {
+                            var map = ((Map) o);
+                            return (
+                                map.get("processInstanceId").equals(message.get("processInstanceId")) &&
+                                map.get("processDefinitionId").equals(message.get("processDefinitionId")) &&
+                                map.get("eventType").equals(message.get("eventType"))
+                            );
+                        })
+                );
     }
 
     public static StringObjectMapBuilder mapBuilder() {
