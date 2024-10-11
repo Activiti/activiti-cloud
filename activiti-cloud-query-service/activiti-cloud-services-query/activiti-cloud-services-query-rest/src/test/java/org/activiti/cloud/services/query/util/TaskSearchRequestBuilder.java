@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
+import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.activiti.cloud.services.query.rest.payload.TaskSearchRequest;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,6 +54,7 @@ public class TaskSearchRequestBuilder {
     private Set<VariableFilter> taskVariableFilters;
     private Set<VariableFilter> processVariableFilters;
     private Set<ProcessVariableKey> processVariableKeys;
+    private CloudRuntimeEntitySort sort;
 
     public TaskSearchRequestBuilder onlyStandalone() {
         this.onlyStandalone = true;
@@ -174,6 +176,11 @@ public class TaskSearchRequestBuilder {
         return this;
     }
 
+    public TaskSearchRequestBuilder withSort(CloudRuntimeEntitySort sort) {
+        this.sort = sort;
+        return this;
+    }
+
     public TaskSearchRequest build() {
         if (processVariableFilters != null) {
             Set<ProcessVariableKey> keysFromFilters = processVariableFilters
@@ -212,7 +219,8 @@ public class TaskSearchRequestBuilder {
             candidateGroupId,
             taskVariableFilters,
             processVariableFilters,
-            processVariableKeys
+            processVariableKeys,
+            sort
         );
     }
 
