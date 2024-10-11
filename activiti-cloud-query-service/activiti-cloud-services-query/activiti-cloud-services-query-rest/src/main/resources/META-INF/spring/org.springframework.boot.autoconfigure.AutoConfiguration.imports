@@ -1,4 +1,5 @@
 org.activiti.cloud.conf.QueryRestControllersAutoConfiguration
 org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration
+org.activiti.cloud.services.query.rest.config.CustomHibernateAutoConfiguration
 org.activiti.cloud.services.query.rest.config.QueryRepositoryConfig
 org.activiti.cloud.services.query.rest.config.QueryRestWebAutoConfiguration

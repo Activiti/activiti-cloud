@@ -25,6 +25,7 @@ import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
@@ -34,6 +35,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface ProcessInstanceRepository
     extends
         PagingAndSortingRepository<ProcessInstanceEntity, String>,
+        JpaSpecificationExecutor<ProcessInstanceEntity>,
         QuerydslPredicateExecutor<ProcessInstanceEntity>,
         QuerydslBinderCustomizer<QProcessInstanceEntity>,
         CrudRepository<ProcessInstanceEntity, String> {

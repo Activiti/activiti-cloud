@@ -36,7 +36,7 @@ jobs:
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@b88cd0aad2c36a63e42c71f81cb1958fed95ac87 # v3.0.10
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@40ba2d51b6b6d8695f2b6bd74e785172d4f8d00f # v3.0.14
 
   build:
     runs-on: ubuntu-latest
@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # 4.2.1
+        uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73 # 4.4.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -151,7 +151,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # 4.2.1
+        uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73 # 4.4.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -324,7 +324,7 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
       - name: Setup Java JDK 21
-        uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
+        uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73 # v4.4.0
         with:
           java-version: 21
           distribution: 'temurin'
@@ -438,5 +438,5 @@ jobs:
       - name: Slack Notification
         uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@209bb4275688720e13dc0703dbd17826bf677c5c # v6.1.0
         with:
-          channel-id: 'eng-hxp-studio-activiti-gh-notifs'
+          channel-id: 'C03PMT6APFU' # eng-hxp-studio-activiti-gh-notifs, to be renamed eng-automate-activiti-gh-notifs
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}

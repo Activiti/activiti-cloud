@@ -129,14 +129,14 @@ public class TaskController {
         );
     }
 
-    @Operation(summary = "Search tasks", hidden = true)
+    @Operation(summary = "Search tasks")
     @JsonView(JsonViews.General.class)
     @PostMapping("/search")
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         @RequestBody TaskSearchRequest taskSearchRequest,
         Pageable pageable
     ) {
-        return taskControllerHelper.searchTasks(taskSearchRequest, pageable);
+        return taskControllerHelper.searchTasksRestricted(taskSearchRequest, pageable);
     }
 
     @Operation(summary = "Find tasks")

@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.query.rest;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import org.activiti.api.model.shared.model.ActivitiErrorMessage;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
@@ -48,5 +49,15 @@ public class CommonExceptionHandlerQuery {
     ) {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public EntityModel<ActivitiErrorMessage> handleAppException(
+        EntityNotFoundException ex,
+        HttpServletResponse response
+    ) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return EntityModel.of(new ActivitiErrorMessageImpl(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 }

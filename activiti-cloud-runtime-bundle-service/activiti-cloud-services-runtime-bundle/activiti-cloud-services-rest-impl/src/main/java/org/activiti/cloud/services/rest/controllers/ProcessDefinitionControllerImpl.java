@@ -180,7 +180,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     @Override
     public Map<String, Object> getProcessModelStaticValuesMappingForStartEvent(String id) {
         Map<String, Object> result = new HashMap<>();
-        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
+        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id, true);
         if (
             extensionsStartEventId != null &&
             extensionsStartEventId.extensions() != null &&
@@ -208,7 +208,7 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
     @Override
     public Map<String, Object> getProcessModelConstantValuesForStartEvent(String id) {
         Map<String, Object> result = new HashMap<>();
-        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id);
+        ExtensionsStartEventId extensionsStartEventId = getProcessExtensionsForStartEvent(id, false);
         if (
             extensionsStartEventId != null &&
             extensionsStartEventId.extensions() != null &&
@@ -226,13 +226,13 @@ public class ProcessDefinitionControllerImpl implements ProcessDefinitionControl
         return result;
     }
 
-    private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id) {
+    private ExtensionsStartEventId getProcessExtensionsForStartEvent(String id, boolean formRequired) {
         checkUserCanReadProcessDefinition(id);
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(id);
         Process process = bpmnModel.getMainProcess();
 
-        if (bpmnModel.getStartFormKey(process.getId()) != null) {
+        if (!formRequired || bpmnModel.getStartFormKey(process.getId()) != null) {
             Optional<FlowElement> startEvent = process
                 .getFlowElements()
                 .stream()

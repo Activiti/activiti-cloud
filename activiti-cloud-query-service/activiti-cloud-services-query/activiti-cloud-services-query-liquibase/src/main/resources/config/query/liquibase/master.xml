@@ -492,6 +492,13 @@
              stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" id="drop-index-proc-var-value" dbms="postgresql">
+    <preConditions onFail="MARK_RAN">
+      <indexExists tableName="process_variable" indexName="proc_var_name_value_idx"/>
+    </preConditions>
+    <dropIndex tableName="process_variable" indexName="proc_var_name_value_idx"/>
+  </changeSet>
+
   <changeSet author="activiti-query" runInTransaction="false"
              id="alter24-schema" dbms="postgresql">
     <sqlFile dbms="postgresql"
@@ -502,4 +509,63 @@
               stripComments="true"/>
   </changeSet>
 
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter25-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/25-alter.oracle.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter25-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/25-alter.pg.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter26-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/26-alter.oracle.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter26-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/26-alter.pg.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter27-oracle-schema" dbms="oracle">
+    <sqlFile dbms="oracle"
+             encoding="utf8"
+             path="changelog/27-alter.oracle.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="false"
+             stripComments="true"/>
+  </changeSet>
+
+  <changeSet author="activiti-query" runInTransaction="false"
+             id="alter27-schema" dbms="postgresql">
+    <sqlFile dbms="postgresql"
+             encoding="utf8"
+             path="changelog/27-alter.pg.schema.8.7.0.sql"
+             relativeToChangelogFile="true"
+             splitStatements="true"
+             stripComments="true"/>
+  </changeSet>
 </databaseChangeLog>

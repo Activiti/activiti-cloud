@@ -21,6 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.querydsl.core.types.Predicate;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Collections;
 import java.util.Date;
@@ -105,7 +106,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
                 new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
             );
@@ -120,7 +121,7 @@ public class ProcessInstanceEntityAdminControllerIT {
     @Test
     public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
-        given(processInstanceRepository.findAll(any(), any(Pageable.class)))
+        given(processInstanceRepository.findAll(any(Predicate.class), any(Pageable.class)))
             .willReturn(
                 new PageImpl<>(Collections.singletonList(buildDefaultProcessInstance()), PageRequest.of(1, 10), 11)
             );

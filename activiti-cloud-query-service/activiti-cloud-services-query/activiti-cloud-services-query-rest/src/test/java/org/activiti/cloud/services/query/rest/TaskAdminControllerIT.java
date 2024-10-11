@@ -16,10 +16,11 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.postProcessors;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.context.WebApplicationContext;
@@ -54,9 +56,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = {
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
-        "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
@@ -95,6 +95,7 @@ public class TaskAdminControllerIT {
     @BeforeEach
     public void setUp() {
         webAppContextSetup(context);
+        postProcessors(csrf().asHeader());
         taskRepository.deleteAll();
         taskVariableRepository.deleteAll();
         processInstanceRepository.deleteAll();
@@ -104,15 +105,13 @@ public class TaskAdminControllerIT {
     }
 
     @Test
-    @WithMockUser(username = "testadmin", roles = "ACTIVITI_ADMIN")
+    @WithMockUser(username = "testadmin")
     void should_returnTasks_withOnlyRequestedProcessVariables_whenSearchingByTaskVariableNameAndValue() {
         ProcessInstanceEntity processInstanceEntity = createProcessInstance();
         Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
 
         TaskVariableEntity taskVariable1 = createTaskVariable();
         TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
 
         Set<TaskVariableEntity> taskVariables = new HashSet<>();
         taskVariables.add(taskVariable1);
@@ -124,7 +123,7 @@ public class TaskAdminControllerIT {
 
         ProcessVariableEntity variableToFetch = processVariables.stream().findFirst().get();
 
-        ValidatableMockMvcResponse response = given()
+        given()
             .webAppContextSetup(context)
             .accept("application/hal+json;charset=UTF-8")
             .when()
@@ -138,20 +137,69 @@ public class TaskAdminControllerIT {
                 "&variables.value=" +
                 taskVariable1.getValue()
             )
-            .then();
+            .then()
+            .statusCode(200)
+            .body("_embedded.tasks", hasSize(1));
+    }
 
-        response.statusCode(200);
-        response.body("_embedded.tasks", hasSize(1));
+    @Test
+    @WithMockUser(username = "testadmin")
+    void should_parseTaskSearchRequest() {
+        String taskSearchRequest =
+            """
+            {
+                "completedFrom": "2021-01-01T00:00:00Z",
+                "completedTo": "2021-01-01T00:00:00Z",
+                "candidateUserId": ["candidateUserId"],
+                "candidateGroupId": ["candidateGroupId"],
+                 "processVariableFilters": [
+                    {
+                        "processDefinitionKey": "processDefinitionKey",
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
+                "taskVariableFilters": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "value": "value",
+                        "operator": "eq"
+                    }
+                ],
+                "processVariableKeys": ["processDef/varName"],
+                "onlyStandalone": true,
+                "onlyRoot": true,
+                "assignee": ["assignee"],
+                "name": ["name"],
+                "description": ["description"],
+                "priority": [1],
+                "status": ["CREATED"],
+                "completedBy": ["completedBy"]
+            }
+            """;
+
+        given()
+            .webAppContextSetup(context)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequest)
+            .when()
+            .post("/admin/v1/tasks/search")
+            .then()
+            .statusCode(200);
     }
 
     @NotNull
     private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
         Set<ProcessVariableEntity> variables = new HashSet<>();
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 2; i++) {
             ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
             processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
+            processVariableEntity.setValue(UUID.randomUUID().toString());
+            processVariableEntity.setType("string");
             processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
             processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
             processVariableEntity.setProcessInstance(processInstanceEntity);
@@ -167,12 +215,13 @@ public class TaskAdminControllerIT {
     private TaskVariableEntity createTaskVariable() {
         TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
         taskVariableEntity.setName("name" + UUID.randomUUID());
-        taskVariableEntity.setValue("var-value");
+        taskVariableEntity.setType("string");
+        taskVariableEntity.setValue(UUID.randomUUID().toString());
+        taskVariableRepository.save(taskVariableEntity);
         return taskVariableEntity;
     }
 
-    @NotNull
-    private TaskEntity createTaskWithVariables(
+    private void createTaskWithVariables(
         ProcessInstanceEntity processInstanceEntity,
         Set<TaskVariableEntity> taskVariables,
         Set<ProcessVariableEntity> processVariables
@@ -189,19 +238,20 @@ public class TaskAdminControllerIT {
         taskVariables.forEach(taskVariableEntity -> {
             taskVariableEntity.setTaskId(taskId);
             taskVariableEntity.setTask(taskEntity);
+            taskVariableEntity.setProcessInstance(processInstanceEntity);
             taskVariableRepository.save(taskVariableEntity);
         });
-        return taskEntity;
     }
 
     @NotNull
     private ProcessInstanceEntity createProcessInstance() {
         ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId("processInstanceId");
-        processInstanceEntity.setName("name");
+        String process = UUID.randomUUID().toString();
+        processInstanceEntity.setId(process);
+        processInstanceEntity.setName(process);
         processInstanceEntity.setInitiator("initiator");
-        processInstanceEntity.setProcessDefinitionName("test");
-        processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
+        processInstanceEntity.setProcessDefinitionName(process);
+        processInstanceEntity.setProcessDefinitionKey(process);
         processInstanceEntity.setServiceName("test");
         processInstanceRepository.save(processInstanceEntity);
         return processInstanceEntity;

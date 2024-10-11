@@ -15,11 +15,26 @@
  */
 package org.activiti.cloud.services.query.rest.filter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum VariableType {
     STRING,
     INTEGER,
     BIGDECIMAL,
     BOOLEAN,
     DATE,
-    DATETIME,
+    DATETIME;
+
+    @JsonValue
+    public String getValue() {
+        return name().toLowerCase();
+    }
+
+    public static VariableType fromString(String name) {
+        try {
+            return VariableType.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format("Cannot determine variable type from '%s'", name));
+        }
+    }
 }

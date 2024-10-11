@@ -85,6 +85,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateSta
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserAddedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCandidateStarterUserRemovedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCompletedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -142,6 +143,7 @@ public class AuditServiceIT {
     public void findAllShouldReturnAllAvailableEvents() {
         //given
         List<CloudRuntimeEvent> coveredEvents = getTestEvents();
+
         producer.send(coveredEvents.toArray(new CloudRuntimeEvent[coveredEvents.size()]));
 
         await()
@@ -1125,6 +1127,14 @@ public class AuditServiceIT {
         testEvents.add(
             new CloudProcessSuspendedEventImpl(
                 "ProcessSuspendedEventId",
+                System.currentTimeMillis(),
+                processInstanceStarted
+            )
+        );
+
+        testEvents.add(
+            new CloudProcessDeletedEventImpl(
+                "ProcessDeletedEventId",
                 System.currentTimeMillis(),
                 processInstanceStarted
             )

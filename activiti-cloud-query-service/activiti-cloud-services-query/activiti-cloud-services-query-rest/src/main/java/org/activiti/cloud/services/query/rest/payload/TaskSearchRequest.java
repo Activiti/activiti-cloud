@@ -16,12 +16,35 @@
 package org.activiti.cloud.services.query.rest.payload;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
+//prettier-ignore
 public record TaskSearchRequest(
-    boolean onlyStandalone, boolean onlyRoot, List<String> name, List<String> description, List<Integer> priority, List<Task.TaskStatus> status, List<String> completedBy, List<String> assignee, Date createdFrom, Date createdTo, Date lastModifiedFrom, Date lastModifiedTo, Date lastClaimedFrom, Date lastClaimedTo, Date dueDateFrom, Date dueDateTo, Date completedFrom, Date completedTo, List<String> candidateUserId, List<String> candidateGroupId, Set<VariableFilter> taskVariableFilters, Set<VariableFilter> processVariableFilters, Set<ProcessVariableKey> processVariableKeys
+    boolean onlyStandalone,
+    boolean onlyRoot,
+    Set<String> name,
+    Set<String> description,
+    Set<String> processDefinitionName,
+    Set<Integer> priority,
+    Set<Task.TaskStatus> status,
+    Set<String> completedBy,
+    Set<String> assignee,
+    Date createdFrom,
+    Date createdTo,
+    Date lastModifiedFrom,
+    Date lastModifiedTo,
+    Date lastClaimedFrom,
+    Date lastClaimedTo,
+    Date dueDateFrom,
+    Date dueDateTo,
+    Date completedFrom,
+    Date completedTo,
+    Set<String> candidateUserId,
+    Set<String> candidateGroupId,
+    Set<VariableFilter> taskVariableFilters,
+    Set<VariableFilter> processVariableFilters,
+    Set<ProcessVariableKey> processVariableKeys
 ) {}

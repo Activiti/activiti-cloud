@@ -34,7 +34,7 @@
     <module>activiti-cloud-service-messaging-starter</module>
   </modules>
   <properties>
-    <activiti.version>8.7.0-alpha.20</activiti.version>
+    <activiti.version>8.7.0-alpha.27</activiti.version>
     <commons-beanutils.version>1.9.4</commons-beanutils.version>
     <commons-configuration.version>1.10</commons-configuration.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -47,7 +47,7 @@
     <json-unit.version>2.36.0</json-unit.version>
     <java-jwt.version>4.4.0</java-jwt.version>
     <!-- override resteasy vulnerable 0.8.3 version of org.apache.james dependencies -->
-    <james.apache-mime4j.version>0.8.9</james.apache-mime4j.version>
+    <james.apache-mime4j.version>0.8.11</james.apache-mime4j.version>
     <batik.version>1.17</batik.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
   </properties>
