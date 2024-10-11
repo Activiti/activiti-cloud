@@ -103,13 +103,6 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyCandidateGroupFilter(root);
         applyTaskVariableFilters(root, query, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
-        applySorting(
-            root,
-            () -> root.join(TaskEntity_.processVariables, JoinType.LEFT),
-            taskSearchRequest.sort(),
-            query,
-            criteriaBuilder
-        );
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }
