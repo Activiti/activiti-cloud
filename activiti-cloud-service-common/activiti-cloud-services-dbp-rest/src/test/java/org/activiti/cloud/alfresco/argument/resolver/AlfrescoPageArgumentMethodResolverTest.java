@@ -20,11 +20,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import java.util.Collections;
 import org.activiti.test.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
@@ -37,7 +36,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @ExtendWith(MockitoExtension.class)
 public class AlfrescoPageArgumentMethodResolverTest {
 
-    @InjectMocks
     private AlfrescoPageArgumentMethodResolver alfrescoPageArgumentMethodResolver;
 
     @Mock
@@ -45,6 +43,17 @@ public class AlfrescoPageArgumentMethodResolverTest {
 
     @Mock
     private PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
+
+    @BeforeEach
+    public void setUp() {
+        this.alfrescoPageArgumentMethodResolver =
+            new AlfrescoPageArgumentMethodResolver(
+                pageParameterParser,
+                pageableHandlerMethodArgumentResolver,
+                1000,
+                true
+            );
+    }
 
     @Test
     public void supportsParameterShouldReturnTrueWhenItsAPageable() throws Exception {

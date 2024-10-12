@@ -90,10 +90,10 @@ public class RuntimeBundleExceptionHandler {
     }
 
     @ExceptionHandler(ActivitiException.class)
-    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    @ResponseStatus(BAD_REQUEST)
     public EntityModel<ActivitiErrorMessage> handleAppException(ActivitiException ex, HttpServletResponse response) {
         response.setContentType(APPLICATION_JSON_VALUE);
-        return EntityModel.of(new ActivitiErrorMessageImpl(INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
+        return EntityModel.of(new ActivitiErrorMessageImpl(BAD_REQUEST.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(ActivitiIllegalArgumentException.class)

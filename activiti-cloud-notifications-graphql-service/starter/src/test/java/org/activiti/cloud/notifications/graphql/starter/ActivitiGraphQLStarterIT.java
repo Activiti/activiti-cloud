@@ -1418,6 +1418,113 @@ public class ActivitiGraphQLStarterIT {
         assertThat("{Tasks={select=[{id=1, assignee=assignee, priority=5}]}}").isEqualTo(result.getData().toString());
     }
 
+    @Test
+    public void testGraphqlAggregateTaskVariablesQuery() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+                query {
+                  TaskVariables(
+                    # Apply filter criteria
+                    where: {name: {IN: ["variable1", "variable2", "variable3"]}}
+                  ) {
+                    aggregate {
+                      # count by variables
+                      variables: count
+                      # Count by associated tasks
+                      groupByVariableName: group {
+                        name: by(field: name)
+                        count
+                      }
+                      by {
+                        groupByTaskStatus: task {
+                          status: by(field: status)
+                          count
+                        }
+                        # Count by associated tasks
+                        groupByTaskAssignee: task {
+                          assignee: by(field: assignee)
+                          count
+                        }
+                      }
+                    }
+                  }
+                }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected =
+            "{TaskVariables={aggregate={variables=3, groupByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}], by={groupByTaskStatus=[{status=COMPLETED, count=2}, {status=CREATED, count=1}], groupByTaskAssignee=[{assignee=assignee, count=3}]}}}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testGraphqlAggregateTasksQuery() {
+        GraphQLQueryRequest query = new GraphQLQueryRequest(
+            """
+                query {
+                  Tasks {
+                    aggregate {
+                      countTasks: count
+                      countProcessVariables: count(of: processVariables)
+                      countTaskVariables: count(of: variables)
+                      countTasksGroupedByStatus: group {
+                        status: by(field: status)
+                        count
+                      }
+                      countProcessVariablesGroupedByTaskName: group {
+                        name: by(field: name)
+                        count(of: processVariables)
+                      }
+                      by {
+                        countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
+                          name: by(field: name)
+                          value: by(field: value)
+                          count
+                        }
+                        countTaskVariablesGroupedByVariableName: variables {
+                          name: by(field: name)
+                          count
+                        }
+                      }
+                    }
+                  }
+                }
+            """
+        );
+
+        ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
+            GRAPHQL_URL,
+            new HttpEntity<>(query, authHeaders),
+            GraphQLQueryResult.class
+        );
+
+        assertThat(entity.getStatusCode()).describedAs(entity.toString()).isEqualTo(HttpStatus.OK);
+
+        GraphQLQueryResult result = entity.getBody();
+
+        assertThat(result).isNotNull();
+        assertThat(result.getErrors()).isNull();
+
+        var expected =
+            "{Tasks={aggregate={countTasks=6, countProcessVariables=2, countTaskVariables=6, countTasksGroupedByStatus=[{status=ASSIGNED, count=1}, {status=COMPLETED, count=2}, {status=CREATED, count=3}], countProcessVariablesGroupedByTaskName=[{name=task4, count=1}, {name=task5, count=1}], by={countTaskProcessVariablesGroupedByVariableNameAndValue=[{name=initiator, value={key=[1, 2, 3, 4, 5]}, count=2}], countTaskVariablesGroupedByVariableName=[{name=variable1, count=1}, {name=variable2, count=1}, {name=variable3, count=1}, {name=variable4, count=1}, {name=variable5, count=1}, {name=variable6, count=1}]}}}}";
+
+        assertThat(result.getData().toString()).isEqualTo(expected);
+    }
+
     public static StringObjectMapBuilder mapBuilder() {
         return new StringObjectMapBuilder();
     }

@@ -10,6 +10,216 @@
     }
   ],
   "paths": {
+    "/v1/tasks/search": {
+      "post": {
+        "tags": [
+          "task-controller"
+        ],
+        "summary": "Search tasks",
+        "operationId": "searchTasks",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_General"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/v1/process-instances/search": {
+      "post": {
+        "tags": [
+          "process-instance-controller"
+        ],
+        "summary": "Search process instances",
+        "operationId": "searchProcessInstances",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
     "/admin/v1/tasks": {
       "get": {
         "tags": [
@@ -379,6 +589,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -406,9 +636,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -760,6 +987,26 @@
           }
         },
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -787,9 +1034,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -1085,6 +1329,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -1112,9 +1376,111 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/tasks/search": {
+      "post": {
+        "tags": [
+          "task-admin-controller"
+        ],
+        "summary": "Search tasks",
+        "operationId": "searchTasks",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskSearchRequest_General"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentQueryCloudTask_General"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -1386,6 +1752,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -1413,9 +1799,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -1680,6 +2063,26 @@
           }
         },
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -1707,9 +2110,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -1936,6 +2336,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -1963,9 +2383,111 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/process-instances/search": {
+      "post": {
+        "tags": [
+          "process-instance-admin-controller"
+        ],
+        "summary": "Search process instances",
+        "operationId": "searchProcessInstances",
+        "parameters": [
+          {
+            "name": "maxItems",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           },
+          {
+            "name": "skipCount",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessInstanceSearchRequest_ProcessVariables"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponseContentCloudProcessInstance_ProcessVariables"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -2344,6 +2866,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2371,9 +2913,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2445,6 +2984,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2472,9 +3031,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2502,6 +3058,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2529,9 +3105,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2559,6 +3132,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2592,9 +3185,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2622,6 +3212,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2655,9 +3265,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2929,6 +3536,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -2956,9 +3583,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -2986,6 +3610,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3013,9 +3657,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3094,6 +3735,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3121,9 +3782,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3194,6 +3852,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3221,9 +3899,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3492,6 +4167,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3519,9 +4214,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3549,6 +4241,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3571,9 +4283,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3686,6 +4395,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3713,9 +4442,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3743,6 +4469,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3765,9 +4511,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3837,6 +4580,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3864,9 +4627,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3938,6 +4698,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -3965,9 +4745,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -3995,6 +4772,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4022,9 +4819,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4052,6 +4846,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4085,9 +4899,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4115,6 +4926,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4148,9 +4979,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4199,6 +5027,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4226,9 +5074,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4256,6 +5101,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4283,9 +5148,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4313,6 +5175,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4340,9 +5222,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4370,6 +5249,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4397,9 +5296,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4478,6 +5374,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4505,9 +5421,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4564,6 +5477,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4591,9 +5524,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4650,6 +5580,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4677,9 +5627,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4707,6 +5654,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4729,9 +5696,289 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "oauth": []
+          }
+        ]
+      }
+    },
+    "/admin/v1/process-instances/appVersions": {
+      "get": {
+        "tags": [
+          "process-instance-admin-controller"
+        ],
+        "summary": "Find application versions for process instances",
+        "operationId": "findProcessAppVersions",
+        "parameters": [
+          {
+            "name": "initiator",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           },
+          {
+            "name": "processDefinitionName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "serviceTasks",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "processDefinitionKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tasks",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModifiedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "processDefinitionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "variables",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sequenceFlows",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "completedDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "parentId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "suspendedFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "activities",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastModified",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "suspendedDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "processDefinitionVersion",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "RUNNING",
+                "SUSPENDED",
+                "CANCELLED",
+                "COMPLETED"
+              ]
+            }
+          },
+          {
+            "name": "suspendedTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
           "404": {
-            "description": "Not Found"
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/hal+json": {
+                "schema": {
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "uniqueItems": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -4844,6 +6091,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4871,9 +6138,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4901,6 +6165,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -4923,9 +6207,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -4995,6 +6276,26 @@
           }
         ],
         "responses": {
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponseContentActivitiErrorMessage"
+                }
+              }
+            }
+          },
           "403": {
             "description": "Forbidden",
             "content": {
@@ -5022,9 +6323,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           }
         },
         "security": [
@@ -5056,6 +6354,722 @@
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/ActivitiErrorMessage"
+          }
+        }
+      },
+      "ProcessVariableKey_General": {
+        "title": "ProcessVariableKey_General",
+        "type": "object",
+        "properties": {
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "variableName": {
+            "type": "string"
+          }
+        }
+      },
+      "TaskSearchRequest_General": {
+        "title": "TaskSearchRequest_General",
+        "type": "object",
+        "properties": {
+          "onlyStandalone": {
+            "type": "boolean"
+          },
+          "onlyRoot": {
+            "type": "boolean"
+          },
+          "name": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "processDefinitionName": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "priority": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "status": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CREATED",
+                "ASSIGNED",
+                "SUSPENDED",
+                "COMPLETED",
+                "CANCELLED",
+                "DELETED"
+              ]
+            }
+          },
+          "completedBy": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignee": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastClaimedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastClaimedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDateFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDateTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "candidateUserId": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroupId": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "taskVariableFilters": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariableFilter_General"
+            }
+          },
+          "processVariableFilters": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariableFilter_General"
+            }
+          },
+          "processVariableKeys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProcessVariableKey_General"
+            }
+          }
+        }
+      },
+      "VariableFilter_General": {
+        "title": "VariableFilter_General",
+        "type": "object",
+        "properties": {
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "integer",
+              "bigdecimal",
+              "boolean",
+              "date",
+              "datetime"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "like",
+              "gt",
+              "gte",
+              "lt",
+              "lte"
+            ]
+          }
+        }
+      },
+      "CloudVariableInstance_General": {
+        "title": "CloudVariableInstance_General",
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "taskVariable": {
+            "type": "boolean"
+          },
+          "taskId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          }
+        }
+      },
+      "EntriesResponseContentQueryCloudTask_General": {
+        "title": "EntriesResponseContentQueryCloudTask_General",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentQueryCloudTask_General"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata_General"
+          }
+        }
+      },
+      "EntryResponseContentQueryCloudTask_General": {
+        "title": "EntryResponseContentQueryCloudTask_General",
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/QueryCloudTask_General"
+          }
+        }
+      },
+      "ListResponseContentQueryCloudTask_General": {
+        "title": "ListResponseContentQueryCloudTask_General",
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudTask_General"
+          }
+        }
+      },
+      "PaginationMetadata_General": {
+        "title": "PaginationMetadata_General",
+        "type": "object",
+        "properties": {
+          "skipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasMoreItems": {
+            "type": "boolean"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QueryCloudTask_General": {
+        "title": "QueryCloudTask_General",
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "VIEW",
+                "CLAIM",
+                "RELEASE",
+                "UPDATE"
+              ]
+            }
+          },
+          "processVariables": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CloudVariableInstance_General"
+            }
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "standalone": {
+            "type": "boolean"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedBy": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "ASSIGNED",
+              "SUSPENDED",
+              "COMPLETED",
+              "CANCELLED",
+              "DELETED"
+            ]
+          },
+          "candidateUsers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidateGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CloudRuntimeEntitySort_ProcessVariables": {
+        "title": "CloudRuntimeEntitySort_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          },
+          "isProcessVariable": {
+            "type": "boolean"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "integer",
+              "bigdecimal",
+              "boolean",
+              "date",
+              "datetime"
+            ]
+          }
+        }
+      },
+      "ProcessInstanceSearchRequest_ProcessVariables": {
+        "title": "ProcessInstanceSearchRequest_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "name": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "initiator": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appVersion": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastModifiedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspendedFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspendedTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processVariableFilters": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VariableFilter_ProcessVariables"
+            }
+          },
+          "processVariableKeys": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProcessVariableKey_ProcessVariables"
+            }
+          },
+          "sort": {
+            "$ref": "#/components/schemas/CloudRuntimeEntitySort_ProcessVariables"
+          }
+        }
+      },
+      "ProcessVariableKey_ProcessVariables": {
+        "title": "ProcessVariableKey_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "variableName": {
+            "type": "string"
+          }
+        }
+      },
+      "VariableFilter_ProcessVariables": {
+        "title": "VariableFilter_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "integer",
+              "bigdecimal",
+              "boolean",
+              "date",
+              "datetime"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "like",
+              "gt",
+              "gte",
+              "lt",
+              "lte"
+            ]
+          }
+        }
+      },
+      "CloudProcessInstance_ProcessVariables": {
+        "title": "CloudProcessInstance_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "appName": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceType": {
+            "type": "string"
+          },
+          "serviceFullName": {
+            "type": "string"
+          },
+          "serviceVersion": {
+            "type": "string"
+          },
+          "appVersion": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "initiator": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "RUNNING",
+              "SUSPENDED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "processDefinitionId": {
+            "type": "string"
+          },
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionName": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "EntriesResponseContentCloudProcessInstance_ProcessVariables": {
+        "title": "EntriesResponseContentCloudProcessInstance_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_ProcessVariables"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata_ProcessVariables"
+          }
+        }
+      },
+      "EntryResponseContentCloudProcessInstance_ProcessVariables": {
+        "title": "EntryResponseContentCloudProcessInstance_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/CloudProcessInstance_ProcessVariables"
+          }
+        }
+      },
+      "ListResponseContentCloudProcessInstance_ProcessVariables": {
+        "title": "ListResponseContentCloudProcessInstance_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "list": {
+            "$ref": "#/components/schemas/EntriesResponseContentCloudProcessInstance_ProcessVariables"
+          }
+        }
+      },
+      "PaginationMetadata_ProcessVariables": {
+        "title": "PaginationMetadata_ProcessVariables",
+        "type": "object",
+        "properties": {
+          "skipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hasMoreItems": {
+            "type": "boolean"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5109,10 +7123,10 @@
         "title": "CloudVariableInstance_ProcessVariables",
         "type": "object",
         "properties": {
-          "serviceName": {
+          "appName": {
             "type": "string"
           },
-          "appName": {
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -5180,31 +7194,6 @@
           }
         }
       },
-      "PaginationMetadata_ProcessVariables": {
-        "title": "PaginationMetadata_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "skipCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "maxItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "hasMoreItems": {
-            "type": "boolean"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
       "QueryCloudTask_ProcessVariables": {
         "title": "QueryCloudTask_ProcessVariables",
         "type": "object",
@@ -5221,9 +7210,6 @@
               ]
             }
           },
-          "processDefinitionName": {
-            "type": "string"
-          },
           "processVariables": {
             "uniqueItems": true,
             "type": "array",
@@ -5231,10 +7217,13 @@
               "$ref": "#/components/schemas/CloudVariableInstance_ProcessVariables"
             }
           },
-          "serviceName": {
+          "processDefinitionName": {
             "type": "string"
           },
           "appName": {
+            "type": "string"
+          },
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -5269,9 +7258,32 @@
           "standalone": {
             "type": "boolean"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "businessKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedBy": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -5283,33 +7295,6 @@
               "CANCELLED",
               "DELETED"
             ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "completedBy": {
-            "type": "string"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "assignee": {
-            "type": "string"
-          },
-          "claimedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "formKey": {
-            "type": "string"
           },
           "candidateUsers": {
             "type": "array",
@@ -5323,21 +7308,25 @@
               "type": "string"
             }
           },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "parentTaskId": {
             "type": "string"
           },
           "taskDefinitionKey": {
             "type": "string"
           },
+          "processDefinitionId": {
+            "type": "string"
+          },
           "processInstanceId": {
             "type": "string"
           },
-          "processDefinitionId": {
-            "type": "string"
+          "completedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -5345,10 +7334,10 @@
         "title": "CloudVariableInstance",
         "type": "object",
         "properties": {
-          "serviceName": {
+          "appName": {
             "type": "string"
           },
-          "appName": {
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -5441,304 +7430,14 @@
           }
         }
       },
-      "CloudVariableInstance_General": {
-        "title": "CloudVariableInstance_General",
-        "type": "object",
-        "properties": {
-          "serviceName": {
-            "type": "string"
-          },
-          "appName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
-          "serviceFullName": {
-            "type": "string"
-          },
-          "serviceVersion": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "value": {
-            "type": "object"
-          },
-          "type": {
-            "type": "string"
-          },
-          "taskVariable": {
-            "type": "boolean"
-          },
-          "taskId": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
-          }
-        }
-      },
-      "EntryResponseContentQueryCloudTask_General": {
-        "title": "EntryResponseContentQueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/QueryCloudTask_General"
-          }
-        }
-      },
-      "QueryCloudTask_General": {
-        "title": "QueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "permissions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "VIEW",
-                "CLAIM",
-                "RELEASE",
-                "UPDATE"
-              ]
-            }
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "processVariables": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CloudVariableInstance_General"
-            }
-          },
-          "serviceName": {
-            "type": "string"
-          },
-          "appName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
-          "serviceFullName": {
-            "type": "string"
-          },
-          "serviceVersion": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "priority": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "id": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "standalone": {
-            "type": "boolean"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "ASSIGNED",
-              "SUSPENDED",
-              "COMPLETED",
-              "CANCELLED",
-              "DELETED"
-            ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "completedBy": {
-            "type": "string"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dueDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "assignee": {
-            "type": "string"
-          },
-          "claimedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "formKey": {
-            "type": "string"
-          },
-          "candidateUsers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "candidateGroups": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "parentTaskId": {
-            "type": "string"
-          },
-          "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processInstanceId": {
-            "type": "string"
-          },
-          "processDefinitionId": {
-            "type": "string"
-          }
-        }
-      },
-      "CloudProcessInstance_ProcessVariables": {
-        "title": "CloudProcessInstance_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "serviceName": {
-            "type": "string"
-          },
-          "appName": {
-            "type": "string"
-          },
-          "serviceType": {
-            "type": "string"
-          },
-          "serviceFullName": {
-            "type": "string"
-          },
-          "serviceVersion": {
-            "type": "string"
-          },
-          "appVersion": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "RUNNING",
-              "SUSPENDED",
-              "CANCELLED",
-              "COMPLETED"
-            ]
-          },
-          "parentId": {
-            "type": "string"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "completedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "processDefinitionId": {
-            "type": "string"
-          }
-        }
-      },
-      "EntriesResponseContentCloudProcessInstance_ProcessVariables": {
-        "title": "EntriesResponseContentCloudProcessInstance_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntryResponseContentCloudProcessInstance_ProcessVariables"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetadata_ProcessVariables"
-          }
-        }
-      },
-      "EntryResponseContentCloudProcessInstance_ProcessVariables": {
-        "title": "EntryResponseContentCloudProcessInstance_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/CloudProcessInstance_ProcessVariables"
-          }
-        }
-      },
-      "ListResponseContentCloudProcessInstance_ProcessVariables": {
-        "title": "ListResponseContentCloudProcessInstance_ProcessVariables",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentCloudProcessInstance_ProcessVariables"
-          }
-        }
-      },
       "CloudProcessInstance_General": {
         "title": "CloudProcessInstance_General",
         "type": "object",
         "properties": {
-          "serviceName": {
+          "appName": {
             "type": "string"
           },
-          "appName": {
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -5759,14 +7458,17 @@
           "id": {
             "type": "string"
           },
-          "processDefinitionKey": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessKey": {
             "type": "string"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "initiator": {
+            "type": "string"
           },
-          "processDefinitionName": {
+          "parentId": {
             "type": "string"
           },
           "status": {
@@ -5779,25 +7481,22 @@
               "COMPLETED"
             ]
           },
-          "parentId": {
+          "processDefinitionId": {
             "type": "string"
-          },
-          "initiator": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
           },
-          "processDefinitionId": {
+          "processDefinitionName": {
             "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -5834,39 +7533,14 @@
           }
         }
       },
-      "PaginationMetadata_General": {
-        "title": "PaginationMetadata_General",
-        "type": "object",
-        "properties": {
-          "skipCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "maxItems": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "hasMoreItems": {
-            "type": "boolean"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
       "CloudProcessDefinition": {
         "title": "CloudProcessDefinition",
         "type": "object",
         "properties": {
-          "serviceName": {
+          "appName": {
             "type": "string"
           },
-          "appName": {
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -5894,13 +7568,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "description": {
-            "type": "string"
-          },
           "formKey": {
             "type": "string"
           },
           "category": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           }
         }
@@ -5993,12 +7667,12 @@
           "id": {
             "type": "string"
           },
-          "processDefinitionKey": {
-            "type": "string"
+          "startedDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
+          "businessKey": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -6009,10 +7683,7 @@
               "ERROR"
             ]
           },
-          "businessKey": {
-            "type": "string"
-          },
-          "startedDate": {
+          "cancelledDate": {
             "type": "string",
             "format": "date-time"
           },
@@ -6020,14 +7691,17 @@
             "type": "string",
             "format": "date-time"
           },
-          "cancelledDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "serviceName": {
+          "processDefinitionKey": {
             "type": "string"
           },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "appName": {
+            "type": "string"
+          },
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -6045,19 +7719,19 @@
           "executionId": {
             "type": "string"
           },
-          "activityType": {
+          "activityName": {
             "type": "string"
           },
-          "activityName": {
+          "activityType": {
             "type": "string"
           },
           "elementId": {
             "type": "string"
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "processInstanceId": {
             "type": "string"
           }
         }
@@ -6102,17 +7776,6 @@
           "errorMessage": {
             "type": "string"
           },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INTEGRATION_REQUESTED",
-              "INTEGRATION_RESULT_RECEIVED",
-              "INTEGRATION_ERROR_RECEIVED"
-            ]
-          },
-          "errorCode": {
-            "type": "string"
-          },
           "requestDate": {
             "type": "string",
             "format": "date-time"
@@ -6124,6 +7787,20 @@
           "errorDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INTEGRATION_REQUESTED",
+              "INTEGRATION_RESULT_RECEIVED",
+              "INTEGRATION_ERROR_RECEIVED"
+            ]
+          },
+          "errorClassName": {
+            "type": "string"
           },
           "stackTraceElements": {
             "type": "array",
@@ -6158,23 +7835,7 @@
               }
             }
           },
-          "errorClassName": {
-            "type": "string"
-          },
           "id": {
-            "type": "string"
-          },
-          "processDefinitionKey": {
-            "type": "string"
-          },
-          "processDefinitionVersion": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rootProcessInstanceId": {
-            "type": "string"
-          },
-          "parentProcessInstanceId": {
             "type": "string"
           },
           "clientId": {
@@ -6183,23 +7844,17 @@
           "clientName": {
             "type": "string"
           },
-          "businessKey": {
-            "type": "string"
-          },
           "executionId": {
             "type": "string"
           },
           "clientType": {
             "type": "string"
           },
-          "appVersion": {
+          "businessKey": {
             "type": "string"
           },
-          "outBoundVariables": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+          "appVersion": {
+            "type": "string"
           },
           "connectorType": {
             "type": "string"
@@ -6210,16 +7865,35 @@
               "type": "object"
             }
           },
-          "processInstanceId": {
-            "type": "string"
+          "outBoundVariables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
           },
           "processDefinitionId": {
             "type": "string"
           },
-          "serviceName": {
+          "processInstanceId": {
             "type": "string"
           },
+          "rootProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionKey": {
+            "type": "string"
+          },
+          "parentProcessInstanceId": {
+            "type": "string"
+          },
+          "processDefinitionVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
           "appName": {
+            "type": "string"
+          },
+          "serviceName": {
             "type": "string"
           },
           "serviceType": {
@@ -6239,30 +7913,6 @@
         "properties": {
           "entry": {
             "$ref": "#/components/schemas/CloudIntegrationContext"
-          }
-        }
-      },
-      "EntriesResponseContentQueryCloudTask_General": {
-        "title": "EntriesResponseContentQueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EntryResponseContentQueryCloudTask_General"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetadata_General"
-          }
-        }
-      },
-      "ListResponseContentQueryCloudTask_General": {
-        "title": "ListResponseContentQueryCloudTask_General",
-        "type": "object",
-        "properties": {
-          "list": {
-            "$ref": "#/components/schemas/EntriesResponseContentQueryCloudTask_General"
           }
         }
       }

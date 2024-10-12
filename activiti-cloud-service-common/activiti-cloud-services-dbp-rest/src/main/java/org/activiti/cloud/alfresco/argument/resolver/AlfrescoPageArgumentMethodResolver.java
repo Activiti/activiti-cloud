@@ -29,12 +29,19 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
     private final AlfrescoPageParameterParser pageParameterParser;
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
 
+    private final int maxItemsLimit;
+    private final boolean maxItemsLimitEnabled;
+
     public AlfrescoPageArgumentMethodResolver(
         AlfrescoPageParameterParser pageParameterParser,
-        PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver
+        PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
+        int maxItemsLimit,
+        boolean maxItemsLimitEnabled
     ) {
         this.pageParameterParser = pageParameterParser;
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
+        this.maxItemsLimit = maxItemsLimit;
+        this.maxItemsLimitEnabled = maxItemsLimitEnabled;
     }
 
     @Override
@@ -58,7 +65,10 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         );
 
         AlfrescoQueryParameters alfrescoQueryParameters = pageParameterParser.parseParameters(webRequest);
-        if (
+
+        if (isPaginationValueExceedingLimit(alfrescoQueryParameters, basePageable)) {
+            throw new IllegalStateException("Exceeded max limit of " + maxItemsLimit + " elements");
+        } else if (
             alfrescoQueryParameters.getSkipCountParameter().isSet() ||
             alfrescoQueryParameters.getMaxItemsParameter().isSet()
         ) {
@@ -70,5 +80,19 @@ public class AlfrescoPageArgumentMethodResolver implements PageableArgumentResol
         } else {
             return basePageable;
         }
+    }
+
+    private boolean isPaginationValueExceedingLimit(
+        AlfrescoQueryParameters alfrescoQueryParameters,
+        Pageable basePageable
+    ) {
+        if (maxItemsLimitEnabled) {
+            if (alfrescoQueryParameters.getMaxItemsParameter().isSet()) {
+                return alfrescoQueryParameters.getMaxItemsParameter().getValue() > maxItemsLimit;
+            } else {
+                return basePageable.getPageSize() > maxItemsLimit;
+            }
+        }
+        return false;
     }
 }

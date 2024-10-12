@@ -15,50 +15,31 @@
  */
 package org.activiti.cloud.services.events.services;
 
-import java.util.Arrays;
-import java.util.List;
-import org.activiti.api.process.model.ProcessInstance;
-import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
-import org.activiti.cloud.api.process.model.impl.CloudProcessInstanceImpl;
-import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
-import org.activiti.cloud.services.events.ProcessEngineChannels;
-import org.activiti.cloud.services.events.converter.RuntimeBundleInfoAppender;
-import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
+import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
+import org.activiti.engine.ManagementService;
 
 public class CloudProcessDeletedService {
 
-    private final ProcessEngineChannels producer;
-    private final RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory;
-    private final RuntimeBundleInfoAppender runtimeBundleInfoAppender;
+    private final ManagementService managementService;
+    private final ProcessEngineEventsAggregator processEngineEventsAggregator;
 
     public CloudProcessDeletedService(
-        ProcessEngineChannels producer,
-        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
-        this.producer = producer;
-        this.runtimeBundleMessageBuilderFactory = runtimeBundleMessageBuilderFactory;
-        this.runtimeBundleInfoAppender = runtimeBundleInfoAppender;
+        this.managementService = managementService;
+        this.processEngineEventsAggregator = processEngineEventsAggregator;
+    }
+
+    public void delete(String processInstanceId) {
+        managementService.executeCommand(
+            new DeleteCloudProcessInstanceCmd(processInstanceId, processEngineEventsAggregator)
+        );
     }
 
     public void sendDeleteEvent(String processInstanceId) {
-        sendEvent(buildProcessInstance(processInstanceId));
-    }
-
-    protected void sendEvent(ProcessInstance processInstance) {
-        producer
-            .auditProducer()
-            .send(runtimeBundleMessageBuilderFactory.create().withPayload(buildEvents(processInstance)).build());
-    }
-
-    protected List<CloudRuntimeEvent<?, ?>> buildEvents(ProcessInstance processInstance) {
-        CloudProcessDeletedEventImpl event = new CloudProcessDeletedEventImpl(processInstance);
-        return Arrays.asList(runtimeBundleInfoAppender.appendRuntimeBundleInfoTo(event));
-    }
-
-    protected ProcessInstance buildProcessInstance(String processInstanceId) {
-        CloudProcessInstanceImpl processInstance = new CloudProcessInstanceImpl();
-        processInstance.setId(processInstanceId);
-        return processInstance;
+        managementService.executeCommand(
+            new SendDeleteCloudProcessInstanceEventCmd(processInstanceId, processEngineEventsAggregator)
+        );
     }
 }

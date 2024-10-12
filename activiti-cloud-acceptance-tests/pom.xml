@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-build-parent</artifactId>
-    <version>8.6.0-SNAPSHOT</version>
+    <version>8.7.0-SNAPSHOT</version>
     <relativePath>../activiti-cloud-build</relativePath>
   </parent>
   <artifactId>activiti-cloud-acceptance-tests-parent</artifactId>
@@ -83,6 +83,11 @@
         <groupId>org.apache.xmlgraphics</groupId>
         <artifactId>batik-codec</artifactId>
         <version>${batik.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.classgraph</groupId>
+        <artifactId>classgraph</artifactId>
+        <version>${classgraph.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

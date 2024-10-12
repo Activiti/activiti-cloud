@@ -67,4 +67,16 @@ public class ProcessDefinitionRestTemplate {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         return responseEntity;
     }
+
+    public ResponseEntity<Map<String, String>> getProcessModelConstantValuesForStartEvent(String id) {
+        ResponseEntity<Map<String, String>> responseEntity = testRestTemplate.exchange(
+            PROCESS_DEFINITIONS_URL.concat("/").concat(id).concat("/constant-values"),
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<>() {}
+        );
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        return responseEntity;
+    }
 }

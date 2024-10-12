@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import org.activiti.cloud.api.model.shared.events.CloudRuntimeEvent;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -58,6 +59,14 @@ public class AuditConsumerStreamHandler {
 
     public List<CloudRuntimeEvent<?, ?>> getAllReceivedEvents() {
         return allReceivedEvents;
+    }
+
+    public <T extends CloudRuntimeEvent<?, ?>> List<T> getAllReceivedEvents(Class<T> eventType) {
+        return allReceivedEvents
+            .stream()
+            .filter(eventType::isInstance)
+            .map(eventType::cast)
+            .collect(Collectors.toList());
     }
 
     public Map<String, Object> getReceivedHeaders() {

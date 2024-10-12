@@ -60,7 +60,7 @@ create table process_definition
     service_name           varchar(255),
     service_type           varchar(255),
     service_version        varchar(255),
-    description            varchar(255),
+    description            varchar(4000),
     form_key               varchar(255),
     process_definition_key varchar(255),
     name                   varchar(255),
@@ -118,7 +118,7 @@ create table process_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    "value"             text,
+    "value"             json,
     variable_definition_id varchar(64),
     process_definition_key varchar(255),
     primary key (id)
@@ -191,7 +191,7 @@ create table task_variable
     name                varchar(255),
     process_instance_id varchar(255),
     type                varchar(255),
-    "value"             text,
+    "value"             json,
     task_id             varchar(255),
     primary key (id)
 );
@@ -309,3 +309,8 @@ alter table task_process_variable
   add constraint fk_process_variable_id foreign key (process_variable_id) references process_variable;
 alter table task_process_variable
   add constraint uk_task_process_var unique (task_id, process_variable_id);
+create index idx_task_assignee on task(assignee);
+create index idx_task_owner on task(owner);
+create index idx_process_instance_initiator on process_instance(initiator);
+CREATE INDEX idx_task_process_var_taskId_processVarId ON task_process_variable (task_id, process_variable_id);
+CREATE INDEX idx_task_createdDate ON task (created_date);

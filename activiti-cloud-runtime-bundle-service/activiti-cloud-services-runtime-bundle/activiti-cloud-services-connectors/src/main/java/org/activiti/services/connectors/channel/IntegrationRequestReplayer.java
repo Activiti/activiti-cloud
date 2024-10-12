@@ -51,7 +51,7 @@ public class IntegrationRequestReplayer {
             ExecutionEntity execution = (ExecutionEntity) executions.get(0);
             managementService.executeCommand(
                 (Command<Void>) commandContext -> {
-                    mqServiceTaskBehavior.execute(execution);
+                    mqServiceTaskBehavior.apply(execution);
                     return null;
                 }
             );

@@ -21,9 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.querydsl.core.types.Predicate;
@@ -39,7 +42,9 @@ import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -55,6 +60,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -65,19 +71,33 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(TaskController.class)
 @Import(
-    { QueryRestWebMvcAutoConfiguration.class, CommonModelAutoConfiguration.class, AlfrescoWebAutoConfiguration.class }
+    {
+        QueryRestWebMvcAutoConfiguration.class,
+        CommonModelAutoConfiguration.class,
+        AlfrescoWebAutoConfiguration.class,
+        CommonExceptionHandlerQuery.class,
+    }
 )
 @EnableSpringDataWebSupport
 @AutoConfigureMockMvc
 @WithMockUser
-@TestPropertySource("classpath:application-test.properties")
-public class TaskEntityControllerIT {
+@TestPropertySource(
+    locations = { "classpath:application-test.properties" },
+    properties = "activiti.cloud.rest.max-items.enabled=true"
+)
+class TaskEntityControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private EntityFinder entityFinder;
@@ -114,11 +134,11 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
@@ -142,12 +162,12 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
+    void findAllShouldReturnAllResultsUsingHalWhenMediaTypeIsApplicationHalJson() throws Exception {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
+        when(taskRepository.findAll(nullable(Predicate.class), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when
         mockMvc
@@ -157,7 +177,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
+    void findByIdShouldUseAlfrescoMetadataWhenMediaTypeIsApplicationJson() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         given(entityFinder.findById(eq(taskRepository), eq(taskEntity.getId()), anyString())).willReturn(taskEntity);
@@ -174,7 +194,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnCandidates_when_invokeGetTaskById() throws Exception {
+    void should_returnCandidates_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateGroups(buildCandidateGroups(taskEntity));
@@ -227,7 +247,7 @@ public class TaskEntityControllerIT {
     }
 
     @Test
-    public void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
+    void should_returnTaskPermissions_when_invokeGetTaskById() throws Exception {
         //given
         TaskEntity taskEntity = buildDefaultTask();
         taskEntity.setTaskCandidateUsers(buildCandidateUsers(taskEntity));
@@ -249,5 +269,63 @@ public class TaskEntityControllerIT {
             .isArray()
             .ofLength(1)
             .thatContains(TaskPermissions.VIEW);
+    }
+
+    @Test
+    void should_returnBadRequest_when_invokeWithPagingParametersExceedingLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
+
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?skipCount=1000&maxItems=1001").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
+    }
+
+    @Test
+    void should_returnBadRequest_when_invokeWithPageParameterExceedingLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
+
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?page=0&size=1001").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.entry.message").value("Exceeded max limit of 1000 elements"));
+    }
+
+    @Test
+    void should_returnOK_when_invokeWithPagingParametersWithinLimits() throws Exception {
+        //given
+        AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
+
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?skipCount=0&maxItems=1000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void should_returnOK_when_invokeWithPageParameterWithinLimits() throws Exception {
+        //given
+        PageRequest pageRequest = PageRequest.of(0, 1000);
+
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
+            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
+
+        //when
+        mockMvc
+            .perform(get("/v1/tasks?page=0&size=1000").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 }

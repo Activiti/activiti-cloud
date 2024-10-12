@@ -33,7 +33,9 @@ import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.cloud.alfresco.argument.resolver.AlfrescoPageRequest;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.security.TaskLookupRestrictionService;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesManager;
@@ -70,6 +72,12 @@ public class ProcessInstanceEntityTasksControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @MockBean
+    private VariableRepository variableRepository;
 
     @MockBean
     private UserGroupManager userGroupManager;

@@ -23,7 +23,6 @@ import org.activiti.api.process.model.ProcessCandidateStarterGroup;
 import org.activiti.api.runtime.model.impl.ProcessCandidateStarterGroupImpl;
 import org.activiti.cloud.api.process.model.events.CloudProcessCandidateStarterGroupAddedEvent;
 import org.activiti.cloud.services.audit.jpa.converters.json.ProcessCandidateStarterGroupJpaJsonConverter;
-import org.hibernate.annotations.DynamicInsert;
 
 @Entity(name = ProcessCandidateStarterGroupAddedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT)
 @DiscriminatorValue(value = ProcessCandidateStarterGroupAddedEventEntity.PROCESS_CANDIDATE_STARTER_GROUP_ADDED_EVENT)

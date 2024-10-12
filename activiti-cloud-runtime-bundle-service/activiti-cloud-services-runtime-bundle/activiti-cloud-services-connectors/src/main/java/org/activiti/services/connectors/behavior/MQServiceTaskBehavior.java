@@ -22,8 +22,8 @@ import org.activiti.cloud.api.process.model.impl.events.CloudIntegrationRequeste
 import org.activiti.cloud.services.events.configuration.RuntimeBundleProperties;
 import org.activiti.cloud.services.events.listeners.ProcessEngineEventsAggregator;
 import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
-import org.activiti.engine.impl.delegate.TriggerableActivityBehavior;
+import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionFunction;
+import org.activiti.engine.impl.bpmn.behavior.DelegateExecutionOutcome;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextManager;
 import org.activiti.runtime.api.connector.DefaultServiceTaskBehavior;
@@ -31,7 +31,7 @@ import org.activiti.runtime.api.connector.IntegrationContextBuilder;
 import org.activiti.services.connectors.IntegrationRequestSender;
 import org.activiti.services.connectors.channel.IntegrationRequestBuilder;
 
-public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implements TriggerableActivityBehavior {
+public class MQServiceTaskBehavior implements DelegateExecutionFunction {
 
     private final IntegrationContextManager integrationContextManager;
     private final IntegrationContextBuilder integrationContextBuilder;
@@ -60,18 +60,20 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
     }
 
     @Override
-    public void execute(DelegateExecution execution) {
+    public DelegateExecutionOutcome apply(DelegateExecution execution) {
         if (defaultServiceTaskBehavior.hasConnectorBean(execution)) {
             // use de default implementation -> directly call a bean
-            defaultServiceTaskBehavior.execute(execution);
-        } else {
-            IntegrationContextEntity integrationContextEntity = storeIntegrationContext(execution);
-
-            IntegrationContext integrationContext = integrationContextBuilder.from(integrationContextEntity, execution);
-            sendIntegrationRequest(integrationContext);
-
-            aggregateCloudIntegrationRequestedEvent(integrationContext);
+            return defaultServiceTaskBehavior.apply(execution);
         }
+
+        IntegrationContext integrationContext = integrationContextBuilder.from(
+            storeIntegrationContext(execution),
+            execution
+        );
+        sendIntegrationRequest(integrationContext);
+        aggregateCloudIntegrationRequestedEvent(integrationContext);
+
+        return DelegateExecutionOutcome.WAIT_FOR_TRIGGER;
     }
 
     private void aggregateCloudIntegrationRequestedEvent(IntegrationContext integrationContext) {
@@ -101,10 +103,5 @@ public class MQServiceTaskBehavior extends AbstractBpmnActivityBehavior implemen
         integrationContext.setFlowNodeId(execution.getCurrentActivityId());
         integrationContext.setCreatedDate(new Date());
         return integrationContext;
-    }
-
-    @Override
-    public void trigger(DelegateExecution execution, String signalEvent, Object signalData) {
-        leave(execution);
     }
 }

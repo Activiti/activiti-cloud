@@ -50,13 +50,19 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
 
     private final PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver;
     private final int defaultPageSize;
+    private final int maxItemsLimit;
+    private final boolean maxItemsLimitEnabled;
 
     public AlfrescoWebAutoConfiguration(
         @Lazy PageableHandlerMethodArgumentResolver pageableHandlerMethodArgumentResolver,
-        @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize
+        @Value("${spring.data.rest.default-page-size:100}") int defaultPageSize,
+        @Value("${activiti.cloud.rest.max-items}") int maxItemsLimit,
+        @Value("${activiti.cloud.rest.max-items.enabled}") boolean maxItemsLimitEnabled
     ) {
         this.pageableHandlerMethodArgumentResolver = pageableHandlerMethodArgumentResolver;
         this.defaultPageSize = defaultPageSize;
+        this.maxItemsLimit = maxItemsLimit;
+        this.maxItemsLimitEnabled = maxItemsLimitEnabled;
     }
 
     @Override
@@ -65,7 +71,9 @@ public class AlfrescoWebAutoConfiguration implements WebMvcConfigurer {
             0,
             new AlfrescoPageArgumentMethodResolver(
                 new AlfrescoPageParameterParser(defaultPageSize),
-                pageableHandlerMethodArgumentResolver
+                pageableHandlerMethodArgumentResolver,
+                maxItemsLimit,
+                maxItemsLimitEnabled
             )
         );
     }

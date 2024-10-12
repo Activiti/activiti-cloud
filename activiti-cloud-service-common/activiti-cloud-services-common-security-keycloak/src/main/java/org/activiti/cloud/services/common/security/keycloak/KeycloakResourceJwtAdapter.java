@@ -47,6 +47,11 @@ public class KeycloakResourceJwtAdapter implements JwtAdapter {
     }
 
     @Override
+    public List<String> getScopes() {
+        return jwt.getClaimAsStringList("scope");
+    }
+
+    @Override
     public List<String> getGroups() {
         if (jwt.hasClaim("groups")) {
             return jwt.getClaimAsStringList("groups");

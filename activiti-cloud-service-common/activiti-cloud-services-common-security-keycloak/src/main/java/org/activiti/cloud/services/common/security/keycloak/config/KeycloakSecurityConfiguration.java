@@ -64,10 +64,12 @@ public class KeycloakSecurityConfiguration {
     @ConditionalOnMissingBean
     public OAuthFlow swaggerOAuthFlow(
         @Value("${keycloak.auth-server-url}") String authServer,
-        @Value("${keycloak.realm}") String realm
+        @Value("${keycloak.realm}") String realm,
+        @Value("${spring.security.oauth2.client.provider.keycloak.token-uri}") String tokenUrl
     ) {
         return new OAuthFlow()
             .authorizationUrl(authServer + "/realms/" + realm + "/protocol/openid-connect/auth")
+            .tokenUrl(tokenUrl)
             .scopes(new Scopes());
     }
 }

@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.List;
+import org.activiti.api.process.runtime.ProcessAdminRuntime;
 import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -37,6 +38,7 @@ import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.conf.ActivitiCoreCommonUtilAutoConfiguration;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.autoconfigure.ConnectorAutoConfiguration;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.runtime.api.conf.ConnectorsAutoConfiguration;
@@ -91,6 +93,12 @@ class ConnectorDefinitionControllerImplIT {
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
+
+    @MockBean
+    private ProcessAdminRuntime processAdminRuntime;
+
+    @MockBean
+    private ManagementService managementService;
 
     @BeforeEach
     void setup() {

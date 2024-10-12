@@ -28,6 +28,8 @@ public interface JwtAdapter {
 
     List<String> getGroups();
 
+    List<String> getScopes();
+
     default List<String> getPermissions() {
         return Collections.emptyList();
     }

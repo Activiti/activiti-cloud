@@ -1,0 +1,2 @@
+org.activiti.cloud.services.audit.api.config.AuditConsumerChannelsAutoConfiguration
+org.activiti.cloud.services.audit.jpa.streams.config.AuditJPAStreamsAutoConfiguration

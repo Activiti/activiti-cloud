@@ -166,6 +166,17 @@ public class ProcessInstanceEventContainedBuilder {
         return processInstance;
     }
 
+    public ProcessInstanceImpl aCompletedProcessInstanceWithAppVersion(String name, String appVersion) {
+        ProcessInstanceImpl processInstance = buildProcessInstance(name);
+        processInstance.setAppVersion(appVersion);
+        eventsAggregator.addEvents(
+            new CloudProcessCreatedEventImpl(processInstance),
+            new CloudProcessStartedEventImpl(processInstance),
+            new CloudProcessCompletedEventImpl(processInstance)
+        );
+        return processInstance;
+    }
+
     public CloudProcessInstanceImpl aRunningProcessInstanceWithSuspendedDate(String name, Date suspendedDate) {
         CloudProcessInstanceImpl suspendedProcess = buildSuspendedProcessInstance(name);
         suspendedProcess.setSuspendedDate(suspendedDate);

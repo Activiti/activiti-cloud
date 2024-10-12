@@ -133,7 +133,7 @@ import org.springframework.test.context.TestPropertySource;
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-class AuditProducerIT {
+public class AuditProducerIT {
 
     private static final String SIMPLE_SUB_PROCESS1 = "simpleSubProcess1";
     private static final String SIMPLE_SUB_PROCESS2 = "simpleSubProcess2";
