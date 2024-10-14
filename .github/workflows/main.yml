@@ -139,6 +139,9 @@ jobs:
           - messaging-broker: kafka
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
+          - messaging-broker: rabbitmq
+            messaging-partitioned: non-partitioned
+            messaging-destinations: pdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
