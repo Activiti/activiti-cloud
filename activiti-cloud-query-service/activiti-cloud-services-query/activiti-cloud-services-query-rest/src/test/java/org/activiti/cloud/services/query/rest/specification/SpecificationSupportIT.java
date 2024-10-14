@@ -37,8 +37,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -194,12 +194,12 @@ class SpecificationSupportIT {
 
     @ParameterizedTest
     @MethodSource("provideArgumentsThatShouldThrow")
-    void should_throw_InvalidDataAccessApiUsageException(VariableType variableType, FilterOperator operator) {
+    void should_throw_ResponseStatusException(VariableType variableType, FilterOperator operator) {
         VariableFilter filter = new VariableFilter(null, "name", variableType, "", operator);
         Specification<ProcessVariableEntity> specification = getSpecification(filter);
 
         assertThatThrownBy(() -> variableRepository.findAll(specification))
-            .isInstanceOf(InvalidDataAccessApiUsageException.class)
+            .isInstanceOf(ResponseStatusException.class)
             .hasMessageContaining(variableType.name())
             .hasMessageContaining(operator.name());
     }

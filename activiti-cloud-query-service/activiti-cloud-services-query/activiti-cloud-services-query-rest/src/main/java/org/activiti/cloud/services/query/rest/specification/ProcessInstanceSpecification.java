@@ -69,7 +69,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyProcessVariableFilters(root, query, criteriaBuilder);
         applySorting(
             root,
-            () -> root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
+            root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
             searchRequest.sort(),
             query,
             criteriaBuilder

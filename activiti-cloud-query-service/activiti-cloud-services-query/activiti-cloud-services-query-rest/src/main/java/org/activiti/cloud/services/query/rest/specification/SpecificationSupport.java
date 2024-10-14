@@ -25,10 +25,10 @@ import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
+import org.activiti.cloud.services.query.rest.exception.IllegalFilterException;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
 import org.springframework.data.jpa.domain.Specification;
@@ -116,52 +116,56 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
         VariableFilter filter,
         CriteriaBuilder criteriaBuilder
     ) {
-        VariableValueCondition valueConditionStrategy =
-            switch (filter.type()) {
-                case STRING -> new StringVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case INTEGER -> new IntegerVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case BIGDECIMAL -> new BigDecimalVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case DATE -> new DateVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case DATETIME -> new DatetimeVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-                case BOOLEAN -> new BooleanVariableValueCondition(
-                    valueColumnPath,
-                    filter.operator(),
-                    filter.value(),
-                    criteriaBuilder
-                );
-            };
+        try {
+            VariableValueCondition valueConditionStrategy =
+                switch (filter.type()) {
+                    case STRING -> new StringVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case INTEGER -> new IntegerVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case BIGDECIMAL -> new BigDecimalVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case DATE -> new DateVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case DATETIME -> new DatetimeVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                    case BOOLEAN -> new BooleanVariableValueCondition(
+                        valueColumnPath,
+                        filter.operator(),
+                        filter.value(),
+                        criteriaBuilder
+                    );
+                };
 
-        return valueConditionStrategy.toPredicate();
+            return valueConditionStrategy.toPredicate();
+        } catch (IllegalFilterException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     protected void applySorting(
         Root<T> root,
-        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        SetJoin<T, ProcessVariableEntity> joinedProcessVars,
         CloudRuntimeEntitySort sort,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
@@ -170,11 +174,10 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             validateSort(sort);
             Expression<Object> orderByClause;
             if (sort.isProcessVariable()) {
-                SetJoin<T, ProcessVariableEntity> join = joinSupplier.get();
                 Expression<?> extractedValue = criteriaBuilder.function(
                     CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
                     Object.class,
-                    join.get(ProcessVariableEntity_.value)
+                    joinedProcessVars.get(ProcessVariableEntity_.value)
                 );
                 orderByClause =
                     criteriaBuilder
@@ -182,10 +185,10 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                         .when(
                             criteriaBuilder.and(
                                 criteriaBuilder.equal(
-                                    join.get(ProcessVariableEntity_.processDefinitionKey),
+                                    joinedProcessVars.get(ProcessVariableEntity_.processDefinitionKey),
                                     sort.processDefinitionKey()
                                 ),
-                                criteriaBuilder.equal(join.get(ProcessVariableEntity_.name), sort.field())
+                                criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
                             ),
                             extractedValue
                         )
