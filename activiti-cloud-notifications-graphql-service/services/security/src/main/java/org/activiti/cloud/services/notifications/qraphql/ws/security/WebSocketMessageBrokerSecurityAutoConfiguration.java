@@ -19,9 +19,11 @@ import java.util.function.Function;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
+import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWsNativeEnabler;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt.JwtAccessTokenVerifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -52,11 +54,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
             @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true),
         }
     )
-    @ConditionalOnProperty(
-        value = "spring.activiti.cloud.services.notification.graphql.ws.native.enabled",
-        havingValue = "false",
-        matchIfMissing = true
-    )
+    @ConditionalOnMissingBean(GraphQLWsNativeEnabler.class)
     public static class DefaultWebSocketMessageBrokerSecurityConfiguration {
 
         @Bean
@@ -122,10 +120,7 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
             @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true),
         }
     )
-    @ConditionalOnProperty(
-        value = "spring.activiti.cloud.services.notification.graphql.ws.native.enabled",
-        havingValue = "true"
-    )
+    @ConditionalOnBean(GraphQLWsNativeEnabler.class)
     public static class SpringNativeWebSocketMessageBrokerSecurityConfiguration {
 
         @Bean
