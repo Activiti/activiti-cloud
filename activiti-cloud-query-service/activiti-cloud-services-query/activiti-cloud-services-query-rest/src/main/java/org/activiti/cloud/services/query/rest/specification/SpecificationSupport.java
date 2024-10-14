@@ -25,7 +25,6 @@ import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.metamodel.SingularAttribute;
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Supplier;
 import org.activiti.cloud.dialect.CustomPostgreSQLDialect;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableEntity_;
@@ -166,7 +165,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
 
     protected void applySorting(
         Root<T> root,
-        Supplier<SetJoin<T, ProcessVariableEntity>> joinSupplier,
+        SetJoin<T, ProcessVariableEntity> joinedProcessVars,
         CloudRuntimeEntitySort sort,
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
@@ -175,11 +174,10 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
             validateSort(sort);
             Expression<Object> orderByClause;
             if (sort.isProcessVariable()) {
-                SetJoin<T, ProcessVariableEntity> join = joinSupplier.get();
                 Expression<?> extractedValue = criteriaBuilder.function(
                     CustomPostgreSQLDialect.getExtractionFunction(sort.type()),
                     Object.class,
-                    join.get(ProcessVariableEntity_.value)
+                    joinedProcessVars.get(ProcessVariableEntity_.value)
                 );
                 orderByClause =
                     criteriaBuilder
@@ -187,10 +185,10 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                         .when(
                             criteriaBuilder.and(
                                 criteriaBuilder.equal(
-                                    join.get(ProcessVariableEntity_.processDefinitionKey),
+                                    joinedProcessVars.get(ProcessVariableEntity_.processDefinitionKey),
                                     sort.processDefinitionKey()
                                 ),
-                                criteriaBuilder.equal(join.get(ProcessVariableEntity_.name), sort.field())
+                                criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
                             ),
                             extractedValue
                         )
