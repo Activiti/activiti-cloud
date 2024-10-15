@@ -60,7 +60,9 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
+import org.activiti.cloud.notifications.graphql.starter.ActivitiGraphQLWsNativeStarterIT.GraphQLWsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
+import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWsNativeEnabler;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -73,6 +75,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.graphql.server.support.GraphQlWebSocketMessage;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -103,11 +107,11 @@ import reactor.test.StepVerifier;
     }
 )
 @ContextConfiguration(
-    classes = EngineEventsConfiguration.class,
+    classes = { EngineEventsConfiguration.class, GraphQLWsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
-public class ActivitiGraphQLWsStarterIT {
+public class ActivitiGraphQLWsNativeStarterIT {
 
     private static final String WS_GRAPHQL_URI = "/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
@@ -141,6 +145,15 @@ public class ActivitiGraphQLWsStarterIT {
     private HttpHeaders authHeaders;
 
     private GraphQlTester graphQlTester;
+
+    @Configuration
+    static class GraphQLWsConfiguration {
+
+        @Bean
+        public GraphQLWsNativeEnabler graphQLWsNativeEnabler() {
+            return new GraphQLWsNativeEnabler();
+        }
+    }
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -1126,34 +1139,34 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlAggregateTaskVariablesQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
-                    query {
-                      TaskVariables(
-                        # Apply filter criteria
-                        where: {name: {IN: ["variable1", "variable2", "variable3"]}}
-                      ) {
-                        aggregate {
-                          # count by variables
-                          variables: count
-                          # Count by associated tasks
-                          groupByVariableName: group {
-                            name: by(field: name)
-                            count
-                          }
-                          by {
-                            groupByTaskStatus: task {
-                              status: by(field: status)
-                              count
-                            }
-                            # Count by associated tasks
-                            groupByTaskAssignee: task {
-                              assignee: by(field: assignee)
-                              count
-                            }
-                          }
+                query {
+                  TaskVariables(
+                    # Apply filter criteria
+                    where: {name: {IN: ["variable1", "variable2", "variable3"]}}
+                  ) {
+                    aggregate {
+                      # count by variables
+                      variables: count
+                      # Count by associated tasks
+                      groupByVariableName: group {
+                        name: by(field: name)
+                        count
+                      }
+                      by {
+                        groupByTaskStatus: task {
+                          status: by(field: status)
+                          count
+                        }
+                        # Count by associated tasks
+                        groupByTaskAssignee: task {
+                          assignee: by(field: assignee)
+                          count
                         }
                       }
                     }
-                """
+                  }
+                }
+            """
         );
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
@@ -1179,35 +1192,35 @@ public class ActivitiGraphQLWsStarterIT {
     public void testGraphqlAggregateTasksQuery() {
         GraphQLQueryRequest query = new GraphQLQueryRequest(
             """
-                    query {
-                      Tasks {
-                        aggregate {
-                          countTasks: count
-                          countProcessVariables: count(of: processVariables)
-                          countTaskVariables: count(of: variables)
-                          countTasksGroupedByStatus: group {
-                            status: by(field: status)
-                            count
-                          }
-                          countProcessVariablesGroupedByTaskName: group {
-                            name: by(field: name)
-                            count(of: processVariables)
-                          }
-                          by {
-                            countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
-                              name: by(field: name)
-                              value: by(field: value)
-                              count
-                            }
-                            countTaskVariablesGroupedByVariableName: variables {
-                              name: by(field: name)
-                              count
-                            }
-                          }
+                query {
+                  Tasks {
+                    aggregate {
+                      countTasks: count
+                      countProcessVariables: count(of: processVariables)
+                      countTaskVariables: count(of: variables)
+                      countTasksGroupedByStatus: group {
+                        status: by(field: status)
+                        count
+                      }
+                      countProcessVariablesGroupedByTaskName: group {
+                        name: by(field: name)
+                        count(of: processVariables)
+                      }
+                      by {
+                        countTaskProcessVariablesGroupedByVariableNameAndValue: processVariables {
+                          name: by(field: name)
+                          value: by(field: value)
+                          count
+                        }
+                        countTaskVariablesGroupedByVariableName: variables {
+                          name: by(field: name)
+                          count
                         }
                       }
                     }
-                """
+                  }
+                }
+            """
         );
 
         ResponseEntity<GraphQLQueryResult> entity = rest.postForEntity(
