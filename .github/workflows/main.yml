@@ -139,6 +139,9 @@ jobs:
           - messaging-broker: kafka
             messaging-partitioned: partitioned
             messaging-destinations: override-destinations
+          - messaging-broker: rabbitmq
+            messaging-partitioned: non-partitioned
+            messaging-destinations: pdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -405,6 +408,7 @@ jobs:
           git checkout -b $FULL_CHART_PR_BRANCH
           yq -i e '.runtime-bundle.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-query.image.tag = env(VERSION)' values.yaml
+          yq -i e '.activiti-cloud-consumer.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
