@@ -202,7 +202,10 @@ public interface KeycloakClient {
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")
     @Headers("Content-Type: application/json")
-    List<KeycloakUser> getAllUsers(@RequestParam(name = "max", required = false, defaultValue = "100") Integer max);
+    List<KeycloakUser> getAllUsers(
+        @RequestParam(name = "max", required = false, defaultValue = "100") Integer max,
+        @RequestParam(name = "briefRepresentation", required = false, defaultValue = "true") boolean briefRepresentation
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = "/users/count")
     @Headers("Content-Type: application/json")

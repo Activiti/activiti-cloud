@@ -74,7 +74,7 @@ public class KeycloakUserGroupManager implements UserGroupManager {
     @Override
     public List<String> getUsers() {
         return keycloakClient
-            .getAllUsers(keycloakClient.countAllUsers())
+            .getAllUsers(keycloakClient.countAllUsers(), true)
             .stream()
             .map(KeycloakUser::getUsername)
             .collect(Collectors.toList());
