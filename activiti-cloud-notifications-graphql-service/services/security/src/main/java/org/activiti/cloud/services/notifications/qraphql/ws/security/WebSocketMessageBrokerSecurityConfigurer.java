@@ -15,15 +15,12 @@
  */
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
-import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWsNativeEnabler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
 import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 
 @Configuration
-@ConditionalOnMissingBean(GraphQLWsNativeEnabler.class)
 public class WebSocketMessageBrokerSecurityConfigurer extends AbstractSecurityWebSocketMessageBrokerConfigurer {
 
     @Value("${spring.activiti.cloud.services.notifications.graphql.ws.endpoint}")

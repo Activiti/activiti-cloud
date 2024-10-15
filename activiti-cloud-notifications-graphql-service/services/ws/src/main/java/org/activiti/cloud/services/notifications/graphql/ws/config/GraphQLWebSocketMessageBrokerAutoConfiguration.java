@@ -61,7 +61,6 @@ public class GraphQLWebSocketMessageBrokerAutoConfiguration {
 
     @EnableWebSocket
     @Configuration
-    @ConditionalOnMissingBean(GraphQLWsNativeEnabler.class)
     public static class DefaultGraphQLWebSocketMessageBrokerConfiguration
         extends DelegatingWebSocketMessageBrokerConfiguration {
 

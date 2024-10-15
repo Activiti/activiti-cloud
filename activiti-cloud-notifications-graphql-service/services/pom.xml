@@ -21,6 +21,5 @@
     <module>security</module>
     <module>jpa-query</module>
     <module>api</module>
-    <module>config</module>
   </modules>
 </project>
