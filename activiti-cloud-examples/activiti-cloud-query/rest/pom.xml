@@ -12,6 +12,10 @@
   <artifactId>activiti-cloud-query-starter-rest</artifactId>
   <name>Activiti Cloud :: Query Starter Rest Api</name>
 
+  <properties>
+    <start-class>org.activiti.cloud.query.rest.QueryRestApplication</start-class>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

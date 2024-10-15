@@ -12,6 +12,10 @@
   <artifactId>activiti-cloud-query-starter</artifactId>
   <name>Activiti Cloud :: Query Starter All-In-One</name>
 
+  <properties>
+    <start-class>org.activiti.cloud.query.QueryApplication</start-class>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>

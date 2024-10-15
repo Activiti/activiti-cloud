@@ -12,6 +12,10 @@
   <artifactId>activiti-cloud-query-starter-consumer</artifactId>
   <name>Activiti Cloud :: Query Starter Events Consumer</name>
 
+  <properties>
+    <start-class>org.activiti.cloud.query.consumer.QueryConsumerApplication</start-class>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
