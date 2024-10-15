@@ -60,9 +60,7 @@ import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEvent
 import org.activiti.cloud.notifications.graphql.GrapqhQLApplication;
 import org.activiti.cloud.notifications.graphql.config.EngineEvents;
 import org.activiti.cloud.notifications.graphql.config.EngineEventsConfiguration;
-import org.activiti.cloud.notifications.graphql.starter.ActivitiGraphQLWsNativeStarterIT.GraphQLWsConfiguration;
 import org.activiti.cloud.services.notifications.graphql.web.api.GraphQLQueryResult;
-import org.activiti.cloud.services.notifications.graphql.ws.config.GraphQLWsNativeEnabler;
 import org.activiti.cloud.services.query.model.ProcessDefinitionEntity;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
@@ -101,19 +99,18 @@ import reactor.test.StepVerifier;
     webEnvironment = WebEnvironment.RANDOM_PORT,
     classes = { GrapqhQLApplication.class },
     properties = {
-        "spring.activiti.cloud.services.notification.graphql.ws.native.enabled=true",
-        "spring.graphql.websocket.path=/ws/graphql",
+        "spring.graphql.websocket.path=" + ActivitiGraphQLWsNativeStarterIT.WS_GRAPHQL_URI,
         "spring.graphql.websocket.keep-alive=PT1S",
     }
 )
 @ContextConfiguration(
-    classes = { EngineEventsConfiguration.class, GraphQLWsConfiguration.class },
+    classes = { EngineEventsConfiguration.class },
     initializers = { KeycloakContainerApplicationInitializer.class }
 )
 @Import(TestChannelBinderConfiguration.class)
 public class ActivitiGraphQLWsNativeStarterIT {
 
-    private static final String WS_GRAPHQL_URI = "/ws/graphql";
+    public static final String WS_GRAPHQL_URI = "/v2/ws/graphql/";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
@@ -145,15 +142,6 @@ public class ActivitiGraphQLWsNativeStarterIT {
     private HttpHeaders authHeaders;
 
     private GraphQlTester graphQlTester;
-
-    @Configuration
-    static class GraphQLWsConfiguration {
-
-        @Bean
-        public GraphQLWsNativeEnabler graphQLWsNativeEnabler() {
-            return new GraphQLWsNativeEnabler();
-        }
-    }
 
     @BeforeEach
     public void setUp() throws Exception {
