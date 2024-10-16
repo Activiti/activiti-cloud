@@ -40,4 +40,34 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-banned-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>org.activiti.cloud:activiti-cloud-services-query-consumer</exclude>
+                    <exclude>org.activiti.cloud:activiti-cloud-services-audit-consumer</exclude>
+                  </excludes>
+                  <searchTransitive>true</searchTransitive>
+                  <message>Query and Audit event consumer modules should not be used in the Query Rest application.</message>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
