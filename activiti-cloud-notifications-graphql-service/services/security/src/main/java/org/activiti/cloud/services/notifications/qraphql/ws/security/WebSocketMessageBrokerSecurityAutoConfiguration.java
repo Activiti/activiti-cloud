@@ -30,8 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
+import org.springframework.graphql.server.support.BearerTokenAuthenticationExtractor;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 
 @AutoConfiguration
 @ConditionalOnProperty(
@@ -103,6 +107,24 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         @ConditionalOnMissingBean
         public JWSAuthenticationManager keycloakWebSocketAuthManager(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
             return new JWSAuthenticationManager(keycloakTokenVerifier);
+        }
+    }
+
+    @Configuration
+    @PropertySources(
+        value = {
+            @PropertySource(value = "classpath:META-INF/graphql-security.properties"),
+            @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true),
+        }
+    )
+    public static class SpringNativeWebSocketMessageBrokerSecurityConfiguration {
+
+        @Bean
+        public WebSocketGraphQlInterceptor authenticationInterceptor(JwtDecoder jwtDecoder) {
+            return new AuthenticationWebSocketInterceptorImpl(
+                new BearerTokenAuthenticationExtractor(),
+                new ProviderManager(new JwtAuthenticationProvider(jwtDecoder))
+            );
         }
     }
 }
