@@ -31,7 +31,6 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
-    @Lazy
     public ActivitiMessagingDestinationsBeanPostProcessor(
         ActivitiMessagingDestinationTransformer destinationTransformer
     ) {

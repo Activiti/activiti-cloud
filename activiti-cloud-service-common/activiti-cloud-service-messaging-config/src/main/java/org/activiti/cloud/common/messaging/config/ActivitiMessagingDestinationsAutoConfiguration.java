@@ -39,6 +39,7 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
         return new ActivitiMessagingDestinationTransformer(messagingProperties);
     }
 
+    @Lazy
     @Bean
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
         ActivitiMessagingDestinationTransformer destinationTransformer
