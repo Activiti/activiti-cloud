@@ -46,5 +46,6 @@ public record TaskSearchRequest(
     Set<String> candidateGroupId,
     Set<VariableFilter> taskVariableFilters,
     Set<VariableFilter> processVariableFilters,
-    Set<ProcessVariableKey> processVariableKeys
+    Set<ProcessVariableKey> processVariableKeys,
+    CloudRuntimeEntitySort sort
 ) {}
