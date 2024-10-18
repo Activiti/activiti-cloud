@@ -32,6 +32,7 @@ import org.springframework.cloud.function.context.catalog.SimpleFunctionRegistry
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.integration.core.GenericHandler;
 import org.springframework.integration.core.GenericSelector;
 import org.springframework.integration.dsl.IntegrationFlow;
@@ -61,6 +62,7 @@ public class ConnectorConfiguration extends AbstractFunctionalBindingConfigurati
             .get();
     }
 
+    @Lazy
     @Bean(name = "connectorBindingPostProcessor")
     public BeanPostProcessor connectorBindingPostProcessor(
         FunctionAnnotationService functionAnnotationService,
