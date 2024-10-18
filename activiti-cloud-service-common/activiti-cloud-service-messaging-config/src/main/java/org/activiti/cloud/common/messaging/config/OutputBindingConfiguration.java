@@ -32,6 +32,7 @@ import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -52,6 +53,7 @@ public class OutputBindingConfiguration extends AbstractFunctionalBindingConfigu
 
     public static final String OUTPUT_BINDING = "_source";
 
+    @Lazy
     @Bean
     public BeanPostProcessor outputBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,

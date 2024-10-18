@@ -39,6 +39,7 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
         return new ActivitiMessagingDestinationTransformer(messagingProperties);
     }
 
+    @Lazy
     @Bean
     public ActivitiMessagingDestinationsBeanPostProcessor activitiMessagingDestinationsBeanPostProcessor(
         ActivitiMessagingDestinationTransformer destinationTransformer
@@ -46,11 +47,13 @@ public class ActivitiMessagingDestinationsAutoConfiguration {
         return new ActivitiMessagingDestinationsBeanPostProcessor(destinationTransformer);
     }
 
+    @Lazy
     @Bean
     public InputConverterFunction toLowerCase() {
         return String::toLowerCase;
     }
 
+    @Lazy
     @Bean
     public InputConverterFunction escapeIllegalChars(@Lazy ActivitiCloudMessagingProperties messagingProperties) {
         return value ->

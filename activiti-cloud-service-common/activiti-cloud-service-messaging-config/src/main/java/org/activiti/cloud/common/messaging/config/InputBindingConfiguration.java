@@ -26,6 +26,7 @@ import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.cloud.stream.function.StreamFunctionProperties;
 import org.springframework.cloud.stream.messaging.DirectWithAttributesChannel;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.StringUtils;
 
@@ -34,6 +35,7 @@ public class InputBindingConfiguration extends AbstractFunctionalBindingConfigur
 
     public static final String INPUT_BINDING = "_sink";
 
+    @Lazy
     @Bean
     public BeanPostProcessor inputBindingBeanPostProcessor(
         FunctionAnnotationService functionAnnotationService,
