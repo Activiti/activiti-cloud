@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.stream.config.BindingServiceProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 
 public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostProcessor, Ordered {
@@ -30,6 +31,7 @@ public class ActivitiMessagingDestinationsBeanPostProcessor implements BeanPostP
 
     private final ActivitiMessagingDestinationTransformer destinationTransformer;
 
+    @Lazy
     public ActivitiMessagingDestinationsBeanPostProcessor(
         ActivitiMessagingDestinationTransformer destinationTransformer
     ) {
