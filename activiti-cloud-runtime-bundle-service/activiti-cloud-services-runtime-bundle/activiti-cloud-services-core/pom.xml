@@ -147,7 +147,6 @@
     <dependency>
       <groupId>org.activiti</groupId>
       <artifactId>activiti-api-process-runtime-impl</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.activiti</groupId>
