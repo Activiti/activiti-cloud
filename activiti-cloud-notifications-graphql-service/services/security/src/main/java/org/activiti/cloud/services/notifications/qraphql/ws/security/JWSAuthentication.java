@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 
 public class JWSAuthentication extends AbstractAuthenticationToken implements Authentication {
 
@@ -31,6 +32,17 @@ public class JWSAuthentication extends AbstractAuthenticationToken implements Au
     public JWSAuthentication(String token) {
         this(token, null, null);
         setAuthenticated(false);
+    }
+
+    public JWSAuthentication(BearerTokenAuthenticationToken bearerTokenAuthenticationToken) {
+        this(
+            bearerTokenAuthenticationToken.getToken(),
+            bearerTokenAuthenticationToken.getPrincipal() instanceof User
+                ? (User) bearerTokenAuthenticationToken.getPrincipal()
+                : null,
+            bearerTokenAuthenticationToken.getAuthorities()
+        );
+        setAuthenticated(bearerTokenAuthenticationToken.isAuthenticated());
     }
 
     public JWSAuthentication(String token, User principal, Collection<? extends GrantedAuthority> authorities) {
