@@ -251,7 +251,7 @@
           {
             "name": "variableKeys",
             "in": "query",
-            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.",
+            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.",
             "required": false,
             "schema": {
               "type": "array",
@@ -1501,7 +1501,7 @@
           {
             "name": "variableKeys",
             "in": "query",
-            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.",
+            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2528,7 +2528,7 @@
           {
             "name": "variableKeys",
             "in": "query",
-            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.",
+            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.",
             "required": false,
             "schema": {
               "type": "array",
@@ -3285,7 +3285,7 @@
           {
             "name": "variableKeys",
             "in": "query",
-            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.",
+            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.",
             "required": false,
             "schema": {
               "type": "array",
@@ -3810,7 +3810,7 @@
           {
             "name": "variableKeys",
             "in": "query",
-            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.",
+            "description": "Used to retrieve process variables. It is constructed from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.",
             "required": false,
             "schema": {
               "type": "array",
@@ -6719,13 +6719,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "parentTaskId": {
-            "type": "string"
-          },
-          "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -6740,12 +6734,27 @@
               "type": "string"
             }
           },
-          "processDefinitionId": {
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
           },
           "createdDate": {
             "type": "string",
@@ -6760,15 +6769,6 @@
             "format": "date-time"
           },
           "completedBy": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "assignee": {
-            "type": "string"
-          },
-          "formKey": {
             "type": "string"
           },
           "status": {
@@ -6976,15 +6976,15 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
           "processDefinitionKey": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
           },
           "processDefinitionId": {
             "type": "string"
@@ -6996,12 +6996,12 @@
           "businessKey": {
             "type": "string"
           },
-          "initiator": {
-            "type": "string"
-          },
           "startDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "initiator": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7265,13 +7265,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "parentTaskId": {
-            "type": "string"
-          },
-          "taskDefinitionKey": {
-            "type": "string"
-          },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
           "candidateUsers": {
@@ -7286,12 +7280,27 @@
               "type": "string"
             }
           },
-          "processDefinitionId": {
+          "parentTaskId": {
+            "type": "string"
+          },
+          "taskDefinitionKey": {
             "type": "string"
           },
           "completedDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "processInstanceId": {
+            "type": "string"
+          },
+          "businessKey": {
+            "type": "string"
+          },
+          "formKey": {
+            "type": "string"
+          },
+          "assignee": {
+            "type": "string"
           },
           "createdDate": {
             "type": "string",
@@ -7306,15 +7315,6 @@
             "format": "date-time"
           },
           "completedBy": {
-            "type": "string"
-          },
-          "businessKey": {
-            "type": "string"
-          },
-          "assignee": {
-            "type": "string"
-          },
-          "formKey": {
             "type": "string"
           },
           "status": {
@@ -7461,15 +7461,15 @@
           "id": {
             "type": "string"
           },
+          "processDefinitionName": {
+            "type": "string"
+          },
           "processDefinitionKey": {
             "type": "string"
           },
           "processDefinitionVersion": {
             "type": "integer",
             "format": "int32"
-          },
-          "processDefinitionName": {
-            "type": "string"
           },
           "processDefinitionId": {
             "type": "string"
@@ -7481,12 +7481,12 @@
           "businessKey": {
             "type": "string"
           },
-          "initiator": {
-            "type": "string"
-          },
           "startDate": {
             "type": "string",
             "format": "date-time"
+          },
+          "initiator": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -7728,10 +7728,10 @@
           "executionId": {
             "type": "string"
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "processInstanceId": {
             "type": "string"
           },
           "elementId": {
@@ -7869,10 +7869,10 @@
               "type": "object"
             }
           },
-          "processInstanceId": {
+          "processDefinitionId": {
             "type": "string"
           },
-          "processDefinitionId": {
+          "processInstanceId": {
             "type": "string"
           },
           "clientId": {
@@ -7884,13 +7884,13 @@
           "businessKey": {
             "type": "string"
           },
-          "appVersion": {
+          "executionId": {
             "type": "string"
           },
           "clientType": {
             "type": "string"
           },
-          "executionId": {
+          "appVersion": {
             "type": "string"
           },
           "serviceFullName": {
