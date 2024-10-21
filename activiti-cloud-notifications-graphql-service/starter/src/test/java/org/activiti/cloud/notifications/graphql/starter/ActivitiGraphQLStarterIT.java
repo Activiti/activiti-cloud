@@ -102,6 +102,7 @@ public class ActivitiGraphQLStarterIT {
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
     private static final String TESTADMIN = "testadmin";
+    private static final String TESTDEVOPS = "testdevops";
     private static final String TASK_NAME = "task1";
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
@@ -1100,6 +1101,55 @@ public class ActivitiGraphQLStarterIT {
     }
 
     @Test
+    public void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
+        ReplayProcessor<String> output = ReplayProcessor.create();
+
+        identityTokenProducer.withTestUser(TESTDEVOPS);
+
+        final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+
+        Map<String, Object> payload = mapBuilder().put("X-Authorization", accessToken).get();
+
+        String initMessage = objectMapper.writeValueAsString(
+            GraphQLMessage
+                .builder()
+                .type(GraphQLMessageType.CONNECTION_INIT)
+                .id("unauthorized-role")
+                .payload(payload)
+                .build()
+        );
+        HttpClient
+            .create()
+            .baseUrl("ws://localhost:" + port)
+            .wiretap(true)
+            .headers(h -> h.add(AUTHORIZATION, accessToken))
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) -> {
+                o.sendString(Mono.just(initMessage)).then().log("client-send").subscribe();
+
+                return i
+                    .aggregateFrames()
+                    .receive()
+                    .asString()
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(output, o);
+                    });
+            })
+            .log("client-received")
+            .take(1)
+            .subscribeWith(output)
+            .collectList()
+            .doOnError(i -> System.err.println("Failed requesting server: " + i))
+            .subscribe();
+
+        String expected = objectMapper.writeValueAsString(
+            GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ERROR).id("unauthorized-role").build()
+        );
+        StepVerifier.create(output).expectNext(expected).expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
     public void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
@@ -1134,7 +1184,7 @@ public class ActivitiGraphQLStarterIT {
         String expected = objectMapper.writeValueAsString(
             GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ERROR).id("unauthorized-connection").build()
         );
-        StepVerifier.create(output).expectNext(expected).verifyComplete();
+        StepVerifier.create(output).expectNext(expected).expectComplete().verify(TIMEOUT);
     }
 
     @Test

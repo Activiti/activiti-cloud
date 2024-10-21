@@ -108,11 +108,12 @@ import reactor.test.StepVerifier;
 @Import(TestChannelBinderConfiguration.class)
 public class ActivitiGraphQLWsNativeStarterIT {
 
-    public static final String WS_GRAPHQL_URI = "/v2/ws/graphql/";
+    public static final String WS_GRAPHQL_URI = "/v2/ws/graphql";
     private static final String GRAPHQL_WS = "graphql-transport-ws";
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
     private static final String TESTADMIN = "testadmin";
+    private static final String TESTDEVOPS = "testdevops";
     private static final String TASK_NAME = "task1";
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
@@ -206,6 +207,43 @@ public class ActivitiGraphQLWsNativeStarterIT {
         var kaMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.ping(null));
 
         StepVerifier.create(output).expectNext(ackMessage).expectNext(kaMessage).expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
+    public void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
+        ReplayProcessor<String> output = ReplayProcessor.create();
+
+        identityTokenProducer.withTestUser(TESTDEVOPS);
+        final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+
+        Map<String, Object> payload = new StringObjectMapBuilder().put("Authorization", accessToken).get();
+
+        var initMessage = objectMapper.writeValueAsString(GraphQlWebSocketMessage.connectionInit(payload));
+
+        HttpClient
+            .create()
+            .baseUrl("ws://localhost:" + port)
+            .wiretap(true)
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) -> {
+                o.sendString(Mono.just(initMessage)).then().log("client-send").subscribe();
+
+                return i
+                    .aggregateFrames()
+                    .receive()
+                    .asString()
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(output, o);
+                    });
+            })
+            .log("client-received")
+            .take(1)
+            .subscribeWith(output)
+            .collectList()
+            .subscribe();
+
+        StepVerifier.create(output).expectComplete().verify(); //TODO add timeout
     }
 
     @Test
