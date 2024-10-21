@@ -289,7 +289,7 @@ public class TaskControllerHelperIT {
 
     @Test
     void should_returnTask_whenItHashNoMatchingProcessVariablesFetchKeys() {
-        String processDefinitionKey = "processDefinitionKeys";
+        String processDefinitionKey = "processDefinitionKey";
         ProcessInstanceEntity processInstanceEntity1 = createProcessInstance(processDefinitionKey);
         ProcessInstanceEntity processInstanceEntity2 = createProcessInstance(processDefinitionKey);
         Set<ProcessVariableEntity> variables1 = createProcessVariables(processInstanceEntity1, 2);
@@ -582,6 +582,6 @@ public class TaskControllerHelperIT {
 
     @NotNull
     private ProcessInstanceEntity createProcessInstance() {
-        return createProcessInstance("processDefinitionKeys");
+        return createProcessInstance("processDefinitionKey");
     }
 }
