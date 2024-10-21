@@ -12,6 +12,10 @@
   <artifactId>activiti-cloud-query-starter-rest</artifactId>
   <name>Activiti Cloud :: Query Starter Rest Api</name>
 
+  <properties>
+    <start-class>org.activiti.cloud.query.rest.QueryRestApplication</start-class>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -29,6 +33,41 @@
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-banned-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>org.activiti.cloud:activiti-cloud-services-query-consumer</exclude>
+                    <exclude>org.activiti.cloud:activiti-cloud-services-audit-consumer</exclude>
+                  </excludes>
+                  <searchTransitive>true</searchTransitive>
+                  <message>Query and Audit event consumer modules should not be used in the Query Rest application.</message>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

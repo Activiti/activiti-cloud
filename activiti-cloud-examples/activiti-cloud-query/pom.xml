@@ -12,7 +12,6 @@
   <name>Activiti Cloud :: Query</name>
 
   <properties>
-    <start-class>org.activiti.cloud.query.QueryApplication</start-class>
     <graphql-java.version>22.1</graphql-java.version>
   </properties>
 

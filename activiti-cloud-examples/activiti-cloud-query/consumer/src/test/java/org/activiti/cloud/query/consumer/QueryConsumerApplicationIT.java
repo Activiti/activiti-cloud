@@ -22,5 +22,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class QueryConsumerApplicationIT {
 
     @Test
-    public void contextLoads() throws Exception {}
+    public void contextLoads() {}
 }

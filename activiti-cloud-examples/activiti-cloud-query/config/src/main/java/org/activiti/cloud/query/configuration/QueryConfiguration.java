@@ -24,39 +24,54 @@ import org.activiti.core.common.spring.security.policies.ProcessSecurityPolicies
 import org.activiti.core.common.spring.security.policies.ProcessSecurityPoliciesManagerImpl;
 import org.activiti.core.common.spring.security.policies.SecurityPoliciesRestrictionApplier;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.PropertySource;
 
 @AutoConfiguration
+@PropertySource("classpath:activiti-cloud-query-config.properties")
 public class QueryConfiguration {
 
-    @Bean(name = "baseOpenApi")
-    @ConditionalOnMissingBean
-    public OpenAPI baseOpenApi(
-        BaseOpenApiBuilder baseOpenApiBuilder,
-        @Value("${server.servlet.context-path:/}") String swaggerBasePath,
-        BuildProperties buildProperties
-    ) {
-        return baseOpenApiBuilder.build(String.format("%s ReST API", buildProperties.getName()), swaggerBasePath);
+    @Configuration
+    @ConditionalOnClass({ OpenAPI.class, GroupedOpenApi.class })
+    static class OpenAPIConfiguration {
+
+        @Bean(name = "baseOpenApi")
+        @ConditionalOnMissingBean
+        public OpenAPI baseOpenApi(
+            BaseOpenApiBuilder baseOpenApiBuilder,
+            @Value("${server.servlet.context-path:/}") String swaggerBasePath,
+            BuildProperties buildProperties
+        ) {
+            return baseOpenApiBuilder.build(String.format("%s ReST API", buildProperties.getName()), swaggerBasePath);
+        }
     }
 
-    @Bean
-    @Primary
-    public ProcessSecurityPoliciesManager processSecurityPoliciesManager(
-        SecurityManager securityManager,
-        SecurityPoliciesProperties securityPoliciesProperties,
-        SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier,
-        SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier
-    ) {
-        return new ProcessSecurityPoliciesManagerImpl(
-            securityManager,
-            securityPoliciesProperties,
-            processDefinitionRestrictionApplier,
-            processInstanceRestrictionApplier
-        );
+    @Configuration
+    @ConditionalOnClass(ProcessSecurityPoliciesManager.class)
+    static class SecurityPolicyManagerConfiguration {
+
+        @Bean
+        @Primary
+        public ProcessSecurityPoliciesManager processSecurityPoliciesManager(
+            SecurityManager securityManager,
+            SecurityPoliciesProperties securityPoliciesProperties,
+            SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier,
+            SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier
+        ) {
+            return new ProcessSecurityPoliciesManagerImpl(
+                securityManager,
+                securityPoliciesProperties,
+                processDefinitionRestrictionApplier,
+                processInstanceRestrictionApplier
+            );
+        }
     }
 }
