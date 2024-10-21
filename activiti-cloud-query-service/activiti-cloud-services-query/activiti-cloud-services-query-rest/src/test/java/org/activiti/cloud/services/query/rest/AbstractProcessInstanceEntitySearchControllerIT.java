@@ -29,6 +29,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -54,7 +56,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
     private static final String PROCESS_DEFINITION_KEY = "process-def-key";
-
+    private static final String VAR_NAME = "var-name";
     public static final String USER = "testuser";
 
     @Autowired
@@ -328,7 +330,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
                 new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
             )
             .buildAndSave();
@@ -352,7 +354,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
                 new QueryTestUtils.VariableInput("var2", VariableType.INTEGER, 1),
                 new QueryTestUtils.VariableInput("var3", VariableType.STRING, "value3"),
                 new QueryTestUtils.VariableInput("var4", VariableType.BOOLEAN, true)
@@ -361,7 +363,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withProcessVariableKeys(
-                new ProcessVariableKey(PROCESS_DEFINITION_KEY, "var1"),
+                new ProcessVariableKey(PROCESS_DEFINITION_KEY, VAR_NAME),
                 new ProcessVariableKey(PROCESS_DEFINITION_KEY, "var3")
             );
 
@@ -375,7 +377,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(1))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance.getId()))
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables", hasSize(2))
-            .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem("var1"))
+            .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem(VAR_NAME))
             .body(PROCESS_INSTANCES_JSON_PATH + "[0].variables.name", hasItem("var3"));
     }
 
@@ -386,14 +388,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
                 new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
             )
             .buildAndSave();
 
         VariableFilter matchingFilter1 = new VariableFilter(
             processInstance.getProcessDefinitionKey(),
-            "var1",
+            VAR_NAME,
             VariableType.STRING,
             "value1",
             FilterOperator.EQUALS
@@ -428,14 +430,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"),
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"),
                 new QueryTestUtils.VariableInput("var2", VariableType.STRING, "value2")
             )
             .buildAndSave();
 
         VariableFilter matchingFilter = new VariableFilter(
             processInstance.getProcessDefinitionKey(),
-            "var1",
+            VAR_NAME,
             VariableType.STRING,
             "value1",
             FilterOperator.EQUALS
@@ -468,19 +470,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "value1"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value1"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "other-value"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "other-value"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.STRING,
             "value1",
             FilterOperator.EQUALS
@@ -505,19 +507,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "abcdefg"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "abcdefg"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "other-value"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "other-value"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.STRING,
             "bcde",
             FilterOperator.LIKE
@@ -543,19 +545,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 1))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 1))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             String.valueOf(1),
             FilterOperator.EQUALS
@@ -581,19 +583,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 10))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 10))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             String.valueOf(2),
             FilterOperator.GREATER_THAN
@@ -619,19 +621,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 10))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 10))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             String.valueOf(2),
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -658,19 +660,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 10))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 10))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             String.valueOf(10),
             FilterOperator.LESS_THAN
@@ -696,19 +698,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 10))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 10))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             String.valueOf(10),
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -735,26 +737,26 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 4))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 4))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 8))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 8))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 15))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 15))
             .buildAndSave();
 
         VariableFilter filterGt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             "4",
             FilterOperator.GREATER_THAN
@@ -762,7 +764,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             "15",
             FilterOperator.LESS_THAN
@@ -783,7 +785,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             "4",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -791,7 +793,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.INTEGER,
             "15",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -818,19 +820,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("1.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.1")))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("1.2")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("1.2")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "1.1",
             FilterOperator.EQUALS
@@ -856,19 +858,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("10.1")))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("2.1")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "2.1",
             FilterOperator.GREATER_THAN
@@ -894,19 +896,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("10.1")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("2.1")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "2.1",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -933,19 +935,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("2.1")))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("10.1")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "10.1",
             FilterOperator.LESS_THAN
@@ -971,19 +973,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("2.1")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("10.1")))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "10.1",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1010,26 +1012,26 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("4.8")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("4.8")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("15.16")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("15.16")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("23.42")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("23.42")))
             .buildAndSave();
 
         VariableFilter filterGt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "4.8",
             FilterOperator.GREATER_THAN
@@ -1037,7 +1039,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "23.42",
             FilterOperator.LESS_THAN
@@ -1058,7 +1060,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "4.8",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -1066,7 +1068,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BIGDECIMAL,
             "23.42",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1093,19 +1095,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-01",
             FilterOperator.EQUALS
@@ -1131,19 +1133,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-01",
             FilterOperator.GREATER_THAN
@@ -1169,19 +1171,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-01",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -1208,19 +1210,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-02",
             FilterOperator.LESS_THAN
@@ -1246,19 +1248,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-02",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1285,26 +1287,26 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-03"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-03"))
             .buildAndSave();
 
         VariableFilter filterGt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-01",
             FilterOperator.GREATER_THAN
@@ -1312,7 +1314,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-03",
             FilterOperator.LESS_THAN
@@ -1333,7 +1335,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-01",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -1341,7 +1343,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATE,
             "2024-09-03",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1369,7 +1371,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1378,13 +1380,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:11:00.000+00:00",
             FilterOperator.EQUALS
@@ -1411,7 +1413,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1420,13 +1422,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:11:00.000+00:00",
             FilterOperator.GREATER_THAN
@@ -1453,7 +1455,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1462,13 +1464,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:11:00.000+00:00",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -1496,7 +1498,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1505,13 +1507,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:12:00.000+00:00",
             FilterOperator.LESS_THAN
@@ -1538,7 +1540,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1547,13 +1549,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:12:00.000+00:00",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1581,7 +1583,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1590,7 +1592,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
@@ -1599,13 +1601,13 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:13:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:13:00.000+00:00")
             )
             .buildAndSave();
 
         VariableFilter filterGt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:11:00.000+00:00",
             FilterOperator.GREATER_THAN
@@ -1613,7 +1615,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLt = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:13:00.000+00:00",
             FilterOperator.LESS_THAN
@@ -1634,7 +1636,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterGtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:11:00.000+00:00",
             FilterOperator.GREATER_THAN_OR_EQUAL
@@ -1642,7 +1644,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         VariableFilter filterLtEq = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.DATETIME,
             "2024-09-01T00:13:00.000+00:00",
             FilterOperator.LESS_THAN_OR_EQUAL
@@ -1669,19 +1671,19 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, true))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, true))
             .buildAndSave();
 
         queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, false))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, false))
             .buildAndSave();
 
         VariableFilter variableFilter = new VariableFilter(
             PROCESS_DEFINITION_KEY,
-            "var1",
+            VAR_NAME,
             VariableType.BOOLEAN,
             "true",
             FilterOperator.EQUALS
@@ -1765,30 +1767,30 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "cool"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "amazing"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "beautiful"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "beautiful"))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.STRING
                 )
             );
@@ -1810,10 +1812,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.STRING
                     )
                 );
@@ -1838,30 +1840,30 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 2))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 2))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 3))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 3))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.INTEGER, 1))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.INTEGER, 1))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.INTEGER
                 )
             );
@@ -1883,10 +1885,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.INTEGER
                     )
                 );
@@ -1911,30 +1913,30 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("2.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("2.1")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("10.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("10.1")))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BIGDECIMAL, new BigDecimal("5.1")))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BIGDECIMAL, new BigDecimal("5.1")))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.BIGDECIMAL
                 )
             );
@@ -1956,10 +1958,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.BIGDECIMAL
                     )
                 );
@@ -1984,26 +1986,32 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-03"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-03"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-01"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-01"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.DATE, "2024-09-02"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATE, "2024-09-02"))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
-                new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, VariableType.DATE)
+                new CloudRuntimeEntitySort(
+                    VAR_NAME,
+                    Sort.Direction.ASC,
+                    true,
+                    List.of(PROCESS_DEFINITION_KEY),
+                    VariableType.DATE
+                )
             );
 
         given()
@@ -2023,10 +2031,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.DATE
                     )
                 );
@@ -2052,7 +2060,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:11:00.000+00:00")
             )
             .buildAndSave();
 
@@ -2061,7 +2069,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:10:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:10:00.000+00:00")
             )
             .buildAndSave();
 
@@ -2070,17 +2078,17 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
             .withVariables(
-                new QueryTestUtils.VariableInput("var1", VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
+                new QueryTestUtils.VariableInput(VAR_NAME, VariableType.DATETIME, "2024-09-01T00:12:00.000+00:00")
             )
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.DATETIME
                 )
             );
@@ -2102,10 +2110,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.DATETIME
                     )
                 );
@@ -2130,30 +2138,30 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, true))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, true))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, false))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, false))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.BOOLEAN, true))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.BOOLEAN, true))
             .buildAndSave();
 
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.BOOLEAN
                 )
             );
@@ -2179,10 +2187,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             new ProcessInstanceSearchRequestBuilder()
                 .withSort(
                     new CloudRuntimeEntitySort(
-                        "var1",
+                        VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.BOOLEAN
                     )
                 );
@@ -2212,14 +2220,14 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .withInitiator(USER)
             .withAppName("Nice app")
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "cool"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance2 = queryTestUtils
             .buildProcessInstance()
             .withInitiator(USER)
             .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
-            .withVariables(new QueryTestUtils.VariableInput("var1", VariableType.STRING, "amazing"))
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
             .buildAndSave();
 
         ProcessInstanceEntity processInstance3 = queryTestUtils
@@ -2240,10 +2248,10 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
             .withSort(
                 new CloudRuntimeEntitySort(
-                    "var1",
+                    VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.STRING
                 )
             );
@@ -2266,7 +2274,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
                         "var2",
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.INTEGER
                     )
                 );
@@ -2301,7 +2309,7 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
     @Test
     void should_returnBadRequest_when_sortParameterIsInvalid() {
         ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
-            .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, null, VariableType.STRING));
+            .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, null, VariableType.STRING));
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2313,7 +2321,15 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
 
         requestBuilder =
             new ProcessInstanceSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort("var1", Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        VAR_NAME,
+                        Sort.Direction.ASC,
+                        true,
+                        List.of(PROCESS_DEFINITION_KEY),
+                        null
+                    )
+                );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
@@ -2322,5 +2338,71 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .post(getSearchEndpoint())
             .then()
             .statusCode(400);
+    }
+
+    @Test
+    void should_returnProcessInstances_sortedByProcessVariable_withDifferentProcessDefinitionKeys() {
+        String id1 = UUID.randomUUID().toString();
+        String id2 = UUID.randomUUID().toString();
+
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(id1)
+            .withInitiator(USER)
+            .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "cool"))
+            .buildAndSave();
+
+        String otherProcDefKey = "other-process-definition-key";
+        queryTestUtils
+            .buildProcessInstance()
+            .withId(id2)
+            .withInitiator(USER)
+            .withProcessDefinitionKey(otherProcDefKey)
+            .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "amazing"))
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withSort(
+                new CloudRuntimeEntitySort(
+                    VAR_NAME,
+                    Sort.Direction.ASC,
+                    true,
+                    List.of(PROCESS_DEFINITION_KEY, otherProcDefKey),
+                    VariableType.STRING
+                )
+            );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains(id2, id1));
+
+        requestBuilder =
+            new ProcessInstanceSearchRequestBuilder()
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        VAR_NAME,
+                        Sort.Direction.DESC,
+                        true,
+                        List.of(PROCESS_DEFINITION_KEY, otherProcDefKey),
+                        VariableType.STRING
+                    )
+                );
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains(id1, id2));
     }
 }

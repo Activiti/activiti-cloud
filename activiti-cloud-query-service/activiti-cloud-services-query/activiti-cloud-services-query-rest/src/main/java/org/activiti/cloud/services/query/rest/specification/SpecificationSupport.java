@@ -184,10 +184,9 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                         .selectCase()
                         .when(
                             criteriaBuilder.and(
-                                criteriaBuilder.equal(
-                                    joinedProcessVars.get(ProcessVariableEntity_.processDefinitionKey),
-                                    sort.processDefinitionKey()
-                                ),
+                                joinedProcessVars
+                                    .get(ProcessVariableEntity_.processDefinitionKey)
+                                    .in(sort.processDefinitionKey()),
                                 criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
                             ),
                             extractedValue
