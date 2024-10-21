@@ -46,6 +46,11 @@ public class ProcessInstanceBuilder {
         this.withProcessDefinitionKey(UUID.randomUUID().toString());
     }
 
+    public ProcessInstanceBuilder withId(String id) {
+        process.setId(id);
+        return this;
+    }
+
     public ProcessInstanceBuilder withName(String name) {
         process.setName(name);
         return this;

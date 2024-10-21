@@ -16,11 +16,12 @@
 package org.activiti.cloud.services.query.rest.payload;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.Collection;
 import org.activiti.cloud.services.query.rest.filter.VariableType;
 import org.springframework.data.domain.Sort;
 
 public record CloudRuntimeEntitySort(
-    String field, Sort.Direction direction, boolean isProcessVariable, String processDefinitionKey, VariableType type
+    String field, Sort.Direction direction, boolean isProcessVariable, Collection<String> processDefinitionKeys, VariableType type
 ) {
     /**
      * This constructor's purpose is to make deserialization of 'direction' case-insensitive.
@@ -30,14 +31,14 @@ public record CloudRuntimeEntitySort(
         String field,
         String direction,
         boolean isProcessVariable,
-        String processDefinitionKey,
+        Collection<String> processDefinitionKeys,
         VariableType type
     ) {
         this(
             field,
             Sort.Direction.fromString(direction),
             isProcessVariable,
-            processDefinitionKey,
+            processDefinitionKeys,
             type == null ? null : VariableType.fromString(type.name())
         );
     }
