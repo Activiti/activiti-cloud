@@ -28,7 +28,7 @@ public class RestDocConstants {
 
     public static final String VARIABLE_KEYS_DESC =
         "Used to retrieve process variables. It is constructed " +
-        "from process definition key and variable name, e.g.: {processDefinitionKeys}/{variableName}.";
+        "from process definition key and variable name, e.g.: {processDefinitionKey}/{variableName}.";
 
     public static final String VARIABLE_KEYS_EXAMPLE = "Process_90W_3nLpw/initializedVar";
 
