@@ -19,8 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
-import org.activiti.cloud.api.process.model.SyncProcessDefinitionRequest;
-import org.activiti.cloud.api.process.model.impl.SyncProcessDefinitionRequestImpl;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,12 +38,12 @@ public class SyncProcessDefinitionsCmdExecutorTest {
 
     @Test
     public void syncProcessDefinitionsCmdExecutorTest() {
-        SyncProcessDefinitionRequest payload = new SyncProcessDefinitionRequestImpl(List.of("1", "2", "3"));
+        SyncCloudProcessDefinitionsPayload payload = new SyncCloudProcessDefinitionsPayload(List.of("1", "2", "3"));
 
-        assertThat(subject.getHandledType()).isEqualTo(SyncProcessDefinitionRequest.class.getName());
+        assertThat(subject.getHandledType()).isEqualTo(SyncCloudProcessDefinitionsPayload.class.getName());
 
         subject.execute(payload);
 
-        verify(processDefinitionsSyncService).syncProcessDefinitions(payload.getExcludedProcessDefinitionIds());
+        verify(processDefinitionsSyncService).syncProcessDefinitions(payload);
     }
 }

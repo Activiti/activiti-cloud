@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.activiti.cloud.api.process.model.impl;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import org.activiti.cloud.api.process.model.SyncProcessDefinitionRequest;
+import org.activiti.api.model.shared.Payload;
 
-public class SyncProcessDefinitionRequestImpl implements SyncProcessDefinitionRequest {
+public class SyncCloudProcessDefinitionsPayload implements Payload {
 
     private final String id = UUID.randomUUID().toString();
     private List<String> excludedProcessDefinitionIds;
 
-    public SyncProcessDefinitionRequestImpl() {}
+    public SyncCloudProcessDefinitionsPayload() {}
 
-    public SyncProcessDefinitionRequestImpl(List<String> excludedProcessDefinitionIds) {
+    public SyncCloudProcessDefinitionsPayload(List<String> excludedProcessDefinitionIds) {
         this.excludedProcessDefinitionIds = excludedProcessDefinitionIds;
     }
 
@@ -43,24 +44,15 @@ public class SyncProcessDefinitionRequestImpl implements SyncProcessDefinitionRe
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SyncProcessDefinitionRequest that)) return false;
+        if (!(o instanceof SyncCloudProcessDefinitionsPayload that)) return false;
         return (
-            Objects.equals(id, that.getId()) &&
-            Objects.equals(excludedProcessDefinitionIds, that.getExcludedProcessDefinitionIds())
+            Objects.equals(id, that.id) &&
+            Objects.equals(excludedProcessDefinitionIds, that.excludedProcessDefinitionIds)
         );
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, excludedProcessDefinitionIds);
-    }
-
-    @Override
-    public String toString() {
-        final StringBuffer sb = new StringBuffer("SyncProcessDefinitionRequest{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", excludeProcessDefinitionIds=").append(excludedProcessDefinitionIds);
-        sb.append('}');
-        return sb.toString();
     }
 }

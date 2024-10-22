@@ -50,7 +50,6 @@ import org.activiti.cloud.api.process.model.CloudStartMessageDeploymentDefinitio
 import org.activiti.cloud.api.process.model.IntegrationError;
 import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.api.process.model.IntegrationResult;
-import org.activiti.cloud.api.process.model.SyncProcessDefinitionRequest;
 import org.activiti.cloud.api.process.model.impl.CloudApplicationImpl;
 import org.activiti.cloud.api.process.model.impl.CloudBPMNActivityImpl;
 import org.activiti.cloud.api.process.model.impl.CloudIntegrationContextImpl;
@@ -61,7 +60,8 @@ import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefi
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
-import org.activiti.cloud.api.process.model.impl.SyncProcessDefinitionRequestImpl;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
@@ -282,6 +282,20 @@ public class CloudProcessModelAutoConfiguration {
             )
         );
 
+        module.registerSubtypes(
+            new NamedType(
+                SyncCloudProcessDefinitionsPayload.class,
+                SyncCloudProcessDefinitionsPayload.class.getSimpleName()
+            )
+        );
+
+        module.registerSubtypes(
+            new NamedType(
+                SyncCloudProcessDefinitionsResult.class,
+                SyncCloudProcessDefinitionsResult.class.getSimpleName()
+            )
+        );
+
         SimpleAbstractTypeResolver resolver = new SimpleAbstractTypeResolver() {
             //this is a workaround for https://github.com/FasterXML/jackson-databind/issues/2019
             //once version 2.9.6 is related we can remove this @override method
@@ -294,7 +308,6 @@ public class CloudProcessModelAutoConfiguration {
         resolver.addMapping(IntegrationRequest.class, IntegrationRequestImpl.class);
         resolver.addMapping(IntegrationResult.class, IntegrationResultImpl.class);
         resolver.addMapping(IntegrationError.class, IntegrationErrorImpl.class);
-        resolver.addMapping(SyncProcessDefinitionRequest.class, SyncProcessDefinitionRequestImpl.class);
 
         resolver.addMapping(CloudProcessDefinition.class, CloudProcessDefinitionImpl.class);
         resolver.addMapping(
