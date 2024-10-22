@@ -45,6 +45,7 @@ import org.activiti.api.runtime.shared.security.PrincipalIdentityProvider;
 import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider;
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
 import org.activiti.cloud.services.events.configuration.CloudEventsAutoConfiguration;
@@ -136,6 +137,9 @@ class ProcessInstanceAdminControllerImplIT {
 
     @MockBean
     private ManagementService managementService;
+
+    @MockBean
+    private ProcessDefinitionsSyncService processDefinitionsSyncService;
 
     @BeforeEach
     void setUp() {
