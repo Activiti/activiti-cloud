@@ -184,10 +184,9 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
                         .selectCase()
                         .when(
                             criteriaBuilder.and(
-                                criteriaBuilder.equal(
-                                    joinedProcessVars.get(ProcessVariableEntity_.processDefinitionKey),
-                                    sort.processDefinitionKey()
-                                ),
+                                joinedProcessVars
+                                    .get(ProcessVariableEntity_.processDefinitionKey)
+                                    .in(sort.processDefinitionKeys()),
                                 criteriaBuilder.equal(joinedProcessVars.get(ProcessVariableEntity_.name), sort.field())
                             ),
                             extractedValue
@@ -207,7 +206,7 @@ public abstract class SpecificationSupport<T> implements Specification<T> {
 
     protected void validateSort(CloudRuntimeEntitySort sort) {
         if (sort.isProcessVariable()) {
-            if (sort.processDefinitionKey() == null) {
+            if (sort.processDefinitionKeys() == null) {
                 throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Process definition key is required when sorting by process variable"
