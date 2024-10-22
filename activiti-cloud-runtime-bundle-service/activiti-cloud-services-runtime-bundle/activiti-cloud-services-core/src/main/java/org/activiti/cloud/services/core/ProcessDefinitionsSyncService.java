@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,10 +28,10 @@ import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.runtime.event.impl.ProcessDeployedEventImpl;
 import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.engine.RepositoryService;
 import org.activiti.runtime.api.model.impl.APIProcessDefinitionConverter;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StreamUtils;
 
 public class ProcessDefinitionsSyncService {
@@ -49,11 +50,15 @@ public class ProcessDefinitionsSyncService {
         this.converter = converter;
     }
 
-    @Async
-    public void syncProcessDefinitions(List<String> excludedProcessDefinitionIds) {
-        toProcessDeployedEventList(excludedProcessDefinitionIds)
+    public List<String> syncProcessDefinitions(SyncCloudProcessDefinitionsPayload payload) {
+        List<String> excludedProcessDefinitionIds = payload.getExcludedProcessDefinitionIds();
+
+        return toProcessDeployedEventList(excludedProcessDefinitionIds)
             .map(ProcessDeployedEvents::new)
-            .forEach(applicationEventPublisher::publishEvent);
+            .peek(applicationEventPublisher::publishEvent)
+            .flatMap(it -> it.getProcessDeployedEvents().stream())
+            .map(ProcessDeployedEvent::getProcessDefinitionId)
+            .toList();
     }
 
     private Stream<List<ProcessDeployedEvent>> toProcessDeployedEventList(List<String> excludedProcessDefinitionIds) {
@@ -63,7 +68,9 @@ public class ProcessDefinitionsSyncService {
             .createProcessDefinitionQuery()
             .list()
             .stream()
-            .filter(it -> !excludedProcessDefinitionIds.contains(it.getId()))
+            .filter(it ->
+                Optional.ofNullable(excludedProcessDefinitionIds).map(list -> !list.contains(it.getId())).orElse(true)
+            )
             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 10))
             .values()
             .stream()

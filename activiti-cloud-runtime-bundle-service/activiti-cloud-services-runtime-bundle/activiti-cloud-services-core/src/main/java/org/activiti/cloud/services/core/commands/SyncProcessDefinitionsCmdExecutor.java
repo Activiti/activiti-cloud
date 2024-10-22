@@ -15,11 +15,11 @@
  */
 package org.activiti.cloud.services.core.commands;
 
-import org.activiti.api.model.shared.EmptyResult;
-import org.activiti.cloud.api.process.model.SyncProcessDefinitionRequest;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 
-public class SyncProcessDefinitionsCmdExecutor extends AbstractCommandExecutor<SyncProcessDefinitionRequest> {
+public class SyncProcessDefinitionsCmdExecutor extends AbstractCommandExecutor<SyncCloudProcessDefinitionsPayload> {
 
     private final ProcessDefinitionsSyncService processDefinitionsSyncService;
 
@@ -28,11 +28,9 @@ public class SyncProcessDefinitionsCmdExecutor extends AbstractCommandExecutor<S
     }
 
     @Override
-    public EmptyResult execute(SyncProcessDefinitionRequest syncProcessDefinitionRequest) {
-        processDefinitionsSyncService.syncProcessDefinitions(
-            syncProcessDefinitionRequest.getExcludedProcessDefinitionIds()
-        );
+    public SyncCloudProcessDefinitionsResult execute(SyncCloudProcessDefinitionsPayload payload) {
+        var result = processDefinitionsSyncService.syncProcessDefinitions(payload);
 
-        return new EmptyResult();
+        return new SyncCloudProcessDefinitionsResult(payload, result);
     }
 }

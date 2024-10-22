@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package org.activiti.cloud.api.process.model;
+package org.activiti.cloud.api.process.model.impl;
 
 import java.util.List;
-import org.activiti.api.model.shared.Payload;
+import org.activiti.api.model.shared.Result;
 
-public interface SyncProcessDefinitionRequest extends Payload {
-    List<String> getExcludedProcessDefinitionIds();
+public class SyncCloudProcessDefinitionsResult extends Result<List<String>> {
+
+    SyncCloudProcessDefinitionsResult() {}
+
+    public SyncCloudProcessDefinitionsResult(SyncCloudProcessDefinitionsPayload payload, List<String> result) {
+        super(payload, result);
+    }
 }
