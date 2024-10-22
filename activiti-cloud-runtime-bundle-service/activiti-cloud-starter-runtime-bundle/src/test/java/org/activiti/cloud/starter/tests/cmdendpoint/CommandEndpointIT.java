@@ -24,6 +24,7 @@ import static org.awaitility.Awaitility.await;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -216,6 +217,30 @@ public class CommandEndpointIT {
             .extracting(SyncCloudProcessDefinitionsResult::getEntity)
             .asInstanceOf(InstanceOfAssertFactories.LIST)
             .contains(processDefinitionIds.values().toArray());
+    }
+
+    @Test
+    public void syncCloudProcessDefinitionsExcludedTest() {
+        streamHandler.resetSyncProcessDefinitionsAck();
+
+        var payload = new SyncCloudProcessDefinitionsPayload(
+            List.of(processDefinitionIds.values().toArray(String[]::new))
+        );
+
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).setHeader("cmdId", "jobId").build());
+
+        await("process definitions result to be synced")
+            .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
+
+        var result = streamHandler.getSyncProcessDefinitionsAck().get();
+
+        assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
+
+        assertThat(result)
+            .extracting(SyncCloudProcessDefinitionsResult::getEntity)
+            .asInstanceOf(InstanceOfAssertFactories.LIST)
+            .isNotEmpty()
+            .doesNotContain(processDefinitionIds.values().toArray());
     }
 
     private void completeTask(Task task) {
