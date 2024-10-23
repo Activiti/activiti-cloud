@@ -39,7 +39,7 @@ public class EngineEventsConsumerMessageHandler {
         List<Map<String, Object>> events = message.getPayload();
         String routingKey = (String) message.getHeaders().get("routingKey");
 
-        logger.debug("Recieved source message {} with routingKey: {}", message, routingKey);
+        logger.debug("Received source message {} with routingKey: {}", message, routingKey);
 
         return MessageBuilder.<List<EngineEvent>>createMessage(transformer.transform(events), message.getHeaders());
     }
