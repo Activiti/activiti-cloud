@@ -48,6 +48,7 @@ import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.StartEvent;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -149,6 +150,9 @@ class ProcessDefinitionControllerImplIT {
 
     @MockBean
     private ManagementService managementService;
+
+    @MockBean
+    private ProcessDefinitionsSyncService processDefinitionsSyncService;
 
     private final ObjectMapper om = new ObjectMapper();
 

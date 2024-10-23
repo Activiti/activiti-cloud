@@ -60,6 +60,7 @@ import org.activiti.api.runtime.shared.security.SecurityContextPrincipalProvider
 import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
+import org.activiti.cloud.services.core.ProcessDefinitionsSyncService;
 import org.activiti.cloud.services.core.ProcessDiagramGeneratorWrapper;
 import org.activiti.cloud.services.core.conf.ServicesCoreAutoConfiguration;
 import org.activiti.cloud.services.events.ProcessEngineChannels;
@@ -147,6 +148,9 @@ class ProcessInstanceControllerImplIT {
 
     @MockBean
     private ManagementService managementService;
+
+    @MockBean
+    private ProcessDefinitionsSyncService processDefinitionsSyncService;
 
     @Test
     void getProcessInstances() throws Exception {

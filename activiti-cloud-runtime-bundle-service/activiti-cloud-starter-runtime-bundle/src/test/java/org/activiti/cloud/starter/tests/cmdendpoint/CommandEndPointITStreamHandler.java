@@ -18,6 +18,7 @@ package org.activiti.cloud.starter.tests.cmdendpoint;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import org.activiti.api.model.shared.Result;
 import org.activiti.api.process.model.ProcessInstance;
@@ -32,6 +33,7 @@ import org.activiti.api.task.model.payloads.CompleteTaskPayload;
 import org.activiti.api.task.model.payloads.CreateTaskVariablePayload;
 import org.activiti.api.task.model.payloads.ReleaseTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -58,6 +60,7 @@ public class CommandEndPointITStreamHandler {
     private AtomicBoolean removeProcessVariablesAck = new AtomicBoolean(false);
     private AtomicBoolean createTaskVariableAck = new AtomicBoolean(false);
     private AtomicBoolean updateTaskVariableAck = new AtomicBoolean(false);
+    private AtomicReference<SyncCloudProcessDefinitionsResult> syncProcessDefinitionsAck = new AtomicReference<>();
 
     @TestConfiguration
     class CommandEndpointITStreamHandlerConfiguration {
@@ -93,6 +96,8 @@ public class CommandEndPointITStreamHandler {
                     setProcessVariablesAck.set(true);
                 } else if (result.getPayload() instanceof RemoveProcessVariablesPayload) {
                     removeProcessVariablesAck.set(true);
+                } else if (result instanceof SyncCloudProcessDefinitionsResult syncCloudProcessDefinitionsResult) {
+                    syncProcessDefinitionsAck.set(syncCloudProcessDefinitionsResult);
                 }
             };
         }
@@ -122,6 +127,10 @@ public class CommandEndPointITStreamHandler {
         claimedTaskAck.set(false);
     }
 
+    public void resetSyncProcessDefinitionsAck() {
+        syncProcessDefinitionsAck.set(null);
+    }
+
     public AtomicBoolean getReleasedTaskAck() {
         return releasedTaskAck;
     }
@@ -148,5 +157,9 @@ public class CommandEndPointITStreamHandler {
 
     public AtomicBoolean getRemoveProcessVariablesAck() {
         return removeProcessVariablesAck;
+    }
+
+    public AtomicReference<SyncCloudProcessDefinitionsResult> getSyncProcessDefinitionsAck() {
+        return syncProcessDefinitionsAck;
     }
 }
