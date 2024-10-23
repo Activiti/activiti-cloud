@@ -130,7 +130,7 @@ public class TaskController {
     }
 
     @Operation(summary = "Search tasks")
-    @JsonView(JsonViews.General.class)
+    @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/search")
     public PagedModel<EntityModel<QueryCloudTask>> searchTasks(
         @RequestBody TaskSearchRequest taskSearchRequest,
