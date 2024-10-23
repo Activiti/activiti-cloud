@@ -27,6 +27,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.activiti.api.task.model.Task;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
@@ -3004,7 +3005,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.STRING
                 )
             );
@@ -3026,7 +3027,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.STRING
                     )
                 );
@@ -3074,7 +3075,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.INTEGER
                 )
             );
@@ -3096,7 +3097,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.INTEGER
                     )
                 );
@@ -3144,7 +3145,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.BIGDECIMAL
                 )
             );
@@ -3166,7 +3167,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.BIGDECIMAL
                     )
                 );
@@ -3214,7 +3215,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.DATE
                 )
             );
@@ -3236,7 +3237,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.DATE
                     )
                 );
@@ -3290,7 +3291,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.DATETIME
                 )
             );
@@ -3312,7 +3313,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.DATETIME
                     )
                 );
@@ -3352,7 +3353,7 @@ public abstract class AbstractTaskControllerIT {
                     VAR_NAME,
                     Sort.Direction.ASC,
                     true,
-                    PROCESS_DEFINITION_KEY,
+                    List.of(PROCESS_DEFINITION_KEY),
                     VariableType.BOOLEAN
                 )
             );
@@ -3374,7 +3375,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.BOOLEAN
                     )
                 );
@@ -3459,7 +3460,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.ASC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.STRING
                     )
                 );
@@ -3482,7 +3483,7 @@ public abstract class AbstractTaskControllerIT {
                         VAR_NAME,
                         Sort.Direction.DESC,
                         true,
-                        PROCESS_DEFINITION_KEY,
+                        List.of(PROCESS_DEFINITION_KEY),
                         VariableType.STRING
                     )
                 );
@@ -3514,7 +3515,15 @@ public abstract class AbstractTaskControllerIT {
 
         requestBuilder =
             new TaskSearchRequestBuilder()
-                .withSort(new CloudRuntimeEntitySort(VAR_NAME, Sort.Direction.ASC, true, PROCESS_DEFINITION_KEY, null));
+                .withSort(
+                    new CloudRuntimeEntitySort(
+                        VAR_NAME,
+                        Sort.Direction.ASC,
+                        true,
+                        List.of(PROCESS_DEFINITION_KEY),
+                        null
+                    )
+                );
 
         given()
             .contentType(MediaType.APPLICATION_JSON)
