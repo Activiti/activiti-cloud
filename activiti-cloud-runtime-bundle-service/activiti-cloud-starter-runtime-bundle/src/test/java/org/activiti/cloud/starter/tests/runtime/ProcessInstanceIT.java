@@ -707,6 +707,44 @@ class ProcessInstanceIT {
             .contains(PROCESS_DELETED);
     }
 
+    @Test
+    void adminShouldCancelAndThenForceDestroyProcessInstance() {
+        //given
+        ResponseEntity<CloudProcessInstance> processEntity = processInstanceRestTemplate.startProcess(
+            processDefinitionIds.get(SIMPLE_PROCESS),
+            null,
+            "business_key"
+        );
+
+        assertThat(processEntity).isNotNull();
+        assertThat(processEntity.getBody()).isNotNull();
+        assertThat(processEntity.getBody().getId()).isNotNull();
+        assertThat(processEntity.getBody().getProcessDefinitionId()).contains("SimpleProcess:");
+
+        identityTokenProducer.withTestUser("testadmin");
+        ResponseEntity<CloudProcessInstance> responseEntity = processInstanceRestTemplate.adminDelete(processEntity);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatExceptionOfType(AssertionError.class)
+            .isThrownBy(() -> processInstanceRestTemplate.getProcessInstance(processEntity))
+            .withMessageContaining("404 NOT_FOUND");
+
+        //when
+        identityTokenProducer.withTestUser("testadmin");
+        responseEntity = processInstanceRestTemplate.adminDestroy(processEntity, true);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        verify(this.processEngineEventsAggregator, atLeast(1)).add(this.cloudRuntimeEventArgumentCaptor.capture());
+        assertThat(cloudRuntimeEventArgumentCaptor.getAllValues())
+            .isNotEmpty()
+            .extracting("eventType")
+            .contains(PROCESS_DELETED);
+    }
+
     private void assertEventActorIsSet(String processInstanceId) {
         List<IdentityLink> identityLinksForProcessInstance =
             this.runtimeService.getIdentityLinksForProcessInstance(processInstanceId);
