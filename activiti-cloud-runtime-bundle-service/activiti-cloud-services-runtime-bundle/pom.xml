@@ -23,5 +23,6 @@
     <module>activiti-cloud-services-job-executor</module>
     <module>messages-events</module>
     <module>activiti-cloud-runtime-bundle-rest-client</module>
+    <module>activiti-cloud-services-runtime-gateway</module>
   </modules>
 </project>
