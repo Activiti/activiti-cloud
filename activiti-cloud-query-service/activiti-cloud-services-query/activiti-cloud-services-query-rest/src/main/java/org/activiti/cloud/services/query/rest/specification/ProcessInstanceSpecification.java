@@ -33,7 +33,7 @@ import org.springframework.util.CollectionUtils;
 
 public class ProcessInstanceSpecification extends SpecificationSupport<ProcessInstanceEntity> {
 
-    List<Predicate> predicates = new ArrayList<>();
+    private List<Predicate> predicates;
 
     private final String userId;
 
@@ -58,6 +58,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         CriteriaQuery<?> query,
         CriteriaBuilder criteriaBuilder
     ) {
+        predicates = new ArrayList<>();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyNameFilter(root, criteriaBuilder);
         applyInitiatorFilter(root);
@@ -67,13 +68,15 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyCompletedFilters(root, criteriaBuilder);
         applySuspendedFilters(root, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
-        applySorting(
-            root,
-            root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
-            searchRequest.sort(),
-            query,
-            criteriaBuilder
-        );
+        if (!query.getResultType().equals(Long.class)) {
+            applySorting(
+                root,
+                root.join(ProcessInstanceEntity_.variables, JoinType.LEFT),
+                searchRequest.sort(),
+                query,
+                criteriaBuilder
+            );
+        }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }

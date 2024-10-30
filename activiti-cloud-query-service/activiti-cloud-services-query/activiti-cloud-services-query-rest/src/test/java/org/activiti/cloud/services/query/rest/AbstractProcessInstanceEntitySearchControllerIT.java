@@ -2405,4 +2405,77 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains(id1, id2));
     }
+
+    @Test
+    void should_returnFilteredPaginatedAndSortedProcessInstances() {
+        for (int i = 0; i < 10; i++) {
+            queryTestUtils
+                .buildProcessInstance()
+                .withId(String.valueOf(i))
+                .withInitiator(USER)
+                .withProcessDefinitionKey(PROCESS_DEFINITION_KEY)
+                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"))
+                .buildAndSave();
+        }
+
+        ProcessInstanceSearchRequestBuilder taskSearchRequestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withProcessVariableFilters(
+                new VariableFilter(
+                    PROCESS_DEFINITION_KEY,
+                    VAR_NAME,
+                    VariableType.STRING,
+                    "value",
+                    FilterOperator.EQUALS
+                )
+            )
+            .withSort(new CloudRuntimeEntitySort("id", Sort.Direction.ASC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 0)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("0", "1", "2", "3"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(0));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 4)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(4))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("4", "5", "6", "7"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 8)
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, contains("8", "9"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(2));
+    }
 }

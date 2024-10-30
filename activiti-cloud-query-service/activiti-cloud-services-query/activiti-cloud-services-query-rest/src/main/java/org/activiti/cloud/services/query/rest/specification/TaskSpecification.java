@@ -38,7 +38,7 @@ import org.springframework.util.CollectionUtils;
 
 public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
-    List<Predicate> predicates = new ArrayList<>();
+    private List<Predicate> predicates;
 
     private final TaskSearchRequest taskSearchRequest;
 
@@ -84,6 +84,7 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
 
     @Override
     public Predicate toPredicate(Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+        predicates = new ArrayList<>();
         applyUserRestrictionFilter(root, criteriaBuilder);
         applyRootTasksFilter(root, criteriaBuilder);
         applyStandaloneFilter(root, criteriaBuilder);
@@ -103,13 +104,15 @@ public class TaskSpecification extends SpecificationSupport<TaskEntity> {
         applyCandidateGroupFilter(root);
         applyTaskVariableFilters(root, query, criteriaBuilder);
         applyProcessVariableFilters(root, query, criteriaBuilder);
-        applySorting(
-            root,
-            root.join(TaskEntity_.processVariables, JoinType.LEFT),
-            taskSearchRequest.sort(),
-            query,
-            criteriaBuilder
-        );
+        if (!query.getResultType().equals(Long.class)) {
+            applySorting(
+                root,
+                root.join(TaskEntity_.processVariables, JoinType.LEFT),
+                taskSearchRequest.sort(),
+                query,
+                criteriaBuilder
+            );
+        }
         if (predicates.isEmpty()) {
             return criteriaBuilder.conjunction();
         }

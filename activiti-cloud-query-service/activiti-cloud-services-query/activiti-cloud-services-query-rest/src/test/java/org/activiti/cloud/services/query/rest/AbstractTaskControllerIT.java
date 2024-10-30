@@ -3533,4 +3533,71 @@ public abstract class AbstractTaskControllerIT {
             .then()
             .statusCode(400);
     }
+
+    @Test
+    void should_returnFilteredPaginatedAndSortedTasks() {
+        for (int i = 0; i < 10; i++) {
+            queryTestUtils
+                .buildTask()
+                .withAssignee(CURRENT_USER)
+                .withVariables(new QueryTestUtils.VariableInput(VAR_NAME, VariableType.STRING, "value"))
+                .withId(String.valueOf(i))
+                .buildAndSave();
+            queryTestUtils.buildTask().withAssignee(CURRENT_USER).buildAndSave();
+        }
+
+        TaskSearchRequestBuilder taskSearchRequestBuilder = new TaskSearchRequestBuilder()
+            .withTaskVariableFilters(
+                new VariableFilter(null, VAR_NAME, VariableType.STRING, "value", FilterOperator.EQUALS)
+            )
+            .withSort(new CloudRuntimeEntitySort("id", Sort.Direction.ASC, false, null, null));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 0)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(4))
+            .body(TASK_IDS_JSON_PATH, contains("0", "1", "2", "3"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(0));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 4)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(4))
+            .body(TASK_IDS_JSON_PATH, contains("4", "5", "6", "7"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(1));
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(taskSearchRequestBuilder.buildJson())
+            .param("maxItems", 4)
+            .param("skipCount", 8)
+            .when()
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(2))
+            .body(TASK_IDS_JSON_PATH, contains("8", "9"))
+            .body("page.totalElements", is(10))
+            .body("page.totalPages", is(3))
+            .body("page.size", is(4))
+            .body("page.number", is(2));
+    }
 }
