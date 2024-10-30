@@ -207,6 +207,11 @@
       <artifactId>activiti-cloud-services-test-containers</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-services-runtime-gateway</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

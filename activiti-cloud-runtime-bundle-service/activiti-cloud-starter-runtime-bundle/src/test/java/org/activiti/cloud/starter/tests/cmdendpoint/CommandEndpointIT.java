@@ -46,6 +46,7 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.api.task.model.CloudTask;
+import org.activiti.cloud.services.gateway.ProcessRuntimeGateway;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -100,6 +101,9 @@ public class CommandEndpointIT {
 
     @Autowired
     private CommandEndPointITStreamHandler streamHandler;
+
+    @Autowired
+    private ProcessRuntimeGateway processRuntimeGateway;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -210,6 +214,22 @@ public class CommandEndpointIT {
             .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
 
         var result = streamHandler.getSyncProcessDefinitionsAck().get();
+
+        assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
+
+        assertThat(result)
+            .extracting(SyncCloudProcessDefinitionsResult::getEntity)
+            .asInstanceOf(InstanceOfAssertFactories.LIST)
+            .contains(processDefinitionIds.values().toArray());
+    }
+
+    @Test
+    public void syncCloudProcessDefinitionsRuntimeGatewayTest() {
+        streamHandler.resetSyncProcessDefinitionsAck();
+
+        var payload = new SyncCloudProcessDefinitionsPayload();
+
+        var result = processRuntimeGateway.syncProcessDefinitions(payload);
 
         assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
 
