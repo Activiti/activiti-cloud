@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.Collection;
 import net.thucydides.core.annotations.Step;
 import org.activiti.api.model.shared.model.VariableInstance;
@@ -112,6 +113,7 @@ public class ProcessQuerySteps {
         Object variableValue
     ) {
         await()
+            .atMost(Duration.ofSeconds(30))
             .untilAsserted(() -> {
                 assertThat(variableName).isNotNull();
                 final Collection<CloudVariableInstance> variableInstances = processQueryService
