@@ -53,7 +53,8 @@ public class ProcessDefinitionsSyncService {
     public List<String> syncProcessDefinitions(SyncCloudProcessDefinitionsPayload payload) {
         List<String> excludedProcessDefinitionIds = payload.getExcludedProcessDefinitionIds();
 
-        return toProcessDeployedEventList(excludedProcessDefinitionIds)
+        return queryProcessDefinitionsStream(excludedProcessDefinitionIds)
+            .map(processDefinitions -> processDefinitions.stream().map(this::toProcessDeployedEvent).toList())
             .map(ProcessDeployedEvents::new)
             .peek(applicationEventPublisher::publishEvent)
             .flatMap(it -> it.getProcessDeployedEvents().stream())
@@ -61,7 +62,7 @@ public class ProcessDefinitionsSyncService {
             .toList();
     }
 
-    private Stream<List<ProcessDeployedEvent>> toProcessDeployedEventList(List<String> excludedProcessDefinitionIds) {
+    private Stream<List<ProcessDefinition>> queryProcessDefinitionsStream(List<String> excludedProcessDefinitionIds) {
         final AtomicInteger counter = new AtomicInteger();
 
         return repositoryService
@@ -74,8 +75,7 @@ public class ProcessDefinitionsSyncService {
             .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / 10))
             .values()
             .stream()
-            .map(converter::from)
-            .map(processDefinitions -> processDefinitions.stream().map(this::toProcessDeployedEvent).toList());
+            .map(converter::from);
     }
 
     private ProcessDeployedEvent toProcessDeployedEvent(ProcessDefinition processDefinition) {

@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,11 +31,13 @@ import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.model.events.ProcessDeployedEvent;
 import org.activiti.api.process.model.payloads.ResumeProcessPayload;
 import org.activiti.api.process.model.payloads.SetProcessVariablesPayload;
 import org.activiti.api.process.model.payloads.SignalPayload;
 import org.activiti.api.process.model.payloads.StartProcessPayload;
 import org.activiti.api.process.model.payloads.SuspendProcessPayload;
+import org.activiti.api.runtime.event.impl.ProcessDeployedEvents;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
@@ -56,9 +59,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
@@ -81,6 +86,7 @@ import org.springframework.test.context.TestPropertySource;
         TaskRestTemplate.class,
         MessageClientStreamConfiguration.class,
         TestChannelBinderConfiguration.class,
+        CommandEndpointIT.TestProcessDeployedEventsListener.class,
     }
 )
 @ContextConfiguration(initializers = { KeycloakContainerApplicationInitializer.class })
@@ -106,6 +112,17 @@ public class CommandEndpointIT {
     private ProcessRuntimeGateway processRuntimeGateway;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
+
+    private static List<ProcessDeployedEvents> processDeployedEvents = new ArrayList<>();
+
+    @TestComponent
+    static class TestProcessDeployedEventsListener {
+
+        @EventListener
+        void on(ProcessDeployedEvents event) {
+            processDeployedEvents.add(event);
+        }
+    }
 
     private static final String PROCESS_DEFINITIONS_URL = "/v1/process-definitions";
     private static final String PROCESS_INSTANCES_RELATIVE_URL = "/v1/process-instances";
@@ -205,6 +222,7 @@ public class CommandEndpointIT {
     @Test
     public void syncCloudProcessDefinitionsTest() {
         streamHandler.resetSyncProcessDefinitionsAck();
+        processDeployedEvents.clear();
 
         var payload = new SyncCloudProcessDefinitionsPayload();
 
@@ -221,11 +239,23 @@ public class CommandEndpointIT {
             .extracting(SyncCloudProcessDefinitionsResult::getEntity)
             .asInstanceOf(InstanceOfAssertFactories.LIST)
             .contains(processDefinitionIds.values().toArray());
+
+        assertThat(processDeployedEvents).isNotEmpty();
+
+        assertThat(
+            processDeployedEvents
+                .stream()
+                .flatMap(it -> it.getProcessDeployedEvents().stream())
+                .map(ProcessDeployedEvent::getProcessDefinitionId)
+                .toList()
+        )
+            .contains(processDefinitionIds.values().toArray(String[]::new));
     }
 
     @Test
     public void syncCloudProcessDefinitionsRuntimeGatewayTest() {
         streamHandler.resetSyncProcessDefinitionsAck();
+        processDeployedEvents.clear();
 
         var payload = new SyncCloudProcessDefinitionsPayload();
 
@@ -237,6 +267,17 @@ public class CommandEndpointIT {
             .extracting(SyncCloudProcessDefinitionsResult::getEntity)
             .asInstanceOf(InstanceOfAssertFactories.LIST)
             .contains(processDefinitionIds.values().toArray());
+
+        assertThat(processDeployedEvents).isNotEmpty();
+
+        assertThat(
+            processDeployedEvents
+                .stream()
+                .flatMap(it -> it.getProcessDeployedEvents().stream())
+                .map(ProcessDeployedEvent::getProcessDefinitionId)
+                .toList()
+        )
+            .contains(processDefinitionIds.values().toArray(String[]::new));
     }
 
     @Test
