@@ -49,7 +49,6 @@ import org.activiti.cloud.api.process.model.CloudProcessInstance;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.api.task.model.CloudTask;
-import org.activiti.cloud.services.gateway.ProcessRuntimeGateway;
 import org.activiti.cloud.services.test.containers.KeycloakContainerApplicationInitializer;
 import org.activiti.cloud.services.test.identity.IdentityTokenProducer;
 import org.activiti.cloud.starter.tests.helper.ProcessInstanceRestTemplate;
@@ -107,9 +106,6 @@ public class CommandEndpointIT {
 
     @Autowired
     private CommandEndPointITStreamHandler streamHandler;
-
-    @Autowired
-    private ProcessRuntimeGateway processRuntimeGateway;
 
     private Map<String, String> processDefinitionIds = new HashMap<>();
 
@@ -223,15 +219,9 @@ public class CommandEndpointIT {
     public void syncCloudProcessDefinitionsTest() {
         streamHandler.resetSyncProcessDefinitionsAck();
         processDeployedEvents.clear();
-
         var payload = new SyncCloudProcessDefinitionsPayload();
 
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).setHeader("cmdId", "jobId").build());
-
-        await("process definitions result to be synced")
-            .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
-
-        var result = streamHandler.getSyncProcessDefinitionsAck().get();
+        var result = doSyncCloudProcessDefinitions(payload);
 
         assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
 
@@ -252,32 +242,15 @@ public class CommandEndpointIT {
             .contains(processDefinitionIds.values().toArray(String[]::new));
     }
 
-    @Test
-    public void syncCloudProcessDefinitionsRuntimeGatewayTest() {
-        streamHandler.resetSyncProcessDefinitionsAck();
-        processDeployedEvents.clear();
+    protected SyncCloudProcessDefinitionsResult doSyncCloudProcessDefinitions(
+        SyncCloudProcessDefinitionsPayload payload
+    ) {
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).setHeader("cmdId", "jobId").build());
 
-        var payload = new SyncCloudProcessDefinitionsPayload();
+        await("process definitions result to be synced")
+            .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
 
-        var result = processRuntimeGateway.syncProcessDefinitions(payload);
-
-        assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
-
-        assertThat(result)
-            .extracting(SyncCloudProcessDefinitionsResult::getEntity)
-            .asInstanceOf(InstanceOfAssertFactories.LIST)
-            .contains(processDefinitionIds.values().toArray());
-
-        assertThat(processDeployedEvents).isNotEmpty();
-
-        assertThat(
-            processDeployedEvents
-                .stream()
-                .flatMap(it -> it.getProcessDeployedEvents().stream())
-                .map(ProcessDeployedEvent::getProcessDefinitionId)
-                .toList()
-        )
-            .contains(processDefinitionIds.values().toArray(String[]::new));
+        return streamHandler.getSyncProcessDefinitionsAck().get();
     }
 
     @Test
@@ -288,12 +261,7 @@ public class CommandEndpointIT {
             List.of(processDefinitionIds.values().toArray(String[]::new))
         );
 
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).setHeader("cmdId", "jobId").build());
-
-        await("process definitions result to be synced")
-            .untilAsserted(() -> assertThat(streamHandler.getSyncProcessDefinitionsAck()).isNotNull());
-
-        var result = streamHandler.getSyncProcessDefinitionsAck().get();
+        var result = doSyncCloudProcessDefinitions(payload);
 
         assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
 
@@ -312,20 +280,32 @@ public class CommandEndpointIT {
             .withTaskId(task.getId())
             .withVariables(variables)
             .build();
+
+        doCompleteTask(completeTaskCmd);
+    }
+
+    protected void doCompleteTask(CompleteTaskPayload payload) {
         clientStream
             .myCmdProducer()
-            .send(MessageBuilder.withPayload(completeTaskCmd).setHeader("cmdId", completeTaskCmd.getId()).build());
+            .send(MessageBuilder.withPayload(payload).setHeader("cmdId", payload.getId()).build());
+
         await("task to be completed").untilTrue(streamHandler.getCompletedTaskAck());
     }
 
     private void releaseTask(Task task) {
         ReleaseTaskPayload releaseTaskCmd = TaskPayloadBuilder.release().withTaskId(task.getId()).build();
-        clientStream
-            .myCmdProducer()
-            .send(MessageBuilder.withPayload(releaseTaskCmd).setHeader("cmdId", releaseTaskCmd.getId()).build());
-        await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
+
+        doReleaseTask(releaseTaskCmd);
 
         assertThatTaskHasStatus(task.getId(), CREATED);
+    }
+
+    protected void doReleaseTask(ReleaseTaskPayload payload) {
+        clientStream
+            .myCmdProducer()
+            .send(MessageBuilder.withPayload(payload).setHeader("cmdId", payload.getId()).build());
+
+        await("task to be released").untilTrue(streamHandler.getReleasedTaskAck());
     }
 
     private void setProcessVariables(String proInstanceId) {
@@ -336,13 +316,7 @@ public class CommandEndpointIT {
             .withVariables(variables)
             .build();
 
-        clientStream
-            .myCmdProducer()
-            .send(
-                MessageBuilder.withPayload(setProcessVariables).setHeader("cmdId", setProcessVariables.getId()).build()
-            );
-
-        await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
+        doSetProcessVariables(setProcessVariables);
 
         ResponseEntity<CollectionModel<CloudVariableInstance>> retrievedVars = processInstanceRestTemplate.getVariables(
             proInstanceId
@@ -352,6 +326,14 @@ public class CommandEndpointIT {
             .contains(tuple("procVar", "v2"));
     }
 
+    protected void doSetProcessVariables(SetProcessVariablesPayload payload) {
+        clientStream
+            .myCmdProducer()
+            .send(MessageBuilder.withPayload(payload).setHeader("cmdId", payload.getId()).build());
+
+        await("Variable to be set").untilTrue(streamHandler.getSetProcessVariablesAck());
+    }
+
     private void claimTask(Task task) {
         streamHandler.resetClaimedTaskAck();
         ClaimTaskPayload claimTaskPayload = TaskPayloadBuilder
@@ -359,13 +341,18 @@ public class CommandEndpointIT {
             .withTaskId(task.getId())
             .withAssignee("hruser")
             .build();
+
+        doClaimTask(claimTaskPayload);
+
+        assertThatTaskHasStatus(task.getId(), ASSIGNED);
+    }
+
+    protected void doClaimTask(ClaimTaskPayload claimTaskPayload) {
         clientStream
             .myCmdProducer()
             .send(MessageBuilder.withPayload(claimTaskPayload).setHeader("cmdId", claimTaskPayload.getId()).build());
 
         await("task to be claimed").untilTrue(streamHandler.getClaimedTaskAck());
-
-        assertThatTaskHasStatus(task.getId(), ASSIGNED);
     }
 
     private void assertThatTaskHasStatus(String taskId, Task.TaskStatus status) {
@@ -377,11 +364,8 @@ public class CommandEndpointIT {
     private void resumeProcessInstance(String processDefinitionId, String processInstanceId) {
         //given
         ResumeProcessPayload resumeProcess = ProcessPayloadBuilder.resume(processInstanceId);
-        clientStream
-            .myCmdProducer()
-            .send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId", resumeProcess.getId()).build());
 
-        await("process to be resumed").untilTrue(streamHandler.getResumedProcessInstanceAck());
+        doResumeProcessInstance(resumeProcess);
 
         await()
             .untilAsserted(() -> {
@@ -397,12 +381,18 @@ public class CommandEndpointIT {
             });
     }
 
+    protected void doResumeProcessInstance(ResumeProcessPayload resumeProcess) {
+        clientStream
+            .myCmdProducer()
+            .send(MessageBuilder.withPayload(resumeProcess).setHeader("cmdId", resumeProcess.getId()).build());
+
+        await("process to be resumed").untilTrue(streamHandler.getResumedProcessInstanceAck());
+    }
+
     private void suspendProcessInstance(SuspendProcessPayload suspendProcessInstanceCmd) {
         //given
+        doSuspendProcessInstance(suspendProcessInstanceCmd);
 
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(suspendProcessInstanceCmd).build());
-
-        await("process to be suspended").untilTrue(streamHandler.getSuspendedProcessInstanceAck());
         //when
         ProcessInstance processInstance = executeGetProcessInstanceRequest(
             suspendProcessInstanceCmd.getProcessInstanceId()
@@ -414,12 +404,15 @@ public class CommandEndpointIT {
         assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.SUSPENDED);
     }
 
+    protected void doSuspendProcessInstance(SuspendProcessPayload payload) {
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).build());
+
+        await("process to be suspended").untilTrue(streamHandler.getSuspendedProcessInstanceAck());
+    }
+
     private String startProcessInstance(StartProcessPayload startProcessPayload) {
         //given
-        clientStream.myCmdProducer().send(MessageBuilder.withPayload(startProcessPayload).build());
-
-        await("process to be started").untilTrue(streamHandler.getStartedProcessInstanceAck());
-        String processInstanceId = streamHandler.getProcessInstanceId();
+        var processInstanceId = doStartProcessInstance(startProcessPayload);
 
         //when
         ProcessInstance processInstance = executeGetProcessInstanceRequest(processInstanceId);
@@ -430,6 +423,14 @@ public class CommandEndpointIT {
         assertThat(processInstance.getStartDate()).isNotNull();
         assertThat(processInstance.getStatus()).isEqualTo(ProcessInstance.ProcessInstanceStatus.RUNNING);
         return processInstance.getId();
+    }
+
+    protected String doStartProcessInstance(StartProcessPayload payload) {
+        clientStream.myCmdProducer().send(MessageBuilder.withPayload(payload).build());
+
+        await("process to be started").untilTrue(streamHandler.getStartedProcessInstanceAck());
+
+        return streamHandler.getProcessInstanceId();
     }
 
     private ProcessInstance executeGetProcessInstanceRequest(String processInstanceId) {
@@ -478,14 +479,19 @@ public class CommandEndpointIT {
         );
         SignalPayload sendSignal = ProcessPayloadBuilder.signal().withName("go").build();
 
+        doSendSignal(sendSignal);
+
+        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
+        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
+    }
+
+    protected void doSendSignal(SignalPayload sendSignal) {
         //when
         clientStream
             .myCmdProducer()
             .send(MessageBuilder.withPayload(sendSignal).setHeader("cmdId", sendSignal.getId()).build());
+
         //then
         await("signal to be sent").untilTrue(streamHandler.getSendSignalAck());
-
-        ResponseEntity<PagedModel<CloudTask>> taskEntity = processInstanceRestTemplate.getTasks(startProcessEntity);
-        assertThat(taskEntity.getBody().getContent()).extracting(Task::getName).containsExactly("Boundary target");
     }
 }

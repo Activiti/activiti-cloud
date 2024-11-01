@@ -41,7 +41,7 @@ public interface ProcessRuntimeGateway {
 
     ProcessInstanceResult suspendProcess(SuspendProcessPayload payload);
 
-    ProcessInstanceResult resumeProcessInstance(ResumeProcessPayload payload);
+    ProcessInstanceResult resumeProcess(ResumeProcessPayload payload);
 
     EmptyResult setProcessVariables(SetProcessVariablesPayload setProcessVariablesPayload);
 
