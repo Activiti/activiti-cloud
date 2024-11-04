@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
@@ -137,6 +138,41 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()))
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance2.getId()));
+    }
+
+    @Test
+    void should_returnProcessInstances_filteredByStatus() {
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("id1")
+            .withInitiator(USER)
+            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING)
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withId("id2")
+            .withInitiator(USER)
+            .withStatus(ProcessInstance.ProcessInstanceStatus.COMPLETED)
+            .buildAndSave();
+        queryTestUtils
+            .buildProcessInstance()
+            .withInitiator(USER)
+            .withStatus(ProcessInstance.ProcessInstanceStatus.SUSPENDED)
+            .buildAndSave();
+
+        ProcessInstanceSearchRequestBuilder requestBuilder = new ProcessInstanceSearchRequestBuilder()
+            .withStatus(ProcessInstance.ProcessInstanceStatus.RUNNING, ProcessInstance.ProcessInstanceStatus.COMPLETED);
+
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBuilder.buildJson())
+            .when()
+            .post(getSearchEndpoint())
+            .then()
+            .statusCode(200)
+            .body(PROCESS_INSTANCES_JSON_PATH, hasSize(2))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem("id1"))
+            .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem("id2"));
     }
 
     @Test
@@ -615,7 +651,6 @@ abstract class AbstractProcessInstanceEntitySearchControllerIT {
             .body(PROCESS_INSTANCE_IDS_JSON_PATH, hasItem(processInstance1.getId()));
     }
 
-    @Test
     void should_returnProcessInstances_filteredByIntegerVariable_greaterThanEqual() {
         ProcessInstanceEntity processInstance1 = queryTestUtils
             .buildProcessInstance()

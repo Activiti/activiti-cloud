@@ -17,6 +17,7 @@ package org.activiti.cloud.services.query.rest.payload;
 
 import java.util.Date;
 import java.util.Set;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 
@@ -25,6 +26,7 @@ public record ProcessInstanceSearchRequest(
     Set<String> name,
     Set<String> initiator,
     Set<String> appVersion,
+    Set<ProcessInstance.ProcessInstanceStatus> status,
     Date lastModifiedFrom,
     Date lastModifiedTo,
     Date startFrom,

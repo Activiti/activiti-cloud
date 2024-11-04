@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
@@ -116,6 +117,11 @@ public class ProcessInstanceBuilder {
 
     public ProcessInstanceBuilder withInitiator(String initiator) {
         process.setInitiator(initiator);
+        return this;
+    }
+
+    public ProcessInstanceBuilder withStatus(ProcessInstance.ProcessInstanceStatus status) {
+        process.setStatus(status);
         return this;
     }
 

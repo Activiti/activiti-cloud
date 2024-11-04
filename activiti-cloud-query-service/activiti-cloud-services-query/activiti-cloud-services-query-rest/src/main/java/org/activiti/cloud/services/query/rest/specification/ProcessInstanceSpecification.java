@@ -63,6 +63,7 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
         applyNameFilter(root, criteriaBuilder);
         applyInitiatorFilter(root);
         applyAppVersionFilter(root);
+        applyStatusFilter(root);
         applyLastModifiedDateFilters(root, criteriaBuilder);
         applyStartFilters(root, criteriaBuilder);
         applyCompletedFilters(root, criteriaBuilder);
@@ -98,6 +99,12 @@ public class ProcessInstanceSpecification extends SpecificationSupport<ProcessIn
     private void applyAppVersionFilter(Root<ProcessInstanceEntity> root) {
         if (!CollectionUtils.isEmpty(searchRequest.appVersion())) {
             predicates.add(root.get(ProcessInstanceEntity_.appVersion).in(searchRequest.appVersion()));
+        }
+    }
+
+    private void applyStatusFilter(Root<ProcessInstanceEntity> root) {
+        if (!CollectionUtils.isEmpty(searchRequest.status())) {
+            predicates.add(root.get(ProcessInstanceEntity_.status).in(searchRequest.status()));
         }
     }
 

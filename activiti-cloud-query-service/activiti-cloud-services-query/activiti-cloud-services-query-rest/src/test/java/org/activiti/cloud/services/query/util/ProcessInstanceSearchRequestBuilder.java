@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.cloud.services.query.model.ProcessVariableKey;
 import org.activiti.cloud.services.query.rest.filter.VariableFilter;
 import org.activiti.cloud.services.query.rest.payload.CloudRuntimeEntitySort;
@@ -32,6 +33,7 @@ public class ProcessInstanceSearchRequestBuilder {
     private Set<String> names;
     private Set<String> initiators;
     private Set<String> appVersions;
+    private Set<ProcessInstance.ProcessInstanceStatus> statuses;
     private Date lastModifiedFrom;
     private Date lastModifiedTo;
     private Date startFrom;
@@ -56,6 +58,11 @@ public class ProcessInstanceSearchRequestBuilder {
 
     public ProcessInstanceSearchRequestBuilder withAppVersions(String... appVersions) {
         this.appVersions = Set.of(appVersions);
+        return this;
+    }
+
+    public ProcessInstanceSearchRequestBuilder withStatus(ProcessInstance.ProcessInstanceStatus... statuses) {
+        this.statuses = Set.of(statuses);
         return this;
     }
 
@@ -132,6 +139,7 @@ public class ProcessInstanceSearchRequestBuilder {
             names,
             initiators,
             appVersions,
+            statuses,
             lastModifiedFrom,
             lastModifiedTo,
             startFrom,
