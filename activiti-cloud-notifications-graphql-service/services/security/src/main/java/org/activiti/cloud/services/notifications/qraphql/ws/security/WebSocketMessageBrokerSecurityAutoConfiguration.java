@@ -16,11 +16,13 @@
 package org.activiti.cloud.services.notifications.qraphql.ws.security;
 
 import java.util.function.Function;
+import org.activiti.cloud.security.authorization.CustomAuthorizationManager;
 import org.activiti.cloud.services.common.security.jwt.JwtAccessTokenValidator;
 import org.activiti.cloud.services.common.security.jwt.JwtAdapter;
 import org.activiti.cloud.services.common.security.jwt.JwtUserInfoUriAuthenticationConverter;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.GraphQLAccessTokenVerifier;
 import org.activiti.cloud.services.notifications.qraphql.ws.security.tokenverifier.jwt.JwtAccessTokenVerifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,8 +32,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
+import org.springframework.graphql.server.support.BearerTokenAuthenticationExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 @AutoConfiguration
 @ConditionalOnProperty(
@@ -103,6 +108,39 @@ public class WebSocketMessageBrokerSecurityAutoConfiguration {
         @ConditionalOnMissingBean
         public JWSAuthenticationManager keycloakWebSocketAuthManager(GraphQLAccessTokenVerifier keycloakTokenVerifier) {
             return new JWSAuthenticationManager(keycloakTokenVerifier);
+        }
+    }
+
+    @Configuration
+    @PropertySources(
+        value = {
+            @PropertySource(value = "classpath:META-INF/graphql-security.properties"),
+            @PropertySource(value = "classpath:graphql-security.properties", ignoreResourceNotFound = true),
+        }
+    )
+    public static class SpringNativeWebSocketMessageBrokerSecurityConfiguration {
+
+        @Value("${spring.activiti.cloud.services.notifications.graphql.ws.security.authorities:}")
+        private String[] authorities;
+
+        @Value("${spring.activiti.cloud.services.notifications.graphql.ws.security.permissions:}")
+        private String[] permissions;
+
+        @Bean
+        JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor() {
+            return new JWSBearerTokenAuthenticationExtractor(new BearerTokenAuthenticationExtractor());
+        }
+
+        @Bean
+        public WebSocketGraphQlInterceptor authenticationInterceptor(
+            JWSAuthenticationManager jwsAuthenticationManager,
+            JWSBearerTokenAuthenticationExtractor jwsBearerTokenAuthenticationExtractor
+        ) {
+            return new SecurityWebSocketInterceptor(
+                jwsBearerTokenAuthenticationExtractor,
+                jwsAuthenticationManager,
+                new CustomAuthorizationManager<RequestAuthorizationContext>(authorities, permissions)
+            );
         }
     }
 }

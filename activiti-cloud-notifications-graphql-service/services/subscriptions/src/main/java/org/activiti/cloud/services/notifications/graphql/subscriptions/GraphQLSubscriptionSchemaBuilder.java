@@ -64,12 +64,12 @@ public class GraphQLSubscriptionSchemaBuilder {
                         .coercing(new JavaScalars.GraphQLObjectCoercing())
                         .build()
                 )
-                .scalar(ExtendedScalars.GraphQLLong)
-                .transformer(new JavaScalarsWiringPostProcessor());
+                .scalar(ExtendedScalars.GraphQLLong);
     }
 
     private GraphQLSchema buildSchema() {
-        return new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build());
+        return new JavaScalarsWiringPostProcessor()
+            .process(new SchemaGenerator().makeExecutableSchema(typeRegistry, wiring.build()));
     }
 
     public TypeRuntimeWiring.Builder withTypeWiring(String typeName) {

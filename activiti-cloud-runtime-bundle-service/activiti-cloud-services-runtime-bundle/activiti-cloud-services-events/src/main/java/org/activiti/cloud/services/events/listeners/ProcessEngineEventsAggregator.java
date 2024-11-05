@@ -15,6 +15,7 @@
  */
 package org.activiti.cloud.services.events.listeners;
 
+import java.util.Optional;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.BPMNActivity;
 import org.activiti.api.process.model.BPMNSequenceFlow;
@@ -90,15 +91,15 @@ public class ProcessEngineEventsAggregator
 
     protected ExecutionContext resolveExecutionContext(CommandContext commandContext, String executionId) {
         if (executionId != null && commandContext.getGenericAttribute(executionId) == null) {
-            ExecutionEntity executionEntity = commandContext.getExecutionEntityManager().findById(executionId);
+            Optional
+                .ofNullable(commandContext.getExecutionEntityManager().findById(executionId))
+                .ifPresent(executionEntity -> {
+                    mayBeAddRootExecutionContext(commandContext, executionEntity);
 
-            mayBeAddRootExecutionContext(commandContext, executionEntity);
+                    ExecutionContext executionContext = createExecutionContext(executionEntity);
 
-            ExecutionContext executionContext = createExecutionContext(executionEntity);
-
-            if (executionEntity != null) {
-                commandContext.addAttribute(executionId, executionContext);
-            }
+                    commandContext.addAttribute(executionId, executionContext);
+                });
         }
 
         return commandContext.getGenericAttribute(executionId);

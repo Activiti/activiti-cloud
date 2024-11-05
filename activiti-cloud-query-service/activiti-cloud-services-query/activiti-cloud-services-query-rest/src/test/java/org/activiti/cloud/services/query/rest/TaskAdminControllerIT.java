@@ -16,35 +16,18 @@
 package org.activiti.cloud.services.query.rest;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.webAppContextSetup;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
-import io.restassured.module.mockmvc.response.ValidatableMockMvcResponse;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import org.activiti.QueryRestTestApplication;
 import org.activiti.cloud.alfresco.config.AlfrescoWebAutoConfiguration;
-import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
-import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
-import org.activiti.cloud.services.query.app.repository.TaskRepository;
-import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
-import org.activiti.cloud.services.query.app.repository.VariableRepository;
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.ProcessVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
-import org.activiti.cloud.services.query.model.TaskVariableEntity;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -54,156 +37,46 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = {
         "spring.main.banner-mode=off",
         "spring.jpa.properties.hibernate.enable_lazy_load_no_trans=false",
-        "logging.level.org.hibernate.collection.spi=warn",
-        "spring.jpa.show-sql=true",
-        "spring.jpa.properties.hibernate.format_sql=true",
+        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
     }
 )
 @TestPropertySource("classpath:application-test.properties")
 @Testcontainers
-//TODO Make the test work using AlfrescoJackson2HttpMessageConverter to simulate the actual response that we have in real environment
-public class TaskAdminControllerIT {
-
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
-    TaskControllerHelper taskControllerHelper;
-
-    @Autowired
-    TaskRepository taskRepository;
-
-    @Autowired
-    TaskVariableRepository taskVariableRepository;
-
-    @Autowired
-    private ProcessInstanceRepository processInstanceRepository;
-
-    @Autowired
-    private VariableRepository variableRepository;
-
-    @Autowired
-    private TaskCandidateGroupRepository taskCandidateGroupRepository;
-
-    @Autowired
-    private TaskCandidateUserRepository taskCandidateUserRepository;
+@WithMockUser(username = AbstractTaskControllerIT.CURRENT_USER, roles = "ACTIVITI_ADMIN")
+class TaskAdminControllerIT extends AbstractTaskControllerIT {
 
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
-    @BeforeEach
-    public void setUp() {
-        webAppContextSetup(context);
-        taskRepository.deleteAll();
-        taskVariableRepository.deleteAll();
-        processInstanceRepository.deleteAll();
-        variableRepository.deleteAll();
-        taskCandidateGroupRepository.deleteAll();
-        taskCandidateUserRepository.deleteAll();
+    @Override
+    protected String getSearchEndpointHttpGet() {
+        return "/admin/v1/tasks";
+    }
+
+    @Override
+    protected String getSearchEndpointHttpPost() {
+        return "/admin/v1/tasks/search";
     }
 
     @Test
-    @WithMockUser(username = "testadmin", roles = "ACTIVITI_ADMIN")
-    void should_returnTasks_withOnlyRequestedProcessVariables_whenSearchingByTaskVariableNameAndValue() {
-        ProcessInstanceEntity processInstanceEntity = createProcessInstance();
-        Set<ProcessVariableEntity> processVariables = createProcessVariables(processInstanceEntity);
+    void should_returnTasks_unrestrictedTasks() {
+        String otherUser = "other-user";
 
-        TaskVariableEntity taskVariable1 = createTaskVariable();
-        TaskVariableEntity taskVariable2 = createTaskVariable();
-        taskVariableRepository.save(taskVariable1);
-        taskVariableRepository.save(taskVariable2);
+        TaskEntity task1 = queryTestUtils.buildTask().withOwner(otherUser).buildAndSave();
 
-        Set<TaskVariableEntity> taskVariables = new HashSet<>();
-        taskVariables.add(taskVariable1);
-        taskVariables.add(taskVariable2);
+        TaskEntity task2 = queryTestUtils.buildTask().withTaskCandidateUsers(otherUser).buildAndSave();
 
-        createTaskWithVariables(processInstanceEntity, taskVariables, processVariables);
+        TaskEntity task3 = queryTestUtils.buildTask().withAssignee(otherUser).buildAndSave();
 
-        processInstanceRepository.save(processInstanceEntity);
-
-        ProcessVariableEntity variableToFetch = processVariables.stream().findFirst().get();
-
-        ValidatableMockMvcResponse response = given()
-            .webAppContextSetup(context)
-            .accept("application/hal+json;charset=UTF-8")
+        given()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{}")
             .when()
-            .get(
-                "/admin/v1/tasks?maxItems=500&skipCount=0&sort=createdDate,desc&variableKeys=" +
-                processInstanceEntity.getProcessDefinitionKey() +
-                "/" +
-                variableToFetch.getName() +
-                "&variables.name=" +
-                taskVariable1.getName() +
-                "&variables.value=" +
-                taskVariable1.getValue()
-            )
-            .then();
-
-        response.statusCode(200);
-        response.body("_embedded.tasks", hasSize(1));
-    }
-
-    @NotNull
-    private Set<ProcessVariableEntity> createProcessVariables(ProcessInstanceEntity processInstanceEntity) {
-        Set<ProcessVariableEntity> variables = new HashSet<>();
-
-        for (int i = 0; i < 8; i++) {
-            ProcessVariableEntity processVariableEntity = new ProcessVariableEntity();
-            processVariableEntity.setName("name" + i);
-            processVariableEntity.setValue("id");
-            processVariableEntity.setProcessInstanceId(processInstanceEntity.getId());
-            processVariableEntity.setProcessDefinitionKey(processInstanceEntity.getProcessDefinitionKey());
-            processVariableEntity.setProcessInstance(processInstanceEntity);
-            variables.add(processVariableEntity);
-        }
-        variableRepository.saveAll(variables);
-        processInstanceEntity.setVariables(variables);
-        processInstanceRepository.save(processInstanceEntity);
-        return variables;
-    }
-
-    @NotNull
-    private TaskVariableEntity createTaskVariable() {
-        TaskVariableEntity taskVariableEntity = new TaskVariableEntity();
-        taskVariableEntity.setName("name" + UUID.randomUUID());
-        taskVariableEntity.setValue("var-value");
-        return taskVariableEntity;
-    }
-
-    @NotNull
-    private TaskEntity createTaskWithVariables(
-        ProcessInstanceEntity processInstanceEntity,
-        Set<TaskVariableEntity> taskVariables,
-        Set<ProcessVariableEntity> processVariables
-    ) {
-        TaskEntity taskEntity = new TaskEntity();
-        String taskId = UUID.randomUUID().toString();
-        taskEntity.setId(taskId);
-        taskEntity.setCreatedDate(new Date());
-        taskEntity.setProcessInstance(processInstanceEntity);
-        taskEntity.setProcessInstanceId(processInstanceEntity.getId());
-        taskEntity.setVariables(taskVariables);
-        taskEntity.setProcessVariables(processVariables);
-        taskRepository.save(taskEntity);
-        taskVariables.forEach(taskVariableEntity -> {
-            taskVariableEntity.setTaskId(taskId);
-            taskVariableEntity.setTask(taskEntity);
-            taskVariableRepository.save(taskVariableEntity);
-        });
-        return taskEntity;
-    }
-
-    @NotNull
-    private ProcessInstanceEntity createProcessInstance() {
-        ProcessInstanceEntity processInstanceEntity = new ProcessInstanceEntity();
-        processInstanceEntity.setId("processInstanceId");
-        processInstanceEntity.setName("name");
-        processInstanceEntity.setInitiator("initiator");
-        processInstanceEntity.setProcessDefinitionName("test");
-        processInstanceEntity.setProcessDefinitionKey("processDefinitionKey");
-        processInstanceEntity.setServiceName("test");
-        processInstanceRepository.save(processInstanceEntity);
-        return processInstanceEntity;
+            .post(getSearchEndpointHttpPost())
+            .then()
+            .statusCode(200)
+            .body(TASKS_JSON_PATH, hasSize(3))
+            .body(TASK_IDS_JSON_PATH, containsInAnyOrder(task1.getId(), task2.getId(), task3.getId()));
     }
 }

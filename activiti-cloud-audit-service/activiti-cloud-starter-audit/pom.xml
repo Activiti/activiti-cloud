@@ -10,7 +10,7 @@
     <relativePath>../activiti-cloud-audit-dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-audit</artifactId>
-  <name>Activiti Cloud Starter :: Audit</name>
+  <name>Activiti Cloud Starter :: All In One</name>
   <dependencies>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -22,7 +22,11 @@
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-services-audit-jpa</artifactId>
+      <artifactId>activiti-cloud-starter-audit-rest</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.activiti.cloud</groupId>
+      <artifactId>activiti-cloud-starter-audit-consumer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -31,10 +35,6 @@
     <dependency>
       <groupId>org.activiti.cloud</groupId>
       <artifactId>activiti-cloud-services-metadata</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.activiti.cloud</groupId>
-      <artifactId>activiti-cloud-service-messaging-config</artifactId>
     </dependency>
     <dependency>
       <groupId>org.activiti.cloud</groupId>
@@ -99,10 +99,6 @@
     <dependency>
       <groupId>com.querydsl</groupId>
       <artifactId>querydsl-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-commons</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
