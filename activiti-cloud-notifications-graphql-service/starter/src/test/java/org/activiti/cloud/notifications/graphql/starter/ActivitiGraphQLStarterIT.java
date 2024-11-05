@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import org.activiti.api.runtime.model.impl.BPMNMessageImpl;
@@ -103,6 +102,7 @@ public class ActivitiGraphQLStarterIT {
     private static final String HRUSER = "hruser";
     private static final String AUTHORIZATION = "Authorization";
     private static final String TESTADMIN = "testadmin";
+    private static final String TESTDEVOPS = "testdevops";
     private static final String TASK_NAME = "task1";
     private static final String GRAPHQL_URL = "/graphql";
     private static final Duration TIMEOUT = Duration.ofMillis(20000);
@@ -1101,6 +1101,55 @@ public class ActivitiGraphQLStarterIT {
     }
 
     @Test
+    public void testGraphqlWsSubprotocolServerWithUserRoleUnauthorized() throws JsonProcessingException {
+        ReplayProcessor<String> output = ReplayProcessor.create();
+
+        identityTokenProducer.withTestUser(TESTDEVOPS);
+
+        final String accessToken = identityTokenProducer.authorizationHeaders().getFirst(AUTHORIZATION);
+
+        Map<String, Object> payload = mapBuilder().put("X-Authorization", accessToken).get();
+
+        String initMessage = objectMapper.writeValueAsString(
+            GraphQLMessage
+                .builder()
+                .type(GraphQLMessageType.CONNECTION_INIT)
+                .id("unauthorized-role")
+                .payload(payload)
+                .build()
+        );
+        HttpClient
+            .create()
+            .baseUrl("ws://localhost:" + port)
+            .wiretap(true)
+            .headers(h -> h.add(AUTHORIZATION, accessToken))
+            .websocket(graphqlWsClientSpec)
+            .uri(WS_GRAPHQL_URI)
+            .handle((i, o) -> {
+                o.sendString(Mono.just(initMessage)).then().log("client-send").subscribe();
+
+                return i
+                    .aggregateFrames()
+                    .receive()
+                    .asString()
+                    .doOnCancel(() -> {
+                        closeWebSocketAnCompleteDataProcessor(output, o);
+                    });
+            })
+            .log("client-received")
+            .take(1)
+            .subscribeWith(output)
+            .collectList()
+            .doOnError(i -> System.err.println("Failed requesting server: " + i))
+            .subscribe();
+
+        String expected = objectMapper.writeValueAsString(
+            GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ERROR).id("unauthorized-role").build()
+        );
+        StepVerifier.create(output).expectNext(expected).expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
     public void testGraphqlWsSubprotocolServerUnauthorized() throws JsonProcessingException {
         ReplayProcessor<String> output = ReplayProcessor.create();
 
@@ -1135,7 +1184,7 @@ public class ActivitiGraphQLStarterIT {
         String expected = objectMapper.writeValueAsString(
             GraphQLMessage.builder().type(GraphQLMessageType.CONNECTION_ERROR).id("unauthorized-connection").build()
         );
-        StepVerifier.create(output).expectNext(expected).verifyComplete();
+        StepVerifier.create(output).expectNext(expected).expectComplete().verify(TIMEOUT);
     }
 
     @Test
@@ -1527,29 +1576,5 @@ public class ActivitiGraphQLStarterIT {
 
     public static StringObjectMapBuilder mapBuilder() {
         return new StringObjectMapBuilder();
-    }
-}
-
-/**
- * A map builder creating a map with String keys and values.
- */
-class StringObjectMapBuilder extends MapBuilder<StringObjectMapBuilder, String, Object> {}
-
-class MapBuilder<B extends MapBuilder<B, K, V>, K, V> {
-
-    private final Map<K, V> map = new LinkedHashMap<>();
-
-    public B put(K key, V value) {
-        this.map.put(key, value);
-        return _this();
-    }
-
-    public Map<K, V> get() {
-        return this.map;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected final B _this() {
-        return (B) this;
     }
 }

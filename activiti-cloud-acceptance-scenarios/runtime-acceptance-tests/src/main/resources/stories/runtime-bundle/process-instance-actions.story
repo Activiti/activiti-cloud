@@ -120,6 +120,12 @@ When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VAR
 And the admin deletes the process
 Then the process instance is deleted
 
+Scenario: admin force destroy a process instance
+Given the user is authenticated as testadmin
+When the user starts an instance of the process called PROCESS_INSTANCE_WITH_VARIABLES
+And the admin force destroys the process
+Then the process instance is destroyed
+
 Scenario: check sequence number and message id for events
 Given the user is authenticated as testuser
 When the user starts an instance of the process called SIMPLE_PROCESS_INSTANCE

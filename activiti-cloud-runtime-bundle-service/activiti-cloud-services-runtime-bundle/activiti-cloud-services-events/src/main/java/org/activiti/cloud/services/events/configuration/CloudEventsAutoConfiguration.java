@@ -74,6 +74,7 @@ import org.activiti.cloud.services.events.message.CloudRuntimeEventMessageBuilde
 import org.activiti.cloud.services.events.message.ExecutionContextMessageBuilderFactory;
 import org.activiti.cloud.services.events.message.RuntimeBundleMessageBuilderFactory;
 import org.activiti.cloud.services.events.services.CloudProcessDeletedService;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.spring.process.CachingProcessExtensionService;
@@ -593,14 +594,9 @@ public class CloudEventsAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CloudProcessDeletedService cloudProcessDeletedProducer(
-        ProcessEngineChannels processEngineChannels,
-        RuntimeBundleMessageBuilderFactory runtimeBundleMessageBuilderFactory,
-        RuntimeBundleInfoAppender runtimeBundleInfoAppender
+        ManagementService managementService,
+        ProcessEngineEventsAggregator processEngineEventsAggregator
     ) {
-        return new CloudProcessDeletedService(
-            processEngineChannels,
-            runtimeBundleMessageBuilderFactory,
-            runtimeBundleInfoAppender
-        );
+        return new CloudProcessDeletedService(managementService, processEngineEventsAggregator);
     }
 }

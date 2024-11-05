@@ -404,6 +404,11 @@ public class ProcessInstanceTasks {
         processRuntimeAdminSteps.deleteProcessInstance(processInstance.getId());
     }
 
+    @When("the admin force destroys the process")
+    public void adminForceDeleteCurrentProcessInstance() throws Exception {
+        processRuntimeAdminSteps.destroyProcessInstance(processInstance.getId(), true);
+    }
+
     @When("the user suspends the process instance")
     public void suspendProcessInstance() throws Exception {
         processRuntimeBundleSteps.suspendProcessInstance(processInstance.getId());
@@ -420,6 +425,16 @@ public class ProcessInstanceTasks {
         auditSteps.checkProcessInstanceEvent(
             processInstance.getId(),
             ProcessRuntimeEvent.ProcessEvents.PROCESS_CANCELLED
+        );
+    }
+
+    @Then("the process instance is destroyed")
+    public void verifyProcessInstanceIsForceDestroyed() throws Exception {
+        processRuntimeBundleSteps.checkProcessInstanceNotFound(processInstance.getId());
+        processQuerySteps.checkProcessInstanceNotFound(processInstance.getId());
+        auditSteps.checkProcessInstanceEvent(
+            processInstance.getId(),
+            ProcessRuntimeEvent.ProcessEvents.PROCESS_DELETED
         );
     }
 

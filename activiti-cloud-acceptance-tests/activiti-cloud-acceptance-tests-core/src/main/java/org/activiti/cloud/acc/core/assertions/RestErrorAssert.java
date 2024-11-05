@@ -15,7 +15,8 @@
  */
 package org.activiti.cloud.acc.core.assertions;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletResponse;

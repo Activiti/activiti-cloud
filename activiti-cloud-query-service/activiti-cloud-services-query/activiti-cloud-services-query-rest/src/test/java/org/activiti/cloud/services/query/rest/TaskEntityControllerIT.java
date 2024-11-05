@@ -21,8 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +42,9 @@ import org.activiti.cloud.api.task.model.QueryCloudTask.TaskPermissions;
 import org.activiti.cloud.conf.QueryRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessDefinitionRepository;
+import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskCandidateGroupEntity;
 import org.activiti.cloud.services.query.model.TaskCandidateUserEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -56,6 +60,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -87,6 +92,12 @@ class TaskEntityControllerIT {
 
     @MockBean
     private TaskRepository taskRepository;
+
+    @MockBean
+    private ProcessInstanceRepository processInstanceRepository;
+
+    @MockBean
+    private VariableRepository processVariableRepository;
 
     @MockBean
     private EntityFinder entityFinder;
@@ -127,7 +138,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(11, 10, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 12));
 
         //when
@@ -155,8 +166,8 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(1, 10);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
-            .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
+        when(taskRepository.findAll(nullable(Predicate.class), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 11));
 
         //when
         mockMvc
@@ -265,7 +276,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
@@ -280,7 +291,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(1000, 1000, PageRequest.of(0, 1000));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 2000));
 
         //when
@@ -295,7 +306,7 @@ class TaskEntityControllerIT {
         //given
         AlfrescoPageRequest pageRequest = new AlfrescoPageRequest(0, 1000, PageRequest.of(0, 20));
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
 
         //when
@@ -309,7 +320,7 @@ class TaskEntityControllerIT {
         //given
         PageRequest pageRequest = PageRequest.of(0, 1000);
 
-        given(taskRepository.findAll(any(), eq(pageRequest)))
+        given(taskRepository.findAll(nullable(Predicate.class), eq(pageRequest)))
             .willReturn(new PageImpl<>(Collections.singletonList(buildDefaultTask()), pageRequest, 1001));
 
         //when

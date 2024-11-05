@@ -46,6 +46,7 @@ import org.activiti.cloud.services.rest.assemblers.CollectionModelAssembler;
 import org.activiti.cloud.services.rest.conf.ServicesRestWebMvcAutoConfiguration;
 import org.activiti.cloud.services.rest.config.StreamConfig;
 import org.activiti.common.util.DateFormatterProvider;
+import org.activiti.engine.ManagementService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.spring.process.CachingProcessExtensionService;
@@ -126,6 +127,9 @@ class ProcessInstanceVariableControllerImplIT {
 
     @MockBean
     private PrincipalIdentityProvider principalIdentityProvider;
+
+    @MockBean
+    private ManagementService managementService;
 
     @BeforeEach
     void setUp() {

@@ -77,6 +77,6 @@ public class BaseOpenApiBuilder {
             .bearerFormat("jwt")
             .in(SecurityScheme.In.HEADER)
             .description("Authorizing with SSO")
-            .flows(new OAuthFlows().implicit(swaggerOAuthFlow));
+            .flows(new OAuthFlows().authorizationCode(swaggerOAuthFlow));
     }
 }

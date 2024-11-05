@@ -59,4 +59,9 @@ public class KeycloakJwtAdapter implements JwtAdapter {
     private List<String> getRoles(Map<String, Object> getRolesParent) {
         return (List<String>) getRolesParent.get("roles");
     }
+
+    @Override
+    public List<String> getScopes() {
+        return jwt.getClaimAsStringList("scope");
+    }
 }

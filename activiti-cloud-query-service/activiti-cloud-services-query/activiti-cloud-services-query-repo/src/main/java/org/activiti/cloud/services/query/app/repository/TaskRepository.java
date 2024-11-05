@@ -21,17 +21,17 @@ import com.querydsl.core.types.dsl.StringPath;
 import java.util.Arrays;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.querydsl.binding.QuerydslBinderCustomizer;
 import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-@RepositoryRestResource(exported = false)
 public interface TaskRepository
     extends
         PagingAndSortingRepository<TaskEntity, String>,
+        JpaSpecificationExecutor<TaskEntity>,
         QuerydslPredicateExecutor<TaskEntity>,
         QuerydslBinderCustomizer<QTaskEntity>,
         CustomizedTaskRepository,

@@ -63,4 +63,12 @@ public class KeycloakJwtAdapterTest {
 
         assertThat(keycloakJwtAdapter.getRoles()).hasSize(2).containsExactly("roleA", "roleB");
     }
+
+    @Test
+    public void shouldReturnScope() {
+        Map<String, Object> rolesParent = JSONObjectUtils.newJSONObject();
+        rolesParent.put("scope", List.of("scopeA", "scopeB"));
+        when(jwt.getClaimAsStringList("scope")).thenReturn(List.of("scopeA", "scopeB"));
+        assertThat(keycloakJwtAdapter.getScopes()).hasSize(2).containsExactly("scopeA", "scopeB");
+    }
 }

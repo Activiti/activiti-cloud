@@ -26,6 +26,8 @@ public interface ConnectorIntegrationChannels {
     String CONSTANTS_INTEGRATION_EVENTS_CONSUMER = "constantsIntegrationEventsConsumer";
     String MEALS_CONNECTOR_CONSUMER = "mealsConnectorConsumer";
     String VALUE_PROCESSOR_CONSUMER = "valueProcessorConsumer";
+    String RACE_CONDITIONS_MULTI_INSTANCE_CONSUMER = "raceConditionsMultiInstanceConsumer";
+    String RACE_CONDITION_SINGLE_INSTANCE_CONSUMER = "raceConditionsSingleInstanceConsumer";
 
     @InputBinding(INTEGRATION_EVENTS_CONSUMER)
     default SubscribableChannel integrationEventsConsumer() {
@@ -55,5 +57,15 @@ public interface ConnectorIntegrationChannels {
     @InputBinding(VALUE_PROCESSOR_CONSUMER)
     default SubscribableChannel valueProcessorConsumer() {
         return MessageChannels.publishSubscribe(VALUE_PROCESSOR_CONSUMER).getObject();
+    }
+
+    @InputBinding(RACE_CONDITIONS_MULTI_INSTANCE_CONSUMER)
+    default SubscribableChannel raceConditionsMultiInstanceConsumer() {
+        return MessageChannels.publishSubscribe(RACE_CONDITIONS_MULTI_INSTANCE_CONSUMER).getObject();
+    }
+
+    @InputBinding(RACE_CONDITION_SINGLE_INSTANCE_CONSUMER)
+    default SubscribableChannel raceConditionsSingleInstanceConsumer() {
+        return MessageChannels.publishSubscribe(RACE_CONDITION_SINGLE_INSTANCE_CONSUMER).getObject();
     }
 }

@@ -55,6 +55,11 @@ public class ProcessRuntimeAdminSteps {
     }
 
     @Step
+    public void destroyProcessInstance(String id, boolean force) {
+        processRuntimeAdminService.destroyProcess(id, force);
+    }
+
+    @Step
     public CloudProcessInstance message(StartMessagePayload payload) throws IOException {
         return processRuntimeAdminService.message(payload);
     }

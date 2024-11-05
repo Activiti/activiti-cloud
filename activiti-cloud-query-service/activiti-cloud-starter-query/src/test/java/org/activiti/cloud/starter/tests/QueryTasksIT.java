@@ -2651,21 +2651,6 @@ public class QueryTasksIT {
         taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
         assertThat(taskProcessVariableCount).isEqualTo(0);
 
-        await()
-            .untilAsserted(() -> {
-                //when
-                Collection<QueryCloudTask> retrievedTasks = executeRequestGetTasksWithProcessVariables(
-                    "varAProcessDefinitionKey/varAName"
-                )
-                    .getBody()
-                    .getContent();
-
-                //then
-                assertThat(retrievedTasks)
-                    .extracting(Task::getName, tasks -> tasks.getProcessVariables().size())
-                    .containsExactly(tuple("Task", 0));
-            });
-
         processVariablesMigrationHelper.migrateTaskProcessVariableData();
         taskProcessVariableCount = processVariablesMigrationHelper.getTaskProcessVariableCount(task.getId());
         assertThat(taskProcessVariableCount).isEqualTo(2);

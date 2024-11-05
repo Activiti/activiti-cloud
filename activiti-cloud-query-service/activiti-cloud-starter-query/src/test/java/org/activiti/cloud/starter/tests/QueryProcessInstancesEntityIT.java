@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessInstance;
@@ -34,7 +35,9 @@ import org.activiti.api.process.model.ProcessInstance.ProcessInstanceStatus;
 import org.activiti.api.runtime.model.impl.ActivitiErrorMessageImpl;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessCreatedEventImpl;
+import org.activiti.cloud.api.process.model.impl.events.CloudProcessDeletedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessResumedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessStartedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudProcessSuspendedEventImpl;
@@ -43,6 +46,11 @@ import org.activiti.cloud.common.error.attributes.ErrorAttributesMessageSanitize
 import org.activiti.cloud.services.query.app.repository.BPMNActivityRepository;
 import org.activiti.cloud.services.query.app.repository.BPMNSequenceFlowRepository;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateGroupRepository;
+import org.activiti.cloud.services.query.app.repository.TaskCandidateUserRepository;
+import org.activiti.cloud.services.query.app.repository.TaskRepository;
+import org.activiti.cloud.services.query.app.repository.TaskVariableRepository;
+import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.AbstractVariableEntity;
 import org.activiti.cloud.services.query.model.BPMNActivityEntity;
 import org.activiti.cloud.services.query.model.BPMNSequenceFlowEntity;
@@ -59,6 +67,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -109,6 +118,21 @@ public class QueryProcessInstancesEntityIT {
     @Autowired
     private SubscribableChannel errorChannel;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private TaskVariableRepository taskVariableRepository;
+
+    @Autowired
+    private TaskCandidateGroupRepository taskCandidateGroupRepository;
+
+    @Autowired
+    private TaskCandidateUserRepository taskCandidateUserRepository;
+
+    @Autowired
+    private VariableRepository variableRepository;
+
     private EventsAggregator eventsAggregator;
 
     private ProcessInstanceEventContainedBuilder processInstanceBuilder;
@@ -130,7 +154,12 @@ public class QueryProcessInstancesEntityIT {
     public void tearDown() {
         sequenceFlowRepository.deleteAll();
         activityRepository.deleteAll();
+        taskVariableRepository.deleteAll();
+        taskRepository.deleteAll();
+        variableRepository.deleteAll();
         processInstanceRepository.deleteAll();
+        taskCandidateGroupRepository.deleteAll();
+        taskCandidateUserRepository.deleteAll();
     }
 
     @Test
@@ -256,6 +285,77 @@ public class QueryProcessInstancesEntityIT {
 
                 ProcessInstance responseProcess = responseEntity.getBody();
                 assertThat(responseProcess.getId()).isEqualTo(process.getId());
+            });
+    }
+
+    @Test
+    public void shouldDeleteProcessInfo() {
+        //given
+        ProcessInstance process = processInstanceBuilder.startSimpleProcessInstance("simple");
+
+        var candidateUserTask = taskEventBuilder.aTaskWithUserCandidate("userCandidate", "testuser", process);
+        var candidateGroupTask = taskEventBuilder.aTaskWithGroupCandidate("groupCandidate", "testgroup", process);
+
+        variableBuilder.aCreatedVariable("foo", "bar").onProcessInstance(process);
+        variableBuilder.aCreatedVariable("baz", "qux").onTask(candidateGroupTask);
+        variableBuilder.aCreatedVariable("quux", "bax").onTask(candidateUserTask);
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                identityTokenProducer.withTestUser("hradmin");
+
+                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/" + process.getId(),
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isNotNull();
+                assertThat(responseEntity.getBody().getId()).isNotNull();
+
+                ProcessInstance responseProcess = responseEntity.getBody();
+                assertThat(responseProcess.getId()).isEqualTo(process.getId());
+
+                assertThat(taskRepository.findAll()).isNotEmpty();
+                assertThat(taskVariableRepository.findAll()).isNotEmpty();
+                assertThat(activityRepository.findAll()).isNotEmpty();
+                assertThat(sequenceFlowRepository.findAll()).isNotEmpty();
+                assertThat(variableRepository.findAll()).isNotEmpty();
+                assertThat(processInstanceRepository.findAll()).isNotEmpty();
+                assertThat(taskCandidateGroupRepository.findAll()).isNotEmpty();
+                assertThat(taskCandidateUserRepository.findAll()).isNotEmpty();
+
+                eventsAggregator.addEvents(new CloudProcessCancelledEventImpl(responseProcess));
+                eventsAggregator.addEvents(new CloudProcessDeletedEventImpl(responseProcess));
+            });
+
+        eventsAggregator.sendAll();
+
+        await()
+            .untilAsserted(() -> {
+                identityTokenProducer.withTestUser("hradmin");
+
+                ResponseEntity<ProcessInstance> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/" + process.getId(),
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+                assertThat(taskRepository.findAll()).isEmpty();
+                assertThat(taskVariableRepository.findAll()).isEmpty();
+                assertThat(activityRepository.findAll()).isEmpty();
+                assertThat(sequenceFlowRepository.findAll()).isEmpty();
+                assertThat(variableRepository.findAll()).isEmpty();
+                assertThat(processInstanceRepository.findAll()).isEmpty();
+                assertThat(taskCandidateGroupRepository.findAll()).isEmpty();
+                assertThat(taskCandidateUserRepository.findAll()).isEmpty();
             });
     }
 
@@ -414,6 +514,59 @@ public class QueryProcessInstancesEntityIT {
                             runningProcess.getProcessDefinitionName()
                         )
                     );
+            });
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "status=COMPLETED, 1",
+            "status=RUNNING, 2",
+            "status=COMPLETED&status=RUNNING, 1;2",
+            "status=CREATED&status=RUNNING, 2",
+        }
+    )
+    public void shouldGetProcessInstancesAppVersionsAsAdmin(String queryParameters, String expectedResult) {
+        //given
+        processInstanceBuilder.aCompletedProcessInstanceWithAppVersion("Process for filter", "1");
+        processInstanceBuilder.aRunningProcessInstanceWithAppVersion("Process", "2");
+
+        eventsAggregator.sendAll();
+
+        identityTokenProducer.withTestUser("hradmin");
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/appVersions?" + queryParameters,
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).containsExactly(expectedResult.split(";"));
+            });
+    }
+
+    @Test
+    public void shouldGetProcessInstancesEmptyAppVersionsAsAdmin() {
+        //given
+        processInstanceBuilder.aCompletedProcessInstanceWithAppVersion("Process for filter", "1");
+
+        eventsAggregator.sendAll();
+
+        identityTokenProducer.withTestUser("hradmin");
+        await()
+            .untilAsserted(() -> {
+                ResponseEntity<Set<String>> responseEntity = testRestTemplate.exchange(
+                    ADMIN_PROC_URL + "/appVersions?status=CREATED",
+                    HttpMethod.GET,
+                    identityTokenProducer.entityWithAuthorizationHeader(),
+                    new ParameterizedTypeReference<>() {}
+                );
+                //then
+                assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+                assertThat(responseEntity.getBody()).isInstanceOf(Set.class).isEmpty();
             });
     }
 

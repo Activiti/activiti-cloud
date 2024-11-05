@@ -17,14 +17,20 @@ package org.activiti.cloud.services.query.rest;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.activiti.cloud.services.query.app.repository.EntityFinder;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
+import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateAggregator;
 import org.activiti.cloud.services.query.rest.predicate.QueryDslPredicateFilter;
 import org.hibernate.Filter;
@@ -32,11 +38,14 @@ import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 public class ProcessInstanceAdminService {
 
     private final ProcessInstanceRepository processInstanceRepository;
+
+    private final ProcessInstanceSearchService processInstanceSearchService;
 
     private final EntityFinder entityFinder;
 
@@ -47,10 +56,12 @@ public class ProcessInstanceAdminService {
 
     public ProcessInstanceAdminService(
         ProcessInstanceRepository processInstanceRepository,
+        ProcessInstanceSearchService processInstanceSearchService,
         EntityFinder entityFinder,
         QueryDslPredicateAggregator queryDslPredicateAggregator
     ) {
         this.processInstanceRepository = processInstanceRepository;
+        this.processInstanceSearchService = processInstanceSearchService;
         this.entityFinder = entityFinder;
         this.predicateAggregator = queryDslPredicateAggregator;
     }
@@ -76,7 +87,7 @@ public class ProcessInstanceAdminService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<ProcessInstanceEntity> findAllWithVariables(
         Predicate predicate,
         List<String> variableKeys,
@@ -96,7 +107,27 @@ public class ProcessInstanceAdminService {
         return entityFinder.findById(
             processInstanceRepository,
             processInstanceId,
-            "Unable to find task for the given id:'" + processInstanceId + "'"
+            "Unable to find process instance for the given id:'" + processInstanceId + "'"
         );
+    }
+
+    public Set<String> findAllAppVersions(Predicate predicate) {
+        Predicate transformedPredicate = Optional.ofNullable(predicate).orElseGet(BooleanBuilder::new);
+        JPAQuery<?> query = new JPAQueryFactory(entityManager).query();
+
+        QProcessInstanceEntity process = QProcessInstanceEntity.processInstanceEntity;
+        List<String> appVersions = query
+            .select(process.appVersion)
+            .distinct()
+            .from(process)
+            .where(transformedPredicate)
+            .fetch();
+
+        return appVersions.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProcessInstanceEntity> search(ProcessInstanceSearchRequest searchRequest, Pageable pageable) {
+        return processInstanceSearchService.searchUnrestricted(searchRequest, pageable);
     }
 }

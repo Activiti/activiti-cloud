@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.activiti.cloud</groupId>
     <artifactId>activiti-cloud-notifications-graphql-dependencies</artifactId>
-    <version>8.6.0-SNAPSHOT</version>
+    <version>8.7.0-SNAPSHOT</version>
     <relativePath>../dependencies</relativePath>
   </parent>
   <artifactId>activiti-cloud-starter-notifications-graphql</artifactId>
@@ -152,6 +152,10 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.graphql</groupId>
+      <artifactId>spring-graphql-test</artifactId>
     </dependency>
   </dependencies>
 </project>

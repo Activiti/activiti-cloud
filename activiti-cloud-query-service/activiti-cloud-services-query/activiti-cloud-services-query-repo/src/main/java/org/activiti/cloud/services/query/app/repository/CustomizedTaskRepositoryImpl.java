@@ -16,7 +16,6 @@
 package org.activiti.cloud.services.query.app.repository;
 
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -24,7 +23,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QProcessVariableEntity;
 import org.activiti.cloud.services.query.model.QTaskEntity;
 import org.activiti.cloud.services.query.model.QTaskVariableEntity;
 import org.activiti.cloud.services.query.model.TaskEntity;
@@ -84,54 +82,6 @@ public class CustomizedTaskRepositoryImpl extends QuerydslRepositorySupport impl
             .innerJoin(taskEntity.variables, variableEntity)
             .on(condition)
             .where(taskEntity.id.in(taskIds));
-
-        return PageableExecutionUtils.getPage(
-            querydsl.applySorting(pageable.getSort(), tasksQuery).fetch(),
-            pageable,
-            () -> totalElements
-        );
-    }
-
-    @Override
-    public Page<TaskEntity> findWithProcessVariables(
-        List<String> variableKeys,
-        Predicate predicate,
-        Pageable pageable
-    ) {
-        Assert.notNull(variableKeys, "keys must not be null!");
-        Assert.notNull(predicate, "Predicate must not be null!");
-        Assert.notNull(pageable, "Pageable must not be null!");
-
-        EntityManager entityManager = getEntityManager();
-        Querydsl querydsl = getQuerydsl();
-        JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
-
-        QTaskEntity taskEntity = QTaskEntity.taskEntity;
-        QProcessVariableEntity processVariableEntity = QProcessVariableEntity.processVariableEntity;
-
-        JPAQuery<String> taskIdsQuery = queryFactory.query().select(taskEntity.id).from(taskEntity).where(predicate);
-
-        long totalElements = taskIdsQuery.fetchCount();
-
-        List<String> taskIds = querydsl.applyPagination(pageable, taskIdsQuery).fetch();
-
-        BooleanExpression processVariableFilter = processVariableEntity.processDefinitionKey
-            .concat("/")
-            .concat(processVariableEntity.name)
-            .in(variableKeys);
-
-        JPQLQuery<TaskEntity> tasksQuery = queryFactory
-            .query()
-            .select(taskEntity)
-            .from(taskEntity)
-            .where(taskEntity.id.in(taskIds))
-            .leftJoin(taskEntity.processVariables, processVariableEntity)
-            .where(processVariableEntity.isNull().or(processVariableFilter))
-            .fetchJoin()
-            .leftJoin(taskEntity.taskCandidateGroups)
-            .fetchJoin()
-            .leftJoin(taskEntity.taskCandidateUsers)
-            .fetchJoin();
 
         return PageableExecutionUtils.getPage(
             querydsl.applySorting(pageable.getSort(), tasksQuery).fetch(),

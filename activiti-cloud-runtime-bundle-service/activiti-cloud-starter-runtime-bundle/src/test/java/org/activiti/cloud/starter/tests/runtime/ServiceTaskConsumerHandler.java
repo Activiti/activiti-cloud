@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.activiti.api.process.model.IntegrationContext;
@@ -32,6 +34,8 @@ import org.activiti.cloud.api.process.model.IntegrationRequest;
 import org.activiti.cloud.common.messaging.functional.ConditionalFunctionBinding;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
 import org.assertj.core.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -68,6 +72,20 @@ public class ServiceTaskConsumerHandler {
     private final AtomicInteger currentMealIndex = new AtomicInteger(0);
     private List<String> meals = Arrays.asList("pizza", "pasta");
     private List<String> sizes = Arrays.asList("small", "medium");
+
+    private CountDownLatch multiInstanceLatch = new CountDownLatch(1);
+
+    private CountDownLatch singleInstanceLatch = new CountDownLatch(1);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskConsumerHandler.class);
+
+    public CountDownLatch getSingleInstanceLatch() {
+        return singleInstanceLatch;
+    }
+
+    public CountDownLatch getMultiInstanceLatch() {
+        return multiInstanceLatch;
+    }
 
     @FunctionBinding(input = ConnectorIntegrationChannels.INTEGRATION_EVENTS_CONSUMER)
     @Bean
@@ -254,6 +272,47 @@ public class ServiceTaskConsumerHandler {
             IntegrationContext integrationContext = message.getPayload().getIntegrationContext();
             integrationContext.addOutBoundVariable("providedValue", integrationContext.getInBoundVariable("input"));
             integrationResultSender.send(message.getPayload(), integrationContext);
+        };
+    }
+
+    @FunctionBinding(input = ConnectorIntegrationChannels.RACE_CONDITIONS_MULTI_INSTANCE_CONSUMER)
+    @Bean
+    public Consumer<Message<IntegrationRequest>> raceConditionMultiInstanceConnector() {
+        return message -> {
+            integrationResultSender.send(message.getPayload(), message.getPayload().getIntegrationContext());
+            LOGGER.info("Integration result sent for multi-instance. Thread: {}", Thread.currentThread().threadId());
+        };
+    }
+
+    @FunctionBinding(input = ConnectorIntegrationChannels.RACE_CONDITION_SINGLE_INSTANCE_CONSUMER)
+    @Bean
+    public Consumer<Message<IntegrationRequest>> raceConditionSingleInstanceConnector() {
+        return message -> {
+            try {
+                // unblock who was waiting for single instance service task to start (integration result for single
+                // service task)
+                singleInstanceLatch.countDown();
+                LOGGER.info(
+                    "Single instance started: single instance latch counted down. Waiting for multi-instance latch to be counted down... Thread: {}",
+                    Thread.currentThread().threadId()
+                );
+                boolean conditionReached = multiInstanceLatch.await(5, TimeUnit.SECONDS);
+                if (conditionReached) {
+                    LOGGER.info(
+                        "Proceeding with the execution of single instance. Thread: {}",
+                        Thread.currentThread().threadId()
+                    );
+                } else {
+                    LOGGER.info(
+                        "Timeout while waiting for multi-instance latch to be counted down. Thread: {}",
+                        Thread.currentThread().threadId()
+                    );
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
+            integrationResultSender.send(message.getPayload(), message.getPayload().getIntegrationContext());
         };
     }
 }

@@ -25,7 +25,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 public class KeycloakContainerApplicationInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:18.0.0")
+    private static KeycloakContainer keycloakContainer = new KeycloakContainer("quay.io/keycloak/keycloak:24.0.3")
         .withAdminUsername("admin")
         .withAdminPassword("admin")
         .withRealmImportFile("activiti-realm.json")
