@@ -32,7 +32,7 @@ jobs:
       - name: Check dependabot build
         uses: Activiti/Activiti/.github/actions/check-ext-build@7700f0283a9ff5181581a350d2520e55c61c1c60 # 8.6.0
       - name: pre-commit
-        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           skip_checkout: true
       - name: Ensure SHA pinned actions
@@ -72,7 +72,7 @@ jobs:
           GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
           echo "version=0.0.1-${GITHUB_PR_NUMBER}-SNAPSHOT" >> $GITHUB_OUTPUT
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         id: update-pom-to-next-version
         with:
           version: ${{ steps.resolve-override-version.outputs.version }}
@@ -170,7 +170,7 @@ jobs:
           version: v3.5.2
 
       - name: Set up rancher
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -351,7 +351,7 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -374,7 +374,7 @@ jobs:
       DEVELOPMENT_BRANCH: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           version: ${{ needs.build.outputs.version }}
           auto-merge: 'true'
@@ -412,12 +412,12 @@ jobs:
           yq -i e '.activiti-cloud-connector.image.tag = env(VERSION)' values.yaml
           yq -i e '.activiti-cloud-identity-adapter.image.tag = env(VERSION)' values.yaml
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
       - name: Update helm docs
         working-directory: ${{ env.FULL_CHART_DIR}}
         run: helm-docs
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -440,7 +440,7 @@ jobs:
     if: always() && failure() && github.event_name == 'push'
     steps:
       - name: Slack Notification
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@231ca442a35bf41dbda3c9960d74e8d703c208f4 # v8.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@a0837df06d10de2cae8a99319e8e101a6cbe9083 # v8.4.0
         with:
           channel-id: 'C03PMT6APFU' # eng-hxp-studio-activiti-gh-notifs, to be renamed eng-automate-activiti-gh-notifs
           token: ${{ secrets.SLACK_NOTIFICATION_BOT_TOKEN }}
