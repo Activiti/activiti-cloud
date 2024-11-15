@@ -107,9 +107,11 @@ public class CommandEndpointIT {
     @Autowired
     private CommandEndPointITStreamHandler streamHandler;
 
-    private Map<String, String> processDefinitionIds = new HashMap<>();
+    private final Map<String, String> processDefinitionIds = new HashMap<>();
 
-    private static List<ProcessDeployedEvents> processDeployedEvents = new ArrayList<>();
+    private final Map<String, String> processDefinitionKeys = new HashMap<>();
+
+    private static final List<ProcessDeployedEvents> processDeployedEvents = new ArrayList<>();
 
     @TestComponent
     static class TestProcessDeployedEventsListener {
@@ -140,6 +142,7 @@ public class CommandEndpointIT {
 
         for (ProcessDefinition pd : processDefinitions.getBody().getContent()) {
             processDefinitionIds.put(pd.getName(), pd.getId());
+            processDefinitionKeys.put(pd.getKey(), pd.getId());
         }
     }
 
@@ -271,6 +274,28 @@ public class CommandEndpointIT {
             .asInstanceOf(InstanceOfAssertFactories.LIST)
             .isNotEmpty()
             .doesNotContain(processDefinitionIds.values().toArray());
+    }
+
+    @Test
+    public void syncCloudProcessDefinitionsKeysTest() {
+        final var testProcessDefinitionKey = "SimpleProcess";
+        streamHandler.resetSyncProcessDefinitionsAck();
+
+        var payload = SyncCloudProcessDefinitionsPayload
+            .builder()
+            .processDefinitionKeys(List.of(testProcessDefinitionKey))
+            .excludedProcessDefinitionIds(List.of("foo", "bar"))
+            .build();
+
+        var result = doSyncCloudProcessDefinitions(payload);
+
+        assertThat(result).extracting(SyncCloudProcessDefinitionsResult::getPayload).isEqualTo(payload);
+
+        assertThat(result)
+            .extracting(SyncCloudProcessDefinitionsResult::getEntity)
+            .asInstanceOf(InstanceOfAssertFactories.LIST)
+            .isNotEmpty()
+            .containsOnly(processDefinitionKeys.get(testProcessDefinitionKey));
     }
 
     private void completeTask(Task task) {

@@ -19,9 +19,12 @@ package org.activiti.cloud.services.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.activiti.api.process.model.ProcessDefinition;
@@ -52,8 +55,9 @@ public class ProcessDefinitionsSyncService {
 
     public List<String> syncProcessDefinitions(SyncCloudProcessDefinitionsPayload payload) {
         List<String> excludedProcessDefinitionIds = payload.getExcludedProcessDefinitionIds();
+        var processDefinitionKeys = payload.getProcessDefinitionKeys();
 
-        return queryProcessDefinitionsStream(excludedProcessDefinitionIds)
+        return queryProcessDefinitionsStream(processDefinitionKeys, excludedProcessDefinitionIds)
             .map(processDefinitions -> processDefinitions.stream().map(this::toProcessDeployedEvent).toList())
             .map(ProcessDeployedEvents::new)
             .peek(applicationEventPublisher::publishEvent)
@@ -62,11 +66,21 @@ public class ProcessDefinitionsSyncService {
             .toList();
     }
 
-    private Stream<List<ProcessDefinition>> queryProcessDefinitionsStream(List<String> excludedProcessDefinitionIds) {
+    private Stream<List<ProcessDefinition>> queryProcessDefinitionsStream(
+        List<String> processDefinitionKeys,
+        List<String> excludedProcessDefinitionIds
+    ) {
         final AtomicInteger counter = new AtomicInteger();
 
-        return repositoryService
-            .createProcessDefinitionQuery()
+        var query = repositoryService.createProcessDefinitionQuery();
+
+        Optional
+            .ofNullable(processDefinitionKeys)
+            .filter(Predicate.not(Collection::isEmpty))
+            .map(Set::copyOf)
+            .ifPresent(query::processDefinitionKeys);
+
+        return query
             .list()
             .stream()
             .filter(it ->
