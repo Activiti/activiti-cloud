@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
 import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.common.messaging.functional.FunctionBinding;
@@ -30,6 +32,7 @@ import org.activiti.cloud.common.messaging.functional.InputBinding;
 import org.activiti.cloud.common.messaging.functional.OutputBinding;
 import org.activiti.cloud.services.gateway.channels.ProcessRuntimeGatewayChannels;
 import org.activiti.cloud.services.gateway.config.ProcessRuntimeGatewayProperties;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -74,9 +77,13 @@ public class ProcessRuntimeGatewayTest {
         @Bean
         Function<SyncCloudProcessDefinitionsPayload, SyncCloudProcessDefinitionsResult> testCommandExecutor() {
             return payload -> {
-                var processDefinitionsIds = payload.getExcludedProcessDefinitionIds();
+                var result = Stream
+                    .of("foo:1", "foo:2", "bar:1", "bar:2", "baz")
+                    .filter(it -> payload.getProcessDefinitionKeys().stream().anyMatch(it::startsWith))
+                    .filter(Predicate.not(payload.getExcludedProcessDefinitionIds()::contains))
+                    .toList();
 
-                return new SyncCloudProcessDefinitionsResult(payload, processDefinitionsIds);
+                return new SyncCloudProcessDefinitionsResult(payload, result);
             };
         }
     }
@@ -109,17 +116,23 @@ public class ProcessRuntimeGatewayTest {
     @Test
     void processRuntimeGatewayTest() {
         // given
-        var excludedProcessDefinitionIds = List.of("foo", "bar");
+        var processDefinitionKeys = List.of("foo", "bar", "baz");
+        var excludedProcessDefinitionIds = List.of("foo:1", "bar:1");
 
         // when
         var result = processRuntimeGateway.syncProcessDefinitions(
-            new SyncCloudProcessDefinitionsPayload(excludedProcessDefinitionIds)
+            SyncCloudProcessDefinitionsPayload
+                .builder()
+                .processDefinitionKeys(processDefinitionKeys)
+                .excludedProcessDefinitionIds(excludedProcessDefinitionIds)
+                .build()
         );
 
         // then
         assertThat(result)
             .isNotNull()
             .extracting(SyncCloudProcessDefinitionsResult::getEntity)
-            .isEqualTo(excludedProcessDefinitionIds);
+            .asInstanceOf(InstanceOfAssertFactories.LIST)
+            .containsOnly("foo:2", "bar:2", "baz");
     }
 }

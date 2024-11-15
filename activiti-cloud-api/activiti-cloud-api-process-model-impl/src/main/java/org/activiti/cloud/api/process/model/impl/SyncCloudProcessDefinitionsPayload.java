@@ -24,21 +24,30 @@ import org.activiti.api.model.shared.Payload;
 public class SyncCloudProcessDefinitionsPayload implements Payload {
 
     private final String id = UUID.randomUUID().toString();
+    private List<String> processDefinitionKeys;
     private List<String> excludedProcessDefinitionIds;
 
     public SyncCloudProcessDefinitionsPayload() {}
-
-    public SyncCloudProcessDefinitionsPayload(List<String> excludedProcessDefinitionIds) {
-        this.excludedProcessDefinitionIds = excludedProcessDefinitionIds;
-    }
 
     @Override
     public String getId() {
         return id;
     }
 
+    public List<String> getProcessDefinitionKeys() {
+        return processDefinitionKeys;
+    }
+
     public List<String> getExcludedProcessDefinitionIds() {
         return excludedProcessDefinitionIds;
+    }
+
+    public void setProcessDefinitionKeys(List<String> processDefinitionKeys) {
+        this.processDefinitionKeys = List.copyOf(processDefinitionKeys);
+    }
+
+    public void setExcludedProcessDefinitionIds(List<String> excludedProcessDefinitionIds) {
+        this.excludedProcessDefinitionIds = List.copyOf(excludedProcessDefinitionIds);
     }
 
     @Override
@@ -47,12 +56,61 @@ public class SyncCloudProcessDefinitionsPayload implements Payload {
         if (!(o instanceof SyncCloudProcessDefinitionsPayload that)) return false;
         return (
             Objects.equals(id, that.id) &&
+            Objects.equals(processDefinitionKeys, that.processDefinitionKeys) &&
             Objects.equals(excludedProcessDefinitionIds, that.excludedProcessDefinitionIds)
         );
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(SyncCloudProcessDefinitionsPayload payload) {
+        return new Builder(payload);
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, excludedProcessDefinitionIds);
+        return Objects.hash(id, processDefinitionKeys, excludedProcessDefinitionIds);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("SyncCloudProcessDefinitionsPayload{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", processDefinitionKeys=").append(processDefinitionKeys);
+        sb.append(", excludedProcessDefinitionIds=").append(excludedProcessDefinitionIds);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public static final class Builder {
+
+        private List<String> processDefinitionKeys;
+        private List<String> excludedProcessDefinitionIds;
+
+        public Builder() {}
+
+        public Builder(SyncCloudProcessDefinitionsPayload other) {
+            this.processDefinitionKeys = other.processDefinitionKeys;
+            this.excludedProcessDefinitionIds = other.excludedProcessDefinitionIds;
+        }
+
+        public Builder processDefinitionKeys(List<String> processDefinitionKeys) {
+            this.processDefinitionKeys = List.copyOf(processDefinitionKeys);
+            return this;
+        }
+
+        public Builder excludedProcessDefinitionIds(List<String> excludedProcessDefinitionIds) {
+            this.excludedProcessDefinitionIds = List.copyOf(excludedProcessDefinitionIds);
+            return this;
+        }
+
+        public SyncCloudProcessDefinitionsPayload build() {
+            SyncCloudProcessDefinitionsPayload syncCloudProcessDefinitionsPayload = new SyncCloudProcessDefinitionsPayload();
+            syncCloudProcessDefinitionsPayload.excludedProcessDefinitionIds = this.excludedProcessDefinitionIds;
+            syncCloudProcessDefinitionsPayload.processDefinitionKeys = this.processDefinitionKeys;
+            return syncCloudProcessDefinitionsPayload;
+        }
     }
 }

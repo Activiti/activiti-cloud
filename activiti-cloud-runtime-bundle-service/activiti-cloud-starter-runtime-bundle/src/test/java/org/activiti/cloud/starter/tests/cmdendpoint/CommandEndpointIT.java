@@ -257,9 +257,10 @@ public class CommandEndpointIT {
     public void syncCloudProcessDefinitionsExcludedTest() {
         streamHandler.resetSyncProcessDefinitionsAck();
 
-        var payload = new SyncCloudProcessDefinitionsPayload(
-            List.of(processDefinitionIds.values().toArray(String[]::new))
-        );
+        var payload = SyncCloudProcessDefinitionsPayload
+            .builder()
+            .excludedProcessDefinitionIds(List.of(processDefinitionIds.values().toArray(String[]::new)))
+            .build();
 
         var result = doSyncCloudProcessDefinitions(payload);
 
