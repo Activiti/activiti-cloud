@@ -34,6 +34,7 @@ import org.activiti.cloud.acc.core.services.query.ProcessQueryService;
 import org.activiti.cloud.acc.shared.service.BaseService;
 import org.activiti.cloud.api.model.shared.CloudVariableInstance;
 import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.hateoas.PagedModel;
@@ -128,8 +129,12 @@ public class ProcessQuerySteps {
                         .stream()
                         .filter(it -> it.getName().equals(variableName))
                         .map(CloudVariableInstance::getValue)
-                        .toList()
+                        .map(value -> value instanceof List<?> listOfValues ? listOfValues : List.of(value))
+                        .findFirst()
                 )
+                    .isNotEmpty()
+                    .get()
+                    .asInstanceOf(InstanceOfAssertFactories.LIST)
                     .containsExactlyInAnyOrderElementsOf(
                         variableValue instanceof List<?> variableValues ? variableValues : List.of(variableValue)
                     );
