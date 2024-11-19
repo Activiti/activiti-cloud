@@ -46,9 +46,13 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 
 public class ProcessInstanceConnectors {
+
+    private Logger logger = LoggerFactory.getLogger(ProcessInstanceConnectors.class);
 
     @Steps
     private VariableBufferSteps variableBufferSteps;
@@ -129,13 +133,18 @@ public class ProcessInstanceConnectors {
         "the process instance has a resultCollection named $variableName with the following integer entries: $variableTable"
     )
     public void assertThatQueryHasVariable(String variableName, ExamplesTable variableTable) {
+        logger.info("assertThatQueryHasVariable");
+        logger.info("variableName: {}", variableName);
+        logger.info("variableTable: {}", variableTable);
         String processInstanceId = Serenity.sessionVariableCalled("processInstanceId");
+        logger.info("processInstanceId: {}", processInstanceId);
+
         List<Map<String, Integer>> resultCollectionValue = new ArrayList<>();
         variableTable
             .getRows()
             .forEach(map -> resultCollectionValue.add(singletonMap(map.get("name"), Integer.valueOf(map.get("value"))))
             );
-
+        logger.info("resultCollectionValue: {}", resultCollectionValue);
         processQuerySteps.checkProcessInstanceHasVariableValue(processInstanceId, variableName, resultCollectionValue);
     }
 
