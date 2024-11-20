@@ -60,6 +60,8 @@ import org.activiti.cloud.api.process.model.impl.CloudStartMessageDeploymentDefi
 import org.activiti.cloud.api.process.model.impl.IntegrationErrorImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationRequestImpl;
 import org.activiti.cloud.api.process.model.impl.IntegrationResultImpl;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsPayload;
+import org.activiti.cloud.api.process.model.impl.SyncCloudProcessDefinitionsResult;
 import org.activiti.cloud.api.process.model.impl.events.CloudApplicationDeployedEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCancelledEventImpl;
 import org.activiti.cloud.api.process.model.impl.events.CloudBPMNActivityCompletedEventImpl;
@@ -277,6 +279,20 @@ public class CloudProcessModelAutoConfiguration {
             new NamedType(
                 CloudProcessCandidateStarterGroupRemovedEventImpl.class,
                 ProcessCandidateStarterGroupEvent.ProcessCandidateStarterGroupEvents.PROCESS_CANDIDATE_STARTER_GROUP_REMOVED.name()
+            )
+        );
+
+        module.registerSubtypes(
+            new NamedType(
+                SyncCloudProcessDefinitionsPayload.class,
+                SyncCloudProcessDefinitionsPayload.class.getSimpleName()
+            )
+        );
+
+        module.registerSubtypes(
+            new NamedType(
+                SyncCloudProcessDefinitionsResult.class,
+                SyncCloudProcessDefinitionsResult.class.getSimpleName()
             )
         );
 
