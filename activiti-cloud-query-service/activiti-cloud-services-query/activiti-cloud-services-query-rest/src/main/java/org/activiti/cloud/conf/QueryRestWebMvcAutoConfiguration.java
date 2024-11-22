@@ -29,6 +29,7 @@ import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
+import org.activiti.cloud.services.query.rest.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
@@ -284,6 +285,16 @@ public class QueryRestWebMvcAutoConfiguration {
             processInstanceSearchService,
             entityFinder,
             new QueryDslPredicateAggregator()
+        );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ProcessInstanceControllerHelper processInstanceControllerHelper(
+        ProcessInstanceRepository processInstanceRepository
+    ) {
+        return new ProcessInstanceControllerHelper(
+            processInstanceRepository
         );
     }
 }

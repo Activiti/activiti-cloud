@@ -29,13 +29,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.activiti.cloud.alfresco.data.domain.AlfrescoPagedModelAssembler;
-import org.activiti.cloud.api.process.model.CloudProcessInstance;
+import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.hateoas.EntityModel;
@@ -64,29 +65,35 @@ public class ProcessInstanceAdminController {
 
     private AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler;
 
+    private ProcessInstanceControllerHelper processInstanceControllerHelper;
+
     @Autowired
     public ProcessInstanceAdminController(
         ProcessInstanceAdminService processInstanceAdminService,
         ProcessInstanceRepresentationModelAssembler processInstanceRepresentationModelAssembler,
-        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler
+        AlfrescoPagedModelAssembler<ProcessInstanceEntity> pagedCollectionModelAssembler,
+        ProcessInstanceControllerHelper processInstanceControllerHelper
     ) {
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceRepresentationModelAssembler = processInstanceRepresentationModelAssembler;
         this.pagedCollectionModelAssembler = pagedCollectionModelAssembler;
+        this.processInstanceControllerHelper = processInstanceControllerHelper;
     }
 
     @Operation(summary = "Find process instances", hidden = true)
     @JsonView(JsonViews.General.class)
     @RequestMapping(method = RequestMethod.GET, params = "!variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllProcessInstanceAdmin(
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> findAllProcessInstanceAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
         Pageable pageable
     ) {
+        Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.findAll(predicate, pageable);
+        Page<ProcessInstanceEntity> queryCloudProcessInstances = processInstanceControllerHelper.mapSubprocesses(processInstances, pageable);
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminService.findAll(predicate, pageable),
+            queryCloudProcessInstances,
             processInstanceRepresentationModelAssembler
         );
     }
@@ -94,7 +101,7 @@ public class ProcessInstanceAdminController {
     @Operation(summary = "Find process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @RequestMapping(method = RequestMethod.GET, params = "variableKeys")
-    public PagedModel<EntityModel<CloudProcessInstance>> findAllWithVariablesAdmin(
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> findAllWithVariablesAdmin(
         @Parameter(description = PREDICATE_DESC, example = PREDICATE_EXAMPLE) @QuerydslPredicate(
             root = ProcessInstanceEntity.class
         ) Predicate predicate,
@@ -122,7 +129,7 @@ public class ProcessInstanceAdminController {
     ) {
         ProcessInstanceQueryBody queryBody = Optional.ofNullable(payload).orElse(new ProcessInstanceQueryBody());
 
-        PagedModel<EntityModel<CloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(
+        PagedModel<EntityModel<QueryCloudProcessInstance>> pagedModel = pagedCollectionModelAssembler.toModel(
             pageable,
             processInstanceAdminService.findAllFromBody(
                 predicate,
@@ -146,7 +153,7 @@ public class ProcessInstanceAdminController {
     @Operation(summary = "Search process instances")
     @JsonView(JsonViews.ProcessVariables.class)
     @PostMapping("/search")
-    public PagedModel<EntityModel<CloudProcessInstance>> searchProcessInstances(
+    public PagedModel<EntityModel<QueryCloudProcessInstance>> searchProcessInstances(
         @RequestBody ProcessInstanceSearchRequest searchRequest,
         Pageable pageable
     ) {
@@ -159,7 +166,7 @@ public class ProcessInstanceAdminController {
 
     @JsonView(JsonViews.General.class)
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
-    public EntityModel<CloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
+    public EntityModel<QueryCloudProcessInstance> findByIdProcessAdmin(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(
             processInstanceAdminService.findById(processInstanceId)
         );
