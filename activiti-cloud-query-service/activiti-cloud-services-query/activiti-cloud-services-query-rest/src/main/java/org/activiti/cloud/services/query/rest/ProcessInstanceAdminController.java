@@ -90,7 +90,10 @@ public class ProcessInstanceAdminController {
         Pageable pageable
     ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.findAll(predicate, pageable);
-        Page<ProcessInstanceEntity> queryCloudProcessInstances = processInstanceControllerHelper.mapSubprocesses(processInstances, pageable);
+        Page<ProcessInstanceEntity> queryCloudProcessInstances = processInstanceControllerHelper.mapSubprocesses(
+            processInstances,
+            pageable
+        );
         return pagedCollectionModelAssembler.toModel(
             pageable,
             queryCloudProcessInstances,

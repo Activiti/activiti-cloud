@@ -21,7 +21,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomizedProcessInstanceRepository {
-    Page<ProcessInstanceEntity> findSubprocessesByParentIds(
-            List<String> parentIds,
-            Pageable pageable);
+    Page<ProcessInstanceEntity> findSubprocessesByParentIds(List<String> parentIds, Pageable pageable);
 }

@@ -25,13 +25,13 @@ import org.activiti.cloud.services.query.app.repository.TaskRepository;
 import org.activiti.cloud.services.query.app.repository.VariableRepository;
 import org.activiti.cloud.services.query.model.TaskEntity;
 import org.activiti.cloud.services.query.rest.ProcessInstanceAdminService;
+import org.activiti.cloud.services.query.rest.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.ProcessInstanceSearchService;
 import org.activiti.cloud.services.query.rest.ProcessInstanceService;
 import org.activiti.cloud.services.query.rest.ProcessVariableService;
 import org.activiti.cloud.services.query.rest.QueryLinkRelationProvider;
 import org.activiti.cloud.services.query.rest.TaskControllerHelper;
 import org.activiti.cloud.services.query.rest.TaskPermissionsHelper;
-import org.activiti.cloud.services.query.rest.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.assembler.ApplicationRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.IntegrationContextRepresentationModelAssembler;
 import org.activiti.cloud.services.query.rest.assembler.ProcessDefinitionRepresentationModelAssembler;
@@ -299,8 +299,6 @@ public class QueryRestWebMvcAutoConfiguration {
     public ProcessInstanceControllerHelper processInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository
     ) {
-        return new ProcessInstanceControllerHelper(
-            processInstanceRepository
-        );
+        return new ProcessInstanceControllerHelper(processInstanceRepository);
     }
 }

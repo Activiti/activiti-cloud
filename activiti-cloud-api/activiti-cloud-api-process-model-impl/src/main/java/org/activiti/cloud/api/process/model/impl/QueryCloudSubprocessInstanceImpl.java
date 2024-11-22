@@ -16,13 +16,13 @@
 package org.activiti.cloud.api.process.model.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Date;
+import java.util.Set;
 import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 
-import java.util.Date;
-import java.util.Set;
-
 public class QueryCloudSubprocessInstanceImpl implements QueryCloudSubprocessInstance {
+
     private String id;
     private String processDefinitionName;
 
