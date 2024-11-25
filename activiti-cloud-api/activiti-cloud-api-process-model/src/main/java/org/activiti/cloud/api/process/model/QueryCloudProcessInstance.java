@@ -19,4 +19,6 @@ import java.util.Set;
 
 public interface QueryCloudProcessInstance extends CloudProcessInstance {
     Set<QueryCloudSubprocessInstance> getSubprocesses();
+
+    void setSubprocesses(Set<QueryCloudSubprocessInstance> subprocesses);
 }

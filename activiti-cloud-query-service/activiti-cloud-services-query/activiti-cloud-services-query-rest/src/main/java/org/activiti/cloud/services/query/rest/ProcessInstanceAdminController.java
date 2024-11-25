@@ -33,6 +33,7 @@ import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceAdminControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceQueryBody;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;

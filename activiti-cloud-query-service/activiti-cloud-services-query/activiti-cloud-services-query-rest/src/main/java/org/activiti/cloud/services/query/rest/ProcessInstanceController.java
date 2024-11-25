@@ -30,6 +30,7 @@ import org.activiti.cloud.api.process.model.QueryCloudProcessInstance;
 import org.activiti.cloud.services.query.model.JsonViews;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.assembler.ProcessInstanceRepresentationModelAssembler;
+import org.activiti.cloud.services.query.rest.helper.ProcessInstanceControllerHelper;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -144,7 +145,7 @@ public class ProcessInstanceController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceService.subprocesses(processInstanceId, predicate, pageable),
+            processInstanceControllerHelper.searchSubprocesses(processInstanceId, predicate, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
