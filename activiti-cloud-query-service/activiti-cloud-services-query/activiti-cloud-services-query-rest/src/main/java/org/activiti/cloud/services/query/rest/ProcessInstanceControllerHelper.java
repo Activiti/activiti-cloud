@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.List;
-
 import com.querydsl.core.types.Predicate;
+import java.util.List;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.activiti.cloud.services.query.rest.payload.ProcessInstanceSearchRequest;
@@ -31,15 +30,13 @@ public class ProcessInstanceControllerHelper {
 
     public ProcessInstanceControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
-        ProcessInstanceService processInstanceService) {
+        ProcessInstanceService processInstanceService
+    ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceService = processInstanceService;
     }
 
-    public Page<ProcessInstanceEntity> findAllProcessInstances(
-        Predicate predicate,
-        Pageable pageable
-    ) {
+    public Page<ProcessInstanceEntity> findAllProcessInstances(Predicate predicate, Pageable pageable) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.findAll(predicate, pageable);
         return mapAllSubprocesses(processInstances, pageable);
     }
@@ -47,11 +44,13 @@ public class ProcessInstanceControllerHelper {
     public Page<ProcessInstanceEntity> findAllProcessInstancesWithVariables(
         Predicate predicate,
         List<String> variableKeys,
-        Pageable pageable) {
+        Pageable pageable
+    ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.findAllWithVariables(
             predicate,
             variableKeys,
-            pageable);
+            pageable
+        );
         return mapAllSubprocesses(processInstances, pageable);
     }
 
@@ -62,7 +61,8 @@ public class ProcessInstanceControllerHelper {
 
     public Page<ProcessInstanceEntity> searchProcessInstances(
         ProcessInstanceSearchRequest searchRequest,
-        Pageable pageable) {
+        Pageable pageable
+    ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceService.search(searchRequest, pageable);
         return mapAllSubprocesses(processInstances, pageable);
     }
@@ -70,7 +70,8 @@ public class ProcessInstanceControllerHelper {
     public Page<ProcessInstanceEntity> searchSubprocesses(
         String processInstanceId,
         Predicate predicate,
-        Pageable pageable) {
+        Pageable pageable
+    ) {
         Page<ProcessInstanceEntity> processInstanceSubprocesses = processInstanceService.subprocesses(
             processInstanceId,
             predicate,
@@ -81,10 +82,8 @@ public class ProcessInstanceControllerHelper {
 
     public Page<ProcessInstanceEntity> mapAllSubprocesses(
         Page<ProcessInstanceEntity> processInstances,
-        Pageable pageable) {
-        return processInstanceRepository.mapSubprocesses(
-            processInstances,
-            pageable
-        );
+        Pageable pageable
+    ) {
+        return processInstanceRepository.mapSubprocesses(processInstances, pageable);
     }
 }

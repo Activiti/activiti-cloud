@@ -90,7 +90,7 @@ public class ProcessInstanceAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(predicate,pageable),
+            processInstanceAdminControllerHelper.findAllProcessInstanceAdmin(predicate, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -111,7 +111,11 @@ public class ProcessInstanceAdminController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(predicate,variableKeys,pageable),
+            processInstanceAdminControllerHelper.findAllProcessInstanceAdminWithVariables(
+                predicate,
+                variableKeys,
+                pageable
+            ),
             processInstanceRepresentationModelAssembler
         );
     }

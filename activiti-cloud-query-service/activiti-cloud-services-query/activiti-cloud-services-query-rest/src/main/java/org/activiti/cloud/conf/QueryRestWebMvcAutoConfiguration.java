@@ -301,10 +301,7 @@ public class QueryRestWebMvcAutoConfiguration {
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceService processInstanceService
     ) {
-        return new ProcessInstanceControllerHelper(
-            processInstanceRepository,
-            processInstanceService
-        );
+        return new ProcessInstanceControllerHelper(processInstanceRepository, processInstanceService);
     }
 
     @Bean

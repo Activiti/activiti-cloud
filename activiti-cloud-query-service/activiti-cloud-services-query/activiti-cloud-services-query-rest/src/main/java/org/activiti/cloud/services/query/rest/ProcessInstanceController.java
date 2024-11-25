@@ -120,7 +120,7 @@ public class ProcessInstanceController {
     ) {
         return pagedCollectionModelAssembler.toModel(
             pageable,
-            processInstanceControllerHelper.searchProcessInstances(searchRequest,pageable),
+            processInstanceControllerHelper.searchProcessInstances(searchRequest, pageable),
             processInstanceRepresentationModelAssembler
         );
     }
@@ -129,8 +129,8 @@ public class ProcessInstanceController {
     @RequestMapping(value = "/{processInstanceId}", method = RequestMethod.GET)
     public EntityModel<QueryCloudProcessInstance> findByIdProcess(@PathVariable String processInstanceId) {
         return processInstanceRepresentationModelAssembler.toModel(
-            processInstanceControllerHelper.findById(processInstanceId
-            ));
+            processInstanceControllerHelper.findById(processInstanceId)
+        );
     }
 
     @JsonView(JsonViews.General.class)

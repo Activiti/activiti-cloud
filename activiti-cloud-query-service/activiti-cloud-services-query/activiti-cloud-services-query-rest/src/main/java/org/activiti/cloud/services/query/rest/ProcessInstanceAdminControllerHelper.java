@@ -15,9 +15,8 @@
  */
 package org.activiti.cloud.services.query.rest;
 
-import java.util.List;
-
 import com.querydsl.core.types.Predicate;
+import java.util.List;
 import org.activiti.cloud.services.query.app.repository.ProcessInstanceRepository;
 import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
 import org.springframework.data.domain.Page;
@@ -32,16 +31,14 @@ public class ProcessInstanceAdminControllerHelper {
     public ProcessInstanceAdminControllerHelper(
         ProcessInstanceRepository processInstanceRepository,
         ProcessInstanceAdminService processInstanceAdminService,
-        ProcessInstanceControllerHelper processInstanceControllerHelper) {
+        ProcessInstanceControllerHelper processInstanceControllerHelper
+    ) {
         this.processInstanceRepository = processInstanceRepository;
         this.processInstanceAdminService = processInstanceAdminService;
         this.processInstanceControllerHelper = processInstanceControllerHelper;
     }
 
-    public Page<ProcessInstanceEntity> findAllProcessInstanceAdmin(
-        Predicate predicate,
-        Pageable pageable
-    ) {
+    public Page<ProcessInstanceEntity> findAllProcessInstanceAdmin(Predicate predicate, Pageable pageable) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.findAll(predicate, pageable);
         return processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
     }
@@ -49,11 +46,13 @@ public class ProcessInstanceAdminControllerHelper {
     public Page<ProcessInstanceEntity> findAllProcessInstanceAdminWithVariables(
         Predicate predicate,
         List<String> variableKeys,
-        Pageable pageable) {
+        Pageable pageable
+    ) {
         Page<ProcessInstanceEntity> processInstances = processInstanceAdminService.findAllWithVariables(
             predicate,
             variableKeys,
-            pageable);
+            pageable
+        );
         return processInstanceControllerHelper.mapAllSubprocesses(processInstances, pageable);
     }
 

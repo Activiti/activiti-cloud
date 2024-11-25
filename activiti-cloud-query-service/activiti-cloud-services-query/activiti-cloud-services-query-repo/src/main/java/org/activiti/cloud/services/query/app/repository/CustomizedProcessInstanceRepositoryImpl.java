@@ -18,16 +18,14 @@ package org.activiti.cloud.services.query.app.repository;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
-import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.activiti.cloud.api.process.model.QueryCloudSubprocessInstance;
 import org.activiti.cloud.api.process.model.impl.QueryCloudSubprocessInstanceImpl;
+import org.activiti.cloud.services.query.model.ProcessInstanceEntity;
+import org.activiti.cloud.services.query.model.QProcessInstanceEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.Querydsl;
@@ -53,10 +51,7 @@ public class CustomizedProcessInstanceRepositoryImpl
             .map(ProcessInstanceEntity::getId)
             .collect(Collectors.toList());
 
-        Page<ProcessInstanceEntity> subprocesses = findSubprocessesByParentIds(
-            parentIds,
-            pageable
-        );
+        Page<ProcessInstanceEntity> subprocesses = findSubprocessesByParentIds(parentIds, pageable);
 
         Map<String, Set<QueryCloudSubprocessInstance>> subprocessMap = subprocesses
             .getContent()
